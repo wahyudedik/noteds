@@ -10,6 +10,7 @@
 - Composer 2.x
 - Supervisor (for queue workers)
 - Redis (optional, for caching)
+- Ollama (for AI features - can be installed on same server or separate)
 
 ## 🚀 Deployment Steps
 
@@ -38,6 +39,9 @@ sudo apt install nodejs -y
 # Install Composer
 curl -sS https://getcomposer.org/installer | php
 sudo mv composer.phar /usr/local/bin/composer
+
+# Install additional PHP extensions for Laravel 12
+sudo apt install php8.2-readline php8.2-tokenizer -y
 ```
 
 ### 2. Database Setup
@@ -93,9 +97,25 @@ MIDTRANS_SERVER_KEY=your_production_key
 MIDTRANS_CLIENT_KEY=your_production_key
 MIDTRANS_IS_PRODUCTION=true
 
+# Ollama Configuration (for AI features)
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+# Or if Ollama is on different server:
+# OLLAMA_URL=http://your-ollama-server:11434
+
 QUEUE_CONNECTION=database
 SESSION_DRIVER=database
 CACHE_DRIVER=file
+
+# Mail Configuration (for notifications)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=your_mail_username
+MAIL_PASSWORD=your_mail_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@your-domain.com
+MAIL_FROM_NAME="${APP_NAME}"
 ```
 
 ### 5. Run Migrations & Seeders
@@ -111,6 +131,11 @@ sudo -u www-data php artisan db:seed --force
 sudo -u www-data php artisan storage:link
 sudo chmod -R 775 storage bootstrap/cache
 sudo chown -R www-data:www-data storage bootstrap/cache
+
+# Set proper permissions for application
+sudo chmod -R 755 /var/www/noteds
+sudo chmod -R 775 /var/www/noteds/storage
+sudo chmod -R 775 /var/www/noteds/bootstrap/cache
 ```
 
 ### 7. Optimize Laravel
@@ -150,11 +175,21 @@ server {
         fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
+        fastcgi_hide_header X-Powered-By;
     }
 
     location ~ /\.(?!well-known).* {
         deny all;
     }
+
+    # Increase upload size for file attachments
+    client_max_body_size 50M;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/json application/javascript application/xml+rss;
 }
 ```
 
@@ -209,12 +244,42 @@ Add:
 * * * * * cd /var/www/noteds && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-### 12. Monitoring Setup
+### 12. Ollama Setup (AI Features)
+
+Ollama can be installed on the same server or a separate server:
+
+#### Option 1: Install Ollama on Same Server
+```bash
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Start Ollama service
+sudo systemctl enable ollama
+sudo systemctl start ollama
+
+# Pull required model (adjust based on your needs)
+ollama pull llama3.2
+# or
+ollama pull mistral
+```
+
+#### Option 2: Install Ollama on Separate Server
+If using a separate server, ensure:
+- Ollama service is running on that server
+- Update `.env` with correct `OLLAMA_URL`
+- Configure firewall to allow connection (if needed)
+
+#### Verify Ollama Connection
+```bash
+curl http://localhost:11434/api/tags
+```
+
+### 13. Monitoring Setup
 
 #### Laravel Telescope (Production Admin Only)
 Already configured in `TelescopeServiceProvider` with admin role gate.
 
-#### Sentry (Error Tracking)
+#### Sentry (Error Tracking - Optional)
 ```bash
 composer require sentry/sentry-laravel
 ```
@@ -223,6 +288,18 @@ Configure in `.env`:
 ```env
 SENTRY_LARAVEL_DSN=your_sentry_dsn
 SENTRY_TRACES_SAMPLE_RATE=1.0
+```
+
+#### Log Monitoring
+```bash
+# View Laravel logs
+sudo tail -f /var/www/noteds/storage/logs/laravel.log
+
+# View Nginx access logs
+sudo tail -f /var/log/nginx/access.log
+
+# View Nginx error logs
+sudo tail -f /var/log/nginx/error.log
 ```
 
 ## 🔄 Deployment Workflow
@@ -251,11 +328,16 @@ See `.github/workflows/deploy.yml` (create if needed)
 - [ ] Enable SSL/HTTPS
 - [ ] Configure firewall (UFW)
 - [ ] Set proper file permissions (775/664)
-- [ ] Disable PHP execution in storage
-- [ ] Regular security updates
+- [ ] Disable PHP execution in storage/public directories
+- [ ] Regular security updates (`sudo apt update && sudo apt upgrade`)
 - [ ] Database backups automated
-- [ ] Rate limiting configured
+- [ ] Rate limiting configured (Laravel throttling)
 - [ ] Email notification for errors
+- [ ] Hide PHP version (X-Powered-By header)
+- [ ] Secure `.env` file (chmod 600)
+- [ ] Restrict MySQL user privileges
+- [ ] Configure fail2ban for SSH protection
+- [ ] Regular security audits
 
 ## 🔄 Backup Strategy
 
@@ -333,10 +415,60 @@ sudo supervisorctl restart noteds-worker:*
 - Run `npm run build` in production
 - Check Nginx config for proper root
 - Verify file permissions
+- Clear browser cache
+- Check Vite manifest: `public/build/.vite/manifest.json`
+
+### Ollama Connection Issues
+- Verify Ollama is running: `sudo systemctl status ollama`
+- Test connection: `curl http://localhost:11434/api/tags`
+- Check `.env` `OLLAMA_URL` is correct
+- Check firewall rules if using remote Ollama server
+- View Ollama logs: `sudo journalctl -u ollama -f`
+
+## 🔥 Firewall Configuration (UFW)
+
+```bash
+# Enable UFW
+sudo ufw enable
+
+# Allow SSH (important - do this first!)
+sudo ufw allow 22/tcp
+
+# Allow HTTP and HTTPS
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+# Allow Ollama if on same server (optional)
+sudo ufw allow 11434/tcp
+
+# Check status
+sudo ufw status
+```
 
 ## 📞 Support
 
 For deployment issues, refer to:
-- [Laravel Deployment Docs](https://laravel.com/docs/12.x/deployment)
+- [Laravel 12 Deployment Docs](https://laravel.com/docs/12.x/deployment)
 - [DigitalOcean Laravel Setup](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-laravel-with-nginx-on-ubuntu-22-04)
+- [Ollama Installation](https://ollama.com/download)
+- [Nginx Performance Tuning](https://www.nginx.com/blog/tuning-nginx/)
+
+## 📝 Additional Notes
+
+### Laravel Version
+This project uses **Laravel 12** (not Laravel 11). Ensure all commands are compatible.
+
+### UUID Primary Keys
+All database tables use UUID primary keys. Ensure MySQL supports UUID functions.
+
+### Premium Features
+AI Memory Platform features require:
+- Active premium subscription
+- Ollama service running and accessible
+- Sufficient server resources for AI processing
+
+### Storage Considerations
+- Note attachments are stored in `storage/app/private/attachments`
+- Ensure sufficient disk space for user uploads
+- Consider using cloud storage (S3) for production scale
 
