@@ -1,0 +1,100 @@
+@extends('layouts.app')
+
+@section('title', 'Top-up Checkout')
+
+@section('content')
+<div class="py-8 sm:py-12">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Top-up Checkout</h1>
+            <p class="mt-2 text-base text-gray-600">Complete your wallet top-up payment</p>
+        </div>
+
+        <!-- Payment Details Card -->
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="text-lg font-semibold text-gray-900">Payment Summary</h2>
+            </div>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
+                    <div class="flex items-center gap-3">
+                        <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Top-up Amount</p>
+                            <p class="text-3xl font-bold text-green-600">Rp {{ number_format($transaction->amount, 0, ',', '.') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="font-medium text-gray-900">Secure Payment by Midtrans</span>
+                    </div>
+                    <p class="text-xs text-gray-500 ml-7">You will be redirected to a secure payment page. Choose your preferred payment method.</p>
+                </div>
+
+                <div id="snap-container" class="min-h-[200px] flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200 border-dashed">
+                    <div class="text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <p class="mt-4 text-sm text-gray-600">Loading payment gateway...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3 flex-1">
+                    <h3 class="text-sm font-medium text-blue-800 mb-1">Payment Instructions</h3>
+                    <ul class="list-disc list-inside text-sm text-blue-700 space-y-1">
+                        <li>Select your preferred payment method on the payment page</li>
+                        <li>Complete the payment as instructed</li>
+                        <li>Your wallet balance will be updated automatically upon successful payment</li>
+                        <li>If payment is pending, please wait for confirmation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+<script>
+    window.snap.pay('{{ $snapToken }}', {
+        onSuccess: function(result) {
+            console.log('Payment success:', result);
+            window.location.href = '{{ route('wallet.index') }}?status=success';
+        },
+        onPending: function(result) {
+            console.log('Payment pending:', result);
+            window.location.href = '{{ route('wallet.index') }}?status=pending';
+        },
+        onError: function(result) {
+            console.log('Payment error:', result);
+            window.location.href = '{{ route('wallet.index') }}?status=error';
+        },
+        onClose: function() {
+            console.log('Customer closed payment popup');
+            window.location.href = '{{ route('wallet.index') }}?status=cancelled';
+        }
+    });
+</script>
+@endpush
+@endsection

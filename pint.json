@@ -1,0 +1,13 @@
+{
+  "$schema": "https://laravel-pint.github.io/schema.json",
+  "preset": "laravel",
+  "rules": {
+    "ordered_imports": true,
+    "no_unused_imports": true,
+    "single_quote": true,
+    "array_syntax": { "syntax": "short" },
+    "concat_space": { "spacing": "one" }
+  }
+}
+
+
