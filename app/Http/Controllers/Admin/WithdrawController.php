@@ -56,9 +56,19 @@ class WithdrawController extends Controller
 
             // If approved, deduct from wallet
             if ($request->status === 'approved') {
-                $wallet = Wallet::where('user_id', $withdraw->user_id)->first();
+                $wallet = Wallet::firstOrCreate(
+                    ['user_id' => $withdraw->user_id],
+                    ['balance' => 0]
+                );
                 
-                if (!$wallet || $wallet->balance < $withdraw->amount) {
+                // Sync wallet balance with user wallet_balance before checking
+                $user = $withdraw->user;
+                if ($wallet->balance != $user->wallet_balance) {
+                    $wallet->balance = $user->wallet_balance;
+                    $wallet->save();
+                }
+                
+                if ($wallet->balance < $withdraw->amount) {
                     DB::rollBack();
                     return redirect()->route('admin.withdraws.show', $withdraw)
                         ->with('error', 'Saldo wallet user tidak mencukupi untuk approve withdraw ini.');
@@ -67,7 +77,6 @@ class WithdrawController extends Controller
                 $wallet->balance -= $withdraw->amount;
                 $wallet->save();
 
-                $user = $withdraw->user;
                 $user->wallet_balance = $wallet->balance;
                 $user->save();
 

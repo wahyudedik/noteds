@@ -93,9 +93,10 @@ DB_DATABASE=noteds_production
 DB_USERNAME=noteds_user
 DB_PASSWORD=your_strong_password
 
-MIDTRANS_SERVER_KEY=your_production_key
-MIDTRANS_CLIENT_KEY=your_production_key
-MIDTRANS_IS_PRODUCTION=true
+# Midtrans Configuration (akan dijelaskan di section 5)
+# MIDTRANS_SERVER_KEY=your_production_key
+# MIDTRANS_CLIENT_KEY=your_production_key
+# MIDTRANS_IS_PRODUCTION=true
 
 # Ollama Configuration (for AI features)
 OLLAMA_URL=http://localhost:11434
@@ -107,7 +108,7 @@ QUEUE_CONNECTION=database
 SESSION_DRIVER=database
 CACHE_DRIVER=file
 
-# Mail Configuration (for notifications)
+# Mail Configuration (for notifications & contact form)
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.mailtrap.io
 MAIL_PORT=2525
@@ -116,16 +117,105 @@ MAIL_PASSWORD=your_mail_password
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=noreply@your-domain.com
 MAIL_FROM_NAME="${APP_NAME}"
+
+# Support Email (for contact form - optional, defaults to MAIL_FROM_ADDRESS)
+# Can be configured via Admin Settings UI
 ```
 
-### 5. Run Migrations & Seeders
+### 5. Midtrans Payment Gateway Setup
+
+Midtrans adalah payment gateway yang digunakan untuk memproses transaksi pembayaran (premium subscription, pembelian notes, dll).
+
+#### 5.1. Daftar & Setup Akun Midtrans
+
+1. **Daftar Akun Midtrans:**
+   - Kunjungi [https://dashboard.midtrans.com](https://dashboard.midtrans.com)
+   - Daftar akun baru atau login jika sudah punya
+   - Pilih plan sesuai kebutuhan (dapat mulai dengan free plan untuk testing)
+
+2. **Dapatkan API Keys:**
+   - Login ke Midtrans Dashboard
+   - Navigate ke **Settings** → **Access Keys**
+   - Anda akan melihat:
+     - **Server Key** (untuk backend)
+     - **Client Key** (untuk frontend)
+   - **PENTING:** Ada 2 environment:
+     - **Sandbox** (untuk testing) - gratis, unlimited
+     - **Production** (untuk live) - perlu verifikasi
+
+3. **Untuk Development/Testing:**
+   - Gunakan **Sandbox Keys** dari dashboard
+   - Set `MIDTRANS_IS_PRODUCTION=false` di `.env`
+
+4. **Untuk Production:**
+   - Verifikasi akun Midtrans (upload dokumen bisnis)
+   - Setelah verifikasi, dapatkan **Production Keys**
+   - Set `MIDTRANS_IS_PRODUCTION=true` di `.env`
+
+#### 5.2. Konfigurasi di Aplikasi
+
+**Update `.env` dengan keys dari Midtrans Dashboard:**
+
+```env
+# Midtrans Configuration
+MIDTRANS_SERVER_KEY=your_server_key_here
+MIDTRANS_CLIENT_KEY=your_client_key_here
+MIDTRANS_IS_PRODUCTION=false  # true untuk production, false untuk sandbox
+MIDTRANS_MERCHANT_ID=your_merchant_id  # Optional, jika ada
+```
+
+**Catatan:**
+- `MIDTRANS_SERVER_KEY`: Digunakan di backend untuk membuat Snap Token dan handle webhook
+- `MIDTRANS_CLIENT_KEY`: Digunakan di frontend untuk memuat Snap.js
+- `MIDTRANS_IS_PRODUCTION`: Harus sesuai dengan environment keys yang digunakan
+- Jangan pernah commit keys ke repository!
+
+#### 5.3. Verifikasi Konfigurasi
+
+Setelah setup, aplikasi akan otomatis menggunakan Midtrans melalui:
+- `config/services.php` - membaca dari `.env`
+- `WalletController` - menggunakan Midtrans untuk Snap Token
+- Webhook handler untuk update status transaksi
+
+**Test Payment Flow:**
+1. Coba beli note atau subscribe premium
+2. Pastikan payment page muncul dengan Snap.js
+3. Gunakan kartu test dari Midtrans untuk testing
+4. Cek webhook notification di Midtrans Dashboard
+
+**Midtrans Test Cards:**
+- Visa: 4811 1111 1111 1114
+- Mastercard: 5211 1111 1111 1117
+- CVV: 123
+- Expiry: Any future date
+
+**Webhook Configuration:**
+- Di Midtrans Dashboard → Settings → Configuration → Webhook URL
+- Set Webhook URL: `https://your-domain.com/wallet/webhook`
+- Route handler: `WalletController::webhook()` (sudah ada di aplikasi)
+- Pastikan server dapat diakses dari internet (untuk webhook callback)
+- Webhook ini akan otomatis update status transaksi setelah payment selesai
+- **PENTING:** Webhook harus menggunakan HTTPS di production
+- **Note:** Webhook route sudah exempt dari CSRF protection (required untuk Midtrans)
+- Webhook akan return JSON response untuk debugging
+- Duplicate webhook calls akan di-handle dengan proper idempotency check
+
+### 6. Run Migrations & Seeders
 
 ```bash
+# Run database migrations
 sudo -u www-data php artisan migrate --force
+
+# Seed database dengan initial data (admin user, dll)
 sudo -u www-data php artisan db:seed --force
 ```
 
-### 6. Storage & Permissions
+**Catatan Migrations:**
+- Pastikan semua migrations berhasil dijalankan
+- Jika ada error, cek database connection di `.env`
+- Untuk production, backup database sebelum migrate
+
+### 7. Storage & Permissions
 
 ```bash
 sudo -u www-data php artisan storage:link
@@ -138,7 +228,7 @@ sudo chmod -R 775 /var/www/noteds/storage
 sudo chmod -R 775 /var/www/noteds/bootstrap/cache
 ```
 
-### 7. Optimize Laravel
+### 8. Optimize Laravel
 
 ```bash
 sudo -u www-data php artisan config:cache
@@ -146,7 +236,7 @@ sudo -u www-data php artisan route:cache
 sudo -u www-data php artisan view:cache
 ```
 
-### 8. Nginx Configuration
+### 9. Nginx Configuration
 
 Create `/etc/nginx/sites-available/noteds`:
 ```nginx
@@ -200,14 +290,14 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-### 9. SSL Certificate (Let's Encrypt)
+### 10. SSL Certificate (Let's Encrypt)
 
 ```bash
 sudo apt install certbot python3-certbot-nginx -y
 sudo certbot --nginx -d your-domain.com
 ```
 
-### 10. Queue Workers (Supervisor)
+### 11. Queue Workers (Supervisor)
 
 Create `/etc/supervisor/conf.d/noteds-worker.conf`:
 ```ini
@@ -232,7 +322,7 @@ sudo supervisorctl update
 sudo supervisorctl start noteds-worker:*
 ```
 
-### 11. Scheduled Tasks (Cron)
+### 12. Scheduled Tasks (Cron)
 
 Edit crontab:
 ```bash
@@ -244,7 +334,7 @@ Add:
 * * * * * cd /var/www/noteds && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-### 12. Ollama Setup (AI Features)
+### 13. Ollama Setup (AI Features)
 
 Ollama can be installed on the same server or a separate server:
 
@@ -274,7 +364,7 @@ If using a separate server, ensure:
 curl http://localhost:11434/api/tags
 ```
 
-### 13. Monitoring Setup
+### 14. Monitoring Setup
 
 #### Laravel Telescope (Production Admin Only)
 Already configured in `TelescopeServiceProvider` with admin role gate.
@@ -338,6 +428,10 @@ See `.github/workflows/deploy.yml` (create if needed)
 - [ ] Restrict MySQL user privileges
 - [ ] Configure fail2ban for SSH protection
 - [ ] Regular security audits
+- [ ] Webhook CSRF exemption properly configured (only for Midtrans webhook)
+- [ ] Midtrans API keys stored securely in `.env` (never commit to repository)
+- [ ] Webhook endpoint accessible only via HTTPS in production
+- [ ] Duplicate transaction processing prevention enabled
 
 ## 🔄 Backup Strategy
 
@@ -425,6 +519,22 @@ sudo supervisorctl restart noteds-worker:*
 - Check firewall rules if using remote Ollama server
 - View Ollama logs: `sudo journalctl -u ollama -f`
 
+### Midtrans Payment Issues
+- Verify API keys di `.env` sudah benar
+- Pastikan `MIDTRANS_IS_PRODUCTION` sesuai dengan environment keys
+- Check Midtrans Dashboard untuk melihat transaction logs
+- Verify webhook URL sudah di-set di Midtrans Dashboard: `https://your-domain.com/wallet/webhook`
+- Test dengan kartu test dari Midtrans (Visa: 4811 1111 1111 1114)
+- Check Laravel logs: `tail -f storage/logs/laravel.log` untuk error Midtrans
+- Pastikan webhook route dapat diakses: `curl -X POST https://your-domain.com/wallet/webhook`
+- Pastikan HTTPS sudah aktif untuk webhook (Midtrans memerlukan HTTPS di production)
+- **Webhook Improvements (2025-11-03):**
+  - Webhook route sudah exempt dari CSRF protection
+  - Duplicate processing protection sudah ditambahkan
+  - Better error handling dan logging
+  - Amount verification untuk security
+  - Support untuk semua transaction status (settlement, capture, pending, challenge, deny, expire, cancel)
+
 ## 🔥 Firewall Configuration (UFW)
 
 ```bash
@@ -471,4 +581,35 @@ AI Memory Platform features require:
 - Note attachments are stored in `storage/app/private/attachments`
 - Ensure sufficient disk space for user uploads
 - Consider using cloud storage (S3) for production scale
+- S3 backup configuration available via Admin Settings UI
+
+### Email Configuration
+- Contact form emails are sent to support email (configurable via Admin Settings)
+- Default support email: Uses `MAIL_FROM_ADDRESS` from `.env`
+- Email sending uses Laravel Mail system (SMTP, Sendmail, SES, etc.)
+- Contact form uses `ContactMail` mailable class
+- Email failures are logged but don't fail the contact form submission
+
+### Midtrans Integration Details
+- Aplikasi menggunakan **Midtrans PHP SDK** (package: `midtrans/midtrans-php` - sudah di `composer.json`)
+- Payment flow menggunakan **Snap.js** untuk frontend payment UI
+- Backend menggunakan **Server Key** untuk generate Snap Token via `WalletController`
+- Frontend menggunakan **Client Key** untuk load Snap.js library
+- Webhook handler otomatis update status transaksi setelah payment selesai
+- Route webhook: `/wallet/webhook` (handler: `WalletController::webhook()`)
+- Semua transaksi (topup wallet, premium subscription, purchase notes) menggunakan Midtrans
+- **PENTING:** Webhook harus dapat diakses dari internet dengan HTTPS di production
+- Test thoroughly dengan sandbox environment sebelum switch ke production
+- Monitor transaction logs di Midtrans Dashboard untuk debugging
+- **Security:** Jangan commit API keys ke repository, selalu gunakan `.env`
+
+**Recent Improvements (2025-11-03):**
+- ✅ Dynamic Midtrans URL (sandbox/production) based on environment config
+- ✅ Webhook CSRF exemption untuk Midtrans webhook calls
+- ✅ Duplicate processing prevention (double-check sebelum process)
+- ✅ Amount verification untuk security
+- ✅ Comprehensive status handling (settlement, capture, pending, challenge, deny, expire, cancel)
+- ✅ Better error logging dan response handling
+- ✅ Max amount validation (100M) untuk topup
+- ✅ Midtrans configuration check sebelum process
 

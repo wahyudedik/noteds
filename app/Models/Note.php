@@ -13,6 +13,8 @@ class Note extends Model
     use HasUuids;
     protected $fillable = [
         'user_id',
+        'folder_id',
+        'workspace_id',
         'title',
         'content',
         'summary',
@@ -58,6 +60,22 @@ class Note extends Model
     public function activities()
     {
         return $this->hasMany(NoteActivity::class)->latest();
+    }
+
+    /**
+     * Get the folder that contains this note.
+     */
+    public function folder(): BelongsTo
+    {
+        return $this->belongsTo(Folder::class);
+    }
+
+    /**
+     * Get the workspace that contains this note.
+     */
+    public function workspace(): BelongsTo
+    {
+        return $this->belongsTo(Workspace::class);
     }
 
     /**

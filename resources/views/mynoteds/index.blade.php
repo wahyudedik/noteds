@@ -28,6 +28,36 @@
             </div>
         </div>
 
+        <!-- Workspace Selector (Premium) -->
+        @if(auth()->user()->hasPremium())
+        <div class="mb-6 bg-white rounded-lg border border-gray-200 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <label for="workspace_filter" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        Filter by Workspace
+                    </label>
+                    <select id="workspace_filter" name="workspace_id" onchange="filterByWorkspace(this.value)"
+                        class="rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                        <option value="">All Workspaces</option>
+                        <option value="personal">Personal</option>
+                        @foreach(auth()->user()->allWorkspaces() as $workspace)
+                            <option value="{{ $workspace->id }}">{{ $workspace->name }} ({{ $workspace->type }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <a href="{{ route('workspaces.index') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    Manage Workspaces
+                </a>
+            </div>
+        </div>
+        @endif
+
         <!-- Quick Actions -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <a href="{{ route('mynoteds.ask') }}" class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
@@ -157,5 +187,28 @@
         </div>
     </div>
 </div>
+
+@if(auth()->user()->hasPremium())
+@push('scripts')
+<script>
+    function filterByWorkspace(workspaceId) {
+        // This would typically make an AJAX request to filter notes
+        // For now, we'll just reload the page with query parameter
+        if (workspaceId) {
+            window.location.href = '{{ route("mynoteds.index") }}?workspace_id=' + workspaceId;
+        } else {
+            window.location.href = '{{ route("mynoteds.index") }}';
+        }
+    }
+    
+    // Set selected workspace from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const workspaceId = urlParams.get('workspace_id');
+    if (workspaceId) {
+        document.getElementById('workspace_filter').value = workspaceId;
+    }
+</script>
+@endpush
+@endif
 @endsection
 

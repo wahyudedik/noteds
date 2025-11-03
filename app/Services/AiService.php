@@ -368,4 +368,147 @@ class AiService
             return null;
         }
     }
+
+    /**
+     * Detect context links between notes - identify related notes based on content similarity.
+     * This helps users understand relationships between their notes.
+     *
+     * @param array $notes Array of notes with 'id', 'title', 'content'
+     * @param string|null $focusNoteId Optional: focus note ID to find links for
+     * @return array Array of linked note pairs with relationship description
+     */
+    public function detectContextLinks(array $notes, ?string $focusNoteId = null): array
+    {
+        try {
+            if (count($notes) < 2) {
+                return [];
+            }
+
+            // Prepare note summaries for AI analysis
+            $noteSummaries = [];
+            foreach ($notes as $note) {
+                $summary = $this->truncateContent(
+                    ($note['title'] ?? '') . ' ' . ($note['content'] ?? ''),
+                    800
+                );
+                $noteSummaries[] = [
+                    'id' => $note['id'],
+                    'summary' => $summary,
+                ];
+            }
+
+            // Build context for AI
+            $context = implode("\n\n", array_map(function($n, $idx) {
+                return "Note " . ($idx + 1) . " (ID: {$n['id']}):\n{$n['summary']}";
+            }, $noteSummaries, array_keys($noteSummaries)));
+
+            $prompt = "Analyze these notes and identify relationships between them. " .
+                     "Look for:\n" .
+                     "1. Similar topics or themes\n" .
+                     "2. Related people, projects, or events\n" .
+                     "3. Sequential or chronological connections\n" .
+                     "4. Complementary information\n\n" .
+                     "Notes:\n{$context}\n\n" .
+                     "List related note pairs in format: 'Note ID1 <-> Note ID2: relationship description'\n" .
+                     "Example: 'abc-123 <-> def-456: Both discuss project timeline'\n" .
+                     "Only list pairs that are clearly related:\n";
+
+            $response = $this->callOllama($prompt, [
+                'temperature' => 0.4,
+                'num_predict' => 800,
+            ]);
+
+            if ($response && isset($response['response'])) {
+                $links = $this->parseContextLinks($response['response'], $notes);
+                
+                // If focus note ID provided, filter to only show links involving that note
+                if ($focusNoteId) {
+                    $links = array_filter($links, function($link) use ($focusNoteId) {
+                        return $link['note_id_1'] === $focusNoteId || $link['note_id_2'] === $focusNoteId;
+                    });
+                }
+
+                return array_values($links);
+            }
+
+            return [];
+        } catch (Exception $e) {
+            Log::error('Context linking failed', [
+                'error' => $e->getMessage(),
+                'focus_note_id' => $focusNoteId,
+            ]);
+
+            return [];
+        }
+    }
+
+    /**
+     * Parse context links from AI response.
+     *
+     * @param string $response AI response text
+     * @param array $notes Original notes array
+     * @return array Array of parsed links
+     */
+    protected function parseContextLinks(string $response, array $notes): array
+    {
+        $links = [];
+        $validIds = array_column($notes, 'id');
+
+        // Pattern: UUID <-> UUID: description
+        $pattern = '/\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\s*(?:<->|->|<-)\s*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}):\s*(.+)/i';
+        
+        if (preg_match_all($pattern, $response, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $id1 = $match[1];
+                $id2 = $match[2];
+                $description = trim($match[3]);
+
+                // Validate both IDs exist in our notes
+                if (in_array($id1, $validIds) && in_array($id2, $validIds) && $id1 !== $id2) {
+                    // Avoid duplicates (A->B and B->A)
+                    $key = $id1 < $id2 ? "{$id1}:{$id2}" : "{$id2}:{$id1}";
+                    
+                    if (!isset($links[$key])) {
+                        $links[$key] = [
+                            'note_id_1' => $id1 < $id2 ? $id1 : $id2,
+                            'note_id_2' => $id1 < $id2 ? $id2 : $id1,
+                            'relationship' => $description,
+                            'strength' => 'medium', // Could be enhanced with confidence scoring
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Fallback: try simpler pattern without UUID format
+        if (empty($links)) {
+            $lines = explode("\n", $response);
+            foreach ($lines as $line) {
+                // Look for "Note X" patterns
+                if (preg_match('/Note\s+(\d+).*?Note\s+(\d+).*?:\s*(.+)/i', $line, $match)) {
+                    $idx1 = (int)$match[1] - 1;
+                    $idx2 = (int)$match[2] - 1;
+                    
+                    if (isset($notes[$idx1]) && isset($notes[$idx2])) {
+                        $id1 = $notes[$idx1]['id'];
+                        $id2 = $notes[$idx2]['id'];
+                        
+                        if ($id1 !== $id2) {
+                            $key = $id1 < $id2 ? "{$id1}:{$id2}" : "{$id2}:{$id1}";
+                            if (!isset($links[$key])) {
+                                $links[$key] = [
+                                    'note_id_1' => $id1 < $id2 ? $id1 : $id2,
+                                    'note_id_2' => $id1 < $id2 ? $id2 : $id1,
+                                    'relationship' => trim($match[3]),
+                                    'strength' => 'medium',
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $links;
+    }
 }

@@ -70,6 +70,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Redirect to username setup (username is required)
+        return redirect(route('setup-username.create', absolute: false));
     }
 }

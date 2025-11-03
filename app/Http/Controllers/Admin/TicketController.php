@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SupportTicket;
+use App\Models\SupportTicketReply;
 use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
@@ -48,7 +49,7 @@ class TicketController extends Controller
      */
     public function show(SupportTicket $ticket): View
     {
-        $ticket->load(['user', 'assignedAdmin', 'closedByUser']);
+        $ticket->load(['user', 'assignedAdmin', 'closedByUser', 'replies.user']);
         $admins = User::whereHas('roles', function ($query) {
             $query->where('name', 'admin');
         })->get();
@@ -88,23 +89,42 @@ class TicketController extends Controller
     }
 
     /**
-     * Admin response to ticket.
+     * Admin reply to ticket.
      */
-    public function response(Request $request, SupportTicket $ticket): RedirectResponse
+    public function reply(Request $request, SupportTicket $ticket): RedirectResponse
     {
+        if ($ticket->status === 'closed') {
+            return redirect()->route('admin.tickets.show', $ticket)
+                ->with('error', 'You cannot reply to a closed ticket.');
+        }
+
         $validated = $request->validate([
-            'admin_response' => ['required', 'string', 'min:10'],
+            'message' => ['required', 'string', 'min:10'],
         ]);
 
-        $ticket->update([
-            'admin_response' => $request->admin_response,
-            'status' => 'in_progress',
+        $reply = SupportTicketReply::create([
+            'support_ticket_id' => $ticket->id,
+            'user_id' => auth()->id(),
+            'message' => $request->message,
+            'is_admin' => true,
         ]);
 
-        // Notify user about admin response
-        $this->notificationService->notifyTicketResponse($ticket->user, $ticket->title);
+        // Update ticket status to in_progress if it's open
+        if ($ticket->status === 'open') {
+            $ticket->update(['status' => 'in_progress']);
+        }
+
+        // Notify user about admin reply
+        $this->notificationService->create(
+            $ticket->user,
+            'ticket_reply',
+            '💬 New Reply on Your Ticket',
+            auth()->user()->name . ' replied to your ticket: ' . $ticket->title,
+            route('support-tickets.show', $ticket),
+            ['ticket_id' => $ticket->id]
+        );
 
         return redirect()->route('admin.tickets.show', $ticket)
-            ->with('success', 'Response sent successfully!');
+            ->with('success', 'Reply sent successfully!');
     }
 }

@@ -48,11 +48,17 @@ class WalletController extends Controller
     public function topup(Request $request): RedirectResponse
     {
         $request->validate([
-            'amount' => ['required', 'numeric', 'min:10000'],
+            'amount' => ['required', 'numeric', 'min:10000', 'max:100000000'],
         ]);
 
         $user = auth()->user();
-        $amount = $request->amount;
+        $amount = (float) $request->amount;
+
+        // Check if Midtrans is configured
+        if (empty(config('services.midtrans.server_key')) || empty(config('services.midtrans.client_key'))) {
+            return redirect()->route('wallet.index')
+                ->with('error', 'Payment gateway belum dikonfigurasi. Silakan hubungi administrator.');
+        }
 
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $user->id],
@@ -120,12 +126,16 @@ class WalletController extends Controller
         return view('wallet.topup-checkout', compact('snapToken', 'transaction'));
     }
 
-    public function webhook(Request $request): void
+    public function webhook(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $notification = json_decode($request->getContent(), true);
             
-            Log::info('Midtrans Webhook:', $notification);
+            Log::info('Midtrans Webhook Received:', [
+                'order_id' => $notification['order_id'] ?? null,
+                'transaction_status' => $notification['transaction_status'] ?? null,
+                'timestamp' => now()->toDateTimeString(),
+            ]);
 
             $orderId = $notification['order_id'] ?? null;
             $transactionStatus = $notification['transaction_status'] ?? null;
@@ -133,14 +143,21 @@ class WalletController extends Controller
             $grossAmount = $notification['gross_amount'] ?? null;
 
             if (!$orderId) {
-                return;
+                Log::warning('Webhook received without order_id');
+                return response()->json(['status' => 'error', 'message' => 'Missing order_id'], 400);
             }
 
             $transaction = Transaction::where('midtrans_order_id', $orderId)->first();
 
             if (!$transaction) {
                 Log::warning('Transaction not found for order_id: ' . $orderId);
-                return;
+                return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
+            }
+
+            // Prevent duplicate processing
+            if ($transaction->status === 'success' && ($transactionStatus === 'settlement' || $transactionStatus === 'capture')) {
+                Log::info('Transaction already processed: ' . $orderId);
+                return response()->json(['status' => 'ok', 'message' => 'Already processed']);
             }
 
             // Handle different transaction types
@@ -150,8 +167,15 @@ class WalletController extends Controller
                 // Handle purchase webhook if needed
                 $this->handlePurchaseWebhook($transaction, $transactionStatus, $fraudStatus);
             }
+
+            return response()->json(['status' => 'ok', 'message' => 'Webhook processed']);
         } catch (\Exception $e) {
-            Log::error('Webhook Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Webhook Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'notification' => $request->getContent(),
+            ]);
+            
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -159,7 +183,24 @@ class WalletController extends Controller
     {
         if ($status === 'settlement' || $status === 'capture') {
             if ($fraudStatus === 'accept') {
+                // Verify amount matches
+                if ($grossAmount != $transaction->amount) {
+                    Log::warning('Amount mismatch in webhook', [
+                        'transaction_id' => $transaction->id,
+                        'expected' => $transaction->amount,
+                        'received' => $grossAmount,
+                    ]);
+                    // Still process but log the mismatch
+                }
+
                 DB::transaction(function () use ($transaction, $grossAmount) {
+                    // Double-check transaction status to prevent duplicate processing
+                    $transaction->refresh();
+                    if ($transaction->status === 'success') {
+                        Log::info('Transaction already processed, skipping: ' . $transaction->id);
+                        return;
+                    }
+
                     $transaction->status = 'success';
                     $transaction->save();
 
@@ -175,10 +216,29 @@ class WalletController extends Controller
                     $user = $transaction->buyer;
                     $user->wallet_balance = $wallet->balance;
                     $user->save();
+
+                    Log::info('Top-up successful', [
+                        'transaction_id' => $transaction->id,
+                        'user_id' => $user->id,
+                        'amount' => $grossAmount,
+                        'new_balance' => $wallet->balance,
+                    ]);
                 });
+            } elseif ($fraudStatus === 'challenge') {
+                // Challenge status - payment is being reviewed
+                $transaction->status = 'pending';
+                $transaction->save();
+                Log::info('Transaction under challenge review', ['transaction_id' => $transaction->id]);
             }
         } elseif ($status === 'deny' || $status === 'expire' || $status === 'cancel') {
             $transaction->status = 'failed';
+            $transaction->save();
+            Log::info('Transaction failed', [
+                'transaction_id' => $transaction->id,
+                'status' => $status,
+            ]);
+        } elseif ($status === 'pending') {
+            $transaction->status = 'pending';
             $transaction->save();
         }
     }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ContactMail;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -31,8 +33,7 @@ class ContactController extends Controller
         ]);
 
         try {
-            // For now, just log the contact message
-            // In production, you can add email sending functionality
+            // Log the contact message
             Log::info('Contact form submission', [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -40,8 +41,27 @@ class ContactController extends Controller
                 'message' => $validated['message'],
             ]);
 
-            // TODO: Send email to support@noteds.test
-            // Mail::to('support@noteds.test')->send(new ContactMail($validated));
+            // Get support email from settings or use default
+            $supportEmail = Setting::getSetting('support_email', 'general', config('mail.from.address', 'support@noteds.test'));
+
+            // Send email to support
+            try {
+                Mail::to($supportEmail)->send(new ContactMail(
+                    $validated['name'],
+                    $validated['email'],
+                    $validated['subject'],
+                    $validated['message']
+                ));
+                
+                Log::info('Contact email sent successfully', ['to' => $supportEmail]);
+            } catch (\Exception $mailException) {
+                // Log email error but don't fail the request
+                Log::error('Failed to send contact email', [
+                    'error' => $mailException->getMessage(),
+                    'to' => $supportEmail,
+                ]);
+                // Continue - message is still logged
+            }
 
             return redirect()->route('contact.index')
                 ->with('success', 'Thank you for your message! We\'ll get back to you as soon as possible.');

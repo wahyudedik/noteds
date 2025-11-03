@@ -18,6 +18,12 @@ class WithdrawController extends Controller
             ['balance' => 0]
         );
 
+        // Sync wallet balance with user wallet_balance for consistency
+        if ($wallet->balance != $user->wallet_balance) {
+            $wallet->balance = $user->wallet_balance;
+            $wallet->save();
+        }
+
         return view('wallet.withdraw', compact('wallet'));
     }
 
@@ -28,6 +34,12 @@ class WithdrawController extends Controller
             ['user_id' => $user->id],
             ['balance' => 0]
         );
+
+        // Sync wallet balance with user wallet_balance for consistency
+        if ($wallet->balance != $user->wallet_balance) {
+            $wallet->balance = $user->wallet_balance;
+            $wallet->save();
+        }
 
         // Double check balance
         if ($wallet->balance < $request->amount || $wallet->balance < 50000) {

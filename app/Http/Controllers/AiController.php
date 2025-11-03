@@ -239,6 +239,112 @@ class AiController extends Controller
     }
 
     /**
+     * Context linking - Detect relationships between notes.
+     * Premium feature only.
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function contextLinks(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'note_id' => 'nullable|exists:notes,id', // Optional: focus on specific note
+            'limit' => 'nullable|integer|min:1|max:50', // Limit number of notes to analyze
+        ]);
+
+        // This is a premium feature - middleware ensures user has premium
+        $user = $request->user();
+        $focusNoteId = $validated['note_id'] ?? null;
+        $limit = $validated['limit'] ?? 30;
+
+        // Get user's notes
+        $notesQuery = $user->notes();
+        
+        // If focus note ID provided, ensure it's included
+        if ($focusNoteId) {
+            $notesQuery->where('id', $focusNoteId)
+                ->orWhere(function($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
+        }
+
+        // Get notes for analysis
+        $notes = $notesQuery
+            ->latest()
+            ->limit($limit)
+            ->get(['id', 'title', 'content']);
+
+        if ($notes->count() < 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Need at least 2 notes to detect relationships.',
+                'links' => [],
+            ], 400);
+        }
+
+        // Check if Ollama is available
+        if (!$this->aiService->isAvailable()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'AI service is currently unavailable. Please try again later.',
+                'links' => [],
+            ], 503);
+        }
+
+        try {
+            // Prepare notes data
+            $notesData = $notes->map(fn($note) => [
+                'id' => $note->id,
+                'title' => $note->title,
+                'content' => strip_tags($note->content),
+            ])->toArray();
+
+            // Detect context links
+            $links = $this->aiService->detectContextLinks($notesData, $focusNoteId);
+
+            // Enrich links with note titles
+            $enrichedLinks = [];
+            foreach ($links as $link) {
+                $note1 = $notes->firstWhere('id', $link['note_id_1']);
+                $note2 = $notes->firstWhere('id', $link['note_id_2']);
+                
+                if ($note1 && $note2) {
+                    $enrichedLinks[] = [
+                        'note_1' => [
+                            'id' => $note1->id,
+                            'title' => $note1->title,
+                        ],
+                        'note_2' => [
+                            'id' => $note2->id,
+                            'title' => $note2->title,
+                        ],
+                        'relationship' => $link['relationship'],
+                        'strength' => $link['strength'],
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'links' => $enrichedLinks,
+                'total' => count($enrichedLinks),
+                'notes_analyzed' => $notes->count(),
+            ]);
+        } catch (\Exception $e) {
+            logger()->error('Context linking error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while detecting context links.',
+                'links' => [],
+            ], 500);
+        }
+    }
+
+    /**
      * Check if AI service is available.
      */
     public function status(): JsonResponse

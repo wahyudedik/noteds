@@ -12,9 +12,11 @@ export default defineConfig({
         host: '0.0.0.0',
         port: 5173,
         strictPort: false,
+        // Use HTTP for Vite dev server (recommended for Herd)
+        // If Herd is using HTTPS, access site via HTTP (http://noteds.test) to avoid mixed content
         hmr: {
-            protocol: 'ws',
             host: 'noteds.test',
+            protocol: 'ws', // Use ws (not wss) for HTTP Vite server
         },
     },
 });

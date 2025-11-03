@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'premium' => \App\Http\Middleware\EnsureUserHasPremium::class,
+            'username.setup' => \App\Http\Middleware\EnsureUsernameSetup::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

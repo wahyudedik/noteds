@@ -26,7 +26,8 @@
                         Premium Plan
                     </div>
                     <h2 class="text-3xl font-bold text-gray-900 mb-2">Upgrade Now</h2>
-                    <p class="text-base text-gray-600">Get all premium features</p>
+                    <p class="text-base text-gray-600 mb-2">Get all premium features</p>
+                    <p class="text-2xl font-bold text-green-600">{{ \App\Models\Setting::formatPremiumPrice(false) }}</p>
                 </div>
 
                 <form action="{{ route('subscription.store') }}" method="POST" class="space-y-6">

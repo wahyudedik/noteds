@@ -30,8 +30,18 @@ class NoteController extends Controller
     public function create(): View
     {
         $tags = Tag::orderBy('name')->get();
+        $user = auth()->user();
+        
+        // Get folders and workspaces for premium users
+        $folders = [];
+        $workspaces = [];
+        
+        if ($user->hasPremium()) {
+            $folders = $user->allFolders()->get();
+            $workspaces = $user->allWorkspaces();
+        }
 
-        return view('notes.create', compact('tags'));
+        return view('notes.create', compact('tags', 'folders', 'workspaces'));
     }
 
     /**
@@ -118,9 +128,19 @@ class NoteController extends Controller
         $this->authorize('update', $note);
 
         $tags = Tag::orderBy('name')->get();
-        $note->load('tags');
+        $note->load('tags', 'folder', 'workspace');
+        $user = auth()->user();
+        
+        // Get folders and workspaces for premium users
+        $folders = [];
+        $workspaces = [];
+        
+        if ($user->hasPremium()) {
+            $folders = $user->allFolders()->get();
+            $workspaces = $user->allWorkspaces();
+        }
 
-        return view('notes.edit', compact('note', 'tags'));
+        return view('notes.edit', compact('note', 'tags', 'folders', 'workspaces'));
     }
 
     /**

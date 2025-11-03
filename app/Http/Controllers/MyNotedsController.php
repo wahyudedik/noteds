@@ -17,17 +17,34 @@ class MyNotedsController extends Controller
         $user = $request->user();
 
         // Get user's notes for AI Memory Platform
-        $notes = $user->notes()
-            ->with(['tags', 'reviews'])
-            ->latest()
-            ->paginate(15);
+        $notesQuery = $user->notes()->with(['tags', 'reviews', 'folder', 'workspace']);
+        
+        // Filter by workspace if provided
+        if ($request->has('workspace_id') && $request->workspace_id) {
+            if ($request->workspace_id === 'personal') {
+                $notesQuery->whereNull('workspace_id');
+            } else {
+                $notesQuery->where('workspace_id', $request->workspace_id);
+            }
+        }
+        
+        $notes = $notesQuery->latest()->paginate(15);
 
-        // Statistics for dashboard
+        // Statistics for dashboard (filtered if workspace selected)
+        $baseQuery = $user->notes();
+        if ($request->has('workspace_id') && $request->workspace_id) {
+            if ($request->workspace_id === 'personal') {
+                $baseQuery->whereNull('workspace_id');
+            } else {
+                $baseQuery->where('workspace_id', $request->workspace_id);
+            }
+        }
+        
         $stats = [
-            'total_notes' => $user->notes()->count(),
-            'public_notes' => $user->notes()->where('is_public', true)->count(),
-            'private_notes' => $user->notes()->where('is_public', false)->count(),
-            'total_tags' => $user->notes()->with('tags')->get()->flatMap->tags->unique('id')->count(),
+            'total_notes' => (clone $baseQuery)->count(),
+            'public_notes' => (clone $baseQuery)->where('is_public', true)->count(),
+            'private_notes' => (clone $baseQuery)->where('is_public', false)->count(),
+            'total_tags' => (clone $baseQuery)->with('tags')->get()->flatMap->tags->unique('id')->count(),
         ];
 
         return view('mynoteds.index', compact('notes', 'stats'));

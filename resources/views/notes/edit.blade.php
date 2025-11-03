@@ -268,6 +268,49 @@
                         </label>
                     </div>
 
+                    @if(auth()->user()->hasPremium())
+                    <!-- Organization (Premium Features) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                        <div>
+                            <label for="folder_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                </svg>
+                                Folder (Optional)
+                            </label>
+                            <select name="folder_id" id="folder_id"
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                                <option value="">None (Root)</option>
+                                @foreach($folders as $folder)
+                                    <option value="{{ $folder->id }}" {{ old('folder_id', $note->folder_id) == $folder->id ? 'selected' : '' }}>
+                                        {{ $folder->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">Organize notes in folders</p>
+                        </div>
+
+                        <div>
+                            <label for="workspace_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                Workspace (Optional)
+                            </label>
+                            <select name="workspace_id" id="workspace_id"
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                                <option value="">Personal</option>
+                                @foreach($workspaces as $workspace)
+                                    <option value="{{ $workspace->id }}" {{ old('workspace_id', $note->workspace_id) == $workspace->id ? 'selected' : '' }}>
+                                        {{ $workspace->name }} ({{ $workspace->type }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">Assign to workspace</p>
+                        </div>
+                    </div>
+                    @endif
+
                     <!-- Tags -->
                     <div>
                         <label for="tags" class="block text-sm font-medium text-gray-700 mb-2">

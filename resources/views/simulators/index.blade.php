@@ -14,7 +14,7 @@
         </div>
 
         <!-- Simulator Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             
             <!-- Earnings Calculator -->
             <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
@@ -187,7 +187,7 @@
                             </div>
                             <div class="flex items-center justify-between mb-3 mt-2">
                                 <h4 class="text-lg font-bold text-gray-900">Premium Plan</h4>
-                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Rp25k/mo</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">{{ \App\Models\Setting::formatPremiumPrice(true) }}</span>
                             </div>
                             <div class="space-y-2 mb-4">
                                 <div class="flex items-center">
@@ -218,6 +218,295 @@
                             <a href="{{ route('subscription.create') }}" class="block w-full bg-green-600 hover:bg-green-700 text-white text-center font-semibold py-2 rounded-lg transition-all duration-200">
                                 Upgrade Now
                             </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Second Row: New Simulators -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            
+            <!-- Wallet Simulator -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">Wallet Simulator</h3>
+                            <p class="text-indigo-100 text-sm">Track balance & transactions</p>
+                        </div>
+                        <svg class="w-12 h-12 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <div class="bg-indigo-50 rounded-lg p-4 text-center">
+                            <p class="text-sm text-gray-600 mb-1">Current Balance</p>
+                            <p class="text-3xl font-bold text-indigo-700" id="wallet-balance">Rp 0</p>
+                        </div>
+                    </div>
+                    <form id="wallet-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Topup Amount (Rp)</label>
+                            <input type="number" id="wallet-topup" name="topup" value="100000" min="10000" step="10000"
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Withdraw Amount (Rp)</label>
+                            <input type="number" id="wallet-withdraw" name="withdraw" value="50000" min="10000" step="10000"
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="button" id="wallet-topup-btn" 
+                                class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition-all duration-200">
+                                Topup
+                            </button>
+                            <button type="button" id="wallet-withdraw-btn" 
+                                class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 rounded-lg transition-all duration-200">
+                                Withdraw
+                            </button>
+                        </div>
+                    </form>
+                    <div id="wallet-history" class="mt-6 space-y-2 max-h-40 overflow-y-auto">
+                        <p class="text-xs text-gray-500 text-center">Transaction history will appear here</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marketplace Preview Demo -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="bg-gradient-to-r from-pink-500 to-pink-600 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">Marketplace Preview</h3>
+                            <p class="text-pink-100 text-sm">Explore marketplace features</p>
+                        </div>
+                        <svg class="w-12 h-12 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('marketplace.index') }}'">
+                            <div class="flex items-start justify-between mb-2">
+                                <h4 class="font-semibold text-gray-900">Sample Note Title</h4>
+                                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">Free</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">This is a preview of how notes appear in the marketplace. Click to explore more!</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                        <span class="text-sm text-gray-600 ml-1">4.5</span>
+                                    </div>
+                                    <span class="text-xs text-gray-500">•</span>
+                                    <span class="text-xs text-gray-500">15 reviews</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">Rp 0</span>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <p class="text-xs text-blue-800">
+                                <strong>Marketplace Features:</strong> Search, filter by price/tags, ratings, reviews, and secure transactions
+                            </p>
+                        </div>
+                        <a href="{{ route('marketplace.index') }}" class="block w-full bg-pink-600 hover:bg-pink-700 text-white text-center font-semibold py-2 rounded-lg transition-all duration-200">
+                            Explore Marketplace
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction Flow Simulator -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">Transaction Flow</h3>
+                            <p class="text-orange-100 text-sm">Visualize payment process</p>
+                        </div>
+                        <svg class="w-12 h-12 text-orange-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4" id="transaction-flow">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                <span class="text-orange-600 font-bold text-sm">1</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-900">Select Note</p>
+                                <p class="text-xs text-gray-500">Choose note to purchase</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 opacity-50" id="flow-step-2">
+                            <div class="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                <span class="text-gray-600 font-bold text-sm">2</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-700">Checkout</p>
+                                <p class="text-xs text-gray-500">Review order details</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 opacity-50" id="flow-step-3">
+                            <div class="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                <span class="text-gray-600 font-bold text-sm">3</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-700">Payment</p>
+                                <p class="text-xs text-gray-500">Secure payment via Midtrans</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 opacity-50" id="flow-step-4">
+                            <div class="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                <span class="text-gray-600 font-bold text-sm">4</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-700">Complete</p>
+                                <p class="text-xs text-gray-500">Access granted to note</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" id="flow-simulate" 
+                        class="mt-6 w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
+                        Simulate Transaction
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Summary Generator Demo -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="bg-gradient-to-r from-teal-500 to-teal-600 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">AI Summary Generator</h3>
+                            <p class="text-teal-100 text-sm">Auto-generate summaries</p>
+                        </div>
+                        <svg class="w-12 h-12 text-teal-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Note Content</label>
+                        <textarea id="ai-content" rows="4" 
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500"
+                            placeholder="Paste your note content here...">Laravel is a powerful PHP framework that makes web development easier. It provides elegant syntax, robust features, and a vibrant ecosystem. With Laravel, you can build applications quickly while maintaining code quality and following best practices.</textarea>
+                    </div>
+                    <button type="button" id="ai-generate" 
+                        class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
+                        Generate Summary
+                    </button>
+                    <div id="ai-result" class="mt-6 hidden">
+                        <div class="bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg">
+                            <h4 class="text-lg font-bold text-teal-800 mb-2">AI Summary</h4>
+                            <p class="text-sm text-gray-700" id="ai-summary-text"></p>
+                            <p class="text-xs text-gray-500 mt-2">Powered by Ollama AI</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tag Suggestion Simulator -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="bg-gradient-to-r from-cyan-500 to-cyan-600 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">Tag Suggestion</h3>
+                            <p class="text-cyan-100 text-sm">AI-powered tag suggestions</p>
+                        </div>
+                        <svg class="w-12 h-12 text-cyan-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Note Title</label>
+                        <input type="text" id="tag-title" 
+                            value="Laravel Framework Tutorial"
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Note Content</label>
+                        <textarea id="tag-content" rows="3" 
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500"
+                            placeholder="Enter note content...">Learn how to build modern web applications using Laravel PHP framework. This tutorial covers routing, controllers, models, migrations, and more.</textarea>
+                    </div>
+                    <button type="button" id="tag-suggest" 
+                        class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
+                        Get Tag Suggestions
+                    </button>
+                    <div id="tag-result" class="mt-6 hidden">
+                        <div class="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+                            <h4 class="text-sm font-bold text-cyan-800 mb-3">Suggested Tags:</h4>
+                            <div class="flex flex-wrap gap-2" id="tag-suggestions">
+                                <!-- Tags will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Benchmark Tool -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="bg-gradient-to-r from-violet-500 to-violet-600 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">Price Benchmark</h3>
+                            <p class="text-violet-100 text-sm">Compare note prices</p>
+                        </div>
+                        <svg class="w-12 h-12 text-violet-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Note Price (Rp)</label>
+                        <input type="number" id="benchmark-price" value="50000" min="0" step="1000"
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                        <select id="benchmark-category" 
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500">
+                            <option value="tutorial">Tutorial</option>
+                            <option value="template">Template</option>
+                            <option value="guide">Guide</option>
+                            <option value="resource">Resource</option>
+                        </select>
+                    </div>
+                    <button type="button" id="benchmark-calculate" 
+                        class="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
+                        Compare Prices
+                    </button>
+                    <div id="benchmark-result" class="mt-6 hidden">
+                        <div class="bg-violet-50 border-l-4 border-violet-500 p-4 rounded-r-lg">
+                            <h4 class="text-lg font-bold text-violet-800 mb-3">Market Analysis</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-700">Market Average:</span>
+                                    <span class="font-bold text-gray-900" id="benchmark-avg"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-700">Your Price:</span>
+                                    <span class="font-bold text-violet-700" id="benchmark-yours"></span>
+                                </div>
+                                <div class="flex justify-between border-t-2 border-violet-200 pt-2">
+                                    <span class="text-gray-700">Position:</span>
+                                    <span class="font-bold" id="benchmark-position"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -316,6 +605,194 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.getElementById('referral-count').value && document.getElementById('referral-transaction').value) {
             referralForm.click();
         }
+    });
+
+    // Wallet Simulator
+    let walletBalance = 0;
+    const walletHistory = [];
+    
+    document.getElementById('wallet-topup-btn').addEventListener('click', function() {
+        const amount = parseFloat(document.getElementById('wallet-topup').value) || 0;
+        if (amount > 0) {
+            walletBalance += amount;
+            updateWalletBalance();
+            addWalletTransaction('Topup', amount, 'success');
+        }
+    });
+    
+    document.getElementById('wallet-withdraw-btn').addEventListener('click', function() {
+        const amount = parseFloat(document.getElementById('wallet-withdraw').value) || 0;
+        if (amount > 0 && amount <= walletBalance) {
+            walletBalance -= amount;
+            updateWalletBalance();
+            addWalletTransaction('Withdraw', amount, 'warning');
+        } else if (amount > walletBalance) {
+            alert('Insufficient balance!');
+        }
+    });
+    
+    function updateWalletBalance() {
+        document.getElementById('wallet-balance').textContent = formatRupiah(walletBalance);
+    }
+    
+    function addWalletTransaction(type, amount, statusClass) {
+        const historyDiv = document.getElementById('wallet-history');
+        if (walletHistory.length === 0) {
+            historyDiv.innerHTML = '';
+        }
+        
+        const timestamp = new Date().toLocaleTimeString('id-ID');
+        const transaction = {
+            type,
+            amount,
+            timestamp,
+            statusClass
+        };
+        walletHistory.unshift(transaction);
+        
+        if (walletHistory.length > 5) walletHistory.pop();
+        
+        historyDiv.innerHTML = walletHistory.map(t => `
+            <div class="flex items-center justify-between text-xs p-2 bg-gray-50 rounded">
+                <div>
+                    <span class="font-medium ${t.statusClass === 'success' ? 'text-green-600' : 'text-orange-600'}">${t.type}</span>
+                    <span class="text-gray-500 ml-2">${t.timestamp}</span>
+                </div>
+                <span class="font-semibold ${t.statusClass === 'success' ? 'text-green-700' : 'text-orange-700'}">
+                    ${t.statusClass === 'success' ? '+' : '-'}${formatRupiah(t.amount)}
+                </span>
+            </div>
+        `).join('');
+    }
+
+    // Transaction Flow Simulator
+    document.getElementById('flow-simulate').addEventListener('click', function() {
+        const steps = document.querySelectorAll('#transaction-flow > div');
+        let currentStep = 0;
+        
+        function activateStep(stepIndex) {
+            steps.forEach((step, index) => {
+                if (index <= stepIndex) {
+                    step.classList.remove('opacity-50');
+                    step.querySelector('div').classList.remove('bg-gray-200', 'text-gray-600');
+                    step.querySelector('div').classList.add('bg-orange-100', 'text-orange-600');
+                } else {
+                    step.classList.add('opacity-50');
+                    step.querySelector('div').classList.remove('bg-orange-100', 'text-orange-600');
+                    step.querySelector('div').classList.add('bg-gray-200', 'text-gray-600');
+                }
+            });
+        }
+        
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                activateStep(currentStep);
+                setTimeout(nextStep, 1000);
+            } else {
+                setTimeout(() => {
+                    currentStep = 0;
+                    activateStep(0);
+                    this.textContent = 'Simulate Transaction';
+                    this.disabled = false;
+                }, 2000);
+                this.textContent = 'Transaction Complete!';
+                this.disabled = true;
+            }
+        }
+        
+        this.textContent = 'Processing...';
+        this.disabled = true;
+        activateStep(0);
+        setTimeout(nextStep.bind(this), 1000);
+    });
+
+    // AI Summary Generator Demo
+    document.getElementById('ai-generate').addEventListener('click', function() {
+        const content = document.getElementById('ai-content').value;
+        if (!content.trim()) {
+            alert('Please enter some content first!');
+            return;
+        }
+        
+        this.disabled = true;
+        this.textContent = 'Generating...';
+        
+        // Simulate AI processing (in real app, this would call API)
+        setTimeout(() => {
+            const summary = `Laravel is a PHP framework that simplifies web development. It offers elegant syntax, powerful features, and a rich ecosystem. Developers can build applications efficiently while ensuring code quality and best practices.`;
+            
+            document.getElementById('ai-summary-text').textContent = summary;
+            document.getElementById('ai-result').classList.remove('hidden');
+            this.disabled = false;
+            this.textContent = 'Generate Summary';
+        }, 2000);
+    });
+
+    // Tag Suggestion Simulator
+    document.getElementById('tag-suggest').addEventListener('click', function() {
+        const title = document.getElementById('tag-title').value;
+        const content = document.getElementById('tag-content').value;
+        
+        if (!title.trim() && !content.trim()) {
+            alert('Please enter title or content!');
+            return;
+        }
+        
+        this.disabled = true;
+        this.textContent = 'Analyzing...';
+        
+        // Simulate AI tag suggestions (in real app, this would call API)
+        setTimeout(() => {
+            const tags = ['laravel', 'php', 'framework', 'tutorial', 'web-development', 'backend'];
+            const suggestionsDiv = document.getElementById('tag-suggestions');
+            suggestionsDiv.innerHTML = tags.map(tag => `
+                <span class="px-3 py-1 bg-cyan-100 text-cyan-800 rounded-full text-xs font-medium">
+                    #${tag}
+                </span>
+            `).join('');
+            
+            document.getElementById('tag-result').classList.remove('hidden');
+            this.disabled = false;
+            this.textContent = 'Get Tag Suggestions';
+        }, 1500);
+    });
+
+    // Price Benchmark Tool
+    document.getElementById('benchmark-calculate').addEventListener('click', function() {
+        const yourPrice = parseFloat(document.getElementById('benchmark-price').value) || 0;
+        const category = document.getElementById('benchmark-category').value;
+        
+        // Simulate market analysis (in real app, this would query database)
+        const marketAverages = {
+            tutorial: 45000,
+            template: 75000,
+            guide: 55000,
+            resource: 60000
+        };
+        
+        const marketAvg = marketAverages[category] || 50000;
+        const difference = yourPrice - marketAvg;
+        const percentage = ((difference / marketAvg) * 100).toFixed(1);
+        
+        let position = '';
+        let positionClass = '';
+        if (difference < -10000) {
+            position = 'Below Market (Good Value)';
+            positionClass = 'text-green-600';
+        } else if (difference > 10000) {
+            position = 'Above Market (Premium)';
+            positionClass = 'text-orange-600';
+        } else {
+            position = 'Market Average (Competitive)';
+            positionClass = 'text-blue-600';
+        }
+        
+        document.getElementById('benchmark-avg').textContent = formatRupiah(marketAvg);
+        document.getElementById('benchmark-yours').textContent = formatRupiah(yourPrice);
+        document.getElementById('benchmark-position').textContent = position;
+        document.getElementById('benchmark-position').className = 'font-bold ' + positionClass;
+        document.getElementById('benchmark-result').classList.remove('hidden');
     });
 });
 </script>

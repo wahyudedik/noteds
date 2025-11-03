@@ -3,16 +3,27 @@
 namespace App\Services;
 
 use App\Models\Referral;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ReferralService
 {
     /**
-     * Reward amounts (configurable)
+     * Get signup reward amount (dynamic from settings).
      */
-    protected float $signupReward = 5000; // Rp 5,000 for signup
-    protected float $transactionRewardPercent = 5; // 5% commission from transaction
+    protected function getSignupReward(): float
+    {
+        return Setting::getReferralSignupReward();
+    }
+
+    /**
+     * Get transaction reward percentage (dynamic from settings).
+     */
+    protected function getTransactionRewardPercent(): float
+    {
+        return Setting::getReferralCommissionPercent();
+    }
 
     /**
      * Process signup reward for referral.
@@ -34,18 +45,28 @@ class ReferralService
         try {
             DB::beginTransaction();
 
+            $signupReward = $this->getSignupReward();
+
             // Create referral record
             $referral = Referral::create([
                 'referrer_id' => $referrer->id,
                 'referred_id' => $referredUser->id,
                 'reward_type' => 'signup',
-                'reward_amount' => $this->signupReward,
+                'reward_amount' => $signupReward,
                 'status' => 'pending',
                 'notes' => 'Signup bonus',
             ]);
 
             // Add reward to referrer's wallet immediately
-            $referrer->increment('wallet_balance', $this->signupReward);
+            $referrer->increment('wallet_balance', $signupReward);
+            
+            // Sync Wallet model with user wallet_balance
+            $referrerWallet = \App\Models\Wallet::firstOrCreate(
+                ['user_id' => $referrer->id],
+                ['balance' => 0]
+            );
+            $referrerWallet->balance = $referrer->wallet_balance;
+            $referrerWallet->save();
             
             // Update referral status to paid
             $referral->update(['status' => 'paid']);
@@ -84,8 +105,9 @@ class ReferralService
             return null;
         }
 
-        // Calculate reward (5% of transaction amount)
-        $rewardAmount = $transaction->amount * ($this->transactionRewardPercent / 100);
+        // Calculate reward (dynamic percentage from settings)
+        $commissionPercent = $this->getTransactionRewardPercent();
+        $rewardAmount = $transaction->amount * ($commissionPercent / 100);
 
         try {
             DB::beginTransaction();
@@ -114,6 +136,14 @@ class ReferralService
             // Add reward to referrer's wallet immediately
             $referrer->increment('wallet_balance', $rewardAmount);
             
+            // Sync Wallet model with user wallet_balance
+            $referrerWallet = \App\Models\Wallet::firstOrCreate(
+                ['user_id' => $referrer->id],
+                ['balance' => 0]
+            );
+            $referrerWallet->balance = $referrer->wallet_balance;
+            $referrerWallet->save();
+            
             // Update referral status to paid
             $referral->update(['status' => 'paid']);
 
@@ -141,8 +171,8 @@ class ReferralService
     public function getRewardConfig(): array
     {
         return [
-            'signup_reward' => $this->signupReward,
-            'transaction_reward_percent' => $this->transactionRewardPercent,
+            'signup_reward' => $this->getSignupReward(),
+            'transaction_reward_percent' => $this->getTransactionRewardPercent(),
         ];
     }
 }

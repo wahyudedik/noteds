@@ -32,7 +32,7 @@ Edit `.env`:
 APP_NAME="Noteds"
 APP_ENV=local
 APP_DEBUG=true
-APP_URL=https://noteds.test
+APP_URL=http://noteds.test  # Use HTTP for development to avoid mixed content errors
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -62,13 +62,18 @@ php artisan storage:link
 
 ### 6. Frontend Assets
 
-#### Using Herd (HTTPS) - Recommended
+#### Using Herd - Recommended
 ```bash
 npm install
-npm run build
+npm run dev  # For development with hot reload
+# OR
+npm run build  # For production build (no hot reload)
 ```
 
-**Note:** `npm run dev` tidak stabil dengan Node.js 22.x + Herd HTTPS. Gunakan `npm run build` untuk development.
+**⚠️ Important:** 
+- **Akses via HTTP:** `http://noteds.test` (bukan https) untuk menghindari Mixed Content errors
+- Jika Herd menggunakan HTTPS, disable HTTPS di Herd settings atau akses langsung via HTTP
+- `npm run dev` menggunakan Vite dev server (HTTP) yang tidak kompatibel dengan HTTPS pages
 
 #### Using `php artisan serve` (HTTP)
 ```bash
@@ -129,14 +134,119 @@ npm run build    # With Herd/Vite (production build)
 
 ## 🐛 Troubleshooting
 
-### Vite ERR_EMPTY_RESPONSE
-**Problem:** Node.js 22.x + Vite 6.x + Herd HTTPS incompatibility
+### SSL Certificate Error (NET::ERR_CERT_COMMON_NAME_INVALID)
+**Problem:** Browser menampilkan error "Your connection is not private" dengan error code `NET::ERR_CERT_COMMON_NAME_INVALID`.
 
-**Solution:**
-```bash
-npm run build
-# Or downgrade to Node.js 20
-```
+**Root Cause:**
+- Server `noteds.test` menyajikan sertifikat SSL untuk `backend.test` (bukan `noteds.test`)
+- Browser tidak dapat memverifikasi identitas server
+- Ini terjadi karena Herd menggunakan sertifikat yang salah untuk domain `noteds.test`
+
+**Solutions (Pilih salah satu):**
+
+1. **✅ RECOMMENDED - Akses via HTTP:**
+   - Akses langsung: `http://noteds.test` (bukan https://)
+   - Tidak akan ada SSL certificate error karena tidak menggunakan HTTPS
+   - Clear browser cache jika masih redirect ke HTTPS
+
+2. **Disable HTTPS di Herd:**
+   - Buka Laravel Herd
+   - Pilih site `noteds.test`
+   - Settings → Disable HTTPS / pilih HTTP Only
+   - Restart site
+
+3. **Clear HSTS Cache (Chrome/Edge) - PENTING:**
+   - Buka: `chrome://net-internals/#hsts`
+   - Di bagian "Delete domain security policies", masukkan: `noteds.test` dan klik "Delete"
+   - Masukkan juga: `backend.test` dan klik "Delete" (untuk menghapus referensi ke domain lama)
+   - Clear browser cache (Ctrl+Shift+Delete)
+   - Restart browser
+   - **Langkah ini CRITICAL untuk menghapus referensi ke `backend.test`**
+
+4. **Clear Browser Cache Lengkap:**
+   - Buka: `chrome://settings/clearBrowserData` (atau Ctrl+Shift+Delete)
+   - Pilih: "Cached images and files", "Cookies and other site data", "Hosted app data"
+   - Time range: "All time"
+   - Klik "Clear data"
+   - Restart browser
+
+**Note:** Ini adalah masalah SSL certificate mismatch di Herd. Domain `backend.test` sudah tidak digunakan lagi. Pastikan untuk menghapus HSTS cache untuk kedua domain (`noteds.test` dan `backend.test`).
+
+### Mixed Content Error (Vite + Herd HTTPS)
+**Problem:** Browser console shows "Mixed Content" errors ketika mengakses `https://noteds.test`
+
+**Root Cause:**
+- Browser mengakses `https://noteds.test` (HTTPS)
+- Vite dev server berjalan di `http://noteds.test:5173` (HTTP)
+- Browser block mixed content (HTTPS page loading HTTP resources)
+
+**Solutions (Pilih salah satu):**
+
+1. **✅ RECOMMENDED - Akses via HTTP:**
+   - Akses langsung: `http://noteds.test` (bukan https://)
+   - Browser akan otomatis menggunakan HTTP dan tidak ada mixed content error
+   - Clear browser cache jika masih redirect ke HTTPS
+
+2. **Disable HTTPS di Herd:**
+   - Buka Laravel Herd
+   - Pilih site `noteds.test`
+   - Settings → Disable HTTPS / pilih HTTP Only
+   - Restart site
+
+3. **Clear HSTS Cache (Chrome/Edge):**
+   - Buka: `chrome://net-internals/#hsts`
+   - Delete domain: `noteds.test`
+   - Clear browser cache
+   - Restart browser
+
+**Note:** Production tidak terpengaruh karena menggunakan `npm run build` (assets di-build, tidak menggunakan dev server).
+
+### Vite ERR_EMPTY_RESPONSE (Assets Not Loading)
+**Problem:** Console menampilkan error `ERR_EMPTY_RESPONSE` untuk `app.css`, `app.js`, dan `client` meskipun Vite server sudah berjalan.
+
+**Root Cause:**
+- Browser mengakses via HTTPS tapi Vite server HTTP
+- Hostname mismatch antara browser dan Vite server
+- Network issue atau firewall block
+
+**Solutions:**
+
+1. **✅ Pastikan Akses via HTTP (Bukan HTTPS):**
+   - Akses: `http://noteds.test` (bukan https://)
+   - Vite server berjalan di HTTP port 5173
+   - HTTPS tidak bisa connect ke HTTP server
+
+2. **Check Vite Server Running:**
+   ```bash
+   # Windows PowerShell
+   netstat -ano | findstr :5173
+   ```
+   - Jika ada output, berarti server sudah berjalan
+   - Jika tidak ada output, jalankan: `npm run dev`
+
+3. **Restart Vite Server:**
+   ```bash
+   # Stop server (Ctrl+C)
+   npm run dev
+   ```
+   - Pastikan server start tanpa error
+   - Check output: `VITE v6.x.x  ready in xxx ms`
+
+4. **Use Production Build (Alternative):**
+   Jika masih error, gunakan build:
+   ```bash
+   npm run build
+   ```
+   - Assets akan di-build ke `public/build/`
+   - Tidak perlu Vite dev server
+   - Reload page setelah build
+
+5. **Check Browser Console:**
+   - Buka DevTools (F12)
+   - Check Network tab
+   - Lihat apakah request ke `http://noteds.test:5173` berhasil atau gagal
+
+**Status:** ✅ Fixed - Pastikan akses via HTTP dan Vite server berjalan.
 
 ### Database Connection Error
 - Check MySQL service is running

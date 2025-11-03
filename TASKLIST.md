@@ -83,6 +83,8 @@ Seller dapat menarik saldo, admin dapat mengatur transaksi & komisi.
 - [x] Konfirmasi Admin
 - [x] Halaman Admin
 - [x] Admin Dashboard Analytics (Wallet, Referral, Notes, Revenue, Top Performers)
+- [x] Withdraw support untuk hasil penjualan dan hasil referral (wallet balance unified)
+- [x] Admin Settings: Dynamic referral reward configuration
 
 ---
 
@@ -114,23 +116,23 @@ Menambah sumber pendapatan dan benefit user premium dengan plugin AI Memory Plat
 - [x] Langganan via QRIS (manual/approve admin)
 - [x] Admin manual subscription creation
 - [x] Fitur premium (unlimited notes)
-- [ ] Backup ke cloud (opsional)
+- [x] Backup ke cloud (S3) - ✅ Admin Settings UI untuk konfigurasi S3 (AWS, DigitalOcean Spaces, Wasabi, S3-compatible)
 
 **AI Memory Platform Plugin (Premium Feature):**
-- [ ] Migration: `workspaces` table (personal, team, organization)
-- [ ] Migration: `workspace_users` table (multi-user workspace)
+- [x] Migration: `workspaces` table (personal, team, organization) - ✅ Created (`2025_11_03_201328_create_workspaces_table.php`)
+- [x] Migration: `workspace_members` table (multi-user workspace) - ✅ Created (`2025_11_03_201329_create_workspace_members_table.php`)
 - [x] Migration: `note_activities` table - ✅ Created (`2025_11_03_100000_create_note_activities_table.php`)
-- [ ] Migration: `ai_insights` table (ringkasan & insight otomatis)
-- [ ] Model Workspace dengan relationships (users, notes, activities)
+- [x] Migration: `ai_insights` table (ringkasan & insight otomatis) - ✅ Created (`2025_11_03_203415_create_ai_insights_table.php`)
+- [x] Model Workspace dengan relationships (users, notes, activities) - ✅ Model `Workspace` dengan relationships lengkap (owner, members, notes, folders)
 - [x] AI Context Engine Service - ✅ Enhanced `AiService` with Q&A & semantic search methods
 - [x] Natural Language Q&A endpoint - ✅ Fully implemented (`AiController::ask()` + `AiService::answerQuestion()`)
-- [ ] Auto-summarization untuk catatan panjang (enhanced - basic sudah ada)
-- [ ] Context linking antar catatan (relationship detection)
+- [x] Auto-summarization untuk catatan panjang (enhanced - basic sudah ada) - ✅ `AiService::generateSummary()` dengan configurable length
+- [x] Context linking antar catatan (relationship detection) - ✅ Fully implemented (`AiService::detectContextLinks()`, `AiController::contextLinks()` endpoint `/ai-memory/context-links`)
 - [x] Keyword tagging otomatis - ✅ (dilengkapi dari FASE 2)
-- [ ] Folder & tag system (enhanced)
+- [x] Folder & tag system (enhanced) - ✅ Folder management UI + backend (nested folders, color coding), integrated di note forms
 - [x] Activity timeline & history tracking - ✅ Model `NoteActivity` + Service `NoteActivityService` implemented
-- [ ] Multi-workspace UI (personal, tim, lembaga)
-- [ ] Authentication & role khusus untuk AI Memory Platform (bisa terpisah dari marketplace)
+- [x] Multi-workspace UI (personal, tim, lembaga) - ✅ Workspace management UI + controller, integrated di MyNoteds dashboard
+- [ ] Authentication & role khusus untuk AI Memory Platform (bisa terpisah dari marketplace) - ⏸️ Skipped for now (current premium middleware is sufficient)
 - [x] Semantic search endpoint - ✅ Fully implemented (`AiController::semanticSearch()` + `AiService::semanticSearch()`)
 - [x] Premium protection middleware - ✅ `EnsureUserHasPremium` middleware implemented & registered
 
@@ -150,8 +152,8 @@ Menyiapkan aplikasi untuk rilis publik.
 - [x] Rich Text Editor (Quill) integration
 - [x] Tag deletion bug fix
 - [x] SweetAlert2 notification system
-- [ ] Deploy ke Hosting
-- [ ] Custom domain
+- [x] Deploy ke Hosting
+- [x] Custom domain
 
 ---
 
@@ -175,22 +177,21 @@ Menyiapkan aplikasi untuk rilis publik.
 
 **AI Layer Components:**
 - [x] Natural Language Understanding: LLM lokal via Ollama - ✅ Implemented (`AiService::answerQuestion()`)
-- [ ] Embedding & Semantic Search: 
-  - `sentence-transformers` atau `OpenAI embeddings` (opsional, bisa pakai model lokal `all-MiniLM-L6-v2`)
-  - ✅ Basic semantic search implemented via Ollama (AI-based relevance scoring)
-- [ ] Insight Engine: Modul Laravel khusus untuk:
-  - Summarization (ringkasan otomatis) ✅ (basic sudah ada)
+- [x] Embedding & Semantic Search: 
+  - ✅ Basic semantic search implemented via Ollama (AI-based relevance scoring) - ✅ Fully implemented (`AiService::semanticSearch()`, `AiController::semanticSearch()`)
+- [x] Insight Engine: Modul Laravel khusus untuk:
+  - Summarization (ringkasan otomatis) ✅ Implemented (`AiService::generateSummary()`)
   - Q&A berbasis catatan ✅ Implemented (`AiService::answerQuestion()`, `AiController::ask()`)
-  - Context linking antar catatan (coming soon)
-  - Keyword tagging otomatis ✅ (sudah ada)
+  - Context linking antar catatan ✅ Fully implemented (`AiService::detectContextLinks()`, `AiController::contextLinks()` API endpoint `/ai-memory/context-links`)
+  - Keyword tagging otomatis ✅ Implemented (`AiService::suggestTags()`)
 
 **Fitur Tambahan untuk Premium:**
-- [ ] 📝 Catatan teks, gambar, & dokumen (upload + auto-tagging) ✅ (basic sudah ada)
+- [x] 📝 Catatan teks, gambar, & dokumen (upload + auto-tagging) ✅ Fully implemented (basic sudah ada di marketplace)
 - [x] 🔍 Pencarian pintar (AI-based semantic search) - ✅ Fully implemented (Routes, Controller, Service, UI)
 - [x] 💬 Tanya catatanmu: "Apa yang kubicarakan dengan Rina minggu lalu?" - ✅ Fully implemented (Routes, Controller, Service, UI)
 - [x] 🧠 Insight otomatis (ringkasan mingguan, deteksi topik) - ✅ Fully implemented (Service, Controller, UI)
-- [ ] 📂 Folder & tag system (enhanced)
-- [ ] 👥 Multi workspace (personal, tim, lembaga)
+- [x] 📂 Folder & tag system (enhanced) - ✅ Fully implemented (Migration, Model, Controller, Routes, nested folders support)
+- [x] 👥 Multi workspace (personal, tim, lembaga) - ✅ Basic structure implemented (Migration, Models, relationships, personal workspace auto-create)
 - [x] 🔒 Premium protection middleware - ✅ Implemented (`EnsureUserHasPremium` middleware)
 - [x] 📱 MyNoteds Navigation - ✅ Added to main navigation (shows only for premium users)
 - [x] 🏠 MyNoteds Dashboard - ✅ Created (`/mynoteds`) with stats, quick actions, and note list
@@ -209,17 +210,19 @@ Menyiapkan aplikasi untuk rilis publik.
 - [x] Auto generate referral code untuk semua user
 - [x] Integrasi referral code di registration form
 - [x] Reward otomatis saat referral signup & transaksi
+- [x] Admin Settings: Dynamic referral reward configuration (signup reward & commission %)
+- [x] ReferralService menggunakan dynamic settings (bukan hardcoded)
 
 ### Simulator / Demo Interactive
 - [x] Earnings Calculator ✅
 - [x] Referral ROI Calculator ✅
 - [x] Premium vs Basic Comparison ✅
-- [ ] Wallet Simulator
-- [ ] Marketplace Preview Demo
-- [ ] Transaction Flow Simulator
-- [ ] AI Summary Generator Demo
-- [ ] Tag Suggestion Simulator
-- [ ] Price Benchmark Tool
+- [x] Wallet Simulator ✅
+- [x] Marketplace Preview Demo ✅
+- [x] Transaction Flow Simulator ✅
+- [x] AI Summary Generator Demo ✅
+- [x] Tag Suggestion Simulator ✅
+- [x] Price Benchmark Tool ✅
 
 ### Multi-Tier Content Protection
 - [x] Migration: `preview_content` (300 chars), `attachments` JSON, `file_count`
@@ -234,16 +237,23 @@ Menyiapkan aplikasi untuk rilis publik.
 - [x] Download control: Secure file serving with access control
 - [x] Trust indicators: Purchase count, money-back badge
 - [x] Views: notes/show, notes/edit, notes/create, notes/index, marketplace/show
-- [ ] Security: Virus scanning integration (optional: ClamAV)
+- [ ] Security: Virus scanning integration (ClamAV)
 
 ### Support Ticket System
 - [x] Migration `support_tickets` table (UUID, status, priority, screenshots, links, admin_response)
+- [x] Migration `support_ticket_replies` table (UUID, conversation thread support)
 - [x] Model & Controller: SupportTicketController
+- [x] Model: SupportTicketReply (conversation replies)
 - [x] Admin\TicketController
 - [x] UI: Full ticket system (create, view, edit, delete for users)
 - [x] UI: Admin ticket management (index, show, assign, respond)
-- [x] Notification: Auto-notify on new tickets & responses
+- [x] UI: Conversation thread with replies (user & admin can reply)
+- [x] UI: Reply form with validation
+- [x] Notification: Auto-notify on new tickets & replies
 - [x] Attachment support (screenshots & links JSON fields)
+- [x] Reply system: Both user and admin can reply to tickets
+- [x] Conversation history: All replies displayed in chronological order
+- [x] Status auto-update: Ticket status updates based on replies
 
 ### Comprehensive Documentation System
 - [x] Setup wiki/docs section
@@ -262,7 +272,56 @@ Menyiapkan aplikasi untuk rilis publik.
 - [x] Navigation integration (admin dashboard link)
 
 ### Setup Harga Premium
-- Membuat admin fitur untuk setup harga premiumnya jadi kalau misal ada perubahan harga biar mudah tinggal di ubah di admin
+- [x] Membuat admin fitur untuk setup harga premiumnya jadi kalau misal ada perubahan harga biar mudah tinggal di ubah di admin ✅
+- [x] Setting model: Method `getPremiumPrice()` dan `formatPremiumPrice()` untuk dynamic price
+- [x] Admin Settings UI: Form untuk mengubah harga premium dengan preview real-time
+- [x] Update semua hardcoded price: Simulator, subscription create page
+- [x] Default value: 25000 (Rp 25.000/bulan) disimpan di database
+- [x] Validation: Min 0, max 10.000.000, numeric only
+
+### S3 Cloud Backup Configuration
+- [x] Migration `settings` table - ✅ Created untuk menyimpan konfigurasi system-wide
+- [x] Model `Setting` - ✅ Dengan type casting (boolean, json, number, string)
+- [x] Admin Settings Controller - ✅ `SettingsController` dengan CRUD & test connection
+- [x] Admin Settings UI - ✅ Full UI di `/admin/settings` dengan form S3 configuration
+- [x] S3 Provider Support - ✅ AWS, DigitalOcean Spaces, Wasabi, S3-compatible
+- [x] S3 Configuration Fields:
+  - Enable/Disable S3 backup toggle
+  - Provider selection (AWS, DigitalOcean, Wasabi, Other)
+  - Access Key ID
+  - Secret Access Key (hidden input)
+  - Region
+  - Bucket Name
+  - Endpoint URL (for non-AWS providers)
+  - Path Prefix (default: backups)
+- [x] Test Connection Feature - ✅ Button untuk test S3 connection sebelum enable
+- [x] Documentation in UI - ✅ Setup guide langsung di halaman settings
+- [x] Routes - ✅ `/admin/settings` (GET, POST), `/admin/settings/test-s3` (POST)
+- [x] Quick Link in Admin Dashboard - ✅ Added Settings link di quick links section
+
+**Dokumentasi Setup S3:**
+1. **Buat S3 Bucket:** Login ke cloud provider (AWS/DigitalOcean/Wasabi) dan buat bucket untuk backup
+2. **Generate Access Keys:** Buat IAM user dengan permission S3 read/write, generate access keys
+3. **Configure di Admin:** 
+   - Buka `/admin/settings`
+   - Pilih provider (AWS/DigitalOcean/Wasabi/Other)
+   - Isi Access Key ID, Secret Key, Region, Bucket Name
+   - Untuk non-AWS: isi Endpoint URL (contoh: `https://sgp1.digitaloceanspaces.com`)
+   - Set Path Prefix (opsional, default: `backups`)
+4. **Test Connection:** Klik "Test Connection" untuk verifikasi credentials
+5. **Enable S3:** Centang "Enable S3 Cloud Backup" setelah test berhasil
+6. **Backup Otomatis:** Setelah enabled, backup akan otomatis upload ke S3
+
+**Supported Providers:**
+- **Amazon S3 (AWS):** Standard AWS S3
+- **DigitalOcean Spaces:** S3-compatible object storage
+- **Wasabi:** S3-compatible cloud storage
+- **Other:** Any S3-compatible storage (minio, etc.)
+
+**Security Notes:**
+- Secret keys disimpan di database (encrypted recommended untuk production)
+- Settings hanya bisa diubah oleh admin role
+- Test connection tidak upload file, hanya verify credentials
 
 ### REST API & Mobile
 - [ ] REST API publik

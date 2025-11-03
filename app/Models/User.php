@@ -65,6 +65,73 @@ class User extends Authenticatable
         return $this->hasMany(Note::class);
     }
 
+    public function folders()
+    {
+        return $this->hasMany(Folder::class)->whereNull('parent_id')->orderBy('order');
+    }
+
+    public function allFolders()
+    {
+        return $this->hasMany(Folder::class)->orderBy('order');
+    }
+
+    /**
+     * Get workspaces owned by user.
+     */
+    public function ownedWorkspaces()
+    {
+        return $this->hasMany(Workspace::class, 'owner_id');
+    }
+
+    /**
+     * Get workspaces user is a member of.
+     */
+    public function workspaces(): BelongsToMany
+    {
+        return $this->belongsToMany(Workspace::class, 'workspace_members', 'user_id', 'workspace_id')
+            ->withPivot('role', 'is_active', 'joined_at')
+            ->withTimestamps()
+            ->wherePivot('is_active', true);
+    }
+
+    /**
+     * Get all workspaces (owned + member).
+     */
+    public function allWorkspaces()
+    {
+        $owned = $this->ownedWorkspaces()->get();
+        $member = $this->workspaces()->get();
+        
+        return $owned->merge($member)->unique('id');
+    }
+
+    /**
+     * Get or create personal workspace.
+     */
+    public function getPersonalWorkspace(): Workspace
+    {
+        $workspace = $this->ownedWorkspaces()
+            ->where('type', 'personal')
+            ->first();
+        
+        if (!$workspace) {
+            $workspace = $this->ownedWorkspaces()->create([
+                'name' => $this->name . "'s Workspace",
+                'type' => 'personal',
+                'description' => 'Personal workspace',
+            ]);
+            
+            // Add user as owner member
+            $workspace->memberRecords()->create([
+                'user_id' => $this->id,
+                'role' => 'owner',
+                'is_active' => true,
+            ]);
+        }
+        
+        return $workspace;
+    }
+
     public function wallet()
     {
         return $this->hasOne(Wallet::class);

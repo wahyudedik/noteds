@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SupportTicket;
+use App\Models\SupportTicketReply;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -98,9 +99,92 @@ class SupportTicketController extends Controller
             abort(403);
         }
 
-        $supportTicket->load(['user', 'assignedAdmin', 'closedByUser']);
+        $supportTicket->load(['user', 'assignedAdmin', 'closedByUser', 'replies.user']);
 
         return view('support-tickets.show', compact('supportTicket'));
+    }
+
+    /**
+     * Store a reply to the ticket.
+     */
+    public function reply(Request $request, SupportTicket $supportTicket): RedirectResponse
+    {
+        // Ensure user owns this ticket or is admin
+        if ($supportTicket->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
+            abort(403);
+        }
+
+        // Don't allow replies to closed tickets
+        if ($supportTicket->status === 'closed') {
+            return redirect()->route('support-tickets.show', $supportTicket)
+                ->with('error', 'You cannot reply to a closed ticket.');
+        }
+
+        $validated = $request->validate([
+            'message' => ['required', 'string', 'min:10'],
+        ]);
+
+        $isAdmin = auth()->user()->hasRole('admin');
+
+        $reply = SupportTicketReply::create([
+            'support_ticket_id' => $supportTicket->id,
+            'user_id' => auth()->id(),
+            'message' => $request->message,
+            'is_admin' => $isAdmin,
+        ]);
+
+        // Update ticket status
+        if (!$isAdmin && $supportTicket->status === 'resolved') {
+            // User replied to resolved ticket, reopen it
+            $supportTicket->update(['status' => 'open']);
+        } elseif ($isAdmin && $supportTicket->status === 'open') {
+            // Admin replied, mark as in progress
+            $supportTicket->update(['status' => 'in_progress']);
+        }
+
+        // Notify the other party
+        if ($isAdmin) {
+            // Admin replied, notify user
+            $this->notificationService->create(
+                $supportTicket->user,
+                'ticket_reply',
+                '💬 New Reply on Your Ticket',
+                auth()->user()->name . ' replied to your ticket: ' . $supportTicket->title,
+                route('support-tickets.show', $supportTicket),
+                ['ticket_id' => $supportTicket->id]
+            );
+        } else {
+            // User replied, notify assigned admin or all admins
+            if ($supportTicket->assigned_to) {
+                $this->notificationService->create(
+                    $supportTicket->assignedAdmin,
+                    'ticket_reply',
+                    '💬 New Reply on Ticket',
+                    auth()->user()->name . ' replied to ticket: ' . $supportTicket->title,
+                    route('admin.tickets.show', $supportTicket),
+                    ['ticket_id' => $supportTicket->id]
+                );
+            } else {
+                // Notify all admins
+                $admins = \App\Models\User::whereHas('roles', function ($query) {
+                    $query->where('name', 'admin');
+                })->get();
+
+                foreach ($admins as $admin) {
+                    $this->notificationService->create(
+                        $admin,
+                        'ticket_reply',
+                        '💬 New Reply on Ticket',
+                        auth()->user()->name . ' replied to ticket: ' . $supportTicket->title,
+                        route('admin.tickets.show', $supportTicket),
+                        ['ticket_id' => $supportTicket->id]
+                    );
+                }
+            }
+        }
+
+        return redirect()->route('support-tickets.show', $supportTicket)
+            ->with('success', 'Reply sent successfully!');
     }
 
     /**

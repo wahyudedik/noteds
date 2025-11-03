@@ -24,13 +24,27 @@ class StoreWithdrawRequest extends FormRequest
     {
         $user = auth()->user();
         $minBalance = 50000;
+        
+        // Get wallet balance (sync if needed)
+        $wallet = \App\Models\Wallet::firstOrCreate(
+            ['user_id' => $user->id],
+            ['balance' => 0]
+        );
+        
+        // Sync wallet balance with user wallet_balance
+        if ($wallet->balance != $user->wallet_balance) {
+            $wallet->balance = $user->wallet_balance;
+            $wallet->save();
+        }
+        
+        $maxBalance = max($wallet->balance, $user->wallet_balance ?? 0);
 
         return [
             'amount' => [
                 'required',
                 'numeric',
                 'min:' . $minBalance,
-                'max:' . ($user->wallet_balance ?? 0),
+                'max:' . $maxBalance,
             ],
             'bank_name' => ['required', 'string', 'max:100'],
             'account_number' => ['required', 'string', 'max:50'],
