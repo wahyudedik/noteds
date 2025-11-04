@@ -16,11 +16,11 @@
                             </span>
                         @elseif(auth()->user()->hasRole('seller'))
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                                💰 Seller
+                                💰 {{ __('messages.seller') }}
                             </span>
                         @else
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                                🛒 Buyer
+                                🛒 {{ __('messages.buyer') }}
                             </span>
                         @endif
                     </div>
@@ -113,7 +113,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Sales</p>
+                        <p class="text-sm font-medium text-gray-500">{{ __('messages.total_sales') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ auth()->user()->transactionsAsSeller()->where('status', 'success')->count() }}</p>
                     </div>
                 </div>
@@ -130,8 +130,8 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">Create Note</h3>
-                        <p class="text-sm text-gray-500 mt-1">Start writing a new note</p>
+                        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">{{ __('messages.create_note') }}</h3>
+                        <p class="text-sm text-gray-500 mt-1">{{ __('messages.start_writing_note') }}</p>
                     </div>
                 </div>
             </a>
@@ -144,8 +144,8 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">Browse Marketplace</h3>
-                        <p class="text-sm text-gray-500 mt-1">Discover public notes</p>
+                        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">{{ __('messages.browse_marketplace') }}</h3>
+                        <p class="text-sm text-gray-500 mt-1">{{ __('messages.discover_public_notes') }}</p>
                     </div>
                 </div>
             </a>
@@ -158,8 +158,8 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">Manage Wallet</h3>
-                        <p class="text-sm text-gray-500 mt-1">Top-up or withdraw funds</p>
+                        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">{{ __('messages.manage_wallet') }}</h3>
+                        <p class="text-sm text-gray-500 mt-1">{{ __('messages.topup_withdraw_funds') }}</p>
                     </div>
                 </div>
             </a>
@@ -173,7 +173,7 @@
         @if($recentNotes->count() > 0)
             <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Recent Notes</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.recent_notes') }}</h2>
                 </div>
                 <div class="divide-y divide-gray-200">
                     @foreach($recentNotes as $note)
@@ -187,7 +187,7 @@
                                     <div class="mt-2 flex items-center gap-2">
                                         @if($note->is_public)
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                                Public
+                                                {{ __('messages.public') }}
                                             </span>
                                         @endif
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
@@ -198,7 +198,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <a href="{{ route('notes.show', $note) }}" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                                        View →
+                                        {{ __('messages.view') }} →
                                     </a>
                                 </div>
                             </div>
@@ -207,7 +207,7 @@
                 </div>
                 <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
                     <a href="{{ route('notes.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700">
-                        View all notes →
+                        {{ __('messages.view_all_notes') }} →
                     </a>
                 </div>
             </div>
@@ -216,11 +216,11 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <h3 class="mt-4 text-lg font-medium text-gray-900">No notes yet</h3>
-                <p class="mt-2 text-sm text-gray-500">Get started by creating your first note.</p>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">{{ __('messages.no_notes_yet') }}</h3>
+                <p class="mt-2 text-sm text-gray-500">{{ __('messages.start_creating') }}</p>
                 <div class="mt-6">
                     <a href="{{ route('notes.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                        Create Note
+                        {{ __('messages.create_note') }}
                     </a>
                 </div>
             </div>

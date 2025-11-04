@@ -1,29 +1,29 @@
 @extends('layouts.app')
 
-@section('title', 'Marketplace')
+@section('title', __('messages.marketplace'))
 
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">Marketplace</h1>
-            <p class="mt-2 text-base text-gray-600">Discover and purchase quality notes from the community</p>
+            <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.marketplace') }}</h1>
+            <p class="mt-2 text-base text-gray-600">{{ __('messages.discover_purchase_notes') }}</p>
         </div>
 
         <!-- Search and Filter Form -->
         <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-8">
             <form method="GET" action="{{ route('marketplace.index') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
-                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search Title</label>
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.search_title') }}</label>
                     <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                        placeholder="Search notes..."
+                        :placeholder="__('messages.search_notes')"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
                 </div>
                 <div>
-                    <label for="tag" class="block text-sm font-medium text-gray-700 mb-2">Tag</label>
+                    <label for="tag" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.tag') }}</label>
                     <select name="tag" id="tag" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
-                        <option value="">All Tags</option>
+                        <option value="">{{ __('messages.all_tags') }}</option>
                         @foreach($tags as $tag)
                             <option value="{{ $tag->id }}" {{ request('tag') == $tag->id ? 'selected' : '' }}>
                                 {{ $tag->name }} ({{ $tag->notes_count }})
@@ -32,13 +32,13 @@
                     </select>
                 </div>
                 <div>
-                    <label for="min_price" class="block text-sm font-medium text-gray-700 mb-2">Min Price</label>
+                    <label for="min_price" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.min_price') }}</label>
                     <input type="number" name="min_price" id="min_price" value="{{ request('min_price') }}" 
                         placeholder="0" min="0" step="0.01"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
                 </div>
                 <div>
-                    <label for="max_price" class="block text-sm font-medium text-gray-700 mb-2">Max Price</label>
+                    <label for="max_price" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.max_price') }}</label>
                     <input type="number" name="max_price" id="max_price" value="{{ request('max_price') }}" 
                         placeholder="999999999" min="0" step="0.01"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
@@ -48,11 +48,11 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        Filter
+                        {{ __('messages.filter') }}
                     </button>
                     @if(request()->hasAny(['search', 'tag', 'min_price', 'max_price']))
                         <a href="{{ route('marketplace.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200">
-                            Clear
+                            {{ __('messages.clear') }}
                         </a>
                     @endif
                 </div>
@@ -101,7 +101,7 @@
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                        Free
+                                        {{ __('messages.free') }}
                                     </span>
                                 @endif
                             </div>
@@ -135,8 +135,8 @@
                 <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                 </svg>
-                <h3 class="mt-4 text-lg font-medium text-gray-900">No notes found</h3>
-                <p class="mt-2 text-sm text-gray-500">Try adjusting your search criteria or filters to find what you're looking for.</p>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">{{ __('messages.no_notes_found') }}</h3>
+                <p class="mt-2 text-sm text-gray-500">{{ __('messages.try_adjusting_criteria') }}</p>
             </div>
         @endif
     </div>

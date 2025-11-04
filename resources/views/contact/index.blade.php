@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Contact Us')
+@section('title', __('messages.contact_us'))
 
 @section('content')
 <div class="py-12">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ __('messages.contact_us') }}</h1>
             <p class="text-xl text-gray-600">
-                Have a question or need help? We're here for you!
+                {{ __('messages.have_question_need_help') }}
             </p>
         </div>
 
@@ -48,7 +48,7 @@
             <!-- Contact Info -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Get in Touch</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">{{ __('messages.get_in_touch') }}</h3>
                     <div class="space-y-4">
                         <!-- Email -->
                         <div class="flex items-start">
@@ -58,7 +58,7 @@
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <h4 class="text-sm font-medium text-gray-900 mb-1">Email</h4>
+                                <h4 class="text-sm font-medium text-gray-900 mb-1">{{ __('messages.email') }}</h4>
                                 <a href="mailto:support@noteds.test" class="text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200">
                                     support@noteds.test
                                 </a>
@@ -73,8 +73,8 @@
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <h4 class="text-sm font-medium text-gray-900 mb-1">Response Time</h4>
-                                <p class="text-sm text-gray-600">Within 24 hours</p>
+                                <h4 class="text-sm font-medium text-gray-900 mb-1">{{ __('messages.response_time') }}</h4>
+                                <p class="text-sm text-gray-600">{{ __('messages.within_24_hours') }}</p>
                             </div>
                         </div>
 
@@ -86,7 +86,7 @@
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <h4 class="text-sm font-medium text-gray-900 mb-1">Support Hours</h4>
+                                <h4 class="text-sm font-medium text-gray-900 mb-1">{{ __('messages.support_hours') }}</h4>
                                 <p class="text-sm text-gray-600">Mon - Fri, 9:00 - 17:00 WIB</p>
                             </div>
                         </div>
@@ -94,14 +94,14 @@
 
                     <!-- Helpful Links -->
                     <div class="mt-6 pt-6 border-t border-gray-200">
-                        <h4 class="text-sm font-semibold text-gray-900 mb-3">Quick Links</h4>
+                        <h4 class="text-sm font-semibold text-gray-900 mb-3">{{ __('messages.quick_links') }}</h4>
                         <ul class="space-y-2">
                             <li>
                                 <a href="{{ route('faq') }}" class="text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200 flex items-center">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    View FAQ
+                                    {{ __('messages.faq') }}
                                 </a>
                             </li>
                             <li>
@@ -129,7 +129,7 @@
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h2 class="text-lg font-semibold text-gray-900">Send us a Message</h2>
+                        <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.send_message') }}</h2>
                     </div>
                     <div class="p-6">
                         <form action="{{ route('contact.store') }}" method="POST">
@@ -139,10 +139,10 @@
                                 <!-- Name -->
                                 <div>
                                     <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Your Name <span class="text-red-500">*</span>
+                                        {{ __('messages.your_name') }} <span class="text-red-500">*</span>
                                     </label>
                                     <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                                        placeholder="John Doe"
+                                        :placeholder="__('messages.enter_your_name')"
                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 @error('name') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
                                     @error('name')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -152,10 +152,10 @@
                                 <!-- Email -->
                                 <div>
                                     <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Email Address <span class="text-red-500">*</span>
+                                        {{ __('messages.your_email') }} <span class="text-red-500">*</span>
                                     </label>
                                     <input type="email" name="email" id="email" value="{{ old('email', auth()->user()->email ?? '') }}" required
-                                        placeholder="your@email.com"
+                                        :placeholder="__('messages.enter_your_email')"
                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 @error('email') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
                                     @error('email')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -165,10 +165,10 @@
                                 <!-- Subject -->
                                 <div>
                                     <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Subject <span class="text-red-500">*</span>
+                                        {{ __('messages.subject') }} <span class="text-red-500">*</span>
                                     </label>
                                     <input type="text" name="subject" id="subject" value="{{ old('subject') }}" required
-                                        placeholder="What's this regarding?"
+                                        :placeholder="__('messages.enter_subject')"
                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 @error('subject') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
                                     @error('subject')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -178,10 +178,10 @@
                                 <!-- Message -->
                                 <div>
                                     <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Message <span class="text-red-500">*</span>
+                                        {{ __('messages.your_message') }} <span class="text-red-500">*</span>
                                     </label>
                                     <textarea name="message" id="message" rows="6" required
-                                        placeholder="Tell us how we can help you..."
+                                        :placeholder="__('messages.enter_your_message')"
                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 resize-y @error('message') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">{{ old('message') }}</textarea>
                                     <p class="mt-1 text-xs text-gray-500">Maximum 2000 characters</p>
                                     @error('message')
@@ -196,7 +196,7 @@
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                         </svg>
-                                        Send Message
+                                        {{ __('messages.send_message') }}
                                     </button>
                                 </div>
                             </div>

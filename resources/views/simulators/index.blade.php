@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Marketing Simulators')
+@section('title', __('messages.marketing_simulators'))
 
 @section('content')
 <div class="py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-900 mb-4">Marketing Simulators</h1>
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ __('messages.marketing_simulators') }}</h1>
             <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                Calculate your potential earnings and plan your strategy on Noteds
+                {{ __('messages.calculate_potential_earnings') }}
             </p>
         </div>
 
@@ -21,8 +21,8 @@
                 <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Earnings Calculator</h3>
-                            <p class="text-blue-100 text-sm">Calculate seller earnings</p>
+                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.earnings_calculator') }}</h3>
+                            <p class="text-blue-100 text-sm">{{ __('messages.calculate_seller_earnings') }}</p>
                         </div>
                         <svg class="w-12 h-12 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -32,18 +32,18 @@
                 <div class="p-6">
                     <form id="earnings-form" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Note Price (Rp)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.note_price') }}</label>
                             <input type="number" id="earnings-price" name="price" value="50000" min="0" step="1000"
                                 class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Sales per Month</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.sales_per_month') }}</label>
                             <input type="number" id="earnings-sales" name="sales" value="10" min="0" step="1"
                                 class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                         </div>
                         <button type="button" id="earnings-calculate" 
                             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
-                            Calculate Earnings
+                            {{ __('messages.calculate_earnings') }}
                         </button>
                     </form>
                     <div id="earnings-result" class="mt-6 hidden">
@@ -53,18 +53,18 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <div class="flex-1">
-                                    <h4 class="text-lg font-bold text-green-800 mb-2">Your Potential Earnings</h4>
+                                    <h4 class="text-lg font-bold text-green-800 mb-2">{{ __('messages.your_potential_earnings') }}</h4>
                                     <div class="space-y-2">
                                         <div class="flex justify-between">
-                                            <span class="text-gray-700">Monthly:</span>
+                                            <span class="text-gray-700">{{ __('messages.monthly') }}:</span>
                                             <span class="font-bold text-green-700" id="earnings-monthly"></span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span class="text-gray-700">Yearly:</span>
+                                            <span class="text-gray-700">{{ __('messages.yearly') }}:</span>
                                             <span class="font-bold text-green-700" id="earnings-yearly"></span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span class="text-gray-700">After 20% commission:</span>
+                                            <span class="text-gray-700">{{ __('messages.after_commission') }}:</span>
                                             <span class="font-bold text-green-700" id="earnings-net"></span>
                                         </div>
                                     </div>
@@ -80,8 +80,8 @@
                 <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Referral ROI</h3>
-                            <p class="text-purple-100 text-sm">Track referral earnings</p>
+                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.referral_roi') }}</h3>
+                            <p class="text-purple-100 text-sm">{{ __('messages.track_referral_earnings') }}</p>
                         </div>
                         <svg class="w-12 h-12 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -91,18 +91,18 @@
                 <div class="p-6">
                     <form id="referral-form" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Referrals</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.total_referrals') }}</label>
                             <input type="number" id="referral-count" name="count" value="20" min="0" step="1"
                                 class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Avg. Transaction (Rp)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.avg_transaction') }}</label>
                             <input type="number" id="referral-transaction" name="transaction" value="50000" min="0" step="1000"
                                 class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
                         </div>
                         <button type="button" id="referral-calculate" 
                             class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
-                            Calculate ROI
+                            {{ __('messages.calculate_referral_roi') }}
                         </button>
                     </form>
                     <div id="referral-result" class="mt-6 hidden">
@@ -112,18 +112,18 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <div class="flex-1">
-                                    <h4 class="text-lg font-bold text-purple-800 mb-2">Your Referral Rewards</h4>
+                                    <h4 class="text-lg font-bold text-purple-800 mb-2">{{ __('messages.your_referral_rewards') }}</h4>
                                     <div class="space-y-2">
                                         <div class="flex justify-between">
-                                            <span class="text-gray-700">Signup rewards:</span>
+                                            <span class="text-gray-700">{{ __('messages.signup_rewards') }}:</span>
                                             <span class="font-bold text-purple-700" id="referral-signup"></span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span class="text-gray-700">Transaction commissions:</span>
+                                            <span class="text-gray-700">{{ __('messages.transaction_commissions') }}:</span>
                                             <span class="font-bold text-purple-700" id="referral-commission"></span>
                                         </div>
                                         <div class="flex justify-between border-t-2 border-purple-200 pt-2">
-                                            <span class="text-gray-700">Total monthly:</span>
+                                            <span class="text-gray-700">{{ __('messages.total_monthly') }}:</span>
                                             <span class="font-bold text-purple-800" id="referral-total"></span>
                                         </div>
                                     </div>

@@ -1,19 +1,11 @@
-@extends('layouts.guest')
-
-@section('title', 'Setup Username')
-
-@section('content')
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8" style="margin-top: -64px;">
-    <div class="max-w-md w-full space-y-8">
+<x-guest-layout>
+    <div class="space-y-6">
         <div>
-            <div class="flex justify-center">
-                <img src="{{ asset('logo.png') }}" alt="{{ config('app.name', 'Noteds') }}" class="h-16 w-16">
-            </div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Welcome to Noteds! 🎉
+            <h2 class="text-center text-2xl font-bold text-gray-900">
+                {{ __('messages.welcome_to_noteds') }}
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600">
-                Please choose a username to continue
+                {{ __('messages.choose_username_continue') }}
             </p>
         </div>
 
@@ -35,10 +27,10 @@
         <form class="mt-8 space-y-6" action="{{ route('setup-username.store') }}" method="POST">
             @csrf
 
-            <div class="bg-white rounded-lg shadow-md p-6 space-y-6">
+            <div class="space-y-6">
                 <div>
                     <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
-                        Choose Your Username <span class="text-red-500">*</span>
+                        {{ __('messages.choose_username') }} <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -60,11 +52,11 @@
                         >
                     </div>
                     <p class="mt-2 text-xs text-gray-500">
-                        <strong>Requirements:</strong>
+                        <strong>{{ __('messages.requirements') }}</strong>
                         <ul class="list-disc list-inside mt-1 space-y-1">
-                            <li>3-30 characters</li>
-                            <li>Only lowercase letters, numbers, dashes (-) and underscores (_)</li>
-                            <li>This will be your unique identifier on Noteds</li>
+                            <li>{{ __('messages.username_length') }}</li>
+                            <li>{{ __('messages.username_format') }}</li>
+                            <li>{{ __('messages.username_identifier') }}</li>
                         </ul>
                     </p>
                     @error('username')
@@ -86,13 +78,13 @@
                         </div>
                         <div class="ml-3">
                             <h3 class="text-sm font-medium text-blue-800">
-                                Your username will be used for:
+                                {{ __('messages.username_used_for') }}
                             </h3>
                             <div class="mt-2 text-sm text-blue-700">
                                 <ul class="list-disc list-inside space-y-1">
-                                    <li>Your public profile URL</li>
-                                    <li>Sharing your notes and profile</li>
-                                    <li>Finding you on Noteds</li>
+                                    <li>{{ __('messages.public_profile_url') }}</li>
+                                    <li>{{ __('messages.sharing_notes_profile') }}</li>
+                                    <li>{{ __('messages.finding_on_noteds') }}</li>
                                 </ul>
                             </div>
                         </div>
@@ -101,7 +93,7 @@
 
                 <div>
                     <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                        Continue to Noteds
+                        {{ __('messages.continue_to_noteds') }}
                     </button>
                 </div>
             </div>
@@ -109,22 +101,21 @@
 
         <div class="text-center">
             <p class="text-xs text-gray-500">
-                You can change your username later in settings
+                {{ __('messages.change_username_later') }}
             </p>
         </div>
     </div>
-</div>
 
-@push('scripts')
-<script>
-    // Auto-format username input
-    document.getElementById('username').addEventListener('input', function(e) {
-        // Convert to lowercase and remove invalid characters
-        let value = e.target.value.toLowerCase();
-        value = value.replace(/[^a-z0-9_-]/g, '');
-        e.target.value = value;
-    });
-</script>
-@endpush
-@endsection
+    @push('scripts')
+    <script>
+        // Auto-format username input
+        document.getElementById('username').addEventListener('input', function(e) {
+            // Convert to lowercase and remove invalid characters
+            let value = e.target.value.toLowerCase();
+            value = value.replace(/[^a-z0-9_-]/g, '');
+            e.target.value = value;
+        });
+    </script>
+    @endpush
+</x-guest-layout>
 

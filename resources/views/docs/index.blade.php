@@ -1,27 +1,27 @@
 @extends('layouts.app')
 
-@section('title', 'Documentation')
+@section('title', __('messages.documentation'))
 
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">Documentation</h1>
-            <p class="mt-2 text-base text-gray-600">Find guides, tutorials, and references to help you get the most out of Noteds</p>
+            <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.documentation') }}</h1>
+            <p class="mt-2 text-base text-gray-600">{{ __('messages.find_guides_tutorials') }}</p>
         </div>
 
         <!-- Search -->
         <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-8">
             <form method="GET" action="{{ route('docs.index') }}" class="flex gap-4">
                 <input type="text" name="search" value="{{ request('search') }}" 
-                    placeholder="Search documentation..."
+                    :placeholder="__('messages.search_documentation')"
                     class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                 <button type="submit" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    Search
+                    {{ __('messages.search') }}
                 </button>
             </form>
         </div>
@@ -63,7 +63,7 @@
                                 {{ $label }}
                             </h3>
                             <p class="mt-1 text-sm text-gray-600">
-                                {{ $categoryCounts[$key] ?? 0 }} {{ Str::plural('article', $categoryCounts[$key] ?? 0) }}
+                                {{ $categoryCounts[$key] ?? 0 }} {{ ($categoryCounts[$key] ?? 0) == 1 ? __('messages.article') : __('messages.articles') }}
                             </p>
                         </div>
                         <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,10 +78,10 @@
         @if($documentations->count() > 0)
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl font-bold text-gray-900">All Documentation</h2>
+                    <h2 class="text-2xl font-bold text-gray-900">{{ __('messages.all_documentation') }}</h2>
                     @if(request('search'))
                         <a href="{{ route('docs.index') }}" class="text-sm text-blue-600 hover:text-blue-700">
-                            Clear search
+                            {{ __('messages.clear_search') }}
                         </a>
                     @endif
                 </div>

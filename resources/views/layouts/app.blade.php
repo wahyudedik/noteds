@@ -48,44 +48,44 @@
                         <!-- About -->
                         <div>
                             <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
-                                About
+                                {{ __('messages.about') }}
                             </h3>
                             <p class="text-sm text-gray-600 leading-relaxed">
-                                A digital marketplace connecting creators with learners. Share knowledge, discover insights, and grow together.
+                                {{ __('messages.about_description') }}
                             </p>
                         </div>
 
                         <!-- Quick Links -->
                         <div>
                             <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
-                                Quick Links
+                                {{ __('messages.quick_links') }}
                             </h3>
                             <ul class="space-y-2">
                                 <li>
                                     <a href="{{ route('marketplace.index') }}" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                                        Marketplace
+                                        {{ __('messages.marketplace') }}
                                     </a>
                                 </li>
                                 @auth
                                     <li>
                                         <a href="{{ route('notes.index') }}" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                                            My Notes
+                                            {{ __('messages.my_notes') }}
                                         </a>
                                     </li>
                                     <li>
                                         <a href="{{ route('dashboard') }}" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                                            Dashboard
+                                            {{ __('messages.dashboard') }}
                                         </a>
                                     </li>
                                 @else
                                     <li>
                                         <a href="{{ route('login') }}" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                                            Sign In
+                                            {{ __('messages.sign_in') }}
                                         </a>
                                     </li>
                                     <li>
                                         <a href="{{ route('register') }}" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                                            Sign Up
+                                            {{ __('messages.register') }}
                                         </a>
                                     </li>
                                 @endauth
@@ -95,22 +95,22 @@
                         <!-- Support -->
                         <div>
                             <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
-                                Support
+                                {{ __('messages.support') }}
                             </h3>
                             <ul class="space-y-2">
                                 <li>
                                     <a href="{{ route('docs.index') }}" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                                        Documentation
+                                        {{ __('messages.documentation') }}
                                     </a>
                                 </li>
                                 <li>
                                     <a href="{{ route('faq') }}" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                                        FAQ
+                                        {{ __('messages.faq') }}
                                     </a>
                                 </li>
                                 <li>
                                     <a href="{{ route('contact.index') }}" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                                        Contact Us
+                                        {{ __('messages.contact_us') }}
                                     </a>
                                 </li>
                                 <li>
@@ -124,7 +124,7 @@
                         <!-- Connect -->
                         <div>
                             <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
-                                Connect
+                                {{ __('messages.connect') }}
                             </h3>
                             <div class="flex space-x-4">
                                 @php
@@ -162,7 +162,7 @@
 
                     <div class="border-t border-gray-200 pt-8">
                         <p class="text-center text-sm text-gray-500">
-                            &copy; {{ date('Y') }} {{ config('app.name', 'Noteds') }}. All rights reserved.
+                            &copy; {{ date('Y') }} {{ config('app.name', 'Noteds') }}. {{ __('messages.all_rights_reserved') }}.
                         </p>
                     </div>
                 </div>

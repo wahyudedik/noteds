@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'My Subscription')
+@section('title', __('messages.my_subscription'))
 
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">My Subscription</h1>
-            <p class="mt-2 text-base text-gray-600">Manage your premium subscription</p>
+            <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.my_subscription') }}</h1>
+            <p class="mt-2 text-base text-gray-600">{{ __('messages.manage_premium_subscription') }}</p>
         </div>
 
         <!-- Flash Messages -->
@@ -53,19 +53,19 @@
                                     <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                     </svg>
-                                    Active Premium
+                                    {{ __('messages.active_premium') }}
                                 </span>
                             </div>
-                            <h3 class="text-xl font-semibold text-gray-900 mb-2">Premium Subscription</h3>
-                            <p class="text-base text-gray-600 mb-4">You have full access to all premium features</p>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ __('messages.premium_subscription') }}</h3>
+                            <p class="text-base text-gray-600 mb-4">{{ __('messages.full_access_premium_features') }}</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <p class="text-sm text-gray-500">Expires At</p>
-                                    <p class="text-base font-medium text-gray-900">{{ $subscription->expired_at ? $subscription->expired_at->format('d M Y, H:i') : 'No expiry' }}</p>
+                                    <p class="text-sm text-gray-500">{{ __('messages.expires_at') }}</p>
+                                    <p class="text-base font-medium text-gray-900">{{ $subscription->expired_at ? $subscription->expired_at->format('d M Y, H:i') : __('messages.no_expiry') }}</p>
                                 </div>
                                 @if($subscription->approved_by)
                                     <div>
-                                        <p class="text-sm text-gray-500">Approved By</p>
+                                        <p class="text-sm text-gray-500">{{ __('messages.approved_by') }}</p>
                                         <p class="text-base font-medium text-gray-900">{{ $subscription->approvedBy->name ?? 'Admin' }}</p>
                                     </div>
                                 @endif
@@ -91,11 +91,11 @@
                                     <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
                                     </svg>
-                                    Pending Approval
+                                    {{ __('messages.pending_approval') }}
                                 </span>
                             </div>
-                            <h3 class="text-xl font-semibold text-gray-900 mb-2">Subscription Request Submitted</h3>
-                            <p class="text-base text-gray-600 mb-4">Your subscription request is being reviewed by admin</p>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ __('messages.subscription_request_submitted') }}</h3>
+                            <p class="text-base text-gray-600 mb-4">{{ __('messages.subscription_request_reviewed') }}</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <p class="text-sm text-gray-500">Submitted At</p>
@@ -121,10 +121,10 @@
                         <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">No Active Subscription</h3>
-                        <p class="text-base text-gray-600 mb-6">You're currently on the Basic plan</p>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ __('messages.no_active_subscription') }}</h3>
+                        <p class="text-base text-gray-600 mb-6">{{ __('messages.currently_on_basic_plan') }}</p>
                         <a href="{{ route('subscription.create') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
-                            Upgrade to Premium
+                            {{ __('messages.upgrade_to_premium') }}
                         </a>
                     </div>
                 </div>
@@ -134,7 +134,7 @@
         <!-- Premium Features -->
         <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
             <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h2 class="text-lg font-semibold text-gray-900">Premium Features</h2>
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.premium_features') }}</h2>
             </div>
             <div class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -145,8 +145,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900 mb-1">Unlimited Notes</h3>
-                            <p class="text-sm text-gray-600">Create as many notes as you want without any limits</p>
+                            <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.unlimited_notes') }}</h3>
+                            <p class="text-sm text-gray-600">{{ __('messages.create_many_notes_no_limits') }}</p>
                         </div>
                     </div>
                     <div class="flex items-start gap-4">
@@ -156,8 +156,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900 mb-1">Advanced Analytics</h3>
-                            <p class="text-sm text-gray-600">Track your sales performance with detailed statistics</p>
+                            <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.advanced_analytics') }}</h3>
+                            <p class="text-sm text-gray-600">{{ __('messages.track_sales_performance') }}</p>
                         </div>
                     </div>
                     <div class="flex items-start gap-4">
@@ -167,8 +167,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900 mb-1">Priority Support</h3>
-                            <p class="text-sm text-gray-600">Get faster response times from our support team</p>
+                            <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.priority_support') }}</h3>
+                            <p class="text-sm text-gray-600">{{ __('messages.get_faster_response_times') }}</p>
                         </div>
                     </div>
                     <div class="flex items-start gap-4">
@@ -178,8 +178,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900 mb-1">Cloud Backup</h3>
-                            <p class="text-sm text-gray-600">Automatic backup of all your notes to secure cloud storage</p>
+                            <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.cloud_backup') }}</h3>
+                            <p class="text-sm text-gray-600">{{ __('messages.automatic_backup_notes') }}</p>
                         </div>
                     </div>
                 </div>

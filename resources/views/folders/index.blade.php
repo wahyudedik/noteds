@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Folders')
+@section('title', __('messages.folders'))
 
 @section('content')
 <div class="py-8 sm:py-12">
@@ -12,15 +12,15 @@
                     <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                     </svg>
-                    Folders
+                    {{ __('messages.folders') }}
                 </h1>
-                <p class="text-gray-600">Organize your notes with folders</p>
+                <p class="text-gray-600">{{ __('messages.organize_notes_with_folders') }}</p>
             </div>
             <a href="{{ route('folders.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                New Folder
+                {{ __('messages.new_folder') }}
             </a>
         </div>
 
@@ -68,7 +68,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
                                     </a>
-                                    <form action="{{ route('folders.destroy', $folder) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure? Notes in this folder will be moved to root.');">
+                                    <form action="{{ route('folders.destroy', $folder) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure_delete_folder') }}');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors">
@@ -84,14 +84,14 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    {{ $folder->notes_count }} notes
+                                    {{ $folder->notes_count }} {{ $folder->notes_count == 1 ? __('messages.note') : __('messages.notes') }}
                                 </span>
                                 @if($folder->children_count > 0)
                                     <span class="flex items-center gap-1">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                                         </svg>
-                                        {{ $folder->children_count }} subfolders
+                                        {{ $folder->children_count }} {{ $folder->children_count == 1 ? __('messages.subfolder') : __('messages.subfolders') }}
                                     </span>
                                 @endif
                             </div>
@@ -104,10 +104,10 @@
                 <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                 </svg>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No folders yet</h3>
-                <p class="text-gray-600 mb-6">Create folders to organize your notes</p>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('messages.no_folders_yet') }}</h3>
+                <p class="text-gray-600 mb-6">{{ __('messages.create_first_folder') }}</p>
                 <a href="{{ route('folders.create') }}" class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200">
-                    Create Your First Folder
+                    {{ __('messages.new_folder') }}
                 </a>
             </div>
         @endif

@@ -11,7 +11,7 @@
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
-                Back to Marketplace
+                {{ __('messages.back_to_marketplace') }}
             </a>
         </div>
 
@@ -57,7 +57,7 @@
                                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                 <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
                             </svg>
-                            Public
+                            {{ __('messages.public') }}
                         </span>
                     @endif
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
@@ -71,7 +71,7 @@
                                 </svg>
                             @endfor
                             <span class="text-sm font-medium text-gray-700">{{ $note->average_rating }}</span>
-                            <span class="text-xs text-gray-500">({{ $note->total_reviews }} {{ Str::plural('review', $note->total_reviews) }})</span>
+                            <span class="text-xs text-gray-500">({{ $note->total_reviews }} {{ $note->total_reviews == 1 ? __('messages.review') : __('messages.reviews_count') }})</span>
                         </div>
                     @endif
                     @if($note->price > 0)
@@ -121,7 +121,7 @@
                             <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            Published {{ localized_time($note->created_at, 'date') }}
+                            {{ __('messages.published') }} {{ localized_time($note->created_at, 'date') }}
                         </div>
                     </div>
                 </div>
@@ -139,7 +139,7 @@
                                 <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
-                                Attachments ({{ $note->file_count }})
+                                {{ __('messages.attachments') }} ({{ $note->file_count }})
                             </h3>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @foreach($note->attachments as $attachment)
@@ -177,8 +177,8 @@
                         <!-- Blur overlay for paid content -->
                         <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white backdrop-blur-sm pointer-events-none flex items-end justify-center pb-8">
                             <div class="text-center px-4">
-                                <p class="text-sm font-semibold text-gray-700 mb-2">🔒 Full content available after purchase</p>
-                                <p class="text-xs text-gray-600">Buy this note to unlock complete content and attachments</p>
+                                <p class="text-sm font-semibold text-gray-700 mb-2">{{ __('messages.full_content_available_after_purchase') }}</p>
+                                <p class="text-xs text-gray-600">{{ __('messages.buy_note_to_unlock') }}</p>
                             </div>
                         </div>
                     </div>
@@ -190,28 +190,28 @@
                                 <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                What You'll Get
+                                {{ __('messages.what_youll_get') }}
                             </h3>
                             <ul class="space-y-2 text-sm text-gray-700">
                                 <li class="flex items-start">
                                     <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                     </svg>
-                                    <span>Full note content</span>
+                                    <span>{{ __('messages.full_note_content') }}</span>
                                 </li>
                                 @if($note->hasAttachments())
                                     <li class="flex items-start">
                                         <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                         </svg>
-                                        <span>{{ $note->file_count }} downloadable file(s)</span>
+                                        <span>{{ $note->file_count }} {{ __('messages.downloadable_files') }}</span>
                                     </li>
                                 @endif
                                 <li class="flex items-start">
                                     <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                     </svg>
-                                    <span>Lifetime access to purchased content</span>
+                                    <span>{{ __('messages.lifetime_access') }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -226,14 +226,14 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <span class="font-semibold">{{ $note->purchase_count }}</span>
-                                    <span class="ml-1">{{ \Illuminate\Support\Str::plural('purchase', $note->purchase_count) }}</span>
+                                    <span class="ml-1">{{ $note->purchase_count == 1 ? __('messages.purchase') : __('messages.purchases') }}</span>
                                 </div>
                                 @if($note->purchase_count >= 10)
                                     <div class="flex items-center text-yellow-600">
                                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
-                                        <span class="font-semibold">Popular</span>
+                                        <span class="font-semibold">{{ __('messages.popular') }}</span>
                                     </div>
                                 @endif
                             </div>
@@ -250,7 +250,7 @@
                                     <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                     </svg>
-                                    <span class="text-green-600 font-semibold">You have purchased this note</span>
+                                    <span class="text-green-600 font-semibold">{{ __('messages.you_have_purchased') }}</span>
                                 </div>
                                 <a href="{{ route('notes.show', $note) }}" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200">
                                     View full note →
@@ -294,7 +294,7 @@
                     @endif
                 @else
                     <div class="mt-6 pt-6 border-t border-gray-200">
-                        <p class="text-gray-600 mb-3">To purchase this note, please login first.</p>
+                        <p class="text-gray-600 mb-3">{{ __('messages.to_purchase_please_login') }}</p>
                         <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
                             Login to Continue
                         </a>
@@ -307,13 +307,13 @@
         @if(($note->total_reviews > 0) || (auth()->check() && isset($canReview) && $canReview))
             <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <h2 class="text-lg font-semibold text-gray-900">Reviews ({{ $note->total_reviews }})</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.reviews') }} ({{ $note->total_reviews }})</h2>
                 </div>
                 <div class="p-6">
                     <!-- Review Form (if user can review) -->
                     @if(auth()->check() && isset($canReview) && $canReview)
                         <div class="mb-6 pb-6 border-b border-gray-200">
-                            <h3 class="text-base font-semibold text-gray-900 mb-4">Write a Review</h3>
+                            <h3 class="text-base font-semibold text-gray-900 mb-4">{{ __('messages.write_review') }}</h3>
                             <form action="{{ route('reviews.store', $note) }}" method="POST">
                                 @csrf
                                 <div class="mb-4">
@@ -343,7 +343,7 @@
                                 </div>
 
                                 <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
-                                    Submit Review
+                                    {{ __('messages.submit_review') }}
                                 </button>
                             </form>
                         </div>
@@ -406,7 +406,7 @@
                             </div>
                         </div>
                     @else
-                        <p class="text-center text-gray-500 py-8">No reviews yet. Be the first to review this note!</p>
+                        <p class="text-center text-gray-500 py-8">{{ __('messages.no_reviews_yet_be_first') }}</p>
                     @endif
                 </div>
             </div>

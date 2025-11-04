@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Semantic Search - MyNoteds')
+@section('title', __('messages.semantic_search_title'))
 
 @section('content')
 <div class="py-8 sm:py-12">
@@ -13,9 +13,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
                 </a>
-                <h1 class="text-3xl font-bold text-gray-900">Semantic Search</h1>
+                <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.semantic_search') }}</h1>
             </div>
-            <p class="text-gray-600">Search your notes by meaning, not just keywords. AI-powered semantic understanding helps you find exactly what you're looking for.</p>
+            <p class="text-gray-600">{{ __('messages.search_by_meaning_description') }}</p>
         </div>
 
         <!-- Search Interface -->
@@ -26,7 +26,7 @@
                         type="text" 
                         id="search-query"
                         value="{{ $query }}"
-                        placeholder="Search by meaning... e.g., 'meeting notes about project deadline'"
+                        :placeholder="__('messages.search_by_meaning_placeholder')"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 px-4 py-3"
                         autofocus
                     >
@@ -40,7 +40,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
-                        AI Search
+                        {{ __('messages.ai_search') }}
                     </span>
                 </button>
                 <button 
@@ -52,7 +52,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        Basic Search
+                        {{ __('messages.basic_search') }}
                     </span>
                 </button>
             </div>
@@ -61,7 +61,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <p class="text-sm text-gray-600 mt-2">AI is searching...</p>
+                <p class="text-sm text-gray-600 mt-2">{{ __('messages.ai_is_searching') }}</p>
             </div>
         </div>
 
@@ -70,7 +70,7 @@
             <div id="basic-results" class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
                 <div class="p-6 border-b border-gray-200">
                     <h2 class="text-xl font-bold text-gray-900">
-                        Found {{ $results->total() }} result(s) for "{{ $query }}" (Basic Search)
+                        {{ __('messages.found_results', ['total' => $results->total(), 'query' => $query]) }}
                     </h2>
                 </div>
                 <div class="p-6">
@@ -118,13 +118,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div>
-                        <h3 class="text-lg font-semibold text-blue-900 mb-2">🔍 Two Search Modes</h3>
+                        <h3 class="text-lg font-semibold text-blue-900 mb-2">{{ __('messages.two_search_modes') }}</h3>
                         <ul class="text-blue-800 text-sm space-y-2">
-                            <li><strong>AI Search:</strong> Semantic search powered by AI - understands meaning and context</li>
-                            <li><strong>Basic Search:</strong> Traditional keyword search in title and content</li>
+                            <li><strong>{{ __('messages.ai_search') }}:</strong> {{ __('messages.ai_search_semantic') }}</li>
+                            <li><strong>{{ __('messages.basic_search') }}:</strong> {{ __('messages.basic_search_traditional') }}</li>
                         </ul>
                         <p class="text-blue-700 text-sm mt-3">
-                            Try searching with natural language like "notes about meetings" or "project deadlines"
+                            {{ __('messages.try_searching_natural_language') }}
                         </p>
                     </div>
                 </div>
@@ -176,11 +176,14 @@ document.addEventListener('DOMContentLoaded', function() {
             loading.classList.add('hidden');
 
             if (data.success && data.results && data.results.length > 0) {
+                const foundResultsText = `{{ __('messages.found_results_semantic', ['total' => ':total', 'query' => ':query']) }}`
+                    .replace(':total', data.total)
+                    .replace(':query', data.query);
                 let html = `
                     <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
                         <div class="p-6 border-b border-gray-200">
                             <h2 class="text-xl font-bold text-gray-900">
-                                Found ${data.total} result(s) for "${data.query}" (AI Semantic Search)
+                                ${foundResultsText}
                             </h2>
                         </div>
                         <div class="p-6">
@@ -214,8 +217,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">No results found</h3>
-                        <p class="text-gray-600">${data.message || 'Try different search terms or use basic search'}</p>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('messages.no_results_found') }}</h3>
+                        <p class="text-gray-600">${data.message || '{{ __('messages.try_different_search_terms') }}'}</p>
                     </div>
                 `;
                 semanticResults.classList.remove('hidden');
@@ -224,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
             loading.classList.add('hidden');
             semanticResults.innerHTML = `
                 <div class="bg-red-50 border-l-4 border-red-500 rounded-r-lg p-6">
-                    <p class="text-red-800">Error: ${error.message || 'Network error. Please try again.'}</p>
+                    <p class="text-red-800">{{ __('messages.error') }}: ${error.message || '{{ __('messages.network_error') }}'}</p>
                 </div>
             `;
             semanticResults.classList.remove('hidden');

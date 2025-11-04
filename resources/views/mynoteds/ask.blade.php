@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Ask Your Notes - MyNoteds')
+@section('title', __('messages.ask_your_notes_title'))
 
 @section('content')
 <div class="py-8 sm:py-12">
@@ -13,9 +13,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
                 </a>
-                <h1 class="text-3xl font-bold text-gray-900">Ask Your Notes</h1>
+                <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.ask_your_notes') }}</h1>
             </div>
-            <p class="text-gray-600">Ask natural language questions about your notes. The AI will search through your content and provide answers.</p>
+            <p class="text-gray-600">{{ __('messages.ask_natural_language_questions_description') }}</p>
         </div>
 
         <!-- Q&A Interface -->
@@ -24,13 +24,13 @@
                 @csrf
                 <div>
                     <label for="question" class="block text-sm font-medium text-gray-700 mb-2">
-                        Your Question
+                        {{ __('messages.your_question') }}
                     </label>
                     <textarea 
                         id="question" 
                         name="question" 
                         rows="3"
-                        placeholder='Example: "Apa yang kubicarakan dengan Rina minggu lalu?" atau "What were my main takeaways from last month?"'
+                        :placeholder="__('messages.question_placeholder')"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500"
                         required
                     ></textarea>
@@ -44,7 +44,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
-                        Ask AI
+                        {{ __('messages.ask_ai') }}
                     </span>
                 </button>
             </form>
@@ -55,7 +55,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <p class="text-gray-600">AI is thinking...</p>
+                <p class="text-gray-600">{{ __('messages.ai_is_thinking') }}</p>
             </div>
 
             <!-- Answer Section -->
@@ -65,7 +65,7 @@
                         <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
-                        Answer
+                        {{ __('messages.answer') }}
                     </h3>
                     <div id="answer-content" class="text-gray-700 prose max-w-none mb-4"></div>
                     
@@ -75,7 +75,7 @@
                             <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            Referenced Notes:
+                            {{ __('messages.referenced_notes') }}
                         </h4>
                         <div id="referenced-notes-list" class="flex flex-wrap gap-2"></div>
                     </div>
@@ -85,7 +85,7 @@
             <!-- Error Section -->
             <div id="error-section" class="hidden mt-6">
                 <div class="bg-red-50 border-l-4 border-red-500 rounded-r-lg p-6">
-                    <h3 class="text-lg font-semibold text-red-900 mb-2">Error</h3>
+                    <h3 class="text-lg font-semibold text-red-900 mb-2">{{ __('messages.error') }}</h3>
                     <p id="error-message" class="text-red-700"></p>
                 </div>
             </div>
@@ -98,12 +98,12 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
-                    <h3 class="text-lg font-semibold text-blue-900 mb-2">💡 Tips for Better Answers</h3>
+                    <h3 class="text-lg font-semibold text-blue-900 mb-2">{{ __('messages.tips_for_better_answers') }}</h3>
                     <ul class="text-blue-800 text-sm space-y-1 list-disc list-inside">
-                        <li>Ask specific questions about your notes</li>
-                        <li>Mention names, dates, or topics from your notes</li>
-                        <li>Example: "Apa yang kubicarakan dengan Rina minggu lalu?"</li>
-                        <li>The AI searches through your last 100 notes</li>
+                        <li>{{ __('messages.ask_specific_questions') }}</li>
+                        <li>{{ __('messages.mention_names_dates_topics') }}</li>
+                        <li>{{ __('messages.example_question') }}</li>
+                        <li>{{ __('messages.ai_searches_last_100_notes') }}</li>
                     </ul>
                 </div>
             </div>
@@ -205,13 +205,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     referencedNotesDiv.classList.add('hidden');
                 }
             } else {
-                errorMessage.textContent = data.message || 'An error occurred. Please try again.';
+                errorMessage.textContent = data.message || '{{ __('messages.an_error_occurred') }}';
                 errorSection.classList.remove('hidden');
             }
         } catch (error) {
             loading.classList.add('hidden');
             askButton.disabled = false;
-            errorMessage.textContent = 'Network error. Please check your connection and try again.';
+            errorMessage.textContent = '{{ __('messages.network_error') }}';
             errorSection.classList.remove('hidden');
         }
     });

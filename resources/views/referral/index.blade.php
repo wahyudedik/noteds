@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Referral Program')
+@section('title', __('messages.referral_program'))
 
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">Referral Program</h1>
-            <p class="mt-2 text-base text-gray-600">Invite friends and earn rewards</p>
+            <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.referral_program') }}</h1>
+            <p class="mt-2 text-base text-gray-600">{{ __('messages.invite_friends_earn_rewards') }}</p>
         </div>
 
         <!-- Stats Cards -->
@@ -23,7 +23,7 @@
                             </svg>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Total Referrals</p>
+                            <p class="text-sm font-medium text-gray-500">{{ __('messages.total_referrals') }}</p>
                             <p class="text-2xl font-bold text-gray-900">{{ $totalReferrals }}</p>
                         </div>
                     </div>
@@ -40,7 +40,7 @@
                             </svg>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Total Earned</p>
+                            <p class="text-sm font-medium text-gray-500">{{ __('messages.total_earnings') }}</p>
                             <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($totalEarned, 0, ',', '.') }}</p>
                         </div>
                     </div>
@@ -57,7 +57,7 @@
                             </svg>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Signup Rewards</p>
+                            <p class="text-sm font-medium text-gray-500">{{ __('messages.signup_rewards') }}</p>
                             <p class="text-2xl font-bold text-gray-900">{{ $signupRewards }}</p>
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                             </svg>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Transaction Rewards</p>
+                            <p class="text-sm font-medium text-gray-500">{{ __('messages.transaction_rewards') }}</p>
                             <p class="text-2xl font-bold text-gray-900">{{ $transactionRewards }}</p>
                         </div>
                     </div>
@@ -87,15 +87,15 @@
             <div class="p-8">
                 <div class="flex items-center justify-between">
                     <div class="flex-1">
-                        <h2 class="text-2xl font-bold text-white mb-2">Your Referral Link</h2>
-                        <p class="text-purple-100 mb-4">Share this link with your friends and earn rewards!</p>
+                        <h2 class="text-2xl font-bold text-white mb-2">{{ __('messages.your_referral_link') }}</h2>
+                        <p class="text-purple-100 mb-4">{{ __('messages.share_link_earn_rewards') }}</p>
                         <div class="bg-white rounded-lg p-4 flex items-center justify-between">
                             <code class="text-sm text-gray-800 flex-1 mr-4">{{ $referralLink }}</code>
                             <button onclick="copyReferralLink()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
-                                Copy
+                                {{ __('messages.copy') }}
                             </button>
                         </div>
                     </div>

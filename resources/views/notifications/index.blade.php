@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Notifications')
+@section('title', __('messages.notifications'))
 
 @section('content')
 <div class="py-12">
@@ -8,14 +8,14 @@
         <div class="mb-8">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Notifications</h1>
-                    <p class="mt-2 text-base text-gray-600">All your notifications in one place</p>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.notifications') }}</h1>
+                    <p class="mt-2 text-base text-gray-600">{{ __('messages.all_notifications_one_place') }}</p>
                 </div>
                 @if(auth()->user()->notifications()->unread()->count() > 0)
                     <form action="{{ route('notifications.mark-all-read') }}" method="POST" class="inline-block">
                         @csrf
                         <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
-                            Mark All as Read
+                            {{ __('messages.mark_all_read') }}
                         </button>
                     </form>
                 @endif

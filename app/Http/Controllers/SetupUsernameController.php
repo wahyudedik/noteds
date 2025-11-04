@@ -12,11 +12,6 @@ use Illuminate\View\View;
 
 class SetupUsernameController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     /**
      * Show the form for setting up username.
      */
@@ -53,12 +48,12 @@ class SetupUsernameController extends Controller
                 Rule::unique('users', 'username')->ignore($user->id),
             ],
         ], [
-            'username.required' => 'Username is required.',
-            'username.min' => 'Username must be at least 3 characters.',
-            'username.max' => 'Username must not exceed 30 characters.',
-            'username.alpha_dash' => 'Username may only contain letters, numbers, dashes and underscores.',
-            'username.lowercase' => 'Username must be lowercase.',
-            'username.unique' => 'This username is already taken. Please choose another one.',
+            'username.required' => __('messages.username_required'),
+            'username.min' => __('messages.username_min'),
+            'username.max' => __('messages.username_max'),
+            'username.alpha_dash' => __('messages.username_alpha_dash'),
+            'username.lowercase' => __('messages.username_lowercase'),
+            'username.unique' => __('messages.username_unique'),
         ]);
 
         // Generate username from name if not provided (fallback)
@@ -80,6 +75,6 @@ class SetupUsernameController extends Controller
         ]);
 
         return redirect()->route('dashboard')
-            ->with('success', 'Username setup successfully! Welcome to Noteds.');
+            ->with('success', __('messages.username_setup_success'));
     }
 }

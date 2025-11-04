@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
         // Create sellers
         for ($i = 1; $i <= 5; $i++) {
             $seller = User::firstOrCreate(
-                ['email' => "seller{$i}@noteds.test"],
+                ['email' => "seller{$i}@noteds.com"],
                 [
                     'name' => "Seller $i",
                     'username' => 'seller' . $i,
@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
         // Create buyers
         for ($i = 1; $i <= 10; $i++) {
             $buyer = User::firstOrCreate(
-                ['email' => "buyer{$i}@noteds.test"],
+                ['email' => "buyer{$i}@noteds.com"],
                 [
                     'name' => "Buyer $i",
                     'username' => 'buyer' . $i,

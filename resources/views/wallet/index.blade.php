@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'My Wallet')
+@section('title', __('messages.my_wallet'))
 
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">My Wallet</h1>
-            <p class="mt-2 text-base text-gray-600">Manage your balance and view transaction history</p>
+            <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.my_wallet') }}</h1>
+            <p class="mt-2 text-base text-gray-600">{{ __('messages.manage_balance_view_history') }}</p>
         </div>
 
         <!-- Flash Messages -->
@@ -54,7 +54,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-sm font-medium text-gray-500 mb-1">Wallet Balance</h3>
+                                <h3 class="text-sm font-medium text-gray-500 mb-1">{{ __('messages.wallet_balance_title') }}</h3>
                                 <p class="text-4xl font-bold text-green-600">Rp {{ number_format($wallet->balance, 0, ',', '.') }}</p>
                             </div>
                         </div>
@@ -66,14 +66,14 @@
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <span class="text-gray-500 text-sm">Rp</span>
                                 </div>
-                                <input type="number" name="amount" min="10000" step="1000" placeholder="Min. 10.000" required
+                                <input type="number" name="amount" min="10000" step="1000" :placeholder="__('messages.min_amount')" required
                                     class="block w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
                             </div>
                             <button type="submit" class="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
-                                Top-up
+                                {{ __('messages.top_up') }}
                             </button>
                         </form>
                         @if($wallet->balance >= 50000)
@@ -81,7 +81,7 @@
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
-                                Withdraw
+                                {{ __('messages.withdraw') }}
                             </a>
                         @endif
                     </div>
@@ -92,7 +92,7 @@
         <!-- Transaction History -->
         <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
             <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h2 class="text-lg font-semibold text-gray-900">Transaction History</h2>
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.transaction_history') }}</h2>
             </div>
             <div class="p-6">
                 @if($transactions->count() > 0)

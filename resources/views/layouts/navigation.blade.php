@@ -8,25 +8,25 @@
                 </a>
                 <nav class="hidden md:flex items-center gap-4">
                     <a href="/" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('welcome') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
-                        Home
+                        {{ __('messages.home') }}
                     </a>
                     @auth
                         <a href="{{ route('dashboard') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('dashboard') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
-                            Dashboard
+                            {{ __('messages.dashboard') }}
                         </a>
                         <a href="{{ route('notes.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('notes.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
-                            Notes
+                            {{ __('messages.notes') }}
                         </a>
                         <a href="{{ route('wallet.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('wallet.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
-                            Wallet
+                            {{ __('messages.wallet') }}
                         </a>
                         @if(!auth()->user()->hasRole('admin'))
                             <a href="{{ route('subscription.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('subscription.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
-                                Subscription
+                                {{ __('messages.subscription') }}
                             </a>
                         @endif
                         <a href="{{ route('referral.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('referral.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
-                            Referral
+                            {{ __('messages.referral') }}
                         </a>
                         @if(auth()->user()->hasPremium())
                             <a href="{{ route('mynoteds.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('mynoteds.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
@@ -34,21 +34,21 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                     </svg>
-                                    MyNoteds
+                                    {{ __('messages.mynoteds') }}
                                 </span>
                             </a>
                         @endif
                         @if(auth()->user()->hasRole('admin'))
                             <a href="{{ route('admin.dashboard') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('admin.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
-                                Admin
+                                {{ __('messages.admin') }}
                             </a>
                         @endif
                     @endauth
                     <a href="{{ route('marketplace.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('marketplace.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
-                        Marketplace
+                        {{ __('messages.marketplace') }}
                     </a>
                     <a href="{{ route('simulators.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('simulators.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
-                        Simulators
+                        {{ __('messages.simulators') }}
                     </a>
                 </nav>
             </div>
@@ -93,9 +93,9 @@
                             <!-- Notifications Dropdown -->
                             <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 max-h-96 overflow-y-auto">
                                 <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-                                    <h3 class="text-sm font-semibold text-gray-900">Notifications</h3>
+                                    <h3 class="text-sm font-semibold text-gray-900">{{ __('messages.notifications') }}</h3>
                                     @if($unreadCount > 0)
-                                        <a href="{{ route('notifications.index') }}" class="text-xs text-blue-600 hover:text-blue-700">View All</a>
+                                        <a href="{{ route('notifications.index') }}" class="text-xs text-blue-600 hover:text-blue-700">{{ __('messages.view_all') }}</a>
                                     @endif
                                 </div>
                                 @php
@@ -160,7 +160,7 @@
                                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                         </svg>
-                                        <p class="mt-2 text-sm text-gray-600">No notifications yet</p>
+                                        <p class="mt-2 text-sm text-gray-600">{{ __('messages.no_notifications_yet') }}</p>
                                     </div>
                                 @endforelse
                             </div>
@@ -189,7 +189,7 @@
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
-                                        My Profile
+                                        {{ __('messages.my_profile') }}
                                     </div>
                                 </a>
                                 @if(!auth()->user()->hasRole('admin'))
@@ -198,7 +198,7 @@
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                             </svg>
-                                            Subscription
+                                            {{ __('messages.subscription') }}
                                         </div>
                                     </a>
                                 @endif
@@ -208,7 +208,7 @@
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        Support Ticket
+                                        {{ __('messages.support_ticket') }}
                                     </div>
                                 </a>
                                 @if(auth()->user()->hasRole('admin'))
@@ -217,7 +217,7 @@
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                             </svg>
-                                            Telescope
+                                            {{ __('messages.telescope') }}
                                             <svg class="w-3 h-3 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                             </svg>
@@ -232,7 +232,7 @@
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                             </svg>
-                                            Logout
+                                            {{ __('messages.logout') }}
                                         </div>
                                     </button>
                                 </form>
@@ -241,10 +241,10 @@
                     </div>
                 @else
                     <a href="{{ route('login') }}" class="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors duration-200">
-                        Login
+                        {{ __('messages.login') }}
                     </a>
                     <a href="{{ route('register') }}" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md">
-                        Register
+                        {{ __('messages.register') }}
                     </a>
                 @endauth
             </div>

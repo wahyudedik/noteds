@@ -1,20 +1,20 @@
 @extends('layouts.app')
 
-@section('title', 'Top-up Checkout')
+@section('title', __('messages.topup_checkout'))
 
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">Top-up Checkout</h1>
-            <p class="mt-2 text-base text-gray-600">Complete your wallet top-up payment</p>
+            <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.topup_checkout') }}</h1>
+            <p class="mt-2 text-base text-gray-600">{{ __('messages.complete_wallet_topup_payment') }}</p>
         </div>
 
         <!-- Payment Details Card -->
         <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
             <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h2 class="text-lg font-semibold text-gray-900">Payment Summary</h2>
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.payment_summary') }}</h2>
             </div>
             <div class="p-6">
                 <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
@@ -25,7 +25,7 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Top-up Amount</p>
+                            <p class="text-sm font-medium text-gray-500">{{ __('messages.topup_amount') }}</p>
                             <p class="text-3xl font-bold text-green-600">Rp {{ number_format($transaction->amount, 0, ',', '.') }}</p>
                         </div>
                     </div>
@@ -36,9 +36,9 @@
                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span class="font-medium text-gray-900">Secure Payment by Midtrans</span>
+                        <span class="font-medium text-gray-900">{{ __('messages.secure_payment_by_midtrans') }}</span>
                     </div>
-                    <p class="text-xs text-gray-500 ml-7">You will be redirected to a secure payment page. Choose your preferred payment method.</p>
+                    <p class="text-xs text-gray-500 ml-7">{{ __('messages.redirected_to_secure_payment') }}</p>
                 </div>
 
                 <div id="snap-container" class="min-h-[200px] flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200 border-dashed">
@@ -46,7 +46,7 @@
                         <svg class="mx-auto h-12 w-12 text-gray-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        <p class="mt-4 text-sm text-gray-600">Loading payment gateway...</p>
+                        <p class="mt-4 text-sm text-gray-600">{{ __('messages.loading_payment_gateway') }}</p>
                     </div>
                 </div>
             </div>
@@ -61,12 +61,12 @@
                     </svg>
                 </div>
                 <div class="ml-3 flex-1">
-                    <h3 class="text-sm font-medium text-blue-800 mb-1">Payment Instructions</h3>
+                    <h3 class="text-sm font-medium text-blue-800 mb-1">{{ __('messages.payment_instructions') }}</h3>
                     <ul class="list-disc list-inside text-sm text-blue-700 space-y-1">
-                        <li>Select your preferred payment method on the payment page</li>
-                        <li>Complete the payment as instructed</li>
-                        <li>Your wallet balance will be updated automatically upon successful payment</li>
-                        <li>If payment is pending, please wait for confirmation</li>
+                        <li>{{ __('messages.select_payment_method') }}</li>
+                        <li>{{ __('messages.complete_payment_instructed') }}</li>
+                        <li>{{ __('messages.wallet_balance_updated_automatically') }}</li>
+                        <li>{{ __('messages.if_payment_pending_wait') }}</li>
                     </ul>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'My Notes')
+@section('title', __('messages.my_notes'))
 
 @section('content')
 <div class="py-8 sm:py-12">
@@ -59,7 +59,7 @@
                                     @endforeach
                                     @if($note->tags->count() > 3)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                            +{{ $note->tags->count() - 3 }} more
+                                            +{{ $note->tags->count() - 3 }} {{ __('messages.more') }}
                                         </span>
                                     @endif
                                 </div>
@@ -73,14 +73,14 @@
                                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                             <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
                                         </svg>
-                                        Public
+                                        {{ __('messages.public') }}
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                                         </svg>
-                                        Private
+                                        {{ __('messages.private') }}
                                     </span>
                                 @endif
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
@@ -92,7 +92,7 @@
                                     </span>
                                 @endif
                                 @if($note->hasAttachments())
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800" title="{{ $note->file_count }} {{ Str::plural('file', $note->file_count) }}">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800" title="{{ $note->file_count }} {{ $note->file_count == 1 ? __('messages.file') : __('messages.files') }}">
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                         </svg>
@@ -115,7 +115,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-700 transition-colors duration-200 focus:outline-none">
-                                            Delete
+                                            {{ __('messages.delete') }}
                                         </button>
                                     </form>
                                 </div>
@@ -142,7 +142,7 @@
                         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        Create your first note
+                        {{ __('messages.create_your_first_note') }}
                     </a>
                 </div>
             </div>
@@ -163,14 +163,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
+                    title: '{{ __('messages.are_you_sure') }}',
+                    text: '{{ __('messages.delete_confirmation') }}',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#dc2626',
                     cancelButtonColor: '#6b7280',
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'Cancel'
+                    confirmButtonText: '{{ __('messages.yes_delete') }}',
+                    cancelButtonText: '{{ __('messages.no_cancel') }}'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         form.submit();

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create Note')
+@section('title', __('messages.create_new_note'))
 
 @section('content')
 <div class="py-8 sm:py-12">
@@ -13,9 +13,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
                 </a>
-                <h1 class="text-3xl font-bold text-gray-900">Create New Note</h1>
+                <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.create_new_note') }}</h1>
             </div>
-            <p class="mt-2 text-base text-gray-600">Share your knowledge with the community</p>
+            <p class="mt-2 text-base text-gray-600">{{ __('messages.share_knowledge') }}</p>
         </div>
 
         <!-- Flash Messages -->
@@ -35,7 +35,7 @@
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                     </svg>
-                                    Upgrade to Premium →
+                                    {{ __('messages.upgrade_to_premium') }} →
                                 </a>
                             </div>
                         @endif
@@ -61,11 +61,11 @@
                         </div>
                         <div class="ml-3 flex-1">
                             <p class="text-sm font-medium text-yellow-800">
-                                You have {{ $remaining }} {{ Str::plural('note', $remaining) }} remaining on your Basic plan.
+                                {{ __('messages.you_have') }} {{ $remaining }} {{ __('messages.notes_remaining') }}
                             </p>
                             <div class="mt-2">
                                 <a href="{{ route('subscription.create') }}" class="inline-flex items-center text-sm font-semibold text-yellow-700 hover:text-yellow-800">
-                                    Upgrade to Premium for unlimited notes →
+                                    {{ __('messages.upgrade_to_premium_unlimited') }} →
                                 </a>
                             </div>
                         </div>
@@ -77,7 +77,7 @@
         <!-- Form Card -->
         <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
             <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h2 class="text-lg font-semibold text-gray-900">Note Details</h2>
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.note_details') }}</h2>
             </div>
             <div class="p-6">
             <form action="{{ route('notes.store') }}" method="POST" enctype="multipart/form-data">
@@ -87,10 +87,10 @@
                     <!-- Title -->
                     <div>
                         <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
-                            Title <span class="text-red-500">*</span>
+                            {{ __('messages.title') }} <span class="text-red-500">*</span>
                         </label>
                         <input type="text" name="title" id="title" value="{{ old('title') }}" required
-                            placeholder="Enter note title"
+                            :placeholder="__('messages.enter_note_title')"
                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 @error('title') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
                         @error('title')
                             <p class="mt-2 text-sm text-red-600 flex items-center">
@@ -105,7 +105,7 @@
                     <!-- Content (Rich Text Editor) -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Content <span class="text-red-500">*</span>
+                            {{ __('messages.content') }} <span class="text-red-500">*</span>
                         </label>
                         <div class="mt-1" id="editor-wrapper" style="min-height: 300px;">
                             <div id="content-editor" style="min-height: 300px;"></div>
@@ -215,7 +215,7 @@
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                         </svg>
-                                        Upgrade to Premium →
+                                        {{ __('messages.upgrade_to_premium') }} →
                                     </a>
                                 @endif
                             </div>

@@ -47,11 +47,11 @@
                     <div>
                         @if($user->role === 'admin')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                                Admin
+                                {{ __('messages.admin') }}
                             </span>
                         @elseif($user->role === 'seller')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                Seller
+                                {{ __('messages.seller') }}
                             </span>
                         @endif
                     </div>
@@ -69,7 +69,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Public Notes</p>
+                        <p class="text-sm font-medium text-gray-500">{{ __('messages.public_notes') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ $stats['total_notes'] }}</p>
                     </div>
                 </div>
@@ -83,7 +83,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Sales</p>
+                        <p class="text-sm font-medium text-gray-500">{{ __('messages.total_sales') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ $stats['total_sales'] }}</p>
                     </div>
                 </div>
@@ -103,7 +103,7 @@
                         @endif
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Average Rating</p>
+                        <p class="text-sm font-medium text-gray-500">{{ __('messages.average_rating') }}</p>
                         <p class="text-2xl font-bold text-gray-900">
                             @if($stats['average_rating'] > 0)
                                 {{ $stats['average_rating'] }} / 5
@@ -111,7 +111,7 @@
                                 N/A
                             @endif
                         </p>
-                        <p class="text-xs text-gray-500">{{ $stats['total_reviews'] }} {{ Str::plural('review', $stats['total_reviews']) }}</p>
+                        <p class="text-xs text-gray-500">{{ $stats['total_reviews'] }} {{ $stats['total_reviews'] == 1 ? __('messages.review') : __('messages.reviews_count') }}</p>
                     </div>
                 </div>
             </div>
@@ -124,7 +124,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Revenue</p>
+                        <p class="text-sm font-medium text-gray-500">{{ __('messages.total_revenue') }}</p>
                         <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}</p>
                     </div>
                 </div>
@@ -134,7 +134,7 @@
         <!-- Public Notes -->
         <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
             <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h2 class="text-lg font-semibold text-gray-900">Public Notes</h2>
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.public_notes') }}</h2>
             </div>
             <div class="p-6">
                 @if($publicNotes->count() > 0)
@@ -173,7 +173,7 @@
                                         @if($note->price > 0)
                                             <span class="text-sm font-semibold text-yellow-600">Rp {{ number_format($note->price, 0, ',', '.') }}</span>
                                         @else
-                                            <span class="text-xs text-gray-500">Free</span>
+                                            <span class="text-xs text-gray-500">{{ __('messages.free') }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -189,8 +189,8 @@
                         <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <h3 class="mt-4 text-lg font-medium text-gray-900">No public notes yet</h3>
-                        <p class="mt-2 text-sm text-gray-500">This user hasn't published any public notes.</p>
+                        <h3 class="mt-4 text-lg font-medium text-gray-900">{{ __('messages.no_public_notes_yet') }}</h3>
+                        <p class="mt-2 text-sm text-gray-500">{{ __('messages.user_hasnt_published_notes') }}</p>
                     </div>
                 @endif
             </div>

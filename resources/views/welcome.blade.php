@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Welcome to ' . config('app.name'))
+@section('title', __('messages.welcome_to_noteds_title', ['name' => config('app.name')]))
 
 @section('content')
 <div class="py-12 sm:py-16 lg:py-20">
@@ -264,25 +264,25 @@
                     <img src="{{ asset('logo.png') }}" alt="{{ config('app.name', 'Noteds') }}" class="h-20 w-20 sm:h-24 sm:w-24">
                 </div>
                 <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-                    Welcome to {{ config('app.name') }}
+                    {{ __('messages.welcome_to_noteds', ['name' => config('app.name')]) }}
                 </h1>
                 <p class="text-xl sm:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                    The digital marketplace where knowledge meets opportunity. Buy and sell quality notes, discover insights, and share your expertise.
+                    {{ __('messages.welcome_description') }}
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                     @auth
                         <a href="{{ route('dashboard') }}" class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700">
-                            Go to Dashboard
+                            {{ __('messages.go_to_dashboard') }}
                         </a>
                         <a href="{{ route('marketplace.index') }}" class="inline-flex items-center px-8 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50">
-                            Explore Marketplace
+                            {{ __('messages.explore_marketplace') }}
                         </a>
                     @else
                         <a href="{{ route('register') }}" class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700">
-                            Get Started Free
+                            {{ __('messages.get_started_free') }}
                         </a>
                         <a href="{{ route('login') }}" class="inline-flex items-center px-8 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50">
-                            Sign In
+                            {{ __('messages.sign_in') }}
                         </a>
                     @endauth
                 </div>

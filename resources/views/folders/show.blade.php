@@ -10,7 +10,7 @@
                 <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
-                Back to Folders
+                {{ __('messages.back_to_folders') }}
             </a>
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
@@ -39,7 +39,7 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                        Edit
+                        {{ __('messages.edit') }}
                     </a>
                 </div>
             </div>
@@ -48,7 +48,7 @@
         <!-- Subfolders -->
         @if($folder->children->count() > 0)
             <div class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Subfolders</h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('messages.subfolders') }}</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     @foreach($folder->children as $child)
                         <a href="{{ route('folders.show', $child) }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
@@ -62,7 +62,7 @@
                                 @endif
                                 <div>
                                     <div class="font-medium text-gray-900">{{ $child->name }}</div>
-                                    <div class="text-sm text-gray-600">{{ $child->notes()->count() }} notes</div>
+                                    <div class="text-sm text-gray-600">{{ $child->notes()->count() }} {{ $child->notes()->count() == 1 ? __('messages.note') : __('messages.notes') }}</div>
                                 </div>
                             </div>
                         </a>
@@ -75,8 +75,8 @@
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-semibold text-gray-900">Notes in this folder</h2>
-                    <span class="text-sm text-gray-600">{{ $folder->notes->count() }} notes</span>
+                    <h2 class="text-xl font-semibold text-gray-900">{{ __('messages.notes_in_this_folder') }}</h2>
+                    <span class="text-sm text-gray-600">{{ $folder->notes->count() }} {{ $folder->notes->count() == 1 ? __('messages.note') : __('messages.notes') }}</span>
                 </div>
             </div>
             <div class="p-6">
@@ -95,9 +95,9 @@
                                 <div class="flex items-center gap-4 text-xs text-gray-500">
                                     <span>{{ $note->created_at->diffForHumans() }}</span>
                                     @if($note->is_public)
-                                        <span class="px-2 py-0.5 rounded-full bg-green-100 text-green-800">Public</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-green-100 text-green-800">{{ __('messages.public') }}</span>
                                     @else
-                                        <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-800">Private</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-800">{{ __('messages.private') }}</span>
                                     @endif
                                 </div>
                             </div>
@@ -108,7 +108,10 @@
                         <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <p>No notes in this folder yet</p>
+                        <p>{{ __('messages.no_notes_in_folder') }}</p>
+                        <a href="{{ route('notes.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                            {{ __('messages.create_first_note_folder') }}
+                        </a>
                     </div>
                 @endif
             </div>

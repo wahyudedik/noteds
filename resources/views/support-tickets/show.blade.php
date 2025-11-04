@@ -13,12 +13,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                     </a>
-                    <h1 class="text-3xl font-bold text-gray-900">Ticket Details</h1>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.ticket_details') }}</h1>
                 </div>
                 <div class="flex items-center gap-2">
                     @if($supportTicket->isOpen() && $supportTicket->user_id === auth()->id())
                         <a href="{{ route('support-tickets.edit', $supportTicket) }}" class="px-4 py-2 text-sm font-medium text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50">
-                            Edit
+                            {{ __('messages.edit') }}
                         </a>
                     @endif
                     @if($supportTicket->isOpen() && $supportTicket->user_id === auth()->id())
@@ -26,7 +26,7 @@
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="px-4 py-2 text-sm font-medium text-red-600 border border-red-300 rounded-lg hover:bg-red-50">
-                                Delete
+                                {{ __('messages.delete') }}
                             </button>
                         </form>
                     @endif
@@ -55,37 +55,37 @@
                         <!-- Status Badge -->
                         @if($supportTicket->status === 'open')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                Open
+                                {{ __('messages.open') }}
                             </span>
                         @elseif($supportTicket->status === 'in_progress')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                In Progress
+                                {{ __('messages.in_progress') }}
                             </span>
                         @elseif($supportTicket->status === 'resolved')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                                Resolved
+                                {{ __('messages.resolved') }}
                             </span>
                         @else
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                                Closed
+                                {{ __('messages.closed') }}
                             </span>
                         @endif
                         <!-- Priority Badge -->
                         @if($supportTicket->priority === 'urgent')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                                Urgent
+                                {{ __('messages.urgent') }}
                             </span>
                         @elseif($supportTicket->priority === 'high')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
-                                High
+                                {{ __('messages.high') }}
                             </span>
                         @elseif($supportTicket->priority === 'medium')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                Medium
+                                {{ __('messages.medium') }}
                             </span>
                         @else
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                Low
+                                {{ __('messages.low') }}
                             </span>
                         @endif
                     </div>
@@ -95,22 +95,22 @@
                 <!-- Meta Information -->
                 <div class="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div>
-                        <span class="font-medium text-gray-700">Created:</span>
+                        <span class="font-medium text-gray-700">{{ __('messages.created') }}:</span>
                         <span class="text-gray-600 ml-2">{{ $supportTicket->created_at->format('F d, Y H:i') }}</span>
                     </div>
                     <div>
-                        <span class="font-medium text-gray-700">Last Updated:</span>
+                        <span class="font-medium text-gray-700">{{ __('messages.last_updated') }}:</span>
                         <span class="text-gray-600 ml-2">{{ $supportTicket->updated_at->format('F d, Y H:i') }}</span>
                     </div>
                     @if($supportTicket->assignedAdmin)
                         <div>
-                            <span class="font-medium text-gray-700">Assigned To:</span>
+                            <span class="font-medium text-gray-700">{{ __('messages.assigned_to') }}:</span>
                             <span class="text-gray-600 ml-2">{{ $supportTicket->assignedAdmin->name }}</span>
                         </div>
                     @endif
                     @if($supportTicket->closedByUser)
                         <div>
-                            <span class="font-medium text-gray-700">Closed By:</span>
+                            <span class="font-medium text-gray-700">{{ __('messages.closed_by') }}:</span>
                             <span class="text-gray-600 ml-2">{{ $supportTicket->closedByUser->name }}</span>
                         </div>
                     @endif
@@ -119,7 +119,7 @@
                 <!-- Links -->
                 @if($supportTicket->links && count($supportTicket->links) > 0)
                     <div class="border-t border-gray-200 pt-4 mt-4">
-                        <h3 class="text-sm font-medium text-gray-700 mb-3">Related Links</h3>
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">{{ __('messages.related_links_optional') }}</h3>
                         <div class="flex flex-wrap gap-2">
                             @foreach($supportTicket->links as $link)
                                 <a href="{{ $link }}" target="_blank" class="inline-flex items-center px-3 py-1 rounded-lg text-sm text-blue-600 bg-blue-50 hover:bg-blue-100">
@@ -141,7 +141,7 @@
         <!-- Conversation Thread -->
         <div class="bg-white shadow-sm rounded-lg border border-gray-200 mb-6">
             <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h3 class="text-lg font-semibold text-gray-900">Conversation</h3>
+                <h3 class="text-lg font-semibold text-gray-900">{{ __('messages.conversation') }}</h3>
             </div>
             <div class="divide-y divide-gray-200">
                 <!-- Original Ticket Message -->
@@ -160,7 +160,7 @@
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="font-semibold text-gray-900">{{ $supportTicket->user->name }}</span>
                                 <span class="text-xs text-gray-500">{{ $supportTicket->created_at->format('M d, Y H:i') }}</span>
-                                <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">Original Message</span>
+                                <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">{{ __('messages.original_message') }}</span>
                             </div>
                             <div class="prose max-w-none">
                                 <p class="text-gray-700 whitespace-pre-wrap">{{ $supportTicket->description }}</p>
@@ -186,7 +186,7 @@
                                 <div class="flex items-center gap-2 mb-2">
                                     <span class="font-semibold text-gray-900">{{ $reply->user->name }}</span>
                                     @if($reply->is_admin)
-                                        <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">Admin</span>
+                                        <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">{{ __('messages.admin') }}</span>
                                     @endif
                                     <span class="text-xs text-gray-500">{{ $reply->created_at->format('M d, Y H:i') }}</span>
                                 </div>
@@ -198,7 +198,7 @@
                     </div>
                 @empty
                     <div class="p-6 text-center text-gray-500">
-                        No replies yet. Be the first to reply!
+                        {{ __('messages.no_replies_yet') }}
                     </div>
                 @endforelse
             </div>
@@ -207,27 +207,27 @@
         <!-- Reply Form -->
         @if($supportTicket->status !== 'closed')
             <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Add Reply</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.add_reply') }}</h3>
                 <form action="{{ route('support-tickets.reply', $supportTicket) }}" method="POST">
                     @csrf
                     <div class="mb-4">
-                        <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Your Message</label>
+                        <label for="message" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.your_message') }}</label>
                         <textarea name="message" id="message" rows="5" required minlength="10"
-                            placeholder="Type your reply here..."
+                            :placeholder="__('messages.type_your_reply_here')"
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 @error('message') border-red-500 @enderror">{{ old('message') }}</textarea>
                         @error('message')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                        <p class="mt-1 text-xs text-gray-500">Minimum 10 characters required.</p>
+                        <p class="mt-1 text-xs text-gray-500">{{ __('messages.minimum_characters_required') }}</p>
                     </div>
                     <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                        Send Reply
+                        {{ __('messages.send_reply') }}
                     </button>
                 </form>
             </div>
         @else
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-                <p class="text-gray-600">This ticket is closed. You cannot add more replies.</p>
+                <p class="text-gray-600">{{ __('messages.ticket_closed_no_replies') }}</p>
             </div>
         @endif
     </div>
