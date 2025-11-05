@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Admin - CMS Pages')
+@section('title', __('messages.admin_cms_pages'))
 
 @section('content')
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">CMS Pages Management</h2>
-            <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800">← Back to Dashboard</a>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('messages.cms_pages_management') }}</h2>
+            <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800">← {{ __('messages.back_to_dashboard') }}</a>
         </div>
 
         @if(session('success'))
@@ -22,7 +22,7 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Add New Page
+                {{ __('messages.add_new_page') }}
             </a>
         </div>
 
@@ -31,10 +31,10 @@
                 <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <h3 class="mt-4 text-lg font-semibold text-gray-900">No CMS pages yet</h3>
-                <p class="mt-2 text-gray-600">Create pages like Privacy Policy, Terms of Service, etc.</p>
+                <h3 class="mt-4 text-lg font-semibold text-gray-900">{{ __('messages.no_cms_pages_yet') }}</h3>
+                <p class="mt-2 text-gray-600">{{ __('messages.create_pages_like') }}</p>
                 <a href="{{ route('admin.cms-pages.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200">
-                    Add Page
+                    {{ __('messages.add_page') }}
                 </a>
             </div>
         @else
@@ -43,11 +43,11 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.slug') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.title') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.status') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.updated') }}</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -62,11 +62,11 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($page->is_active)
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                Active
+                                                {{ __('messages.active') }}
                                             </span>
                                         @else
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                Inactive
+                                                {{ __('messages.inactive') }}
                                             </span>
                                         @endif
                                     </td>
@@ -76,10 +76,10 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center justify-end gap-2">
                                             <a href="{{ route('cms.show', $page) }}" target="_blank" class="text-green-600 hover:text-green-900">
-                                                View
+                                                {{ __('messages.view') }}
                                             </a>
                                             <a href="{{ route('admin.cms-pages.edit', $page) }}" class="text-blue-600 hover:text-blue-900">
-                                                Edit
+                                                {{ __('messages.edit') }}
                                             </a>
                                             <form action="{{ route('admin.cms-pages.destroy', $page) }}" method="POST" class="inline delete-cms-page-form">
                                                 @csrf

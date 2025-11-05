@@ -20,6 +20,9 @@
                         <a href="{{ route('wallet.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('wallet.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
                             {{ __('messages.wallet') }}
                         </a>
+                        <a href="{{ route('featured-notes.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('featured-notes.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
+                            Featured
+                        </a>
                         @if(!auth()->user()->hasRole('admin'))
                             <a href="{{ route('subscription.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('subscription.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
                                 {{ __('messages.subscription') }}
@@ -31,9 +34,9 @@
                         @if(auth()->user()->hasPremium())
                             <a href="{{ route('mynoteds.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 {{ request()->routeIs('mynoteds.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : '' }}">
                                 <span class="inline-flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    {{-- <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                    </svg>
+                                    </svg> --}}
                                     {{ __('messages.mynoteds') }}
                                 </span>
                             </a>

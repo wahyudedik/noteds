@@ -31,6 +31,8 @@ class StoreNoteRequest extends FormRequest
             'price' => ['nullable', 'numeric', 'min:0'],
             'is_public' => ['nullable', 'boolean'],
             'status' => ['nullable', 'in:active,sold,inactive'],
+            'workspace_id' => ['nullable', 'exists:workspaces,id'],
+            'folder_id' => ['nullable', 'exists:folders,id'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string', 'max:50'],
             'attachments.*' => [

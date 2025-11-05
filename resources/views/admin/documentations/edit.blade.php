@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create Documentation')
+@section('title', __('messages.admin_edit_documentation'))
 
 @section('content')
 <div class="py-8 sm:py-12">
@@ -9,11 +9,11 @@
         <div class="mb-8">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Edit Documentation</h1>
-                    <p class="mt-2 text-base text-gray-600">Update documentation article, guide, or reference</p>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.admin_edit_documentation') }}</h1>
+                    <p class="mt-2 text-base text-gray-600">{{ __('messages.update_documentation') }}</p>
                 </div>
                 <a href="{{ route('admin.documentations.index') }}" class="text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                    ← Back to List
+                    ← {{ __('messages.back_to_list') }}
                 </a>
             </div>
         </div>
@@ -26,14 +26,14 @@
                 <!-- Title -->
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
-                        Title <span class="text-red-500">*</span>
+                        {{ __('messages.title') }} <span class="text-red-500">*</span>
                     </label>
                     <input type="text" 
                         id="title"
                         name="title"
                         value="{{ old('title', $documentation->title) }}"
                         required
-                        placeholder="e.g., How to Create Your First Note"
+                        placeholder="{{ __('messages.example_how_to_create_first_note') }}"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 @error('title') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
                     @error('title')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -43,7 +43,7 @@
                 <!-- Slug (Auto-generated, but can be overridden) -->
                 <div>
                     <label for="slug" class="block text-sm font-medium text-gray-700 mb-2">
-                        Slug (URL) <span class="text-xs text-gray-500">(Auto-generated from title if empty)</span>
+                        {{ __('messages.slug_auto_generated') }} <span class="text-xs text-gray-500">{{ __('messages.auto_generated_from_title') }}</span>
                     </label>
                     <input type="text" 
                         id="slug"
@@ -51,7 +51,7 @@
                         value="{{ old('slug', $documentation->slug) }}"
                         placeholder="e.g., how-to-create-first-note"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 @error('slug') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
-                    <p class="mt-1 text-xs text-gray-500">URL-friendly identifier. Will be auto-generated if left empty.</p>
+                    <p class="mt-1 text-xs text-gray-500">{{ __('messages.url_friendly_will_auto_generate') }}</p>
                     @error('slug')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -60,11 +60,11 @@
                 <!-- Category -->
                 <div>
                     <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
-                        Category <span class="text-red-500">*</span>
+                        {{ __('messages.category') }} <span class="text-red-500">*</span>
                     </label>
                     <select name="category" id="category" required
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 @error('category') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
-                        <option value="">Select Category</option>
+                        <option value="">{{ __('messages.select_category') }}</option>
                         @foreach($categories as $key => $label)
                             <option value="{{ $key }}" {{ old('category', $documentation->category) === $key ? 'selected' : '' }}>
                                 {{ $label }}
@@ -79,12 +79,12 @@
                 <!-- Summary -->
                 <div>
                     <label for="summary" class="block text-sm font-medium text-gray-700 mb-2">
-                        Summary <span class="text-xs text-gray-500">(Brief description, max 500 chars)</span>
+                        {{ __('messages.summary_brief_description') }} <span class="text-xs text-gray-500">{{ __('messages.brief_description_max_chars') }}</span>
                     </label>
                     <textarea name="summary" id="summary" rows="3" maxlength="500"
-                        placeholder="Brief summary of this documentation..."
+                        :placeholder="__('messages.brief_summary_placeholder')"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 @error('summary') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">{{ old('summary', $documentation->summary) }}</textarea>
-                    <p class="mt-1 text-xs text-gray-500"><span id="summary-char-count">{{ strlen(old('summary', $documentation->summary ?? '')) }}</span>/500 characters</p>
+                    <p class="mt-1 text-xs text-gray-500"><span id="summary-char-count">{{ strlen(old('summary', $documentation->summary ?? '')) }}</span>/500 {{ __('messages.characters') }}</p>
                     @error('summary')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -93,7 +93,7 @@
                 <!-- Content (Rich Text Editor) -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Content <span class="text-red-500">*</span>
+                        {{ __('messages.content') }} <span class="text-red-500">*</span>
                     </label>
                     <div class="mt-1" id="editor-wrapper" style="min-height: 400px;">
                         <div id="content-editor" style="min-height: 400px;"></div>
@@ -114,7 +114,7 @@
                     <!-- Order -->
                     <div>
                         <label for="order" class="block text-sm font-medium text-gray-700 mb-2">
-                            Display Order
+                            {{ __('messages.display_order') }}
                         </label>
                         <input type="number" 
                             id="order"
@@ -122,13 +122,13 @@
                             value="{{ old('order', $documentation->order) }}"
                             min="0"
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                        <p class="mt-1 text-xs text-gray-500">Lower numbers appear first</p>
+                        <p class="mt-1 text-xs text-gray-500">{{ __('messages.lower_numbers_appear_first') }}</p>
                     </div>
 
                     <!-- Icon -->
                     <div>
                         <label for="icon" class="block text-sm font-medium text-gray-700 mb-2">
-                            Icon <span class="text-xs text-gray-500">(Emoji or icon code)</span>
+                            {{ __('messages.icon_emoji_or_code') }} <span class="text-xs text-gray-500">{{ __('messages.emoji_or_icon_code') }}</span>
                         </label>
                         <input type="text" 
                             id="icon"
@@ -142,13 +142,13 @@
                 <!-- Links (Dynamic) -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Related Links
+                        {{ __('messages.related_links') }}
                     </label>
                     <div id="links-container" class="space-y-2">
                         <!-- Links will be added here dynamically -->
                     </div>
                     <button type="button" id="add-link-btn" class="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium">
-                        + Add Link
+                        {{ __('messages.add_link') }}
                     </button>
                 </div>
 
@@ -168,7 +168,7 @@
                 <!-- Tags -->
                 <div>
                     <label for="tags" class="block text-sm font-medium text-gray-700 mb-2">
-                        Tags <span class="text-xs text-gray-500">(Comma-separated)</span>
+                        {{ __('messages.tags') }} <span class="text-xs text-gray-500">({{ __('messages.comma_separated') }})</span>
                     </label>
                     <input type="text" 
                         id="tags"
@@ -176,7 +176,7 @@
                         value="{{ old('tags_input', is_array($documentation->tags) ? implode(', ', $documentation->tags) : '') }}"
                         placeholder="e.g., getting-started, tutorial, guide"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                    <p class="mt-1 text-xs text-gray-500">Separate tags with commas</p>
+                    <p class="mt-1 text-xs text-gray-500">{{ __('messages.separate_tags_with_commas') }}</p>
                 </div>
 
                 <!-- Active Status -->
@@ -188,17 +188,17 @@
                         {{ old('is_active', $documentation->is_active) ? 'checked' : '' }}
                         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                     <label for="is_active" class="ml-2 block text-sm text-gray-900">
-                        Active (visible to public)
+                        {{ __('messages.active_visible_public') }}
                     </label>
                 </div>
 
                 <!-- Submit Buttons -->
                 <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
                     <a href="{{ route('admin.documentations.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200">
-                        Cancel
+                        {{ __('messages.cancel') }}
                     </a>
                     <button type="submit" class="px-6 py-2 border border-transparent rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                        Update Documentation
+                        {{ __('messages.save_documentation') }}
                     </button>
                 </div>
             </div>
@@ -300,11 +300,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const linkDiv = document.createElement('div');
         linkDiv.className = 'flex gap-2 items-start';
         linkDiv.innerHTML = `
-            <input type="text" name="links[${linkIndex}][title]" value="${title}" placeholder="Link title" required
+            <input type="text" name="links[${linkIndex}][title]" value="${title}" placeholder="{{ __('messages.link_title') }}" required
                 class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
             <input type="url" name="links[${linkIndex}][url]" value="${url}" placeholder="https://example.com" required
                 class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-            <button type="button" class="remove-link text-red-600 hover:text-red-700" title="Remove">
+            <button type="button" class="remove-link text-red-600 hover:text-red-700" title="{{ __('messages.remove') }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -369,8 +369,8 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             Swal.fire({
                 icon: 'error',
-                title: 'Content Required',
-                text: 'Please provide documentation content.',
+                title: @json(__('messages.content_required')),
+                text: @json(__('messages.please_provide_documentation_content')),
             });
             return false;
         }

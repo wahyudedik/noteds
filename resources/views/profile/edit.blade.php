@@ -100,6 +100,53 @@
                             @enderror
                         </div>
 
+                        <!-- Bank Account Information Section -->
+                        <div class="pt-6 border-t border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.bank_account') }}</h3>
+                            <p class="text-sm text-gray-600 mb-4">This information will be used for withdrawal requests.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="bank_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                        {{ __('messages.bank_name') }}
+                                    </label>
+                                    <input type="text" name="bank_name" id="bank_name" value="{{ old('bank_name', $user->bank_name) }}"
+                                        placeholder="e.g., BCA, Mandiri, BRI"
+                                        maxlength="100"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 @error('bank_name') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                                    @error('bank_name')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="bank_account_number" class="block text-sm font-medium text-gray-700 mb-2">
+                                        {{ __('messages.account_number') }}
+                                    </label>
+                                    <input type="text" name="bank_account_number" id="bank_account_number" value="{{ old('bank_account_number', $user->bank_account_number) }}"
+                                        placeholder="{{ __('messages.account_number') }}"
+                                        maxlength="50"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 @error('bank_account_number') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                                    @error('bank_account_number')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <label for="bank_account_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ __('messages.account_name') }}
+                                </label>
+                                <input type="text" name="bank_account_name" id="bank_account_name" value="{{ old('bank_account_name', $user->bank_account_name) }}"
+                                    placeholder="{{ __('messages.name_as_appears_bank') }}"
+                                    maxlength="100"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 @error('bank_account_name') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                                @error('bank_account_name')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
                             @if(session('status') === 'profile-updated')
                                 <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"

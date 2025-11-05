@@ -1,38 +1,38 @@
 @extends('layouts.app')
 
-@section('title', 'Admin - Notes')
+@section('title', __('messages.admin_notes'))
 
 @section('content')
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Notes Management</h2>
-            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800">← Back to Dashboard</a>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('messages.notes_management') }}</h2>
+            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800">← {{ __('messages.back_to_dashboard') }}</a>
         </div>
 
         <!-- Filter -->
         <div class="bg-white shadow-sm rounded-lg p-4 mb-6">
             <form method="GET" action="{{ route('admin.notes.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search title or content..."
+                <input type="text" name="search" value="{{ request('search') }}" :placeholder="__('messages.search_title_or_content')"
                     class="rounded-md border-gray-300 shadow-sm">
                 <select name="is_public" class="rounded-md border-gray-300 shadow-sm">
-                    <option value="">All Visibility</option>
-                    <option value="1" {{ request('is_public') === '1' ? 'selected' : '' }}>Public</option>
-                    <option value="0" {{ request('is_public') === '0' ? 'selected' : '' }}>Private</option>
+                    <option value="">{{ __('messages.all_visibility') }}</option>
+                    <option value="1" {{ request('is_public') === '1' ? 'selected' : '' }}>{{ __('messages.public') }}</option>
+                    <option value="0" {{ request('is_public') === '0' ? 'selected' : '' }}>{{ __('messages.private') }}</option>
                 </select>
                 <select name="status" class="rounded-md border-gray-300 shadow-sm">
-                    <option value="">All Status</option>
-                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="sold" {{ request('status') === 'sold' ? 'selected' : '' }}>Sold</option>
-                    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    <option value="">{{ __('messages.all_status') }}</option>
+                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>{{ __('messages.active') }}</option>
+                    <option value="sold" {{ request('status') === 'sold' ? 'selected' : '' }}>{{ __('messages.sold') }}</option>
+                    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>{{ __('messages.inactive') }}</option>
                 </select>
                 <div class="flex gap-2">
                     <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Filter
+                        {{ __('messages.filter') }}
                     </button>
                     @if(request()->hasAny(['search', 'is_public', 'status']))
                         <a href="{{ route('admin.notes.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                            Clear
+                            {{ __('messages.clear') }}
                         </a>
                     @endif
                 </div>
@@ -45,13 +45,13 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visibility</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.title') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.owner') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.price') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.visibility') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.created') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.action') }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -67,14 +67,14 @@
                                         @if($note->price > 0)
                                             Rp {{ number_format($note->price, 0, ',', '.') }}
                                         @else
-                                            <span class="text-gray-400">Free</span>
+                                            <span class="text-gray-400">{{ __('messages.free') }}</span>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($note->is_public)
-                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Public</span>
+                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">{{ __('messages.public') }}</span>
                                         @else
-                                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">Private</span>
+                                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">{{ __('messages.private') }}</span>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -84,7 +84,7 @@
                                         {{ $note->created_at->format('d M Y') }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <a href="{{ route('marketplace.show', $note) }}" class="text-blue-600 hover:text-blue-800">View</a>
+                                        <a href="{{ route('marketplace.show', $note) }}" class="text-blue-600 hover:text-blue-800">{{ __('messages.view') }}</a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -98,7 +98,7 @@
             </div>
         @else
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 text-center">
-                <p class="text-gray-600">No notes found.</p>
+                <p class="text-gray-600">{{ __('messages.no_notes_found') }}</p>
             </div>
         @endif
     </div>

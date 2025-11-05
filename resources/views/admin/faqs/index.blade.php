@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Admin - FAQs')
+@section('title', __('messages.admin_faqs'))
 
 @section('content')
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">FAQs Management</h2>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('messages.faqs_management') }}</h2>
             <div class="flex gap-4">
-                <a href="{{ route('faq') }}" class="text-blue-600 hover:text-blue-800" target="_blank">View Public FAQ →</a>
-                <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800">← Back to Dashboard</a>
+                <a href="{{ route('faq') }}" class="text-blue-600 hover:text-blue-800" target="_blank">{{ __('messages.view_public_faq') }}</a>
+                <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800">← {{ __('messages.back_to_dashboard') }}</a>
             </div>
         </div>
 
@@ -25,7 +25,7 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Add New FAQ
+                {{ __('messages.add_new_faq') }}
             </a>
         </div>
 
@@ -34,10 +34,10 @@
                 <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <h3 class="mt-4 text-lg font-semibold text-gray-900">No FAQs yet</h3>
-                <p class="mt-2 text-gray-600">Create your first FAQ to help your users.</p>
+                <h3 class="mt-4 text-lg font-semibold text-gray-900">{{ __('messages.no_faqs_yet') }}</h3>
+                <p class="mt-2 text-gray-600">{{ __('messages.create_first_faq') }}</p>
                 <a href="{{ route('admin.faqs.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200">
-                    Add FAQ
+                    {{ __('messages.add_faq') }}
                 </a>
             </div>
         @else
@@ -46,11 +46,11 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Question</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.order') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.question') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.status') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.created') }}</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -65,11 +65,11 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($faq->is_active)
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                Active
+                                                {{ __('messages.active') }}
                                             </span>
                                         @else
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                Inactive
+                                                {{ __('messages.inactive') }}
                                             </span>
                                         @endif
                                     </td>
@@ -79,7 +79,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center justify-end gap-2">
                                             <a href="{{ route('admin.faqs.edit', $faq) }}" class="text-blue-600 hover:text-blue-900">
-                                                Edit
+                                                {{ __('messages.edit') }}
                                             </a>
                                             <form action="{{ route('admin.faqs.destroy', $faq) }}" method="POST" class="inline delete-faq-form">
                                                 @csrf

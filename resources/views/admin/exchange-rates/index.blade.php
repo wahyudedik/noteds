@@ -1,20 +1,20 @@
 @extends('layouts.app')
 
-@section('title', 'Exchange Rates')
+@section('title', __('messages.admin_exchange_rates'))
 
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-8 flex justify-between items-center">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Exchange Rates</h1>
-                <p class="mt-2 text-base text-gray-600">Manage currency exchange rates for top-up conversions</p>
+                <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.admin_exchange_rates') }}</h1>
+                <p class="mt-2 text-base text-gray-600">{{ __('messages.manage_currency_exchange_rates') }}</p>
             </div>
             <a href="{{ route('admin.exchange-rates.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                Add Exchange Rate
+                {{ __('messages.add_exchange_rate') }}
             </a>
         </div>
 
@@ -35,12 +35,12 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.from') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.to') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.rate') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.status') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.notes') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -51,23 +51,23 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($rate->rate, 4) }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $rate->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                        {{ $rate->is_active ? 'Active' : 'Inactive' }}
+                                        {{ $rate->is_active ? __('messages.active') : __('messages.inactive') }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ Str::limit($rate->notes ?? '-', 50) }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <a href="{{ route('admin.exchange-rates.edit', $rate) }}" class="text-blue-600 hover:text-blue-700 mr-3">Edit</a>
+                                    <a href="{{ route('admin.exchange-rates.edit', $rate) }}" class="text-blue-600 hover:text-blue-700 mr-3">{{ __('messages.edit') }}</a>
                                     <form action="{{ route('admin.exchange-rates.destroy', $rate) }}" method="POST" class="inline delete-exchange-rate-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-700">Delete</button>
+                                        <button type="submit" class="text-red-600 hover:text-red-700">{{ __('messages.delete') }}</button>
                                     </form>
                                 </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">
-                                    No exchange rates found. <a href="{{ route('admin.exchange-rates.create') }}" class="text-blue-600 hover:text-blue-700">Create one</a>
+                                    {{ __('messages.no_exchange_rates_found') }} <a href="{{ route('admin.exchange-rates.create') }}" class="text-blue-600 hover:text-blue-700">{{ __('messages.create_one') }}</a>
                                 </td>
                             </tr>
                         @endforelse

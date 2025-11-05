@@ -100,10 +100,10 @@
                     <!-- Summary -->
                     <div>
                         <label for="summary" class="block text-sm font-medium text-gray-700 mb-2">
-                            Summary <span class="text-xs text-gray-500">(Optional)</span>
+                            {{ __('messages.summary') }} <span class="text-xs text-gray-500">{{ __('messages.summary_optional') }}</span>
                         </label>
                         <textarea name="summary" id="summary" rows="3"
-                            placeholder="Brief summary of your note..."
+                            placeholder="{{ __('messages.brief_summary_placeholder') }}"
                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 resize-y @error('summary') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">{{ old('summary', $note->summary) }}</textarea>
                         @error('summary')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -114,14 +114,14 @@
                     @if(old('price', $note->price) > 0)
                     <div id="preview-content-wrapper">
                         <label for="preview_content" class="block text-sm font-medium text-gray-700 mb-2">
-                            Preview Content <span class="text-xs text-gray-500">(Optional - max 300 chars, shown before purchase)</span>
+                            {{ __('messages.preview_content') }} <span class="text-xs text-gray-500">{{ __('messages.preview_content_optional') }}</span>
                         </label>
                         <textarea name="preview_content" id="preview_content" rows="3" maxlength="300"
-                            placeholder="Enter a preview that will be shown to potential buyers (first 300 chars)..."
+                            placeholder="{{ __('messages.enter_preview_for_buyers') }}"
                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 resize-y @error('preview_content') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">{{ old('preview_content', $note->preview_content) }}</textarea>
                         <p class="mt-1 text-xs text-gray-500">
-                            <span id="preview-char-count">{{ strlen(old('preview_content', $note->preview_content)) }}</span>/300 characters. 
-                            @if(empty(old('preview_content', $note->preview_content))) Auto-generated from content if left empty. @endif
+                            <span id="preview-char-count">{{ strlen(old('preview_content', $note->preview_content)) }}</span>/300 {{ __('messages.characters') }}. 
+                            @if(empty(old('preview_content', $note->preview_content))) {{ __('messages.auto_generated_from_content') }} @endif
                         </p>
                         @error('preview_content')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -154,7 +154,7 @@
                                         </div>
                                         <label class="ml-3 flex items-center cursor-pointer">
                                             <input type="checkbox" name="removed_attachments[]" value="{{ $filename }}" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
-                                            <span class="ml-2 text-xs text-red-600">Remove</span>
+                                            <span class="ml-2 text-xs text-red-600">{{ __('messages.remove') }}</span>
                                         </label>
                                     </div>
                                 @endforeach
@@ -165,9 +165,9 @@
                     <!-- New File Attachments -->
                     <div>
                         <label for="attachments" class="block text-sm font-medium text-gray-700 mb-2">
-                            Add More Files
+                            {{ __('messages.add_more_files') }}
                             <span class="text-xs text-gray-500 font-normal">
-                                (Optional - PDF, DOC, DOCX, TXT, ZIP, RAR, JPG, PNG, GIF, XLS, XLSX, PPT, PPTX)
+                                {{ __('messages.file_attachments_optional') }}
                             </span>
                         </label>
                         <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition-colors duration-200">
@@ -177,16 +177,16 @@
                                 </svg>
                                 <div class="flex text-sm text-gray-600">
                                     <label for="attachments" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                        <span>Upload files</span>
+                                        <span>{{ __('messages.upload_files') }}</span>
                                         <input id="attachments" name="attachments[]" type="file" multiple accept=".pdf,.doc,.docx,.txt,.zip,.rar,.jpg,.jpeg,.png,.gif,.xls,.xlsx,.ppt,.pptx" class="sr-only">
                                     </label>
-                                    <p class="pl-1">or drag and drop</p>
+                                    <p class="pl-1">{{ __('messages.or_drag_and_drop') }}</p>
                                 </div>
                                 <p class="text-xs text-gray-500">
                                     @if(auth()->user()->hasPremium())
-                                        Max 50MB per file
+                                        {{ __('messages.max_50mb_per_file') }}
                                     @else
-                                        Max 5MB per file (Premium: 50MB)
+                                        {{ __('messages.max_5mb_per_file') }}
                                     @endif
                                 </p>
                             </div>
@@ -200,7 +200,7 @@
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                         </svg>
-                                        Upgrade to Premium →
+                                        {{ __('messages.upgrade_to_premium_arrow') }}
                                     </a>
                                 @endif
                             </div>
@@ -216,7 +216,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
-                                Price <span class="text-xs text-gray-500 font-normal">(Rp 0 for free sharing)</span>
+                                {{ __('messages.price') }} <span class="text-xs text-gray-500 font-normal">{{ __('messages.price_rp_0_for_free') }}</span>
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -231,8 +231,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <p class="text-xs text-gray-600">
-                                    <strong class="text-green-700">Free</strong>: Share knowledge freely • 
-                                    <strong class="text-blue-700">Paid</strong>: Set your own price
+                                    <strong class="text-green-700">{{ __('messages.free') }}</strong>: {{ __('messages.share_knowledge_freely') }} • 
+                                    <strong class="text-blue-700">{{ __('messages.paid') }}</strong>: {{ __('messages.set_your_own_price') }}
                                 </p>
                             </div>
                             @error('price')
@@ -242,13 +242,13 @@
 
                         <div>
                             <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
-                                Status
+                                {{ __('messages.status') }}
                             </label>
                             <select name="status" id="status"
                                 class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 @error('status') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
-                                <option value="active" {{ old('status', $note->status) === 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="sold" {{ old('status', $note->status) === 'sold' ? 'selected' : '' }}>Sold</option>
-                                <option value="inactive" {{ old('status', $note->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                <option value="active" {{ old('status', $note->status) === 'active' ? 'selected' : '' }}>{{ __('messages.active') }}</option>
+                                <option value="sold" {{ old('status', $note->status) === 'sold' ? 'selected' : '' }}>{{ __('messages.sold') }}</option>
+                                <option value="inactive" {{ old('status', $note->status) === 'inactive' ? 'selected' : '' }}>{{ __('messages.inactive') }}</option>
                             </select>
                             @error('status')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -262,8 +262,8 @@
                             <input type="checkbox" name="is_public" value="1" {{ old('is_public', $note->is_public) ? 'checked' : '' }}
                                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200">
                             <div class="ml-3">
-                                <span class="text-sm font-medium text-gray-700">Make Public</span>
-                                <p class="text-xs text-gray-500 mt-0.5">Available in marketplace</p>
+                                <span class="text-sm font-medium text-gray-700">{{ __('messages.make_public') }}</span>
+                                <p class="text-xs text-gray-500 mt-0.5">{{ __('messages.available_in_marketplace') }}</p>
                             </div>
                         </label>
                     </div>
@@ -276,18 +276,18 @@
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                                 </svg>
-                                Folder (Optional)
+                                {{ __('messages.folder_optional') }}
                             </label>
                             <select name="folder_id" id="folder_id"
                                 class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
-                                <option value="">None (Root)</option>
+                                <option value="">{{ __('messages.none_root') }}</option>
                                 @foreach($folders as $folder)
                                     <option value="{{ $folder->id }}" {{ old('folder_id', $note->folder_id) == $folder->id ? 'selected' : '' }}>
                                         {{ $folder->name }}
                                     </option>
                                 @endforeach
                             </select>
-                            <p class="mt-1 text-xs text-gray-500">Organize notes in folders</p>
+                            <p class="mt-1 text-xs text-gray-500">{{ __('messages.organize_notes_in_folders') }}</p>
                         </div>
 
                         <div>
@@ -295,18 +295,18 @@
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
-                                Workspace (Optional)
+                                {{ __('messages.workspace_optional') }}
                             </label>
                             <select name="workspace_id" id="workspace_id"
                                 class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
-                                <option value="">Personal</option>
+                                <option value="">{{ __('messages.personal') }}</option>
                                 @foreach($workspaces as $workspace)
                                     <option value="{{ $workspace->id }}" {{ old('workspace_id', $note->workspace_id) == $workspace->id ? 'selected' : '' }}>
                                         {{ $workspace->name }} ({{ $workspace->type }})
                                     </option>
                                 @endforeach
                             </select>
-                            <p class="mt-1 text-xs text-gray-500">Assign to workspace</p>
+                            <p class="mt-1 text-xs text-gray-500">{{ __('messages.assign_to_workspace') }}</p>
                         </div>
                     </div>
                     @endif
@@ -345,12 +345,12 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                                <input type="text" id="tag-input" placeholder="Type tag and press Enter" 
+                                <input type="text" id="tag-input" placeholder="{{ __('messages.type_tag_and_press_enter') }}" 
                                     class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
                             </div>
                             <div>
                                 <select id="tag-select" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
-                                    <option value="">Select existing tag...</option>
+                                    <option value="">{{ __('messages.select_existing_tag') }}</option>
                                     @foreach($tags as $tag)
                                         <option value="{{ $tag->name }}">{{ $tag->name }} ({{ $tag->notes_count }} notes)</option>
                                     @endforeach

@@ -19,6 +19,7 @@ class AdminSeeder extends Seeder
                 'name' => 'Admin',
                 'username' => 'admin',
                 'password' => bcrypt('password'),
+                'email_verified_at' => now(),
                 'role' => 'admin',
                 'wallet_balance' => 1000000, // Platform wallet
                 'avatar' => 'https://ui-avatars.com/api/?name=Admin',

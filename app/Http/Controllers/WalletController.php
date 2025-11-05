@@ -98,6 +98,11 @@ class WalletController extends Controller
                     'name' => 'Top-up Wallet',
                 ],
             ],
+            'callbacks' => [
+                'finish' => route('payment.finish'),
+                'unfinish' => route('payment.unfinish'),
+                'error' => route('payment.error'),
+            ],
         ];
 
         try {
@@ -247,5 +252,87 @@ class WalletController extends Controller
     {
         // Will be handled in MarketplaceController purchase method
         // This is for future use if needed
+    }
+
+    /**
+     * Handle payment finish redirect from Midtrans.
+     */
+    public function paymentFinish(Request $request): RedirectResponse
+    {
+        $orderId = $request->get('order_id');
+        $transactionStatus = $request->get('transaction_status');
+        
+        if ($orderId) {
+            $transaction = Transaction::where('midtrans_order_id', $orderId)->first();
+            
+            if ($transaction) {
+                // Update transaction status based on Midtrans response
+                if (in_array($transactionStatus, ['settlement', 'capture'])) {
+                    return redirect()->route('wallet.index')
+                        ->with('success', 'Pembayaran berhasil! Saldo wallet telah diperbarui.');
+                } elseif ($transactionStatus === 'pending') {
+                    return redirect()->route('wallet.index')
+                        ->with('info', 'Pembayaran sedang diproses. Saldo akan diperbarui setelah pembayaran dikonfirmasi.');
+                }
+            }
+        }
+        
+        return redirect()->route('wallet.index')
+            ->with('success', 'Terima kasih! Pembayaran Anda sedang diproses.');
+    }
+
+    /**
+     * Handle payment unfinish redirect from Midtrans.
+     */
+    public function paymentUnfinish(Request $request): RedirectResponse
+    {
+        $orderId = $request->get('order_id');
+        
+        if ($orderId) {
+            $transaction = Transaction::where('midtrans_order_id', $orderId)->first();
+            
+            if ($transaction && $transaction->status === 'pending') {
+                return redirect()->route('wallet.index')
+                    ->with('info', 'Pembayaran belum selesai. Silakan selesaikan pembayaran Anda untuk mengaktifkan saldo.');
+            }
+        }
+        
+        return redirect()->route('wallet.index')
+            ->with('warning', 'Pembayaran belum selesai. Silakan coba lagi atau hubungi support jika ada masalah.');
+    }
+
+    /**
+     * Handle payment error redirect from Midtrans.
+     */
+    public function paymentError(Request $request): RedirectResponse
+    {
+        $orderId = $request->get('order_id');
+        $transactionStatus = $request->get('transaction_status');
+        
+        if ($orderId) {
+            $transaction = Transaction::where('midtrans_order_id', $orderId)->first();
+            
+            if ($transaction) {
+                // Update transaction status to failed if not already updated
+                if ($transaction->status === 'pending') {
+                    $transaction->status = 'failed';
+                    $transaction->save();
+                }
+            }
+        }
+        
+        return redirect()->route('wallet.index')
+            ->with('error', 'Pembayaran gagal. Silakan coba lagi atau gunakan metode pembayaran lain.');
+    }
+
+    /**
+     * Handle payment callback (alternative webhook endpoint).
+     * This can be used for recurring payments or pay account notifications.
+     */
+    public function paymentCallback(Request $request): \Illuminate\Http\JsonResponse
+    {
+        // This endpoint can handle additional payment notifications
+        // For now, redirect to webhook handler
+        return $this->webhook($request);
     }
 }

@@ -27,7 +27,7 @@ class NoteController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
         $tags = Tag::orderBy('name')->get();
         $user = auth()->user();
@@ -35,13 +35,39 @@ class NoteController extends Controller
         // Get folders and workspaces for premium users
         $folders = [];
         $workspaces = [];
+        $selectedWorkspace = null;
+        $selectedFolder = null;
         
         if ($user->hasPremium()) {
             $folders = $user->allFolders()->get();
             $workspaces = $user->allWorkspaces();
+            
+            // Pre-select workspace if specified
+            if ($request->has('workspace_id')) {
+                $selectedWorkspace = \App\Models\Workspace::where('id', $request->workspace_id)
+                    ->where(function($q) use ($user) {
+                        $q->where('owner_id', $user->id)
+                          ->orWhereHas('members', function($q) use ($user) {
+                              $q->where('users.id', $user->id);
+                          });
+                    })
+                    ->first();
+            }
+            
+            // Pre-select folder if specified
+            if ($request->has('folder_id')) {
+                $selectedFolder = \App\Models\Folder::where('id', $request->folder_id)
+                    ->where('user_id', $user->id)
+                    ->first();
+                
+                // If folder has workspace, use it
+                if ($selectedFolder && $selectedFolder->workspace_id && !$selectedWorkspace) {
+                    $selectedWorkspace = $selectedFolder->workspace;
+                }
+            }
         }
 
-        return view('notes.create', compact('tags', 'folders', 'workspaces'));
+        return view('notes.create', compact('tags', 'folders', 'workspaces', 'selectedWorkspace', 'selectedFolder'));
     }
 
     /**
@@ -80,10 +106,51 @@ class NoteController extends Controller
         }
 
         $validated = $request->validated();
-        $validated['user_id'] = auth()->id();
+        $user = auth()->user();
+        $validated['user_id'] = $user->id;
+        $validated['original_creator_id'] = $user->id; // Set original creator on creation
         $validated['price'] = $validated['price'] ?? 0;
         $validated['is_public'] = $request->has('is_public');
         $validated['status'] = $validated['status'] ?? 'active';
+        $validated['is_sold'] = false; // New notes are not sold yet
+        
+        // Handle workspace and folder
+        $workspace = null;
+        $folder = null;
+        
+        if (!empty($validated['workspace_id'])) {
+            $workspace = \App\Models\Workspace::where('id', $validated['workspace_id'])
+                ->where(function($q) use ($user) {
+                    $q->where('owner_id', $user->id)
+                      ->orWhereHas('members', function($q) use ($user) {
+                          $q->where('users.id', $user->id);
+                      });
+                })
+                ->first();
+            
+            if ($workspace) {
+                $validated['workspace_id'] = $workspace->id;
+            } else {
+                unset($validated['workspace_id']);
+            }
+        }
+        
+        if (!empty($validated['folder_id'])) {
+            $folder = \App\Models\Folder::where('id', $validated['folder_id'])
+                ->where('user_id', $user->id)
+                ->first();
+            
+            if ($folder) {
+                $validated['folder_id'] = $folder->id;
+                // If folder has workspace, use it
+                if ($folder->workspace_id && !$workspace) {
+                    $validated['workspace_id'] = $folder->workspace_id;
+                    $workspace = $folder->workspace;
+                }
+            } else {
+                unset($validated['folder_id']);
+            }
+        }
 
         // Handle preview content - auto-generate if not provided
         if (empty($validated['preview_content'])) {
@@ -105,7 +172,21 @@ class NoteController extends Controller
         // Log activity
         app(NoteActivityService::class)->logCreated($note, auth()->user());
 
-        return redirect()->route('notes.index')->with('success', 'Note created successfully.');
+        // Redirect based on context
+        if ($workspace) {
+            $redirectParams = ['workspace' => $workspace->id];
+            if ($folder) {
+                $redirectParams['folder'] = $folder->id;
+            }
+            return redirect()->route('workspaces.show', $redirectParams)
+                ->with('success', __('messages.note_created_successfully'));
+        } elseif ($folder) {
+            return redirect()->route('folders.show', $folder)
+                ->with('success', __('messages.note_created_successfully'));
+        }
+        
+        return redirect()->route('notes.index')
+            ->with('success', __('messages.note_created_successfully'));
     }
 
     /**

@@ -151,4 +151,32 @@ class Setting extends Model
 
         return $percent && is_numeric($percent->value) ? (float) $percent->value : 5.0;
     }
+
+    /**
+     * Get platform commission percentage (for every transaction).
+     * 
+     * @return float
+     */
+    public static function getPlatformCommissionPercent(): float
+    {
+        $percent = static::where('key', 'platform_commission_percent')
+            ->where('group', 'marketplace')
+            ->first();
+
+        return $percent && is_numeric($percent->value) ? (float) $percent->value : 20.0;
+    }
+
+    /**
+     * Get creator commission percentage (only for original creator on resale).
+     * 
+     * @return float
+     */
+    public static function getCreatorCommissionPercent(): float
+    {
+        $percent = static::where('key', 'creator_commission_percent')
+            ->where('group', 'marketplace')
+            ->first();
+
+        return $percent && is_numeric($percent->value) ? (float) $percent->value : 0.0;
+    }
 }

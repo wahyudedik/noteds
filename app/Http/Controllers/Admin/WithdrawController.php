@@ -45,6 +45,13 @@ class WithdrawController extends Controller
                 ->with('error', 'Withdraw ini sudah diproses sebelumnya.');
         }
 
+        // Check minimum 24 hours requirement
+        $hoursSinceRequest = $withdraw->created_at->diffInHours(now());
+        if ($request->status === 'approved' && $hoursSinceRequest < 24) {
+            return redirect()->route('admin.withdraws.show', $withdraw)
+                ->with('error', 'Withdraw harus menunggu minimal 24 jam sebelum dapat disetujui. Sisa waktu: ' . (24 - $hoursSinceRequest) . ' jam.');
+        }
+
         try {
             DB::beginTransaction();
 

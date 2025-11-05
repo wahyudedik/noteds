@@ -219,6 +219,78 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
+        // Topup History (Last 50 transactions)
+        $topupHistory = Transaction::where('payment_method', 'topup')
+            ->with(['buyer'])
+            ->latest()
+            ->limit(50)
+            ->get();
+
+        // Topup Statistics
+        $topupStats = [
+            'total_topups' => Transaction::where('payment_method', 'topup')->count(),
+            'successful_topups' => Transaction::where('payment_method', 'topup')
+                ->where('status', 'success')
+                ->count(),
+            'pending_topups' => Transaction::where('payment_method', 'topup')
+                ->where('status', 'pending')
+                ->count(),
+            'failed_topups' => Transaction::where('payment_method', 'topup')
+                ->where('status', 'failed')
+                ->count(),
+            'total_topup_amount' => Transaction::where('payment_method', 'topup')
+                ->where('status', 'success')
+                ->sum('amount'),
+            'total_topup_today' => Transaction::where('payment_method', 'topup')
+                ->where('status', 'success')
+                ->whereDate('created_at', today())
+                ->sum('amount'),
+            'total_topup_this_month' => Transaction::where('payment_method', 'topup')
+                ->where('status', 'success')
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->sum('amount'),
+        ];
+
+        // Midtrans Statistics (All transactions via Midtrans)
+        $midtransStats = [
+            'total_midtrans_transactions' => Transaction::whereNotNull('midtrans_order_id')->count(),
+            'successful_midtrans_transactions' => Transaction::whereNotNull('midtrans_order_id')
+                ->where('status', 'success')
+                ->count(),
+            'total_midtrans_amount' => Transaction::whereNotNull('midtrans_order_id')
+                ->where('status', 'success')
+                ->sum('amount'),
+            'total_midtrans_today' => Transaction::whereNotNull('midtrans_order_id')
+                ->where('status', 'success')
+                ->whereDate('created_at', today())
+                ->sum('amount'),
+            'total_midtrans_this_month' => Transaction::whereNotNull('midtrans_order_id')
+                ->where('status', 'success')
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->sum('amount'),
+            'total_midtrans_commission' => Transaction::whereNotNull('midtrans_order_id')
+                ->where('status', 'success')
+                ->sum('commission'),
+        ];
+
+        // Topup by Type (Top-up vs Purchase)
+        $topupByType = Transaction::whereNotNull('midtrans_order_id')
+            ->where('status', 'success')
+            ->select(
+                DB::raw('CASE 
+                    WHEN payment_method = "topup" THEN "Top-up"
+                    WHEN payment_method = "purchase" THEN "Purchase"
+                    WHEN payment_method = "subscription" THEN "Subscription"
+                    ELSE "Other"
+                END as type'),
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(amount) as total_amount')
+            )
+            ->groupBy('type')
+            ->get();
+
         return view('admin.dashboard', compact(
             'stats',
             'platformBalance',
@@ -235,7 +307,11 @@ class DashboardController extends Controller
             'topBuyers',
             'userGrowth',
             'recentTransactions',
-            'recentWithdraws'
+            'recentWithdraws',
+            'topupHistory',
+            'topupStats',
+            'midtransStats',
+            'topupByType'
         ));
     }
 }

@@ -59,8 +59,8 @@
                             </div>
                             <div class="ml-4">
                                 <h4 class="text-sm font-medium text-gray-900 mb-1">{{ __('messages.email') }}</h4>
-                                <a href="mailto:support@noteds.test" class="text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200">
-                                    support@noteds.test
+                                <a href="mailto:info@noteds.com" class="text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200">
+                                    info@noteds.com
                                 </a>
                             </div>
                         </div>

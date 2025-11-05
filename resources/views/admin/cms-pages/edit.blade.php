@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Admin - Edit CMS Page')
+@section('title', __('messages.admin_edit_cms_page'))
 
 @section('content')
 <div class="py-12">
     <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Edit CMS Page</h2>
-            <a href="{{ route('admin.cms-pages.index') }}" class="text-gray-600 hover:text-gray-800">← Back to CMS Pages</a>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('messages.edit') }} {{ __('messages.page') }}</h2>
+            <a href="{{ route('admin.cms-pages.index') }}" class="text-gray-600 hover:text-gray-800">← {{ __('messages.back_to_cms_pages') }}</a>
         </div>
 
         <div class="bg-white shadow-sm rounded-lg p-6">
@@ -18,7 +18,7 @@
                 <!-- Slug -->
                 <div class="mb-6">
                     <label for="slug" class="block text-sm font-medium text-gray-700 mb-2">
-                        Slug (URL) <span class="text-red-600">*</span>
+                        {{ __('messages.slug_url') }} <span class="text-red-600">*</span>
                     </label>
                     <input type="text" 
                         id="slug"
@@ -26,7 +26,7 @@
                         value="{{ old('slug', $cmsPage->slug) }}"
                         required
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('slug') border-red-500 @enderror">
-                    <p class="mt-1 text-sm text-gray-500">URL-friendly identifier. Accessible at: /page/slug</p>
+                    <p class="mt-1 text-sm text-gray-500">{{ __('messages.url_friendly_identifier') }}</p>
                     @error('slug')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -35,7 +35,7 @@
                 <!-- Title -->
                 <div class="mb-6">
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
-                        Title <span class="text-red-600">*</span>
+                        {{ __('messages.title') }} <span class="text-red-600">*</span>
                     </label>
                     <input type="text" 
                         id="title"
@@ -51,7 +51,7 @@
                 <!-- Content -->
                 <div class="mb-6">
                     <label for="content" class="block text-sm font-medium text-gray-700 mb-2">
-                        Content <span class="text-red-600">*</span>
+                        {{ __('messages.content') }} <span class="text-red-600">*</span>
                     </label>
                     <textarea 
                         id="content"
@@ -59,7 +59,7 @@
                         rows="15"
                         required
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('content') border-red-500 @enderror">{{ old('content', $cmsPage->content) }}</textarea>
-                    <p class="mt-1 text-sm text-gray-500">Use new lines for formatting. HTML is supported.</p>
+                    <p class="mt-1 text-sm text-gray-500">{{ __('messages.use_new_lines_html_supported') }}</p>
                     @error('content')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -68,7 +68,7 @@
                 <!-- Meta Title -->
                 <div class="mb-6">
                     <label for="meta_title" class="block text-sm font-medium text-gray-700 mb-2">
-                        Meta Title (SEO)
+                        {{ __('messages.meta_title_seo') }}
                     </label>
                     <input type="text" 
                         id="meta_title"
@@ -83,7 +83,7 @@
                 <!-- Meta Description -->
                 <div class="mb-6">
                     <label for="meta_description" class="block text-sm font-medium text-gray-700 mb-2">
-                        Meta Description (SEO)
+                        {{ __('messages.meta_description_seo') }}
                     </label>
                     <textarea 
                         id="meta_description"
@@ -103,7 +103,7 @@
                             value="1"
                             {{ old('is_active', $cmsPage->is_active) ? 'checked' : '' }}
                             class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        <span class="ml-2 text-sm text-gray-700">Active (visible on public page)</span>
+                        <span class="ml-2 text-sm text-gray-700">{{ __('messages.active_visible_public') }}</span>
                     </label>
                 </div>
 
@@ -111,11 +111,11 @@
                 <div class="flex items-center justify-end gap-4">
                     <a href="{{ route('admin.cms-pages.index') }}" 
                         class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                        Cancel
+                        {{ __('messages.cancel') }}
                     </a>
                     <button type="submit" 
                         class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition-colors duration-200">
-                        Update Page
+                        {{ __('messages.update_page') }}
                     </button>
                 </div>
 

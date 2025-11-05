@@ -116,5 +116,35 @@ class NotificationService
             ['amount' => $amount, 'status' => $status]
         );
     }
+
+    /**
+     * Notify user about subscription renewal success.
+     */
+    public function notifySubscriptionRenewed(User $user, float $amount): AppNotification
+    {
+        return $this->create(
+            $user,
+            'subscription_renewed',
+            '✅ Subscription Renewed',
+            "Your premium subscription has been automatically renewed for another month. Rp " . number_format($amount, 0, ',', '.') . " has been deducted from your wallet.",
+            route('subscription.index'),
+            ['amount' => $amount, 'renewed_at' => now()]
+        );
+    }
+
+    /**
+     * Notify user about subscription expiration due to insufficient balance.
+     */
+    public function notifySubscriptionExpired(User $user, float $requiredAmount, float $currentBalance): AppNotification
+    {
+        return $this->create(
+            $user,
+            'subscription_expired',
+            '⚠️ Premium Subscription Expired',
+            "Your premium subscription has expired due to insufficient wallet balance (Rp " . number_format($requiredAmount, 0, ',', '.') . " required). Please top up your wallet to reactivate.",
+            route('wallet.index'),
+            ['required_amount' => $requiredAmount, 'current_balance' => $currentBalance]
+        );
+    }
 }
 

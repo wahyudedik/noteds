@@ -6,13 +6,28 @@
 <div class="py-8 sm:py-12">
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
-            <a href="{{ route('folders.index') }}" class="text-gray-500 hover:text-gray-700 inline-flex items-center mb-4">
-                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-                {{ __('messages.back_to_folders') }}
-            </a>
+            @if($workspace)
+                <a href="{{ route('workspaces.show', ['workspace' => $workspace->id, 'folder' => $parentFolder?->id]) }}" class="text-gray-500 hover:text-gray-700 inline-flex items-center mb-4">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    {{ __('messages.back_to_workspace') }}
+                </a>
+            @else
+                <a href="{{ route('folders.index') }}" class="text-gray-500 hover:text-gray-700 inline-flex items-center mb-4">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    {{ __('messages.back_to_folders') }}
+                </a>
+            @endif
             <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.create_new_folder') }}</h1>
+            @if($workspace)
+                <p class="text-gray-600 mt-2">{{ __('messages.creating_folder_in_workspace') }}: <strong>{{ $workspace->name }}</strong></p>
+            @endif
+            @if($parentFolder)
+                <p class="text-gray-600 mt-1">{{ __('messages.creating_folder_in') }}: <strong>{{ $parentFolder->name }}</strong></p>
+            @endif
         </div>
 
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -41,11 +56,14 @@
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                             <option value="">{{ __('messages.none_root_folder') }}</option>
                             @foreach($folders as $parent)
-                                <option value="{{ $parent->id }}" {{ old('parent_id') == $parent->id ? 'selected' : '' }}>
+                                <option value="{{ $parent->id }}" {{ old('parent_id', $parentFolder?->id) == $parent->id ? 'selected' : '' }}>
                                     {{ $parent->name }}
                                 </option>
                             @endforeach
                         </select>
+                        @if($workspace)
+                            <input type="hidden" name="workspace_id" value="{{ $workspace->id }}">
+                        @endif
                         @error('parent_id')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -84,9 +102,15 @@
 
                     <!-- Actions -->
                     <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-200">
-                        <a href="{{ route('folders.index') }}" class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                            {{ __('messages.cancel') }}
-                        </a>
+                        @if($workspace)
+                            <a href="{{ route('workspaces.show', ['workspace' => $workspace->id, 'folder' => $parentFolder?->id]) }}" class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                                {{ __('messages.cancel') }}
+                            </a>
+                        @else
+                            <a href="{{ route('folders.index') }}" class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                                {{ __('messages.cancel') }}
+                            </a>
+                        @endif
                         <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                             {{ __('messages.create_folder_button') }}
                         </button>

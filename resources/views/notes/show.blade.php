@@ -177,7 +177,7 @@
                 @if($note->is_public && $note->total_reviews > 0)
                     <div class="mt-8 pt-6 border-t border-gray-200">
                         <div class="flex items-center gap-2 mb-2">
-                            <h3 class="text-base font-semibold text-gray-900">Rating Summary</h3>
+                            <h3 class="text-base font-semibold text-gray-900">{{ __('messages.rating_summary') }}</h3>
                             <div class="flex items-center gap-0.5">
                                 @for($i = 1; $i <= 5; $i++)
                                     <svg class="w-4 h-4 {{ $i <= $note->average_rating ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">

@@ -1,0 +1,275 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\FeaturedNote;
+use App\Models\Note;
+use App\Models\Setting;
+use App\Models\Transaction;
+use App\Models\Wallet;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
+
+class FeaturedNoteController extends Controller
+{
+    /**
+     * Show the form for creating a new featured note request.
+     */
+    public function create(Request $request): View
+    {
+        $user = auth()->user();
+        
+        // Get user's notes that are public and active
+        $notes = Note::where('user_id', $user->id)
+            ->where('is_public', true)
+            ->where('status', 'active')
+            ->latest()
+            ->get();
+
+        // Get wallet balance
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => $user->id],
+            ['balance' => 0]
+        );
+
+        // Get pricing for each location and duration
+        $pricing = $this->getPricing();
+
+        // Get selected note if provided
+        $selectedNote = null;
+        if ($request->has('note_id')) {
+            $selectedNote = $notes->firstWhere('id', $request->note_id);
+        }
+
+        return view('featured-notes.create', compact('notes', 'wallet', 'pricing', 'selectedNote'));
+    }
+
+    /**
+     * Store a new featured note request.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'note_id' => ['required', 'exists:notes,id'],
+            'location' => ['required', 'in:landing_hero,landing_carousel,marketplace_banner,marketplace_grid,popup_welcome,popup_exit,popup_interstitial'],
+            'duration_days' => ['required', 'integer', 'min:7', 'max:30'],
+        ]);
+
+        $user = auth()->user();
+        $note = Note::findOrFail($validated['note_id']);
+
+        // Check if note belongs to user
+        if ($note->user_id !== $user->id) {
+            return redirect()->route('featured-notes.create')
+                ->with('error', 'Anda hanya bisa mempromosikan note milik Anda sendiri.');
+        }
+
+        // Check if note is public and active
+        if (!$note->is_public || $note->status !== 'active') {
+            return redirect()->route('featured-notes.create')
+                ->with('error', 'Note harus public dan aktif untuk bisa di-featured.');
+        }
+
+        // Check if note already has active featured in this location
+        $existingFeatured = FeaturedNote::where('note_id', $note->id)
+            ->where('location', $validated['location'])
+            ->whereIn('status', ['pending', 'active'])
+            ->where(function ($query) {
+                $query->where(function ($q) {
+                    $q->where('end_date', '>=', now())
+                      ->orWhereNull('end_date');
+                })
+                ->orWhere(function ($q) {
+                    $q->whereNull('start_date')
+                      ->whereNull('end_date');
+                });
+            })
+            ->first();
+
+        if ($existingFeatured) {
+            return redirect()->route('featured-notes.create', ['note_id' => $note->id])
+                ->with('error', 'Note ini sudah memiliki featured request aktif di lokasi ini.');
+        }
+
+        // Calculate price
+        $price = $this->calculatePrice($validated['location'], $validated['duration_days']);
+
+        // Check wallet balance
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => $user->id],
+            ['balance' => 0]
+        );
+
+        if ($wallet->balance < $price) {
+            return redirect()->route('featured-notes.create', ['note_id' => $note->id])
+                ->with('error', 'Saldo wallet tidak cukup. Saldo: Rp ' . number_format($wallet->balance, 0, ',', '.') . ', Diperlukan: Rp ' . number_format($price, 0, ',', '.'))
+                ->with('insufficient_balance', true);
+        }
+
+        try {
+            $autoApprove = $user->hasPremium(); // Auto-approve for premium users
+            
+            DB::transaction(function () use ($user, $wallet, $note, $validated, $price, $autoApprove) {
+                // Deduct from wallet
+                $wallet->balance -= $price;
+                $wallet->save();
+                $user->wallet_balance = $wallet->balance;
+                $user->save();
+
+                // Create transaction record
+                Transaction::create([
+                    'buyer_id' => $user->id,
+                    'seller_id' => $user->id,
+                    'note_id' => $note->id,
+                    'amount' => $price,
+                    'commission' => 0,
+                    'platform_fee' => $price, // Full amount as platform fee for ad
+                    'creator_commission' => 0,
+                    'status' => $autoApprove ? 'success' : 'pending',
+                    'payment_method' => 'wallet',
+                    'notes' => 'Pembayaran iklan featured note: ' . $note->title . ' di ' . $validated['location'] . ' selama ' . $validated['duration_days'] . ' hari.' . ($autoApprove ? ' (Auto-approved for premium user)' : ''),
+                ]);
+
+                // Create featured note request
+                $featuredNote = FeaturedNote::create([
+                    'note_id' => $note->id,
+                    'user_id' => $user->id,
+                    'location' => $validated['location'],
+                    'duration_days' => $validated['duration_days'],
+                    'price' => $price,
+                    'status' => $autoApprove ? 'active' : 'pending',
+                    'start_date' => $autoApprove ? now() : null,
+                    'end_date' => $autoApprove ? now()->addDays($validated['duration_days']) : null,
+                    'admin_notes' => $autoApprove ? 'Auto-approved for premium user' : null,
+                ]);
+            });
+
+            $message = $autoApprove 
+                ? 'Featured note berhasil diaktifkan! (Auto-approved untuk premium user)'
+                : 'Request featured note berhasil dibuat. Menunggu approval admin.';
+
+            return redirect()->route('featured-notes.index')
+                ->with('success', $message);
+        } catch (\Exception $e) {
+            return redirect()->route('featured-notes.create', ['note_id' => $note->id])
+                ->with('error', 'Terjadi kesalahan saat membuat request. Silakan coba lagi.');
+        }
+    }
+
+    /**
+     * Display a listing of user's featured notes.
+     */
+    public function index(): View
+    {
+        $user = auth()->user();
+        
+        $featuredNotes = FeaturedNote::where('user_id', $user->id)
+            ->with(['note'])
+            ->latest()
+            ->paginate(20);
+
+        // Calculate analytics
+        $totalImpressions = FeaturedNote::where('user_id', $user->id)->sum('impressions');
+        $totalClicks = FeaturedNote::where('user_id', $user->id)->sum('clicks');
+        $totalSpent = FeaturedNote::where('user_id', $user->id)->sum('price');
+        $activeCount = FeaturedNote::where('user_id', $user->id)
+            ->where('status', 'active')
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->count();
+        
+        $avgCTR = $totalImpressions > 0 ? ($totalClicks / $totalImpressions * 100) : 0;
+        
+        // Get revenue from featured notes (notes sold after being featured)
+        $featuredNoteIds = FeaturedNote::where('user_id', $user->id)
+            ->whereNotNull('start_date')
+            ->pluck('note_id')
+            ->toArray();
+        
+        $firstFeaturedDate = FeaturedNote::where('user_id', $user->id)
+            ->whereNotNull('start_date')
+            ->where('status', 'active')
+            ->min('start_date');
+        
+        $revenueFromFeatured = 0;
+        if ($firstFeaturedDate && count($featuredNoteIds) > 0) {
+            $revenueFromFeatured = \App\Models\Transaction::whereIn('note_id', $featuredNoteIds)
+                ->where('seller_id', $user->id)
+                ->where('status', 'success')
+                ->where('created_at', '>=', $firstFeaturedDate)
+                ->sum('amount');
+        }
+
+        $analytics = [
+            'total_impressions' => $totalImpressions,
+            'total_clicks' => $totalClicks,
+            'avg_ctr' => round($avgCTR, 2),
+            'total_spent' => $totalSpent,
+            'active_count' => $activeCount,
+            'revenue_from_featured' => $revenueFromFeatured,
+            'roi' => $totalSpent > 0 ? round(($revenueFromFeatured / $totalSpent * 100), 2) : 0,
+        ];
+
+        return view('featured-notes.index', compact('featuredNotes', 'analytics'));
+    }
+
+    /**
+     * Get pricing for featured notes.
+     */
+    private function getPricing(): array
+    {
+        $locations = [
+            'landing_hero',
+            'landing_carousel',
+            'marketplace_banner',
+            'marketplace_grid',
+            'popup_welcome',
+            'popup_exit',
+            'popup_interstitial',
+        ];
+
+        $durations = [7, 14, 30];
+        $pricing = [];
+
+        foreach ($locations as $location) {
+            foreach ($durations as $duration) {
+                $key = "featured_price_{$location}_{$duration}";
+                $price = Setting::getSetting($key, 'featured_notes', $this->getDefaultPrice($location, $duration));
+                $pricing[$location][$duration] = (float) $price;
+            }
+        }
+
+        return $pricing;
+    }
+
+    /**
+     * Calculate price for featured note.
+     */
+    private function calculatePrice(string $location, int $durationDays): float
+    {
+        $key = "featured_price_{$location}_{$durationDays}";
+        $price = Setting::getSetting($key, 'featured_notes', $this->getDefaultPrice($location, $durationDays));
+        
+        return (float) $price;
+    }
+
+    /**
+     * Get default pricing (fallback).
+     */
+    private function getDefaultPrice(string $location, int $duration): float
+    {
+        $defaults = [
+            'landing_hero' => [7 => 150000, 14 => 280000, 30 => 500000],
+            'landing_carousel' => [7 => 100000, 14 => 180000, 30 => 350000],
+            'marketplace_banner' => [7 => 75000, 14 => 140000, 30 => 250000],
+            'marketplace_grid' => [7 => 50000, 14 => 90000, 30 => 150000],
+            'popup_welcome' => [7 => 100000, 14 => 180000, 30 => 350000],
+            'popup_exit' => [7 => 80000, 14 => 150000, 30 => 280000],
+            'popup_interstitial' => [7 => 60000, 14 => 110000, 30 => 200000],
+        ];
+
+        return $defaults[$location][$duration] ?? 50000;
+    }
+}

@@ -18,6 +18,26 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @stack('styles')
+        
+        <!-- Expose Laravel translation helper to Alpine.js -->
+        <script>
+            // Load all translations from messages file
+            window.__translations = @json(trans('messages'));
+            
+            // Make Laravel's __() function available to Alpine.js
+            window.__ = function(key, replace = {}) {
+                let translation = window.__translations[key] || key;
+                
+                // Replace placeholders like :name, :count, etc.
+                if (replace && typeof replace === 'object') {
+                    Object.keys(replace).forEach(replaceKey => {
+                        translation = translation.replace(`:${replaceKey}`, replace[replaceKey]);
+                    });
+                }
+                
+                return translation;
+            };
+        </script>
     </head>
     <body class="font-sans antialiased bg-gray-50">
         <div class="min-h-screen flex flex-col">
@@ -114,8 +134,8 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="mailto:support@noteds.test" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                                        support@noteds.test
+                                    <a href="mailto:info@noteds.com" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
+                                        info@noteds.com
                                     </a>
                                 </li>
                             </ul>
@@ -235,5 +255,8 @@
         @endif
 
         @stack('scripts')
+        
+        <!-- Featured Notes Popups -->
+        @include('components.featured-popups')
     </body>
 </html>

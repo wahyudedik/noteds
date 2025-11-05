@@ -21,12 +21,20 @@ class Workspace extends Model
         'description',
         'avatar',
         'is_active',
+        'price',
+        'is_for_sale',
+        'sold_at',
+        'sold_to_user_id',
+        'marketplace_description',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
+            'is_for_sale' => 'boolean',
+            'price' => 'decimal:2',
+            'sold_at' => 'datetime',
         ];
     }
 
@@ -139,5 +147,29 @@ class Workspace extends Model
         
         $role = $this->getUserRole($user);
         return in_array($role, ['owner', 'admin']);
+    }
+
+    /**
+     * Check if workspace is for sale.
+     */
+    public function isForSale(): bool
+    {
+        return $this->is_for_sale && $this->price > 0 && !$this->sold_at;
+    }
+
+    /**
+     * Check if workspace is sold.
+     */
+    public function isSold(): bool
+    {
+        return $this->sold_at !== null;
+    }
+
+    /**
+     * Get the buyer user.
+     */
+    public function buyer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sold_to_user_id');
     }
 }

@@ -59,6 +59,95 @@
             </form>
         </div>
 
+        <!-- Featured Banner -->
+        @if(isset($featuredBanner) && $featuredBanner)
+            <div class="mb-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg p-6 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <span class="inline-block px-3 py-1 bg-white rounded-full text-xs font-semibold text-orange-600 mb-2">⭐ FEATURED</span>
+                        <h3 class="text-2xl font-bold text-white mb-2">
+                            <a href="{{ route('marketplace.show', $featuredBanner->note) }}" class="hover:underline">
+                                {{ $featuredBanner->note->title }}
+                            </a>
+                        </h3>
+                        <p class="text-white/90 mb-3">{{ Str::limit($featuredBanner->note->summary ?? strip_tags($featuredBanner->note->content), 100) }}</p>
+                        <div class="flex items-center gap-4">
+                            @if($featuredBanner->note->price > 0)
+                                <span class="text-white font-semibold">Rp {{ number_format($featuredBanner->note->price, 0, ',', '.') }}</span>
+                            @else
+                                <span class="text-white font-semibold">FREE</span>
+                            @endif
+                            <a href="{{ route('marketplace.show', $featuredBanner->note) }}" 
+                               class="px-4 py-2 bg-white text-orange-600 font-semibold rounded-lg hover:bg-orange-50 transition">
+                                View Note →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Featured Notes Grid -->
+        @if(isset($featuredNotes) && $featuredNotes->count() > 0)
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">⭐ Featured Notes</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach($featuredNotes as $featured)
+                        @php($note = $featured->note)
+                        <div class="bg-white overflow-hidden shadow-lg rounded-lg border-2 border-yellow-400 hover:shadow-xl hover:border-yellow-500 transition-all duration-200 group relative">
+                            <!-- Featured Badge -->
+                            <div class="absolute top-2 right-2 z-10">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">
+                                    ⭐ FEATURED
+                                </span>
+                            </div>
+                            <div class="p-6">
+                                <!-- Title and Content -->
+                                <div class="mb-4">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
+                                        <a href="{{ route('marketplace.show', $note) }}">{{ $note->title }}</a>
+                                    </h3>
+                                    <p class="text-sm text-gray-600 line-clamp-3">{!! Str::limit(strip_tags($note->content), 120) !!}</p>
+                                </div>
+
+                                <!-- Tags -->
+                                @if($note->tags->count() > 0)
+                                    <div class="flex flex-wrap gap-2 mb-4">
+                                        @foreach($note->tags->take(3) as $tag)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                {{ $tag->name }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                <!-- Price and Author -->
+                                <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                                    <div>
+                                        @if($note->price > 0)
+                                            <span class="text-lg font-bold text-green-600">Rp {{ number_format($note->price, 0, ',', '.') }}</span>
+                                        @else
+                                            <span class="text-lg font-bold text-gray-600">FREE</span>
+                                        @endif
+                                    </div>
+                                    <a href="{{ route('public.profile.show', $note->user->username) }}" class="text-sm text-gray-600 hover:text-blue-600">
+                                        {{ $note->user->name }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        <!-- Regular Notes Section -->
+        <div class="mb-4">
+            <h2 class="text-xl font-bold text-gray-900">All Notes</h2>
+        </div>
+
         @if($notes->count() > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($notes as $note)

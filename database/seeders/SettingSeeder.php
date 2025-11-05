@@ -41,6 +41,50 @@ class SettingSeeder extends Seeder
                 'description' => 'Referral transaction commission percentage',
             ]
         );
+
+        // Marketplace commission settings
+        Setting::updateOrCreate(
+            ['key' => 'platform_commission_percent', 'group' => 'marketplace'],
+            [
+                'value' => '20',
+                'type' => 'number',
+                'description' => 'Platform commission percentage (deducted from every transaction)',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'creator_commission_percent', 'group' => 'marketplace'],
+            [
+                'value' => '0',
+                'type' => 'number',
+                'description' => 'Creator commission percentage (only for original creator on resale)',
+            ]
+        );
+
+        // Featured Notes Pricing
+        $locations = ['marketplace_grid', 'marketplace_banner', 'landing_hero', 'landing_carousel'];
+        $durations = [7, 14, 30];
+
+        $defaultPricing = [
+            'marketplace_grid' => [7 => 50000, 14 => 90000, 30 => 150000],
+            'marketplace_banner' => [7 => 75000, 14 => 140000, 30 => 250000],
+            'landing_hero' => [7 => 150000, 14 => 280000, 30 => 500000],
+            'landing_carousel' => [7 => 100000, 14 => 180000, 30 => 350000],
+        ];
+
+        foreach ($locations as $location) {
+            foreach ($durations as $duration) {
+                $key = "featured_price_{$location}_{$duration}";
+                Setting::updateOrCreate(
+                    ['key' => $key, 'group' => 'featured_notes'],
+                    [
+                        'value' => (string) $defaultPricing[$location][$duration],
+                        'type' => 'number',
+                        'description' => "Price for featured note at {$location} for {$duration} days",
+                    ]
+                );
+            }
+        }
     }
 }
 

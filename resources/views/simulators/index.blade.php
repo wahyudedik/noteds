@@ -139,8 +139,8 @@
                 <div class="bg-gradient-to-r from-green-500 to-green-600 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Plan Comparison</h3>
-                            <p class="text-green-100 text-sm">Compare features</p>
+                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.plan_comparison') }}</h3>
+                            <p class="text-green-100 text-sm">{{ __('messages.compare_features') }}</p>
                         </div>
                         <svg class="w-12 h-12 text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -152,41 +152,41 @@
                         <!-- Basic Plan -->
                         <div class="border-2 border-gray-200 rounded-lg p-4">
                             <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-lg font-bold text-gray-900">Basic Plan</h4>
-                                <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">FREE</span>
+                                <h4 class="text-lg font-bold text-gray-900">{{ __('messages.basic_plan') }}</h4>
+                                <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">{{ __('messages.free') }}</span>
                             </div>
                             <div class="space-y-2 mb-4">
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <span class="text-sm text-gray-600">10 notes total</span>
+                                    <span class="text-sm text-gray-600">10 {{ __('messages.notes_total') }}</span>
                                 </div>
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <span class="text-sm text-gray-600">Standard support</span>
+                                    <span class="text-sm text-gray-600">{{ __('messages.standard_support') }}</span>
                                 </div>
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <span class="text-sm text-gray-600">Public marketplace</span>
+                                    <span class="text-sm text-gray-600">{{ __('messages.public_marketplace') }}</span>
                                 </div>
                             </div>
                             <a href="{{ route('register') }}" class="block w-full bg-gray-600 hover:bg-gray-700 text-white text-center font-semibold py-2 rounded-lg transition-all duration-200">
-                                Get Started
+                                {{ __('messages.get_started') }}
                             </a>
                         </div>
 
                         <!-- Premium Plan -->
                         <div class="border-2 border-green-500 rounded-lg p-4 bg-gradient-to-br from-green-50 to-transparent relative">
                             <div class="absolute top-0 right-0 bg-green-500 text-white px-3 py-1 rounded-bl-lg rounded-tr-lg text-xs font-bold">
-                                BEST VALUE
+                                {{ __('messages.best_value') }}
                             </div>
                             <div class="flex items-center justify-between mb-3 mt-2">
-                                <h4 class="text-lg font-bold text-gray-900">Premium Plan</h4>
+                                <h4 class="text-lg font-bold text-gray-900">{{ __('messages.premium_plan') }}</h4>
                                 <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">{{ \App\Models\Setting::formatPremiumPrice(true) }}</span>
                             </div>
                             <div class="space-y-2 mb-4">
@@ -194,29 +194,29 @@
                                     <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <span class="text-sm text-gray-700 font-medium">Unlimited notes</span>
+                                    <span class="text-sm text-gray-700 font-medium">{{ __('messages.unlimited_notes') }}</span>
                                 </div>
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <span class="text-sm text-gray-700 font-medium">Priority support</span>
+                                    <span class="text-sm text-gray-700 font-medium">{{ __('messages.priority_support') }}</span>
                                 </div>
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <span class="text-sm text-gray-700 font-medium">Featured in marketplace</span>
+                                    <span class="text-sm text-gray-700 font-medium">{{ __('messages.featured_in_marketplace') }}</span>
                                 </div>
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <span class="text-sm text-gray-700 font-medium">Advanced analytics</span>
+                                    <span class="text-sm text-gray-700 font-medium">{{ __('messages.advanced_analytics') }}</span>
                                 </div>
                             </div>
                             <a href="{{ route('subscription.create') }}" class="block w-full bg-green-600 hover:bg-green-700 text-white text-center font-semibold py-2 rounded-lg transition-all duration-200">
-                                Upgrade Now
+                                {{ __('messages.upgrade_now') }}
                             </a>
                         </div>
                     </div>
@@ -233,8 +233,8 @@
                 <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Wallet Simulator</h3>
-                            <p class="text-indigo-100 text-sm">Track balance & transactions</p>
+                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.wallet_simulator') }}</h3>
+                            <p class="text-indigo-100 text-sm">{{ __('messages.track_balance_transactions') }}</p>
                         </div>
                         <svg class="w-12 h-12 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -244,34 +244,34 @@
                 <div class="p-6">
                     <div class="mb-4">
                         <div class="bg-indigo-50 rounded-lg p-4 text-center">
-                            <p class="text-sm text-gray-600 mb-1">Current Balance</p>
+                            <p class="text-sm text-gray-600 mb-1">{{ __('messages.current_balance') }}</p>
                             <p class="text-3xl font-bold text-indigo-700" id="wallet-balance">Rp 0</p>
                         </div>
                     </div>
                     <form id="wallet-form" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Topup Amount (Rp)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.topup_amount') }}</label>
                             <input type="number" id="wallet-topup" name="topup" value="100000" min="10000" step="10000"
                                 class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Withdraw Amount (Rp)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.withdraw_amount') }}</label>
                             <input type="number" id="wallet-withdraw" name="withdraw" value="50000" min="10000" step="10000"
                                 class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
                         </div>
                         <div class="flex gap-2">
                             <button type="button" id="wallet-topup-btn" 
                                 class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition-all duration-200">
-                                Topup
+                                {{ __('messages.topup') }}
                             </button>
                             <button type="button" id="wallet-withdraw-btn" 
                                 class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 rounded-lg transition-all duration-200">
-                                Withdraw
+                                {{ __('messages.withdraw') }}
                             </button>
                         </div>
                     </form>
                     <div id="wallet-history" class="mt-6 space-y-2 max-h-40 overflow-y-auto">
-                        <p class="text-xs text-gray-500 text-center">Transaction history will appear here</p>
+                        <p class="text-xs text-gray-500 text-center">{{ __('messages.transaction_history_will_appear') }}</p>
                     </div>
                 </div>
             </div>
@@ -281,8 +281,8 @@
                 <div class="bg-gradient-to-r from-pink-500 to-pink-600 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Marketplace Preview</h3>
-                            <p class="text-pink-100 text-sm">Explore marketplace features</p>
+                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.marketplace_preview') }}</h3>
+                            <p class="text-pink-100 text-sm">{{ __('messages.explore_marketplace_features') }}</p>
                         </div>
                         <svg class="w-12 h-12 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -293,10 +293,10 @@
                     <div class="space-y-4">
                         <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('marketplace.index') }}'">
                             <div class="flex items-start justify-between mb-2">
-                                <h4 class="font-semibold text-gray-900">Sample Note Title</h4>
-                                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">Free</span>
+                                <h4 class="font-semibold text-gray-900">{{ __('messages.sample_note_title') }}</h4>
+                                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">{{ __('messages.free') }}</span>
                             </div>
-                            <p class="text-sm text-gray-600 mb-2">This is a preview of how notes appear in the marketplace. Click to explore more!</p>
+                            <p class="text-sm text-gray-600 mb-2">{{ __('messages.preview_marketplace_notes') }}</p>
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-2">
                                     <div class="flex items-center">
@@ -313,11 +313,11 @@
                         </div>
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
                             <p class="text-xs text-blue-800">
-                                <strong>Marketplace Features:</strong> Search, filter by price/tags, ratings, reviews, and secure transactions
+                                <strong>{{ __('messages.marketplace_features') }}</strong> {{ __('messages.marketplace_features_desc') }}
                             </p>
                         </div>
                         <a href="{{ route('marketplace.index') }}" class="block w-full bg-pink-600 hover:bg-pink-700 text-white text-center font-semibold py-2 rounded-lg transition-all duration-200">
-                            Explore Marketplace
+                            {{ __('messages.explore_marketplace') }}
                         </a>
                     </div>
                 </div>
@@ -328,8 +328,8 @@
                 <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Transaction Flow</h3>
-                            <p class="text-orange-100 text-sm">Visualize payment process</p>
+                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.transaction_flow') }}</h3>
+                            <p class="text-orange-100 text-sm">{{ __('messages.visualize_payment_process') }}</p>
                         </div>
                         <svg class="w-12 h-12 text-orange-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -343,8 +343,8 @@
                                 <span class="text-orange-600 font-bold text-sm">1</span>
                             </div>
                             <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-900">Select Note</p>
-                                <p class="text-xs text-gray-500">Choose note to purchase</p>
+                                <p class="text-sm font-medium text-gray-900">{{ __('messages.select_note') }}</p>
+                                <p class="text-xs text-gray-500">{{ __('messages.choose_note_to_purchase') }}</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3 opacity-50" id="flow-step-2">
@@ -352,8 +352,8 @@
                                 <span class="text-gray-600 font-bold text-sm">2</span>
                             </div>
                             <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-700">Checkout</p>
-                                <p class="text-xs text-gray-500">Review order details</p>
+                                <p class="text-sm font-medium text-gray-700">{{ __('messages.checkout') }}</p>
+                                <p class="text-xs text-gray-500">{{ __('messages.review_order_details') }}</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3 opacity-50" id="flow-step-3">
@@ -361,8 +361,8 @@
                                 <span class="text-gray-600 font-bold text-sm">3</span>
                             </div>
                             <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-700">Payment</p>
-                                <p class="text-xs text-gray-500">Secure payment via Midtrans</p>
+                                <p class="text-sm font-medium text-gray-700">{{ __('messages.payment') }}</p>
+                                <p class="text-xs text-gray-500">{{ __('messages.secure_payment_via_midtrans') }}</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3 opacity-50" id="flow-step-4">
@@ -370,14 +370,14 @@
                                 <span class="text-gray-600 font-bold text-sm">4</span>
                             </div>
                             <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-700">Complete</p>
-                                <p class="text-xs text-gray-500">Access granted to note</p>
+                                <p class="text-sm font-medium text-gray-700">{{ __('messages.complete') }}</p>
+                                <p class="text-xs text-gray-500">{{ __('messages.access_granted_to_note') }}</p>
                             </div>
                         </div>
                     </div>
                     <button type="button" id="flow-simulate" 
                         class="mt-6 w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
-                        Simulate Transaction
+                        {{ __('messages.simulate_transaction') }}
                     </button>
                 </div>
             </div>
@@ -387,8 +387,8 @@
                 <div class="bg-gradient-to-r from-teal-500 to-teal-600 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2">AI Summary Generator</h3>
-                            <p class="text-teal-100 text-sm">Auto-generate summaries</p>
+                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.ai_summary_generator') }}</h3>
+                            <p class="text-teal-100 text-sm">{{ __('messages.auto_generate_summaries') }}</p>
                         </div>
                         <svg class="w-12 h-12 text-teal-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -397,20 +397,20 @@
                 </div>
                 <div class="p-6">
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Note Content</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.note_content') }}</label>
                         <textarea id="ai-content" rows="4" 
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500"
-                            placeholder="Paste your note content here...">Laravel is a powerful PHP framework that makes web development easier. It provides elegant syntax, robust features, and a vibrant ecosystem. With Laravel, you can build applications quickly while maintaining code quality and following best practices.</textarea>
+                            placeholder="{{ __('messages.paste_note_content') }}">Laravel is a powerful PHP framework that makes web development easier. It provides elegant syntax, robust features, and a vibrant ecosystem. With Laravel, you can build applications quickly while maintaining code quality and following best practices.</textarea>
                     </div>
                     <button type="button" id="ai-generate" 
                         class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
-                        Generate Summary
+                        {{ __('messages.generate_summary') }}
                     </button>
                     <div id="ai-result" class="mt-6 hidden">
                         <div class="bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg">
-                            <h4 class="text-lg font-bold text-teal-800 mb-2">AI Summary</h4>
+                            <h4 class="text-lg font-bold text-teal-800 mb-2">{{ __('messages.ai_summary') }}</h4>
                             <p class="text-sm text-gray-700" id="ai-summary-text"></p>
-                            <p class="text-xs text-gray-500 mt-2">Powered by Ollama AI</p>
+                            <p class="text-xs text-gray-500 mt-2">{{ __('messages.powered_by_ollama') }}</p>
                         </div>
                     </div>
                 </div>
@@ -421,8 +421,8 @@
                 <div class="bg-gradient-to-r from-cyan-500 to-cyan-600 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Tag Suggestion</h3>
-                            <p class="text-cyan-100 text-sm">AI-powered tag suggestions</p>
+                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.tag_suggestion') }}</h3>
+                            <p class="text-cyan-100 text-sm">{{ __('messages.ai_powered_tag_suggestions') }}</p>
                         </div>
                         <svg class="w-12 h-12 text-cyan-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -431,24 +431,24 @@
                 </div>
                 <div class="p-6">
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Note Title</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.note_title') }}</label>
                         <input type="text" id="tag-title" 
                             value="Laravel Framework Tutorial"
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500">
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Note Content</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.note_content') }}</label>
                         <textarea id="tag-content" rows="3" 
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500"
-                            placeholder="Enter note content...">Learn how to build modern web applications using Laravel PHP framework. This tutorial covers routing, controllers, models, migrations, and more.</textarea>
+                            placeholder="{{ __('messages.enter_note_content') }}">Learn how to build modern web applications using Laravel PHP framework. This tutorial covers routing, controllers, models, migrations, and more.</textarea>
                     </div>
                     <button type="button" id="tag-suggest" 
                         class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
-                        Get Tag Suggestions
+                        {{ __('messages.get_tag_suggestions') }}
                     </button>
                     <div id="tag-result" class="mt-6 hidden">
                         <div class="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
-                            <h4 class="text-sm font-bold text-cyan-800 mb-3">Suggested Tags:</h4>
+                            <h4 class="text-sm font-bold text-cyan-800 mb-3">{{ __('messages.suggested_tags') }}</h4>
                             <div class="flex flex-wrap gap-2" id="tag-suggestions">
                                 <!-- Tags will be inserted here -->
                             </div>
@@ -462,8 +462,8 @@
                 <div class="bg-gradient-to-r from-violet-500 to-violet-600 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Price Benchmark</h3>
-                            <p class="text-violet-100 text-sm">Compare note prices</p>
+                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.price_benchmark') }}</h3>
+                            <p class="text-violet-100 text-sm">{{ __('messages.compare_note_prices') }}</p>
                         </div>
                         <svg class="w-12 h-12 text-violet-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -472,38 +472,39 @@
                 </div>
                 <div class="p-6">
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Note Price (Rp)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.your_note_price') }}</label>
                         <input type="number" id="benchmark-price" value="50000" min="0" step="1000"
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500">
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.category') }}</label>
                         <select id="benchmark-category" 
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500">
-                            <option value="tutorial">Tutorial</option>
-                            <option value="template">Template</option>
-                            <option value="guide">Guide</option>
-                            <option value="resource">Resource</option>
+                            <option value="">{{ __('messages.all_categories') }}</option>
+                            <option value="tutorial">{{ __('messages.tutorial') }}</option>
+                            <option value="template">{{ __('messages.template') }}</option>
+                            <option value="guide">{{ __('messages.guide') }}</option>
+                            <option value="resource">{{ __('messages.resource') }}</option>
                         </select>
                     </div>
                     <button type="button" id="benchmark-calculate" 
                         class="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
-                        Compare Prices
+                        {{ __('messages.compare_note_prices') }}
                     </button>
                     <div id="benchmark-result" class="mt-6 hidden">
                         <div class="bg-violet-50 border-l-4 border-violet-500 p-4 rounded-r-lg">
-                            <h4 class="text-lg font-bold text-violet-800 mb-3">Market Analysis</h4>
+                            <h4 class="text-lg font-bold text-violet-800 mb-3">{{ __('messages.market_analysis') }}</h4>
                             <div class="space-y-2">
                                 <div class="flex justify-between">
-                                    <span class="text-gray-700">Market Average:</span>
+                                    <span class="text-gray-700">{{ __('messages.market_average') }}</span>
                                     <span class="font-bold text-gray-900" id="benchmark-avg"></span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-700">Your Price:</span>
+                                    <span class="text-gray-700">{{ __('messages.your_price') }}</span>
                                     <span class="font-bold text-violet-700" id="benchmark-yours"></span>
                                 </div>
                                 <div class="flex justify-between border-t-2 border-violet-200 pt-2">
-                                    <span class="text-gray-700">Position:</span>
+                                    <span class="text-gray-700">{{ __('messages.position') }}</span>
                                     <span class="font-bold" id="benchmark-position"></span>
                                 </div>
                             </div>
@@ -538,6 +539,29 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Translation strings for JavaScript
+    const translations = {
+        simulateTransaction: @json(__('messages.simulate_transaction')),
+        transactionComplete: @json(__('messages.transaction_complete')),
+        processing: @json(__('messages.processing')),
+        generating: @json(__('messages.generating')),
+        generateSummary: @json(__('messages.generate_summary')),
+        analyzing: @json(__('messages.analyzing')),
+        getTagSuggestions: @json(__('messages.get_tag_suggestions')),
+        pleaseEnterContent: @json(__('messages.please_enter_content')),
+        pleaseEnterTitleOrContent: @json(__('messages.please_enter_title_or_content')),
+        insufficientBalance: @json(__('messages.insufficient_balance')),
+        topup: @json(__('messages.topup')),
+        withdraw: @json(__('messages.withdraw')),
+        marketAnalysis: @json(__('messages.market_analysis')),
+        marketAverageLabel: @json(__('messages.market_average')),
+        yourPrice: @json(__('messages.your_price')),
+        position: @json(__('messages.position')),
+        belowMarket: @json(__('messages.below_market')),
+        aboveMarket: @json(__('messages.above_market')),
+        marketAverageCompetitive: @json(__('messages.market_average_competitive')),
+    };
+    
     // Format number to Rupiah
     function formatRupiah(amount) {
         return new Intl.NumberFormat('id-ID', {
@@ -616,7 +640,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (amount > 0) {
             walletBalance += amount;
             updateWalletBalance();
-            addWalletTransaction('Topup', amount, 'success');
+            addWalletTransaction(translations.topup, amount, 'success');
         }
     });
     
@@ -625,9 +649,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (amount > 0 && amount <= walletBalance) {
             walletBalance -= amount;
             updateWalletBalance();
-            addWalletTransaction('Withdraw', amount, 'warning');
+            addWalletTransaction(translations.withdraw, amount, 'warning');
         } else if (amount > walletBalance) {
-            alert('Insufficient balance!');
+            alert(translations.insufficientBalance);
         }
     });
     
@@ -693,15 +717,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => {
                     currentStep = 0;
                     activateStep(0);
-                    this.textContent = 'Simulate Transaction';
+                    this.textContent = translations.simulateTransaction;
                     this.disabled = false;
                 }, 2000);
-                this.textContent = 'Transaction Complete!';
+                this.textContent = translations.transactionComplete;
                 this.disabled = true;
             }
         }
         
-        this.textContent = 'Processing...';
+        this.textContent = translations.processing;
         this.disabled = true;
         activateStep(0);
         setTimeout(nextStep.bind(this), 1000);
@@ -711,12 +735,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('ai-generate').addEventListener('click', function() {
         const content = document.getElementById('ai-content').value;
         if (!content.trim()) {
-            alert('Please enter some content first!');
+            alert(translations.pleaseEnterContent);
             return;
         }
         
         this.disabled = true;
-        this.textContent = 'Generating...';
+        this.textContent = translations.generating;
         
         // Simulate AI processing (in real app, this would call API)
         setTimeout(() => {
@@ -725,7 +749,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('ai-summary-text').textContent = summary;
             document.getElementById('ai-result').classList.remove('hidden');
             this.disabled = false;
-            this.textContent = 'Generate Summary';
+            this.textContent = translations.generateSummary;
         }, 2000);
     });
 
@@ -735,12 +759,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const content = document.getElementById('tag-content').value;
         
         if (!title.trim() && !content.trim()) {
-            alert('Please enter title or content!');
+            alert(translations.pleaseEnterTitleOrContent);
             return;
         }
         
         this.disabled = true;
-        this.textContent = 'Analyzing...';
+        this.textContent = translations.analyzing;
         
         // Simulate AI tag suggestions (in real app, this would call API)
         setTimeout(() => {
@@ -754,7 +778,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             document.getElementById('tag-result').classList.remove('hidden');
             this.disabled = false;
-            this.textContent = 'Get Tag Suggestions';
+            this.textContent = translations.getTagSuggestions;
         }, 1500);
     });
 
@@ -778,13 +802,13 @@ document.addEventListener('DOMContentLoaded', function() {
         let position = '';
         let positionClass = '';
         if (difference < -10000) {
-            position = 'Below Market (Good Value)';
+            position = translations.belowMarket;
             positionClass = 'text-green-600';
         } else if (difference > 10000) {
-            position = 'Above Market (Premium)';
+            position = translations.aboveMarket;
             positionClass = 'text-orange-600';
         } else {
-            position = 'Market Average (Competitive)';
+            position = translations.marketAverageCompetitive;
             positionClass = 'text-blue-600';
         }
         

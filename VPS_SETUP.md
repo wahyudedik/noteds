@@ -41,7 +41,7 @@ curl -sS https://getcomposer.org/installer | php
 sudo mv composer.phar /usr/local/bin/composer
 
 # Install additional PHP extensions for Laravel 12
-sudo apt install php8.2-readline php8.2-tokenizer -y
+sudo apt install php8.2-readline php8.2-tokenizer php8.2-fileinfo -y
 ```
 
 ### 2. Database Setup
@@ -189,16 +189,91 @@ Setelah setup, aplikasi akan otomatis menggunakan Midtrans melalui:
 - CVV: 123
 - Expiry: Any future date
 
-**Webhook Configuration:**
-- Di Midtrans Dashboard → Settings → Configuration → Webhook URL
-- Set Webhook URL: `https://your-domain.com/wallet/webhook`
-- Route handler: `WalletController::webhook()` (sudah ada di aplikasi)
-- Pastikan server dapat diakses dari internet (untuk webhook callback)
-- Webhook ini akan otomatis update status transaksi setelah payment selesai
-- **PENTING:** Webhook harus menggunakan HTTPS di production
-- **Note:** Webhook route sudah exempt dari CSRF protection (required untuk Midtrans)
-- Webhook akan return JSON response untuk debugging
-- Duplicate webhook calls akan di-handle dengan proper idempotency check
+**Midtrans URL Endpoints Configuration:**
+
+Setelah deploy ke production, Anda HARUS mengkonfigurasi URL endpoints berikut di Midtrans Dashboard:
+
+1. **Login ke Midtrans Dashboard:**
+   - Kunjungi [https://dashboard.midtrans.com](https://dashboard.midtrans.com)
+   - Login dengan akun production Anda
+
+2. **Navigate ke Settings → Configuration → URL Settings**
+
+3. **Konfigurasi URL Endpoints:**
+
+   **Payment Notification URL** (Webhook - Required):
+   ```
+   https://your-domain.com/payment/callback
+   ```
+   atau
+   ```
+   https://your-domain.com/wallet/webhook
+   ```
+   - Address where Midtrans will send payment notification via HTTP POST
+   - Route handler: `WalletController::webhook()` atau `WalletController::paymentCallback()`
+   - **PENTING:** Must use HTTPS in production
+   - **PENTING:** Route is exempt from CSRF protection (required for Midtrans)
+   - Automatically updates transaction status after payment completion
+   - Handles duplicate notifications with idempotency check
+
+   **Recurring Notification URL** (Optional - for recurring payments):
+   ```
+   https://your-domain.com/payment/callback
+   ```
+   - Address for recurring payment notifications
+   - Same handler as payment notification URL
+
+   **Pay Account Notification URL** (Optional - for pay account status):
+   ```
+   https://your-domain.com/payment/callback
+   ```
+   - Address for pay account status notifications
+   - Same handler as payment notification URL
+
+   **Finish Redirect URL** (Required):
+   ```
+   https://your-domain.com/payment/finish
+   ```
+   - Customer redirected here after successful payment
+   - Route handler: `WalletController::paymentFinish()`
+   - Shows success message and redirects to wallet page
+
+   **Unfinish Redirect URL** (Required):
+   ```
+   https://your-domain.com/payment/unfinish
+   ```
+   - Customer redirected here if they click "Back to Order Website" on payment page
+   - Route handler: `WalletController::paymentUnfinish()`
+   - Shows info message about incomplete payment
+
+   **Error Redirect URL** (Required):
+   ```
+   https://your-domain.com/payment/error
+   ```
+   - Customer redirected here if payment fails or encounters error
+   - Route handler: `WalletController::paymentError()`
+   - Shows error message and allows user to retry
+
+4. **Save Configuration:**
+   - Click "Save" after entering all URLs
+   - Midtrans will validate URLs (must be accessible via HTTPS)
+   - URLs must return proper HTTP status codes (200 OK)
+
+5. **Testing Endpoints:**
+   - Test webhook: `curl -X POST https://your-domain.com/payment/callback`
+   - Test finish: Visit `https://your-domain.com/payment/finish?order_id=test`
+   - Test unfinish: Visit `https://your-domain.com/payment/unfinish?order_id=test`
+   - Test error: Visit `https://your-domain.com/payment/error?order_id=test`
+
+**Webhook Security Notes:**
+- Webhook route is exempt from CSRF protection (required for Midtrans)
+- All webhook routes use POST method (except redirect URLs which are GET)
+- Webhook handler validates transaction status and prevents duplicate processing
+- Amount verification is performed for security
+- All webhook calls are logged for debugging
+- Duplicate webhook calls are handled with idempotency check
+- **PENTING:** Webhook must be accessible via HTTPS in production
+- **PENTING:** Never expose webhook endpoint in public repositories
 
 ### 6. Run Migrations & Seeders
 
@@ -231,6 +306,10 @@ sudo chmod -R 775 /var/www/noteds/bootstrap/cache
 ### 8. Optimize Laravel
 
 ```bash
+# For Laravel 12, use optimize command (combines all caches)
+sudo -u www-data php artisan optimize
+
+# Or manually cache each component:
 sudo -u www-data php artisan config:cache
 sudo -u www-data php artisan route:cache
 sudo -u www-data php artisan view:cache
@@ -334,6 +413,70 @@ Add:
 * * * * * cd /var/www/noteds && php artisan schedule:run >> /dev/null 2>&1
 ```
 
+**Note:** Laravel scheduler (`schedule:run`) will automatically run all scheduled tasks defined in `routes/console.php`, including:
+- Subscription auto-renewal (`subscriptions:renew`) - runs daily at 00:00 WIB
+- Featured notes expiry check (`featured:expire`) - runs daily at 01:00 WIB
+
+#### Subscription Auto-Renewal Command
+
+The `php artisan subscriptions:renew` command is automatically scheduled to run daily at 00:00 WIB (configured in `routes/console.php`).
+
+**What it does:**
+- Checks all active premium subscriptions that are expiring today or tomorrow
+- **If wallet balance is sufficient:**
+  - Automatically deducts premium price from user's wallet
+  - Extends subscription for another month
+  - Creates transaction record
+  - Sends app notification to user
+- **If wallet balance is insufficient:**
+  - Changes subscription status to `expired`
+  - Sends email notification to user about renewal failure
+  - Sends app notification
+  - Premium features are automatically disabled (via `EnsureUserHasPremium` middleware)
+
+**Manual execution (for testing):**
+```bash
+sudo -u www-data php artisan subscriptions:renew
+```
+
+**Monitoring:**
+- Check Laravel logs: `tail -f storage/logs/laravel.log`
+- Command output includes summary: renewed count, expired count, errors
+- All errors are logged for debugging
+
+**Important Notes:**
+- Command uses database transactions to ensure data consistency
+- Premium price is retrieved from Settings table (`premium_price_monthly` key)
+- Email notifications are sent via Laravel Mail system (configured in `.env`)
+- App notifications are stored in `notifications` table
+- Subscription expiration automatically disables premium features via middleware
+
+#### Featured Notes Auto-Expiry Command
+
+The `php artisan featured:expire` command is automatically scheduled to run daily at 01:00 WIB (configured in `routes/console.php`).
+
+**What it does:**
+- Checks all active featured notes that have passed their `end_date`
+- Automatically updates status from `active` to `expired`
+- Prevents expired featured notes from being displayed
+- Logs all expired featured notes for admin review
+
+**Manual execution (for testing):**
+```bash
+sudo -u www-data php artisan featured:expire
+```
+
+**Monitoring:**
+- Check Laravel logs: `tail -f storage/logs/laravel.log`
+- Command output includes summary: total expired count, errors
+- All errors are logged for debugging
+
+**Important Notes:**
+- Command processes all featured notes with `status = 'active'` and `end_date < now()`
+- Featured notes are automatically hidden from display after expiry
+- Expired featured notes can be extended with a new payment request
+- Analytics data (impressions, clicks) are preserved after expiry
+
 ### 13. Ollama Setup (AI Features)
 
 Ollama can be installed on the same server or a separate server:
@@ -401,9 +544,7 @@ sudo git pull origin main
 sudo -u www-data composer install --no-dev --optimize-autoloader
 sudo -u www-data php artisan migrate --force
 sudo -u www-data npm run build
-sudo -u www-data php artisan config:cache
-sudo -u www-data php artisan route:cache
-sudo -u www-data php artisan view:cache
+sudo -u www-data php artisan optimize  # Laravel 12: combines config, route, view cache
 sudo supervisorctl restart noteds-worker:*
 ```
 
@@ -432,6 +573,9 @@ See `.github/workflows/deploy.yml` (create if needed)
 - [ ] Midtrans API keys stored securely in `.env` (never commit to repository)
 - [ ] Webhook endpoint accessible only via HTTPS in production
 - [ ] Duplicate transaction processing prevention enabled
+- [ ] Featured notes auto-expire command scheduled (daily at 01:00 WIB)
+- [ ] Featured notes pricing configured in admin settings
+- [ ] Featured notes analytics tracking enabled
 
 ## 🔄 Backup Strategy
 
@@ -523,17 +667,50 @@ sudo supervisorctl restart noteds-worker:*
 - Verify API keys di `.env` sudah benar
 - Pastikan `MIDTRANS_IS_PRODUCTION` sesuai dengan environment keys
 - Check Midtrans Dashboard untuk melihat transaction logs
-- Verify webhook URL sudah di-set di Midtrans Dashboard: `https://your-domain.com/wallet/webhook`
+- **Verify all URL endpoints di Midtrans Dashboard:**
+  - Payment Notification URL: `https://your-domain.com/payment/callback`
+  - Finish Redirect URL: `https://your-domain.com/payment/finish`
+  - Unfinish Redirect URL: `https://your-domain.com/payment/unfinish`
+  - Error Redirect URL: `https://your-domain.com/payment/error`
 - Test dengan kartu test dari Midtrans (Visa: 4811 1111 1111 1114)
 - Check Laravel logs: `tail -f storage/logs/laravel.log` untuk error Midtrans
-- Pastikan webhook route dapat diakses: `curl -X POST https://your-domain.com/wallet/webhook`
-- Pastikan HTTPS sudah aktif untuk webhook (Midtrans memerlukan HTTPS di production)
+- Test webhook endpoint: `curl -X POST https://your-domain.com/payment/callback`
+- Test redirect endpoints: Visit URLs directly dengan query params
+- Pastikan HTTPS sudah aktif untuk semua endpoints (Midtrans memerlukan HTTPS di production)
 - **Webhook Improvements (2025-11-03):**
   - Webhook route sudah exempt dari CSRF protection
   - Duplicate processing protection sudah ditambahkan
   - Better error handling dan logging
   - Amount verification untuk security
   - Support untuk semua transaction status (settlement, capture, pending, challenge, deny, expire, cancel)
+- **Payment Redirect URLs (2025-11-05):**
+  - Added finish, unfinish, and error redirect handlers
+  - Proper transaction status updates on redirect
+  - User-friendly error messages
+  - All redirect URLs configured in Snap.js callbacks
+
+### Featured Notes Issues
+- **Featured notes not displaying:**
+  - Check if featured notes are active: `status = 'active'` and `start_date <= now()` and `end_date >= now()`
+  - Verify featured notes have correct location set
+  - Check if auto-expire command is running: `php artisan featured:expire`
+  - View featured notes in admin panel: `/admin/featured-notes`
+- **Analytics not tracking:**
+  - Verify impressions are incremented on display (landing page, marketplace)
+  - Verify clicks are incremented on purchase
+  - Check database: `featured_notes` table columns `impressions` and `clicks`
+  - Analytics tracking requires authenticated users
+- **Auto-approve not working:**
+  - Verify user has active premium subscription: `subscriptions` table
+  - Check `hasPremium()` method in User model
+  - Auto-approve only works for premium users
+  - Non-premium users require admin approval
+- **Popup modals not appearing:**
+  - Check if featured notes exist for popup locations (`popup_welcome`, `popup_exit`, `popup_interstitial`)
+  - Verify localStorage keys: `popup_welcome_shown`, `popup_exit_shown_today`, `popup_interstitial_shown_today`
+  - Check browser console for JavaScript errors
+  - Popups only show once per day (for exit intent and interstitial)
+  - Welcome popup only shows for non-authenticated users
 
 ## 🔥 Firewall Configuration (UFW)
 
@@ -577,6 +754,18 @@ AI Memory Platform features require:
 - Ollama service running and accessible
 - Sufficient server resources for AI processing
 
+### Featured Notes System
+Featured Notes advertising system features:
+- **Payment:** Featured notes are paid via wallet (deducted immediately on request)
+- **Auto-approve:** Premium users get instant approval (no admin review needed)
+- **Admin approval:** Non-premium users require admin approval before activation
+- **Refund:** If admin rejects, full refund is automatically processed
+- **Auto-expire:** Expired featured notes are automatically updated daily via scheduled command
+- **Analytics:** Impressions and clicks are tracked automatically
+- **Pricing:** Configurable per location and duration in admin settings
+- **Locations:** Landing Hero, Carousel, Marketplace Banner/Grid, Popup modals
+- **Scheduled command:** `featured:expire` runs daily at 01:00 WIB
+
 ### Storage Considerations
 - Note attachments are stored in `storage/app/private/attachments`
 - Ensure sufficient disk space for user uploads
@@ -612,4 +801,16 @@ AI Memory Platform features require:
 - ✅ Better error logging dan response handling
 - ✅ Max amount validation (100M) untuk topup
 - ✅ Midtrans configuration check sebelum process
+
+**Featured Notes System (2025-11-05):**
+- ✅ Complete featured notes advertising system
+- ✅ Landing page featured sections (hero & carousel)
+- ✅ Marketplace featured banner & grid
+- ✅ Popup modals (welcome, exit intent, interstitial)
+- ✅ Seller analytics dashboard (impressions, clicks, CTR, ROI)
+- ✅ Auto-approve untuk premium users
+- ✅ Admin approval system dengan refund jika reject
+- ✅ Auto-expire command untuk expired featured notes
+- ✅ Analytics tracking (impressions & clicks)
+- ✅ Pricing configurable per location & duration
 

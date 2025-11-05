@@ -13,6 +13,7 @@ class Note extends Model
     use HasUuids;
     protected $fillable = [
         'user_id',
+        'original_creator_id',
         'folder_id',
         'workspace_id',
         'title',
@@ -24,6 +25,7 @@ class Note extends Model
         'price',
         'is_public',
         'status',
+        'is_sold',
     ];
 
     protected function casts(): array
@@ -32,6 +34,7 @@ class Note extends Model
             'price' => 'decimal:2',
             'is_public' => 'boolean',
             'status' => 'string',
+            'is_sold' => 'boolean',
             'attachments' => 'array',
             'file_count' => 'integer',
         ];
@@ -40,6 +43,22 @@ class Note extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the original creator of this note.
+     */
+    public function originalCreator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'original_creator_id');
+    }
+
+    /**
+     * Check if note has been sold (can only be sold once).
+     */
+    public function hasBeenSold(): bool
+    {
+        return $this->is_sold;
     }
 
     public function tags(): BelongsToMany
@@ -145,5 +164,23 @@ class Note extends Model
         
         // Fallback to query if not eager loaded
         return $this->reviews()->count();
+    }
+
+    /**
+     * Get featured notes for this note.
+     */
+    public function featuredNotes()
+    {
+        return $this->hasMany(FeaturedNote::class);
+    }
+
+    /**
+     * Get active featured note for this note.
+     */
+    public function activeFeaturedNote()
+    {
+        return $this->hasOne(FeaturedNote::class)->where('status', 'active')
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now());
     }
 }

@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Admin - Withdraws')
+@section('title', __('messages.admin_withdraws'))
 
 @section('content')
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Withdraw Requests</h2>
-            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800">← Back to Dashboard</a>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('messages.withdraw_requests') }}</h2>
+            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800">← {{ __('messages.back_to_dashboard') }}</a>
         </div>
 
         @if(session('success'))
@@ -26,17 +26,17 @@
         <div class="bg-white shadow-sm rounded-lg p-4 mb-6">
             <form method="GET" action="{{ route('admin.withdraws.index') }}" class="flex gap-4">
                 <select name="status" class="rounded-md border-gray-300 shadow-sm">
-                    <option value="">All Status</option>
-                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
-                    <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                    <option value="">{{ __('messages.all_status') }}</option>
+                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>{{ __('messages.pending') }}</option>
+                    <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>{{ __('messages.approved') }}</option>
+                    <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>{{ __('messages.rejected') }}</option>
                 </select>
                 <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Filter
+                    {{ __('messages.filter') }}
                 </button>
                 @if(request('status'))
                     <a href="{{ route('admin.withdraws.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                        Clear
+                        {{ __('messages.clear') }}
                     </a>
                 @endif
             </form>
@@ -48,13 +48,13 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bank Details</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Processed By</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.date') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.user') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.amount') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.bank_details') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.processed_by') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.action') }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -77,11 +77,11 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($withdraw->status === 'approved')
-                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Approved</span>
+                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">{{ __('messages.approved') }}</span>
                                         @elseif($withdraw->status === 'rejected')
-                                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Rejected</span>
+                                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">{{ __('messages.rejected') }}</span>
                                         @else
-                                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Pending</span>
+                                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">{{ __('messages.pending') }}</span>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -94,7 +94,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <a href="{{ route('admin.withdraws.show', $withdraw) }}" class="text-blue-600 hover:text-blue-800">
-                                            {{ $withdraw->status === 'pending' ? 'Review' : 'View' }}
+                                            {{ $withdraw->status === 'pending' ? __('messages.review') : __('messages.view') }}
                                         </a>
                                     </td>
                                 </tr>
@@ -109,7 +109,7 @@
             </div>
         @else
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 text-center">
-                <p class="text-gray-600">No withdraw requests found.</p>
+                <p class="text-gray-600">{{ __('messages.no_withdraw_requests_found') }}</p>
             </div>
         @endif
     </div>

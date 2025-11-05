@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class TransactionSeeder extends Seeder
 {
@@ -39,17 +40,73 @@ class TransactionSeeder extends Seeder
             }
 
             $amount = $note->price;
-            $commission = $amount * 0.15; // 15% platform commission
+            
+            // Get commission rates from settings or use defaults
+            $platformCommissionPercent = \App\Models\Setting::getPlatformCommissionPercent();
+            $creatorCommissionPercent = \App\Models\Setting::getCreatorCommissionPercent();
+            
+            $platformFee = $amount * ($platformCommissionPercent / 100);
+            $originalCreator = $note->originalCreator ?? $note->user;
+            $creatorCommission = 0;
+            
+            if ($originalCreator && $creatorCommissionPercent > 0) {
+                $creatorCommission = $amount * ($creatorCommissionPercent / 100);
+            }
 
             Transaction::create([
                 'buyer_id' => $buyer->id,
                 'seller_id' => $note->user_id,
+                'original_creator_id' => $originalCreator ? $originalCreator->id : null,
                 'note_id' => $note->id,
                 'amount' => $amount,
-                'commission' => $commission,
+                'commission' => $platformFee, // For backward compatibility
+                'platform_fee' => $platformFee,
+                'creator_commission' => $creatorCommission,
                 'status' => 'success',
                 'payment_method' => 'wallet',
                 'notes' => 'Seeded transaction for testing',
+            ]);
+        }
+
+        // Create some topup transactions for testing
+        $allUsers = User::all();
+        $topupCount = min(10, $allUsers->count());
+
+        foreach ($allUsers->random($topupCount) as $user) {
+            $topupAmount = rand(50000, 500000);
+            
+            Transaction::create([
+                'buyer_id' => $user->id,
+                'seller_id' => $user->id, // Self top-up
+                'original_creator_id' => null,
+                'note_id' => null,
+                'amount' => $topupAmount,
+                'commission' => 0,
+                'platform_fee' => 0,
+                'creator_commission' => 0,
+                'status' => ['success', 'success', 'success', 'pending'][rand(0, 3)],
+                'payment_method' => 'topup',
+                'notes' => 'Seeded top-up transaction for testing',
+                'midtrans_order_id' => 'topup-seeded-' . Str::random(10),
+            ]);
+        }
+
+        // Create some featured notes payment transactions
+        $featuredNotes = \App\Models\FeaturedNote::all();
+        
+        foreach ($featuredNotes->take(5) as $featured) {
+            Transaction::create([
+                'buyer_id' => $featured->user_id,
+                'seller_id' => $featured->user_id, // Self-payment for ad
+                'original_creator_id' => null,
+                'note_id' => $featured->note_id,
+                'amount' => $featured->price,
+                'commission' => 0,
+                'platform_fee' => $featured->price, // Full amount as platform fee for ad
+                'creator_commission' => 0,
+                'status' => $featured->status === 'active' ? 'success' : ($featured->status === 'pending' ? 'pending' : 'success'),
+                'payment_method' => 'wallet',
+                'notes' => 'Seeded featured note payment: ' . $featured->note->title . ' di ' . $featured->location . ' selama ' . $featured->duration_days . ' hari.',
             ]);
         }
     }

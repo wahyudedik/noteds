@@ -24,7 +24,7 @@ class WithdrawController extends Controller
             $wallet->save();
         }
 
-        return view('wallet.withdraw', compact('wallet'));
+        return view('wallet.withdraw', compact('wallet', 'user'));
     }
 
     public function store(StoreWithdrawRequest $request): RedirectResponse

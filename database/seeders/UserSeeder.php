@@ -23,6 +23,7 @@ class UserSeeder extends Seeder
                     'name' => "Seller $i",
                     'username' => 'seller' . $i,
                     'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
                     'role' => 'seller',
                     'wallet_balance' => rand(50000, 500000),
                     'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode("Seller $i") . '&background=4ade80&color=fff',
@@ -49,6 +50,7 @@ class UserSeeder extends Seeder
                     'name' => "Buyer $i",
                     'username' => 'buyer' . $i,
                     'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
                     'role' => 'buyer',
                     'wallet_balance' => rand(50000, 200000),
                     'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode("Buyer $i") . '&background=60a5fa&color=fff',
@@ -64,6 +66,43 @@ class UserSeeder extends Seeder
             // Generate referral code if not exists
             if (!$buyer->referral_code) {
                 $buyer->generateReferralCode();
+            }
+        }
+
+        // Create some premium users for testing
+        for ($i = 1; $i <= 3; $i++) {
+            $premiumUser = User::firstOrCreate(
+                ['email' => "premium{$i}@noteds.com"],
+                [
+                    'name' => "Premium User $i",
+                    'username' => 'premium' . $i,
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                    'role' => 'seller',
+                    'wallet_balance' => rand(100000, 500000),
+                    'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode("Premium User $i") . '&background=8b5cf6&color=fff',
+                    'bio' => 'Premium subscriber with access to advanced features.',
+                    'location' => 'Jakarta, Indonesia',
+                ]
+            );
+
+            if (!$premiumUser->hasRole('seller')) {
+                $premiumUser->assignRole('seller');
+            }
+
+            // Generate referral code if not exists
+            if (!$premiumUser->referral_code) {
+                $premiumUser->generateReferralCode();
+            }
+
+            // Create premium subscription
+            if (!$premiumUser->subscription || $premiumUser->subscription->status !== 'active') {
+                \App\Models\Subscription::create([
+                    'user_id' => $premiumUser->id,
+                    'plan' => 'premium',
+                    'status' => 'active',
+                    'expired_at' => now()->addMonths(rand(1, 12)),
+                ]);
             }
         }
     }

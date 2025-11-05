@@ -1,23 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'Admin - Transactions')
+@section('title', __('messages.admin_transactions'))
 
 @section('content')
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Transactions</h2>
-            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800">← Back to Dashboard</a>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('messages.transactions') }}</h2>
+            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800">← {{ __('messages.back_to_dashboard') }}</a>
         </div>
 
         <!-- Statistics -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <div class="text-sm font-medium text-gray-500">Total Revenue</div>
+                <div class="text-sm font-medium text-gray-500">{{ __('messages.total_revenue') }}</div>
                 <div class="text-2xl font-bold text-green-600">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</div>
             </div>
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <div class="text-sm font-medium text-gray-500">Total Transaction Value</div>
+                <div class="text-sm font-medium text-gray-500">{{ __('messages.total_transaction_value') }}</div>
                 <div class="text-2xl font-bold text-blue-600">Rp {{ number_format($totalTransactions, 0, ',', '.') }}</div>
             </div>
         </div>
@@ -25,25 +25,25 @@
         <!-- Filter -->
         <div class="bg-white shadow-sm rounded-lg p-4 mb-6">
             <form method="GET" action="{{ route('admin.transactions.index') }}" class="flex gap-4">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search buyer/seller..."
+                <input type="text" name="search" value="{{ request('search') }}" :placeholder="__('messages.search_buyer_seller')"
                     class="rounded-md border-gray-300 shadow-sm">
                 <select name="status" class="rounded-md border-gray-300 shadow-sm">
-                    <option value="">All Status</option>
-                    <option value="success" {{ request('status') === 'success' ? 'selected' : '' }}>Success</option>
-                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>Failed</option>
+                    <option value="">{{ __('messages.all_status') }}</option>
+                    <option value="success" {{ request('status') === 'success' ? 'selected' : '' }}>{{ __('messages.success') }}</option>
+                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>{{ __('messages.pending') }}</option>
+                    <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>{{ __('messages.failed') }}</option>
                 </select>
                 <select name="payment_method" class="rounded-md border-gray-300 shadow-sm">
-                    <option value="">All Payment Methods</option>
-                    <option value="wallet" {{ request('payment_method') === 'wallet' ? 'selected' : '' }}>Wallet</option>
-                    <option value="withdraw" {{ request('payment_method') === 'withdraw' ? 'selected' : '' }}>Withdraw</option>
+                    <option value="">{{ __('messages.all_payment_methods') }}</option>
+                    <option value="wallet" {{ request('payment_method') === 'wallet' ? 'selected' : '' }}>{{ __('messages.wallet') }}</option>
+                    <option value="withdraw" {{ request('payment_method') === 'withdraw' ? 'selected' : '' }}>{{ __('messages.withdraw') }}</option>
                 </select>
                 <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Filter
+                    {{ __('messages.filter') }}
                 </button>
                 @if(request()->hasAny(['search', 'status', 'payment_method']))
                     <a href="{{ route('admin.transactions.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                        Clear
+                        {{ __('messages.clear') }}
                     </a>
                 @endif
             </form>
@@ -55,14 +55,14 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buyer</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Seller</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Note</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Commission</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.date') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.buyer') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.seller') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.note') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.amount') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.commission') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.method') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -95,11 +95,11 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($transaction->status === 'success')
-                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Success</span>
+                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">{{ __('messages.success') }}</span>
                                         @elseif($transaction->status === 'pending')
-                                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Pending</span>
+                                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">{{ __('messages.pending') }}</span>
                                         @else
-                                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Failed</span>
+                                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">{{ __('messages.failed') }}</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -114,7 +114,7 @@
             </div>
         @else
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 text-center">
-                <p class="text-gray-600">No transactions found.</p>
+                <p class="text-gray-600">{{ __('messages.no_transactions_found') }}</p>
             </div>
         @endif
     </div>

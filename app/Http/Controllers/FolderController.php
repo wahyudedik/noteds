@@ -35,7 +35,30 @@ class FolderController extends Controller
         $user = $request->user();
         $folders = $user->allFolders()->get();
         
-        return view('folders.create', compact('folders'));
+        // Get workspace if specified
+        $workspace = null;
+        $parentFolder = null;
+        if ($request->has('workspace_id')) {
+            $workspace = \App\Models\Workspace::where('id', $request->workspace_id)
+                ->where(function($q) use ($user) {
+                    $q->where('owner_id', $user->id)
+                      ->orWhereHas('members', function($q) use ($user) {
+                          $q->where('users.id', $user->id);
+                      });
+                })
+                ->first();
+        }
+        
+        if ($request->has('parent_id')) {
+            $parentFolder = Folder::where('id', $request->parent_id)
+                ->where('user_id', $user->id)
+                ->first();
+            if ($parentFolder && !$workspace) {
+                $workspace = $parentFolder->workspace;
+            }
+        }
+        
+        return view('folders.create', compact('folders', 'workspace', 'parentFolder'));
     }
 
     /**
@@ -46,28 +69,66 @@ class FolderController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|exists:folders,id',
+            'workspace_id' => 'nullable|exists:workspaces,id',
             'description' => 'nullable|string|max:1000',
             'color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
         ]);
 
+        $user = $request->user();
+        
         // Ensure parent folder belongs to user
+        $parentFolder = null;
         if ($validated['parent_id']) {
-            $parent = Folder::findOrFail($validated['parent_id']);
-            if ($parent->user_id !== $request->user()->id) {
+            $parentFolder = Folder::findOrFail($validated['parent_id']);
+            if ($parentFolder->user_id !== $user->id) {
                 return back()->withErrors(['parent_id' => 'Invalid parent folder.']);
+            }
+            // If parent has workspace, use it
+            if ($parentFolder->workspace_id && !$validated['workspace_id']) {
+                $validated['workspace_id'] = $parentFolder->workspace_id;
+            }
+        }
+        
+        // Ensure workspace belongs to user
+        $workspace = null;
+        if ($validated['workspace_id']) {
+            $workspace = \App\Models\Workspace::where('id', $validated['workspace_id'])
+                ->where(function($q) use ($user) {
+                    $q->where('owner_id', $user->id)
+                      ->orWhereHas('members', function($q) use ($user) {
+                          $q->where('users.id', $user->id);
+                      });
+                })
+                ->first();
+            
+            if (!$workspace) {
+                return back()->withErrors(['workspace_id' => 'Invalid workspace.']);
             }
         }
 
-        $folder = $request->user()->allFolders()->create([
+        $folder = $user->allFolders()->create([
             'name' => $validated['name'],
             'parent_id' => $validated['parent_id'] ?? null,
+            'workspace_id' => $validated['workspace_id'] ?? null,
             'description' => $validated['description'] ?? null,
             'color' => $validated['color'] ?? null,
-            'order' => $request->user()->allFolders()->where('parent_id', $validated['parent_id'] ?? null)->max('order') + 1 ?? 0,
+            'order' => $user->allFolders()
+                ->where('parent_id', $validated['parent_id'] ?? null)
+                ->where('workspace_id', $validated['workspace_id'] ?? null)
+                ->max('order') + 1 ?? 0,
         ]);
 
+        // Redirect based on context
+        if ($workspace) {
+            return redirect()->route('workspaces.show', ['workspace' => $workspace->id, 'folder' => $folder->id])
+                ->with('success', __('messages.folder_created_successfully'));
+        } elseif ($parentFolder) {
+            return redirect()->route('folders.show', $parentFolder)
+                ->with('success', __('messages.folder_created_successfully'));
+        }
+        
         return redirect()->route('folders.index')
-            ->with('success', 'Folder created successfully.');
+            ->with('success', __('messages.folder_created_successfully'));
     }
 
     /**

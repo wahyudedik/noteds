@@ -133,7 +133,7 @@
                                     {{ __('messages.bank_name') }} <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="bank_name" id="bank_name" 
-                                    value="{{ old('bank_name') }}"
+                                    value="{{ old('bank_name', $user->bank_name ?? '') }}"
                                     placeholder="e.g., BCA, Mandiri, BRI"
                                     required
                                     maxlength="100"
@@ -148,7 +148,7 @@
                                     {{ __('messages.account_number') }} <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="account_number" id="account_number" 
-                                    value="{{ old('account_number') }}"
+                                    value="{{ old('account_number', $user->bank_account_number ?? '') }}"
                                     placeholder="Account number"
                                     required
                                     maxlength="50"
@@ -164,7 +164,7 @@
                                 {{ __('messages.account_name') }} <span class="text-red-500">*</span>
                             </label>
                             <input type="text" name="account_name" id="account_name" 
-                                value="{{ old('account_name') }}"
+                                value="{{ old('account_name', $user->bank_account_name ?? '') }}"
                                     :placeholder="__('messages.name_as_appears_bank')"
                                 required
                                 maxlength="100"

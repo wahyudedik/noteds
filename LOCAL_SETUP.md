@@ -132,6 +132,19 @@ npm run dev      # With php artisan serve
 npm run build    # With Herd/Vite (production build)
 ```
 
+### Subscription Auto-Renewal (Testing)
+```bash
+php artisan subscriptions:renew
+```
+
+**Note:** This command is automatically scheduled to run daily at 00:00 WIB in production (see `routes/console.php`). In development, you can run it manually to test subscription renewal logic.
+
+**What it does:**
+- Checks active premium subscriptions expiring today or tomorrow
+- Auto-renews if wallet balance is sufficient
+- Expires subscription and sends notifications if balance is insufficient
+- See [VPS_SETUP.md](VPS_SETUP.md) for detailed documentation
+
 ## 🐛 Troubleshooting
 
 ### SSL Certificate Error (NET::ERR_CERT_COMMON_NAME_INVALID)

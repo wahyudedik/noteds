@@ -83,22 +83,24 @@ Route::middleware('auth')->prefix('setup-username')->name('setup-username.')->gr
 Route::middleware(['auth', 'username.setup'])->group(function () {
     Route::resource('notes', NoteController::class);
     Route::get('/notes/{note}/attachments/{filename}', [NoteAttachmentController::class, 'download'])->name('notes.attachments.download');
-    
-            // Folders (Premium feature - enhanced organization)
-            Route::middleware('premium')->group(function () {
-                Route::resource('folders', \App\Http\Controllers\FolderController::class);
-                Route::post('/folders/update-order', [\App\Http\Controllers\FolderController::class, 'updateOrder'])->name('folders.update-order');
-            });
-            
-            // Workspaces (Premium feature - multi workspace)
-            Route::middleware('premium')->group(function () {
-                Route::resource('workspaces', \App\Http\Controllers\WorkspaceController::class);
-            });
-    
+
+    // Folders (Premium feature - enhanced organization)
+    Route::middleware('premium')->group(function () {
+        Route::resource('folders', \App\Http\Controllers\FolderController::class);
+        Route::post('/folders/update-order', [\App\Http\Controllers\FolderController::class, 'updateOrder'])->name('folders.update-order');
+    });
+
+    // Workspaces (Premium feature - multi workspace)
+    Route::middleware('premium')->group(function () {
+        Route::resource('workspaces', \App\Http\Controllers\WorkspaceController::class);
+        Route::post('/workspaces/{workspace}/sell', [\App\Http\Controllers\WorkspaceController::class, 'sell'])->name('workspaces.sell');
+        Route::post('/workspaces/{workspace}/purchase', [\App\Http\Controllers\WorkspaceController::class, 'purchase'])->name('workspaces.purchase');
+    });
+
     // AI routes - Basic features (available to all authenticated users)
     Route::post('/ai/analyze', [AiController::class, 'analyze'])->name('ai.analyze');
     Route::get('/ai/status', [AiController::class, 'status'])->name('ai.status');
-    
+
     // MyNoteds (AI Memory Platform) routes - Premium features only
     Route::middleware('premium')->prefix('mynoteds')->name('mynoteds.')->group(function () {
         Route::get('/', [\App\Http\Controllers\MyNotedsController::class, 'index'])->name('index');
@@ -114,35 +116,40 @@ Route::middleware(['auth', 'username.setup'])->group(function () {
         Route::post('/context-links', [AiController::class, 'contextLinks'])->name('context-links'); // Context linking API
         // More premium AI features will be added here
     });
-    
+
     // Subscription routes
     Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
     Route::get('/subscription/create', [SubscriptionController::class, 'create'])->name('subscription.create');
     Route::post('/subscription', [SubscriptionController::class, 'store'])->name('subscription.store');
     Route::get('/subscription/{subscription}', [SubscriptionController::class, 'show'])->name('subscription.show');
-    
+
     // Wallet routes
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::post('/wallet/topup', [WalletController::class, 'topup'])->name('wallet.topup');
     Route::get('/wallet/topup-checkout', [WalletController::class, 'topupCheckout'])->name('wallet.topup-checkout');
-    
+
     // Withdraw routes
     Route::get('/wallet/withdraw', [WithdrawController::class, 'create'])->name('wallet.withdraw.create');
     Route::post('/wallet/withdraw', [WithdrawController::class, 'store'])->name('wallet.withdraw.store');
-    
+
+    // Featured Notes routes
+    Route::get('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'index'])->name('featured-notes.index');
+    Route::get('/featured-notes/create', [\App\Http\Controllers\FeaturedNoteController::class, 'create'])->name('featured-notes.create');
+    Route::post('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'store'])->name('featured-notes.store');
+
     // Referral routes
     Route::get('/referral', [ReferralController::class, 'index'])->name('referral.index');
     Route::get('/referral/statistics', [ReferralController::class, 'statistics'])->name('referral.statistics');
-    
+
     // Support Ticket routes
     Route::resource('support-tickets', SupportTicketController::class);
     Route::post('/support-tickets/{supportTicket}/reply', [SupportTicketController::class, 'reply'])->name('support-tickets.reply');
-    
+
     // Notification routes
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
-    
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -175,6 +182,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin', 'username.setup'])->na
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
     Route::post('/settings/test-s3', [AdminSettingsController::class, 'testS3'])->name('settings.test-s3');
+
+    // Featured Notes Admin routes
+    Route::get('/featured-notes', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'index'])->name('featured-notes.index');
+    Route::get('/featured-notes/{featuredNote}', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'show'])->name('featured-notes.show');
+    Route::post('/featured-notes/{featuredNote}/approve', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'approve'])->name('featured-notes.approve');
+    Route::post('/featured-notes/{featuredNote}/reject', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'reject'])->name('featured-notes.reject');
 });
 
 // Public Documentation routes
@@ -183,10 +196,26 @@ Route::get('/docs/{category}', [DocumentationController::class, 'category'])->na
 Route::get('/docs/{category}/{documentation:slug}', [DocumentationController::class, 'show'])->name('docs.show');
 Route::post('/docs/{category}/{documentation:slug}/helpful', [DocumentationController::class, 'markHelpful'])->middleware(['auth', 'username.setup'])->name('docs.helpful');
 
-// Webhook route (no auth required, CSRF exempt for Midtrans)
+// Midtrans Webhook & Payment Callback Routes (no auth required, CSRF exempt)
 Route::post('/wallet/webhook', [WalletController::class, 'webhook'])
     ->middleware('web')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
     ->name('wallet.webhook');
 
-require __DIR__.'/auth.php';
+// Payment Notification URL (alternative webhook endpoint)
+Route::post('/payment/callback', [WalletController::class, 'paymentCallback'])
+    ->middleware('web')
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
+    ->name('payment.callback');
+
+// Payment Redirect URLs (no auth required for redirects)
+Route::get('/payment/finish', [WalletController::class, 'paymentFinish'])
+    ->name('payment.finish');
+
+Route::get('/payment/unfinish', [WalletController::class, 'paymentUnfinish'])
+    ->name('payment.unfinish');
+
+Route::get('/payment/error', [WalletController::class, 'paymentError'])
+    ->name('payment.error');
+
+require __DIR__ . '/auth.php';

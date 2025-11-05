@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\Note;
 use App\Models\Tag;
 use App\Models\User;
+use App\Models\Workspace;
+use App\Models\Folder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -96,21 +98,48 @@ class NoteSeeder extends Seeder
 
         $allTags = Tag::all();
 
+        // Get workspaces and folders for premium users
+        $workspaces = Workspace::all();
+        $folders = Folder::all();
+
         // Create notes for sellers
         foreach ($sellers as $index => $seller) {
             $notesPerSeller = rand(3, 6);
+            
+            // Check if seller has premium (has workspaces)
+            $sellerWorkspaces = $workspaces->where('owner_id', $seller->id);
+            $hasPremium = $sellerWorkspaces->isNotEmpty();
             
             for ($i = 0; $i < $notesPerSeller; $i++) {
                 $templateIndex = ($index * $notesPerSeller + $i) % count($noteTemplates);
                 $template = $noteTemplates[$templateIndex];
 
+                // 30% chance to assign to workspace/folder if premium user
+                $workspaceId = null;
+                $folderId = null;
+                
+                if ($hasPremium && rand(1, 10) <= 3) {
+                    $selectedWorkspace = $sellerWorkspaces->random();
+                    $workspaceId = $selectedWorkspace->id;
+                    
+                    // 50% chance to assign to folder
+                    $workspaceFolders = $folders->where('workspace_id', $selectedWorkspace->id);
+                    if ($workspaceFolders->isNotEmpty() && rand(1, 2) === 1) {
+                        $folderId = $workspaceFolders->random()->id;
+                    }
+                }
+
                 $note = Note::create([
                     'user_id' => $seller->id,
+                    'original_creator_id' => $seller->id, // Set original creator
+                    'workspace_id' => $workspaceId,
+                    'folder_id' => $folderId,
                     'title' => $template['title'] . ($i > 0 ? ' ' . ($i + 1) : ''),
                     'content' => $template['content'],
                     'price' => $template['price'] + rand(-20000, 20000),
                     'is_public' => rand(0, 100) > 20, // 80% public
                     'status' => ['active', 'active', 'active', 'active', 'inactive'][rand(0, 4)],
+                    'is_sold' => false, // New notes are not sold yet
                 ]);
 
                 // Attach random tags (2-4 tags per note)

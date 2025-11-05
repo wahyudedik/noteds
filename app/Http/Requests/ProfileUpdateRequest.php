@@ -35,6 +35,9 @@ class ProfileUpdateRequest extends FormRequest
             'avatar' => ['nullable', 'string', 'url', 'max:255'],
             'bio' => ['nullable', 'string', 'max:500'],
             'location' => ['nullable', 'string', 'max:255'],
+            'bank_name' => ['nullable', 'string', 'max:100'],
+            'bank_account_number' => ['nullable', 'string', 'max:50'],
+            'bank_account_name' => ['nullable', 'string', 'max:100'],
         ];
     }
 }

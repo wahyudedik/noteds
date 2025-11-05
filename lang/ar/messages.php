@@ -71,7 +71,7 @@ return [
     'username_alpha_dash' => 'يمكن أن يحتوي اسم المستخدم على أحرف وأرقام وشرطات وشرطات سفلية فقط.',
     'username_lowercase' => 'يجب أن يكون اسم المستخدم بأحرف صغيرة.',
     'username_unique' => 'اسم المستخدم هذا مستخدم بالفعل. يرجى اختيار اسم آخر.',
-    
+
     // Authentication
     'email' => 'البريد الإلكتروني',
     'password' => 'كلمة المرور',
@@ -95,7 +95,7 @@ return [
     'verification_link_sent' => 'تم إرسال رابط تحقق جديد إلى عنوان البريد الإلكتروني الذي قدمته أثناء التسجيل.',
     'resend_verification_email' => 'إعادة إرسال بريد التحقق',
     'confirm_password_message' => 'هذه منطقة آمنة من التطبيق. يرجى تأكيد كلمة المرور قبل المتابعة.',
-    
+
     // Dashboard
     'start_writing_note' => 'ابدأ بكتابة ملاحظة جديدة',
     'discover_public_notes' => 'اكتشف الملاحظات العامة',
@@ -103,7 +103,7 @@ return [
     'recent_notes' => 'الملاحظات الأخيرة',
     'view' => 'عرض',
     'status' => 'الحالة',
-    
+
     // FAQ
     'faq' => 'الأسئلة الشائعة',
     'frequently_asked_questions' => 'الأسئلة الشائعة',
@@ -113,7 +113,7 @@ return [
     'still_have_questions' => 'لا تزال لديك أسئلة؟',
     'cant_find_what_youre_looking_for' => 'لا يمكنك العثور على ما تبحث عنه؟ نحن هنا للمساعدة!',
     'contact_support' => 'اتصل بالدعم',
-    
+
     // Profile
     'profile_settings' => 'إعدادات الملف الشخصي',
     'manage_account_settings' => 'إدارة إعدادات حسابك ومعلومات ملفك الشخصي',
@@ -131,7 +131,7 @@ return [
     'save_changes' => 'حفظ التغييرات',
     'update_password' => 'تحديث كلمة المرور',
     'delete_account' => 'حذف الحساب',
-    
+
     // Notes
     'my_notes' => 'ملاحظاتي',
     'create_new_note' => 'إنشاء ملاحظة جديدة',
@@ -156,7 +156,7 @@ return [
     'notes_remaining' => 'ملاحظات متبقية في خطتك الأساسية.',
     'you_have' => 'لديك',
     'private' => 'خاص',
-    
+
     // Marketplace
     'discover_purchase_notes' => 'اكتشف واشتري ملاحظات عالية الجودة من المجتمع',
     'search_title' => 'البحث عن العنوان',
@@ -172,7 +172,7 @@ return [
     'view_details' => 'عرض التفاصيل',
     'no_notes_found' => 'لم يتم العثور على ملاحظات',
     'try_adjusting_filters' => 'حاول تعديل فلاتر البحث',
-    
+
     // Wallet
     'wallet_balance_title' => 'رصيد المحفظة',
     'top_up' => 'إيداع',
@@ -187,7 +187,7 @@ return [
     'bank_name' => 'اسم البنك',
     'request_withdraw' => 'طلب السحب',
     'withdraw_request_success' => 'تم إرسال طلب السحب بنجاح',
-    
+
     // Subscription
     'subscription' => 'الاشتراك',
     'current_plan' => 'الخطة الحالية',
@@ -196,7 +196,7 @@ return [
     'unlimited_notes' => 'ملاحظات غير محدودة',
     'ai_powered_features' => 'ميزات مدعومة بالذكاء الاصطناعي',
     'priority_support' => 'دعم ذو أولوية',
-    
+
     // Support Tickets
     'support_tickets' => 'تذاكر الدعم',
     'create_ticket' => 'إنشاء تذكرة',
@@ -211,7 +211,7 @@ return [
     'reply' => 'رد',
     'no_tickets' => 'لا توجد تذاكر بعد',
     'create_first_ticket' => 'أنشئ تذكرة الدعم الأولى',
-    
+
     // Referral
     'referral_program' => 'برنامج الإحالة',
     'your_referral_code' => 'رمز الإحالة الخاص بك',
@@ -220,13 +220,13 @@ return [
     'total_referrals' => 'إجمالي الإحالات',
     'total_earnings' => 'إجمالي الأرباح',
     'pending_earnings' => 'الأرباح المعلقة',
-    
+
     // Notifications
     'notifications' => 'الإشعارات',
     'no_notifications' => 'لا توجد إشعارات',
     'mark_all_read' => 'تحديد الكل كمقروء',
     'mark_as_read' => 'تحديد كمقروء',
-    
+
     // Additional Notes fields
     'summary' => 'الملخص',
     'summary_optional' => '(اختياري - يمكن للذكاء الاصطناعي إنشاء هذا)',
@@ -254,11 +254,11 @@ return [
     'try_again' => 'حاول مرة أخرى',
     'no_content' => 'لا يوجد محتوى',
     'enter_note_content_first' => 'يرجى إدخال محتوى الملاحظة أولاً قبل استخدام ميزات الذكاء الاصطناعي.',
-    
+
     // Marketplace additional
     'free' => 'مجاني',
     'try_adjusting_criteria' => 'حاول تعديل معايير البحث أو الفلاتر للعثور على ما تبحث عنه.',
-    
+
     // Notes Edit & Show
     'edit_note' => 'تعديل الملاحظة',
     'update_note_information' => 'تحديث معلومات ملاحظتك',
@@ -290,8 +290,13 @@ return [
     'purchase_amount' => 'مبلغ الشراء',
     'wallet_balance' => 'رصيد المحفظة',
     'insufficient_balance' => 'رصيد غير كافٍ',
+    'sufficient_balance' => 'رصيد كافٍ',
+    'top_up_now' => 'شحن الآن',
+    'payment_info' => 'معلومات الدفع',
+    'payment_will_be_deducted_from_wallet' => 'سيتم خصم الدفع تلقائياً من رصيد محفظتك.',
+    'activate_premium' => 'تفعيل المميز',
     'cancel' => 'إلغاء',
-    
+
     // Marketplace Show additional
     'published' => 'نُشر',
     'full_content_available_after_purchase' => '🔒 المحتوى الكامل متاح بعد الشراء',
@@ -305,7 +310,7 @@ return [
     'popular' => 'شائع',
     'to_purchase_please_login' => 'لشراء هذه الملاحظة، يرجى تسجيل الدخول أولاً.',
     'no_reviews_yet_be_first' => 'لا توجد مراجعات بعد. كن أول من يراجع هذه الملاحظة!',
-    
+
     // Wallet
     'my_wallet' => 'محفظتي',
     'manage_balance_view_history' => 'إدارة رصيدك وعرض سجل المعاملات',
@@ -323,7 +328,7 @@ return [
     'copy' => 'نسخ',
     'copied' => 'تم النسخ!',
     'all_notifications_one_place' => 'جميع إشعاراتك في مكان واحد',
-    
+
     // Subscription
     'my_subscription' => 'اشتراكي',
     'manage_premium_subscription' => 'إدارة اشتراكك المميز',
@@ -338,7 +343,7 @@ return [
     'subscription_request_reviewed' => 'طلب الاشتراك الخاص بك قيد المراجعة من قبل المسؤول',
     'request_premium_subscription' => 'طلب اشتراك Premium',
     'upgrade_to_premium_now' => 'الترقية إلى Premium الآن',
-    
+
     // Support Tickets
     'my_support_tickets' => 'تذاكر الدعم الخاصة بي',
     'manage_support_requests' => 'إدارة طلبات الدعم الخاصة بك',
@@ -365,7 +370,7 @@ return [
     'last_updated' => 'آخر تحديث',
     'no_tickets_found' => 'لم يتم العثور على تذاكر',
     'create_first_ticket' => 'أنشئ تذكرة الدعم الأولى',
-    
+
     // Subscription additional
     'no_active_subscription' => 'لا يوجد اشتراك نشط',
     'currently_on_basic_plan' => 'أنت حالياً على الخطة الأساسية',
@@ -379,7 +384,7 @@ return [
     'get_faster_response_times' => 'احصل على أوقات استجابة أسرع من فريق الدعم لدينا',
     'cloud_backup' => 'النسخ الاحتياطي السحابي',
     'automatic_backup_notes' => 'نسخ احتياطي تلقائي لجميع ملاحظاتك إلى تخزين سحابي آمن',
-    
+
     // Subscription Create
     'upgrade_to_premium' => 'الترقية إلى Premium',
     'request_premium_access' => 'طلب الوصول المميز مع ميزات غير محدودة',
@@ -392,7 +397,7 @@ return [
     'note' => 'ملاحظة',
     'after_submitting_request' => 'بعد إرسال طلبك مع إثبات الدفع، سيقوم فريق الإدارة بمراجعة والموافقة على اشتراكك المميز. ستتلقى إشعاراً بمجرد الموافقة.',
     'submit_request' => 'إرسال الطلب',
-    
+
     // Wallet Withdraw
     'withdraw_wallet' => 'سحب المحفظة',
     'request_withdrawal_bank' => 'طلب سحب إلى حسابك البنكي',
@@ -407,7 +412,7 @@ return [
     'enter_withdrawal_amount' => 'أدخل مبلغ السحب',
     'minimum_withdraw_amount' => 'الحد الأدنى لمبلغ السحب هو 50,000 روبية',
     'cannot_exceed_balance' => 'لا يمكن أن يتجاوز رصيدك الحالي',
-    
+
     // Public Profile
     'joined' => 'انضم',
     'public_notes' => 'الملاحظات العامة',
@@ -416,7 +421,7 @@ return [
     'total_followers' => 'إجمالي المتابعين',
     'followers' => 'متابعون',
     'follower' => 'متابع',
-    
+
     // Contact
     'contact_us' => 'اتصل بنا',
     'have_question_need_help' => 'لديك سؤال أو تحتاج مساعدة؟ نحن هنا من أجلك!',
@@ -442,7 +447,7 @@ return [
     'name_as_appears_bank' => 'الاسم كما يظهر في الحساب البنكي',
     'please_double_check_bank' => 'يرجى التحقق مرة أخرى من تفاصيل حسابك البنكي. يتم معالجة طلبات السحب يدوياً من قبل فريق الإدارة لدينا خلال 1-3 أيام عمل.',
     'range' => 'النطاق',
-    
+
     // Support Tickets Edit & Show
     'edit_support_ticket' => 'تعديل تذكرة الدعم',
     'support_ticket_details' => 'تفاصيل تذكرة الدعم',
@@ -450,7 +455,7 @@ return [
     'update_ticket' => 'تحديث التذكرة',
     'back_to_tickets' => 'العودة إلى التذاكر',
     'save_changes' => 'حفظ التغييرات',
-    
+
     // Wallet Topup Checkout
     'topup_checkout' => 'الدفع عند الاستلام',
     'complete_wallet_topup_payment' => 'أكمل دفعة تعبئة المحفظة الخاصة بك',
@@ -464,7 +469,7 @@ return [
     'complete_payment_instructed' => 'أكمل الدفع كما هو موضح',
     'wallet_balance_updated_automatically' => 'سيتم تحديث رصيد محفظتك تلقائياً بعد الدفع الناجح',
     'if_payment_pending_wait' => 'إذا كان الدفع معلقاً، يرجى انتظار التأكيد',
-    
+
     // Support Tickets Show additional
     'conversation' => 'المحادثة',
     'original_message' => 'الرسالة الأصلية',
@@ -473,7 +478,7 @@ return [
     'type_your_reply_here' => 'اكتب ردك هنا...',
     'send_reply' => 'إرسال الرد',
     'ticket_closed_no_replies' => 'هذه التذكرة مغلقة. لا يمكنك إضافة المزيد من الردود.',
-    
+
     // Subscription Show
     'subscription_details' => 'تفاصيل الاشتراك',
     'view_subscription_information' => 'عرض معلومات اشتراكك',
@@ -491,10 +496,10 @@ return [
     'expired' => 'منتهي الصلاحية',
     'cancelled' => 'ملغي',
     'active' => 'نشط',
-    
+
     // Welcome
     'welcome_to_noteds' => 'مرحباً بك في ' . config('app.name'),
-    
+
     // Documentation
     'documentation' => 'التوثيق',
     'find_guides_tutorials' => 'ابحث عن الأدلة والبرامج التعليمية والمراجع لمساعدتك في الاستفادة القصوى من Noteds',
@@ -503,7 +508,7 @@ return [
     'clear_search' => 'مسح البحث',
     'article' => 'مقال',
     'articles' => 'مقالات',
-    
+
     // Folders
     'folders' => 'المجلدات',
     'organize_notes_with_folders' => 'نظم ملاحظاتك باستخدام المجلدات',
@@ -515,7 +520,7 @@ return [
     'no_folders_yet' => 'لا توجد مجلدات بعد',
     'create_first_folder' => 'أنشئ مجلدك الأول لتنظيم ملاحظاتك',
     'are_you_sure_delete_folder' => 'هل أنت متأكد؟ سيتم نقل الملاحظات في هذا المجلد إلى الجذر.',
-    
+
     // Workspaces
     'workspaces' => 'مساحات العمل',
     'manage_workspaces' => 'إدارة مساحات العمل الشخصية والجماعية والتنظيمية',
@@ -530,7 +535,7 @@ return [
     'manage_workspaces_button' => 'إدارة مساحات العمل',
     'filter_by_workspace' => 'تصفية حسب مساحة العمل',
     'all_workspaces' => 'جميع مساحات العمل',
-    
+
     // MyNoteds
     'mynoteds' => 'MyNoteds',
     'mynoteds_description' => 'منصة ذاكرة مدعومة بالذكاء الاصطناعي. اطرح الأسئلة واكتشف الرؤى واربط أفكارك.',
@@ -547,7 +552,7 @@ return [
     'total_questions' => 'إجمالي الأسئلة',
     'total_insights' => 'إجمالي الرؤى',
     'total_connections' => 'إجمالي الاتصالات',
-    
+
     // Simulators
     'marketing_simulators' => 'محاكيات التسويق',
     'calculate_potential_earnings' => 'احسب إمكاناتك في الأرباح وخطط لاستراتيجيتك على Noteds',
@@ -596,10 +601,10 @@ return [
     'signup_rewards' => 'مكافآت التسجيل',
     'transaction_commissions' => 'عمولات المعاملات',
     'total_monthly' => 'الإجمالي الشهري',
-    
+
     // CMS Show
     'back' => 'رجوع',
-    
+
     // Docs Show & Category
     'back_to_all_documentation' => '← العودة إلى جميع التوثيق',
     'related_links' => 'روابط ذات صلة',
@@ -615,7 +620,7 @@ return [
     'solutions_common_problems' => 'حلول للمشاكل والقضايا الشائعة.',
     'technical_api_documentation' => 'توثيق API تقني للمطورين.',
     'video_tutorials_walkthroughs' => 'دروس فيديو وشرح.',
-    
+
     // Folders Create/Edit/Show
     'create_folder' => 'إنشاء مجلد',
     'create_new_folder' => 'إنشاء مجلد جديد',
@@ -633,7 +638,7 @@ return [
     'no_notes_in_folder' => 'لا توجد ملاحظات في هذا المجلد بعد',
     'create_first_note_folder' => 'أنشئ ملاحظتك الأولى في هذا المجلد',
     'optional' => 'اختياري',
-    
+
     // Workspaces Create/Edit
     'create_workspace' => 'إنشاء مساحة عمل',
     'create_new_workspace' => 'إنشاء مساحة عمل جديدة',
@@ -651,7 +656,7 @@ return [
     'active_workspace' => 'مساحة عمل نشطة',
     'inactive_workspaces_wont_appear' => 'مساحات العمل غير النشطة لن تظهر في معظم القوائم',
     'workspace_name_placeholder' => 'مثال: فريقي، ملاحظات الشركة',
-    
+
     // MyNoteds Ask/Search/Insights
     'ask_your_notes_title' => 'اسأل ملاحظاتك - MyNoteds',
     'ask_natural_language_questions_description' => 'اطرح أسئلة بلغة طبيعية حول ملاحظاتك. سيبحث الذكاء الاصطناعي في محتواك ويقدم إجابات.',
@@ -703,7 +708,7 @@ return [
     'note' => 'ملاحظة',
     'tip' => 'نصيحة',
     'new_note' => 'ملاحظة جديدة',
-    
+
     // Welcome/Landing Page
     'welcome_to_noteds_title' => 'مرحباً بك في :name',
     'welcome_to_noteds' => 'مرحباً بك في :name',
@@ -713,7 +718,7 @@ return [
     'get_started_free' => 'ابدأ مجاناً',
     'sign_in' => 'تسجيل الدخول',
     'locale_changed' => 'تم تغيير اللغة بنجاح',
-    
+
     // Navigation
     'home' => 'الرئيسية',
     'dashboard' => 'لوحة التحكم',
@@ -734,7 +739,7 @@ return [
     'notifications' => 'الإشعارات',
     'view_all' => 'عرض الكل',
     'no_notifications_yet' => 'لا توجد إشعارات بعد',
-    
+
     // Footer
     'about' => 'حول',
     'about_description' => 'سوق رقمية تربط المبدعين بالمتعلمين. شارك المعرفة، اكتشف الرؤى، ونم معاً.',
@@ -744,4 +749,799 @@ return [
     'contact_us' => 'اتصل بنا',
     'connect' => 'اتصل',
     'all_rights_reserved' => 'جميع الحقوق محفوظة',
+
+    // Admin Dashboard
+    'admin_dashboard' => 'لوحة تحكم المسؤول',
+    'total_users' => 'إجمالي المستخدمين',
+    'total_notes' => 'إجمالي الملاحظات',
+    'public' => 'عام',
+    'platform_revenue' => 'إيرادات المنصة',
+    'balance' => 'الرصيد',
+    'pending_withdraws' => 'عمليات السحب المعلقة',
+    'view_all' => 'عرض الكل',
+    'pending_subs' => 'الاشتراكات المعلقة',
+    'active' => 'نشط',
+    'manage' => 'إدارة',
+    'users' => 'المستخدمون',
+    'exchange_rates' => 'أسعار الصرف',
+    'subscriptions' => 'الاشتراكات',
+    'withdraws' => 'عمليات السحب',
+    'support_tickets' => 'تذاكر الدعم',
+    'settings' => 'الإعدادات',
+    'documentations' => 'التوثيق',
+    'landing_page' => 'الصفحة الرئيسية',
+    'social_media' => 'وسائل التواصل الاجتماعي',
+    'wallet_analytics' => 'تحليلات المحفظة',
+    'total_balance' => 'إجمالي الرصيد',
+    'avg_balance' => 'متوسط الرصيد',
+    'total_transactions' => 'إجمالي المعاملات',
+    'total_withdrawals' => 'إجمالي عمليات السحب',
+    'total_wallets' => 'إجمالي المحافظ',
+    'with_balance' => 'مع رصيد',
+    'top_10_wallets' => 'أفضل 10 محافظ (حسب الرصيد)',
+    'rank' => 'الترتيب',
+    'user' => 'المستخدم',
+    'email' => 'البريد الإلكتروني',
+    'no_wallets_with_balance' => 'لا توجد محافظ برصيد بعد.',
+    'referral_analytics' => 'تحليلات الإحالة',
+    'total_referrals' => 'إجمالي الإحالات',
+    'signup_rewards' => 'مكافآت التسجيل',
+    'transaction_commissions' => 'عمولات المعاملات',
+    'total_payout' => 'إجمالي الدفع',
+    'referral_leaderboard' => 'لوحة قيادة الإحالة (أفضل 10)',
+    'referrals' => 'الإحالات',
+    'signup' => 'التسجيل',
+    'transaction' => 'المعاملة',
+    'total_commission' => 'إجمالي العمولة',
+    'no_referral_data' => 'لا توجد بيانات إحالة بعد.',
+    'detailed_referral_data' => 'بيانات الإحالة التفصيلية (أفضل 20)',
+    'total_signups' => 'إجمالي التسجيلات',
+    'signup_rewards_label' => 'مكافآت التسجيل',
+    'referred_buyers' => 'المشترين المحالين',
+    'transaction_rewards' => 'مكافآت المعاملات',
+    'no_detailed_referral_data' => 'لا توجد بيانات إحالة تفصيلية بعد.',
+    'note_creation_analytics' => 'تحليلات إنشاء الملاحظات',
+    'daily_note_creation' => 'إنشاء الملاحظات اليومي (آخر 30 يوم)',
+    'date' => 'التاريخ',
+    'notes_created' => 'الملاحظات المنشأة',
+    'unique_users' => 'المستخدمون الفريدون',
+    'avg_per_user' => 'المتوسط لكل مستخدم',
+    'no_note_creation_data' => 'لا توجد بيانات إنشاء ملاحظات في آخر 30 يوم.',
+    'top_10_note_creators' => 'أفضل 10 منشئي ملاحظات',
+    'total_notes_label' => 'إجمالي الملاحظات',
+    'no_note_creators' => 'لا يوجد منشئو ملاحظات بعد.',
+    'daily_notes_per_user' => 'الملاحظات اليومية لكل مستخدم (آخر 7 أيام)',
+    'no_note_activity' => 'لا يوجد نشاط ملاحظات في آخر 7 أيام.',
+    'revenue_analytics' => 'تحليلات الإيرادات (آخر 30 يوم)',
+    'total_amount' => 'إجمالي المبلغ',
+    'commission' => 'العمولة',
+    'transactions' => 'المعاملات',
+    'no_revenue_data' => 'لا توجد بيانات إيرادات في آخر 30 يوم.',
+    'top_10_sellers' => 'أفضل 10 بائعين',
+    'sales' => 'المبيعات',
+    'revenue' => 'الإيرادات',
+    'no_sellers' => 'لا يوجد بائعون بعد.',
+    'top_10_buyers' => 'أفضل 10 مشترين',
+    'purchases' => 'المشتريات',
+    'total_spent' => 'إجمالي المصروف',
+    'no_buyers' => 'لا يوجد مشترون بعد.',
+    'user_growth' => 'نمو المستخدمين (آخر 30 يوم)',
+    'new_users' => 'المستخدمون الجدد',
+    'no_user_growth_data' => 'لا توجد بيانات نمو مستخدمين في آخر 30 يوم.',
+    'recent_transactions' => 'المعاملات الأخيرة',
+    'buyer' => 'المشتري',
+    'seller' => 'البائع',
+    'amount' => 'المبلغ',
+    'status' => 'الحالة',
+    'success' => 'نجح',
+    'pending' => 'معلق',
+    'failed' => 'فشل',
+    'view_all_transactions' => 'عرض جميع المعاملات',
+    'no_transactions' => 'لا توجد معاملات بعد.',
+    'recent_withdraws' => 'عمليات السحب الأخيرة',
+    'bank' => 'البنك',
+    'approved' => 'موافق عليه',
+    'rejected' => 'مرفوض',
+    'view' => 'عرض',
+    'view_all_withdraws' => 'عرض جميع عمليات السحب',
+    'no_withdraws' => 'لا توجد عمليات سحب بعد.',
+    'action' => 'إجراء',
+
+    // Admin Users
+    'admin_users' => 'المسؤول - المستخدمون',
+    'users_management' => 'إدارة المستخدمين',
+    'back_to_dashboard' => 'العودة إلى لوحة التحكم',
+    'search_name_or_email' => 'البحث عن الاسم أو البريد الإلكتروني...',
+    'all_roles' => 'جميع الأدوار',
+    'seller' => 'البائع',
+    'buyer' => 'المشتري',
+    'filter' => 'تصفية',
+    'clear' => 'مسح',
+    'name' => 'الاسم',
+    'role' => 'الدور',
+    'joined' => 'انضم',
+    'edit' => 'تحرير',
+    'no_users_found' => 'لم يتم العثور على مستخدمين.',
+
+    // Admin Notes
+    'admin_notes' => 'المسؤول - الملاحظات',
+    'notes_management' => 'إدارة الملاحظات',
+    'search_title_or_content' => 'البحث عن العنوان أو المحتوى...',
+    'all_visibility' => 'جميع الرؤية',
+    'private' => 'خاص',
+    'all_status' => 'جميع الحالات',
+    'sold' => 'مباع',
+    'inactive' => 'غير نشط',
+    'title' => 'العنوان',
+    'owner' => 'المالك',
+    'price' => 'السعر',
+    'visibility' => 'الرؤية',
+    'created' => 'تم الإنشاء',
+    'free' => 'مجاني',
+    'no_notes_found' => 'لم يتم العثور على ملاحظات.',
+
+    // Admin Tickets
+    'admin_support_tickets' => 'المسؤول - تذاكر الدعم',
+    'support_tickets' => 'تذاكر الدعم',
+    'manage_and_respond_to_user_support_requests' => 'إدارة والرد على طلبات دعم المستخدمين',
+    'search' => 'بحث',
+    'search_tickets' => 'البحث عن التذاكر...',
+    'all_priorities' => 'جميع الأولويات',
+    'urgent' => 'عاجل',
+    'high' => 'عالية',
+    'medium' => 'متوسطة',
+    'low' => 'منخفضة',
+    'open' => 'مفتوح',
+    'in_progress' => 'قيد المعالجة',
+    'resolved' => 'محلول',
+    'closed' => 'مغلق',
+    'assigned_to' => 'مخصص إلى',
+    'unassigned' => 'غير مخصص',
+    'no_support_tickets' => 'لا توجد تذاكر دعم',
+    'no_tickets_match_filters' => 'لا توجد تذاكر تطابق الفلاتر الخاصة بك.',
+    'admin_ticket_details' => 'المسؤول - تفاصيل التذكرة',
+    'ticket' => 'تذكرة',
+    'from' => 'من',
+    'related_links' => 'روابط ذات صلة',
+    'last_updated' => 'آخر تحديث',
+    'closed_by' => 'أُغلق بواسطة',
+    'conversation' => 'محادثة',
+    'priority' => 'الأولوية',
+    'actions' => 'إجراءات',
+    'original_message' => 'الرسالة الأصلية',
+    'no_replies_yet' => 'لا توجد ردود بعد.',
+    'admin_actions' => 'إجراءات المسؤول',
+    'assign_to_admin' => 'تعيين إلى المسؤول',
+    'select_admin' => 'اختر المسؤول...',
+    'assign' => 'تعيين',
+    'update_status_priority' => 'تحديث الحالة والأولوية',
+    'update' => 'تحديث',
+    'send_reply' => 'إرسال رد',
+    'your_message' => 'رسالتك',
+    'type_your_response' => 'اكتب ردك للمستخدم هنا...',
+    'minimum_10_characters' => 'الحد الأدنى 10 أحرف مطلوبة.',
+    'ticket_closed_no_replies' => 'هذه التذكرة مغلقة. لا يمكنك إضافة المزيد من الردود.',
+
+    // Admin Withdraws
+    'admin_withdraws' => 'المسؤول - عمليات السحب',
+    'withdraw_requests' => 'طلبات السحب',
+    'bank_details' => 'تفاصيل البنك',
+    'processed_by' => 'تم المعالجة بواسطة',
+    'review' => 'مراجعة',
+    'no_withdraw_requests_found' => 'لم يتم العثور على طلبات سحب.',
+    'withdraw_detail_admin' => 'تفاصيل السحب - المسؤول',
+    'back_to_withdraws' => 'العودة إلى عمليات السحب',
+    'withdraw_detail' => 'تفاصيل السحب',
+    'user_information' => 'معلومات المستخدم',
+    'current_balance' => 'الرصيد الحالي',
+    'account_number' => 'رقم الحساب',
+    'account_name' => 'اسم الحساب',
+    'requested' => 'مطلوب',
+    'processed' => 'تم المعالجة',
+    'admin_notes' => 'ملاحظات المسؤول',
+    'process_withdraw' => 'معالجة السحب',
+    'admin_notes_optional' => 'ملاحظات المسؤول (اختياري)',
+    'notes_for_user' => 'ملاحظات للمستخدم...',
+    'approve_withdraw' => 'الموافقة على السحب',
+    'reject_withdraw' => 'رفض السحب',
+
+    // Admin Subscriptions
+    'admin_subscriptions' => 'المسؤول - الاشتراكات',
+    'subscription_management' => 'إدارة الاشتراكات',
+    'create_subscription' => 'إنشاء اشتراك',
+    'manage_premium_subscription_requests' => 'إدارة طلبات الاشتراك المميزة',
+    'search_user' => 'البحث عن المستخدم...',
+    'all_plans' => 'جميع الخطط',
+    'basic' => 'أساسي',
+    'premium' => 'مميز',
+    'expired' => 'منتهي الصلاحية',
+    'cancelled' => 'ملغي',
+    'expires' => 'ينتهي',
+    'submitted' => 'تم الإرسال',
+    'no_subscriptions_found' => 'لم يتم العثور على اشتراكات',
+    'no_subscriptions_matching_filters' => 'لا توجد طلبات اشتراك تطابق الفلاتر الخاصة بك.',
+    'admin_create_subscription' => 'المسؤول - إنشاء اشتراك',
+    'manually_create_subscription' => 'إنشاء اشتراك يدوياً للمستخدم',
+    'select_user' => 'اختر المستخدم',
+    'choose_user' => 'اختر مستخدماً...',
+    'plan_type' => 'نوع الخطة',
+    'notes_total' => 'ملاحظات إجمالي',
+    'unlimited_notes' => 'ملاحظات غير محدودة',
+    'subscription_details' => 'تفاصيل الاشتراك',
+    'plan' => 'الخطة',
+    'started' => 'بدأ',
+    'expires_at' => 'ينتهي في',
+    'payment_method' => 'طريقة الدفع',
+    'payment_proof' => 'إثبات الدفع',
+    'view_proof' => 'عرض الإثبات',
+    'no_payment_proof' => 'لم يتم تحميل إثبات الدفع',
+    'approve_subscription' => 'الموافقة على الاشتراك',
+    'reject_subscription' => 'رفض الاشتراك',
+    'extend_subscription' => 'تمديد الاشتراك',
+    'cancel_subscription' => 'إلغاء الاشتراك',
+    'expiration_date' => 'تاريخ الانتهاء',
+    'select_when_expires' => 'اختر متى يجب أن ينتهي هذا الاشتراك',
+    'add_notes_context' => 'أضف أي ملاحظات أو سياق لهذا الاشتراك...',
+    'submitted_at' => 'تم الإرسال في',
+    'approved_by' => 'وافق عليه',
+    'approved_at' => 'تمت الموافقة في',
+    'view_payment_proof' => 'عرض إثبات الدفع',
+    'actions' => 'إجراءات',
+    'notes_optional' => 'ملاحظات (اختياري)',
+    'add_notes_approval' => 'أضف أي ملاحظات حول هذا القبول...',
+    'reason_for_rejection' => 'سبب الرفض',
+    'explain_rejection' => 'يرجى شرح سبب رفض هذا الاشتراك...',
+
+    // Admin Transactions
+    'admin_transactions' => 'المسؤول - المعاملات',
+    'total_revenue' => 'إجمالي الإيرادات',
+    'total_transaction_value' => 'إجمالي قيمة المعاملة',
+    'search_buyer_seller' => 'البحث عن المشتري/البائع...',
+    'all_payment_methods' => 'جميع طرق الدفع',
+    'wallet' => 'المحفظة',
+    'withdraw' => 'سحب',
+    'note' => 'ملاحظة',
+    'method' => 'الطريقة',
+    'no_transactions_found' => 'لم يتم العثور على معاملات.',
+
+    // Admin FAQs
+    'admin_faqs' => 'المسؤول - الأسئلة الشائعة',
+    'faqs_management' => 'إدارة الأسئلة الشائعة',
+    'view_public_faq' => 'عرض الأسئلة الشائعة العامة →',
+    'add_new_faq' => 'إضافة سؤال شائع جديد',
+    'no_faqs_yet' => 'لا توجد أسئلة شائعة بعد',
+    'create_first_faq' => 'أنشئ سؤالك الشائع الأول لمساعدة المستخدمين.',
+    'add_faq' => 'إضافة سؤال شائع',
+    'order' => 'الترتيب',
+    'question' => 'السؤال',
+    'inactive' => 'غير نشط',
+
+    // Admin CMS Pages
+    'admin_cms_pages' => 'المسؤول - صفحات CMS',
+    'cms_pages_management' => 'إدارة صفحات CMS',
+    'add_new_page' => 'إضافة صفحة جديدة',
+    'no_cms_pages_yet' => 'لا توجد صفحات CMS بعد',
+    'create_pages_like' => 'أنشئ صفحات مثل سياسة الخصوصية، شروط الخدمة، إلخ.',
+    'add_page' => 'إضافة صفحة',
+    'slug' => 'الرابط',
+    'updated' => 'تم التحديث',
+
+    // Admin Settings
+    'settings_admin' => 'الإعدادات - المسؤول',
+    'system_settings' => 'إعدادات النظام',
+    'configure_system_wide_settings' => 'تكوين إعدادات النظام بما في ذلك تخزين النسخ الاحتياطي S3',
+    's3_cloud_backup_configuration' => 'تكوين النسخ الاحتياطي السحابي S3',
+    'configure_s3_backups' => 'تكوين Amazon S3 أو تخزين متوافق مع S3 للنسخ الاحتياطي التلقائي',
+    'enable_s3_cloud_backup' => 'تفعيل النسخ الاحتياطي السحابي S3',
+    'when_enabled_backups_uploaded' => 'عند التفعيل، سيتم رفع النسخ الاحتياطية تلقائياً إلى S3',
+    's3_provider' => 'مزود S3',
+    's3_key' => 'مفتاح الوصول S3',
+    's3_secret' => 'المفتاح السري S3',
+    's3_region' => 'منطقة S3',
+    's3_bucket' => 'دلو S3',
+    's3_endpoint' => 'نقطة النهاية S3',
+    's3_path_prefix' => 'بادئة مسار S3',
+    'save_settings' => 'حفظ الإعدادات',
+
+    // Admin Landing Page
+    'landing_page_sections' => 'أقسام الصفحة الرئيسية',
+    'manage_homepage_sections' => 'إدارة الأقسام المعروضة على الصفحة الرئيسية',
+    'view_homepage' => 'عرض الصفحة الرئيسية',
+    'create_section' => 'إنشاء قسم',
+    'all_types' => 'جميع الأنواع',
+    'type' => 'النوع',
+    'valid_period' => 'الفترة الصالحة',
+    'no_title' => '(لا يوجد عنوان)',
+    'from_date' => 'من',
+    'to_date' => 'إلى',
+    'no_end_date' => 'لا يوجد تاريخ انتهاء',
+    'no_sections_found' => 'لم يتم العثور على أقسام.',
+
+    // Admin Documentations
+    'admin_documentations' => 'التوثيق',
+    'manage_documentation_articles' => 'إدارة مقالات التوثيق والأدلة والمراجع',
+    'create_documentation' => 'إنشاء توثيق',
+    'search_title_or_summary' => 'البحث عن العنوان أو الملخص...',
+    'all_categories' => 'جميع الفئات',
+    'author' => 'المؤلف',
+    'views' => 'المشاهدات',
+    'no_documentations_found' => 'لم يتم العثور على توثيق.',
+
+    // Admin Social Media
+    'social_media_links' => 'روابط وسائل التواصل الاجتماعي',
+    'manage_footer_social_links' => 'إدارة روابط وسائل التواصل الاجتماعي المعروضة في التذييل',
+    'view_footer' => 'عرض التذييل',
+    'add_social_media' => 'إضافة وسائل التواصل الاجتماعي',
+    'platform' => 'المنصة',
+    'url' => 'الرابط',
+    'no_social_media_links' => 'لم يتم العثور على روابط وسائل التواصل الاجتماعي.',
+
+    // Admin Exchange Rates
+    'admin_exchange_rates' => 'أسعار الصرف',
+    'manage_currency_exchange_rates' => 'إدارة أسعار صرف العملات لتحويلات الشحن',
+    'add_exchange_rate' => 'إضافة سعر صرف',
+    'from' => 'من',
+    'to' => 'إلى',
+    'rate' => 'السعر',
+    'notes' => 'ملاحظات',
+    'no_exchange_rates_found' => 'لم يتم العثور على أسعار صرف.',
+    'create_one' => 'إنشاء واحد',
+    'until' => 'حتى',
+    'always_active' => 'نشط دائماً',
+    'get_started_creating_first_section' => 'ابدأ بإنشاء أول قسم في الصفحة الرئيسية.',
+    'get_started_adding_first_link' => 'ابدأ بإضافة رابط وسائل التواصل الاجتماعي الأول.',
+    'get_started_creating_first_documentation' => 'ابدأ بإنشاء مقال التوثيق الأول.',
+
+    // Admin FAQs Create/Edit
+    'admin_create_faq' => 'المسؤول - إنشاء سؤال شائع',
+    'admin_edit_faq' => 'المسؤول - تحرير سؤال شائع',
+    'back_to_faqs' => 'العودة إلى الأسئلة الشائعة',
+    'answer' => 'الإجابة',
+    'display_order' => 'ترتيب العرض',
+    'lower_numbers_appear_first' => 'الأرقام الأصغر تظهر أولاً. الافتراضي: 0',
+    'use_new_lines_for_formatting' => 'يمكنك استخدام أسطر جديدة للتنسيق.',
+    'active_visible_public_faq' => 'نشط (مرئي على صفحة الأسئلة الشائعة العامة)',
+    'update_faq' => 'تحديث السؤال الشائع',
+
+    // Admin CMS Pages Create/Edit
+    'admin_create_cms_page' => 'المسؤول - إنشاء صفحة CMS',
+    'admin_edit_cms_page' => 'المسؤول - تحرير صفحة CMS',
+    'back_to_cms_pages' => 'العودة إلى صفحات CMS',
+    'slug_url' => 'الرابط (URL)',
+    'url_friendly_identifier' => 'معرف مناسب للرابط. يمكن الوصول إليه في: /page/slug',
+    'content' => 'المحتوى',
+    'use_new_lines_html_supported' => 'استخدم أسطر جديدة للتنسيق. HTML مدعوم.',
+    'meta_title_seo' => 'عنوان التعريف (SEO)',
+    'meta_description_seo' => 'وصف التعريف (SEO)',
+    'active_visible_public' => 'نشط (مرئي على الصفحات العامة)',
+    'update_page' => 'تحديث الصفحة',
+
+    // Admin Documentations Create/Edit
+    'admin_create_documentation' => 'إنشاء توثيق',
+    'admin_edit_documentation' => 'تحرير التوثيق',
+    'create_new_documentation' => 'إنشاء مقال توثيق أو دليل أو مرجع جديد',
+    'update_documentation' => 'تحديث مقال التوثيق أو الدليل أو المرجع',
+    'back_to_list' => 'العودة إلى القائمة',
+    'slug_auto_generated' => 'الرابط (URL)',
+    'auto_generated_from_title' => '(يتم إنشاؤه تلقائياً من العنوان إذا كان فارغاً)',
+    'url_friendly_will_auto_generate' => 'معرف مناسب للرابط. سيتم إنشاؤه تلقائياً إذا تُرك فارغاً.',
+    'select_category' => 'اختر الفئة',
+    'summary_brief_description' => 'الملخص',
+    'brief_description_max_chars' => '(وصف مختصر، الحد الأقصى 500 حرف)',
+    'brief_summary_placeholder' => 'ملخص مختصر لهذا التوثيق...',
+    'characters' => 'أحرف',
+    'select_section_type' => 'اختر نوع القسم لتكوين المحتوى',
+    'icon_emoji_or_code' => 'الأيقونة',
+    'emoji_or_icon_code' => '(رمز تعبيري أو رمز أيقونة)',
+    'related_links' => 'الروابط ذات الصلة',
+    'add_link' => '+ إضافة رابط',
+    'save_documentation' => 'حفظ التوثيق',
+
+    // Admin Social Media Create/Edit
+    'admin_add_social_media' => 'إضافة رابط وسائل التواصل الاجتماعي',
+    'admin_edit_social_media' => 'تحرير رابط وسائل التواصل الاجتماعي',
+    'add_new_social_link' => 'إضافة رابط وسائل تواصل اجتماعي جديد إلى التذييل',
+    'update_social_link' => 'تحديث معلومات رابط وسائل التواصل الاجتماعي',
+    'select_platform' => 'اختر المنصة',
+    'choose_social_platform' => 'اختر منصة وسائل التواصل الاجتماعي',
+    'display_name' => 'اسم العرض',
+    'facebook_page_example' => 'مثال: صفحة فيسبوك',
+    'custom_icon_optional' => 'أيقونة مخصصة (اختياري)',
+    'svg_or_empty' => '<svg>...</svg> أو اتركها فارغة لاستخدام الأيقونة الافتراضية',
+    'leave_empty_default_icon' => 'اتركها فارغة لاستخدام أيقونة المنصة الافتراضية',
+    'icon_color_optional' => 'لون الأيقونة (اختياري)',
+    'hex_or_currentcolor' => '#1877f2 أو currentColor',
+    'hex_color_example' => 'لون hex (مثال: #1877f2) أو \'currentColor\' للون الموضوع',
+    'active_visible_footer' => 'نشط (مرئي في التذييل)',
+    'create_link' => 'إنشاء رابط',
+    'update_link' => 'تحديث الرابط',
+
+    // Admin Exchange Rates Create/Edit
+    'admin_create_exchange_rate' => 'إنشاء سعر صرف',
+    'admin_edit_exchange_rate' => 'تحرير سعر الصرف',
+    'add_new_exchange_rate' => 'إضافة سعر صرف عملة جديد',
+    'from_currency' => 'من العملة',
+    'to_currency' => 'إلى العملة',
+    'select_currency' => 'اختر العملة...',
+    'idr_indonesian_rupiah' => 'IDR (الروبية الإندونيسية)',
+    'usd_us_dollar' => 'USD (الدولار الأمريكي)',
+    'exchange_rate' => 'سعر الصرف',
+    'rate_example' => 'مثال: 15000 (1 USD = 15000 IDR)',
+    'enter_rate_convert' => 'أدخل سعر الصرف لتحويل من العملة إلى العملة',
+    'current_rate' => 'السعر الحالي:',
+    'notes_optional' => 'ملاحظات (اختياري)',
+    'create_exchange_rate' => 'إنشاء سعر صرف',
+    'update_exchange_rate' => 'تحديث سعر الصرف',
+
+    // Admin Landing Page Create/Edit
+    'admin_create_landing_section' => 'إنشاء قسم الصفحة الرئيسية',
+    'admin_edit_landing_section' => 'تحرير قسم الصفحة الرئيسية',
+    'add_new_section_homepage' => 'إضافة قسم جديد إلى الصفحة الرئيسية',
+    'update_section_content' => 'تحديث محتوى وإعدادات القسم',
+    'section_type' => 'نوع القسم',
+    'select_section_type' => 'اختر نوع القسم',
+    'choose_section_type_create' => 'اختر نوع القسم الذي تريد إنشاؤه',
+    'subtitle_description' => 'العنوان الفرعي / الوصف',
+    'brief_description_subtitle' => 'وصف مختصر أو عنوان فرعي...',
+    'image_url' => 'رابط الصورة',
+    'background_color' => 'لون الخلفية',
+    'hex_or_tailwind' => '#ffffff أو bg-blue-50',
+    'text_color' => 'لون النص',
+    'hex_or_tailwind_text' => '#000000 أو text-gray-900',
+    'alignment' => 'المحاذاة',
+    'left' => 'يسار',
+    'center' => 'وسط',
+    'right' => 'يمين',
+    'valid_from' => 'صالح من',
+    'valid_until' => 'صالح حتى',
+    'active_visible_homepage' => 'نشط (مرئي على الصفحة الرئيسية)',
+    'create_section' => 'إنشاء قسم',
+    'update_section' => 'تحديث القسم',
+
+    // Landing Page Content Builder (JavaScript templates)
+    'hero_section_content' => 'محتوى قسم البطل:',
+    'primary_button_text' => 'نص الزر الأساسي',
+    'primary_button_link' => 'رابط الزر الأساسي',
+    'secondary_button_text_optional' => 'نص الزر الثانوي (اختياري)',
+    'secondary_button_link_optional' => 'رابط الزر الثانوي (اختياري)',
+    'features_grid' => 'شبكة الميزات:',
+    'add_feature' => '+ إضافة ميزة',
+    'feature_title' => 'عنوان الميزة',
+    'icon_svg' => 'الأيقونة/SVG',
+    'description' => 'الوصف',
+    'how_it_works_steps' => 'خطوات كيفية العمل:',
+    'add_step' => '+ إضافة خطوة',
+    'step_number' => 'رقم الخطوة',
+    'step_title' => 'عنوان الخطوة',
+    'premium_benefits' => 'فوائد مميزة:',
+    'add_benefit' => '+ إضافة فائدة',
+    'benefit_title' => 'عنوان الفائدة',
+    'cta_button_text' => 'نص زر CTA',
+    'trust_indicators' => 'مؤشرات الثقة:',
+    'add_indicator' => '+ إضافة مؤشر',
+    'text' => 'النص',
+    'testimonials' => 'الشهادات:',
+    'add_testimonial' => '+ إضافة شهادة',
+    'name' => 'الاسم',
+    'role' => 'الدور',
+    'testimonial_content' => 'محتوى الشهادة',
+    'avatar_url' => 'رابط الصورة الشخصية',
+    'rating_1_5' => 'التقييم (1-5)',
+    'promotional_section' => 'قسم ترويجي:',
+    'promo_text' => 'نص الترويج',
+    'limited_time_offer' => 'عرض محدود الوقت...',
+    'cta_button_link' => 'رابط زر CTA',
+    'discount_code_optional' => 'رمز الخصم (اختياري)',
+    'custom_section_json' => 'قسم مخصص (JSON):',
+    'enter_json_content' => 'أدخل محتوى JSON للقسم المخصص',
+    'remove' => 'إزالة',
+
+    // Profile Information Form
+    'profile_information' => 'معلومات الملف الشخصي',
+    'update_account_profile_info' => 'قم بتحديث معلومات ملفك الشخصي وعنوان بريدك الإلكتروني.',
+    'email_address_unverified' => 'عنوان بريدك الإلكتروني غير مُتحقق منه.',
+    'click_here_resend_verification' => 'انقر هنا لإعادة إرسال بريد التحقق.',
+    'new_verification_link_sent' => 'تم إرسال رابط تحقق جديد إلى عنوان بريدك الإلكتروني.',
+    'saved' => 'تم الحفظ.',
+
+    // Update Password Form
+    'current_password' => 'كلمة المرور الحالية',
+    'new_password' => 'كلمة المرور الجديدة',
+    'confirm_password_label' => 'تأكيد كلمة المرور',
+    'saved_successfully' => 'تم الحفظ بنجاح!',
+    'update_password' => 'تحديث كلمة المرور',
+
+    // Delete User Form
+    'delete_account_warning' => 'بمجرد حذف حسابك، سيتم حذف جميع موارده وبياناته بشكل دائم. قبل حذف حسابك، يرجى تنزيل أي بيانات أو معلومات ترغب في الاحتفاظ بها.',
+    'delete_account' => 'حذف الحساب',
+    'are_you_sure_delete_account' => 'هل أنت متأكد أنك تريد حذف حسابك؟',
+    'delete_account_confirmation' => 'بمجرد حذف حسابك، سيتم حذف جميع موارده وبياناته بشكل دائم. يرجى إدخال كلمة المرور لتأكيد أنك ترغب في حذف حسابك بشكل دائم.',
+    'enter_your_password' => 'أدخل كلمة المرور الخاصة بك',
+
+    // Admin Users Show/Edit
+    'admin_user_detail' => 'تفاصيل المستخدم - المشرف',
+    'admin_edit_user' => 'تحرير المستخدم - المشرف',
+    'back_to_users' => '← العودة إلى المستخدمين',
+    'back_to_user_detail' => '← العودة إلى تفاصيل المستخدم',
+    'user_detail' => 'تفاصيل المستخدم: :name',
+    'edit_user' => 'تحرير المستخدم',
+    'edit_user_title' => 'تحرير المستخدم: :name',
+    'user_information' => 'معلومات المستخدم',
+    'wallet_balance_label' => 'رصيد المحفظة',
+    'joined' => 'انضم',
+    'statistics' => 'الإحصائيات',
+    'total_notes_label' => 'إجمالي الملاحظات',
+    'public_notes_label' => 'الملاحظات العامة',
+    'total_withdraws' => 'إجمالي عمليات السحب',
+    'pending_withdraws' => 'عمليات السحب المعلقة',
+    'transactions_buyer' => 'المعاملات (المشتري)',
+    'transactions_seller' => 'المعاملات (البائع)',
+    'recent_withdraws' => 'عمليات السحب الأخيرة',
+    'update_user' => 'تحديث المستخدم',
+
+    // Email Template - Contact Form
+    'contact_form_submission' => 'إرسال نموذج الاتصال',
+    'new_contact_form_submission' => 'إرسال نموذج اتصال جديد',
+    'received_new_message' => 'لقد تلقيت رسالة جديدة من نموذج الاتصال على :app_name.',
+    'email_sent_from_contact_form' => 'تم إرسال هذا البريد الإلكتروني من نموذج الاتصال على :app_name.',
+    'reply_directly_to_email' => 'يمكنك الرد مباشرة على هذا البريد الإلكتروني للرد على :name.',
+    'subject_label' => 'الموضوع:',
+    'message_label' => 'الرسالة:',
+
+    // Additional Admin Labels
+    'tags_comma_separated' => 'العلامات (مفصولة بفواصل)',
+    'comma_separated' => 'مفصولة بفواصل',
+    'separate_tags_with_commas' => 'افصل العلامات بفواصل',
+    'preview' => 'معاينة',
+    'this_is_how_it_will_appear' => 'هذه هي الطريقة التي ستظهر بها للمستخدمين',
+    'blue' => 'أزرق',
+    'green' => 'أخضر',
+    'purple' => 'بنفسجي',
+    'yellow' => 'أصفر',
+
+    // JavaScript Templates - Landing Page
+    'get_started_free' => 'ابدأ مجاناً',
+    'sign_in' => 'تسجيل الدخول',
+    'upgrade_to_premium' => 'الترقية إلى المميز',
+    'claim_now' => 'احصل عليه الآن',
+    'link_title' => 'عنوان الرابط',
+    'wasabi' => 'Wasabi',
+
+    // Simulators - Plan Comparison
+    'plan_comparison' => 'مقارنة الخطط',
+    'compare_features' => 'مقارنة الميزات',
+    'basic_plan' => 'الخطة الأساسية',
+    'free' => 'مجاني',
+    'notes_total' => 'ملاحظات إجمالية',
+    'standard_support' => 'دعم قياسي',
+    'public_marketplace' => 'السوق العام',
+    'get_started' => 'ابدأ',
+    'premium_plan' => 'الخطة المميزة',
+    'best_value' => 'أفضل قيمة',
+    'unlimited_notes' => 'ملاحظات غير محدودة',
+    'priority_support' => 'دعم ذو أولوية',
+    'featured_in_marketplace' => 'مميز في السوق',
+    'advanced_analytics' => 'تحليلات متقدمة',
+    'upgrade_now' => 'ترقية الآن',
+    'wallet_simulator' => 'محاكي المحفظة',
+    'track_balance_transactions' => 'تتبع الرصيد والمعاملات',
+    'explore_marketplace_features' => 'استكشف ميزات السوق',
+    'visualize_payment_process' => 'تصور عملية الدفع',
+    'checkout' => 'الدفع',
+    'review_order_details' => 'مراجعة تفاصيل الطلب',
+    'payment' => 'الدفع',
+    'complete' => 'مكتمل',
+    'compare_note_prices' => 'مقارنة أسعار الملاحظات',
+    'category' => 'الفئة',
+    'tutorial' => 'برنامج تعليمي',
+    'template' => 'قالب',
+
+    // SweetAlert Messages
+    'content_required' => 'المحتوى مطلوب',
+    'please_provide_documentation_content' => 'يرجى توفير محتوى التوثيق.',
+
+    // Simulators - Additional Labels
+    'current_balance' => 'الرصيد الحالي',
+    'topup_amount' => 'مبلغ الشحن (Rp)',
+    'withdraw_amount' => 'مبلغ السحب (Rp)',
+    'topup' => 'شحن',
+    'withdraw' => 'سحب',
+    'transaction_history_will_appear' => 'سيظهر سجل المعاملات هنا',
+    'marketplace_preview' => 'معاينة السوق',
+    'sample_note_title' => 'عنوان ملاحظة نموذجية',
+    'preview_marketplace_notes' => 'هذه معاينة لكيفية ظهور الملاحظات في السوق. انقر لاستكشاف المزيد!',
+    'marketplace_features' => 'ميزات السوق:',
+    'marketplace_features_desc' => 'البحث، التصفية حسب السعر/العلامات، التقييمات، المراجعات، والمعاملات الآمنة',
+    'explore_marketplace' => 'استكشف السوق',
+    'transaction_flow' => 'تدفق المعاملة',
+    'select_note' => 'اختر ملاحظة',
+    'choose_note_to_purchase' => 'اختر ملاحظة للشراء',
+    'secure_payment_via_midtrans' => 'دفع آمن عبر Midtrans',
+    'access_granted_to_note' => 'تم منح الوصول إلى الملاحظة',
+    'simulate_transaction' => 'محاكاة المعاملة',
+    'ai_summary_generator' => 'مولد الملخص بالذكاء الاصطناعي',
+    'auto_generate_summaries' => 'إنشاء الملخصات تلقائياً',
+    'note_content' => 'محتوى الملاحظة',
+    'paste_note_content' => 'الصق محتوى ملاحظتك هنا...',
+    'generate_summary' => 'إنشاء ملخص',
+    'ai_summary' => 'ملخص الذكاء الاصطناعي',
+    'powered_by_ollama' => 'مدعوم من Ollama AI',
+    'tag_suggestion' => 'اقتراح العلامات',
+    'ai_powered_tag_suggestions' => 'اقتراحات علامات مدعومة بالذكاء الاصطناعي',
+    'note_title' => 'عنوان الملاحظة',
+    'enter_note_content' => 'أدخل محتوى الملاحظة...',
+    'get_tag_suggestions' => 'الحصول على اقتراحات العلامات',
+    'suggested_tags' => 'العلامات المقترحة:',
+    'price_benchmark' => 'مقارنة الأسعار',
+    'your_note_price' => 'سعر ملاحظتك (Rp)',
+    'guide' => 'دليل',
+    'resource' => 'مورد',
+    'transaction_complete' => 'اكتملت المعاملة!',
+    'processing' => 'جارٍ المعالجة...',
+    'generating' => 'جارٍ التوليد...',
+    'analyzing' => 'جارٍ التحليل...',
+    'please_enter_content' => 'يرجى إدخال بعض المحتوى أولاً!',
+    'please_enter_title_or_content' => 'يرجى إدخال العنوان أو المحتوى!',
+    'insufficient_balance' => 'الرصيد غير كافٍ!',
+    'market_analysis' => 'تحليل السوق',
+    'market_average' => 'متوسط السوق:',
+    'below_market' => 'أقل من السوق (قيمة جيدة)',
+    'above_market' => 'أعلى من السوق (مميز)',
+    'market_average_competitive' => 'متوسط السوق (تنافسي)',
+    'good_value' => 'قيمة جيدة',
+    'premium' => 'مميز',
+    'competitive' => 'تنافسي',
+    'your_price' => 'سعرك:',
+    'position' => 'الموضع:',
+
+    // Notes Create/Edit
+    'upload_files' => 'رفع الملفات',
+    'or_drag_and_drop' => 'أو السحب والإفلات',
+    'share_knowledge_freely' => 'شارك المعرفة مجاناً',
+    'set_your_own_price' => 'حدد سعرك الخاص',
+    'available_in_marketplace' => 'متاح في السوق',
+    'organize_notes_in_folders' => 'تنظيم الملاحظات في المجلدات',
+    'personal' => 'شخصي',
+    'assign_to_workspace' => 'تعيين إلى مساحة العمل',
+    'add_more_files' => 'إضافة المزيد من الملفات',
+    'make_public' => 'جعله عاماً',
+    'price_rp_0_for_free' => '(Rp 0 للمشاركة المجانية)',
+
+    // Wallet & Referral
+    'date' => 'التاريخ',
+    'type' => 'النوع',
+    'description' => 'الوصف',
+    'no_transactions_yet' => 'لا توجد معاملات حتى الآن',
+    'reward_type' => 'نوع المكافأة',
+
+    // Marketplace
+    'rating' => 'التقييم',
+
+    // Docs
+    'no_documentation_found' => 'لم يتم العثور على توثيق',
+    
+    // Notes - Additional Labels
+    'file_attachments' => 'مرفقات الملف',
+    'preview_content' => 'محتوى المعاينة',
+    'preview_content_optional' => '(اختياري - بحد أقصى 300 حرف، يُعرض قبل الشراء)',
+    'enter_preview_for_buyers' => 'أدخل معاينة ستُعرض للمشترين المحتملين (أول 300 حرف)...',
+    'characters' => 'أحرف',
+    'auto_generated_from_content' => 'يتم إنشاؤه تلقائياً من المحتوى إذا تُرك فارغاً.',
+    'brief_summary_note' => 'ملخص موجز لملاحظتك (مُوصى به لرؤية أفضل في السوق)',
+    'brief_summary_placeholder' => 'ملخص موجز لملاحظتك...',
+    'auto_generated_summary_placeholder' => 'سيظهر الملخص التلقائي هنا...',
+    'max_50mb_per_file' => 'حد أقصى 50 ميجابايت لكل ملف',
+    'max_5mb_per_file' => 'حد أقصى 5 ميجابايت لكل ملف (مميز: 50 ميجابايت)',
+    'file_size_limit_basic' => 'حد حجم الملف: 5 ميجابايت للمستخدمين الأساسيين.',
+    'file_size_limit_premium' => 'لـ 50 ميجابايت لكل ملف.',
+    'upgrade_to_premium_arrow' => 'ترقية إلى المميز →',
+    'status' => 'الحالة',
+    'active' => 'نشط',
+    'sold' => 'مباع',
+    'inactive' => 'غير نشط',
+    
+    // Notes - Additional Labels
+    'summary' => 'الملخص',
+    'summary_optional_ai' => '(اختياري - يمكن للذكاء الاصطناعي إنشاءه)',
+    'summary_optional' => '(اختياري)',
+    'folder_optional' => 'المجلد (اختياري)',
+    'workspace_optional' => 'مساحة العمل (اختياري)',
+    'file_attachments_optional' => '(اختياري - PDF, DOC, DOCX, TXT, ZIP, RAR, JPG, PNG, GIF, XLS, XLSX, PPT, PPTX)',
+    'type_tag_and_press_enter' => 'اكتب العلامة واضغط Enter',
+    'share_thoughts_about_note' => 'شارك أفكارك حول هذه الملاحظة...',
+    'rating_summary' => 'ملخص التقييم',
+    'example_how_to_create_first_note' => 'مثال، كيفية إنشاء ملاحظتك الأولى',
+    
+    // JavaScript Confirm Messages
+    'delete_social_media_link_confirm' => 'هل أنت متأكد أنك تريد حذف رابط الوسائط الاجتماعية هذا؟',
+    'delete_section_confirm' => 'هل أنت متأكد أنك تريد حذف هذا القسم؟',
+    'delete_documentation_confirm' => 'هل أنت متأكد أنك تريد حذف هذا التوثيق؟',
+    
+    // Controller Messages - General
+    'ticket_updated_successfully' => 'تم تحديث التذكرة بنجاح!',
+    'ticket_assigned_successfully' => 'تم تعيين التذكرة بنجاح!',
+    'cannot_reply_closed_ticket' => 'لا يمكنك الرد على تذكرة مغلقة.',
+    'reply_sent_successfully' => 'تم إرسال الرد بنجاح!',
+    'support_ticket_created_successfully' => 'تم إنشاء تذكرة الدعم بنجاح!',
+    'can_only_edit_open_tickets' => 'يمكنك فقط تعديل التذاكر المفتوحة.',
+    'support_ticket_updated_successfully' => 'تم تحديث تذكرة الدعم بنجاح!',
+    'can_only_delete_open_tickets' => 'يمكنك فقط حذف التذاكر المفتوحة.',
+    'support_ticket_deleted_successfully' => 'تم حذف تذكرة الدعم بنجاح!',
+    'workspace_created_successfully' => 'تم إنشاء مساحة العمل بنجاح.',
+    'workspace_updated_successfully' => 'تم تحديث مساحة العمل بنجاح.',
+    'workspace_deleted_successfully' => 'تم حذف مساحة العمل بنجاح.',
+    'note_creation_limit_reached' => 'تم الوصول إلى حد إنشاء الملاحظات! يمكنك إنشاء :limit ملاحظة فقط في الخطة الأساسية. قم بالترقية إلى المميز للحصول على ملاحظات غير محدودة.',
+    'thank_you_for_message' => 'شكراً لك على رسالتك! سنعود إليك في أقرب وقت ممكن.',
+    'error_sending_message' => 'عذراً، حدث خطأ أثناء إرسال رسالتك. يرجى المحاولة مرة أخرى أو مراسلتنا مباشرة على support@noteds.test',
+    's3_not_enabled' => 'S3 غير مفعّل. يرجى تفعيله أولاً.',
+    'fill_required_s3_credentials' => 'يرجى ملء جميع بيانات الاعتماد المطلوبة لـ S3.',
+    's3_connection_test_successful' => 'نجح اختبار اتصال S3! يمكنك الآن استخدام S3 للنسخ الاحتياطي.',
+    's3_connection_test_failed' => 'فشل اختبار اتصال S3: :error',
+    
+    // Additional Labels
+    'comment_optional' => 'تعليق (اختياري)',
+    'none_root' => 'لا شيء (الجذر)',
+    'select_existing_tag' => 'اختر علامة موجودة...',
+    'delete_ticket_confirm' => 'هل أنت متأكد أنك تريد حذف هذه التذكرة؟ لا يمكن التراجع عن هذا الإجراء.',
+    
+    // Admin Dashboard - Topup & Midtrans
+    'topup_statistics' => 'إحصائيات إعادة الشحن',
+    'midtrans_statistics' => 'إحصائيات Midtrans',
+    'total_topups' => 'إجمالي إعادة الشحن',
+    'total_topup_amount' => 'إجمالي مبلغ إعادة الشحن',
+    'topup_history' => 'سجل إعادة الشحن',
+    'no_topup_history' => 'لا يوجد سجل لإعادة الشحن',
+    'total_midtrans_transactions' => 'إجمالي معاملات Midtrans',
+    'total_midtrans_amount' => 'إجمالي مبلغ Midtrans',
+    'from_midtrans_transactions' => 'من جميع معاملات Midtrans',
+    'all_time' => 'طوال الوقت',
+    'today' => 'اليوم',
+    'this_month' => 'هذا الشهر',
+    'order_id' => 'معرف الطلب',
+    
+    // Workspace & Folder UI
+    'workspace_root' => 'جذر مساحة العمل',
+    'empty_workspace' => 'مساحة عمل فارغة',
+    'start_creating_folders_notes' => 'ابدأ بإنشاء المجلدات أو الملاحظات لتنظيم عملك',
+    'items' => 'عناصر',
+    'folder_created_successfully' => 'تم إنشاء المجلد بنجاح',
+    'create_folder' => 'إنشاء مجلد',
+    'create_note' => 'إنشاء ملاحظة',
+    'note_created_successfully' => 'تم إنشاء الملاحظة بنجاح',
+    'back_to_workspace' => 'العودة إلى مساحة العمل',
+    'creating_folder_in_workspace' => 'إنشاء مجلد في مساحة العمل',
+    'creating_folder_in' => 'إنشاء مجلد داخل',
+    
+    // Workspace Marketplace
+    'for_sale' => 'للبيع',
+    'sold' => 'تم البيع',
+    'sell_workspace' => 'بيع مساحة العمل',
+    'buy_workspace' => 'شراء مساحة العمل',
+    'edit_listing' => 'تعديل القائمة',
+    'list_for_sale' => 'إدراج للبيع',
+    'marketplace_description' => 'وصف السوق',
+    'describe_workspace_for_sale' => 'اشرح ما يجعل مساحة العمل هذه قيمة...',
+    'workspace_already_sold' => 'تم بيع مساحة العمل هذه بالفعل.',
+    'workspace_not_for_sale' => 'مساحة العمل هذه غير معروضة للبيع حالياً.',
+    'cannot_purchase_own_workspace' => 'لا يمكنك شراء مساحة العمل الخاصة بك.',
+    'insufficient_balance_to_purchase' => 'رصيد المحفظة غير كافٍ لشراء مساحة العمل هذه.',
+    'workspace_listed_for_sale' => 'تم إدراج مساحة العمل للبيع بنجاح!',
+    'workspace_purchased_successfully' => 'تم شراء مساحة العمل بنجاح! أنت الآن المالك.',
+    
+    // Plugins
+    'plugins' => 'الإضافات',
+    'plugins_coming_soon' => 'قريباً',
+    'plugins_description' => 'ستسمح الإضافات بإضافة ميزات إضافية إلى مساحة العمل الخاصة بك. هذه الميزة قيد التطوير.',
+    
+    // Withdraw approval
+    'time_elapsed' => 'الوقت المنقضي',
+    'hours' => 'ساعات',
+    'can_approve' => 'يمكن الموافقة',
+    'minimum_wait_required' => 'الانتظار الأدنى مطلوب',
+    'minimum_24_hours_required' => 'يُطلب الحد الأدنى 24 ساعة قبل الموافقة',
+    'withdraw_approval_wait_time' => 'وقت الانتظار للموافقة',
+    'hours_remaining' => 'ساعات متبقية',
+    
+    // Note selling
+    'already_sold' => 'تم البيع بالفعل',
 ];

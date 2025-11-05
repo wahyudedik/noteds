@@ -317,7 +317,7 @@
                             <form action="{{ route('reviews.store', $note) }}" method="POST">
                                 @csrf
                                 <div class="mb-4">
-                                    <label for="rating" class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                                    <label for="rating" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.rating') }}</label>
                                     <div class="flex gap-1" id="rating-container">
                                         @for($i = 1; $i <= 5; $i++)
                                             <button type="button" class="star-rating text-gray-300 hover:text-yellow-400 transition-colors duration-200" data-rating="{{ $i }}">
@@ -334,8 +334,8 @@
                                 </div>
 
                                 <div class="mb-4">
-                                    <label for="comment" class="block text-sm font-medium text-gray-700 mb-2">Comment (optional)</label>
-                                    <textarea name="comment" id="comment" rows="4" placeholder="Share your thoughts about this note..." 
+                                    <label for="comment" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.comment_optional') }}</label>
+                                    <textarea name="comment" id="comment" rows="4" placeholder="{{ __('messages.share_thoughts_about_note') }}" 
                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 @error('comment') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror"></textarea>
                                     @error('comment')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>

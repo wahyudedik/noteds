@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Settings - Admin')
+@section('title', __('messages.settings_admin'))
 
 @section('content')
 <div class="py-12">
@@ -10,10 +10,10 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
-                Back to Dashboard
+                {{ __('messages.back_to_dashboard') }}
             </a>
-            <h2 class="text-2xl font-bold text-gray-900">System Settings</h2>
-            <p class="text-gray-600 mt-1">Configure system-wide settings including S3 backup storage</p>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('messages.system_settings') }}</h2>
+            <p class="text-gray-600 mt-1">{{ __('messages.configure_system_wide_settings') }}</p>
         </div>
 
         @if(session('success'))
@@ -55,9 +55,9 @@
                             <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
-                            S3 Cloud Backup Configuration
+                            {{ __('messages.s3_cloud_backup_configuration') }}
                         </h3>
-                        <p class="text-sm text-gray-600 mt-1">Configure Amazon S3 or S3-compatible storage for automated backups</p>
+                        <p class="text-sm text-gray-600 mt-1">{{ __('messages.configure_s3_backups') }}</p>
                     </div>
                 </div>
             </div>
@@ -71,16 +71,16 @@
                             {{ ($s3Settings->get('s3_enabled')?->value ?? false) ? 'checked' : '' }}
                             class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                         <label for="s3_enabled" class="ml-3 text-sm font-medium text-gray-700">
-                            Enable S3 Cloud Backup
+                            {{ __('messages.enable_s3_cloud_backup') }}
                         </label>
                     </div>
-                    <p class="text-xs text-gray-500 ml-7">When enabled, backups will be automatically uploaded to S3</p>
+                    <p class="text-xs text-gray-500 ml-7">{{ __('messages.when_enabled_backups_uploaded') }}</p>
 
                     <div id="s3-config" class="space-y-4 {{ ($s3Settings->get('s3_enabled')?->value ?? false) ? '' : 'hidden' }}">
                         <!-- S3 Provider -->
                         <div>
                             <label for="s3_provider" class="block text-sm font-medium text-gray-700 mb-2">
-                                S3 Provider
+                                {{ __('messages.s3_provider') }}
                             </label>
                             <select name="s3_provider" id="s3_provider"
                                 class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
@@ -94,7 +94,7 @@
                         <!-- S3 Access Key -->
                         <div>
                             <label for="s3_key" class="block text-sm font-medium text-gray-700 mb-2">
-                                Access Key ID <span class="text-red-500">*</span>
+                                {{ __('messages.s3_key') }} <span class="text-red-500">*</span>
                             </label>
                             <input type="text" name="s3_key" id="s3_key" 
                                 value="{{ old('s3_key', $s3Settings->get('s3_key')?->value) }}"
@@ -106,7 +106,7 @@
                         <!-- S3 Secret Key -->
                         <div>
                             <label for="s3_secret" class="block text-sm font-medium text-gray-700 mb-2">
-                                Secret Access Key <span class="text-red-500">*</span>
+                                {{ __('messages.s3_secret') }} <span class="text-red-500">*</span>
                             </label>
                             <input type="password" name="s3_secret" id="s3_secret" 
                                 value="{{ old('s3_secret', $s3Settings->get('s3_secret')?->value) }}"
@@ -118,7 +118,7 @@
                         <!-- S3 Region -->
                         <div>
                             <label for="s3_region" class="block text-sm font-medium text-gray-700 mb-2">
-                                Region <span class="text-red-500">*</span>
+                                {{ __('messages.s3_region') }} <span class="text-red-500">*</span>
                             </label>
                             <input type="text" name="s3_region" id="s3_region" 
                                 value="{{ old('s3_region', $s3Settings->get('s3_region')?->value ?? 'us-east-1') }}"
@@ -130,7 +130,7 @@
                         <!-- S3 Bucket -->
                         <div>
                             <label for="s3_bucket" class="block text-sm font-medium text-gray-700 mb-2">
-                                Bucket Name <span class="text-red-500">*</span>
+                                {{ __('messages.s3_bucket') }} <span class="text-red-500">*</span>
                             </label>
                             <input type="text" name="s3_bucket" id="s3_bucket" 
                                 value="{{ old('s3_bucket', $s3Settings->get('s3_bucket')?->value) }}"
@@ -142,7 +142,7 @@
                         <!-- S3 Endpoint (for non-AWS providers) -->
                         <div id="s3-endpoint-group">
                             <label for="s3_endpoint" class="block text-sm font-medium text-gray-700 mb-2">
-                                Endpoint URL (Optional - for non-AWS providers)
+                                {{ __('messages.s3_endpoint') }} ({{ __('messages.optional') }})
                             </label>
                             <input type="url" name="s3_endpoint" id="s3_endpoint" 
                                 value="{{ old('s3_endpoint', $s3Settings->get('s3_endpoint')?->value) }}"
@@ -154,7 +154,7 @@
                         <!-- S3 Path Prefix -->
                         <div>
                             <label for="s3_path_prefix" class="block text-sm font-medium text-gray-700 mb-2">
-                                Path Prefix (Optional)
+                                {{ __('messages.s3_path_prefix') }} ({{ __('messages.optional') }})
                             </label>
                             <input type="text" name="s3_path_prefix" id="s3_path_prefix" 
                                 value="{{ old('s3_path_prefix', $s3Settings->get('s3_path_prefix')?->value ?? 'backups') }}"
@@ -166,7 +166,7 @@
                         <!-- Actions -->
                         <div class="flex items-center justify-between pt-4 border-t border-gray-200">
                             <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                                Save S3 Settings
+                                {{ __('messages.save_settings') }}
                             </button>
                             <a href="{{ route('admin.settings.test-s3') }}" 
                                 onclick="event.preventDefault(); document.getElementById('test-s3-form').submit();"
@@ -228,11 +228,11 @@
 
                         <div class="flex items-end">
                             <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 w-full">
-                                <p class="text-xs text-purple-700 font-medium mb-1">Preview</p>
+                                <p class="text-xs text-purple-700 font-medium mb-1">{{ __('messages.preview') }}</p>
                                 <p class="text-lg font-bold text-purple-900" id="price-preview">
                                     {{ \App\Models\Setting::formatPremiumPrice(true) }}
                                 </p>
-                                <p class="text-xs text-purple-600 mt-1">This is how it will appear to users</p>
+                                <p class="text-xs text-purple-600 mt-1">{{ __('messages.this_is_how_it_will_appear') }}</p>
                             </div>
                         </div>
                     </div>
@@ -240,6 +240,103 @@
                     <div class="flex items-center justify-end pt-4 border-t border-gray-200">
                         <button type="submit" class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
                             Save Premium Price
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Marketplace Commission Configuration -->
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Marketplace Commission Settings
+                        </h3>
+                        <p class="text-sm text-gray-600 mt-1">Configure platform fee and creator commission for note transactions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
+                    @csrf
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Platform Commission -->
+                        <div>
+                            <label for="platform_commission_percent" class="block text-sm font-medium text-gray-700 mb-2">
+                                Platform Commission (%) <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="number" name="platform_commission_percent" id="platform_commission_percent" 
+                                    value="{{ old('platform_commission_percent', $platformCommissionPercent) }}"
+                                    min="0" max="100" step="0.1" required
+                                    placeholder="20"
+                                    class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('platform_commission_percent') border-red-500 @enderror">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 text-sm">%</span>
+                                </div>
+                            </div>
+                            @error('platform_commission_percent')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-2 text-xs text-gray-500">
+                                Platform fee yang di-deduct dari <strong>setiap transaksi</strong> (meskipun 20x terjual)
+                            </p>
+                        </div>
+
+                        <!-- Creator Commission -->
+                        <div>
+                            <label for="creator_commission_percent" class="block text-sm font-medium text-gray-700 mb-2">
+                                Creator Commission (%) <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="number" name="creator_commission_percent" id="creator_commission_percent" 
+                                    value="{{ old('creator_commission_percent', $creatorCommissionPercent) }}"
+                                    min="0" max="100" step="0.1" required
+                                    placeholder="0"
+                                    class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('creator_commission_percent') border-red-500 @enderror">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 text-sm">%</span>
+                                </div>
+                            </div>
+                            @error('creator_commission_percent')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-2 text-xs text-gray-500">
+                                Komisi untuk <strong>original creator</strong> di setiap penjualan (penjual kedua dan seterusnya tidak dapat komisi)
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Info Box -->
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3 flex-1">
+                                <p class="text-sm font-medium text-orange-800 mb-2">Commission Rules:</p>
+                                <ul class="text-xs text-orange-700 space-y-1">
+                                    <li>• <strong>Platform Fee</strong>: Deducted dari setiap transaksi (wajib)</li>
+                                    <li>• <strong>Creator Commission</strong>: Selalu untuk original creator di setiap penjualan</li>
+                                    <li>• <strong>Penjual kedua dan seterusnya</strong>: Tidak dapat komisi (hanya original creator)</li>
+                                    <li>• <strong>Setiap user hanya bisa beli note 1x</strong>, tapi note bisa dijual ke user berbeda</li>
+                                    <li>• <strong>Original creator selalu dapat komisi</strong> di setiap transaksi (jika di-setting)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end pt-4 border-t border-gray-200">
+                        <button type="submit" class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors">
+                            Save Commission Settings
                         </button>
                     </div>
                 </form>

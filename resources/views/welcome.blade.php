@@ -5,7 +5,92 @@
 @section('content')
 <div class="py-12 sm:py-16 lg:py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        @forelse($sections as $section)
+        <!-- Featured Hero Note -->
+        @if(isset($featuredHero) && $featuredHero)
+            <div class="mb-16 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl shadow-2xl overflow-hidden">
+                <div class="p-8 sm:p-12 text-white">
+                    <div class="flex items-center justify-center mb-4">
+                        <span class="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold text-white">
+                            ⭐ FEATURED NOTE
+                        </span>
+                    </div>
+                    <div class="text-center mb-6">
+                        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+                            <a href="{{ route('marketplace.show', $featuredHero->note) }}" class="hover:underline">
+                                {{ $featuredHero->note->title }}
+                            </a>
+                        </h2>
+                        <p class="text-lg sm:text-xl text-white/90 max-w-3xl mx-auto mb-6">
+                            {{ Str::limit($featuredHero->note->summary ?? strip_tags($featuredHero->note->content), 150) }}
+                        </p>
+                        <div class="flex items-center justify-center gap-4 mb-6">
+                            @if($featuredHero->note->price > 0)
+                                <span class="text-2xl font-bold">Rp {{ number_format($featuredHero->note->price, 0, ',', '.') }}</span>
+                            @else
+                                <span class="text-2xl font-bold">FREE</span>
+                            @endif
+                            <span class="text-white/70">•</span>
+                            <span class="text-white/80">by {{ $featuredHero->note->user->name }}</span>
+                        </div>
+                        <a href="{{ route('marketplace.show', $featuredHero->note) }}" 
+                           class="inline-flex items-center px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition shadow-lg">
+                            View Note →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Featured Carousel -->
+        @if(isset($featuredCarousel) && $featuredCarousel->count() > 0)
+            <div class="mb-16">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">⭐ Featured Notes</h2>
+                    <p class="text-gray-600">Catatan terpilih yang mungkin menarik untuk Anda</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach($featuredCarousel as $featured)
+                        @php($note = $featured->note)
+                        <div class="bg-white overflow-hidden shadow-lg rounded-lg border-2 border-yellow-400 hover:shadow-xl hover:border-yellow-500 transition-all duration-200 group relative">
+                            <div class="absolute top-2 right-2 z-10">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">
+                                    ⭐ FEATURED
+                                </span>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600">
+                                    <a href="{{ route('marketplace.show', $note) }}">{{ $note->title }}</a>
+                                </h3>
+                                <p class="text-sm text-gray-600 line-clamp-3 mb-4">
+                                    {{ Str::limit(strip_tags($note->content), 100) }}
+                                </p>
+                                @if($note->tags->count() > 0)
+                                    <div class="flex flex-wrap gap-2 mb-4">
+                                        @foreach($note->tags->take(2) as $tag)
+                                            <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded">{{ $tag->name }}</span>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                                    <div>
+                                        @if($note->price > 0)
+                                            <span class="text-lg font-bold text-green-600">Rp {{ number_format($note->price, 0, ',', '.') }}</span>
+                                        @else
+                                            <span class="text-lg font-bold text-gray-600">FREE</span>
+                                        @endif
+                                    </div>
+                                    <a href="{{ route('public.profile.show', $note->user->username) }}" class="text-sm text-gray-600 hover:text-blue-600">
+                                        {{ $note->user->name }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        @forelse($sections ?? collect() as $section)
             @if(!$section->isValid())
                 @continue
             @endif
@@ -59,7 +144,10 @@
                             @foreach($content['features'] as $feature)
                                 <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 p-8 hover:shadow-lg transition-shadow duration-200">
                                     @if(isset($feature['icon']))
-                                        <div class="flex-shrink-0 bg-{{ $feature['color'] ?? 'blue' }}-100 rounded-lg p-4 w-16 h-16 mb-4 flex items-center justify-center">
+                                        @php
+                                            $featureColor = $feature['color'] ?? 'blue';
+                                        @endphp
+                                        <div class="flex-shrink-0 bg-{{ $featureColor }}-100 rounded-lg p-4 w-16 h-16 mb-4 flex items-center justify-center">
                                             {!! $feature['icon'] !!}
                                         </div>
                                     @endif

@@ -22,14 +22,22 @@ Platform di mana pengguna bisa:
 
 - ✅ **Komisi 20%** dari setiap transaksi berbayar
 - ✅ **Free notes:** 0% commission (mendorong knowledge sharing)
-- ✅ **Paid notes:** 20% commission (platform fee standard)
+- ✅ **Paid notes:** Platform fee (default: 20%, configurable) + Creator commission (optional, untuk original creator)
+- ⚠️ **Setiap user hanya bisa beli note 1x**, tapi **note bisa dijual ke user berbeda** (ownership transfer)
+- ⚠️ **Original creator selalu dapat komisi** di setiap penjualan (jika di-setting)
+- ⚠️ **Withdraw:** Approval admin minimal 24 jam (tidak otomatis)
 - ⚠️ Paket Premium: Rp25.000/bln (FASE 7 - opsional)
-- ⚠️ Iklan catatan unggulan (future enhancement)
+- ✅ Iklan catatan unggulan (Featured Notes) — Platform untuk mempromosikan note dengan bayar per iklan
+  - Lokasi iklan: Landing Hero, Landing Carousel, Marketplace Banner, Marketplace Grid, Popup Welcome, Popup Exit Intent, Popup Interstitial
+  - Durasi: 7, 14, atau 30 hari
+  - Auto-approve untuk premium users
+  - Analytics tracking (impressions, clicks, CTR, ROI)
+  - Admin approval system dengan refund jika reject
 
 ### 🧱 Tech Stack
 
 **Backend:**
-- Laravel 11 (PHP 8.2+)
+- Laravel 12 (PHP 8.2+)
 - MySQL
 - Spatie Permission
 - Laravel Breeze
@@ -79,6 +87,13 @@ Platform di mana pengguna bisa:
 - ✅ Marketing simulators
 - ✅ Multi-Tier Content Protection (Preview, secure file uploads, download control)
 - ✅ Internationalization (i18n): 3 languages (EN, ID, AR), 2 currencies (USD, IDR)
+- ✅ Featured Notes Advertising System
+  - Seller can request featured placement for their notes
+  - Multiple locations: Landing Hero, Carousel, Marketplace Banner/Grid, Popup modals
+  - Pricing per location & duration (configurable in admin settings)
+  - Auto-approve for premium users
+  - Analytics tracking (impressions, clicks, CTR, ROI)
+  - Admin approval system with refund if rejected
 
 **AI Memory Platform Plugin (Premium Subscription Feature - Planned):**
 - 🚧 Multi-workspace system (personal, team, organization)
@@ -127,9 +142,47 @@ Platform di mana pengguna bisa:
 - Option 2: **Paid** → Monetize expertise & time investment
 - Option 3: **Hybrid** → Mix gratis untuk branding, premium untuk advanced content
 
-**Platform Commission:**
-- Free notes: 0% commission (encourage sharing)
-- Paid notes: 20% commission (standard marketplace fee)
+**⚠️ Important Note Selling Rules:**
+- ✅ **Setiap user hanya bisa membeli note 1x** (per user, bukan global)
+- ✅ **Note bisa dijual ke banyak user berbeda** (user A jual ke B, B jual ke C, dst)
+- ✅ Setelah pembelian, **ownership note transfer ke buyer** (buyer bisa jual lagi)
+- ✅ **Original creator selalu dapat komisi** di setiap penjualan (jika di-setting)
+- ✅ Jika ingin digunakan banyak orang sekaligus, **gratiskan saja** (bisa dilihat banyak orang)
+
+**Commission System:**
+- **Platform Fee**: Deducted dari **setiap transaksi** (default: 20%, configurable di admin settings)
+  - Platform fee tetap ada meskipun note terjual 20x ke user berbeda
+- **Creator Commission**: **Selalu untuk original creator** (pembuat pertama) di **setiap penjualan**
+  - Default: 0% (bisa di-setting di admin)
+  - Original creator dapat komisi di **setiap transaksi**, bukan hanya pertama kali
+  - **Penjual kedua dan seterusnya tidak dapat komisi** (hanya original creator yang dapat komisi)
+- **Free notes**: 0% commission (encourage sharing)
+
+**Example Flow (Platform Fee: 20%, Creator Commission: 10%):**
+- **User A (creator) jual ke User B (Rp 100.000):**
+  - A dapat: Rp 90.000 (seller amount Rp 80.000 + creator commission Rp 10.000)
+  - Platform dapat: Rp 20.000
+  - Note ownership transfer ke User B
+  
+- **User B jual ke User C (Rp 100.000):**
+  - A (creator) dapat: Rp 10.000 (creator commission)
+  - B dapat: Rp 70.000 (seller amount = 100% - 20% platform - 10% creator commission)
+  - Platform dapat: Rp 20.000
+  - Note ownership transfer ke User C
+  
+- **User C jual ke User D (Rp 100.000):**
+  - A (creator) dapat: Rp 10.000 (creator commission - selalu dapat di setiap penjualan)
+  - C dapat: Rp 70.000 (seller amount)
+  - Platform dapat: Rp 20.000
+  - Note ownership transfer ke User D
+
+- **Setiap user hanya bisa beli note ini 1x**, tapi **note bisa dijual ke user berbeda terus menerus**
+- **Original creator (User A) selalu dapat komisi di setiap penjualan** (jika di-setting)
+
+**Withdraw System:**
+- ⚠️ Withdraw memerlukan **approval admin** minimal **24 jam** setelah request
+- ⚠️ Tidak bisa langsung otomatis masuk rekening (harus menunggu approval admin)
+- Admin dapat approve/reject setelah 24 jam berlalu
 
 ### 💡 Premium Content Protection Strategy
 
@@ -278,9 +331,26 @@ composer pint
 - ✅ Rich Text Editor (Quill) for Notes
 - ✅ Tag deletion bug fix
 - ✅ Multi-Tier Content Protection (Preview, File Upload, Download Control, Trust Indicators)
+- ✅ Featured Notes Advertising System (Landing page, Marketplace, Popup modals)
+- ✅ Seller Analytics Dashboard (Impressions, Clicks, CTR, ROI)
+- ✅ Auto-approve Featured Notes untuk Premium Users
 
 **In Progress:**
 - ⚠️ FASE 8: Deployment & Launch
+
+**Withdraw System:**
+- ⚠️ Withdraw memerlukan **approval admin** minimal **24 jam** setelah request
+- ⚠️ Tidak bisa langsung otomatis masuk rekening (harus menunggu approval admin)
+
+**Featured Notes Advertising System:**
+- ✅ Seller dapat request featured placement untuk note mereka
+- ✅ Multiple locations: Landing Hero, Carousel, Marketplace Banner/Grid, Popup modals
+- ✅ Pricing per location & duration (configurable di admin settings)
+- ✅ Auto-approve untuk premium users (instant activation)
+- ✅ Admin approval system dengan refund jika reject
+- ✅ Analytics tracking: Impressions, Clicks, CTR, ROI
+- ✅ Auto-expire command (daily at 01:00 WIB)
+- ✅ Seller dashboard analytics dengan detailed metrics
 
 **Planned (Premium Subscription Plugin):**
 - 🚧 AI Memory Platform Plugin

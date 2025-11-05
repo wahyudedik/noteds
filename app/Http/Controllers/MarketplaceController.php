@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Note;
+use App\Models\Setting;
 use App\Models\Tag;
 use App\Models\Transaction;
 use App\Models\Wallet;
@@ -17,6 +18,21 @@ class MarketplaceController extends Controller
 {
     public function index(Request $request): View
     {
+        // Get featured notes for marketplace grid
+        $featuredNotes = \App\Models\FeaturedNote::active()
+            ->byLocation('marketplace_grid')
+            ->with(['note.tags', 'note.user', 'note.reviews'])
+            ->inRandomOrder()
+            ->limit(6)
+            ->get();
+
+        // Get featured banner (single note)
+        $featuredBanner = \App\Models\FeaturedNote::active()
+            ->byLocation('marketplace_banner')
+            ->with(['note.tags', 'note.user', 'note.reviews'])
+            ->inRandomOrder()
+            ->first();
+
         $notes = Note::publicOnly()
             ->with(['tags', 'user', 'reviews'])
             ->when($request->search, function ($query) use ($request) {
@@ -42,7 +58,7 @@ class MarketplaceController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('marketplace.index', compact('notes', 'tags'));
+        return view('marketplace.index', compact('notes', 'tags', 'featuredNotes', 'featuredBanner'));
     }
 
     public function show(Note $note): View
@@ -52,6 +68,19 @@ class MarketplaceController extends Controller
         }
 
         $note->load('tags', 'user', 'reviews.user', 'transactions');
+
+        // Track impression for featured notes
+        if (auth()->check()) {
+            $featuredNote = \App\Models\FeaturedNote::where('note_id', $note->id)
+                ->where('status', 'active')
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->first();
+            
+            if ($featuredNote) {
+                $featuredNote->incrementImpressions();
+            }
+        }
 
         // Load reviews with pagination
         $reviews = $note->reviews()->with('user')->latest()->paginate(10);
@@ -65,7 +94,7 @@ class MarketplaceController extends Controller
         if (auth()->check()) {
             $canBuy = auth()->id() !== $note->user_id;
             
-            // Check if already purchased
+            // Check if already purchased (per user)
             if ($canBuy) {
                 $existingTransaction = Transaction::where('buyer_id', auth()->id())
                     ->where('note_id', $note->id)
@@ -73,7 +102,7 @@ class MarketplaceController extends Controller
                     ->first();
                 
                 $alreadyPurchased = $existingTransaction !== null;
-                $canBuy = !$alreadyPurchased;
+                $canBuy = !$alreadyPurchased && $note->price > 0; // Can't buy if already purchased (per user)
                 $showFullContent = $alreadyPurchased || $note->price == 0; // Show full if purchased or free
 
                 // Check if can review (purchased but hasn't reviewed yet)
@@ -106,14 +135,15 @@ class MarketplaceController extends Controller
             return redirect()->route('marketplace.show', $note)->with('error', 'Anda tidak dapat membeli catatan Anda sendiri.');
         }
 
-        // Check if already purchased
+        // Check if buyer already purchased this note (per user, not global)
+        // Each user can only buy a note once, but the note can be sold to different users
         $existingTransaction = Transaction::where('buyer_id', $buyer->id)
             ->where('note_id', $note->id)
             ->where('status', 'success')
             ->first();
 
         if ($existingTransaction) {
-            return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli catatan ini sebelumnya.');
+            return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x.');
         }
 
         if ($note->price <= 0) {
@@ -146,10 +176,26 @@ class MarketplaceController extends Controller
 
             $amount = $note->price;
             
-            // Commission only applies to paid notes
-            // Free notes (price = 0): No commission, encourage knowledge sharing
-            $commission = $amount > 0 ? $amount * 0.20 : 0; // 20% commission for paid notes only
-            $sellerAmount = $amount - $commission;
+            // Get commission rates from settings
+            $platformCommissionPercent = Setting::getSetting('platform_commission_percent', 'marketplace', 20);
+            $creatorCommissionPercent = Setting::getSetting('creator_commission_percent', 'marketplace', 0);
+            
+            // Platform fee (always deducted from every transaction)
+            $platformFee = $amount * ($platformCommissionPercent / 100);
+            
+            // Original creator commission (always for original creator in every transaction)
+            // Original creator gets commission every time the note is sold, regardless of seller
+            $originalCreator = $note->originalCreator ?? $note->user;
+            $creatorCommission = 0;
+            if ($originalCreator && $creatorCommissionPercent > 0) {
+                // Original creator always gets commission (if setting is > 0)
+                // Even if seller is the original creator, they still get commission separately
+                $creatorCommission = $amount * ($creatorCommissionPercent / 100);
+            }
+            
+            // Seller gets: amount - platform_fee - creator_commission
+            // If seller is original creator, they get seller amount + creator commission (total = amount - platform fee)
+            $sellerAmount = $amount - $platformFee - $creatorCommission;
 
             // Deduct from buyer
             $buyerWallet->balance -= $amount;
@@ -157,11 +203,34 @@ class MarketplaceController extends Controller
             $buyer->wallet_balance = $buyerWallet->balance;
             $buyer->save();
 
-            // Add to seller (80%)
+            // Add to seller
             $sellerWallet->balance += $sellerAmount;
             $sellerWallet->save();
             $seller->wallet_balance = $sellerWallet->balance;
             $seller->save();
+
+            // Add commission to original creator (always, if commission is set)
+            // Original creator gets commission in every transaction, even if they are the seller
+            if ($creatorCommission > 0 && $originalCreator) {
+                // If seller is original creator, they already got seller amount, now add commission
+                if ($originalCreator->id === $seller->id) {
+                    // Seller is original creator: add commission to their wallet (they already got sellerAmount)
+                    $sellerWallet->balance += $creatorCommission;
+                    $sellerWallet->save();
+                    $seller->wallet_balance = $sellerWallet->balance;
+                    $seller->save();
+                } else {
+                    // Seller is different: original creator gets separate commission
+                    $creatorWallet = Wallet::firstOrCreate(
+                        ['user_id' => $originalCreator->id],
+                        ['balance' => 0]
+                    );
+                    $creatorWallet->balance += $creatorCommission;
+                    $creatorWallet->save();
+                    $originalCreator->wallet_balance = $creatorWallet->balance;
+                    $originalCreator->save();
+                }
+            }
 
             // Get or create admin wallet (platform wallet)
             $admin = User::where('role', 'admin')->first();
@@ -170,19 +239,27 @@ class MarketplaceController extends Controller
                     ['user_id' => $admin->id],
                     ['balance' => 0]
                 );
-                $adminWallet->balance += $commission;
+                $adminWallet->balance += $platformFee;
                 $adminWallet->save();
                 $admin->wallet_balance = $adminWallet->balance;
                 $admin->save();
             }
 
+            // Transfer note ownership to buyer (so buyer can sell it again)
+            // Original creator stays in original_creator_id for commission tracking
+            $note->user_id = $buyer->id;
+            $note->save();
+
             // Create transaction record
             $transaction = Transaction::create([
                 'buyer_id' => $buyer->id,
                 'seller_id' => $seller->id,
+                'original_creator_id' => $originalCreator ? $originalCreator->id : null,
                 'note_id' => $note->id,
                 'amount' => $amount,
-                'commission' => $commission,
+                'commission' => $platformFee, // Keep for backward compatibility
+                'platform_fee' => $platformFee,
+                'creator_commission' => $creatorCommission,
                 'status' => 'success',
                 'payment_method' => 'wallet',
                 'notes' => 'Pembelian catatan: ' . $note->title,
@@ -201,6 +278,17 @@ class MarketplaceController extends Controller
                         'error' => $e->getMessage(),
                     ]);
                 }
+            }
+
+            // Track click for featured notes
+            $featuredNote = \App\Models\FeaturedNote::where('note_id', $note->id)
+                ->where('status', 'active')
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->first();
+            
+            if ($featuredNote) {
+                $featuredNote->incrementClicks();
             }
 
             return redirect()->route('marketplace.show', $note)

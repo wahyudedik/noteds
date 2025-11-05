@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Admin - Ticket Details')
+@section('title', __('messages.admin_ticket_details'))
 
 @section('content')
 <div class="py-12">
@@ -13,7 +13,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                     </a>
-                    <h1 class="text-3xl font-bold text-gray-900">Ticket #{{ substr($ticket->id, 0, 8) }}</h1>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.ticket') }} #{{ substr($ticket->id, 0, 8) }}</h1>
                 </div>
             </div>
         </div>
@@ -38,36 +38,36 @@
                         <h2 class="text-xl font-bold text-gray-900">{{ $ticket->title }}</h2>
                         @if($ticket->status === 'open')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                Open
+                                {{ __('messages.open') }}
                             </span>
                         @elseif($ticket->status === 'in_progress')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                In Progress
+                                {{ __('messages.in_progress') }}
                             </span>
                         @elseif($ticket->status === 'resolved')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                                Resolved
+                                {{ __('messages.resolved') }}
                             </span>
                         @else
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                                Closed
+                                {{ __('messages.closed') }}
                             </span>
                         @endif
                         @if($ticket->priority === 'urgent')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                                Urgent
+                                {{ __('messages.urgent') }}
                             </span>
                         @elseif($ticket->priority === 'high')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
-                                High
+                                {{ __('messages.high') }}
                             </span>
                         @elseif($ticket->priority === 'medium')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                Medium
+                                {{ __('messages.medium') }}
                             </span>
                         @else
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                Low
+                                {{ __('messages.low') }}
                             </span>
                         @endif
                     </div>
@@ -75,7 +75,7 @@
             </div>
             <div class="p-6">
                 <div class="mb-6">
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">From</h3>
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">{{ __('messages.from') }}</h3>
                     <div class="flex items-center gap-3">
                         @if($ticket->user->avatar)
                             <img src="{{ $ticket->user->avatar }}" alt="{{ $ticket->user->name }}" class="w-10 h-10 rounded-full">
@@ -93,7 +93,7 @@
 
                 @if($ticket->links && count($ticket->links) > 0)
                     <div class="border-t border-gray-200 pt-6 mb-6">
-                        <h3 class="text-sm font-medium text-gray-700 mb-3">Related Links</h3>
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">{{ __('messages.related_links') }}</h3>
                         <div class="flex flex-wrap gap-2">
                             @foreach($ticket->links as $link)
                                 <a href="{{ $link }}" target="_blank" class="inline-flex items-center px-3 py-1 rounded-lg text-sm text-blue-600 bg-blue-50 hover:bg-blue-100">
@@ -113,22 +113,22 @@
                 <div class="border-t border-gray-200 pt-6">
                     <div class="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                            <span class="font-medium text-gray-700">Created:</span>
+                            <span class="font-medium text-gray-700">{{ __('messages.created') }}:</span>
                             <span class="text-gray-600 ml-2">{{ $ticket->created_at->format('F d, Y H:i') }}</span>
                         </div>
                         <div>
-                            <span class="font-medium text-gray-700">Last Updated:</span>
+                            <span class="font-medium text-gray-700">{{ __('messages.last_updated') }}:</span>
                             <span class="text-gray-600 ml-2">{{ $ticket->updated_at->format('F d, Y H:i') }}</span>
                         </div>
                         @if($ticket->assignedAdmin)
                             <div>
-                                <span class="font-medium text-gray-700">Assigned To:</span>
+                                <span class="font-medium text-gray-700">{{ __('messages.assigned_to') }}:</span>
                                 <span class="text-gray-600 ml-2">{{ $ticket->assignedAdmin->name }}</span>
                             </div>
                         @endif
                         @if($ticket->closedByUser)
                             <div>
-                                <span class="font-medium text-gray-700">Closed By:</span>
+                                <span class="font-medium text-gray-700">{{ __('messages.closed_by') }}:</span>
                                 <span class="text-gray-600 ml-2">{{ $ticket->closedByUser->name }}</span>
                             </div>
                         @endif
@@ -140,7 +140,7 @@
         <!-- Conversation Thread -->
         <div class="bg-white shadow-sm rounded-lg border border-gray-200 mb-6">
             <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h3 class="text-lg font-semibold text-gray-900">Conversation</h3>
+                <h3 class="text-lg font-semibold text-gray-900">{{ __('messages.conversation') }}</h3>
             </div>
             <div class="divide-y divide-gray-200">
                 <!-- Original Ticket Message -->
@@ -159,7 +159,7 @@
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="font-semibold text-gray-900">{{ $ticket->user->name }}</span>
                                 <span class="text-xs text-gray-500">{{ $ticket->created_at->format('M d, Y H:i') }}</span>
-                                <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">Original Message</span>
+                                <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">{{ __('messages.original_message') }}</span>
                             </div>
                             <div class="prose max-w-none">
                                 <p class="text-gray-700 whitespace-pre-wrap">{{ $ticket->description }}</p>
@@ -185,9 +185,9 @@
                                 <div class="flex items-center gap-2 mb-2">
                                     <span class="font-semibold text-gray-900">{{ $reply->user->name }}</span>
                                     @if($reply->is_admin)
-                                        <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">Admin</span>
+                                        <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">{{ __('messages.admin') }}</span>
                                     @else
-                                        <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">User</span>
+                                        <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">{{ __('messages.user') }}</span>
                                     @endif
                                     <span class="text-xs text-gray-500">{{ $reply->created_at->format('M d, Y H:i') }}</span>
                                 </div>
@@ -199,7 +199,7 @@
                     </div>
                 @empty
                     <div class="p-6 text-center text-gray-500">
-                        No replies yet.
+                        {{ __('messages.no_replies_yet') }}
                     </div>
                 @endforelse
             </div>
@@ -208,17 +208,17 @@
         <!-- Admin Actions -->
         <div class="bg-white shadow-sm rounded-lg border border-gray-200 mb-6">
             <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h3 class="text-lg font-semibold text-gray-900">Admin Actions</h3>
+                <h3 class="text-lg font-semibold text-gray-900">{{ __('messages.admin_actions') }}</h3>
             </div>
             <div class="p-6 space-y-6">
                 <!-- Assign Ticket -->
                 <div>
-                    <h4 class="text-sm font-medium text-gray-700 mb-3">Assign to Admin</h4>
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">{{ __('messages.assign_to_admin') }}</h4>
                     <form action="{{ route('admin.tickets.assign', $ticket) }}" method="POST" class="flex items-end gap-2">
                         @csrf
                         <div class="flex-1">
                             <select name="assigned_to" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                                <option value="">Select admin...</option>
+                                <option value="">{{ __('messages.select_admin') }}</option>
                                 @foreach($admins as $admin)
                                     <option value="{{ $admin->id }}" {{ $ticket->assigned_to === $admin->id ? 'selected' : '' }}>
                                         {{ $admin->name }}
@@ -227,38 +227,38 @@
                             </select>
                         </div>
                         <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                            Assign
+                            {{ __('messages.assign') }}
                         </button>
                     </form>
                 </div>
 
                 <!-- Update Status & Priority -->
                 <div class="border-t border-gray-200 pt-6">
-                    <h4 class="text-sm font-medium text-gray-700 mb-3">Update Status & Priority</h4>
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">{{ __('messages.update_status_priority') }}</h4>
                     <form action="{{ route('admin.tickets.update', $ticket) }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         @csrf
                         @method('PATCH')
                         <div>
-                            <label for="status" class="block text-xs font-medium text-gray-700 mb-2">Status</label>
+                            <label for="status" class="block text-xs font-medium text-gray-700 mb-2">{{ __('messages.status') }}</label>
                             <select name="status" id="status" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                                <option value="open" {{ $ticket->status === 'open' ? 'selected' : '' }}>Open</option>
-                                <option value="in_progress" {{ $ticket->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                <option value="resolved" {{ $ticket->status === 'resolved' ? 'selected' : '' }}>Resolved</option>
-                                <option value="closed" {{ $ticket->status === 'closed' ? 'selected' : '' }}>Closed</option>
+                                <option value="open" {{ $ticket->status === 'open' ? 'selected' : '' }}>{{ __('messages.open') }}</option>
+                                <option value="in_progress" {{ $ticket->status === 'in_progress' ? 'selected' : '' }}>{{ __('messages.in_progress') }}</option>
+                                <option value="resolved" {{ $ticket->status === 'resolved' ? 'selected' : '' }}>{{ __('messages.resolved') }}</option>
+                                <option value="closed" {{ $ticket->status === 'closed' ? 'selected' : '' }}>{{ __('messages.closed') }}</option>
                             </select>
                         </div>
                         <div>
-                            <label for="priority" class="block text-xs font-medium text-gray-700 mb-2">Priority</label>
+                            <label for="priority" class="block text-xs font-medium text-gray-700 mb-2">{{ __('messages.priority') }}</label>
                             <select name="priority" id="priority" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                                <option value="low" {{ $ticket->priority === 'low' ? 'selected' : '' }}>Low</option>
-                                <option value="medium" {{ $ticket->priority === 'medium' ? 'selected' : '' }}>Medium</option>
-                                <option value="high" {{ $ticket->priority === 'high' ? 'selected' : '' }}>High</option>
-                                <option value="urgent" {{ $ticket->priority === 'urgent' ? 'selected' : '' }}>Urgent</option>
+                                <option value="low" {{ $ticket->priority === 'low' ? 'selected' : '' }}>{{ __('messages.low') }}</option>
+                                <option value="medium" {{ $ticket->priority === 'medium' ? 'selected' : '' }}>{{ __('messages.medium') }}</option>
+                                <option value="high" {{ $ticket->priority === 'high' ? 'selected' : '' }}>{{ __('messages.high') }}</option>
+                                <option value="urgent" {{ $ticket->priority === 'urgent' ? 'selected' : '' }}>{{ __('messages.urgent') }}</option>
                             </select>
                         </div>
                         <div class="flex items-end">
                             <button type="submit" class="w-full px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                                Update
+                                {{ __('messages.update') }}
                             </button>
                         </div>
                     </form>
@@ -269,27 +269,27 @@
         <!-- Reply Form -->
         @if($ticket->status !== 'closed')
             <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Send Reply</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.send_reply') }}</h3>
                 <form action="{{ route('admin.tickets.reply', $ticket) }}" method="POST">
                     @csrf
                     <div class="mb-4">
-                        <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Your Message</label>
+                        <label for="message" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.your_message') }}</label>
                         <textarea name="message" id="message" rows="5" required minlength="10"
-                            placeholder="Type your response to the user here..."
+                            :placeholder="__('messages.type_your_response')"
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 @error('message') border-red-500 @enderror">{{ old('message') }}</textarea>
                         @error('message')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                        <p class="mt-1 text-xs text-gray-500">Minimum 10 characters required.</p>
+                        <p class="mt-1 text-xs text-gray-500">{{ __('messages.minimum_10_characters') }}</p>
                     </div>
                     <button type="submit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
-                        Send Reply
+                        {{ __('messages.send_reply') }}
                     </button>
                 </form>
             </div>
         @else
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-                <p class="text-gray-600">This ticket is closed. You cannot add more replies.</p>
+                <p class="text-gray-600">{{ __('messages.ticket_closed_no_replies') }}</p>
             </div>
         @endif
     </div>

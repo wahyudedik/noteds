@@ -28,7 +28,11 @@ class SettingsController extends Controller
         $referralSignupReward = Setting::getReferralSignupReward();
         $referralCommissionPercent = Setting::getReferralCommissionPercent();
         
-        return view('admin.settings.index', compact('settings', 's3Settings', 'premiumPrice', 'referralSignupReward', 'referralCommissionPercent'));
+        // Get marketplace commission settings
+        $platformCommissionPercent = Setting::getPlatformCommissionPercent();
+        $creatorCommissionPercent = Setting::getCreatorCommissionPercent();
+        
+        return view('admin.settings.index', compact('settings', 's3Settings', 'premiumPrice', 'referralSignupReward', 'referralCommissionPercent', 'platformCommissionPercent', 'creatorCommissionPercent'));
     }
 
     /**
@@ -48,6 +52,8 @@ class SettingsController extends Controller
             'premium_price_monthly' => 'nullable|numeric|min:0|max:10000000',
             'referral_reward_signup' => 'nullable|numeric|min:0|max:10000000',
             'referral_reward_commission_percent' => 'nullable|numeric|min:0|max:100',
+            'platform_commission_percent' => 'nullable|numeric|min:0|max:100',
+            'creator_commission_percent' => 'nullable|numeric|min:0|max:100',
         ]);
 
         // Update or create S3 settings
@@ -104,6 +110,27 @@ class SettingsController extends Controller
             );
         }
 
+        // Update marketplace commission settings
+        if ($request->has('platform_commission_percent')) {
+            Setting::setSetting(
+                'platform_commission_percent',
+                $request->input('platform_commission_percent', 20),
+                'number',
+                'marketplace',
+                'Platform commission percentage (deducted from every transaction)'
+            );
+        }
+
+        if ($request->has('creator_commission_percent')) {
+            Setting::setSetting(
+                'creator_commission_percent',
+                $request->input('creator_commission_percent', 0),
+                'number',
+                'marketplace',
+                'Creator commission percentage (only for original creator on resale)'
+            );
+        }
+
         $message = 'Settings updated successfully.';
         $updates = [];
         
@@ -117,6 +144,14 @@ class SettingsController extends Controller
         
         if ($request->has('referral_reward_commission_percent')) {
             $updates[] = 'Referral commission updated to ' . $request->input('referral_reward_commission_percent') . '%';
+        }
+        
+        if ($request->has('platform_commission_percent')) {
+            $updates[] = 'Platform commission updated to ' . $request->input('platform_commission_percent') . '%';
+        }
+        
+        if ($request->has('creator_commission_percent')) {
+            $updates[] = 'Creator commission updated to ' . $request->input('creator_commission_percent') . '%';
         }
         
         if (!empty($updates)) {

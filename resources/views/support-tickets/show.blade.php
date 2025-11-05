@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             } else {
-                if (confirm('Are you sure you want to delete this ticket? This action cannot be undone.')) {
+                if (confirm(@json(__('messages.delete_ticket_confirm')))) {
                     formElement.submit();
                 }
             }

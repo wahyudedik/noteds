@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create Landing Page Section')
+@section('title', __('messages.admin_create_landing_section'))
 
 @section('content')
 <div class="py-8 sm:py-12">
@@ -9,11 +9,11 @@
         <div class="mb-8">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Create Landing Page Section</h1>
-                    <p class="mt-2 text-base text-gray-600">Add a new section to the homepage</p>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.admin_create_landing_section') }}</h1>
+                    <p class="mt-2 text-base text-gray-600">{{ __('messages.add_new_section_homepage') }}</p>
                 </div>
                 <a href="{{ route('admin.landing-page.index') }}" class="text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                    ← Back to List
+                    ← {{ __('messages.back_to_list') }}
                 </a>
             </div>
         </div>
@@ -25,18 +25,18 @@
                 <!-- Section Type -->
                 <div>
                     <label for="section_type" class="block text-sm font-medium text-gray-700 mb-2">
-                        Section Type <span class="text-red-500">*</span>
+                        {{ __('messages.section_type') }} <span class="text-red-500">*</span>
                     </label>
                     <select name="section_type" id="section_type" required
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 @error('section_type') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
-                        <option value="">Select Section Type</option>
+                        <option value="">{{ __('messages.select_section_type') }}</option>
                         @foreach($sectionTypes as $key => $label)
                             <option value="{{ $key }}" {{ old('section_type') === $key ? 'selected' : '' }}>
                                 {{ $label }}
                             </option>
                         @endforeach
                     </select>
-                    <p class="mt-1 text-xs text-gray-500">Choose the type of section you want to create</p>
+                    <p class="mt-1 text-xs text-gray-500">{{ __('messages.choose_section_type_create') }}</p>
                     @error('section_type')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -45,7 +45,7 @@
                 <!-- Title -->
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
-                        Title
+                        {{ __('messages.title') }}
                     </label>
                     <input type="text" 
                         id="title"
@@ -61,10 +61,10 @@
                 <!-- Subtitle -->
                 <div>
                     <label for="subtitle" class="block text-sm font-medium text-gray-700 mb-2">
-                        Subtitle / Description
+                        {{ __('messages.subtitle_description') }}
                     </label>
                     <textarea name="subtitle" id="subtitle" rows="2"
-                        placeholder="Brief description or subtitle..."
+                        :placeholder="__('messages.brief_description_subtitle')"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 @error('subtitle') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">{{ old('subtitle') }}</textarea>
                     @error('subtitle')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -74,10 +74,10 @@
                 <!-- Content Builder (Dynamic based on section type) -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Content <span class="text-red-500">*</span>
+                        {{ __('messages.content') }} <span class="text-red-500">*</span>
                     </label>
                     <div id="content-builder" class="border border-gray-300 rounded-lg p-4 bg-gray-50">
-                        <p class="text-sm text-gray-500">Select a section type to configure content</p>
+                        <p class="text-sm text-gray-500">{{ __('messages.select_section_type') }}</p>
                     </div>
                     <input type="hidden" name="content" id="content-input" value="{{ old('content', '{}') }}" required>
                     @error('content')
@@ -90,7 +90,7 @@
                     <!-- Image URL -->
                     <div>
                         <label for="image_url" class="block text-sm font-medium text-gray-700 mb-2">
-                            Image URL
+                            {{ __('messages.image_url') }}
                         </label>
                         <input type="url" 
                             id="image_url"
@@ -103,7 +103,7 @@
                     <!-- Order -->
                     <div>
                         <label for="order" class="block text-sm font-medium text-gray-700 mb-2">
-                            Display Order
+                            {{ __('messages.display_order') }}
                         </label>
                         <input type="number" 
                             id="order"
@@ -111,32 +111,32 @@
                             value="{{ old('order', 0) }}"
                             min="0"
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                        <p class="mt-1 text-xs text-gray-500">Lower numbers appear first</p>
+                        <p class="mt-1 text-xs text-gray-500">{{ __('messages.lower_numbers_appear_first') }}</p>
                     </div>
 
                     <!-- Background Color -->
                     <div>
                         <label for="background_color" class="block text-sm font-medium text-gray-700 mb-2">
-                            Background Color
+                            {{ __('messages.background_color') }}
                         </label>
                         <input type="text" 
                             id="background_color"
                             name="background_color"
                             value="{{ old('background_color') }}"
-                            placeholder="#ffffff or bg-blue-50"
+                            :placeholder="__('messages.hex_or_tailwind')"
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <!-- Text Color -->
                     <div>
                         <label for="text_color" class="block text-sm font-medium text-gray-700 mb-2">
-                            Text Color
+                            {{ __('messages.text_color') }}
                         </label>
                         <input type="text" 
                             id="text_color"
                             name="text_color"
                             value="{{ old('text_color') }}"
-                            placeholder="#000000 or text-gray-900"
+                            :placeholder="__('messages.hex_or_tailwind_text')"
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
@@ -144,13 +144,13 @@
                 <!-- Alignment -->
                 <div>
                     <label for="alignment" class="block text-sm font-medium text-gray-700 mb-2">
-                        Alignment
+                        {{ __('messages.alignment') }}
                     </label>
                     <select name="alignment" id="alignment"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                        <option value="left" {{ old('alignment', 'center') === 'left' ? 'selected' : '' }}>Left</option>
-                        <option value="center" {{ old('alignment', 'center') === 'center' ? 'selected' : '' }}>Center</option>
-                        <option value="right" {{ old('alignment', 'center') === 'right' ? 'selected' : '' }}>Right</option>
+                        <option value="left" {{ old('alignment', 'center') === 'left' ? 'selected' : '' }}>{{ __('messages.left') }}</option>
+                        <option value="center" {{ old('alignment', 'center') === 'center' ? 'selected' : '' }}>{{ __('messages.center') }}</option>
+                        <option value="right" {{ old('alignment', 'center') === 'right' ? 'selected' : '' }}>{{ __('messages.right') }}</option>
                     </select>
                 </div>
 
@@ -158,7 +158,7 @@
                 <div id="promo-dates" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="valid_from" class="block text-sm font-medium text-gray-700 mb-2">
-                            Valid From
+                            {{ __('messages.valid_from') }}
                         </label>
                         <input type="date" 
                             id="valid_from"
@@ -169,7 +169,7 @@
 
                     <div>
                         <label for="valid_until" class="block text-sm font-medium text-gray-700 mb-2">
-                            Valid Until
+                            {{ __('messages.valid_until') }}
                         </label>
                         <input type="date" 
                             id="valid_until"
@@ -188,17 +188,17 @@
                         {{ old('is_active', true) ? 'checked' : '' }}
                         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                     <label for="is_active" class="ml-2 block text-sm text-gray-900">
-                        Active (visible on homepage)
+                        {{ __('messages.active_visible_homepage') }}
                     </label>
                 </div>
 
                 <!-- Submit Buttons -->
                 <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
                     <a href="{{ route('admin.landing-page.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200">
-                        Cancel
+                        {{ __('messages.cancel') }}
                     </a>
                     <button type="submit" class="px-6 py-2 border border-transparent rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                        Create Section
+                        {{ __('messages.create_section') }}
                     </button>
                 </div>
             </div>
@@ -209,6 +209,54 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Translation strings for JavaScript templates
+    const translations = {
+        heroSectionContent: @json(__('messages.hero_section_content')),
+        primaryButtonText: @json(__('messages.primary_button_text')),
+        primaryButtonLink: @json(__('messages.primary_button_link')),
+        secondaryButtonTextOptional: @json(__('messages.secondary_button_text_optional')),
+        secondaryButtonLinkOptional: @json(__('messages.secondary_button_link_optional')),
+        featuresGrid: @json(__('messages.features_grid')),
+        addFeature: @json(__('messages.add_feature')),
+        featureTitle: @json(__('messages.feature_title')),
+        iconSvg: @json(__('messages.icon_svg')),
+        description: @json(__('messages.description')),
+        howItWorksSteps: @json(__('messages.how_it_works_steps')),
+        addStep: @json(__('messages.add_step')),
+        stepNumber: @json(__('messages.step_number')),
+        stepTitle: @json(__('messages.step_title')),
+        premiumBenefits: @json(__('messages.premium_benefits')),
+        addBenefit: @json(__('messages.add_benefit')),
+        benefitTitle: @json(__('messages.benefit_title')),
+        ctaButtonText: @json(__('messages.cta_button_text')),
+        trustIndicators: @json(__('messages.trust_indicators')),
+        addIndicator: @json(__('messages.add_indicator')),
+        text: @json(__('messages.text')),
+        testimonials: @json(__('messages.testimonials')),
+        addTestimonial: @json(__('messages.add_testimonial')),
+        name: @json(__('messages.name')),
+        role: @json(__('messages.role')),
+        testimonialContent: @json(__('messages.testimonial_content')),
+        avatarUrl: @json(__('messages.avatar_url')),
+        rating15: @json(__('messages.rating_1_5')),
+        promotionalSection: @json(__('messages.promotional_section')),
+        promoText: @json(__('messages.promo_text')),
+        limitedTimeOffer: @json(__('messages.limited_time_offer')),
+        ctaButtonLink: @json(__('messages.cta_button_link')),
+        discountCodeOptional: @json(__('messages.discount_code_optional')),
+        customSectionJson: @json(__('messages.custom_section_json')),
+        enterJsonContent: @json(__('messages.enter_json_content')),
+        remove: @json(__('messages.remove')),
+        blue: @json(__('messages.blue')),
+        green: @json(__('messages.green')),
+        purple: @json(__('messages.purple')),
+        yellow: @json(__('messages.yellow')),
+        getStartedFree: @json(__('messages.get_started_free')),
+        signIn: @json(__('messages.sign_in')),
+        upgradeToPremium: @json(__('messages.upgrade_to_premium')),
+        claimNow: @json(__('messages.claim_now')),
+    };
+    
     const sectionTypeSelect = document.getElementById('section_type');
     const contentBuilder = document.getElementById('content-builder');
     const contentInput = document.getElementById('content-input');
@@ -221,21 +269,21 @@ document.addEventListener('DOMContentLoaded', function() {
         hero: {
             html: `
                 <div class="space-y-4">
-                    <p class="text-sm font-medium text-gray-700">Hero Section Content:</p>
+                    <p class="text-sm font-medium text-gray-700">${translations.heroSectionContent}</p>
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">Primary Button Text</label>
-                        <input type="text" name="primary_button_text" class="w-full rounded border-gray-300 text-sm" placeholder="Get Started Free">
+                        <label class="block text-xs text-gray-600 mb-1">${translations.primaryButtonText}</label>
+                        <input type="text" name="primary_button_text" class="w-full rounded border-gray-300 text-sm" placeholder="${translations.getStartedFree}">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">Primary Button Link</label>
+                        <label class="block text-xs text-gray-600 mb-1">${translations.primaryButtonLink}</label>
                         <input type="text" name="primary_button_link" class="w-full rounded border-gray-300 text-sm" placeholder="/register">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">Secondary Button Text (optional)</label>
-                        <input type="text" name="secondary_button_text" class="w-full rounded border-gray-300 text-sm" placeholder="Sign In">
+                        <label class="block text-xs text-gray-600 mb-1">${translations.secondaryButtonTextOptional}</label>
+                        <input type="text" name="secondary_button_text" class="w-full rounded border-gray-300 text-sm" placeholder="${translations.signIn}">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">Secondary Button Link (optional)</label>
+                        <label class="block text-xs text-gray-600 mb-1">${translations.secondaryButtonLinkOptional}</label>
                         <input type="text" name="secondary_button_link" class="w-full rounded border-gray-300 text-sm" placeholder="/login">
                     </div>
                 </div>
@@ -252,10 +300,10 @@ document.addEventListener('DOMContentLoaded', function() {
         features: {
             html: `
                 <div class="space-y-4">
-                    <p class="text-sm font-medium text-gray-700">Features Grid:</p>
+                    <p class="text-sm font-medium text-gray-700">${translations.featuresGrid}</p>
                     <div id="features-list" class="space-y-3"></div>
                     <button type="button" id="add-feature" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                        + Add Feature
+                        ${translations.addFeature}
                     </button>
                 </div>
             `,
@@ -275,10 +323,10 @@ document.addEventListener('DOMContentLoaded', function() {
         how_it_works: {
             html: `
                 <div class="space-y-4">
-                    <p class="text-sm font-medium text-gray-700">How It Works Steps:</p>
+                    <p class="text-sm font-medium text-gray-700">${translations.howItWorksSteps}</p>
                     <div id="steps-list" class="space-y-3"></div>
                     <button type="button" id="add-step" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                        + Add Step
+                        ${translations.addStep}
                     </button>
                 </div>
             `,
@@ -297,14 +345,14 @@ document.addEventListener('DOMContentLoaded', function() {
         premium_benefits: {
             html: `
                 <div class="space-y-4">
-                    <p class="text-sm font-medium text-gray-700">Premium Benefits:</p>
+                    <p class="text-sm font-medium text-gray-700">${translations.premiumBenefits}</p>
                     <div id="benefits-list" class="space-y-3"></div>
                     <button type="button" id="add-benefit" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                        + Add Benefit
+                        ${translations.addBenefit}
                     </button>
                     <div class="mt-4">
-                        <label class="block text-xs text-gray-600 mb-1">CTA Button Text</label>
-                        <input type="text" name="cta_text" class="w-full rounded border-gray-300 text-sm" placeholder="Upgrade to Premium">
+                        <label class="block text-xs text-gray-600 mb-1">${translations.ctaButtonText}</label>
+                        <input type="text" name="cta_text" class="w-full rounded border-gray-300 text-sm" placeholder="${translations.upgradeToPremium}">
                     </div>
                 </div>
             `,
@@ -326,10 +374,10 @@ document.addEventListener('DOMContentLoaded', function() {
         trust_indicators: {
             html: `
                 <div class="space-y-4">
-                    <p class="text-sm font-medium text-gray-700">Trust Indicators:</p>
+                    <p class="text-sm font-medium text-gray-700">${translations.trustIndicators}</p>
                     <div id="indicators-list" class="space-y-3"></div>
                     <button type="button" id="add-indicator" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                        + Add Indicator
+                        ${translations.addIndicator}
                     </button>
                 </div>
             `,
@@ -347,10 +395,10 @@ document.addEventListener('DOMContentLoaded', function() {
         testimonials: {
             html: `
                 <div class="space-y-4">
-                    <p class="text-sm font-medium text-gray-700">Testimonials:</p>
+                    <p class="text-sm font-medium text-gray-700">${translations.testimonials}</p>
                     <div id="testimonials-list" class="space-y-3"></div>
                     <button type="button" id="add-testimonial" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                        + Add Testimonial
+                        ${translations.addTestimonial}
                     </button>
                 </div>
             `,
@@ -371,21 +419,21 @@ document.addEventListener('DOMContentLoaded', function() {
         promo: {
             html: `
                 <div class="space-y-4">
-                    <p class="text-sm font-medium text-gray-700">Promotional Section:</p>
+                    <p class="text-sm font-medium text-gray-700">${translations.promotionalSection}</p>
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">Promo Text</label>
-                        <textarea name="promo_text" rows="3" class="w-full rounded border-gray-300 text-sm" placeholder="Limited time offer..."></textarea>
+                        <label class="block text-xs text-gray-600 mb-1">${translations.promoText}</label>
+                        <textarea name="promo_text" rows="3" class="w-full rounded border-gray-300 text-sm" placeholder="${translations.limitedTimeOffer}"></textarea>
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">CTA Button Text</label>
-                        <input type="text" name="cta_text" class="w-full rounded border-gray-300 text-sm" placeholder="Claim Now">
+                        <label class="block text-xs text-gray-600 mb-1">${translations.ctaButtonText}</label>
+                        <input type="text" name="cta_text" class="w-full rounded border-gray-300 text-sm" placeholder="${translations.claimNow}">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">CTA Button Link</label>
+                        <label class="block text-xs text-gray-600 mb-1">${translations.ctaButtonLink}</label>
                         <input type="text" name="cta_link" class="w-full rounded border-gray-300 text-sm" placeholder="/promo">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">Discount Code (optional)</label>
+                        <label class="block text-xs text-gray-600 mb-1">${translations.discountCodeOptional}</label>
                         <input type="text" name="discount_code" class="w-full rounded border-gray-300 text-sm" placeholder="SAVE50">
                     </div>
                 </div>
@@ -402,9 +450,9 @@ document.addEventListener('DOMContentLoaded', function() {
         custom: {
             html: `
                 <div class="space-y-4">
-                    <p class="text-sm font-medium text-gray-700">Custom Section (JSON):</p>
+                    <p class="text-sm font-medium text-gray-700">${translations.customSectionJson}</p>
                     <textarea id="custom-json" rows="10" class="w-full rounded border-gray-300 text-sm font-mono" placeholder='{"key": "value"}'></textarea>
-                    <p class="text-xs text-gray-500">Enter JSON content for custom section</p>
+                    <p class="text-xs text-gray-500">${translations.enterJsonContent}</p>
                 </div>
             `,
             getData: function() {
@@ -437,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add event listeners for dynamic content
             setupDynamicContent(type);
         } else {
-            contentBuilder.innerHTML = '<p class="text-sm text-gray-500">Select a section type to configure content</p>';
+            contentBuilder.innerHTML = '<p class="text-sm text-gray-500">{{ __('messages.select_section_type') }}</p>';
         }
     });
 
@@ -467,17 +515,17 @@ document.addEventListener('DOMContentLoaded', function() {
             div.className = 'feature-item border border-gray-300 rounded p-3 bg-white';
             div.innerHTML = `
                 <div class="grid grid-cols-2 gap-2 mb-2">
-                    <input type="text" name="features[${featureIndex}][title]" placeholder="Feature title" class="text-sm rounded border-gray-300">
-                    <input type="text" name="features[${featureIndex}][icon]" placeholder="Icon/SVG" class="text-sm rounded border-gray-300">
+                    <input type="text" name="features[${featureIndex}][title]" placeholder="${translations.featureTitle}" class="text-sm rounded border-gray-300">
+                    <input type="text" name="features[${featureIndex}][icon]" placeholder="${translations.iconSvg}" class="text-sm rounded border-gray-300">
                 </div>
-                <textarea name="features[${featureIndex}][description]" rows="2" placeholder="Description" class="w-full text-sm rounded border-gray-300 mb-2"></textarea>
+                <textarea name="features[${featureIndex}][description]" rows="2" placeholder="${translations.description}" class="w-full text-sm rounded border-gray-300 mb-2"></textarea>
                 <select name="features[${featureIndex}][color]" class="text-sm rounded border-gray-300">
-                    <option value="blue">Blue</option>
-                    <option value="green">Green</option>
-                    <option value="purple">Purple</option>
-                    <option value="yellow">Yellow</option>
+                    <option value="blue">${translations.blue}</option>
+                    <option value="green">${translations.green}</option>
+                    <option value="purple">${translations.purple}</option>
+                    <option value="yellow">${translations.yellow}</option>
                 </select>
-                <button type="button" class="remove-item text-red-600 text-xs mt-2">Remove</button>
+                <button type="button" class="remove-item text-red-600 text-xs mt-2">${translations.remove}</button>
             `;
             featuresList.appendChild(div);
             featureIndex++;
@@ -499,11 +547,11 @@ document.addEventListener('DOMContentLoaded', function() {
             div.className = 'step-item border border-gray-300 rounded p-3 bg-white';
             div.innerHTML = `
                 <div class="grid grid-cols-3 gap-2 mb-2">
-                    <input type="text" name="steps[${stepIndex}][number]" placeholder="Step number" class="text-sm rounded border-gray-300">
-                    <input type="text" name="steps[${stepIndex}][title]" placeholder="Step title" class="text-sm rounded border-gray-300">
-                    <textarea name="steps[${stepIndex}][description]" rows="2" placeholder="Description" class="text-sm rounded border-gray-300"></textarea>
+                    <input type="text" name="steps[${stepIndex}][number]" placeholder="${translations.stepNumber}" class="text-sm rounded border-gray-300">
+                    <input type="text" name="steps[${stepIndex}][title]" placeholder="${translations.stepTitle}" class="text-sm rounded border-gray-300">
+                    <textarea name="steps[${stepIndex}][description]" rows="2" placeholder="${translations.description}" class="text-sm rounded border-gray-300"></textarea>
                 </div>
-                <button type="button" class="remove-item text-red-600 text-xs">Remove</button>
+                <button type="button" class="remove-item text-red-600 text-xs">${translations.remove}</button>
             `;
             stepsList.appendChild(div);
             stepIndex++;
@@ -525,11 +573,11 @@ document.addEventListener('DOMContentLoaded', function() {
             div.className = 'benefit-item border border-gray-300 rounded p-3 bg-white';
             div.innerHTML = `
                 <div class="grid grid-cols-2 gap-2 mb-2">
-                    <input type="text" name="benefits[${benefitIndex}][title]" placeholder="Benefit title" class="text-sm rounded border-gray-300">
-                    <input type="text" name="benefits[${benefitIndex}][icon]" placeholder="Icon/SVG" class="text-sm rounded border-gray-300">
+                    <input type="text" name="benefits[${benefitIndex}][title]" placeholder="${translations.benefitTitle}" class="text-sm rounded border-gray-300">
+                    <input type="text" name="benefits[${benefitIndex}][icon]" placeholder="${translations.iconSvg}" class="text-sm rounded border-gray-300">
                 </div>
-                <textarea name="benefits[${benefitIndex}][description]" rows="2" placeholder="Description" class="w-full text-sm rounded border-gray-300 mb-2"></textarea>
-                <button type="button" class="remove-item text-red-600 text-xs">Remove</button>
+                <textarea name="benefits[${benefitIndex}][description]" rows="2" placeholder="${translations.description}" class="w-full text-sm rounded border-gray-300 mb-2"></textarea>
+                <button type="button" class="remove-item text-red-600 text-xs">${translations.remove}</button>
             `;
             benefitsList.appendChild(div);
             benefitIndex++;
@@ -551,10 +599,10 @@ document.addEventListener('DOMContentLoaded', function() {
             div.className = 'indicator-item border border-gray-300 rounded p-3 bg-white';
             div.innerHTML = `
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="text" name="indicators[${indicatorIndex}][icon]" placeholder="Icon/SVG" class="text-sm rounded border-gray-300">
-                    <input type="text" name="indicators[${indicatorIndex}][text]" placeholder="Text" class="text-sm rounded border-gray-300">
+                    <input type="text" name="indicators[${indicatorIndex}][icon]" placeholder="${translations.iconSvg}" class="text-sm rounded border-gray-300">
+                    <input type="text" name="indicators[${indicatorIndex}][text]" placeholder="${translations.text}" class="text-sm rounded border-gray-300">
                 </div>
-                <button type="button" class="remove-item text-red-600 text-xs mt-2">Remove</button>
+                <button type="button" class="remove-item text-red-600 text-xs mt-2">${translations.remove}</button>
             `;
             indicatorsList.appendChild(div);
             indicatorIndex++;
@@ -576,15 +624,15 @@ document.addEventListener('DOMContentLoaded', function() {
             div.className = 'testimonial-item border border-gray-300 rounded p-3 bg-white';
             div.innerHTML = `
                 <div class="grid grid-cols-2 gap-2 mb-2">
-                    <input type="text" name="testimonials[${testimonialIndex}][name]" placeholder="Name" class="text-sm rounded border-gray-300">
-                    <input type="text" name="testimonials[${testimonialIndex}][role]" placeholder="Role" class="text-sm rounded border-gray-300">
+                    <input type="text" name="testimonials[${testimonialIndex}][name]" placeholder="${translations.name}" class="text-sm rounded border-gray-300">
+                    <input type="text" name="testimonials[${testimonialIndex}][role]" placeholder="${translations.role}" class="text-sm rounded border-gray-300">
                 </div>
-                <textarea name="testimonials[${testimonialIndex}][content]" rows="3" placeholder="Testimonial content" class="w-full text-sm rounded border-gray-300 mb-2"></textarea>
+                <textarea name="testimonials[${testimonialIndex}][content]" rows="3" placeholder="${translations.testimonialContent}" class="w-full text-sm rounded border-gray-300 mb-2"></textarea>
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="url" name="testimonials[${testimonialIndex}][avatar]" placeholder="Avatar URL" class="text-sm rounded border-gray-300">
-                    <input type="number" name="testimonials[${testimonialIndex}][rating]" placeholder="Rating (1-5)" min="1" max="5" value="5" class="text-sm rounded border-gray-300">
+                    <input type="url" name="testimonials[${testimonialIndex}][avatar]" placeholder="${translations.avatarUrl}" class="text-sm rounded border-gray-300">
+                    <input type="number" name="testimonials[${testimonialIndex}][rating]" placeholder="${translations.rating15}" min="1" max="5" value="5" class="text-sm rounded border-gray-300">
                 </div>
-                <button type="button" class="remove-item text-red-600 text-xs mt-2">Remove</button>
+                <button type="button" class="remove-item text-red-600 text-xs mt-2">${translations.remove}</button>
             `;
             testimonialsList.appendChild(div);
             testimonialIndex++;
