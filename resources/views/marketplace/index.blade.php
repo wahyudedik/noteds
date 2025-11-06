@@ -13,44 +13,56 @@
 
         <!-- Search and Filter Form -->
         <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-8">
-            <form method="GET" action="{{ route('marketplace.index') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div>
-                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.search_title') }}</label>
-                    <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                        :placeholder="__('messages.search_notes')"
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+            <form method="GET" action="{{ route('marketplace.index') }}" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div>
+                        <label for="search" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.search_title') }}</label>
+                        <input type="text" name="search" id="search" value="{{ request('search') }}" 
+                            placeholder="{{ __('messages.search_notes') }}"
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                    </div>
+                    <div>
+                        <label for="tag" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.tag') }}</label>
+                        <select name="tag" id="tag" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                            <option value="">{{ __('messages.all_tags') }}</option>
+                            @foreach($tags as $tag)
+                                <option value="{{ $tag->id }}" {{ request('tag') == $tag->id ? 'selected' : '' }}>
+                                    {{ $tag->name }} ({{ $tag->notes_count }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label for="min_price" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.min_price') }}</label>
+                        <input type="number" name="min_price" id="min_price" value="{{ request('min_price') }}" 
+                            placeholder="0" min="0" step="0.01"
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                    </div>
+                    <div>
+                        <label for="max_price" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.max_price') }}</label>
+                        <input type="number" name="max_price" id="max_price" value="{{ request('max_price') }}" 
+                            placeholder="999999999" min="0" step="0.01"
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                    </div>
+                    <div>
+                        <label for="sort" class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                        <select name="sort" id="sort" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                            <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest</option>
+                            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest</option>
+                            <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
+                            <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
+                            <option value="rating" {{ request('sort') == 'rating' ? 'selected' : '' }}>Highest Rated</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label for="tag" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.tag') }}</label>
-                    <select name="tag" id="tag" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
-                        <option value="">{{ __('messages.all_tags') }}</option>
-                        @foreach($tags as $tag)
-                            <option value="{{ $tag->id }}" {{ request('tag') == $tag->id ? 'selected' : '' }}>
-                                {{ $tag->name }} ({{ $tag->notes_count }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label for="min_price" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.min_price') }}</label>
-                    <input type="number" name="min_price" id="min_price" value="{{ request('min_price') }}" 
-                        placeholder="0" min="0" step="0.01"
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
-                </div>
-                <div>
-                    <label for="max_price" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.max_price') }}</label>
-                    <input type="number" name="max_price" id="max_price" value="{{ request('max_price') }}" 
-                        placeholder="999999999" min="0" step="0.01"
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
-                </div>
-                <div class="flex items-end gap-2">
-                    <button type="submit" class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-center justify-end gap-2">
+                    <button type="submit" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                         {{ __('messages.filter') }}
                     </button>
-                    @if(request()->hasAny(['search', 'tag', 'min_price', 'max_price']))
+                    @if(request()->hasAny(['search', 'tag', 'min_price', 'max_price', 'sort']))
                         <a href="{{ route('marketplace.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200">
                             {{ __('messages.clear') }}
                         </a>
@@ -64,9 +76,11 @@
             <div class="mb-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg p-6 shadow-lg">
                 <div class="flex items-center justify-between">
                     <div class="flex-1">
-                        <span class="inline-block px-3 py-1 bg-white rounded-full text-xs font-semibold text-orange-600 mb-2">⭐ FEATURED</span>
+                        <span class="inline-block px-3 py-1 bg-white rounded-full text-xs font-semibold text-orange-600 mb-2">⭐ {{ __('messages.featured_note') }}</span>
                         <h3 class="text-2xl font-bold text-white mb-2">
-                            <a href="{{ route('marketplace.show', $featuredBanner->note) }}" class="hover:underline">
+                            <a href="{{ route('marketplace.show', $featuredBanner->note) }}" 
+                               class="hover:underline featured-click-tracking" 
+                               data-featured-id="{{ $featuredBanner->id }}">
                                 {{ $featuredBanner->note->title }}
                             </a>
                         </h3>
@@ -78,8 +92,9 @@
                                 <span class="text-white font-semibold">FREE</span>
                             @endif
                             <a href="{{ route('marketplace.show', $featuredBanner->note) }}" 
-                               class="px-4 py-2 bg-white text-orange-600 font-semibold rounded-lg hover:bg-orange-50 transition">
-                                View Note →
+                               class="px-4 py-2 bg-white text-orange-600 font-semibold rounded-lg hover:bg-orange-50 transition featured-click-tracking" 
+                               data-featured-id="{{ $featuredBanner->id }}">
+                                {{ __('messages.view_note') }} →
                             </a>
                         </div>
                     </div>
@@ -91,7 +106,7 @@
         @if(isset($featuredNotes) && $featuredNotes->count() > 0)
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold text-gray-900">⭐ Featured Notes</h2>
+                    <h2 class="text-xl font-bold text-gray-900">⭐ {{ __('messages.featured_notes') }}</h2>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($featuredNotes as $featured)
@@ -100,14 +115,23 @@
                             <!-- Featured Badge -->
                             <div class="absolute top-2 right-2 z-10">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">
-                                    ⭐ FEATURED
+                                    ⭐ {{ __('messages.featured_note') }}
                                 </span>
                             </div>
+                            <!-- Thumbnail -->
+                            @if($note->hasThumbnails())
+                                <div class="h-48 overflow-hidden">
+                                    <img src="{{ Storage::url($note->thumbnails[0]) }}" alt="{{ $note->title }}" 
+                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                            @endif
                             <div class="p-6">
                                 <!-- Title and Content -->
                                 <div class="mb-4">
                                     <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
-                                        <a href="{{ route('marketplace.show', $note) }}">{{ $note->title }}</a>
+                                        <a href="{{ route('marketplace.show', $note) }}" 
+                                           class="featured-click-tracking" 
+                                           data-featured-id="{{ $featured->id }}">{{ $note->title }}</a>
                                     </h3>
                                     <p class="text-sm text-gray-600 line-clamp-3">{!! Str::limit(strip_tags($note->content), 120) !!}</p>
                                 </div>
@@ -127,7 +151,19 @@
                                 <div class="flex items-center justify-between pt-4 border-t border-gray-200">
                                     <div>
                                         @if($note->price > 0)
-                                            <span class="text-lg font-bold text-green-600">Rp {{ number_format($note->price, 0, ',', '.') }}</span>
+                                            @if($note->hasDiscount())
+                                                <div class="flex items-center gap-2">
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-500 line-through">Rp {{ number_format($note->price, 0, ',', '.') }}</span>
+                                                        <span class="text-lg font-bold text-green-600">Rp {{ number_format($note->discount_price, 0, ',', '.') }}</span>
+                                                    </div>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-500 text-white">
+                                                        -{{ $note->discount_percent }}%
+                                                    </span>
+                                                </div>
+                                            @else
+                                                <span class="text-lg font-bold text-green-600">Rp {{ number_format($note->price, 0, ',', '.') }}</span>
+                                            @endif
                                         @else
                                             <span class="text-lg font-bold text-gray-600">FREE</span>
                                         @endif
@@ -152,6 +188,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($notes as $note)
                     <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 group">
+                        <!-- Thumbnail -->
+                        @if($note->hasThumbnails())
+                            <div class="h-48 overflow-hidden">
+                                <img src="{{ Storage::url($note->thumbnails[0]) }}" alt="{{ $note->title }}" 
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            </div>
+                        @endif
                         <div class="p-6">
                             <!-- Title and Content -->
                             <div class="mb-4">
@@ -185,9 +228,21 @@
                                     </div>
                                 @endif
                                 @if($note->price > 0)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 font-semibold">
-                                        Rp {{ number_format($note->price, 0, ',', '.') }}
-                                    </span>
+                                    @if($note->hasDiscount())
+                                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-yellow-100">
+                                            <div class="flex flex-col items-end">
+                                                <span class="text-gray-500 line-through text-[10px]">Rp {{ number_format($note->price, 0, ',', '.') }}</span>
+                                                <span class="text-yellow-800 font-semibold">Rp {{ number_format($note->discount_price, 0, ',', '.') }}</span>
+                                            </div>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500 text-white">
+                                                -{{ $note->discount_percent }}%
+                                            </span>
+                                        </div>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 font-semibold">
+                                            Rp {{ number_format($note->price, 0, ',', '.') }}
+                                        </span>
+                                    @endif
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                                         {{ __('messages.free') }}
@@ -230,5 +285,29 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+<script>
+    // Track clicks on featured notes
+    document.addEventListener('DOMContentLoaded', function() {
+        const featuredLinks = document.querySelectorAll('.featured-click-tracking');
+        featuredLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const featuredId = this.getAttribute('data-featured-id');
+                if (featuredId) {
+                    // Track click via AJAX
+                    fetch(`/api/featured-notes/${featuredId}/click`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    }).catch(err => console.error('Failed to track click:', err));
+                }
+            });
+        });
+    });
+</script>
+@endpush
 @endsection
 

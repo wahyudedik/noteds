@@ -122,7 +122,8 @@
 
         <!-- Quick Actions -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <a href="{{ route('notes.create') }}" class="bg-white overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 group">
+            @if(auth()->user()->role === 'seller' || auth()->user()->hasRole('admin'))
+                <a href="{{ route('notes.create') }}" class="bg-white overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 group">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3 group-hover:bg-blue-200 transition-colors duration-200">
                         <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,6 +136,7 @@
                     </div>
                 </div>
             </a>
+            @endif
 
             <a href="{{ route('marketplace.index') }}" class="bg-white overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 group">
                 <div class="flex items-center">
@@ -218,11 +220,17 @@
                 </svg>
                 <h3 class="mt-4 text-lg font-medium text-gray-900">{{ __('messages.no_notes_yet') }}</h3>
                 <p class="mt-2 text-sm text-gray-500">{{ __('messages.start_creating') }}</p>
-                <div class="mt-6">
-                    <a href="{{ route('notes.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                        {{ __('messages.create_note') }}
-                    </a>
-                </div>
+                @if(auth()->user()->role === 'seller' || auth()->user()->hasRole('admin'))
+                    <div class="mt-6">
+                        <a href="{{ route('notes.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                            {{ __('messages.create_note') }}
+                        </a>
+                    </div>
+                @else
+                    <div class="mt-6">
+                        <p class="text-sm text-gray-600 mb-3">Fitur ini hanya tersedia untuk Seller. Jika ingin menjual note, silakan buat akun Seller dengan email berbeda.</p>
+                    </div>
+                @endif
             </div>
         @endif
     </div>

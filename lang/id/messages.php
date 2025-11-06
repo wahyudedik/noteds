@@ -1544,4 +1544,23 @@ return [
     
     // Note selling
     'already_sold' => 'Sudah Terjual',
+    
+    // Featured Notes
+    'featured_note' => 'Catatan Unggulan',
+    'featured_notes' => 'Catatan Unggulan',
+    'my_featured_notes' => 'Catatan Unggulan Saya',
+    'featured_notes_management' => 'Manajemen Catatan Unggulan',
+    'featured_note_detail' => 'Detail Catatan Unggulan',
+    'view_note' => 'Lihat Catatan',
+    'discover_premium_notes' => 'Temukan pilihan catatan premium pilihan kami',
+    'welcome_to_noteds' => 'Selamat Datang di Noteds!',
+    'check_out_featured_notes' => 'Lihat catatan unggulan ini:',
+    'wait_dont_go' => 'Tunggu! Jangan Pergi Dulu!',
+    'check_out_before_leave' => 'Lihat catatan unggulan ini sebelum Anda pergi:',
+    'manage_featured_notes' => 'Kelola request catatan unggulan Anda',
+    'request_featured' => 'Request Catatan Unggulan',
+    'no_featured_notes_found' => 'Tidak ada catatan unggulan ditemukan.',
+    'back_to_featured_notes' => 'Kembali ke Catatan Unggulan',
+    'close' => 'Tutup',
+    'view' => 'Lihat',
 ];

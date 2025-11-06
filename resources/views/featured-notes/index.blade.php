@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'My Featured Notes')
+@section('title', __('messages.my_featured_notes'))
 
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-8 flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">My Featured Notes</h1>
-                <p class="mt-2 text-base text-gray-600">Kelola request featured notes Anda</p>
+                <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.my_featured_notes') }}</h1>
+                <p class="mt-2 text-base text-gray-600">{{ __('messages.manage_featured_notes') }}</p>
             </div>
             <a href="{{ route('featured-notes.create') }}" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">
-                + Request Featured
+                + {{ __('messages.request_featured') }}
             </a>
         </div>
 

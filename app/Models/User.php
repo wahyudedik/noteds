@@ -278,4 +278,76 @@ class User extends Authenticatable implements MustVerifyEmail
         
         return $this->notes()->count() < $limit;
     }
+
+    /**
+     * Get purchased notes by this user.
+     */
+    public function purchasedNotes()
+    {
+        return $this->hasMany(PurchasedNote::class);
+    }
+
+    /**
+     * Get buyer collections (wishlist).
+     */
+    public function collections()
+    {
+        return $this->hasMany(BuyerCollection::class)->orderBy('order');
+    }
+
+    /**
+     * Get reading progress records.
+     */
+    public function readingProgress()
+    {
+        return $this->hasMany(ReadingProgress::class);
+    }
+
+    /**
+     * Get bookmarks.
+     */
+    public function bookmarks()
+    {
+        return $this->hasMany(Bookmark::class)->orderBy('order');
+    }
+
+    /**
+     * Get AI analyses.
+     */
+    public function aiAnalyses()
+    {
+        return $this->hasMany(AiAnalysis::class);
+    }
+
+    /**
+     * Get study materials.
+     */
+    public function studyMaterials()
+    {
+        return $this->hasMany(StudyMaterial::class);
+    }
+
+    /**
+     * Get note downloads.
+     */
+    public function noteDownloads()
+    {
+        return $this->hasMany(NoteDownload::class);
+    }
+
+    /**
+     * Check if user has purchased a note.
+     */
+    public function hasPurchasedNote($noteId): bool
+    {
+        return $this->purchasedNotes()->where('note_id', $noteId)->exists();
+    }
+
+    /**
+     * Get purchased note record.
+     */
+    public function getPurchasedNote($noteId): ?PurchasedNote
+    {
+        return $this->purchasedNotes()->where('note_id', $noteId)->first();
+    }
 }

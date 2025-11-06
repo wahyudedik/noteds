@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Note;
 use App\Models\Transaction;
+use App\Models\PurchasedNote;
+use App\Models\NoteDownload;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -47,18 +49,29 @@ class NoteAttachmentController extends Controller
 
         // Allow purchasers (only for paid notes)
         if ($note->price > 0 && $user) {
-            $hasPurchased = Transaction::where('buyer_id', $user->id)
+            $purchasedNote = PurchasedNote::where('user_id', $user->id)
                 ->where('note_id', $note->id)
-                ->where('status', 'success')
-                ->exists();
+                ->first();
 
-            if ($hasPurchased) {
+            if ($purchasedNote) {
+                // Check download limit for basic users
+                if (!$user->hasPremium() && !$purchasedNote->canDownload()) {
+                    abort(403, 'Anda telah mencapai batas download (5x). Upgrade ke Premium untuk unlimited downloads.');
+                }
+
+                // Track download
+                $this->trackDownload($user, $note, $filename, $filePath, 'attachment');
+                
+                // Increment download count
+                $purchasedNote->incrementDownload();
+                
                 return $this->sendFile($filePath);
             }
         }
 
         // For free notes, allow authenticated users
         if ($note->price == 0 && $user) {
+            $this->trackDownload($user, $note, $filename, $filePath, 'attachment');
             return $this->sendFile($filePath);
         }
 
@@ -81,6 +94,27 @@ class NoteAttachmentController extends Controller
 
         return response()->download($fullPath, $originalName, [
             'Content-Type' => $mimeType,
+        ]);
+    }
+
+    /**
+     * Track download for analytics
+     */
+    protected function trackDownload($user, Note $note, string $filename, string $filePath, string $downloadType): void
+    {
+        $fileSize = Storage::disk('private')->exists($filePath) 
+            ? Storage::disk('private')->size($filePath) 
+            : null;
+
+        NoteDownload::create([
+            'user_id' => $user->id,
+            'note_id' => $note->id,
+            'file_path' => $filePath,
+            'file_name' => $filename,
+            'download_type' => $downloadType,
+            'file_size' => $fileSize,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
         ]);
     }
 }

@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'premium' => \App\Http\Middleware\EnsureUserHasPremium::class,
             'username.setup' => \App\Http\Middleware\EnsureUsernameSetup::class,
+            'buyer' => \App\Http\Middleware\EnsureBuyerRole::class,
+            'seller' => \App\Http\Middleware\EnsureSellerRole::class,
+            'workspace.user' => \App\Http\Middleware\EnsureWorkspaceUser::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

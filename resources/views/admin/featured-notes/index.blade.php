@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Admin - Featured Notes')
+@section('title', 'Admin - ' . __('messages.featured_notes'))
 
 @section('content')
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Featured Notes Management</h2>
-            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800">← Back to Dashboard</a>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('messages.featured_notes_management') }}</h2>
+            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800">← {{ __('messages.back_to_dashboard') }}</a>
         </div>
 
         @if(session('success'))
@@ -147,7 +147,7 @@
             </div>
         @else
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-12 text-center">
-                <p class="text-gray-500">No featured notes found.</p>
+                <p class="text-gray-500">{{ __('messages.no_featured_notes_found') }}</p>
             </div>
         @endif
     </div>

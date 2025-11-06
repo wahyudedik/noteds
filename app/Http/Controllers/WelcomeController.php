@@ -35,8 +35,8 @@ class WelcomeController extends Controller
             ->inRandomOrder()
             ->first();
 
-        // Track impression for featured hero
-        if ($featuredHero && auth()->check()) {
+        // Track impression for featured hero (track for all users, not just authenticated)
+        if ($featuredHero) {
             $featuredHero->incrementImpressions();
         }
 
@@ -47,8 +47,8 @@ class WelcomeController extends Controller
             ->limit(5)
             ->get();
 
-        // Track impressions for featured carousel
-        if ($featuredCarousel->count() > 0 && auth()->check()) {
+        // Track impressions for featured carousel (track for all users, not just authenticated)
+        if ($featuredCarousel->count() > 0) {
             foreach ($featuredCarousel as $featured) {
                 $featured->incrementImpressions();
             }

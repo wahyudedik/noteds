@@ -126,8 +126,89 @@
                         @error('preview_content')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
+
+                        <!-- Preview Percentage -->
+                        <div class="mt-4">
+                            <label for="preview_percentage" class="block text-sm font-medium text-gray-700 mb-2">
+                                Persentase Preview Konten <span class="text-xs text-gray-500">(Opsional)</span>
+                            </label>
+                            <div class="flex items-center gap-4">
+                                <input type="range" name="preview_percentage" id="preview_percentage" 
+                                    min="0" max="100" step="5" value="{{ old('preview_percentage', $note->preview_percentage ?? 0) }}"
+                                    class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                                <div class="w-20 text-center">
+                                    <span id="preview-percentage-value" class="text-lg font-semibold text-blue-600">{{ old('preview_percentage', $note->preview_percentage ?? 0) }}</span>
+                                    <span class="text-sm text-gray-600">%</span>
+                                </div>
+                            </div>
+                            <div class="mt-2 flex items-start gap-2">
+                                <svg class="w-4 h-4 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div class="text-xs text-gray-600">
+                                    <p><strong>0%</strong> = Konten terkunci sepenuhnya (hanya preview text di atas)</p>
+                                    <p><strong>50%</strong> = Setengah baris konten terlihat (misal: 100 baris → 50 baris terlihat)</p>
+                                    <p><strong>100%</strong> = Konten terlihat penuh (tidak ada kunci)</p>
+                                    <p class="mt-1 text-gray-500">Preview dihitung berdasarkan <strong>baris</strong>, bukan karakter. File attachments tetap terkunci sebelum pembelian.</p>
+                                </div>
+                            </div>
+                            @error('preview_percentage')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                     @endif
+
+                    <!-- Thumbnail Images -->
+                    <div id="thumbnail-wrapper" class="mt-6">
+                        <label for="thumbnails" class="block text-sm font-medium text-gray-700 mb-2">
+                            Thumbnail Images <span class="text-xs text-gray-500">(Maksimal 5 gambar, opsional)</span>
+                        </label>
+                        
+                        <!-- Existing Thumbnails -->
+                        @if($note->hasThumbnails())
+                            <div class="mb-4 grid grid-cols-2 md:grid-cols-5 gap-4">
+                                @foreach($note->thumbnails as $index => $thumbnail)
+                                    <div class="relative group">
+                                        <img src="{{ Storage::url($thumbnail) }}" alt="Thumbnail {{ $index + 1 }}" 
+                                            class="w-full h-32 object-cover rounded-lg border-2 border-gray-200">
+                                        <button type="button" onclick="removeExistingThumbnail('{{ $thumbnail }}')" 
+                                            class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                        <input type="hidden" name="removed_thumbnails[]" id="removed_thumbnail_{{ $index }}" value="">
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition-colors duration-200">
+                            <div class="space-y-1 text-center w-full">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-4h-12m-6 4h.01M17 8h.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600">
+                                    <label for="thumbnails" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                        <span>Upload gambar</span>
+                                        <input type="file" name="thumbnails[]" id="thumbnails" multiple accept="image/*" class="sr-only" onchange="handleThumbnailUpload(this)">
+                                    </label>
+                                    <p class="pl-1">atau drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500">PNG, JPG, GIF hingga 5MB per gambar (maks 5 gambar)</p>
+                            </div>
+                        </div>
+                        <div id="thumbnail-preview" class="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4">
+                            <!-- New thumbnail previews will be inserted here -->
+                        </div>
+                        @error('thumbnails')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        @error('thumbnails.*')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
 
                     <!-- Existing Attachments -->
                     @if($note->hasAttachments())
@@ -238,6 +319,37 @@
                             @error('price')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
+
+                            <!-- Discount Price -->
+                            <div class="mt-4" id="discount-price-wrapper" style="display: {{ old('discount_price', $note->discount_price) || old('price', $note->price) > 0 ? 'block' : 'none' }};">
+                                <label for="discount_price" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Harga Diskon <span class="text-xs text-gray-500 font-normal">(Opsional)</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 sm:text-sm">Rp</span>
+                                    </div>
+                                    <input type="number" name="discount_price" id="discount_price"
+                                        value="{{ old('discount_price', $note->discount_price) }}" min="0" step="0.01" placeholder="0"
+                                        class="mt-1 block w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-all duration-200 @error('discount_price') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                                </div>
+                                <div class="mt-2 flex items-start gap-2">
+                                    <svg class="w-4 h-4 text-green-600 mt-0.5" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                    </svg>
+                                    <p class="text-xs text-gray-600">
+                                        Set harga diskon untuk menarik pembeli. Harga diskon harus lebih murah dari harga normal.
+                                    </p>
+                                </div>
+                                <div id="discount-preview" class="mt-2 text-sm text-gray-600 {{ $note->hasDiscount() ? '' : 'hidden' }}">
+                                    <span class="font-medium text-green-600">Diskon: <span id="discount-percent">{{ $note->discount_percent ?? 0 }}</span>%</span>
+                                </div>
+                                @error('discount_price')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
                         <div>
@@ -434,9 +546,132 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Preview Percentage Slider
+    const previewPercentageInput = document.getElementById('preview_percentage');
+    const previewPercentageValue = document.getElementById('preview-percentage-value');
+    if (previewPercentageInput && previewPercentageValue) {
+        previewPercentageInput.addEventListener('input', function() {
+            previewPercentageValue.textContent = this.value;
+        });
+        // Initial value
+        previewPercentageValue.textContent = previewPercentageInput.value;
+    }
+
+    // Thumbnail Upload Handler
+    window.handleThumbnailUpload = function(input) {
+        const files = Array.from(input.files);
+        const previewContainer = document.getElementById('thumbnail-preview');
+        const maxFiles = 5;
+        
+        // Limit to max 5 files
+        if (files.length > maxFiles) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Terlalu Banyak Gambar',
+                text: `Maksimal ${maxFiles} gambar. Hanya ${maxFiles} gambar pertama yang akan diupload.`,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+            // Keep only first 5 files
+            const dt = new DataTransfer();
+            files.slice(0, maxFiles).forEach(file => dt.items.add(file));
+            input.files = dt.files;
+        }
+
+        previewContainer.innerHTML = '';
+        const filesToShow = Array.from(input.files).slice(0, maxFiles);
+        
+        filesToShow.forEach((file, index) => {
+            if (!file.type.startsWith('image/')) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'File Tidak Valid',
+                    text: `${file.name} bukan file gambar.`,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'relative group';
+                div.innerHTML = `
+                    <img src="${e.target.result}" alt="Thumbnail ${index + 1}" 
+                        class="w-full h-32 object-cover rounded-lg border-2 border-gray-200">
+                    <button type="button" onclick="removeThumbnail(${index})" 
+                        class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                `;
+                previewContainer.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    window.removeThumbnail = function(index) {
+        const input = document.getElementById('thumbnails');
+        const dt = new DataTransfer();
+        const files = Array.from(input.files);
+        files.forEach((file, i) => {
+            if (i !== index) {
+                dt.items.add(file);
+            }
+        });
+        input.files = dt.files;
+        handleThumbnailUpload(input);
+    };
+
+    window.removeExistingThumbnail = function(thumbnail) {
+        // Find the hidden input for this thumbnail
+        const existingThumbnails = @json($note->thumbnails ?? []);
+        const index = existingThumbnails.indexOf(thumbnail);
+        if (index !== -1) {
+            const hiddenInput = document.getElementById('removed_thumbnail_' + index);
+            if (hiddenInput) {
+                hiddenInput.value = thumbnail;
+            }
+            // Hide the thumbnail visually
+            event.target.closest('.relative').style.display = 'none';
+        }
+    };
+
     // Show preview content field when price > 0
     const priceInput = document.getElementById('price');
     const previewContentWrapper = document.getElementById('preview-content-wrapper');
+    const discountPriceWrapper = document.getElementById('discount-price-wrapper');
+    const discountPriceInput = document.getElementById('discount_price');
+    const discountPreview = document.getElementById('discount-preview');
+    const discountPercent = document.getElementById('discount-percent');
+
+    function updateDiscountPreview() {
+        const price = parseFloat(priceInput.value) || 0;
+        const discountPrice = parseFloat(discountPriceInput.value) || 0;
+
+        if (price > 0) {
+            discountPriceWrapper.style.display = 'block';
+        } else {
+            discountPriceWrapper.style.display = 'none';
+            discountPriceInput.value = '';
+        }
+
+        if (discountPrice > 0 && discountPrice < price) {
+            const percent = Math.round(((price - discountPrice) / price) * 100);
+            discountPercent.textContent = percent;
+            discountPreview.classList.remove('hidden');
+        } else {
+            discountPreview.classList.add('hidden');
+        }
+    }
+
     if (priceInput && previewContentWrapper) {
         priceInput.addEventListener('input', function() {
             if (parseFloat(this.value) > 0) {
@@ -444,6 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 previewContentWrapper.style.display = 'none';
             }
+            updateDiscountPreview();
         });
         // Initial check
         if (parseFloat(priceInput.value) > 0) {
@@ -452,6 +688,13 @@ document.addEventListener('DOMContentLoaded', function() {
             previewContentWrapper.style.display = 'none';
         }
     }
+
+    if (discountPriceInput) {
+        discountPriceInput.addEventListener('input', updateDiscountPreview);
+    }
+
+    // Initial check
+    updateDiscountPreview();
 
     // File upload preview
     const fileInput = document.getElementById('attachments');

@@ -31,10 +31,17 @@
                         </div>
                     @endif
                     
-                    <!-- Owner Actions -->
-                    @if($workspace->owner_id === auth()->id() && !$workspace->isSold())
+                    <!-- Owner/Admin Actions -->
+                    @if($workspace->canManage(auth()->user()) && !$workspace->isSold())
                         <!-- Quick Actions -->
                         <div class="flex items-center gap-2">
+                            <a href="{{ route('workspaces.invite', $workspace) }}" 
+                               class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Invite Team
+                            </a>
                             <a href="{{ route('folders.create', array_filter(['workspace_id' => $workspace->id, 'parent_id' => $currentFolder?->id])) }}" 
                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

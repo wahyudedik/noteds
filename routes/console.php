@@ -21,3 +21,9 @@ Schedule::command('featured:expire')
     ->at('01:00')
     ->timezone('Asia/Jakarta')
     ->description('Expire featured notes that have passed their end date');
+
+// Schedule activate scheduled featured notes (run hourly)
+Schedule::command('featured:activate-scheduled')
+    ->hourly()
+    ->timezone('Asia/Jakarta')
+    ->description('Activate scheduled featured notes that have reached their scheduled date');

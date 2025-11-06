@@ -85,7 +85,7 @@ class FeaturedNoteController extends Controller
                 $transaction = Transaction::where('buyer_id', $featuredNote->user_id)
                     ->where('amount', $featuredNote->price)
                     ->where('status', 'pending')
-                    ->where('notes', 'like', '%Featured note request%')
+                    ->where('notes', 'like', '%Pembayaran iklan featured note%')
                     ->latest()
                     ->first();
 
@@ -140,7 +140,7 @@ class FeaturedNoteController extends Controller
                 $transaction = Transaction::where('buyer_id', $featuredNote->user_id)
                     ->where('amount', $featuredNote->price)
                     ->where('status', 'pending')
-                    ->where('notes', 'like', '%Featured note request%')
+                    ->where('notes', 'like', '%Pembayaran iklan featured note%')
                     ->latest()
                     ->first();
 
@@ -158,5 +158,40 @@ class FeaturedNoteController extends Controller
             return redirect()->route('admin.featured-notes.show', $featuredNote)
                 ->with('error', 'Terjadi kesalahan saat reject. Silakan coba lagi.');
         }
+    }
+
+    /**
+     * Show A/B testing analytics.
+     */
+    public function abTesting(): View
+    {
+        // Group by variant and location to compare performance
+        $variants = FeaturedNote::whereNotNull('variant')
+            ->where('status', 'active')
+            ->get()
+            ->groupBy(['variant', 'location']);
+
+        $analytics = [];
+        foreach ($variants as $variant => $locations) {
+            foreach ($locations as $location => $notes) {
+                $totalImpressions = $notes->sum('impressions');
+                $totalClicks = $notes->sum('clicks');
+                $avgCTR = $totalImpressions > 0 ? ($totalClicks / $totalImpressions * 100) : 0;
+                $totalSpent = $notes->sum('price');
+                $count = $notes->count();
+
+                $analytics[] = [
+                    'variant' => $variant,
+                    'location' => $location,
+                    'count' => $count,
+                    'impressions' => $totalImpressions,
+                    'clicks' => $totalClicks,
+                    'ctr' => round($avgCTR, 2),
+                    'total_spent' => $totalSpent,
+                ];
+            }
+        }
+
+        return view('admin.featured-notes.ab-testing', compact('analytics'));
     }
 }

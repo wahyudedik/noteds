@@ -172,4 +172,22 @@ class Workspace extends Model
     {
         return $this->belongsTo(User::class, 'sold_to_user_id');
     }
+
+    /**
+     * Get workspace invitations.
+     */
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(WorkspaceInvitation::class);
+    }
+
+    /**
+     * Get pending (not accepted) invitations.
+     */
+    public function pendingInvitations(): HasMany
+    {
+        return $this->invitations()
+            ->whereNull('accepted_at')
+            ->where('expires_at', '>', now());
+    }
 }

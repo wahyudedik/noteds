@@ -75,9 +75,19 @@
                         </div>
                     @endif
                     @if($note->price > 0)
-                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-base font-semibold bg-yellow-100 text-yellow-800">
-                            {{ currency($note->price) }}
-                        </span>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-yellow-100">
+                            @if($note->hasDiscount())
+                                <div class="flex flex-col items-end">
+                                    <span class="text-xs text-gray-500 line-through">{{ currency($note->price) }}</span>
+                                    <span class="text-base font-semibold text-green-600">{{ currency($note->discount_price) }}</span>
+                                </div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-500 text-white">
+                                    -{{ $note->discount_percent }}%
+                                </span>
+                            @else
+                                <span class="text-base font-semibold text-yellow-800">{{ currency($note->price) }}</span>
+                            @endif
+                        </div>
                     @else
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                             {{ __('messages.free') }}
@@ -128,7 +138,74 @@
 
                 <!-- Note Content (Protected for paid notes) -->
                 @if($showFullContent ?? false)
-                    <div class="prose max-w-none mb-6">
+                    @auth
+                        @if(auth()->user()->hasPremium() && auth()->user()->role === 'buyer' && ($alreadyPurchased ?? false))
+                            <!-- Reading Progress Bar -->
+                            <div id="reading-progress-container" class="mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-700">Reading Progress</span>
+                                    <span id="progress-percentage" class="text-sm font-semibold text-blue-600">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Premium Features Toolbar -->
+                            <div class="mb-4 flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex items-center space-x-3">
+                                    <button type="button" id="add-bookmark-btn" onclick="showAddBookmarkModal()" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors duration-200">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                        </svg>
+                                        Add Bookmark
+                                    </button>
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{{ route('export.pdf', $note) }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            Export PDF
+                                        </a>
+                                        <a href="{{ route('export.docx', $note) }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            Export DOCX
+                                        </a>
+                                        <a href="{{ route('export.markdown', $note) }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                            </svg>
+                                            Export MD
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bookmarks List -->
+                            <div id="bookmarks-section" class="mb-4 hidden">
+                                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="text-sm font-semibold text-purple-900 flex items-center">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                            </svg>
+                                            Bookmarks
+                                        </h4>
+                                        <button type="button" onclick="toggleBookmarks()" class="text-sm text-purple-700 hover:text-purple-900">
+                                            <span id="bookmarks-toggle-text">Show</span>
+                                        </button>
+                                    </div>
+                                    <div id="bookmarks-list" class="space-y-2">
+                                        <!-- Bookmarks will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    @endauth
+
+                    <div class="prose max-w-none mb-6" id="note-content">
                         <div class="ql-editor text-gray-900 leading-relaxed">{!! $note->content !!}</div>
                     </div>
 
@@ -166,21 +243,62 @@
                         </div>
                     @endif
                 @else
-                    <!-- Preview Content (for paid notes, before purchase) -->
-                    <div class="prose max-w-none mb-6 relative">
-                        <div class="whitespace-pre-wrap text-gray-900 leading-relaxed">
-                            {!! \Illuminate\Support\Str::limit(strip_tags($note->preview_content ?: $note->content), 300) !!}
-                            @if(strlen(strip_tags($note->content)) > 300)
-                                <span class="text-gray-500 italic">...</span>
-                            @endif
-                        </div>
-                        <!-- Blur overlay for paid content -->
-                        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white backdrop-blur-sm pointer-events-none flex items-end justify-center pb-8">
-                            <div class="text-center px-4">
-                                <p class="text-sm font-semibold text-gray-700 mb-2">{{ __('messages.full_content_available_after_purchase') }}</p>
-                                <p class="text-xs text-gray-600">{{ __('messages.buy_note_to_unlock') }}</p>
+                    <!-- Thumbnail Images -->
+                    @if($note->hasThumbnails())
+                        <div class="mb-6">
+                            <div class="grid grid-cols-2 md:grid-cols-{{ min($note->getThumbnailCount(), 5) }} gap-4">
+                                @foreach($note->thumbnails as $thumbnail)
+                                    <div class="relative group">
+                                        <img src="{{ Storage::url($thumbnail) }}" alt="Thumbnail" 
+                                            class="w-full h-48 object-cover rounded-lg border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
+                    @endif
+
+                    <!-- Preview Content (for paid notes, before purchase) -->
+                    <div class="prose max-w-none mb-6 relative">
+                        @php
+                            // Use preview_percentage if set, otherwise use preview_content
+                            if ($note->preview_percentage > 0) {
+                                $previewContent = $note->getPreviewContentByPercentage();
+                                $showBlur = $note->preview_percentage < 100;
+                                
+                                // Count total lines for info
+                                $totalLines = count(preg_split('/\r\n|\r|\n/', $note->content));
+                                $visibleLines = (int) ceil($totalLines * ($note->preview_percentage / 100));
+                            } else {
+                                $previewContent = $note->preview_content ?: \Illuminate\Support\Str::limit(strip_tags($note->content), 300);
+                                $showBlur = true;
+                                $totalLines = null;
+                                $visibleLines = null;
+                            }
+                        @endphp
+                        <div class="prose max-w-none">
+                            <div class="ql-editor text-gray-900 leading-relaxed whitespace-pre-wrap">
+                                {!! $previewContent !!}
+                                @if($note->preview_percentage > 0 && $note->preview_percentage < 100)
+                                    <span class="text-gray-500 italic">...</span>
+                                @elseif($note->preview_percentage == 0 && strlen(strip_tags($note->content)) > 300)
+                                    <span class="text-gray-500 italic">...</span>
+                                @endif
+                            </div>
+                        </div>
+                        <!-- Blur overlay for paid content -->
+                        @if($showBlur)
+                            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white backdrop-blur-sm pointer-events-none flex items-end justify-center pb-8">
+                                <div class="text-center px-4">
+                                    <p class="text-sm font-semibold text-gray-700 mb-2">{{ __('messages.full_content_available_after_purchase') }}</p>
+                                    <p class="text-xs text-gray-600">{{ __('messages.buy_note_to_unlock') }}</p>
+                                    @if($note->preview_percentage > 0 && isset($visibleLines) && isset($totalLines))
+                                        <p class="text-xs text-gray-500 mt-1">Preview: {{ $visibleLines }} dari {{ $totalLines }} baris ({{ $note->preview_percentage }}%)</p>
+                                    @elseif($note->preview_percentage > 0)
+                                        <p class="text-xs text-gray-500 mt-1">Preview: {{ $note->preview_percentage }}% konten</p>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- What You'll Get Section -->
@@ -204,7 +322,7 @@
                                         <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                         </svg>
-                                        <span>{{ $note->file_count }} {{ __('messages.downloadable_files') }}</span>
+                                        <span>{{ $note->file_count }} {{ __('messages.downloadable_files') }} <span class="text-xs text-gray-600">(Terkunci sebelum pembelian)</span></span>
                                     </li>
                                 @endif
                                 <li class="flex items-start">
@@ -256,6 +374,17 @@
                                     View full note →
                                 </a>
                             </div>
+                            
+                            @if(auth()->user()->hasPremium() && auth()->user()->role === 'buyer')
+                                <div class="mt-4 pt-4 border-t border-gray-200">
+                                    <button type="button" onclick="showCollectionModal('{{ $note->id }}')" class="inline-flex items-center text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors duration-200">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                        </svg>
+                                        Add to Collection
+                                    </button>
+                                </div>
+                            @endif
                         </div>
                     @elseif($canBuy && $note->price > 0)
                         <div class="mt-6 pt-6 border-t border-gray-200">
@@ -265,15 +394,32 @@
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
-                                    Buy Note ({{ currency($note->price) }})
+                                    Buy Note ({{ currency($note->hasDiscount() ? $note->discount_price : $note->price) }})
                                 </button>
                             </form>
                             <p class="text-sm text-gray-600 mt-3">
                                 Your wallet balance: <strong class="font-semibold text-gray-900">{{ currency(auth()->user()->wallet_balance, auth()->user()->currency) }}</strong>
-                                @if(auth()->user()->wallet_balance < $note->price)
-                                    <span class="text-red-600 font-medium">(Insufficient: {{ currency($note->price - auth()->user()->wallet_balance, auth()->user()->currency) }})</span>
+                                @php
+                                    $finalPrice = $note->hasDiscount() ? $note->discount_price : $note->price;
+                                @endphp
+                                @if(auth()->user()->wallet_balance < $finalPrice)
+                                    <span class="text-red-600 font-medium">(Insufficient: {{ currency($finalPrice - auth()->user()->wallet_balance, auth()->user()->currency) }})</span>
                                 @endif
                             </p>
+                        </div>
+                    @elseif(auth()->user()->role === 'seller' && $note->price > 0 && !$alreadyPurchased)
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-yellow-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-medium text-yellow-800 mb-1">Fitur ini hanya tersedia untuk Buyer</p>
+                                        <p class="text-xs text-yellow-700">Sebagai Seller, Anda tidak dapat membeli note. Jika ingin membeli, silakan buat akun Buyer dengan email berbeda.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     @elseif($note->user_id === auth()->id())
                         <div class="mt-6 pt-6 border-t border-gray-200">
@@ -492,7 +638,318 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+    @if(auth()->check() && auth()->user()->hasPremium() && auth()->user()->role === 'buyer')
+    function showCollectionModal(noteId) {
+        const collections = @json(auth()->user()->collections()->get(['id', 'name']));
+        
+        if (collections.length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'No Collections',
+                text: 'Create a collection first to save notes.',
+                showCancelButton: true,
+                confirmButtonText: 'Create Collection',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{{ route('collections.create') }}';
+                }
+            });
+            return;
+        }
+        
+        Swal.fire({
+            title: 'Add to Collection',
+            input: 'select',
+            inputOptions: Object.fromEntries(collections.map(c => [c.id, c.name])),
+            inputPlaceholder: 'Select a collection',
+            showCancelButton: true,
+            confirmButtonText: 'Add',
+            cancelButtonText: 'Cancel',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Please select a collection';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/collections/${result.value}/add-note`;
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                form.innerHTML = `
+                    <input type="hidden" name="_token" value="${csrfToken}">
+                    <input type="hidden" name="note_id" value="${noteId}">
+                `;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
+    @endif
 </script>
+    @auth
+        @if(auth()->user()->hasPremium() && auth()->user()->role === 'buyer' && ($alreadyPurchased ?? false))
+            // Reading Progress Tracking
+            const noteId = '{{ $note->id }}';
+            let progressUpdateTimeout;
+            let currentProgress = 0;
+
+            // Load existing progress
+            fetch(`/reading-progress/note/${noteId}`, {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.progress) {
+                    currentProgress = data.progress.progress_percentage || 0;
+                    updateProgressBar(currentProgress);
+                }
+            })
+            .catch(error => console.error('Error loading progress:', error));
+
+            // Track scroll position
+            const noteContent = document.getElementById('note-content');
+            if (noteContent) {
+                const totalHeight = noteContent.scrollHeight;
+                const viewportHeight = window.innerHeight;
+                const totalScrollable = totalHeight - viewportHeight;
+
+                window.addEventListener('scroll', () => {
+                    clearTimeout(progressUpdateTimeout);
+                    
+                    progressUpdateTimeout = setTimeout(() => {
+                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                        const contentTop = noteContent.offsetTop;
+                        const scrollPosition = Math.max(0, scrollTop - contentTop);
+                        
+                        const progress = totalScrollable > 0 
+                            ? Math.min(100, Math.round((scrollPosition / totalScrollable) * 100))
+                            : 0;
+
+                        if (progress !== currentProgress) {
+                            currentProgress = progress;
+                            updateProgressBar(progress);
+                            saveProgress(progress, scrollPosition, noteContent.textContent.length);
+                        }
+                    }, 500); // Debounce: update every 500ms
+                });
+            }
+
+            function updateProgressBar(percentage) {
+                const progressBar = document.getElementById('progress-bar');
+                const progressPercentage = document.getElementById('progress-percentage');
+                if (progressBar) progressBar.style.width = percentage + '%';
+                if (progressPercentage) progressPercentage.textContent = percentage + '%';
+            }
+
+            function saveProgress(percentage, position, totalChars) {
+                fetch(`/reading-progress/note/${noteId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        progress_percentage: percentage,
+                        last_position: position,
+                        read_characters: Math.round((percentage / 100) * totalChars),
+                        total_characters: totalChars
+                    })
+                })
+                .catch(error => console.error('Error saving progress:', error));
+            }
+
+            // Bookmarks functionality
+            let bookmarks = [];
+            let bookmarksVisible = false;
+
+            // Load bookmarks
+            function loadBookmarks() {
+                fetch(`/bookmarks/note/${noteId}`, {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        bookmarks = data.bookmarks || [];
+                        renderBookmarks();
+                    }
+                })
+                .catch(error => console.error('Error loading bookmarks:', error));
+            }
+
+            function renderBookmarks() {
+                const bookmarksList = document.getElementById('bookmarks-list');
+                if (!bookmarksList) return;
+
+                if (bookmarks.length === 0) {
+                    bookmarksList.innerHTML = '<p class="text-sm text-gray-600">No bookmarks yet. Click "Add Bookmark" to create one.</p>';
+                    return;
+                }
+
+                bookmarksList.innerHTML = bookmarks.map(bookmark => `
+                    <div class="flex items-start justify-between p-2 bg-white rounded border border-purple-200 hover:bg-purple-50 transition-colors">
+                        <div class="flex-1">
+                            <h5 class="text-sm font-medium text-gray-900">${bookmark.title || 'Bookmark'}</h5>
+                            ${bookmark.section_text ? `<p class="text-xs text-gray-600 mt-1 line-clamp-2">${bookmark.section_text.substring(0, 100)}...</p>` : ''}
+                            ${bookmark.note_text ? `<p class="text-xs text-purple-700 mt-1">${bookmark.note_text}</p>` : ''}
+                        </div>
+                        <div class="flex items-center space-x-2 ml-3">
+                            <button onclick="scrollToBookmark(${bookmark.position})" class="text-xs text-blue-600 hover:text-blue-800" title="Go to bookmark">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </button>
+                            <button onclick="deleteBookmark('${bookmark.id}')" class="text-xs text-red-600 hover:text-red-800" title="Delete bookmark">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function toggleBookmarks() {
+                const section = document.getElementById('bookmarks-section');
+                const toggleText = document.getElementById('bookmarks-toggle-text');
+                if (section) {
+                    bookmarksVisible = !bookmarksVisible;
+                    section.classList.toggle('hidden', !bookmarksVisible);
+                    if (toggleText) {
+                        toggleText.textContent = bookmarksVisible ? 'Hide' : 'Show';
+                    }
+                }
+            }
+
+            function showAddBookmarkModal() {
+                const noteContent = document.getElementById('note-content');
+                const selection = window.getSelection();
+                let selectedText = '';
+                let position = 0;
+
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    selectedText = range.toString();
+                    position = range.startOffset;
+                } else {
+                    // Use scroll position as fallback
+                    position = window.pageYOffset || document.documentElement.scrollTop;
+                }
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Add Bookmark',
+                        html: `
+                            <input id="bookmark-title" class="swal2-input" placeholder="Bookmark title (optional)" value="${selectedText.substring(0, 50) || ''}">
+                            <textarea id="bookmark-note" class="swal2-textarea" placeholder="Add a note about this bookmark (optional)"></textarea>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Add Bookmark',
+                        cancelButtonText: 'Cancel',
+                        preConfirm: () => {
+                            return {
+                                title: document.getElementById('bookmark-title').value || 'Bookmark',
+                                note_text: document.getElementById('bookmark-note').value || null,
+                                section_text: selectedText || null,
+                                position: position
+                            };
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            createBookmark(result.value);
+                        }
+                    });
+                }
+            }
+
+            function createBookmark(data) {
+                fetch(`/bookmarks/note/${noteId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadBookmarks();
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire('Success', 'Bookmark added!', 'success');
+                        }
+                    } else {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire('Error', data.message || 'Failed to add bookmark', 'error');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error creating bookmark:', error);
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('Error', 'Failed to add bookmark', 'error');
+                    }
+                });
+            }
+
+            function deleteBookmark(bookmarkId) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Delete Bookmark?',
+                        text: 'Are you sure you want to delete this bookmark?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, delete it',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(`/bookmarks/${bookmarkId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    loadBookmarks();
+                                    Swal.fire('Deleted', 'Bookmark deleted successfully', 'success');
+                                } else {
+                                    Swal.fire('Error', data.message || 'Failed to delete bookmark', 'error');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error deleting bookmark:', error);
+                                Swal.fire('Error', 'Failed to delete bookmark', 'error');
+                            });
+                        }
+                    });
+                }
+            }
+
+            function scrollToBookmark(position) {
+                window.scrollTo({
+                    top: position,
+                    behavior: 'smooth'
+                });
+            }
+
+            // Load bookmarks on page load
+            loadBookmarks();
+        @endif
+    @endauth
 @endpush
 @endsection
 

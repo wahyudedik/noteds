@@ -17,22 +17,25 @@ class SettingsController extends Controller
     {
         // Get all settings grouped
         $settings = Setting::orderBy('group')->orderBy('key')->get()->groupBy('group');
-        
+
         // Get S3 settings specifically
         $s3Settings = Setting::where('group', 's3')->get()->keyBy('key');
-        
+
         // Get premium price setting
         $premiumPrice = Setting::getPremiumPrice();
-        
+
         // Get referral reward settings
         $referralSignupReward = Setting::getReferralSignupReward();
         $referralCommissionPercent = Setting::getReferralCommissionPercent();
-        
+
         // Get marketplace commission settings
         $platformCommissionPercent = Setting::getPlatformCommissionPercent();
         $creatorCommissionPercent = Setting::getCreatorCommissionPercent();
-        
-        return view('admin.settings.index', compact('settings', 's3Settings', 'premiumPrice', 'referralSignupReward', 'referralCommissionPercent', 'platformCommissionPercent', 'creatorCommissionPercent'));
+
+        // Get featured notes pricing
+        $featuredPricing = $this->getFeaturedPricing();
+
+        return view('admin.settings.index', compact('settings', 's3Settings', 'premiumPrice', 'referralSignupReward', 'referralCommissionPercent', 'platformCommissionPercent', 'creatorCommissionPercent', 'featuredPricing'));
     }
 
     /**
@@ -54,6 +57,7 @@ class SettingsController extends Controller
             'referral_reward_commission_percent' => 'nullable|numeric|min:0|max:100',
             'platform_commission_percent' => 'nullable|numeric|min:0|max:100',
             'creator_commission_percent' => 'nullable|numeric|min:0|max:100',
+            'featured_price.*.*' => 'nullable|numeric|min:0|max:100000000',
         ]);
 
         // Update or create S3 settings
@@ -133,27 +137,59 @@ class SettingsController extends Controller
 
         $message = 'Settings updated successfully.';
         $updates = [];
-        
+
         if ($request->has('premium_price_monthly')) {
             $updates[] = 'Premium price updated to Rp ' . number_format($request->input('premium_price_monthly'), 0, ',', '.') . '/month';
         }
-        
+
         if ($request->has('referral_reward_signup')) {
             $updates[] = 'Referral signup reward updated to Rp ' . number_format($request->input('referral_reward_signup'), 0, ',', '.');
         }
-        
+
         if ($request->has('referral_reward_commission_percent')) {
             $updates[] = 'Referral commission updated to ' . $request->input('referral_reward_commission_percent') . '%';
         }
-        
+
         if ($request->has('platform_commission_percent')) {
             $updates[] = 'Platform commission updated to ' . $request->input('platform_commission_percent') . '%';
         }
-        
+
         if ($request->has('creator_commission_percent')) {
             $updates[] = 'Creator commission updated to ' . $request->input('creator_commission_percent') . '%';
         }
-        
+
+        // Update featured notes pricing
+        if ($request->has('featured_price')) {
+            $locations = [
+                'landing_hero',
+                'landing_carousel',
+                'marketplace_banner',
+                'marketplace_grid',
+                'popup_welcome',
+                'popup_exit',
+                'popup_interstitial',
+            ];
+            $durations = [7, 14, 30];
+
+            foreach ($locations as $location) {
+                foreach ($durations as $duration) {
+                    $key = "featured_price_{$location}_{$duration}";
+                    $price = $request->input("featured_price.{$location}.{$duration}");
+
+                    if ($price !== null) {
+                        Setting::setSetting(
+                            $key,
+                            $price,
+                            'number',
+                            'featured_notes',
+                            "Price for featured note at {$location} for {$duration} days"
+                        );
+                    }
+                }
+            }
+            $updates[] = 'Featured notes pricing updated';
+        }
+
         if (!empty($updates)) {
             $message = 'Settings updated successfully. ' . implode('. ', $updates) . '.';
         }
@@ -169,7 +205,7 @@ class SettingsController extends Controller
     {
         try {
             $s3Settings = Setting::where('group', 's3')->get()->keyBy('key');
-            
+
             if (!$s3Settings->get('s3_enabled')?->value) {
                 return back()->with('error', 'S3 is not enabled. Please enable it first.');
             }
@@ -194,5 +230,43 @@ class SettingsController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'S3 connection test failed: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Get featured notes pricing from settings.
+     */
+    private function getFeaturedPricing(): array
+    {
+        $locations = [
+            'landing_hero',
+            'landing_carousel',
+            'marketplace_banner',
+            'marketplace_grid',
+            'popup_welcome',
+            'popup_exit',
+            'popup_interstitial',
+        ];
+        $durations = [7, 14, 30];
+        $pricing = [];
+
+        $defaults = [
+            'landing_hero' => [7 => 150000, 14 => 280000, 30 => 500000],
+            'landing_carousel' => [7 => 100000, 14 => 180000, 30 => 350000],
+            'marketplace_banner' => [7 => 75000, 14 => 140000, 30 => 250000],
+            'marketplace_grid' => [7 => 50000, 14 => 90000, 30 => 150000],
+            'popup_welcome' => [7 => 100000, 14 => 180000, 30 => 350000],
+            'popup_exit' => [7 => 80000, 14 => 150000, 30 => 280000],
+            'popup_interstitial' => [7 => 60000, 14 => 110000, 30 => 200000],
+        ];
+
+        foreach ($locations as $location) {
+            foreach ($durations as $duration) {
+                $key = "featured_price_{$location}_{$duration}";
+                $price = Setting::getSetting($key, 'featured_notes', $defaults[$location][$duration] ?? 50000);
+                $pricing[$location][$duration] = (float) $price;
+            }
+        }
+
+        return $pricing;
     }
 }

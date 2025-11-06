@@ -24,7 +24,18 @@ class RegisteredUserController extends Controller
         // Get referral code from URL parameter
         $refCode = $request->get('ref');
         
-        return view('auth.register', compact('refCode'));
+        // Check for workspace invitation token
+        $inviteToken = $request->get('invite');
+        $invitation = null;
+        if ($inviteToken) {
+            $invitation = \App\Models\WorkspaceInvitation::where('token', $inviteToken)
+                ->whereNull('accepted_at')
+                ->where('expires_at', '>', now())
+                ->with('workspace')
+                ->first();
+        }
+        
+        return view('auth.register', compact('refCode', 'invitation', 'inviteToken'));
     }
 
     /**
@@ -34,13 +45,44 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request, ReferralService $referralService): RedirectResponse
     {
+        // Check for workspace invitation
+        $invitation = null;
+        $inviteToken = $request->get('invite_token');
+        if ($inviteToken) {
+            $invitation = \App\Models\WorkspaceInvitation::where('token', $inviteToken)
+                ->whereNull('accepted_at')
+                ->where('expires_at', '>', now())
+                ->first();
+            
+            if (!$invitation) {
+                return redirect()->route('register', ['invite' => $inviteToken])
+                    ->withInput()
+                    ->with('error', 'Invitation tidak valid atau sudah kadaluarsa.');
+            }
+            
+            // Validate email matches invitation (case-insensitive)
+            if (strtolower($invitation->email) !== strtolower($request->email)) {
+                return redirect()->route('register', ['invite' => $inviteToken])
+                    ->withInput()
+                    ->with('error', 'Email harus sesuai dengan email yang di-invite: ' . $invitation->email);
+            }
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'in:buyer,seller'],
+            'role' => ['required', 'in:buyer,seller,user_workspaces'],
             'referral_code' => ['nullable', 'string', 'exists:users,referral_code'],
+            'invite_token' => ['nullable', 'string'],
         ]);
+
+        // If invitation exists, role must be user_workspaces
+        if ($invitation && $request->role !== 'user_workspaces') {
+            return redirect()->route('register', ['invite' => $inviteToken])
+                ->withInput()
+                ->with('error', 'Untuk menerima invitation workspace, role harus Workspace User.');
+        }
 
         // Find referrer if referral code provided
         $referrer = null;
@@ -75,17 +117,44 @@ class RegisteredUserController extends Controller
         // Assign Spatie role
         $user->assignRole($request->role);
 
-        // Generate referral code for new user
-        $user->generateReferralCode();
+        // Generate referral code for new user (only if not workspace user)
+        if ($request->role !== 'user_workspaces') {
+            $user->generateReferralCode();
+        }
 
         event(new Registered($user));
 
-        // Process signup reward if referred
-        if ($referrer) {
+        // Process signup reward if referred (only for buyer/seller)
+        if ($referrer && $request->role !== 'user_workspaces') {
             $referralService->processSignupReward($user);
         }
 
+        // Handle workspace invitation acceptance
+        if ($invitation) {
+            $invitation->update([
+                'accepted_at' => now(),
+                'accepted_by' => $user->id,
+            ]);
+            
+            // Add user to workspace
+            $invitation->workspace->members()->attach($user->id, [
+                'role' => $invitation->role,
+                'is_active' => true,
+                'joined_at' => now(),
+            ]);
+        }
+
         Auth::login($user);
+
+        // Redirect based on role
+        if ($request->role === 'user_workspaces') {
+            // Redirect to workspace if invitation exists
+            if ($invitation) {
+                return redirect()->route('workspaces.show', $invitation->workspace)
+                    ->with('success', 'Selamat datang di workspace! Anda telah bergabung sebagai ' . $invitation->role . '.');
+            }
+            return redirect()->route('workspaces.index');
+        }
 
         // Redirect to dashboard (username is already set)
         return redirect(route('dashboard', absolute: false));

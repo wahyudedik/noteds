@@ -36,7 +36,11 @@ class MarketplaceController extends Controller
         $notes = Note::publicOnly()
             ->with(['tags', 'user', 'reviews'])
             ->when($request->search, function ($query) use ($request) {
-                return $query->where('title', 'like', '%' . $request->search . '%');
+                return $query->where(function($q) use ($request) {
+                    $q->where('title', 'like', '%' . $request->search . '%')
+                      ->orWhere('summary', 'like', '%' . $request->search . '%')
+                      ->orWhere('content', 'like', '%' . $request->search . '%');
+                });
             })
             ->when($request->min_price, function ($query) use ($request) {
                 return $query->where('price', '>=', $request->min_price);
@@ -49,7 +53,25 @@ class MarketplaceController extends Controller
                     $q->where('tags.id', $request->tag);
                 });
             })
-            ->latest()
+            ->when($request->seller, function ($query) use ($request) {
+                return $query->whereHas('user', function ($q) use ($request) {
+                    $q->where('users.id', $request->seller)
+                      ->orWhere('users.username', 'like', '%' . $request->seller . '%')
+                      ->orWhere('users.name', 'like', '%' . $request->seller . '%');
+                });
+            })
+            ->when($request->sort, function ($query) use ($request) {
+                return match($request->sort) {
+                    'price_asc' => $query->orderBy('price', 'asc'),
+                    'price_desc' => $query->orderBy('price', 'desc'),
+                    'rating' => $query->orderByDesc('average_rating'),
+                    'newest' => $query->latest(),
+                    'oldest' => $query->oldest(),
+                    default => $query->latest(),
+                };
+            }, function ($query) {
+                return $query->latest();
+            })
             ->paginate(12)
             ->withQueryString();
 
@@ -69,17 +91,15 @@ class MarketplaceController extends Controller
 
         $note->load('tags', 'user', 'reviews.user', 'transactions');
 
-        // Track impression for featured notes
-        if (auth()->check()) {
-            $featuredNote = \App\Models\FeaturedNote::where('note_id', $note->id)
-                ->where('status', 'active')
-                ->where('start_date', '<=', now())
-                ->where('end_date', '>=', now())
-                ->first();
-            
-            if ($featuredNote) {
-                $featuredNote->incrementImpressions();
-            }
+        // Track impression for featured notes (track for all users, not just authenticated)
+        $featuredNote = \App\Models\FeaturedNote::where('note_id', $note->id)
+            ->where('status', 'active')
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->first();
+        
+        if ($featuredNote) {
+            $featuredNote->incrementImpressions();
         }
 
         // Load reviews with pagination
@@ -92,7 +112,9 @@ class MarketplaceController extends Controller
         $showFullContent = false; // For content protection
 
         if (auth()->check()) {
-            $canBuy = auth()->id() !== $note->user_id;
+            $user = auth()->user();
+            // Only buyers can buy (sellers cannot buy)
+            $canBuy = $user->role === 'buyer' && $user->id !== $note->user_id;
             
             // Check if already purchased (per user)
             if ($canBuy) {
@@ -131,6 +153,11 @@ class MarketplaceController extends Controller
         $buyer = auth()->user();
         $seller = $note->user;
 
+        // Check if user is buyer (middleware already checks, but double check for security)
+        if ($buyer->role !== 'buyer' && !$buyer->hasRole('admin')) {
+            return redirect()->route('marketplace.show', $note)->with('error', 'Fitur ini hanya tersedia untuk Buyer. Seller tidak dapat membeli note. Jika ingin membeli, silakan buat akun Buyer dengan email berbeda.');
+        }
+
         if ($buyer->id === $seller->id) {
             return redirect()->route('marketplace.show', $note)->with('error', 'Anda tidak dapat membeli catatan Anda sendiri.');
         }
@@ -146,7 +173,10 @@ class MarketplaceController extends Controller
             return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x.');
         }
 
-        if ($note->price <= 0) {
+        // Get final price (use discount_price if available, otherwise use regular price)
+        $finalPrice = $note->hasDiscount() ? $note->discount_price : $note->price;
+
+        if ($finalPrice <= 0) {
             return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
         }
 
@@ -167,14 +197,14 @@ class MarketplaceController extends Controller
             $buyerWallet->save();
         }
 
-        if ($buyerWallet->balance < $note->price) {
+        if ($buyerWallet->balance < $finalPrice) {
             return redirect()->route('marketplace.show', $note)->with('error', 'Saldo wallet tidak cukup. Silakan top-up terlebih dahulu.');
         }
 
         try {
             DB::beginTransaction();
 
-            $amount = $note->price;
+            $amount = $finalPrice;
             
             // Get commission rates from settings
             $platformCommissionPercent = Setting::getSetting('platform_commission_percent', 'marketplace', 20);
@@ -263,6 +293,16 @@ class MarketplaceController extends Controller
                 'status' => 'success',
                 'payment_method' => 'wallet',
                 'notes' => 'Pembelian catatan: ' . $note->title,
+            ]);
+
+            // Create purchased note record for buyer premium features
+            \App\Models\PurchasedNote::create([
+                'user_id' => $buyer->id,
+                'note_id' => $note->id,
+                'transaction_id' => $transaction->id,
+                'purchase_price' => $amount,
+                'purchased_at' => now(),
+                'download_count' => 0,
             ]);
 
             DB::commit();

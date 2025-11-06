@@ -28,7 +28,11 @@ class UpdateNoteRequest extends FormRequest
             'content' => ['required', 'string'],
             'summary' => ['nullable', 'string', 'max:500'],
             'preview_content' => ['nullable', 'string', 'max:300'],
+            'preview_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'thumbnails' => ['nullable', 'array', 'max:5'],
+            'thumbnails.*' => ['image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'], // 5MB per image
             'price' => ['nullable', 'numeric', 'min:0'],
+            'discount_price' => ['nullable', 'numeric', 'min:0'],
             'is_public' => ['nullable', 'boolean'],
             'status' => ['nullable', 'in:active,sold,inactive'],
             'tags' => ['nullable', 'array'],
@@ -83,6 +87,21 @@ class UpdateNoteRequest extends FormRequest
                             "File '{$file->getClientOriginalName()}' ({$sizeInMB}MB) exceeds 5MB limit for Basic users. <a href='" . route('subscription.create') . "' class='font-semibold text-blue-600 hover:text-blue-700 underline'>Upgrade to Premium</a> to upload files up to 50MB."
                         );
                     }
+                }
+            }
+
+            // Validate discount_price
+            $price = $this->input('price', 0);
+            $discountPrice = $this->input('discount_price');
+            
+            if ($discountPrice !== null && $discountPrice !== '') {
+                $discountPrice = (float) $discountPrice;
+                if ($price <= 0) {
+                    $validator->errors()->add('discount_price', 'Harga diskon hanya bisa diatur jika harga normal lebih dari 0.');
+                } elseif ($discountPrice >= $price) {
+                    $validator->errors()->add('discount_price', 'Harga diskon harus lebih murah dari harga normal.');
+                } elseif ($discountPrice < 0) {
+                    $validator->errors()->add('discount_price', 'Harga diskon tidak boleh negatif.');
                 }
             }
         });

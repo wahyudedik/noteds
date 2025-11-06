@@ -17,6 +17,11 @@ class WorkspaceController extends Controller
     {
         $user = $request->user();
         
+        // Check if user can access workspaces
+        if ($user->role !== 'user_workspaces' && !$user->hasPremium() && !$user->hasRole('admin')) {
+            return redirect()->route('dashboard')->with('error', 'Fitur Workspace hanya tersedia untuk Premium users atau Workspace users.');
+        }
+        
         // Get owned and member workspaces
         $ownedWorkspaces = $user->ownedWorkspaces()->withCount('notes')->get();
         $memberWorkspaces = $user->workspaces()->withCount('notes')->get();
@@ -27,8 +32,15 @@ class WorkspaceController extends Controller
     /**
      * Show the form for creating a new workspace.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
+        $user = $request->user();
+        
+        // Check if user can access workspaces
+        if ($user->role !== 'user_workspaces' && !$user->hasPremium() && !$user->hasRole('admin')) {
+            abort(403, 'Fitur Workspace hanya tersedia untuk Premium users atau Workspace users.');
+        }
+        
         return view('workspaces.create');
     }
 
@@ -37,6 +49,13 @@ class WorkspaceController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $user = $request->user();
+        
+        // Check if user can access workspaces
+        if ($user->role !== 'user_workspaces' && !$user->hasPremium() && !$user->hasRole('admin')) {
+            return redirect()->route('dashboard')->with('error', 'Fitur Workspace hanya tersedia untuk Premium users atau Workspace users.');
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:personal,team,organization',
@@ -44,7 +63,7 @@ class WorkspaceController extends Controller
         ]);
 
         $workspace = Workspace::create([
-            'owner_id' => $request->user()->id,
+            'owner_id' => $user->id,
             'name' => $validated['name'],
             'type' => $validated['type'],
             'description' => $validated['description'] ?? null,
@@ -52,7 +71,7 @@ class WorkspaceController extends Controller
         ]);
 
         // Add owner as member with admin role
-        $workspace->members()->attach($request->user()->id, [
+        $workspace->members()->attach($user->id, [
             'role' => 'admin',
             'is_active' => true,
             'joined_at' => now(),
@@ -65,7 +84,7 @@ class WorkspaceController extends Controller
     /**
      * Display the specified workspace.
      */
-    public function show(Workspace $workspace, Request $request): View
+    public function show(Workspace $workspace, Request $request): View|\Illuminate\Http\RedirectResponse
     {
         $user = $request->user();
         
@@ -262,6 +281,123 @@ class WorkspaceController extends Controller
 
         return redirect()->route('workspaces.show', $workspace)
             ->with('success', __('messages.workspace_purchased_successfully'));
+    }
+
+    /**
+     * Show the form for inviting a user to workspace.
+     */
+    public function invite(Workspace $workspace): View
+    {
+        $user = request()->user();
+        
+        // Only owner or admin can invite
+        if (!$workspace->canManage($user)) {
+            abort(403);
+        }
+
+        // Get pending invitations
+        $pendingInvitations = $workspace->pendingInvitations()
+            ->with('inviter')
+            ->latest()
+            ->get();
+
+        return view('workspaces.invite', compact('workspace', 'pendingInvitations'));
+    }
+
+    /**
+     * Store a new workspace invitation.
+     */
+    public function storeInvite(Request $request, Workspace $workspace): RedirectResponse
+    {
+        $user = $request->user();
+        
+        // Only owner or admin can invite
+        if (!$workspace->canManage($user)) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'max:255'],
+            'role' => ['required', 'in:admin,member'],
+        ]);
+
+        // Check if user already exists
+        $existingUser = \App\Models\User::where('email', $validated['email'])->first();
+        
+        // If user exists and is already a member, don't create invitation
+        if ($existingUser && $workspace->hasMember($existingUser)) {
+            return redirect()->route('workspaces.invite', $workspace)
+                ->with('error', 'User dengan email ini sudah menjadi member workspace.');
+        }
+
+        // Check if there's already a pending invitation for this email
+        $existingInvitation = \App\Models\WorkspaceInvitation::where('workspace_id', $workspace->id)
+            ->where('email', $validated['email'])
+            ->whereNull('accepted_at')
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if ($existingInvitation) {
+            return redirect()->route('workspaces.invite', $workspace)
+                ->with('error', 'Invitation untuk email ini sudah ada dan masih aktif.');
+        }
+
+        // Create invitation
+        $invitation = \App\Models\WorkspaceInvitation::create([
+            'workspace_id' => $workspace->id,
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'invited_by' => $user->id,
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        // Generate invitation link
+        $inviteLink = route('register', ['invite' => $invitation->token]);
+
+        // Send email notification with invite link (if email is configured)
+        try {
+            \Illuminate\Support\Facades\Mail::to($validated['email'])->send(
+                new \App\Mail\WorkspaceInvitationMail($invitation, $inviteLink)
+            );
+        } catch (\Exception $e) {
+            // Log error but don't fail the invitation creation
+            logger()->error('Failed to send workspace invitation email', [
+                'invitation_id' => $invitation->id,
+                'email' => $validated['email'],
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return redirect()->route('workspaces.invite', $workspace)
+            ->with('success', 'Invitation berhasil dikirim ke ' . $validated['email'] . '!')
+            ->with('invite_link', $inviteLink)
+            ->with('invited_email', $validated['email']);
+    }
+
+    /**
+     * Cancel/Delete a workspace invitation.
+     */
+    public function cancelInvite(Workspace $workspace, \App\Models\WorkspaceInvitation $invitation): RedirectResponse
+    {
+        $user = request()->user();
+        
+        // Only owner or admin can cancel invitation
+        if (!$workspace->canManage($user)) {
+            abort(403);
+        }
+
+        // Check if invitation belongs to this workspace
+        if ($invitation->workspace_id !== $workspace->id) {
+            abort(403);
+        }
+
+        // Only cancel if not accepted
+        if (!$invitation->isAccepted()) {
+            $invitation->delete();
+        }
+
+        return redirect()->route('workspaces.invite', $workspace)
+            ->with('success', 'Invitation berhasil dibatalkan.');
     }
 
     /**

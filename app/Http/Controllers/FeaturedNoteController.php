@@ -54,7 +54,11 @@ class FeaturedNoteController extends Controller
         $validated = $request->validate([
             'note_id' => ['required', 'exists:notes,id'],
             'location' => ['required', 'in:landing_hero,landing_carousel,marketplace_banner,marketplace_grid,popup_welcome,popup_exit,popup_interstitial'],
-            'duration_days' => ['required', 'integer', 'min:7', 'max:30'],
+            'duration_days' => ['required', 'integer', 'min:1', 'max:365'], // Allow custom duration
+            'scheduled_date' => ['nullable', 'date', 'after_or_equal:today'],
+            'variant' => ['nullable', 'string', 'max:10'],
+            'locations' => ['nullable', 'array'], // For bulk purchase
+            'locations.*' => ['in:landing_hero,landing_carousel,marketplace_banner,marketplace_grid,popup_welcome,popup_exit,popup_interstitial'],
         ]);
 
         $user = auth()->user();
@@ -93,8 +97,27 @@ class FeaturedNoteController extends Controller
                 ->with('error', 'Note ini sudah memiliki featured request aktif di lokasi ini.');
         }
 
-        // Calculate price
-        $price = $this->calculatePrice($validated['location'], $validated['duration_days']);
+        // Check if bulk purchase (multiple locations)
+        $locations = $request->has('locations') && is_array($request->locations) && count($request->locations) > 0
+            ? $request->locations
+            : [$validated['location']];
+        
+        // Calculate total price for all locations
+        $totalPrice = 0;
+        foreach ($locations as $loc) {
+            $totalPrice += $this->calculatePrice($loc, $validated['duration_days']);
+        }
+        
+        // Apply bulk discount if multiple locations
+        $discountPercent = 0;
+        if (count($locations) > 1) {
+            $discountPercent = min(20, count($locations) * 5); // 5% per additional location, max 20%
+        }
+        
+        $finalPrice = $totalPrice * (1 - $discountPercent / 100);
+        
+        // Check if custom duration
+        $isCustomDuration = !in_array($validated['duration_days'], [7, 14, 30]);
 
         // Check wallet balance
         $wallet = Wallet::firstOrCreate(
@@ -102,47 +125,82 @@ class FeaturedNoteController extends Controller
             ['balance' => 0]
         );
 
-        if ($wallet->balance < $price) {
+        if ($wallet->balance < $finalPrice) {
             return redirect()->route('featured-notes.create', ['note_id' => $note->id])
-                ->with('error', 'Saldo wallet tidak cukup. Saldo: Rp ' . number_format($wallet->balance, 0, ',', '.') . ', Diperlukan: Rp ' . number_format($price, 0, ',', '.'))
+                ->with('error', 'Saldo wallet tidak cukup. Saldo: Rp ' . number_format($wallet->balance, 0, ',', '.') . ', Diperlukan: Rp ' . number_format($finalPrice, 0, ',', '.'))
                 ->with('insufficient_balance', true);
         }
 
         try {
             $autoApprove = $user->hasPremium(); // Auto-approve for premium users
+            $scheduledDate = $request->scheduled_date ? \Carbon\Carbon::parse($request->scheduled_date) : null;
             
-            DB::transaction(function () use ($user, $wallet, $note, $validated, $price, $autoApprove) {
+            DB::transaction(function () use ($user, $wallet, $note, $validated, $finalPrice, $autoApprove, $locations, $discountPercent, $isCustomDuration, $scheduledDate) {
                 // Deduct from wallet
-                $wallet->balance -= $price;
+                $wallet->balance -= $finalPrice;
                 $wallet->save();
                 $user->wallet_balance = $wallet->balance;
                 $user->save();
 
+                // Create parent featured note for bulk purchase
+                $parentId = null;
+                if (count($locations) > 1) {
+                    $parentNote = FeaturedNote::create([
+                        'note_id' => $note->id,
+                        'user_id' => $user->id,
+                        'location' => $locations[0],
+                        'duration_days' => $validated['duration_days'],
+                        'is_custom_duration' => $isCustomDuration,
+                        'price' => $finalPrice,
+                        'discount_percent' => $discountPercent,
+                        'status' => $autoApprove ? 'active' : 'pending',
+                        'start_date' => $autoApprove && !$scheduledDate ? now() : null,
+                        'end_date' => $autoApprove && !$scheduledDate ? now()->addDays($validated['duration_days']) : null,
+                        'scheduled_date' => $scheduledDate,
+                        'variant' => $validated['variant'] ?? null,
+                        'admin_notes' => $autoApprove ? 'Auto-approved for premium user' : null,
+                    ]);
+                    $parentId = $parentNote->id;
+                }
+
+                // Create featured note(s) for each location
+                foreach ($locations as $index => $location) {
+                    $locationPrice = $this->calculatePrice($location, $validated['duration_days']);
+                    
+                    FeaturedNote::create([
+                        'note_id' => $note->id,
+                        'user_id' => $user->id,
+                        'parent_id' => $parentId,
+                        'location' => $location,
+                        'duration_days' => $validated['duration_days'],
+                        'is_custom_duration' => $isCustomDuration,
+                        'price' => $locationPrice,
+                        'discount_percent' => $discountPercent,
+                        'status' => $autoApprove ? 'active' : 'pending',
+                        'start_date' => $autoApprove && !$scheduledDate ? now() : null,
+                        'end_date' => $autoApprove && !$scheduledDate ? now()->addDays($validated['duration_days']) : null,
+                        'scheduled_date' => $scheduledDate,
+                        'variant' => $validated['variant'] ?? null,
+                        'admin_notes' => $autoApprove ? 'Auto-approved for premium user' : null,
+                    ]);
+                }
+
                 // Create transaction record
+                $locationText = count($locations) > 1 
+                    ? implode(', ', $locations) . ' (' . count($locations) . ' lokasi)'
+                    : $validated['location'];
+                    
                 Transaction::create([
                     'buyer_id' => $user->id,
                     'seller_id' => $user->id,
                     'note_id' => $note->id,
-                    'amount' => $price,
+                    'amount' => $finalPrice,
                     'commission' => 0,
-                    'platform_fee' => $price, // Full amount as platform fee for ad
+                    'platform_fee' => $finalPrice, // Full amount as platform fee for ad
                     'creator_commission' => 0,
                     'status' => $autoApprove ? 'success' : 'pending',
                     'payment_method' => 'wallet',
-                    'notes' => 'Pembayaran iklan featured note: ' . $note->title . ' di ' . $validated['location'] . ' selama ' . $validated['duration_days'] . ' hari.' . ($autoApprove ? ' (Auto-approved for premium user)' : ''),
-                ]);
-
-                // Create featured note request
-                $featuredNote = FeaturedNote::create([
-                    'note_id' => $note->id,
-                    'user_id' => $user->id,
-                    'location' => $validated['location'],
-                    'duration_days' => $validated['duration_days'],
-                    'price' => $price,
-                    'status' => $autoApprove ? 'active' : 'pending',
-                    'start_date' => $autoApprove ? now() : null,
-                    'end_date' => $autoApprove ? now()->addDays($validated['duration_days']) : null,
-                    'admin_notes' => $autoApprove ? 'Auto-approved for premium user' : null,
+                    'notes' => 'Pembayaran iklan featured note: ' . $note->title . ' di ' . $locationText . ' selama ' . $validated['duration_days'] . ' hari.' . ($discountPercent > 0 ? ' (Discount ' . $discountPercent . '%)' : '') . ($autoApprove ? ' (Auto-approved for premium user)' : ''),
                 ]);
             });
 
@@ -271,5 +329,104 @@ class FeaturedNoteController extends Controller
         ];
 
         return $defaults[$location][$duration] ?? 50000;
+    }
+
+    /**
+     * Track click on featured note (API endpoint).
+     */
+    public function trackClick(FeaturedNote $featuredNote)
+    {
+        if ($featuredNote->isActive()) {
+            $featuredNote->incrementClicks();
+            return response()->json(['success' => true]);
+        }
+        
+        return response()->json(['success' => false, 'message' => 'Featured note is not active'], 400);
+    }
+
+    /**
+     * Track impression on featured note (API endpoint).
+     */
+    public function trackImpression(FeaturedNote $featuredNote)
+    {
+        if ($featuredNote->isActive()) {
+            $featuredNote->incrementImpressions();
+            return response()->json(['success' => true]);
+        }
+        
+        return response()->json(['success' => false, 'message' => 'Featured note is not active'], 400);
+    }
+
+    /**
+     * Export analytics report (CSV).
+     */
+    public function exportReport(Request $request)
+    {
+        $user = auth()->user();
+        $format = $request->get('format', 'csv'); // csv or pdf
+        
+        $featuredNotes = FeaturedNote::where('user_id', $user->id)
+            ->with(['note'])
+            ->latest()
+            ->get();
+
+        if ($format === 'csv') {
+            $filename = 'featured_notes_report_' . now()->format('Y-m-d') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ];
+
+            $callback = function () use ($featuredNotes) {
+                $file = fopen('php://output', 'w');
+                
+                // CSV Header
+                fputcsv($file, [
+                    'Note Title',
+                    'Location',
+                    'Variant',
+                    'Status',
+                    'Start Date',
+                    'End Date',
+                    'Scheduled Date',
+                    'Duration (Days)',
+                    'Price',
+                    'Discount %',
+                    'Final Price',
+                    'Impressions',
+                    'Clicks',
+                    'CTR (%)',
+                    'Created At',
+                ]);
+
+                // CSV Data
+                foreach ($featuredNotes as $featured) {
+                    fputcsv($file, [
+                        $featured->note->title ?? 'N/A',
+                        $featured->location,
+                        $featured->variant ?? 'N/A',
+                        $featured->status,
+                        $featured->start_date ? $featured->start_date->format('Y-m-d') : 'N/A',
+                        $featured->end_date ? $featured->end_date->format('Y-m-d') : 'N/A',
+                        $featured->scheduled_date ? $featured->scheduled_date->format('Y-m-d') : 'N/A',
+                        $featured->duration_days,
+                        number_format((float) $featured->price, 2, '.', ','),
+                        $featured->discount_percent,
+                        number_format((float) $featured->final_price, 2, '.', ','),
+                        $featured->impressions,
+                        $featured->clicks,
+                        $featured->ctr,
+                        $featured->created_at->format('Y-m-d H:i:s'),
+                    ]);
+                }
+
+                fclose($file);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
+        // PDF export (requires additional package like dompdf or barryvdh/laravel-dompdf)
+        return redirect()->back()->with('error', 'PDF export belum tersedia. Gunakan format CSV.');
     }
 }

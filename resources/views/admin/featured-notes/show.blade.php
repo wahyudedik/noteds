@@ -6,10 +6,10 @@
 <div class="py-12">
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <div class="mb-4">
-            <a href="{{ route('admin.featured-notes.index') }}" class="text-blue-600 hover:text-blue-800">← Back to Featured Notes</a>
+            <a href="{{ route('admin.featured-notes.index') }}" class="text-blue-600 hover:text-blue-800">← {{ __('messages.back_to_featured_notes') }}</a>
         </div>
 
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Featured Note Detail</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ __('messages.featured_note_detail') }}</h2>
 
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">

@@ -60,7 +60,7 @@ Route::get('/page/{cmsPage}', [PublicCmsPageController::class, 'show'])->name('c
 // Marketplace routes
 Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
 Route::get('/marketplace/{note}', [MarketplaceController::class, 'show'])->name('marketplace.show');
-Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purchase'])->middleware(['auth', 'username.setup'])->name('marketplace.purchase');
+Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purchase'])->middleware(['auth', 'username.setup', 'buyer'])->name('marketplace.purchase');
 
 // Public profile routes
 Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('public.profile.show');
@@ -71,6 +71,13 @@ Route::patch('/reviews/{review}', [ReviewController::class, 'update'])->middlewa
 Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->middleware(['auth', 'username.setup'])->name('reviews.destroy');
 
 Route::get('/dashboard', function () {
+    $user = auth()->user();
+    
+    // Workspace users should be redirected to workspaces
+    if ($user->role === 'user_workspaces') {
+        return redirect()->route('workspaces.index');
+    }
+    
     return view('dashboard');
 })->middleware(['auth', 'verified', 'username.setup'])->name('dashboard');
 
@@ -80,7 +87,9 @@ Route::middleware('auth')->prefix('setup-username')->name('setup-username.')->gr
     Route::post('/', [\App\Http\Controllers\SetupUsernameController::class, 'store'])->name('store');
 });
 
-Route::middleware(['auth', 'username.setup'])->group(function () {
+Route::middleware(['auth', 'username.setup', 'workspace.user'])->group(function () {
+    // Notes routes - for sellers and workspace users
+    // Check is done in NoteController and middleware
     Route::resource('notes', NoteController::class);
     Route::get('/notes/{note}/attachments/{filename}', [NoteAttachmentController::class, 'download'])->name('notes.attachments.download');
 
@@ -91,15 +100,67 @@ Route::middleware(['auth', 'username.setup'])->group(function () {
     });
 
     // Workspaces (Premium feature - multi workspace)
-    Route::middleware('premium')->group(function () {
+    // Workspace users can access workspaces even without premium
+    Route::middleware(['auth', 'username.setup'])->group(function () {
+        // Check access in WorkspaceController
         Route::resource('workspaces', \App\Http\Controllers\WorkspaceController::class);
+        Route::get('/workspaces/{workspace}/invite', [\App\Http\Controllers\WorkspaceController::class, 'invite'])->name('workspaces.invite');
+        Route::post('/workspaces/{workspace}/invite', [\App\Http\Controllers\WorkspaceController::class, 'storeInvite'])->name('workspaces.invite.store');
+        Route::delete('/workspaces/{workspace}/invite/{invitation}', [\App\Http\Controllers\WorkspaceController::class, 'cancelInvite'])->name('workspaces.invite.cancel');
         Route::post('/workspaces/{workspace}/sell', [\App\Http\Controllers\WorkspaceController::class, 'sell'])->name('workspaces.sell');
         Route::post('/workspaces/{workspace}/purchase', [\App\Http\Controllers\WorkspaceController::class, 'purchase'])->name('workspaces.purchase');
     });
 
-    // AI routes - Basic features (available to all authenticated users)
+    // AI routes - Premium features only (require subscription)
     Route::post('/ai/analyze', [AiController::class, 'analyze'])->name('ai.analyze');
+    Route::post('/ai/generate-content', [AiController::class, 'generateContent'])->name('ai.generate-content');
+    Route::post('/ai/search-images', [AiController::class, 'searchImages'])->name('ai.search-images');
+    Route::post('/ai/generate-image', [AiController::class, 'generateImage'])->name('ai.generate-image');
+    Route::post('/ai/generate-video', [AiController::class, 'generateVideo'])->name('ai.generate-video');
+    Route::post('/ai/edit-video', [AiController::class, 'editVideo'])->name('ai.edit-video');
+    Route::post('/ai/generate-ideas', [AiController::class, 'generateIdeas'])->name('ai.generate-ideas');
     Route::get('/ai/status', [AiController::class, 'status'])->name('ai.status');
+
+    // Buyer AI routes - Premium features only (for purchased notes)
+    Route::middleware('premium')->prefix('buyer-ai')->name('buyer-ai.')->group(function () {
+        Route::post('/analyze/{note}', [\App\Http\Controllers\BuyerAiController::class, 'analyzePurchasedNote'])->name('analyze');
+        Route::post('/ask', [\App\Http\Controllers\BuyerAiController::class, 'askPurchasedNote'])->name('ask');
+        Route::post('/study-materials/{note}', [\App\Http\Controllers\BuyerAiController::class, 'generateStudyMaterials'])->name('study-materials');
+        Route::post('/compare', [\App\Http\Controllers\BuyerAiController::class, 'compareNotes'])->name('compare');
+        Route::get('/recommendations', [\App\Http\Controllers\BuyerAiController::class, 'getRecommendations'])->name('recommendations');
+    });
+
+    // Collections (Wishlist) routes - Premium features only
+    Route::middleware('premium')->resource('collections', \App\Http\Controllers\CollectionController::class);
+    Route::middleware('premium')->post('/collections/{collection}/add-note', [\App\Http\Controllers\CollectionController::class, 'addNote'])->name('collections.add-note');
+    Route::middleware('premium')->delete('/collections/{collection}/remove-note/{note}', [\App\Http\Controllers\CollectionController::class, 'removeNote'])->name('collections.remove-note');
+
+    // Export routes - Premium features only
+    Route::middleware('premium')->prefix('export')->name('export.')->group(function () {
+        Route::get('/note/{note}/pdf', [\App\Http\Controllers\ExportController::class, 'exportPdf'])->name('pdf');
+        Route::get('/note/{note}/docx', [\App\Http\Controllers\ExportController::class, 'exportDocx'])->name('docx');
+        Route::get('/note/{note}/markdown', [\App\Http\Controllers\ExportController::class, 'exportMarkdown'])->name('markdown');
+    });
+
+    // Reading Progress routes - Premium features only
+    Route::middleware('premium')->prefix('reading-progress')->name('reading-progress.')->group(function () {
+        Route::post('/note/{note}', [\App\Http\Controllers\ReadingProgressController::class, 'update'])->name('update');
+        Route::get('/note/{note}', [\App\Http\Controllers\ReadingProgressController::class, 'show'])->name('show');
+    });
+
+    // Bookmarks routes - Premium features only
+    Route::middleware('premium')->prefix('bookmarks')->name('bookmarks.')->group(function () {
+        Route::get('/note/{note}', [\App\Http\Controllers\BookmarkController::class, 'index'])->name('index');
+        Route::post('/note/{note}', [\App\Http\Controllers\BookmarkController::class, 'store'])->name('store');
+        Route::put('/{bookmark}', [\App\Http\Controllers\BookmarkController::class, 'update'])->name('update');
+        Route::delete('/{bookmark}', [\App\Http\Controllers\BookmarkController::class, 'destroy'])->name('destroy');
+    });
+
+    // Buyer Analytics routes - Premium features only
+    Route::middleware('premium')->prefix('buyer-analytics')->name('buyer-analytics.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\BuyerAnalyticsController::class, 'index'])->name('index');
+        Route::get('/purchase-history', [\App\Http\Controllers\BuyerAnalyticsController::class, 'purchaseHistory'])->name('purchase-history');
+    });
 
     // MyNoteds (AI Memory Platform) routes - Premium features only
     Route::middleware('premium')->prefix('mynoteds')->name('mynoteds.')->group(function () {
@@ -132,10 +193,13 @@ Route::middleware(['auth', 'username.setup'])->group(function () {
     Route::get('/wallet/withdraw', [WithdrawController::class, 'create'])->name('wallet.withdraw.create');
     Route::post('/wallet/withdraw', [WithdrawController::class, 'store'])->name('wallet.withdraw.store');
 
-    // Featured Notes routes
-    Route::get('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'index'])->name('featured-notes.index');
-    Route::get('/featured-notes/create', [\App\Http\Controllers\FeaturedNoteController::class, 'create'])->name('featured-notes.create');
-    Route::post('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'store'])->name('featured-notes.store');
+    // Featured Notes routes - only for sellers
+    Route::middleware('seller')->group(function () {
+        Route::get('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'index'])->name('featured-notes.index');
+        Route::get('/featured-notes/create', [\App\Http\Controllers\FeaturedNoteController::class, 'create'])->name('featured-notes.create');
+        Route::post('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'store'])->name('featured-notes.store');
+        Route::get('/featured-notes/export', [\App\Http\Controllers\FeaturedNoteController::class, 'exportReport'])->name('featured-notes.export');
+    });
 
     // Referral routes
     Route::get('/referral', [ReferralController::class, 'index'])->name('referral.index');
@@ -185,6 +249,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin', 'username.setup'])->na
 
     // Featured Notes Admin routes
     Route::get('/featured-notes', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'index'])->name('featured-notes.index');
+    Route::get('/featured-notes/ab-testing', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'abTesting'])->name('featured-notes.ab-testing');
     Route::get('/featured-notes/{featuredNote}', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'show'])->name('featured-notes.show');
     Route::post('/featured-notes/{featuredNote}/approve', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'approve'])->name('featured-notes.approve');
     Route::post('/featured-notes/{featuredNote}/reject', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'reject'])->name('featured-notes.reject');
@@ -217,5 +282,11 @@ Route::get('/payment/unfinish', [WalletController::class, 'paymentUnfinish'])
 
 Route::get('/payment/error', [WalletController::class, 'paymentError'])
     ->name('payment.error');
+
+// Featured Notes Tracking API (no auth required for analytics)
+Route::post('/api/featured-notes/{featuredNote}/click', [\App\Http\Controllers\FeaturedNoteController::class, 'trackClick'])
+    ->name('api.featured-notes.click');
+Route::post('/api/featured-notes/{featuredNote}/impression', [\App\Http\Controllers\FeaturedNoteController::class, 'trackImpression'])
+    ->name('api.featured-notes.impression');
 
 require __DIR__ . '/auth.php';

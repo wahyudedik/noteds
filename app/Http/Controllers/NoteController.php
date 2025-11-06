@@ -8,6 +8,7 @@ use App\Models\Note;
 use App\Models\Tag;
 use App\Services\NoteActivityService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -29,8 +30,14 @@ class NoteController extends Controller
      */
     public function create(Request $request): View
     {
-        $tags = Tag::orderBy('name')->get();
         $user = auth()->user();
+        
+        // Check if user is seller or workspace user (middleware already checks, but double check for security)
+        if (!in_array($user->role, ['seller', 'user_workspaces']) && !$user->hasRole('admin')) {
+            abort(403, 'Fitur ini hanya tersedia untuk Seller atau Workspace User. Buyer tidak dapat membuat note. Jika ingin membuat note, silakan buat akun Seller dengan email berbeda atau bergabung dengan workspace.');
+        }
+        
+        $tags = Tag::orderBy('name')->get();
         
         // Get folders and workspaces for premium users
         $folders = [];
@@ -75,8 +82,15 @@ class NoteController extends Controller
      */
     public function store(StoreNoteRequest $request): RedirectResponse
     {
+        $user = auth()->user();
+        
+        // Check if user is seller or workspace user (middleware already checks, but double check for security)
+        if (!in_array($user->role, ['seller', 'user_workspaces']) && !$user->hasRole('admin')) {
+            return redirect()->route('dashboard')->with('error', 'Fitur ini hanya tersedia untuk Seller atau Workspace User. Buyer tidak dapat membuat note. Jika ingin membuat note, silakan buat akun Seller dengan email berbeda atau bergabung dengan workspace.');
+        }
+        
         // Check if user can create more notes
-        if (!auth()->user()->canCreateMoreNotes()) {
+        if (!$user->canCreateMoreNotes()) {
             $limit = auth()->user()->getNoteCreationLimit();
             return redirect()->route('notes.create')
                 ->with('error', "Note creation limit reached! You can only create {$limit} notes on the Basic plan. Upgrade to Premium for unlimited notes.");
@@ -162,6 +176,15 @@ class NoteController extends Controller
         $attachments = $this->handleFileUploads($request);
         $validated['attachments'] = $attachments;
         $validated['file_count'] = count($attachments);
+
+        // Handle thumbnail uploads
+        $thumbnails = $this->handleThumbnailUploads($request);
+        $validated['thumbnails'] = $thumbnails;
+
+        // Set default preview_percentage if not provided
+        if (!isset($validated['preview_percentage'])) {
+            $validated['preview_percentage'] = 0;
+        }
 
         $tags = $validated['tags'] ?? [];
         unset($validated['tags']);
@@ -277,6 +300,29 @@ class NoteController extends Controller
         // Merge new and existing attachments
         $validated['attachments'] = array_merge(array_values($existingAttachments), $newAttachments);
         $validated['file_count'] = count($validated['attachments']);
+
+        // Handle thumbnail uploads (merge with existing)
+        $existingThumbnails = $note->thumbnails ?? [];
+        $newThumbnails = $this->handleThumbnailUploads($request);
+        $removedThumbnails = $request->input('removed_thumbnails', []);
+        
+        // Remove deleted thumbnails
+        $existingThumbnails = array_filter($existingThumbnails, function($thumbnail) use ($removedThumbnails) {
+            return !in_array($thumbnail, $removedThumbnails);
+        });
+        
+        // Merge new and existing thumbnails
+        $validated['thumbnails'] = array_merge(array_values($existingThumbnails), $newThumbnails);
+        
+        // Limit to 5 thumbnails
+        if (count($validated['thumbnails']) > 5) {
+            $validated['thumbnails'] = array_slice($validated['thumbnails'], 0, 5);
+        }
+
+        // Set default preview_percentage if not provided
+        if (!isset($validated['preview_percentage'])) {
+            $validated['preview_percentage'] = $note->preview_percentage ?? 0;
+        }
 
         $tags = $validated['tags'] ?? [];
         unset($validated['tags']);
@@ -395,5 +441,38 @@ class NoteController extends Controller
         }
 
         return $attachments;
+    }
+
+    /**
+     * Handle thumbnail uploads for notes
+     */
+    protected function handleThumbnailUploads(Request $request): array
+    {
+        if (!$request->hasFile('thumbnails')) {
+            return [];
+        }
+
+        $files = $request->file('thumbnails');
+        $thumbnails = [];
+
+        // Ensure public storage directory exists
+        if (!Storage::disk('public')->exists('thumbnails')) {
+            Storage::disk('public')->makeDirectory('thumbnails');
+        }
+
+        foreach ($files as $file) {
+            // Validate it's an image
+            if (!$file->isValid() || !str_starts_with($file->getMimeType(), 'image/')) {
+                continue; // Skip invalid files
+            }
+
+            // Generate unique filename
+            $filename = Str::uuid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('thumbnails/' . auth()->id(), $filename, 'public');
+
+            $thumbnails[] = $path;
+        }
+
+        return $thumbnails;
     }
 }

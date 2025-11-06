@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             ReferralCodeSeeder::class,
             FaqSeeder::class,
             SocialMediaLinkSeeder::class,
+            LandingPageSectionSeeder::class,
         ]);
     }
 }

@@ -14,10 +14,19 @@ class AiController extends Controller
 
     /**
      * Generate summary and suggest tags for a note.
-     * Basic AI feature - available to all authenticated users.
+     * Premium feature only - requires subscription.
      */
     public function analyze(Request $request): JsonResponse
     {
+        // Check premium subscription
+        if (!auth()->user()->hasPremium()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.',
+                'requires_premium' => true,
+            ], 403);
+        }
+
         $request->validate([
             'content' => 'required|string|max:10000',
         ]);
@@ -355,5 +364,333 @@ class AiController extends Controller
             'available' => $available,
             'service' => 'Ollama',
         ]);
+    }
+
+    /**
+     * Generate content from a prompt (like LLM).
+     * Premium feature only - requires subscription.
+     */
+    public function generateContent(Request $request): JsonResponse
+    {
+        // Check premium subscription
+        if (!auth()->user()->hasPremium()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.',
+                'requires_premium' => true,
+            ], 403);
+        }
+
+        $request->validate([
+            'prompt' => 'required|string|max:1000',
+            'max_length' => 'nullable|integer|min:100|max:5000',
+        ]);
+
+        try {
+            $prompt = $request->input('prompt');
+            $maxLength = $request->input('max_length', 2000);
+
+            // Check if Ollama is available
+            if (!$this->aiService->isAvailable()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'AI service is currently unavailable. Please try again later.',
+                ], 503);
+            }
+
+            // Generate content
+            $content = $this->aiService->generateContent($prompt, $maxLength);
+
+            if ($content) {
+                return response()->json([
+                    'success' => true,
+                    'content' => $content,
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate content. Please try again.',
+            ], 500);
+        } catch (\Exception $e) {
+            logger()->error('AI Content generation error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while generating content.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Search for images based on query.
+     * Premium feature only - requires subscription.
+     */
+    public function searchImages(Request $request): JsonResponse
+    {
+        // Check premium subscription
+        if (!auth()->user()->hasPremium()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.',
+                'requires_premium' => true,
+            ], 403);
+        }
+
+        $request->validate([
+            'query' => 'required|string|max:200',
+            'limit' => 'nullable|integer|min:1|max:30',
+        ]);
+
+        try {
+            $query = $request->input('query');
+            $limit = $request->input('limit', 10);
+
+            // Search images
+            $images = $this->aiService->searchImages($query, $limit);
+
+            return response()->json([
+                'success' => true,
+                'images' => $images,
+                'total' => count($images),
+            ]);
+        } catch (\Exception $e) {
+            logger()->error('Image search error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while searching for images.',
+                'images' => [],
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate image from text prompt.
+     * Premium feature only - requires subscription.
+     */
+    public function generateImage(Request $request): JsonResponse
+    {
+        // Check premium subscription
+        if (!auth()->user()->hasPremium()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.',
+                'requires_premium' => true,
+            ], 403);
+        }
+
+        $request->validate([
+            'prompt' => 'required|string|max:500',
+            'size' => 'nullable|string|in:512x512,1024x1024,1024x1792,1792x1024',
+            'style' => 'nullable|string|in:vivid,natural',
+        ]);
+
+        try {
+            $prompt = $request->input('prompt');
+            $options = [
+                'size' => $request->input('size', '1024x1024'),
+                'style' => $request->input('style', 'vivid'),
+            ];
+
+            // Generate image
+            $result = $this->aiService->generateImage($prompt, $options);
+
+            if ($result) {
+                return response()->json([
+                    'success' => true,
+                    'image' => $result,
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate image. Please ensure image generation API is configured.',
+            ], 500);
+        } catch (\Exception $e) {
+            logger()->error('Image generation error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while generating image.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate video from text prompt.
+     * Premium feature only - requires subscription.
+     */
+    public function generateVideo(Request $request): JsonResponse
+    {
+        // Check premium subscription
+        if (!auth()->user()->hasPremium()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.',
+                'requires_premium' => true,
+            ], 403);
+        }
+
+        $request->validate([
+            'prompt' => 'required|string|max:500',
+            'duration' => 'nullable|integer|min:1|max:10',
+            'ratio' => 'nullable|string|in:16:9,9:16,1:1',
+        ]);
+
+        try {
+            $prompt = $request->input('prompt');
+            $options = [
+                'duration' => $request->input('duration', 5),
+                'ratio' => $request->input('ratio', '16:9'),
+            ];
+
+            // Generate video
+            $result = $this->aiService->generateVideo($prompt, $options);
+
+            if ($result) {
+                return response()->json([
+                    'success' => true,
+                    'video' => $result,
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate video. Please ensure video generation API is configured.',
+            ], 500);
+        } catch (\Exception $e) {
+            logger()->error('Video generation error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while generating video.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Edit video with specified edits.
+     * Premium feature only - requires subscription.
+     */
+    public function editVideo(Request $request): JsonResponse
+    {
+        // Check premium subscription
+        if (!auth()->user()->hasPremium()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.',
+                'requires_premium' => true,
+            ], 403);
+        }
+
+        $request->validate([
+            'video_url' => 'required|url',
+            'edits' => 'required|array',
+            'edits.trim' => 'nullable|array',
+            'edits.effects' => 'nullable|array',
+        ]);
+
+        try {
+            $videoUrl = $request->input('video_url');
+            $edits = $request->input('edits');
+
+            // Edit video
+            $result = $this->aiService->editVideo($videoUrl, $edits);
+
+            if ($result) {
+                return response()->json([
+                    'success' => true,
+                    'video' => $result,
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to edit video.',
+            ], 500);
+        } catch (\Exception $e) {
+            logger()->error('Video editing error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while editing video.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate content ideas based on topic.
+     * Premium feature only - requires subscription.
+     */
+    public function generateIdeas(Request $request): JsonResponse
+    {
+        // Check premium subscription
+        if (!auth()->user()->hasPremium()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.',
+                'requires_premium' => true,
+            ], 403);
+        }
+
+        $request->validate([
+            'topic' => 'required|string|max:200',
+            'count' => 'nullable|integer|min:1|max:10',
+        ]);
+
+        try {
+            $topic = $request->input('topic');
+            $count = $request->input('count', 5);
+
+            // Check if Ollama is available
+            if (!$this->aiService->isAvailable()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'AI service is currently unavailable. Please try again later.',
+                ], 503);
+            }
+
+            // Generate ideas
+            $ideas = $this->aiService->generateIdeas($topic, $count);
+
+            if (!empty($ideas)) {
+                return response()->json([
+                    'success' => true,
+                    'ideas' => $ideas,
+                    'count' => count($ideas),
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate ideas. Please try again.',
+            ], 500);
+        } catch (\Exception $e) {
+            logger()->error('Idea generation error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while generating ideas.',
+            ], 500);
+        }
     }
 }

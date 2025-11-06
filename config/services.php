@@ -45,6 +45,20 @@ return [
     'ollama' => [
         'url' => env('OLLAMA_URL', 'http://localhost:11434'),
         'model' => env('OLLAMA_MODEL', 'llama3.2'),
+        'image_model' => env('OLLAMA_IMAGE_MODEL', 'flux'), // Model untuk image generation (flux, stable-diffusion-xl, dll)
+    ],
+
+    'unsplash' => [
+        'access_key' => env('UNSPLASH_ACCESS_KEY'),
+        'secret_key' => env('UNSPLASH_SECRET_KEY'),
+    ],
+
+    'stability' => [
+        'api_key' => env('STABILITY_API_KEY'),
+    ],
+
+    'runway' => [
+        'api_key' => env('RUNWAY_API_KEY'),
     ],
 
 ];
