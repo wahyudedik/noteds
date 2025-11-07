@@ -77,7 +77,18 @@ class WalletController extends Controller
             'notes' => 'Top-up saldo wallet',
         ]);
 
-        $orderId = 'topup-' . $transaction->id . '-' . time();
+        // Generate order_id: Midtrans requires max 50 characters
+        // Format: topup-{timestamp}-{short_hash}
+        // Using first 8 chars of UUID + timestamp for uniqueness
+        $shortId = substr(str_replace('-', '', $transaction->id), 0, 8);
+        $orderId = 'topup-' . time() . '-' . $shortId;
+        
+        // Ensure order_id doesn't exceed 50 characters (Midtrans limit)
+        if (strlen($orderId) > 50) {
+            // Fallback: use hash if still too long
+            $orderId = 'topup-' . time() . '-' . substr(md5($transaction->id), 0, 8);
+        }
+        
         $transaction->midtrans_order_id = $orderId;
         $transaction->save();
 
@@ -123,6 +134,7 @@ class WalletController extends Controller
 
             Log::info('Generating Snap Token:', [
                 'order_id' => $orderId,
+                'order_id_length' => strlen($orderId),
                 'amount' => $amount,
                 'user_id' => $user->id,
             ]);
