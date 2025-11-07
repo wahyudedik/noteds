@@ -193,15 +193,29 @@
         @if(session('success'))
             @push('scripts')
             <script>
-                Swal.fire({
-                    icon: 'success',
-                    title: '{{ session('success') }}',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                });
+                (function() {
+                    function showSuccess() {
+                        if (typeof Swal !== 'undefined' && Swal.fire) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '{{ session('success') }}',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                        } else {
+                            // Fallback: wait for Swal to load
+                            setTimeout(showSuccess, 100);
+                        }
+                    }
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', showSuccess);
+                    } else {
+                        showSuccess();
+                    }
+                })();
             </script>
             @endpush
         @endif
@@ -209,15 +223,29 @@
         @if(session('error'))
             @push('scripts')
             <script>
-                Swal.fire({
-                    icon: 'error',
-                    title: '{{ session('error') }}',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                });
+                (function() {
+                    function showError() {
+                        if (typeof Swal !== 'undefined' && Swal.fire) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '{{ session('error') }}',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                        } else {
+                            // Fallback: wait for Swal to load
+                            setTimeout(showError, 100);
+                        }
+                    }
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', showError);
+                    } else {
+                        showError();
+                    }
+                })();
             </script>
             @endpush
         @endif
@@ -225,15 +253,29 @@
         @if(session('warning'))
             @push('scripts')
             <script>
-                Swal.fire({
-                    icon: 'warning',
-                    title: '{{ session('warning') }}',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                });
+                (function() {
+                    function showWarning() {
+                        if (typeof Swal !== 'undefined' && Swal.fire) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: '{{ session('warning') }}',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                        } else {
+                            // Fallback: wait for Swal to load
+                            setTimeout(showWarning, 100);
+                        }
+                    }
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', showWarning);
+                    } else {
+                        showWarning();
+                    }
+                })();
             </script>
             @endpush
         @endif
@@ -241,15 +283,29 @@
         @if(session('info'))
             @push('scripts')
             <script>
-                Swal.fire({
-                    icon: 'info',
-                    title: '{{ session('info') }}',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                });
+                (function() {
+                    function showInfo() {
+                        if (typeof Swal !== 'undefined' && Swal.fire) {
+                            Swal.fire({
+                                icon: 'info',
+                                title: '{{ session('info') }}',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                        } else {
+                            // Fallback: wait for Swal to load
+                            setTimeout(showInfo, 100);
+                        }
+                    }
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', showInfo);
+                    } else {
+                        showInfo();
+                    }
+                })();
             </script>
             @endpush
         @endif

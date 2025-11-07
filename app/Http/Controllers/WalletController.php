@@ -106,14 +106,52 @@ class WalletController extends Controller
         ];
 
         try {
+            // Log configuration for debugging
+            Log::info('Midtrans Configuration Check:', [
+                'server_key_set' => !empty(config('services.midtrans.server_key')),
+                'client_key_set' => !empty(config('services.midtrans.client_key')),
+                'is_production' => config('services.midtrans.is_production', false),
+                'merchant_id' => config('services.midtrans.merchant_id'),
+            ]);
+
+            // Verify Midtrans config is set
+            if (empty(config('services.midtrans.server_key'))) {
+                Log::error('Midtrans Server Key is empty!');
+                return redirect()->route('wallet.index')
+                    ->with('error', 'Payment gateway belum dikonfigurasi dengan benar. Server Key tidak ditemukan.');
+            }
+
+            Log::info('Generating Snap Token:', [
+                'order_id' => $orderId,
+                'amount' => $amount,
+                'user_id' => $user->id,
+            ]);
+
             $snapToken = Snap::getSnapToken($params);
+            
+            if (empty($snapToken)) {
+                Log::error('Snap Token is empty!');
+                return redirect()->route('wallet.index')
+                    ->with('error', 'Gagal membuat transaksi top-up. Token tidak diterima dari payment gateway.');
+            }
+
+            Log::info('Snap Token generated successfully', [
+                'token_length' => strlen($snapToken),
+                'transaction_id' => $transaction->id,
+            ]);
             
             return redirect()->route('wallet.topup-checkout', ['token' => $snapToken, 'transaction' => $transaction->id]);
         } catch (\Exception $e) {
-            Log::error('Midtrans Snap Token Error: ' . $e->getMessage());
+            Log::error('Midtrans Snap Token Error:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'params' => $params,
+            ]);
             
             return redirect()->route('wallet.index')
-                ->with('error', 'Gagal membuat transaksi top-up. Silakan coba lagi.');
+                ->with('error', 'Gagal membuat transaksi top-up: ' . $e->getMessage() . '. Silakan coba lagi atau hubungi support.');
         }
     }
 

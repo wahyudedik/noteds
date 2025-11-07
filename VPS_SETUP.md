@@ -649,12 +649,31 @@ sudo supervisorctl restart noteds-worker:*
 - Check MySQL service: `sudo systemctl status mysql`
 - Test connection: `mysql -u noteds_user -p noteds_production`
 
-### Assets Not Loading
-- Run `npm run build` in production
-- Check Nginx config for proper root
-- Verify file permissions
-- Clear browser cache
-- Check Vite manifest: `public/build/.vite/manifest.json`
+### Assets Not Loading / JavaScript Errors (Swal is not defined)
+- **CRITICAL:** Run `npm run build` in production (Vite assets must be compiled)
+  ```bash
+  cd /var/www/noteds
+  sudo -u www-data npm install
+  sudo -u www-data npm run build
+  ```
+- Verify build output exists: `ls -la public/build/`
+- Check Vite manifest: `public/build/.vite/manifest.json` should exist
+- Clear Laravel cache after build:
+  ```bash
+  sudo -u www-data php artisan optimize:clear
+  sudo -u www-data php artisan optimize
+  ```
+- Check Nginx config for proper root and asset serving
+- Verify file permissions (storage and public/build should be writable)
+- Clear browser cache (hard refresh: Ctrl+Shift+R or Cmd+Shift+R)
+- Check browser console for 404 errors on JavaScript files
+- Verify `.env` has correct `APP_URL` (must match your domain)
+- **If Swal is still undefined after build:**
+  - Check if `resources/js/app.js` is being compiled correctly
+  - Verify `sweetalert2` is in `package.json` dependencies
+  - Run `npm install` again to ensure dependencies are installed
+  - Check browser Network tab to see if `app.js` is loading
+  - Verify Vite is serving assets correctly (check Nginx config)
 
 ### Ollama Connection Issues
 - Verify Ollama is running: `sudo systemctl status ollama`
@@ -663,20 +682,116 @@ sudo supervisorctl restart noteds-worker:*
 - Check firewall rules if using remote Ollama server
 - View Ollama logs: `sudo journalctl -u ollama -f`
 
-### Midtrans Payment Issues
-- Verify API keys di `.env` sudah benar
-- Pastikan `MIDTRANS_IS_PRODUCTION` sesuai dengan environment keys
-- Check Midtrans Dashboard untuk melihat transaction logs
-- **Verify all URL endpoints di Midtrans Dashboard:**
-  - Payment Notification URL: `https://your-domain.com/payment/callback`
-  - Finish Redirect URL: `https://your-domain.com/payment/finish`
-  - Unfinish Redirect URL: `https://your-domain.com/payment/unfinish`
-  - Error Redirect URL: `https://your-domain.com/payment/error`
-- Test dengan kartu test dari Midtrans (Visa: 4811 1111 1111 1114)
-- Check Laravel logs: `tail -f storage/logs/laravel.log` untuk error Midtrans
-- Test webhook endpoint: `curl -X POST https://your-domain.com/payment/callback`
-- Test redirect endpoints: Visit URLs directly dengan query params
-- Pastikan HTTPS sudah aktif untuk semua endpoints (Midtrans memerlukan HTTPS di production)
+### Midtrans Payment Issues / Top-up Tidak Bisa
+
+#### 1. Verifikasi Konfigurasi `.env`
+```bash
+# Pastikan semua key sudah diisi dengan benar
+MIDTRANS_SERVER_KEY=your_server_key_here
+MIDTRANS_CLIENT_KEY=your_client_key_here
+MIDTRANS_IS_PRODUCTION=false  # false untuk sandbox, true untuk production
+MIDTRANS_MERCHANT_ID=your_merchant_id
+```
+
+**PENTING:** Setelah update `.env`, jalankan:
+```bash
+php artisan config:clear
+php artisan cache:clear
+```
+
+#### 2. Cek Log Laravel untuk Error Detail
+```bash
+tail -f storage/logs/laravel.log
+```
+
+Cari log dengan keyword:
+- "Midtrans Configuration Check"
+- "Midtrans Snap Token Error"
+- "Snap Token generated successfully"
+
+#### 3. Verifikasi Midtrans Keys
+- **Sandbox:** Pastikan menggunakan Sandbox keys dari [Midtrans Dashboard](https://dashboard.sandbox.midtrans.com)
+- **Production:** Pastikan menggunakan Production keys dari [Midtrans Dashboard](https://dashboard.midtrans.com)
+- **Server Key** harus dimulai dengan `SB-Mid-server-` untuk sandbox atau `Mid-server-` untuk production
+- **Client Key** harus dimulai dengan `SB-Mid-client-` untuk sandbox atau `Mid-client-` untuk production
+
+#### 4. Test Snap Token Generation
+Buat route test sementara di `routes/web.php`:
+```php
+Route::get('/test-midtrans', function() {
+    \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
+    \Midtrans\Config::$isProduction = config('services.midtrans.is_production', false);
+    
+    $params = [
+        'transaction_details' => [
+            'order_id' => 'test-' . time(),
+            'gross_amount' => 10000,
+        ],
+    ];
+    
+    try {
+        $token = \Midtrans\Snap::getSnapToken($params);
+        return response()->json(['success' => true, 'token' => $token]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'error' => $e->getMessage()]);
+    }
+});
+```
+
+Akses `/test-midtrans` di browser untuk test.
+
+#### 5. Verify all URL endpoints di Midtrans Dashboard
+Login ke [Midtrans Dashboard](https://dashboard.midtrans.com) → Settings → Configuration → URL Settings:
+- **Payment Notification URL:** `https://your-domain.com/payment/callback`
+- **Finish Redirect URL:** `https://your-domain.com/payment/finish`
+- **Unfinish Redirect URL:** `https://your-domain.com/payment/unfinish`
+- **Error Redirect URL:** `https://your-domain.com/payment/error`
+
+#### 6. Test dengan Kartu Test Midtrans
+- **Visa:** 4811 1111 1111 1114
+- **Mastercard:** 5211 1111 1111 1117
+- **CVV:** 123
+- **Expiry:** Any future date (e.g., 12/25)
+
+#### 7. Common Issues & Solutions
+
+**Issue: "Payment gateway belum dikonfigurasi"**
+- Cek apakah `MIDTRANS_SERVER_KEY` dan `MIDTRANS_CLIENT_KEY` sudah diisi di `.env`
+- Jalankan `php artisan config:clear`
+
+**Issue: "Snap Token is empty"**
+- Cek Server Key apakah benar
+- Cek apakah `MIDTRANS_IS_PRODUCTION` sesuai dengan keys yang digunakan
+- Cek Laravel log untuk error detail dari Midtrans API
+
+**Issue: "Snap.js tidak ter-load"**
+- Cek browser console untuk error
+- Pastikan Client Key sudah benar
+- Pastikan URL Snap.js sesuai dengan environment (sandbox vs production)
+- Cek apakah ada firewall yang block CDN Midtrans
+
+**Issue: "Webhook tidak diterima"**
+- Pastikan URL webhook sudah dikonfigurasi di Midtrans Dashboard
+- Pastikan route `/payment/callback` bisa diakses (test dengan `curl`)
+- Cek Laravel log untuk webhook yang diterima
+- Pastikan HTTPS aktif (Midtrans memerlukan HTTPS di production)
+
+#### 8. Debug Commands
+```bash
+# Clear all cache
+php artisan optimize:clear
+
+# Check config
+php artisan config:show services.midtrans
+
+# Test webhook endpoint
+curl -X POST https://your-domain.com/payment/callback \
+  -H "Content-Type: application/json" \
+  -d '{"order_id":"test-123","transaction_status":"settlement"}'
+
+# View real-time logs
+tail -f storage/logs/laravel.log | grep -i midtrans
+```
 - **Webhook Improvements (2025-11-03):**
   - Webhook route sudah exempt dari CSRF protection
   - Duplicate processing protection sudah ditambahkan
