@@ -776,6 +776,19 @@ Login ke [Midtrans Dashboard](https://dashboard.midtrans.com) → Settings → C
 - Cek Laravel log untuk webhook yang diterima
 - Pastikan HTTPS aktif (Midtrans memerlukan HTTPS di production)
 
+**Issue: "HTTP ERROR 404" saat redirect ke payment method (BCA KlikPay, dll)**
+- **Ini adalah masalah dari Midtrans Sandbox, bukan dari kode aplikasi**
+- Beberapa payment method seperti BCA KlikPay tidak tersedia di sandbox environment
+- **Solusi:** Gunakan payment method yang tersedia di sandbox:
+  - ✅ **Credit/Debit Card** (Visa/Mastercard) - **Direkomendasikan untuk testing**
+  - ✅ **Bank Transfer** (Mandiri, BCA, BNI, BRI)
+  - ✅ **Virtual Account** (BCA, Mandiri, BNI, BRI)
+  - ✅ **E-Wallet** (GoPay, OVO, DANA)
+  - ❌ **BCA KlikPay** - Tidak tersedia di sandbox
+  - ❌ Beberapa payment method khusus lainnya mungkin tidak tersedia di sandbox
+- **Untuk production:** Semua payment method akan tersedia setelah akun Midtrans diverifikasi
+- Jika error 404 muncul, tutup popup dan pilih payment method lain yang tersedia
+
 #### 8. Debug Commands
 ```bash
 # Clear all cache

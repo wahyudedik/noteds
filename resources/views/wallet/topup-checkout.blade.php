@@ -42,6 +42,15 @@
                             <span class="font-medium text-gray-900">{{ __('messages.secure_payment_by_midtrans') }}</span>
                         </div>
                         <p class="text-xs text-gray-500 ml-7">{{ __('messages.redirected_to_secure_payment') }}</p>
+                        @if (!config('services.midtrans.is_production', false))
+                            <div class="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                <p class="text-xs text-yellow-800">
+                                    <strong>⚠️ Testing Mode (Sandbox):</strong> Beberapa payment method seperti BCA KlikPay
+                                    mungkin tidak tersedia. Gunakan Credit Card, Bank Transfer, atau Virtual Account untuk
+                                    testing.
+                                </p>
+                            </div>
+                        @endif
                     </div>
 
                     <div id="snap-container"
@@ -128,6 +137,13 @@
                                 },
                                 onError: function(result) {
                                     console.log('Payment error:', result);
+                                    // Check if error is 404 or payment method unavailable
+                                    if (result && (result.status_code === '404' || result
+                                            .status_message)) {
+                                        alert(
+                                            'Payment method tidak tersedia atau terjadi error. Silakan pilih payment method lain atau coba lagi.'
+                                            );
+                                    }
                                     window.location.href = '{{ route('wallet.index') }}?status=error';
                                 },
                                 onClose: function() {
