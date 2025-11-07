@@ -20,8 +20,8 @@ class BuyerAnalyticsController extends Controller
 
         // Purchase statistics
         $totalPurchased = $user->purchasedNotes()->count();
-        $totalSpent = $user->purchasedNotes()->sum('purchase_price');
-        $averagePrice = $totalPurchased > 0 ? $totalSpent / $totalPurchased : 0;
+        $totalSpent = $user->purchasedNotes()->sum('purchase_price') ?? 0;
+        $averagePrice = $totalPurchased > 0 ? ($totalSpent / $totalPurchased) : 0;
 
         // Download statistics
         $totalDownloads = $user->noteDownloads()->count();
@@ -47,16 +47,19 @@ class BuyerAnalyticsController extends Controller
             ->get();
 
         // Categories (from tags)
-        $categories = DB::table('purchased_notes')
-            ->join('notes', 'purchased_notes.note_id', '=', 'notes.id')
-            ->join('note_tag', 'notes.id', '=', 'note_tag.note_id')
-            ->join('tags', 'note_tag.tag_id', '=', 'tags.id')
-            ->where('purchased_notes.user_id', $user->id)
-            ->select('tags.name', DB::raw('COUNT(*) as count'))
-            ->groupBy('tags.name')
-            ->orderByDesc('count')
-            ->limit(10)
-            ->get();
+        $categories = collect();
+        if ($totalPurchased > 0) {
+            $categories = DB::table('purchased_notes')
+                ->join('notes', 'purchased_notes.note_id', '=', 'notes.id')
+                ->join('note_tag', 'notes.id', '=', 'note_tag.note_id')
+                ->join('tags', 'note_tag.tag_id', '=', 'tags.id')
+                ->where('purchased_notes.user_id', $user->id)
+                ->select('tags.name', DB::raw('COUNT(*) as count'))
+                ->groupBy('tags.name')
+                ->orderByDesc('count')
+                ->limit(10)
+                ->get();
+        }
 
         // Monthly spending
         $monthlySpending = $user->purchasedNotes()

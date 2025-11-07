@@ -64,6 +64,8 @@ Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purc
 
 // Public profile routes
 Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('public.profile.show');
+Route::get('/u/{username}/ai-chat', [PublicProfileController::class, 'aiChat'])->name('public.profile.ai-chat');
+Route::post('/u/{username}/ai-chat/ask', [PublicProfileController::class, 'askSeller'])->name('public.profile.ai-chat.ask');
 
 // Review routes
 Route::post('/notes/{note}/reviews', [ReviewController::class, 'store'])->middleware(['auth', 'username.setup'])->name('reviews.store');

@@ -21,6 +21,44 @@
                 </div>
             </div>
             <div class="flex items-center space-x-4">
+                @if(isset($purchasedNotes) && $purchasedNotes->count() > 0)
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add Purchased Notes
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition
+                             class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 max-h-96 overflow-y-auto">
+                            <div class="px-4 py-2 border-b border-gray-200">
+                                <p class="text-sm font-semibold text-gray-900">Select Notes to Add</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ $purchasedNotes->count() }} purchased notes available</p>
+                            </div>
+                            @foreach($purchasedNotes as $note)
+                                <form action="{{ route('collections.add-note', $collection) }}" method="POST" class="px-4 py-2 hover:bg-gray-50 transition-colors">
+                                    @csrf
+                                    <input type="hidden" name="note_id" value="{{ $note->id }}">
+                                    <button type="submit" class="w-full text-left">
+                                        <p class="text-sm font-medium text-gray-900 line-clamp-1">{{ $note->title }}</p>
+                                        <p class="text-xs text-gray-500 mt-1">by {{ $note->user->name }}</p>
+                                    </button>
+                                </form>
+                            @endforeach
+                            @if($purchasedNotes->count() === 0)
+                                <div class="px-4 py-4 text-center text-sm text-gray-500">
+                                    No purchased notes available
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+                <a href="{{ route('marketplace.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Browse Marketplace
+                </a>
                 <a href="{{ route('collections.edit', $collection) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
                     Edit
                 </a>
@@ -73,7 +111,19 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <h3 class="mt-2 text-sm font-medium text-gray-900">No notes in this collection</h3>
-                <p class="mt-1 text-sm text-gray-500">Add notes from the marketplace to this collection.</p>
+                <p class="mt-1 text-sm text-gray-500 mb-4">
+                    @if(isset($purchasedNotes) && $purchasedNotes->count() > 0)
+                        You have {{ $purchasedNotes->count() }} purchased notes. Click "Add Purchased Notes" above to add them to this collection.
+                    @else
+                        Add notes from the marketplace to this collection, or purchase notes first.
+                    @endif
+                </p>
+                <a href="{{ route('marketplace.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Browse Marketplace
+                </a>
             </div>
         @endif
     </div>

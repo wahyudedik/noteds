@@ -75,7 +75,26 @@ class CollectionController extends Controller
             $query->with('tags', 'user', 'reviews');
         }]);
 
-        return view('buyer.collections.show', compact('collection'));
+        // Get purchased notes that are NOT already in this collection
+        $user = auth()->user();
+        $purchasedNotes = $user->purchasedNotes()
+            ->with(['note' => function($query) {
+                $query->with('tags', 'user', 'reviews');
+            }])
+            ->whereHas('note', function($query) {
+                $query->where('status', 'active');
+            })
+            ->get()
+            ->map(function($purchasedNote) {
+                return $purchasedNote->note;
+            })
+            ->filter(function($note) use ($collection) {
+                // Filter out notes that are already in collection
+                return $note && !$collection->notes->contains('id', $note->id);
+            })
+            ->values();
+
+        return view('buyer.collections.show', compact('collection', 'purchasedNotes'));
     }
 
     /**
@@ -131,6 +150,17 @@ class CollectionController extends Controller
             'note_id' => 'required|exists:notes,id',
         ]);
 
+        $user = auth()->user();
+        $note = Note::findOrFail($validated['note_id']);
+
+        // Check if user has purchased this note (for buyer collections)
+        if ($user->role === 'buyer' && !$user->hasPurchasedNote($validated['note_id'])) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Anda harus membeli note ini terlebih dahulu sebelum menambahkannya ke collection.'], 403);
+            }
+            return redirect()->back()->with('error', 'Anda harus membeli note ini terlebih dahulu sebelum menambahkannya ke collection.');
+        }
+
         // Check if note already in collection
         if ($collection->notes()->where('notes.id', $validated['note_id'])->exists()) {
             if ($request->expectsJson()) {
@@ -145,6 +175,10 @@ class CollectionController extends Controller
             ->max('order') ?? 0;
         
         $collection->notes()->attach($validated['note_id'], ['order' => $maxOrder + 1]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Note added to collection.']);
+        }
 
         return redirect()->back()->with('success', 'Note added to collection.');
     }

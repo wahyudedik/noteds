@@ -106,7 +106,7 @@
         </div>
 
         <!-- Categories -->
-        @if($categories->count() > 0)
+        @if(isset($categories) && $categories->count() > 0 && $totalPurchased > 0)
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
                 <h2 class="text-xl font-bold text-gray-900 mb-6">Top Categories</h2>
                 <div class="space-y-3">

@@ -42,10 +42,26 @@ class NotePolicy
 
     /**
      * Determine whether the user can delete the model.
+     * Note: Cannot delete if note has been sold (has transactions).
      */
     public function delete(User $user, Note $note): bool
     {
-        return $user->id === $note->user_id;
+        // Only original creator (or current owner if not sold) can delete
+        if ($user->id !== $note->user_id && $user->id !== $note->original_creator_id) {
+            return false;
+        }
+        
+        // Check if note has been sold (has any successful transactions)
+        $hasTransactions = $note->transactions()
+            ->where('status', 'success')
+            ->exists();
+        
+        // Cannot delete if note has been sold
+        if ($hasTransactions) {
+            return false;
+        }
+        
+        return true;
     }
 
     /**

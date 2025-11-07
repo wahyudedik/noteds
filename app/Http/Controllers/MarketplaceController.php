@@ -89,7 +89,7 @@ class MarketplaceController extends Controller
             abort(404);
         }
 
-        $note->load('tags', 'user', 'reviews.user', 'transactions');
+        $note->load('tags', 'user', 'originalCreator', 'reviews.user', 'transactions');
 
         // Track impression for featured notes (track for all users, not just authenticated)
         $featuredNote = \App\Models\FeaturedNote::where('note_id', $note->id)
@@ -113,35 +113,55 @@ class MarketplaceController extends Controller
 
         if (auth()->check()) {
             $user = auth()->user();
-            // Only buyers can buy (sellers cannot buy)
-            $canBuy = $user->role === 'buyer' && $user->id !== $note->user_id;
             
-            // Check if already purchased (per user)
-            if ($canBuy) {
-                $existingTransaction = Transaction::where('buyer_id', auth()->id())
-                    ->where('note_id', $note->id)
-                    ->where('status', 'success')
-                    ->first();
+            // Check if user owns this note (current owner - only current owner can access)
+            $isNoteOwner = $user->id === $note->user_id;
+            
+            // Check if user has ever purchased this note (for checking if they can buy again)
+            // Note: Once sold, buyer loses access - only current owner has access
+            $existingTransaction = Transaction::where('buyer_id', auth()->id())
+                ->where('note_id', $note->id)
+                ->where('status', 'success')
+                ->first();
+            $alreadyPurchased = $existingTransaction !== null;
+            
+            // IMPORTANT: Only current owner can access full content
+            // Buyer who sold the note loses access - it's a one-time sale
+            $canBuy = false;
+            if ($user->role === 'buyer' && !$isNoteOwner) {
+                // Buyer can buy if they haven't purchased it before
+                $canBuy = !$alreadyPurchased && $note->price > 0;
+                // Only show full content if they are current owner (not if they purchased before but sold it)
+                $showFullContent = false; // Buyer who doesn't own can't see full content
                 
-                $alreadyPurchased = $existingTransaction !== null;
-                $canBuy = !$alreadyPurchased && $note->price > 0; // Can't buy if already purchased (per user)
-                $showFullContent = $alreadyPurchased || $note->price == 0; // Show full if purchased or free
-
-                // Check if can review (purchased but hasn't reviewed yet)
-                if ($alreadyPurchased) {
+                // Check if can review (only if they are current owner)
+                if ($isNoteOwner) {
+                    $userReview = $note->reviews()->where('user_id', auth()->id())->first();
+                    $canReview = $userReview === null;
+                }
+            } elseif ($isNoteOwner) {
+                // Current owner (seller or buyer who owns it) can see full content
+                $showFullContent = true;
+                
+                // Check if can review (if buyer owns it)
+                if ($user->role === 'buyer') {
                     $userReview = $note->reviews()->where('user_id', auth()->id())->first();
                     $canReview = $userReview === null;
                 }
             } else {
-                // Note owner can see full content
-                $showFullContent = true;
+                // Seller viewing other seller's note - can't buy, can see preview
+                $showFullContent = $note->price == 0;
             }
         } else {
             // Guest users can only see preview (for paid notes)
             $showFullContent = $note->price == 0;
         }
 
-        return view('marketplace.show', compact('note', 'canBuy', 'alreadyPurchased', 'reviews', 'canReview', 'userReview', 'showFullContent'));
+        // Pass additional info for view
+        $isNoteOwner = auth()->check() && auth()->id() === $note->user_id;
+        $hasPurchasedBefore = $alreadyPurchased ?? false;
+        
+        return view('marketplace.show', compact('note', 'canBuy', 'alreadyPurchased', 'reviews', 'canReview', 'userReview', 'showFullContent', 'isNoteOwner', 'hasPurchasedBefore'));
     }
 
     public function purchase(Note $note, ReferralService $referralService): RedirectResponse
@@ -158,19 +178,27 @@ class MarketplaceController extends Controller
             return redirect()->route('marketplace.show', $note)->with('error', 'Fitur ini hanya tersedia untuk Buyer. Seller tidak dapat membeli note. Jika ingin membeli, silakan buat akun Buyer dengan email berbeda.');
         }
 
+        // Buyer cannot buy their own note (but they can resell it if they own it)
         if ($buyer->id === $seller->id) {
-            return redirect()->route('marketplace.show', $note)->with('error', 'Anda tidak dapat membeli catatan Anda sendiri.');
+            return redirect()->route('marketplace.show', $note)->with('error', 'Anda tidak dapat membeli catatan Anda sendiri. Jika Anda adalah pemilik note ini, Anda dapat menjualnya ke buyer lain.');
         }
 
         // Check if buyer already purchased this note (per user, not global)
-        // Each user can only buy a note once, but the note can be sold to different users
+        // IMPORTANT: Each user can only buy a note once - even if they sold it, they can't buy it again
+        // This enforces the one-time sale rule: once you sell, you lose access permanently
         $existingTransaction = Transaction::where('buyer_id', $buyer->id)
             ->where('note_id', $note->id)
             ->where('status', 'success')
             ->first();
 
         if ($existingTransaction) {
-            return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x.');
+            // Check if buyer still owns the note (hasn't sold it yet)
+            if ($buyer->id === $note->user_id) {
+                return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah memiliki catatan ini. Anda dapat menjualnya ke buyer lain, tetapi ingat bahwa setelah dijual, Anda tidak akan bisa mengaksesnya lagi.');
+            } else {
+                // Buyer sold the note - can't buy again (one-time sale rule)
+                return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli dan menjual catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x. Setelah dijual, akses hilang secara permanen.');
+            }
         }
 
         // Get final price (use discount_price if available, otherwise use regular price)
@@ -215,7 +243,49 @@ class MarketplaceController extends Controller
             
             // Original creator commission (always for original creator in every transaction)
             // Original creator gets commission every time the note is sold, regardless of seller
-            $originalCreator = $note->originalCreator ?? $note->user;
+            // If note doesn't have original_creator_id set, use the first seller (from first transaction)
+            // or fallback to current seller if no transactions exist
+            $originalCreator = null;
+            if ($note->original_creator_id) {
+                $originalCreator = $note->originalCreator;
+            } else {
+                // Find original creator from first transaction
+                $firstTransaction = Transaction::where('note_id', $note->id)
+                    ->where('status', 'success')
+                    ->orderBy('created_at', 'asc')
+                    ->first();
+                
+                if ($firstTransaction && $firstTransaction->original_creator_id) {
+                    $originalCreator = User::find($firstTransaction->original_creator_id);
+                } else {
+                    // No previous transaction - current seller is original creator
+                    // But check if note was created by a seller (not a buyer reselling)
+                    if ($seller->role === 'seller') {
+                        $originalCreator = $seller;
+                    } else {
+                        // Buyer is selling - find original creator from their purchase transaction
+                        $buyerPurchase = Transaction::where('buyer_id', $seller->id)
+                            ->where('note_id', $note->id)
+                            ->where('status', 'success')
+                            ->first();
+                        
+                        if ($buyerPurchase && $buyerPurchase->original_creator_id) {
+                            $originalCreator = User::find($buyerPurchase->original_creator_id);
+                        }
+                    }
+                }
+            }
+            
+            // If still no original creator found, use current seller (shouldn't happen, but fallback)
+            if (!$originalCreator) {
+                $originalCreator = $seller;
+            }
+            
+            // Set original_creator_id on note if not set (for future resells)
+            if (!$note->original_creator_id) {
+                $note->original_creator_id = $originalCreator->id;
+            }
+            
             $creatorCommission = 0;
             if ($originalCreator && $creatorCommissionPercent > 0) {
                 // Original creator always gets commission (if setting is > 0)
@@ -275,9 +345,14 @@ class MarketplaceController extends Controller
                 $admin->save();
             }
 
-            // Transfer note ownership to buyer (so buyer can sell it again)
+            // Transfer note ownership to buyer (so buyer can resell it to other buyers)
             // Original creator stays in original_creator_id for commission tracking
+            // This allows buyer to resell the note while original creator still gets commission
             $note->user_id = $buyer->id;
+            // Ensure original_creator_id is set (should already be set above, but double check)
+            if (!$note->original_creator_id && $originalCreator) {
+                $note->original_creator_id = $originalCreator->id;
+            }
             $note->save();
 
             // Create transaction record
@@ -293,6 +368,17 @@ class MarketplaceController extends Controller
                 'status' => 'success',
                 'payment_method' => 'wallet',
                 'notes' => 'Pembelian catatan: ' . $note->title,
+            ]);
+            
+            // Create note history record for sale
+            \App\Models\NoteHistory::create([
+                'note_id' => $note->id,
+                'user_id' => $seller->id, // Seller who sold it
+                'action' => 'sold',
+                'old_data' => ['user_id' => $seller->id],
+                'new_data' => ['user_id' => $buyer->id, 'buyer_id' => $buyer->id, 'buyer_name' => $buyer->name],
+                'changes' => 'Note sold to ' . $buyer->name . ' for ' . currency($amount),
+                'notes' => 'Sold by ' . $seller->name . ' to ' . $buyer->name . '. Original creator: ' . ($originalCreator ? $originalCreator->name : 'N/A'),
             ]);
 
             // Create purchased note record for buyer premium features

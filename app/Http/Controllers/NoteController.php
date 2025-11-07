@@ -192,6 +192,17 @@ class NoteController extends Controller
         $note = Note::create($validated);
         $this->syncTags($note, $tags);
 
+        // Create note history record
+        \App\Models\NoteHistory::create([
+            'note_id' => $note->id,
+            'user_id' => auth()->id(),
+            'action' => 'created',
+            'old_data' => null,
+            'new_data' => $note->only(['title', 'content', 'summary', 'price', 'discount_price', 'is_public', 'status']),
+            'changes' => 'Note created',
+            'notes' => 'Note created by ' . auth()->user()->name,
+        ]);
+
         // Log activity
         app(NoteActivityService::class)->logCreated($note, auth()->user());
 
@@ -219,9 +230,34 @@ class NoteController extends Controller
     {
         $this->authorize('view', $note);
 
-        $note->load('tags', 'user', 'reviews');
+        $note->load('tags', 'user', 'reviews', 'histories.user', 'transactions.buyer', 'transactions.seller', 'transactions.originalCreator');
+        
+        // Get buyer history (all successful transactions) - visible to original creator
+        $buyerHistory = collect();
+        if (auth()->check() && ($note->original_creator_id === auth()->id() || $note->user_id === auth()->id())) {
+            $buyerHistory = $note->transactions()
+                ->where('status', 'success')
+                ->with(['buyer', 'seller', 'originalCreator'])
+                ->orderBy('created_at', 'asc')
+                ->get();
+        }
+        
+        // Get update history (all history records except 'sold') - visible to original creator
+        $updateHistory = collect();
+        if (auth()->check() && ($note->original_creator_id === auth()->id() || $note->user_id === auth()->id())) {
+            $updateHistory = $note->histories()
+                ->where('action', '!=', 'sold')
+                ->with('user')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+        
+        // Check if note has been sold (cannot delete)
+        $hasTransactions = $note->transactions()
+            ->where('status', 'success')
+            ->exists();
 
-        return view('notes.show', compact('note'));
+        return view('notes.show', compact('note', 'buyerHistory', 'updateHistory', 'hasTransactions'));
     }
 
     /**
@@ -327,20 +363,50 @@ class NoteController extends Controller
         $tags = $validated['tags'] ?? [];
         unset($validated['tags']);
 
-        // Track changes for activity log
-        $oldData = $note->only(['title', 'content', 'summary', 'price', 'is_public', 'status']);
+        // Track changes for activity log and history
+        $oldData = $note->only(['title', 'content', 'summary', 'price', 'discount_price', 'is_public', 'status', 'preview_content', 'preview_percentage']);
         $oldTags = $note->tags->pluck('name')->toArray();
 
         $note->update($validated);
         $newTags = $this->syncTags($note, $tags);
+        
+        $newData = $note->fresh()->only(['title', 'content', 'summary', 'price', 'discount_price', 'is_public', 'status', 'preview_content', 'preview_percentage']);
+
+        // Create note history record for versioning
+        $changes = [];
+        foreach ($oldData as $key => $oldValue) {
+            $newValue = $newData[$key] ?? null;
+            if ($oldValue != $newValue) {
+                $changes[] = ucfirst(str_replace('_', ' ', $key)) . ': "' . (is_string($oldValue) ? Str::limit($oldValue, 50) : $oldValue) . '" → "' . (is_string($newValue) ? Str::limit($newValue, 50) : $newValue) . '"';
+            }
+        }
+        
+        // Tag changes
+        $addedTags = array_diff($newTags, $oldTags);
+        $removedTags = array_diff($oldTags, $newTags);
+        if (!empty($addedTags)) {
+            $changes[] = 'Tags added: ' . implode(', ', $addedTags);
+        }
+        if (!empty($removedTags)) {
+            $changes[] = 'Tags removed: ' . implode(', ', $removedTags);
+        }
+        
+        // Create history record
+        \App\Models\NoteHistory::create([
+            'note_id' => $note->id,
+            'user_id' => auth()->id(),
+            'action' => 'updated',
+            'old_data' => $oldData,
+            'new_data' => $newData,
+            'changes' => !empty($changes) ? implode('; ', $changes) : 'No significant changes',
+            'notes' => 'Note updated by ' . auth()->user()->name,
+        ]);
 
         // Log activity
         $activityService = app(NoteActivityService::class);
-        $activityService->logUpdated($note, auth()->user(), $oldData, $note->fresh()->only(['title', 'content', 'summary', 'price', 'is_public', 'status']));
+        $activityService->logUpdated($note, auth()->user(), $oldData, $newData);
         
         // Log tag changes if any
-        $addedTags = array_diff($newTags, $oldTags);
-        $removedTags = array_diff($oldTags, $newTags);
         if (!empty($addedTags) || !empty($removedTags)) {
             $activityService->logTagged($note, auth()->user(), $addedTags, $removedTags);
         }
@@ -354,6 +420,16 @@ class NoteController extends Controller
     public function destroy(Note $note): RedirectResponse
     {
         $this->authorize('delete', $note);
+
+        // Check if note has been sold (has any successful transactions)
+        $hasTransactions = $note->transactions()
+            ->where('status', 'success')
+            ->exists();
+        
+        if ($hasTransactions) {
+            return redirect()->route('notes.show', $note)
+                ->with('error', 'Cannot delete note that has been sold. Note has been purchased by buyers and cannot be deleted. You can still update it, but deletion is not allowed.');
+        }
 
         $note->delete();
 

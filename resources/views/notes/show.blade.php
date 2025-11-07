@@ -42,18 +42,27 @@
                                 {{ __('messages.edit') }}
                             </a>
                         @endcan
-                        @can('delete', $note)
-                            <form action="{{ route('notes.destroy', $note) }}" method="POST" class="delete-note-form">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="inline-flex items-center px-3 py-2 border border-red-300 text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                    {{ __('messages.delete') }}
-                                </button>
-                            </form>
-                        @endcan
+                        @if($hasTransactions ?? false)
+                            <div class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-500 bg-gray-50 cursor-not-allowed" title="Cannot delete note that has been sold">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                Cannot Delete (Sold)
+                            </div>
+                        @else
+                            @can('delete', $note)
+                                <form action="{{ route('notes.destroy', $note) }}" method="POST" class="delete-note-form">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-red-300 text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        {{ __('messages.delete') }}
+                                    </button>
+                                </form>
+                            @endcan
+                        @endif
                     </div>
                 </div>
 
@@ -195,6 +204,98 @@
                 @endif
             </div>
         </div>
+
+        <!-- Buyer History (for sellers/original creators) -->
+        @if(isset($buyerHistory) && $buyerHistory->count() > 0 && auth()->check() && ($note->original_creator_id === auth()->id() || $note->user_id === auth()->id()))
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Buyer History
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-4">List of all buyers who have purchased this note (including resells)</p>
+                    <div class="space-y-3">
+                        @foreach($buyerHistory as $index => $transaction)
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <span class="text-sm font-bold text-blue-600">#{{ $index + 1 }}</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900">
+                                            Buyer: {{ $transaction->buyer->name }}
+                                        </p>
+                                        <p class="text-xs text-gray-600">
+                                            Sold by: {{ $transaction->seller->name }}
+                                            @if($transaction->original_creator_id && $transaction->original_creator_id !== $transaction->seller_id)
+                                                <span class="text-blue-600">(Original creator: {{ $transaction->originalCreator->name ?? 'N/A' }})</span>
+                                            @endif
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            {{ $transaction->created_at->format('d M Y, H:i') }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-semibold text-green-600">
+                                        {{ currency($transaction->amount) }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        Platform: {{ currency($transaction->platform_fee) }}
+                                        @if($transaction->creator_commission > 0)
+                                            <br>Creator: {{ currency($transaction->creator_commission) }}
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Update History -->
+        @if(isset($updateHistory) && $updateHistory->count() > 0 && auth()->check() && ($note->original_creator_id === auth()->id() || $note->user_id === auth()->id()))
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Update History
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-4">History of all updates made to this note</p>
+                    <div class="space-y-3">
+                        @foreach($updateHistory as $history)
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex items-start justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium 
+                                            {{ $history->action === 'created' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                            {{ ucfirst($history->action) }}
+                                        </span>
+                                        <span class="text-xs text-gray-500">
+                                            by {{ $history->user->name }}
+                                        </span>
+                                    </div>
+                                    <span class="text-xs text-gray-500">
+                                        {{ $history->created_at->format('d M Y, H:i') }}
+                                    </span>
+                                </div>
+                                @if($history->changes)
+                                    <p class="text-sm text-gray-700 mb-2">{{ $history->changes }}</p>
+                                @endif
+                                @if($history->notes)
+                                    <p class="text-xs text-gray-500 italic">{{ $history->notes }}</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 

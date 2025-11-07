@@ -7,6 +7,9 @@
 
         <title>@yield('title', config('app.name', 'Laravel'))</title>
 
+        <!-- Meta Tags -->
+        @stack('meta')
+
         <!-- Favicon -->
         <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
         <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">

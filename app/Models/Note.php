@@ -88,6 +88,11 @@ class Note extends Model
         return $this->hasMany(NoteActivity::class)->latest();
     }
 
+    public function histories()
+    {
+        return $this->hasMany(NoteHistory::class)->latest();
+    }
+
     /**
      * Get the folder that contains this note.
      */
