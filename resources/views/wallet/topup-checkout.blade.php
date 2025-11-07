@@ -3,6 +3,117 @@
 @section('title', __('messages.topup_checkout'))
 
 @section('content')
+    <!-- CRITICAL: Define functions IMMEDIATELY before any content to ensure they're available -->
+    <script>
+        // Define variables and functions in global scope IMMEDIATELY (before page loads)
+        window.snapToken = '{{ $snapToken }}';
+        window.snapClientKey = '{{ config('services.midtrans.client_key') }}';
+        window.snapLoaded = false;
+        window.snapPayCalled = false;
+        window.snapRetryCount = 0;
+        window.snapMaxRetries = 10;
+
+        // Define functions IMMEDIATELY so they're available when Snap.js onload fires
+        window.initSnapPayment = function() {
+            if (window.snapPayCalled) {
+                console.log('snap.pay() already called, skipping...');
+                return;
+            }
+            window.snapLoaded = true;
+            setTimeout(function() {
+                if (window.snapPayCalled) {
+                    console.log('snap.pay() already called, skipping...');
+                    return;
+                }
+                if (typeof window.snap !== 'undefined' && window.snap.pay) {
+                    try {
+                        window.snapPayCalled = true;
+                        window.snap.pay(window.snapToken, {
+                            onSuccess: function(result) {
+                                console.log('Payment success:', result);
+                                // Redirect to payment.finish to check status and update wallet
+                                const orderId = result.order_id ||
+                                    '{{ $transaction->midtrans_order_id }}';
+                                window.location.href = '{{ route('payment.finish') }}?order_id=' +
+                                    encodeURIComponent(orderId);
+                            },
+                            onPending: function(result) {
+                                console.log('Payment pending:', result);
+                                // IMPORTANT: Even for pending status, redirect to payment.finish
+                                // to check actual status from Midtrans API (for sandbox, pending might be success)
+                                const orderId = result.order_id ||
+                                    '{{ $transaction->midtrans_order_id }}';
+                                window.location.href = '{{ route('payment.finish') }}?order_id=' +
+                                    encodeURIComponent(orderId);
+                            },
+                            onError: function(result) {
+                                console.log('Payment error:', result);
+                                if (result && (result.status_code === '404' || result
+                                        .status_message)) {
+                                    alert(
+                                        'Payment method tidak tersedia atau terjadi error. Silakan pilih payment method lain atau coba lagi.'
+                                    );
+                                }
+                                window.location.href = '{{ route('wallet.index') }}?status=error';
+                            },
+                            onClose: function() {
+                                console.log('Customer closed payment popup');
+                                window.location.href =
+                                    '{{ route('wallet.index') }}?status=cancelled';
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Error initializing Snap payment:', error);
+                        window.snapPayCalled = false;
+                        if (error.message && error.message.includes('Invalid state transition')) {
+                            console.log('Snap popup already open, waiting for user interaction...');
+                            return;
+                        }
+                        document.getElementById('snap-container').innerHTML = `
+                            <div class="text-center p-6">
+                                <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <h3 class="mt-4 text-lg font-medium text-gray-900">Gagal memuat payment gateway</h3>
+                                <p class="mt-2 text-sm text-gray-500">${error.message}</p>
+                                <a href="{{ route('wallet.index') }}" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                    Kembali ke Wallet
+                                </a>
+                            </div>
+                        `;
+                    }
+                } else {
+                    if (window.snapRetryCount < window.snapMaxRetries) {
+                        window.snapRetryCount++;
+                        setTimeout(window.initSnapPayment, 500);
+                    } else {
+                        window.handleSnapError();
+                    }
+                }
+            }, 500);
+        };
+
+        window.handleSnapError = function() {
+            document.getElementById('snap-container').innerHTML = `
+                <div class="text-center p-6">
+                    <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="mt-4 text-lg font-medium text-gray-900">Gagal memuat payment gateway</h3>
+                    <p class="mt-2 text-sm text-gray-500">Tidak dapat memuat Midtrans Snap.js. Silakan coba lagi atau hubungi support.</p>
+                    <div class="mt-4 space-y-2">
+                        <button onclick="location.reload()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            Muat Ulang Halaman
+                        </button>
+                        <a href="{{ route('wallet.index') }}" class="block mt-2 text-sm text-blue-600 hover:text-blue-700">
+                            Kembali ke Wallet
+                        </a>
+                    </div>
+                </div>
+            `;
+        };
+    </script>
+
     <div class="py-8 sm:py-12">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header -->
@@ -91,172 +202,94 @@
         </div>
     </div>
 
-    @push('scripts')
-        <script>
-            // Define variables and functions in global scope FIRST
-            const snapToken = '{{ $snapToken }}';
-            const clientKey = '{{ config('services.midtrans.client_key') }}';
-            let snapLoaded = false;
-            let snapPayCalled = false; // Flag to prevent multiple calls
-            let retryCount = 0;
-            const maxRetries = 10;
-
-            // Define functions in window scope so they're available when onload fires
-            window.initSnapPayment = function() {
-                // Prevent multiple calls to snap.pay()
-                if (snapPayCalled) {
-                    console.log('snap.pay() already called, skipping...');
+    <!-- Load Snap.js script IMMEDIATELY after functions are defined -->
+    <script>
+        // Load Snap.js immediately (functions are already defined above)
+        (function() {
+            function loadSnapScript() {
+                // Check if script already exists to prevent duplicate loading
+                const existingScript = document.querySelector('script[src*="snap.js"]');
+                if (existingScript) {
+                    console.log('Snap.js already loaded, using existing script');
+                    // If script already loaded, try to initialize
+                    if (typeof window.snap !== 'undefined' && typeof window.initSnapPayment === 'function' && !window
+                        .snapPayCalled) {
+                        setTimeout(window.initSnapPayment, 500);
+                    }
                     return;
                 }
 
-                snapLoaded = true;
-
-                // Wait a bit for Snap to fully initialize
-                setTimeout(function() {
-                    // Double check to prevent multiple calls
-                    if (snapPayCalled) {
-                        console.log('snap.pay() already called, skipping...');
-                        return;
-                    }
-
-                    if (typeof window.snap !== 'undefined' && window.snap.pay) {
-                        try {
-                            // Mark as called BEFORE calling to prevent race conditions
-                            snapPayCalled = true;
-
-                            window.snap.pay(snapToken, {
-                                onSuccess: function(result) {
-                                    console.log('Payment success:', result);
-                                    window.location.href =
-                                        '{{ route('wallet.index') }}?status=success';
-                                },
-                                onPending: function(result) {
-                                    console.log('Payment pending:', result);
-                                    window.location.href =
-                                        '{{ route('wallet.index') }}?status=pending';
-                                },
-                                onError: function(result) {
-                                    console.log('Payment error:', result);
-                                    // Check if error is 404 or payment method unavailable
-                                    if (result && (result.status_code === '404' || result
-                                            .status_message)) {
-                                        alert(
-                                            'Payment method tidak tersedia atau terjadi error. Silakan pilih payment method lain atau coba lagi.'
-                                            );
-                                    }
-                                    window.location.href = '{{ route('wallet.index') }}?status=error';
-                                },
-                                onClose: function() {
-                                    console.log('Customer closed payment popup');
-                                    window.location.href =
-                                        '{{ route('wallet.index') }}?status=cancelled';
-                                }
-                            });
-                        } catch (error) {
-                            console.error('Error initializing Snap payment:', error);
-                            // Reset flag on error so user can retry
-                            snapPayCalled = false;
-
-                            // Check if error is about invalid state (popup already open)
-                            if (error.message && error.message.includes('Invalid state transition')) {
-                                console.log('Snap popup already open, waiting for user interaction...');
-                                // Don't show error, popup is already open
-                                return;
-                            }
-
-                            document.getElementById('snap-container').innerHTML = `
-                        <div class="text-center p-6">
-                            <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <h3 class="mt-4 text-lg font-medium text-gray-900">Gagal memuat payment gateway</h3>
-                            <p class="mt-2 text-sm text-gray-500">${error.message}</p>
-                            <a href="{{ route('wallet.index') }}" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                                Kembali ke Wallet
-                            </a>
-                        </div>
-                    `;
-                        }
-                    } else {
-                        // Retry if snap is not yet available
-                        if (retryCount < maxRetries) {
-                            retryCount++;
-                            setTimeout(window.initSnapPayment, 500);
-                        } else {
-                            window.handleSnapError();
-                        }
-                    }
-                }, 500);
-            };
-
-            window.handleSnapError = function() {
-                document.getElementById('snap-container').innerHTML = `
-            <div class="text-center p-6">
-                <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h3 class="mt-4 text-lg font-medium text-gray-900">Gagal memuat payment gateway</h3>
-                <p class="mt-2 text-sm text-gray-500">Tidak dapat memuat Midtrans Snap.js. Silakan coba lagi atau hubungi support.</p>
-                <div class="mt-4 space-y-2">
-                    <button onclick="location.reload()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                        Muat Ulang Halaman
-                    </button>
-                    <a href="{{ route('wallet.index') }}" class="block mt-2 text-sm text-blue-600 hover:text-blue-700">
-                        Kembali ke Wallet
-                    </a>
-                </div>
-            </div>
-        `;
-            };
-
-            // Load Snap.js script AFTER functions are defined
-            (function() {
                 const script = document.createElement('script');
                 script.src =
                     '{{ config('services.midtrans.is_production', false) ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}';
-                script.setAttribute('data-client-key', clientKey);
+                script.setAttribute('data-client-key', window.snapClientKey);
                 script.onload = function() {
-                    if (typeof window.initSnapPayment === 'function' && !snapPayCalled) {
+                    console.log('Snap.js loaded successfully');
+                    // Verify function exists before calling
+                    if (typeof window.initSnapPayment === 'function' && !window.snapPayCalled) {
                         window.initSnapPayment();
+                    } else {
+                        console.warn('initSnapPayment not available or already called');
                     }
                 };
                 script.onerror = function() {
+                    console.error('Failed to load Snap.js');
                     if (typeof window.handleSnapError === 'function') {
                         window.handleSnapError();
                     }
                 };
-                document.head.appendChild(script);
-            })();
 
-            // Fallback: Check if snap is loaded after page load
-            // Only run if snap.pay() hasn't been called yet
-            document.addEventListener('DOMContentLoaded', function() {
-                if (!snapLoaded && !snapPayCalled) {
-                    setTimeout(function() {
-                        // Double check before calling
-                        if (snapPayCalled) {
-                            return;
-                        }
-
-                        if (typeof window.snap === 'undefined') {
-                            if (retryCount < maxRetries) {
-                                retryCount++;
-                                setTimeout(window.initSnapPayment, 500);
-                            } else {
-                                window.handleSnapError();
-                            }
-                        } else {
-                            window.initSnapPayment();
-                        }
-                    }, 1000);
+                // Append to head immediately
+                if (document.head) {
+                    document.head.appendChild(script);
+                } else {
+                    // Fallback: wait for head to be available
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.head.appendChild(script);
+                    });
                 }
-            });
-
-            // Check client key
-            if (!clientKey || clientKey === '') {
-                console.error('Midtrans Client Key is not configured!');
-                window.handleSnapError();
             }
-        </script>
+
+            // Load immediately if head is available, otherwise wait
+            if (document.head) {
+                loadSnapScript();
+            } else {
+                document.addEventListener('DOMContentLoaded', loadSnapScript);
+            }
+        })();
+
+        // Fallback: Check if snap is loaded after page load
+        // Only run if snap.pay() hasn't been called yet
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.snapLoaded && !window.snapPayCalled) {
+                setTimeout(function() {
+                    // Double check before calling
+                    if (window.snapPayCalled) {
+                        return;
+                    }
+
+                    if (typeof window.snap === 'undefined') {
+                        if (window.snapRetryCount < window.snapMaxRetries) {
+                            window.snapRetryCount++;
+                            setTimeout(window.initSnapPayment, 500);
+                        } else {
+                            window.handleSnapError();
+                        }
+                    } else {
+                        window.initSnapPayment();
+                    }
+                }, 1000);
+            }
+        });
+
+        // Check client key
+        if (!window.snapClientKey || window.snapClientKey === '') {
+            console.error('Midtrans Client Key is not configured!');
+            window.handleSnapError();
+        }
+    </script>
+
+    @push('scripts')
+        <!-- Additional scripts if needed -->
     @endpush
 @endsection

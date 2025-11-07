@@ -145,6 +145,160 @@ php artisan subscriptions:renew
 - Expires subscription and sends notifications if balance is insufficient
 - See [VPS_SETUP.md](VPS_SETUP.md) for detailed documentation
 
+## 💳 Testing Midtrans Payment Gateway di Local
+
+### Setup Midtrans Sandbox untuk Local Development
+
+**PENTING:** Midtrans **BISA** di-test di local, tidak harus di VPS!
+
+#### 1. Dapatkan Sandbox Keys
+1. Login ke [Midtrans Sandbox Dashboard](https://dashboard.sandbox.midtrans.com)
+2. Navigate ke **Settings** → **Access Keys**
+3. Copy **Server Key** dan **Client Key** (yang dimulai dengan `SB-Mid-`)
+
+#### 2. Konfigurasi `.env` untuk Local
+```env
+MIDTRANS_SERVER_KEY=SB-Mid-server-xxxxx  # Sandbox Server Key
+MIDTRANS_CLIENT_KEY=SB-Mid-client-xxxxx  # Sandbox Client Key
+MIDTRANS_IS_PRODUCTION=false  # Pastikan false untuk sandbox
+MIDTRANS_MERCHANT_ID=Gxxxxx  # Sandbox Merchant ID (optional)
+```
+
+#### 3. Konfigurasi URL Endpoints di Midtrans Dashboard
+
+**Untuk Local Testing, ada 2 opsi:**
+
+##### Opsi A: Skip Webhook (Paling Mudah untuk Testing Dasar)
+- **Payment Notification URL:** Bisa dikosongkan atau isi dummy URL
+- **Finish/Unfinish/Error Redirect URLs:** Gunakan localhost
+  ```
+  http://noteds.test/payment/finish
+  http://noteds.test/payment/unfinish
+  http://noteds.test/payment/error
+  ```
+- **Catatan:** Webhook tidak akan diterima, tapi redirect setelah payment tetap berfungsi
+- **Untuk update status:** Bisa manual check di Midtrans Dashboard atau gunakan polling
+
+##### Opsi B: Gunakan Ngrok untuk Webhook (Testing Lengkap)
+1. **Install Ngrok:**
+   ```bash
+   # Download dari https://ngrok.com/download
+   # Atau via npm: npm install -g ngrok
+   ```
+
+2. **Start Ngrok Tunnel:**
+   ```bash
+   ngrok http 80  # Jika menggunakan Herd (port 80)
+   # atau
+   ngrok http 8000  # Jika menggunakan php artisan serve (port 8000)
+   ```
+
+3. **Dapatkan Ngrok URL:**
+   - Ngrok akan memberikan URL seperti: `https://abc123.ngrok.io`
+   - URL ini bisa diakses dari internet
+
+4. **Konfigurasi di Midtrans Dashboard:**
+   - **Payment Notification URL:** `https://abc123.ngrok.io/payment/callback`
+   - **Finish Redirect URL:** `https://abc123.ngrok.io/payment/finish`
+   - **Unfinish Redirect URL:** `https://abc123.ngrok.io/payment/unfinish`
+   - **Error Redirect URL:** `https://abc123.ngrok.io/payment/error`
+
+5. **Update `.env` untuk Ngrok:**
+   ```env
+   APP_URL=https://abc123.ngrok.io  # Gunakan ngrok URL
+   ```
+
+#### 4. Test Payment Flow di Local
+
+1. **Start Laravel:**
+   ```bash
+   php artisan serve
+   # atau gunakan Herd: http://noteds.test
+   ```
+
+2. **Test Top-up:**
+   - Buka `http://noteds.test/wallet` atau `http://localhost:8000/wallet`
+   - Klik "Top Up"
+   - Masukkan amount (min Rp 10.000)
+   - Pilih payment method yang tersedia di sandbox:
+     - ✅ **Credit Card** (Visa: 4811 1111 1111 1114)
+     - ✅ **Virtual Account** (BCA, Mandiri, BNI, BRI)
+     - ✅ **Bank Transfer**
+     - ❌ **BCA KlikPay** (tidak tersedia di sandbox)
+
+3. **Test dengan Kartu Test:**
+
+   **✅ Kartu untuk Transaksi Berhasil:**
+   - **Visa:** `4111 1111 1111 1111` (atau `4811 1111 1111 1114`)
+   - **Mastercard:** `5211 1111 1111 1117`
+   - **CVV:** `123`
+   - **Expiry:** Bulan dan tahun mendatang (misalnya: `12/25` atau `01/2026`)
+   - **OTP/3DS:** `112233` (jika diminta untuk 3D Secure)
+
+   **❌ Kartu untuk Simulasi Gagal (Testing Error Handling):**
+   - **Card Declined:** `4000 0000 0000 0002`
+   - **Insufficient Funds:** `4000 0000 0000 9995`
+   - **Invalid Card:** `4000 0000 0000 0127`
+   - **Expired Card:** `4000 0000 0000 0069`
+
+   **📝 Catatan:**
+   - Semua kartu test ini hanya bekerja di **Sandbox Mode** (`MIDTRANS_IS_PRODUCTION=false`)
+   - Tidak akan ada uang yang benar-benar ditarik dari kartu
+   - Gunakan kartu dengan nomor `4111...` atau `4811...` untuk testing normal
+
+#### 5. Verifikasi Transaksi
+
+**Tanpa Ngrok (Skip Webhook):**
+- ✅ **Status check otomatis** - Sistem akan check status ke Midtrans API saat redirect dari payment
+- ✅ **Saldo update otomatis** - Saldo wallet akan ter-update langsung setelah payment success
+- ✅ **Tidak perlu manual check** - Semua proses otomatis meskipun tanpa webhook
+- ✅ **Sandbox Credit Card handling** - Untuk Credit Card di sandbox, sistem akan otomatis process sebagai success meskipun status masih "pending" (karena di sandbox Credit Card biasanya langsung success)
+- ⚠️ **Catatan penting:**
+  - Error 404 pada endpoint 3DS method-response adalah **normal di sandbox** dan tidak mempengaruhi transaksi
+  - Jika popup menunjukkan "Payment successful" tapi saldo belum ter-update, sistem akan otomatis check status ke Midtrans API dan update saldo
+  - Untuk Credit Card di sandbox, kadang status masih "pending" tapi sebenarnya sudah success - sistem akan handle ini otomatis
+
+**Dengan Ngrok (Full Testing):**
+- Webhook akan diterima otomatis (backup mechanism)
+- Status transaksi akan update otomatis via webhook
+- Saldo wallet akan ter-update setelah payment success
+- Lebih reliable untuk production-like testing
+
+#### 6. Troubleshooting Local Testing
+
+**Issue: "Payment Notification URL tidak bisa diakses"**
+- Gunakan Ngrok untuk expose local server ke internet
+- Atau skip webhook untuk testing dasar (redirect tetap berfungsi)
+
+**Issue: "Redirect tidak bekerja"**
+- Pastikan `APP_URL` di `.env` sesuai dengan URL yang digunakan
+- Jika pakai Herd: `APP_URL=http://noteds.test`
+- Jika pakai `php artisan serve`: `APP_URL=http://localhost:8000`
+- Jika pakai Ngrok: `APP_URL=https://abc123.ngrok.io`
+
+**Issue: "BCA KlikPay error 404"**
+- BCA KlikPay tidak tersedia di sandbox
+- Gunakan Credit Card atau Virtual Account untuk testing
+
+**Issue: "Webhook tidak diterima"**
+- Pastikan Ngrok tunnel aktif
+- Pastikan URL di Midtrans Dashboard menggunakan HTTPS (ngrok URL)
+- Cek Laravel log: `tail -f storage/logs/laravel.log`
+
+#### 7. Keuntungan Testing di Local
+
+✅ **Lebih cepat** - tidak perlu deploy ke VPS untuk setiap perubahan
+✅ **Lebih mudah debug** - bisa langsung cek log dan error
+✅ **Tidak ada biaya** - sandbox gratis unlimited
+✅ **Bisa test semua fitur** - dengan Ngrok, webhook juga bisa di-test
+
+#### 8. Kapan Harus Test di VPS?
+
+- Hanya jika perlu test dengan production keys
+- Jika perlu test dengan payment method yang tidak tersedia di sandbox
+- Jika perlu test dengan traffic tinggi
+- Untuk final testing sebelum go-live
+
 ## 🐛 Troubleshooting
 
 ### SSL Certificate Error (NET::ERR_CERT_COMMON_NAME_INVALID)

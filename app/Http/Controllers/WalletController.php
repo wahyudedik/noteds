@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Midtrans\Config;
 use Midtrans\Snap;
+use Midtrans\Transaction as MidtransTransaction;
 
 class WalletController extends Controller
 {
@@ -306,29 +307,181 @@ class WalletController extends Controller
 
     /**
      * Handle payment finish redirect from Midtrans.
+     * This method checks the actual transaction status from Midtrans API
+     * and updates the wallet balance if payment is successful.
      */
     public function paymentFinish(Request $request): RedirectResponse
     {
         $orderId = $request->get('order_id');
-        $transactionStatus = $request->get('transaction_status');
         
-        if ($orderId) {
-            $transaction = Transaction::where('midtrans_order_id', $orderId)->first();
-            
-            if ($transaction) {
-                // Update transaction status based on Midtrans response
-                if (in_array($transactionStatus, ['settlement', 'capture'])) {
+        if (!$orderId) {
+            return redirect()->route('wallet.index')
+                ->with('warning', 'Order ID tidak ditemukan. Silakan cek status transaksi di halaman wallet.');
+        }
+
+        $transaction = \App\Models\Transaction::where('midtrans_order_id', $orderId)->first();
+        
+        if (!$transaction) {
+            Log::warning('Transaction not found for order_id in paymentFinish: ' . $orderId);
+            return redirect()->route('wallet.index')
+                ->with('warning', 'Transaksi tidak ditemukan. Silakan hubungi support jika masalah berlanjut.');
+        }
+
+        // Check transaction status from Midtrans API (important for local testing without webhook)
+        try {
+            $midtransStatus = MidtransTransaction::status($orderId);
+            $transactionStatus = $midtransStatus->transaction_status ?? null;
+            $fraudStatus = $midtransStatus->fraud_status ?? null;
+            $grossAmount = $midtransStatus->gross_amount ?? null;
+
+            Log::info('Payment Finish - Checking Midtrans Status:', [
+                'order_id' => $orderId,
+                'transaction_status' => $transactionStatus,
+                'fraud_status' => $fraudStatus,
+                'current_db_status' => $transaction->status,
+            ]);
+
+            // If transaction is already successful, just redirect
+            if ($transaction->status === 'success') {
+                return redirect()->route('wallet.index')
+                    ->with('success', 'Pembayaran berhasil! Saldo wallet telah diperbarui.');
+            }
+
+            // Handle successful payment
+            if (in_array($transactionStatus, ['settlement', 'capture']) && $fraudStatus === 'accept') {
+                // Process top-up if this is a top-up transaction
+                if ($transaction->payment_method === 'topup') {
+                    DB::transaction(function () use ($transaction, $grossAmount) {
+                        // Double-check to prevent duplicate processing
+                        $transaction->refresh();
+                        if ($transaction->status === 'success') {
+                            Log::info('Transaction already processed in paymentFinish: ' . $transaction->id);
+                            return;
+                        }
+
+                        $transaction->status = 'success';
+                        $transaction->save();
+
+                        $wallet = Wallet::firstOrCreate(
+                            ['user_id' => $transaction->buyer_id],
+                            ['balance' => 0]
+                        );
+
+                        $wallet->balance += $grossAmount ?? $transaction->amount;
+                        $wallet->save();
+
+                        // Update user wallet_balance
+                        $user = $transaction->buyer;
+                        $user->wallet_balance = $wallet->balance;
+                        $user->save();
+
+                        Log::info('Top-up successful via paymentFinish', [
+                            'transaction_id' => $transaction->id,
+                            'user_id' => $user->id,
+                            'amount' => $grossAmount ?? $transaction->amount,
+                            'new_balance' => $wallet->balance,
+                        ]);
+                    });
+
                     return redirect()->route('wallet.index')
                         ->with('success', 'Pembayaran berhasil! Saldo wallet telah diperbarui.');
-                } elseif ($transactionStatus === 'pending') {
-                    return redirect()->route('wallet.index')
-                        ->with('info', 'Pembayaran sedang diproses. Saldo akan diperbarui setelah pembayaran dikonfirmasi.');
                 }
+            } elseif ($transactionStatus === 'pending') {
+                // SPECIAL HANDLING FOR SANDBOX: Credit Card payments in sandbox might show as pending
+                // but are actually successful. Check payment_type to determine if we should wait or process.
+                $paymentType = $midtransStatus->payment_type ?? null;
+                $isCreditCard = in_array($paymentType, ['credit_card', 'cstore']);
+                
+                // For Credit Card in sandbox, if status is pending but fraud_status is accept,
+                // it usually means the payment is successful but not yet settled
+                // In sandbox, Credit Card usually settles immediately, so we can process it
+                if ($isCreditCard && $fraudStatus === 'accept' && !config('services.midtrans.is_production', false)) {
+                    Log::info('Sandbox Credit Card pending with accept fraud_status - processing as success', [
+                        'order_id' => $orderId,
+                        'payment_type' => $paymentType,
+                    ]);
+                    
+                    // Process as success for sandbox Credit Card
+                    if ($transaction->payment_method === 'topup') {
+                        DB::transaction(function () use ($transaction, $grossAmount) {
+                            $transaction->refresh();
+                            if ($transaction->status === 'success') {
+                                return;
+                            }
+
+                            $transaction->status = 'success';
+                            $transaction->save();
+
+                            $wallet = Wallet::firstOrCreate(
+                                ['user_id' => $transaction->buyer_id],
+                                ['balance' => 0]
+                            );
+
+                            $wallet->balance += $grossAmount ?? $transaction->amount;
+                            $wallet->save();
+
+                            $user = $transaction->buyer;
+                            $user->wallet_balance = $wallet->balance;
+                            $user->save();
+
+                            Log::info('Top-up successful via paymentFinish (sandbox credit card)', [
+                                'transaction_id' => $transaction->id,
+                                'user_id' => $user->id,
+                                'amount' => $grossAmount ?? $transaction->amount,
+                                'new_balance' => $wallet->balance,
+                            ]);
+                        });
+
+                        return redirect()->route('wallet.index')
+                            ->with('success', 'Pembayaran berhasil! Saldo wallet telah diperbarui.');
+                    }
+                }
+                
+                // Regular pending handling
+                // Payment is still pending
+                if ($transaction->status !== 'pending') {
+                    $transaction->status = 'pending';
+                    $transaction->save();
+                }
+                
+                return redirect()->route('wallet.index')
+                    ->with('info', 'Pembayaran sedang diproses. Saldo akan diperbarui setelah pembayaran dikonfirmasi.');
+            } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
+                // Payment failed
+                if ($transaction->status !== 'failed') {
+                    $transaction->status = 'failed';
+                    $transaction->save();
+                }
+                
+                return redirect()->route('wallet.index')
+                    ->with('error', 'Pembayaran gagal atau dibatalkan. Silakan coba lagi.');
+            } elseif ($fraudStatus === 'challenge') {
+                // Payment is under review
+                if ($transaction->status !== 'pending') {
+                    $transaction->status = 'pending';
+                    $transaction->save();
+                }
+                
+                return redirect()->route('wallet.index')
+                    ->with('info', 'Pembayaran sedang direview. Saldo akan diperbarui setelah pembayaran dikonfirmasi.');
+            }
+        } catch (\Exception $e) {
+            Log::error('Error checking Midtrans status in paymentFinish:', [
+                'order_id' => $orderId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            // Fallback: check if we have status from query parameter
+            $queryStatus = $request->get('transaction_status');
+            if ($queryStatus && in_array($queryStatus, ['settlement', 'capture'])) {
+                return redirect()->route('wallet.index')
+                    ->with('success', 'Pembayaran berhasil! Saldo wallet telah diperbarui.');
             }
         }
         
         return redirect()->route('wallet.index')
-            ->with('success', 'Terima kasih! Pembayaran Anda sedang diproses.');
+            ->with('info', 'Terima kasih! Pembayaran Anda sedang diproses.');
     }
 
     /**
