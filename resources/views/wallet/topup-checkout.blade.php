@@ -75,18 +75,16 @@
 </div>
 
 @push('scripts')
-<script src="{{ config('services.midtrans.is_production', false) ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" 
-        data-client-key="{{ config('services.midtrans.client_key') }}"
-        onload="initSnapPayment()"
-        onerror="handleSnapError()"></script>
 <script>
+    // Define variables and functions in global scope FIRST
     const snapToken = '{{ $snapToken }}';
     const clientKey = '{{ config('services.midtrans.client_key') }}';
     let snapLoaded = false;
     let retryCount = 0;
     const maxRetries = 10;
 
-    function initSnapPayment() {
+    // Define functions in window scope so they're available when onload fires
+    window.initSnapPayment = function() {
         snapLoaded = true;
         
         // Wait a bit for Snap to fully initialize
@@ -130,15 +128,15 @@
                 // Retry if snap is not yet available
                 if (retryCount < maxRetries) {
                     retryCount++;
-                    setTimeout(initSnapPayment, 500);
+                    setTimeout(window.initSnapPayment, 500);
                 } else {
-                    handleSnapError();
+                    window.handleSnapError();
                 }
             }
         }, 500);
-    }
+    };
 
-    function handleSnapError() {
+    window.handleSnapError = function() {
         document.getElementById('snap-container').innerHTML = `
             <div class="text-center p-6">
                 <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +154,25 @@
                 </div>
             </div>
         `;
-    }
+    };
+
+    // Load Snap.js script AFTER functions are defined
+    (function() {
+        const script = document.createElement('script');
+        script.src = '{{ config('services.midtrans.is_production', false) ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}';
+        script.setAttribute('data-client-key', clientKey);
+        script.onload = function() {
+            if (typeof window.initSnapPayment === 'function') {
+                window.initSnapPayment();
+            }
+        };
+        script.onerror = function() {
+            if (typeof window.handleSnapError === 'function') {
+                window.handleSnapError();
+            }
+        };
+        document.head.appendChild(script);
+    })();
 
     // Fallback: Check if snap is loaded after page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -165,12 +181,12 @@
                 if (typeof window.snap === 'undefined') {
                     if (retryCount < maxRetries) {
                         retryCount++;
-                        setTimeout(initSnapPayment, 500);
+                        setTimeout(window.initSnapPayment, 500);
                     } else {
-                        handleSnapError();
+                        window.handleSnapError();
                     }
                 } else {
-                    initSnapPayment();
+                    window.initSnapPayment();
                 }
             }, 1000);
         }
@@ -179,7 +195,7 @@
     // Check client key
     if (!clientKey || clientKey === '') {
         console.error('Midtrans Client Key is not configured!');
-        handleSnapError();
+        window.handleSnapError();
     }
 </script>
 @endpush
