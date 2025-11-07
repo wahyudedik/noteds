@@ -94,6 +94,12 @@ Route::middleware(['auth', 'username.setup', 'workspace.user'])->group(function 
     // Check is done in NoteController and middleware
     Route::resource('notes', NoteController::class);
     Route::get('/notes/{note}/attachments/{filename}', [NoteAttachmentController::class, 'download'])->name('notes.attachments.download');
+    
+    // Batch Download routes - Premium features only
+    Route::middleware('premium')->prefix('batch-download')->name('batch-download.')->group(function () {
+        Route::get('/', [NoteAttachmentController::class, 'batchDownloadIndex'])->name('index');
+        Route::post('/', [NoteAttachmentController::class, 'batchDownload'])->name('download');
+    });
 
     // Folders (Premium feature - enhanced organization)
     Route::middleware('premium')->group(function () {
@@ -130,6 +136,7 @@ Route::middleware(['auth', 'username.setup', 'workspace.user'])->group(function 
         Route::post('/study-materials/{note}', [\App\Http\Controllers\BuyerAiController::class, 'generateStudyMaterials'])->name('study-materials');
         Route::post('/compare', [\App\Http\Controllers\BuyerAiController::class, 'compareNotes'])->name('compare');
         Route::get('/recommendations', [\App\Http\Controllers\BuyerAiController::class, 'getRecommendations'])->name('recommendations');
+        Route::post('/extract-content/{note}', [\App\Http\Controllers\BuyerAiController::class, 'extractContent'])->name('extract-content');
     });
 
     // Collections (Wishlist) routes - Premium features only
@@ -162,6 +169,11 @@ Route::middleware(['auth', 'username.setup', 'workspace.user'])->group(function 
     Route::middleware('premium')->prefix('buyer-analytics')->name('buyer-analytics.')->group(function () {
         Route::get('/', [\App\Http\Controllers\BuyerAnalyticsController::class, 'index'])->name('index');
         Route::get('/purchase-history', [\App\Http\Controllers\BuyerAnalyticsController::class, 'purchaseHistory'])->name('purchase-history');
+    });
+
+    // Reading History routes - Premium features only
+    Route::middleware('premium')->prefix('reading-history')->name('reading-history.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ReadingHistoryController::class, 'index'])->name('index');
     });
 
     // MyNoteds (AI Memory Platform) routes - Premium features only

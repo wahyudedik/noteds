@@ -46,6 +46,11 @@ return [
         'url' => env('OLLAMA_URL', 'http://localhost:11434'),
         'model' => env('OLLAMA_MODEL', 'llama3.2'),
         'image_model' => env('OLLAMA_IMAGE_MODEL', 'flux'), // Model untuk image generation (flux, stable-diffusion-xl, dll)
+        'vision_model' => env('OLLAMA_VISION_MODEL', 'llava'), // Model untuk vision/OCR (llava, bakllava, dll)
+    ],
+
+    'tesseract' => [
+        'path' => env('TESSERACT_PATH', 'tesseract'), // Path to tesseract executable
     ],
 
     'unsplash' => [

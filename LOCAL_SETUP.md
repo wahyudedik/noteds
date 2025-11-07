@@ -454,6 +454,34 @@ npm install
 - Email format: `seller1@noteds.test`, `buyer1@noteds.test`
 - Password: `password`
 
+## 🆕 Recent Features Added
+
+### Note History & Versioning
+- Seller bisa lihat buyer history (semua buyer yang pernah membeli note)
+- Seller bisa lihat update history (timeline semua perubahan note)
+- Note yang sudah dijual tidak bisa dihapus (untuk melindungi data buyer)
+
+### AI Chat untuk Seller Profile
+- **Route:** `/u/{username}/ai-chat`
+- Semua user bisa bertanya tentang notes seller menggunakan AI
+- AI menggunakan notes public seller sebagai context
+- Akses dari: Marketplace, Profile seller, atau langsung via URL
+
+### Collections Enhancement
+- Tombol "Add Purchased Notes" di collection
+- Dropdown untuk memilih purchased notes yang belum ada di collection
+- Hanya purchased notes yang bisa ditambahkan
+
+### Resell Flow
+- One-time sale: Buyer yang sudah menjual note tidak bisa akses lagi
+- Original creator selalu dapat komisi di setiap resell
+- Warning messages sebelum dan setelah menjual
+
+### Profile Features
+- Avatar upload (file atau URL)
+- Share functionality (Facebook, Twitter, WhatsApp, LinkedIn, Copy Link)
+- Open Graph & Twitter Card meta tags
+
 ## 📝 Next Steps
 
 1. Read [TASKLIST.md](TASKLIST.md) for development roadmap

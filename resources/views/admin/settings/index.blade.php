@@ -338,6 +338,31 @@
                                     seterusnya tidak dapat komisi)
                                 </p>
                             </div>
+
+                            <!-- Premium Buyer Discount -->
+                            <div>
+                                <label for="premium_buyer_discount_percent"
+                                    class="block text-sm font-medium text-gray-700 mb-2">
+                                    Premium Buyer Discount (%) <span class="text-orange-500">*</span>
+                                    <span class="text-xs text-gray-500">(Exclusive discount for premium buyers)</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="number" name="premium_buyer_discount_percent"
+                                        id="premium_buyer_discount_percent"
+                                        value="{{ old('premium_buyer_discount_percent', $premiumBuyerDiscountPercent ?? 10) }}"
+                                        min="0" max="50" step="0.1" required placeholder="10"
+                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('premium_buyer_discount_percent') border-red-500 @enderror">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 text-sm">%</span>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-xs text-gray-500">
+                                    Diskon eksklusif untuk <strong>premium buyers</strong> pada semua pembelian note (default: 10%)
+                                </p>
+                                @error('premium_buyer_discount_percent')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
                         <!-- Info Box -->

@@ -60,11 +60,24 @@ class SupportTicketController extends Controller
             $linksArray = array_filter(array_map('trim', explode(',', $request->links)));
         }
 
+        // Auto-upgrade priority for premium buyers
+        $priority = $request->priority;
+        if (auth()->user()->hasPremium()) {
+            // Upgrade priority: low -> medium, medium -> high, high -> urgent, urgent stays urgent
+            $priorityMap = [
+                'low' => 'medium',
+                'medium' => 'high',
+                'high' => 'urgent',
+                'urgent' => 'urgent',
+            ];
+            $priority = $priorityMap[$priority] ?? $priority;
+        }
+
         $ticket = SupportTicket::create([
             'user_id' => auth()->id(),
             'title' => $request->title,
             'description' => $request->description,
-            'priority' => $request->priority,
+            'priority' => $priority,
             'status' => 'open',
             'links' => $linksArray,
         ]);
@@ -74,12 +87,16 @@ class SupportTicketController extends Controller
             $query->where('name', 'admin');
         })->get();
 
+        $isPremium = auth()->user()->hasPremium();
+        $notificationTitle = $isPremium ? '⭐ Premium Support Ticket' : '🎫 New Support Ticket';
+        $notificationMessage = auth()->user()->name . ($isPremium ? ' (Premium)' : '') . ' created a new support ticket: ' . $ticket->title;
+
         foreach ($admins as $admin) {
             $this->notificationService->create(
                 $admin,
                 'ticket_new',
-                '🎫 New Support Ticket',
-                auth()->user()->name . ' created a new support ticket: ' . $ticket->title,
+                $notificationTitle,
+                $notificationMessage,
                 route('admin.tickets.show', $ticket),
                 ['ticket_id' => $ticket->id]
             );

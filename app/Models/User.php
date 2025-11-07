@@ -336,6 +336,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get note view history.
+     */
+    public function noteViewHistory()
+    {
+        return $this->hasMany(NoteViewHistory::class)->latest('viewed_at');
+    }
+
+    /**
      * Check if user has purchased a note.
      */
     public function hasPurchasedNote($noteId): bool

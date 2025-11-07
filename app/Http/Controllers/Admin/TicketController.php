@@ -29,6 +29,11 @@ class TicketController extends Controller
             ->when($request->priority, function ($query) use ($request) {
                 return $query->where('priority', $request->priority);
             })
+            ->when($request->premium_only, function ($query) {
+                return $query->whereHas('user', function ($q) {
+                    $q->where('premium_expires_at', '>', now());
+                });
+            })
             ->when($request->search, function ($query) use ($request) {
                 return $query->where('title', 'like', '%' . $request->search . '%')
                     ->orWhere('description', 'like', '%' . $request->search . '%')
@@ -37,7 +42,12 @@ class TicketController extends Controller
                             ->orWhere('email', 'like', '%' . $request->search . '%');
                     });
             })
-            ->latest()
+            ->orderByRaw("CASE 
+                WHEN EXISTS (SELECT 1 FROM users WHERE users.id = support_tickets.user_id AND users.premium_expires_at > NOW()) THEN 0 
+                ELSE 1 
+            END")
+            ->orderBy('priority', 'desc')
+            ->orderBy('created_at', 'desc')
             ->paginate(20)
             ->withQueryString();
 

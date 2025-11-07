@@ -44,7 +44,7 @@
                                 <!-- More Menu Dropdown -->
                                 <div class="relative" x-data="{ open: false }">
                                     <button @click="open = !open"
-                                        class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 flex items-center gap-1 {{ request()->routeIs(['featured-notes.*', 'subscription.*', 'referral.*', 'mynoteds.*', 'collections.*', 'buyer-analytics.*', 'simulators.*']) ? 'text-blue-600 bg-blue-50' : '' }}">
+                                        class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 flex items-center gap-1 {{ request()->routeIs(['featured-notes.*', 'subscription.*', 'referral.*', 'mynoteds.*', 'collections.*', 'buyer-analytics.*', 'reading-history.*', 'batch-download.*', 'simulators.*']) ? 'text-blue-600 bg-blue-50' : '' }}">
                                         More
                                         <svg class="w-4 h-4" :class="{ 'rotate-180': open }" fill="none"
                                             stroke="currentColor" viewBox="0 0 24 24">
@@ -83,6 +83,14 @@
                                                 <a href="{{ route('buyer-analytics.index') }}"
                                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('buyer-analytics.*') ? 'bg-blue-50 text-blue-600' : '' }}">
                                                     Analytics
+                                                </a>
+                                                <a href="{{ route('reading-history.index') }}"
+                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('reading-history.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                                                    Reading History
+                                                </a>
+                                                <a href="{{ route('batch-download.index') }}"
+                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('batch-download.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                                                    Batch Download
                                                 </a>
                                             @endif
                                         @endif

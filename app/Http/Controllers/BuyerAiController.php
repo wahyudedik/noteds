@@ -6,13 +6,16 @@ use App\Models\Note;
 use App\Models\PurchasedNote;
 use App\Models\AiAnalysis;
 use App\Services\AiService;
+use App\Services\ContentExtractorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BuyerAiController extends Controller
 {
     public function __construct(
-        protected AiService $aiService
+        protected AiService $aiService,
+        protected ContentExtractorService $contentExtractor
     ) {}
 
     /**
@@ -547,5 +550,124 @@ class BuyerAiController extends Controller
             'comparison' => $response['response'] ?? 'Tidak dapat membandingkan note.',
             'notes_compared' => $notes->map(fn($n) => ['id' => $n->id, 'title' => $n->title])->toArray(),
         ];
+    }
+
+    /**
+     * Extract content from note attachments (PDF text, Image OCR, Tables)
+     * Premium feature only.
+     */
+    public function extractContent(Request $request, Note $note): JsonResponse
+    {
+        $user = auth()->user();
+
+        // Check premium subscription
+        if (!$user->hasPremium()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fitur AI Content Extractor memerlukan subscription premium.',
+                'requires_premium' => true,
+            ], 403);
+        }
+
+        // Check if user has purchased this note
+        $purchasedNote = $user->getPurchasedNote($note->id);
+        if (!$purchasedNote && $note->price > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda harus membeli note ini terlebih dahulu untuk menggunakan fitur AI Content Extractor.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'filename' => ['required', 'string'],
+            'extract_type' => ['nullable', 'in:text,ocr,tables,all'],
+        ]);
+
+        $filename = $validated['filename'];
+        $extractType = $validated['extract_type'] ?? 'all';
+
+        // Find the file in attachments
+        $attachments = $note->attachments ?? [];
+        $filePath = null;
+        $mimeType = null;
+
+        foreach ($attachments as $attachment) {
+            $attachmentFilename = is_array($attachment) 
+                ? ($attachment['filename'] ?? null) 
+                : basename($attachment);
+
+            if ($attachmentFilename === $filename) {
+                $filePath = is_array($attachment) 
+                    ? ($attachment['path'] ?? null) 
+                    : $attachment;
+                $mimeType = is_array($attachment) 
+                    ? ($attachment['mime'] ?? null) 
+                    : null;
+                break;
+            }
+        }
+
+        if (!$filePath || !Storage::disk('private')->exists($filePath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File not found in note attachments.',
+            ], 404);
+        }
+
+        // Detect MIME type if not provided
+        if (!$mimeType) {
+            $mimeType = Storage::disk('private')->mimeType($filePath) ?? 'application/octet-stream';
+        }
+
+        try {
+            $result = [
+                'filename' => $filename,
+                'file_path' => $filePath,
+                'mime_type' => $mimeType,
+            ];
+
+            // Extract based on type
+            if ($extractType === 'all' || $extractType === 'text') {
+                if ($mimeType === 'application/pdf') {
+                    $pdfResult = $this->contentExtractor->extractPdfText($filePath);
+                    if ($pdfResult) {
+                        $result['pdf_text'] = $pdfResult;
+                    }
+                }
+            }
+
+            if ($extractType === 'all' || $extractType === 'ocr') {
+                if (str_starts_with($mimeType, 'image/')) {
+                    $ocrResult = $this->contentExtractor->extractImageText($filePath);
+                    if ($ocrResult) {
+                        $result['ocr_text'] = $ocrResult;
+                    }
+                }
+            }
+
+            if ($extractType === 'all' || $extractType === 'tables') {
+                $fileType = $mimeType === 'application/pdf' ? 'pdf' : 'image';
+                $tablesResult = $this->contentExtractor->extractTables($filePath, $fileType);
+                if ($tablesResult) {
+                    $result['tables'] = $tablesResult;
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $result,
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Content extraction failed', [
+                'error' => $e->getMessage(),
+                'note_id' => $note->id,
+                'filename' => $filename,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengekstrak konten. Silakan coba lagi.',
+            ], 500);
+        }
     }
 }

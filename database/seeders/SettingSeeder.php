@@ -61,6 +61,16 @@ class SettingSeeder extends Seeder
             ]
         );
 
+        // Premium buyer exclusive discount
+        Setting::updateOrCreate(
+            ['key' => 'premium_buyer_discount_percent', 'group' => 'marketplace'],
+            [
+                'value' => '10',
+                'type' => 'number',
+                'description' => 'Exclusive discount percentage for premium buyers (applied to all purchases)',
+            ]
+        );
+
         // Featured Notes Pricing
         $locations = ['marketplace_grid', 'marketplace_banner', 'landing_hero', 'landing_carousel'];
         $durations = [7, 14, 30];

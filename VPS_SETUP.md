@@ -1035,6 +1035,54 @@ Featured Notes advertising system features:
 - **Locations:** Landing Hero, Carousel, Marketplace Banner/Grid, Popup modals
 - **Scheduled command:** `featured:expire` runs daily at 01:00 WIB
 
+### Note History & Versioning System
+- **Migration:** `note_histories` table untuk tracking semua perubahan note
+- **Features:**
+  - History tracking untuk created, updated, sold actions
+  - Buyer history untuk seller (list semua buyer yang pernah membeli)
+  - Update history dengan versioning (detail perubahan setiap update)
+  - Prevent delete jika note sudah dijual (untuk melindungi data buyer)
+- **Access:** Seller/original creator bisa lihat buyer history dan update history di notes.show
+
+### AI Chat untuk Seller Profile (Public Feature)
+- **Routes:** `/u/{username}/ai-chat` (GET), `/u/{username}/ai-chat/ask` (POST)
+- **Features:**
+  - AI chat interface untuk bertanya tentang notes seller
+  - Context dari semua notes public seller
+  - Real-time chat dengan referenced notes links
+  - **Semua user bisa akses** (tidak perlu premium)
+- **Access Points:**
+  - Tombol "AI" di marketplace card note
+  - Tombol "Ask AI" di detail note
+  - Tombol "Ask AI About [Seller Name]'s Notes" di profile seller
+
+### Collections Enhancement
+- **Features:**
+  - Tombol "Add Purchased Notes" di collection header
+  - Dropdown untuk memilih purchased notes yang belum ada di collection
+  - Validasi: Hanya purchased notes yang bisa ditambahkan
+  - Auto-filter: Notes yang sudah ada tidak muncul di dropdown
+
+### Resell Flow & One-Time Sale System
+- **Features:**
+  - One-time sale: Buyer yang sudah menjual note tidak bisa akses lagi
+  - Original creator commission: Creator selalu dapat komisi di setiap resell
+  - Ownership transfer: Note ownership dipindahkan ke buyer baru
+  - Access control: Hanya current owner yang bisa akses full content
+  - Purchase validation: Buyer tidak bisa membeli lagi note yang sudah pernah dibeli
+  - Warning messages: Peringatan jelas sebelum dan setelah menjual
+
+### Profile Features
+- **Avatar Upload:**
+  - Upload file (JPG, PNG, GIF - Max 2MB)
+  - Atau gunakan URL
+  - Storage: `storage/app/public/avatars/{user_id}/`
+- **Share Functionality:**
+  - Share buttons: Facebook, Twitter, WhatsApp, LinkedIn, Copy Link
+  - Open Graph meta tags untuk social media preview
+  - Twitter Card meta tags
+  - Available di: Profile seller, Marketplace index, Marketplace detail note
+
 ### Storage Considerations
 - Note attachments are stored in `storage/app/private/attachments`
 - Ensure sufficient disk space for user uploads

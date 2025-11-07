@@ -102,6 +102,26 @@ class MarketplaceController extends Controller
             $featuredNote->incrementImpressions();
         }
 
+        // Track note view history for authenticated users (Premium feature)
+        if (auth()->check() && auth()->user()->hasPremium()) {
+            // Check if already viewed today
+            $today = now()->startOfDay();
+            $existingView = \App\Models\NoteViewHistory::where('user_id', auth()->id())
+                ->where('note_id', $note->id)
+                ->whereDate('viewed_at', $today)
+                ->first();
+            
+            if (!$existingView) {
+                \App\Models\NoteViewHistory::create([
+                    'user_id' => auth()->id(),
+                    'note_id' => $note->id,
+                    'viewed_at' => now(),
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ]);
+            }
+        }
+
         // Load reviews with pagination
         $reviews = $note->reviews()->with('user')->latest()->paginate(10);
 
@@ -161,7 +181,18 @@ class MarketplaceController extends Controller
         $isNoteOwner = auth()->check() && auth()->id() === $note->user_id;
         $hasPurchasedBefore = $alreadyPurchased ?? false;
         
-        return view('marketplace.show', compact('note', 'canBuy', 'alreadyPurchased', 'reviews', 'canReview', 'userReview', 'showFullContent', 'isNoteOwner', 'hasPurchasedBefore'));
+        // Calculate premium discount for display
+        $premiumDiscountPercent = 0;
+        $premiumDiscountPrice = null;
+        $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
+        
+        if (auth()->check() && auth()->user()->hasPremium() && $basePrice > 0) {
+            $premiumDiscountPercent = \App\Models\Setting::getPremiumBuyerDiscountPercent();
+            $premiumDiscount = $basePrice * ($premiumDiscountPercent / 100);
+            $premiumDiscountPrice = $basePrice - $premiumDiscount;
+        }
+        
+        return view('marketplace.show', compact('note', 'canBuy', 'alreadyPurchased', 'reviews', 'canReview', 'userReview', 'showFullContent', 'isNoteOwner', 'hasPurchasedBefore', 'premiumDiscountPercent', 'premiumDiscountPrice', 'basePrice'));
     }
 
     public function purchase(Note $note, ReferralService $referralService): RedirectResponse
@@ -202,7 +233,18 @@ class MarketplaceController extends Controller
         }
 
         // Get final price (use discount_price if available, otherwise use regular price)
-        $finalPrice = $note->hasDiscount() ? $note->discount_price : $note->price;
+        $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
+
+        // Apply premium buyer exclusive discount if user has premium
+        $finalPrice = $basePrice;
+        $premiumDiscount = 0;
+        $premiumDiscountPercent = 0;
+        
+        if ($buyer->hasPremium() && $basePrice > 0) {
+            $premiumDiscountPercent = \App\Models\Setting::getPremiumBuyerDiscountPercent();
+            $premiumDiscount = $basePrice * ($premiumDiscountPercent / 100);
+            $finalPrice = $basePrice - $premiumDiscount;
+        }
 
         if ($finalPrice <= 0) {
             return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');

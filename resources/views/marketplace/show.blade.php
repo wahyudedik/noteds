@@ -119,21 +119,37 @@
                             </div>
                         @endif
                         @if ($note->price > 0)
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-yellow-100">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-yellow-100 flex-wrap">
+                                @php
+                                    $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
+                                    $displayPrice = isset($premiumDiscountPrice) ? $premiumDiscountPrice : $basePrice;
+                                @endphp
+                                
                                 @if ($note->hasDiscount())
                                     <div class="flex flex-col items-end">
-                                        <span
-                                            class="text-xs text-gray-500 line-through">{{ currency($note->price) }}</span>
-                                        <span
-                                            class="text-base font-semibold text-green-600">{{ currency($note->discount_price) }}</span>
+                                        <span class="text-xs text-gray-500 line-through">{{ currency($note->price) }}</span>
+                                        <span class="text-base font-semibold text-green-600">{{ currency($note->discount_price) }}</span>
                                     </div>
-                                    <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-500 text-white">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-500 text-white">
                                         -{{ $note->discount_percent }}%
                                     </span>
                                 @else
-                                    <span
-                                        class="text-base font-semibold text-yellow-800">{{ currency($note->price) }}</span>
+                                    <span class="text-base font-semibold text-yellow-800">{{ currency($basePrice) }}</span>
+                                @endif
+                                
+                                @if(isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
+                                    <div class="flex flex-col items-end">
+                                        @if(!$note->hasDiscount())
+                                            <span class="text-xs text-gray-500 line-through">{{ currency($basePrice) }}</span>
+                                        @endif
+                                        <span class="text-base font-semibold text-green-600">{{ currency($displayPrice) }}</span>
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-md">
+                                        <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                        -{{ $premiumDiscountPercent }}% Premium
+                                    </span>
                                 @endif
                             </div>
                         @else
@@ -183,9 +199,19 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex items-center gap-2 flex-wrap">
                                             <span
                                                 class="font-medium text-gray-900 group-hover:text-blue-600">{{ $note->user->name }}</span>
+                                            @if ($note->user->hasPremium())
+                                                <span
+                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
+                                                    title="Premium Buyer">
+                                                    <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                    Premium
+                                                </span>
+                                            @endif
                                             @if ($note->user->role === 'seller')
                                                 <span
                                                     class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
@@ -616,15 +642,33 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
-                                        Buy Note ({{ currency($note->hasDiscount() ? $note->discount_price : $note->price) }})
+                                        @php
+                                            $displayPrice = $premiumDiscountPrice ?? ($note->hasDiscount() ? $note->discount_price : $note->price);
+                                        @endphp
+                                        Buy Note ({{ currency($displayPrice) }})
+                                        @if(isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
+                                            <span class="ml-2 text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full">
+                                                -{{ $premiumDiscountPercent }}% Premium
+                                            </span>
+                                        @endif
                                     </button>
                                 </form>
                                 <p class="text-sm text-gray-600 mt-3">
                                     Your wallet balance: <strong
                                         class="font-semibold text-gray-900">{{ currency(auth()->user()->wallet_balance, auth()->user()->currency) }}</strong>
                                     @php
-                                        $finalPrice = $note->hasDiscount() ? $note->discount_price : $note->price;
+                                        $finalPrice = $premiumDiscountPrice ?? ($note->hasDiscount() ? $note->discount_price : $note->price);
                                     @endphp
+                                    @if(isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
+                                        <div class="mt-2 text-xs text-gray-500">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                                                <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                                Premium Discount: Save {{ currency($basePrice - $finalPrice) }} ({{ $premiumDiscountPercent }}%)
+                                            </span>
+                                        </div>
+                                    @endif
                                     @if (auth()->user()->wallet_balance < $finalPrice)
                                         <span class="text-red-600 font-medium">(Insufficient:
                                             {{ currency($finalPrice - auth()->user()->wallet_balance, auth()->user()->currency) }})</span>

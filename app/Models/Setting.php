@@ -179,4 +179,19 @@ class Setting extends Model
 
         return $percent && is_numeric($percent->value) ? (float) $percent->value : 0.0;
     }
+
+    /**
+     * Get premium buyer discount percentage.
+     * Premium buyers get exclusive discount on all purchases.
+     * 
+     * @return float
+     */
+    public static function getPremiumBuyerDiscountPercent(): float
+    {
+        $percent = static::where('key', 'premium_buyer_discount_percent')
+            ->where('group', 'marketplace')
+            ->first();
+
+        return $percent && is_numeric($percent->value) ? (float) $percent->value : 10.0; // Default 10%
+    }
 }

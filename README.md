@@ -76,9 +76,10 @@ Platform di mana pengguna bisa:
 - ✅ Wallet system & transactions
 - ✅ Withdraw management
 - ✅ Rating & reviews
-- ✅ Public profiles
+- ✅ Public profiles with avatar upload & share functionality
 - ✅ Premium subscriptions
 - ✅ AI-powered summaries & tags (Ollama - Basic)
+- ✅ AI Chat untuk Seller Profile (Public feature - semua user bisa akses)
 - ✅ Referral system
 - ✅ Notification system (SweetAlert2)
 - ✅ Support ticket system
@@ -94,6 +95,22 @@ Platform di mana pengguna bisa:
   - Auto-approve for premium users
   - Analytics tracking (impressions, clicks, CTR, ROI)
   - Admin approval system with refund if rejected
+- ✅ Note History & Versioning System
+  - Buyer history untuk seller (list semua buyer yang pernah membeli)
+  - Update history dengan versioning (detail perubahan setiap update)
+  - Prevent delete jika note sudah dijual
+- ✅ Resell Flow & One-Time Sale System
+  - Original creator commission tracking
+  - One-time sale rule (buyer yang sudah menjual tidak bisa akses lagi)
+  - Ownership transfer dengan access control
+- ✅ Collections Enhancement
+  - Add purchased notes to collections
+  - Dropdown untuk memilih purchased notes
+- ✅ Buyer Analytics Dashboard
+  - Purchase statistics (total purchased, total spent)
+  - Download statistics
+  - Completion rate tracking
+  - Recent purchases & categories
 
 **AI Memory Platform Plugin (Premium Subscription Feature - Planned):**
 - 🚧 Multi-workspace system (personal, team, organization)
@@ -334,6 +351,12 @@ composer pint
 - ✅ Featured Notes Advertising System (Landing page, Marketplace, Popup modals)
 - ✅ Seller Analytics Dashboard (Impressions, Clicks, CTR, ROI)
 - ✅ Auto-approve Featured Notes untuk Premium Users
+- ✅ Note History & Versioning System (Buyer history, Update history, Prevent delete)
+- ✅ AI Chat untuk Seller Profile (Public feature - semua user bisa akses)
+- ✅ Collections Enhancement (Add Purchased Notes)
+- ✅ Resell Flow & One-Time Sale System (Original creator commission, Access control)
+- ✅ Profile Features (Avatar upload, Share functionality, Open Graph tags)
+- ✅ Buyer Analytics Dashboard (Purchase stats, Downloads, Completion rate)
 
 **In Progress:**
 - ⚠️ FASE 8: Deployment & Launch

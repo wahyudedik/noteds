@@ -35,7 +35,7 @@ class SettingsController extends Controller
         // Get featured notes pricing
         $featuredPricing = $this->getFeaturedPricing();
 
-        return view('admin.settings.index', compact('settings', 's3Settings', 'premiumPrice', 'referralSignupReward', 'referralCommissionPercent', 'platformCommissionPercent', 'creatorCommissionPercent', 'featuredPricing'));
+        return view('admin.settings.index', compact('settings', 's3Settings', 'premiumPrice', 'referralSignupReward', 'referralCommissionPercent', 'platformCommissionPercent', 'creatorCommissionPercent', 'premiumBuyerDiscountPercent', 'featuredPricing'));
     }
 
     /**
@@ -132,6 +132,17 @@ class SettingsController extends Controller
                 'number',
                 'marketplace',
                 'Creator commission percentage (only for original creator on resale)'
+            );
+        }
+
+        // Update premium buyer discount
+        if ($request->has('premium_buyer_discount_percent')) {
+            Setting::setSetting(
+                'premium_buyer_discount_percent',
+                $request->input('premium_buyer_discount_percent', 10),
+                'number',
+                'marketplace',
+                'Exclusive discount percentage for premium buyers (applied to all purchases)'
             );
         }
 
