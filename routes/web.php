@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\TransactionController as AdminTransactionControll
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawController as AdminWithdrawController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\PostModerationController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicCmsPageController;
@@ -32,6 +33,8 @@ use App\Http\Controllers\Admin\SocialMediaController as AdminSocialMediaControll
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\NoteAttachmentController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\PostAnalyticsController;
+use App\Http\Controllers\ForumPreferenceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
@@ -62,10 +65,39 @@ Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marke
 Route::get('/marketplace/{note}', [MarketplaceController::class, 'show'])->name('marketplace.show');
 Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purchase'])->middleware(['auth', 'username.setup', 'buyer'])->name('marketplace.purchase');
 
-// Public profile routes
-Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('public.profile.show');
-Route::get('/u/{username}/ai-chat', [PublicProfileController::class, 'aiChat'])->name('public.profile.ai-chat');
-Route::post('/u/{username}/ai-chat/ask', [PublicProfileController::class, 'askSeller'])->name('public.profile.ai-chat.ask');
+    // Public profile routes
+    Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('public.profile.show');
+    Route::get('/u/{username}/ai-chat', [PublicProfileController::class, 'aiChat'])->name('public.profile.ai-chat');
+    Route::post('/u/{username}/ai-chat/ask', [PublicProfileController::class, 'askSeller'])->name('public.profile.ai-chat.ask');
+
+    // Forum routes - Available for all authenticated users
+    Route::middleware(['auth', 'username.setup'])->prefix('forum')->name('forum.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ForumController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\ForumController::class, 'store'])->name('store');
+        Route::get('/analytics', [PostAnalyticsController::class, 'index'])->name('analytics');
+        Route::get('/preferences', [ForumPreferenceController::class, 'edit'])->name('preferences.edit');
+        Route::put('/preferences', [ForumPreferenceController::class, 'update'])->name('preferences.update');
+        Route::get('/hashtag/{slug}', [\App\Http\Controllers\ForumController::class, 'hashtag'])->name('hashtag');
+        Route::get('/bookmarks', [\App\Http\Controllers\PostBookmarkController::class, 'index'])->name('bookmarks');
+        Route::post('/post/{post}/bookmark', [\App\Http\Controllers\PostBookmarkController::class, 'toggle'])->name('bookmark');
+        Route::get('/post/{post}', [\App\Http\Controllers\ForumController::class, 'show'])->name('show');
+        Route::put('/post/{post}', [\App\Http\Controllers\ForumController::class, 'update'])->name('update');
+        Route::post('/post/{post}/like', [\App\Http\Controllers\ForumController::class, 'like'])->name('like');
+        Route::post('/post/{post}/share', [\App\Http\Controllers\ForumController::class, 'share'])->name('share');
+        Route::post('/post/{post}/comment', [\App\Http\Controllers\ForumController::class, 'comment'])->name('comment');
+        Route::put('/comment/{comment}', [\App\Http\Controllers\ForumController::class, 'updateComment'])->name('comment.update');
+        Route::delete('/comment/{comment}', [\App\Http\Controllers\ForumController::class, 'destroyComment'])->name('comment.destroy');
+        Route::post('/comment/{comment}/like', [\App\Http\Controllers\ForumController::class, 'likeComment'])->name('comment.like');
+        Route::post('/post/{post}/pin', [\App\Http\Controllers\ForumController::class, 'pin'])->name('pin');
+        Route::post('/post/{post}/report', [\App\Http\Controllers\PostReportController::class, 'store'])->name('report');
+        Route::delete('/post/{post}', [\App\Http\Controllers\ForumController::class, 'destroy'])->name('destroy');
+    });
+
+    // Follow routes
+    Route::middleware(['auth', 'username.setup'])->prefix('follow')->name('follow.')->group(function () {
+        Route::post('/{user}', [\App\Http\Controllers\FollowController::class, 'follow'])->name('follow');
+        Route::delete('/{user}', [\App\Http\Controllers\FollowController::class, 'unfollow'])->name('unfollow');
+    });
 
 // Review routes
 Route::post('/notes/{note}/reviews', [ReviewController::class, 'store'])->middleware(['auth', 'username.setup'])->name('reviews.store');
@@ -130,7 +162,8 @@ Route::middleware(['auth', 'username.setup', 'workspace.user'])->group(function 
     Route::get('/ai/status', [AiController::class, 'status'])->name('ai.status');
 
     // Buyer AI routes - Premium features only (for purchased notes)
-    Route::middleware('premium')->prefix('buyer-ai')->name('buyer-ai.')->group(function () {
+    // Rate limiting: 10 requests per minute per user
+    Route::middleware(['premium', 'throttle.ai:10,1'])->prefix('buyer-ai')->name('buyer-ai.')->group(function () {
         Route::post('/analyze/{note}', [\App\Http\Controllers\BuyerAiController::class, 'analyzePurchasedNote'])->name('analyze');
         Route::post('/ask', [\App\Http\Controllers\BuyerAiController::class, 'askPurchasedNote'])->name('ask');
         Route::post('/study-materials/{note}', [\App\Http\Controllers\BuyerAiController::class, 'generateStudyMaterials'])->name('study-materials');
@@ -260,6 +293,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin', 'username.setup'])->na
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
     Route::post('/settings/test-s3', [AdminSettingsController::class, 'testS3'])->name('settings.test-s3');
+
+    Route::get('/forum/moderation', [PostModerationController::class, 'index'])->name('forum.moderation.index');
+    Route::get('/forum/moderation/{post}', [PostModerationController::class, 'show'])->name('forum.moderation.show');
+    Route::post('/forum/moderation/{post}/hide', [PostModerationController::class, 'hide'])->name('forum.moderation.hide');
+    Route::post('/forum/moderation/{post}/unhide', [PostModerationController::class, 'unhide'])->name('forum.moderation.unhide');
+    Route::delete('/forum/moderation/{post}', [PostModerationController::class, 'destroy'])->name('forum.moderation.destroy');
+    Route::post('/forum/moderation/report/{report}/status', [PostModerationController::class, 'updateReportStatus'])->name('forum.moderation.report.status');
 
     // Featured Notes Admin routes
     Route::get('/featured-notes', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'index'])->name('featured-notes.index');

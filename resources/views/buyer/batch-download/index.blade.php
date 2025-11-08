@@ -163,14 +163,21 @@
         const downloadCountEl = document.getElementById('downloadCount');
         const downloadButton = document.getElementById('downloadButton');
         
-        selectedCountEl.textContent = count + ' note' + (count !== 1 ? 's' : '') + ' selected';
-        downloadCountEl.textContent = count;
+        // Check if elements exist before accessing them
+        if (selectedCountEl) {
+            selectedCountEl.textContent = count + ' note' + (count !== 1 ? 's' : '') + ' selected';
+        }
+        if (downloadCountEl) {
+            downloadCountEl.textContent = count;
+        }
         
         // Enable/disable download button
-        if (count > 0 && count <= 20) {
-            downloadButton.disabled = false;
-        } else {
-            downloadButton.disabled = true;
+        if (downloadButton) {
+            if (count > 0 && count <= 20) {
+                downloadButton.disabled = false;
+            } else {
+                downloadButton.disabled = true;
+            }
         }
         
         // Show warning if more than 20 selected
@@ -196,25 +203,30 @@
         updateSelectedCount();
     }
     
-    // Form submission handler
-    document.getElementById('batchDownloadForm').addEventListener('submit', function(e) {
-        const checkboxes = document.querySelectorAll('.note-checkbox:checked');
-        if (checkboxes.length === 0) {
-            e.preventDefault();
-            alert('Please select at least one note to download.');
-            return false;
-        }
-        if (checkboxes.length > 20) {
-            e.preventDefault();
-            alert('You can only select up to 20 notes at a time.');
-            return false;
-        }
-        
-        // Show loading state
-        const button = document.getElementById('downloadButton');
-        button.disabled = true;
-        button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Preparing download...';
-    });
+    // Form submission handler - only if form exists
+    const batchDownloadForm = document.getElementById('batchDownloadForm');
+    if (batchDownloadForm) {
+        batchDownloadForm.addEventListener('submit', function(e) {
+            const checkboxes = document.querySelectorAll('.note-checkbox:checked');
+            if (checkboxes.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one note to download.');
+                return false;
+            }
+            if (checkboxes.length > 20) {
+                e.preventDefault();
+                alert('You can only select up to 20 notes at a time.');
+                return false;
+            }
+            
+            // Show loading state
+            const button = document.getElementById('downloadButton');
+            if (button) {
+                button.disabled = true;
+                button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Preparing download...';
+            }
+        });
+    }
 </script>
 @endpush
 @endsection

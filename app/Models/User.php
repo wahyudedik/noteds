@@ -38,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'bank_name',
         'bank_account_number',
         'bank_account_name',
+        'forum_email_preferences',
     ];
 
     /**
@@ -61,7 +62,56 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'wallet_balance' => 'decimal:2',
+            'forum_email_preferences' => 'array',
         ];
+    }
+
+    public function getForumEmailPreferencesAttribute($value): array
+    {
+        $stored = is_array($value) ? $value : (json_decode($value ?? '[]', true) ?? []);
+
+        return array_merge($this->defaultForumEmailPreferences(), $stored);
+    }
+
+    public function setForumEmailPreferencesAttribute($value): void
+    {
+        $preferences = array_merge($this->defaultForumEmailPreferences(), array_intersect_key((array) $value, $this->defaultForumEmailPreferences()));
+
+        $this->attributes['forum_email_preferences'] = json_encode($preferences);
+    }
+
+    public function defaultForumEmailPreferences(): array
+    {
+        return [
+            'post_liked' => true,
+            'post_commented' => true,
+            'comment_replied' => true,
+            'comment_liked' => true,
+            'new_follower' => true,
+        ];
+    }
+
+    public function wantsForumEmail(string $type): bool
+    {
+        if (!$this->hasVerifiedEmail()) {
+            return false;
+        }
+
+        $map = [
+            'forum_post_liked' => 'post_liked',
+            'forum_post_commented' => 'post_commented',
+            'forum_comment_replied' => 'comment_replied',
+            'forum_comment_liked' => 'comment_liked',
+            'forum_new_follower' => 'new_follower',
+        ];
+
+        if (!array_key_exists($type, $map)) {
+            return false;
+        }
+
+        $preferences = $this->forum_email_preferences;
+
+        return $preferences[$map[$type]] ?? false;
     }
 
     public function notes()
@@ -344,6 +394,74 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get user's posts.
+     */
+    public function posts()
+    {
+        return $this->hasMany(Post::class)->latest();
+    }
+
+    /**
+     * Get posts that user has liked.
+     */
+    public function likedPosts(): BelongsToMany
+    {
+        return $this->belongsToMany(Post::class, 'post_likes', 'user_id', 'post_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get user's comments.
+     */
+    public function postComments()
+    {
+        return $this->hasMany(PostComment::class)->latest();
+    }
+
+    /**
+     * Get comments that user has liked.
+     */
+    public function likedComments(): BelongsToMany
+    {
+        return $this->belongsToMany(PostComment::class, 'comment_likes', 'user_id', 'comment_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get users that this user follows.
+     */
+    public function following(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get users that follow this user.
+     */
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'follows', 'following_id', 'follower_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Check if user follows another user.
+     */
+    public function isFollowing(User $user): bool
+    {
+        return $this->following()->where('following_id', $user->id)->exists();
+    }
+
+    /**
+     * Check if user is followed by another user.
+     */
+    public function isFollowedBy(User $user): bool
+    {
+        return $this->followers()->where('follower_id', $user->id)->exists();
+    }
+
+    /**
      * Check if user has purchased a note.
      */
     public function hasPurchasedNote($noteId): bool
@@ -357,5 +475,23 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getPurchasedNote($noteId): ?PurchasedNote
     {
         return $this->purchasedNotes()->where('note_id', $noteId)->first();
+    }
+
+    /**
+     * Get bookmarked posts.
+     */
+    public function bookmarkedPosts(): BelongsToMany
+    {
+        return $this->belongsToMany(Post::class, 'post_bookmarks', 'user_id', 'post_id')
+            ->withTimestamps()
+            ->latest('post_bookmarks.created_at');
+    }
+
+    /**
+     * Check if user has bookmarked a post.
+     */
+    public function hasBookmarked(Post $post): bool
+    {
+        return $this->bookmarkedPosts()->where('post_id', $post->id)->exists();
     }
 }

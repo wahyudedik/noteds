@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'buyer' => \App\Http\Middleware\EnsureBuyerRole::class,
             'seller' => \App\Http\Middleware\EnsureSellerRole::class,
             'workspace.user' => \App\Http\Middleware\EnsureWorkspaceUser::class,
+            'throttle.ai' => \App\Http\Middleware\ThrottleAiRequests::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

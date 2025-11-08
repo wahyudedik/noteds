@@ -27,3 +27,8 @@ Schedule::command('featured:activate-scheduled')
     ->hourly()
     ->timezone('Asia/Jakarta')
     ->description('Activate scheduled featured notes that have reached their scheduled date');
+
+Schedule::command('forum:publish-scheduled-posts')
+    ->everyMinute()
+    ->timezone('Asia/Jakarta')
+    ->description('Publish forum posts that have reached their scheduled time');

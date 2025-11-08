@@ -9,7 +9,9 @@ use App\Services\AiService;
 use App\Services\ContentExtractorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class BuyerAiController extends Controller
 {
@@ -44,23 +46,41 @@ class BuyerAiController extends Controller
             ], 403);
         }
 
-        // Check if analysis already exists
+        // Check cache first (faster than DB query)
+        $cacheKey = "ai_analysis_{$user->id}_{$note->id}_analyzer";
+        $cachedAnalysis = Cache::get($cacheKey);
+
+        if ($cachedAnalysis) {
+            return response()->json([
+                'success' => true,
+                'data' => $cachedAnalysis,
+                'cached' => true,
+            ]);
+        }
+
+        // Check if analysis already exists in database (with optimized query)
         $existingAnalysis = AiAnalysis::where('user_id', $user->id)
             ->where('note_id', $note->id)
             ->where('analysis_type', 'analyzer')
+            ->select(['summary', 'key_points', 'insights', 'topics', 'difficulty_level', 'estimated_time_minutes'])
             ->first();
 
         if ($existingAnalysis) {
+            $analysisData = [
+                'summary' => $existingAnalysis->summary,
+                'key_points' => $existingAnalysis->key_points ?? [],
+                'insights' => $existingAnalysis->insights ?? [],
+                'topics' => $existingAnalysis->topics ?? [],
+                'difficulty_level' => $existingAnalysis->difficulty_level,
+                'estimated_time_minutes' => $existingAnalysis->estimated_time_minutes,
+            ];
+
+            // Cache the result for faster future access
+            Cache::put($cacheKey, $analysisData, now()->addDays(7));
+
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'summary' => $existingAnalysis->summary,
-                    'key_points' => $existingAnalysis->key_points ?? [],
-                    'insights' => $existingAnalysis->insights ?? [],
-                    'topics' => $existingAnalysis->topics ?? [],
-                    'difficulty_level' => $existingAnalysis->difficulty_level,
-                    'estimated_time_minutes' => $existingAnalysis->estimated_time_minutes,
-                ],
+                'data' => $analysisData,
                 'cached' => true,
             ]);
         }
@@ -97,29 +117,32 @@ class BuyerAiController extends Controller
             $difficultyLevel = $this->estimateDifficulty($content);
             $estimatedTimeMinutes = $this->estimateReadingTime($content);
 
-            // Save analysis
-            $analysis = AiAnalysis::create([
-                'user_id' => $user->id,
-                'note_id' => $note->id,
-                'analysis_type' => 'analyzer',
+            // Prepare analysis data
+            $analysisData = [
                 'summary' => $summary,
                 'key_points' => $keyPoints,
                 'insights' => $insights,
                 'topics' => $topics,
                 'difficulty_level' => $difficultyLevel,
                 'estimated_time_minutes' => $estimatedTimeMinutes,
-            ]);
+            ];
+
+            // Save analysis (use DB transaction for consistency)
+            DB::transaction(function () use ($user, $note, $analysisData) {
+                AiAnalysis::create([
+                    'user_id' => $user->id,
+                    'note_id' => $note->id,
+                    'analysis_type' => 'analyzer',
+                    ...$analysisData,
+                ]);
+            });
+
+            // Cache the result for faster future access
+            Cache::put($cacheKey, $analysisData, now()->addDays(7));
 
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'summary' => $summary,
-                    'key_points' => $keyPoints,
-                    'insights' => $insights,
-                    'topics' => $topics,
-                    'difficulty_level' => $difficultyLevel,
-                    'estimated_time_minutes' => $estimatedTimeMinutes,
-                ],
+                'data' => $analysisData,
             ]);
         } catch (\Exception $e) {
             logger()->error('AI Note Analyzer error', [
@@ -324,20 +347,43 @@ class BuyerAiController extends Controller
 
         $noteIds = $validated['note_ids'];
 
-        // Verify user has purchased all notes
-        foreach ($noteIds as $noteId) {
-            $note = Note::findOrFail($noteId);
-            if ($note->price > 0 && !$user->hasPurchasedNote($noteId)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Anda harus membeli note dengan ID {$noteId} terlebih dahulu.",
-                ], 403);
-            }
+        // Verify user has purchased all notes (optimized batch check)
+        $purchasedNoteIds = $user->purchasedNotes()
+            ->whereIn('note_id', $noteIds)
+            ->pluck('note_id')
+            ->toArray();
+
+        $paidNotes = Note::whereIn('id', $noteIds)
+            ->where('price', '>', 0)
+            ->pluck('id')
+            ->toArray();
+
+        $missingPurchases = array_diff($paidNotes, $purchasedNoteIds);
+        if (!empty($missingPurchases)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda harus membeli semua note berbayar terlebih dahulu.',
+                'missing_note_ids' => array_values($missingPurchases),
+            ], 403);
         }
 
-        // Get notes
+        // Cache key for comparison (based on note IDs)
+        sort($noteIds); // Sort for consistent cache key
+        $cacheKey = 'ai_compare_' . md5(implode('_', $noteIds));
+        $cachedComparison = Cache::get($cacheKey);
+
+        if ($cachedComparison) {
+            return response()->json([
+                'success' => true,
+                'data' => $cachedComparison,
+                'cached' => true,
+            ]);
+        }
+
+        // Load notes (optimized query)
         $notes = Note::whereIn('id', $noteIds)
-            ->get(['id', 'title', 'content']);
+            ->select(['id', 'title', 'content'])
+            ->get();
 
         // Check if Ollama is available
         if (!$this->aiService->isAvailable()) {
@@ -349,6 +395,9 @@ class BuyerAiController extends Controller
 
         try {
             $comparison = $this->compareNotesContent($notes);
+
+            // Cache comparison result for 24 hours
+            Cache::put($cacheKey, $comparison, now()->addDay());
 
             return response()->json([
                 'success' => true,
@@ -383,9 +432,22 @@ class BuyerAiController extends Controller
             ], 403);
         }
 
-        // Get user's purchased notes
+        // Cache recommendations for 1 hour (user-specific)
+        $cacheKey = "ai_recommendations_{$user->id}";
+        $cachedRecommendations = Cache::get($cacheKey);
+
+        if ($cachedRecommendations) {
+            return response()->json([
+                'success' => true,
+                'recommendations' => $cachedRecommendations,
+                'cached' => true,
+            ]);
+        }
+
+        // Get user's purchased notes (optimized query)
         $purchasedNotes = $user->purchasedNotes()
-            ->with('note.tags')
+            ->with(['note.tags:id,name', 'note.user:id,name,username'])
+            ->select(['id', 'user_id', 'note_id', 'purchased_at'])
             ->latest('purchased_at')
             ->limit(20)
             ->get();
@@ -406,15 +468,26 @@ class BuyerAiController extends Controller
             }
         }
 
-        // Get similar notes based on tags
+        // Get similar notes based on tags (optimized query)
         $purchasedNoteIds = $purchasedNotes->pluck('note_id')->toArray();
+        $tagIds = array_keys($tags);
+
+        if (empty($tagIds)) {
+            return response()->json([
+                'success' => true,
+                'recommendations' => [],
+                'message' => 'Tidak ada tag untuk rekomendasi.',
+            ]);
+        }
+
         $recommendedNotes = Note::publicOnly()
             ->where('status', 'active')
             ->whereNotIn('id', $purchasedNoteIds)
-            ->whereHas('tags', function ($q) use ($tags) {
-                $q->whereIn('tags.id', array_keys($tags));
+            ->whereHas('tags', function ($q) use ($tagIds) {
+                $q->whereIn('tags.id', $tagIds);
             })
-            ->with(['tags', 'user', 'reviews'])
+            ->with(['tags:id,name', 'user:id,name,username'])
+            ->select(['id', 'title', 'summary', 'price', 'discount_price', 'average_rating', 'user_id'])
             ->inRandomOrder()
             ->limit(10)
             ->get()
@@ -435,6 +508,9 @@ class BuyerAiController extends Controller
                     'reason' => 'Similar tags: ' . implode(', ', $matchingTags),
                 ];
             });
+
+        // Cache recommendations for 1 hour
+        Cache::put($cacheKey, $recommendedNotes->toArray(), now()->addHour());
 
         return response()->json([
             'success' => true,
@@ -592,16 +668,16 @@ class BuyerAiController extends Controller
         $mimeType = null;
 
         foreach ($attachments as $attachment) {
-            $attachmentFilename = is_array($attachment) 
-                ? ($attachment['filename'] ?? null) 
+            $attachmentFilename = is_array($attachment)
+                ? ($attachment['filename'] ?? null)
                 : basename($attachment);
 
             if ($attachmentFilename === $filename) {
-                $filePath = is_array($attachment) 
-                    ? ($attachment['path'] ?? null) 
+                $filePath = is_array($attachment)
+                    ? ($attachment['path'] ?? null)
                     : $attachment;
-                $mimeType = is_array($attachment) 
-                    ? ($attachment['mime'] ?? null) 
+                $mimeType = is_array($attachment)
+                    ? ($attachment['mime'] ?? null)
                     : null;
                 break;
             }
@@ -616,7 +692,8 @@ class BuyerAiController extends Controller
 
         // Detect MIME type if not provided
         if (!$mimeType) {
-            $mimeType = Storage::disk('private')->mimeType($filePath) ?? 'application/octet-stream';
+            $fullPath = Storage::disk('private')->path($filePath);
+            $mimeType = file_exists($fullPath) ? (mime_content_type($fullPath) ?: 'application/octet-stream') : 'application/octet-stream';
         }
 
         try {

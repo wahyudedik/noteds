@@ -17,6 +17,7 @@ class PublicProfileController extends Controller
     public function show(string $username): View|RedirectResponse
     {
         $user = User::where('username', $username)->firstOrFail();
+        $viewer = auth()->user();
         
         $user->load(['notes' => function ($query) {
             $query->where('is_public', true)
@@ -40,9 +41,22 @@ class PublicProfileController extends Controller
             'total_revenue' => $user->transactionsAsSeller()->where('status', 'success')->sum('amount'),
             'average_rating' => $this->calculateAverageRating($user),
             'total_reviews' => $this->getTotalReviewsCount($user),
+            'total_posts' => $user->posts()->whereNull('parent_id')->where('is_hidden', false)->published()->visibleTo($viewer)->count(),
         ];
 
-        return view('public.profile.show', compact('user', 'publicNotes', 'stats'));
+        // Get user posts for posts tab
+        $userPosts = $user->posts()
+            ->whereNull('parent_id')
+            ->where('is_hidden', false)
+            ->published()
+            ->visibleTo($viewer)
+            ->with(['note', 'likes'])
+            ->withCount(['replies', 'allComments'])
+            ->orderBy('is_pinned', 'desc')
+            ->latest()
+            ->paginate(12);
+
+        return view('public.profile.show', compact('user', 'publicNotes', 'stats', 'userPosts'));
     }
 
     /**

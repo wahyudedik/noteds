@@ -32,6 +32,9 @@ class SettingsController extends Controller
         $platformCommissionPercent = Setting::getPlatformCommissionPercent();
         $creatorCommissionPercent = Setting::getCreatorCommissionPercent();
 
+        // Get premium buyer discount
+        $premiumBuyerDiscountPercent = Setting::getPremiumBuyerDiscountPercent();
+
         // Get featured notes pricing
         $featuredPricing = $this->getFeaturedPricing();
 
@@ -57,6 +60,7 @@ class SettingsController extends Controller
             'referral_reward_commission_percent' => 'nullable|numeric|min:0|max:100',
             'platform_commission_percent' => 'nullable|numeric|min:0|max:100',
             'creator_commission_percent' => 'nullable|numeric|min:0|max:100',
+            'premium_buyer_discount_percent' => 'nullable|numeric|min:0|max:50',
             'featured_price.*.*' => 'nullable|numeric|min:0|max:100000000',
         ]);
 

@@ -40,6 +40,18 @@
                                     class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('marketplace.*') ? 'text-blue-600 bg-blue-50' : '' }}">
                                     {{ __('messages.marketplace') }}
                                 </a>
+                                <a href="{{ route('forum.index') }}"
+                                    class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ (request()->routeIs('forum.*') && !request()->routeIs('forum.analytics')) ? 'text-blue-600 bg-blue-50' : '' }}">
+                                    Forum
+                                </a>
+                                <a href="{{ route('forum.analytics') }}"
+                                    class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('forum.analytics') ? 'text-blue-600 bg-blue-50' : '' }}">
+                                    Forum Analytics
+                                </a>
+                                <a href="{{ route('forum.preferences.edit') }}"
+                                    class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('forum.preferences.*') ? 'text-blue-600 bg-blue-50' : '' }}">
+                                    Forum Preferences
+                                </a>
 
                                 <!-- More Menu Dropdown -->
                                 <div class="relative" x-data="{ open: false }">
@@ -103,6 +115,10 @@
                                             <a href="{{ route('admin.dashboard') }}"
                                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('admin.*') ? 'bg-blue-50 text-blue-600' : '' }}">
                                                 {{ __('messages.admin') }}
+                                            </a>
+                                            <a href="{{ route('admin.forum.moderation.index') }}"
+                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('admin.forum.moderation.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                                                Forum Moderation
                                             </a>
                                         @endif
                                     </div>
@@ -435,6 +451,21 @@
                         @click="mobileMenuOpen = false">
                         {{ __('messages.marketplace') }}
                     </a>
+                    <a href="{{ route('forum.index') }}"
+                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ (request()->routeIs('forum.*') && !request()->routeIs('forum.analytics')) ? 'text-blue-600 bg-blue-50' : '' }}"
+                        @click="mobileMenuOpen = false">
+                        Forum
+                    </a>
+                    <a href="{{ route('forum.analytics') }}"
+                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('forum.analytics') ? 'text-blue-600 bg-blue-50' : '' }}"
+                        @click="mobileMenuOpen = false">
+                        Forum Analytics
+                    </a>
+                    <a href="{{ route('forum.preferences.edit') }}"
+                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('forum.preferences.*') ? 'text-blue-600 bg-blue-50' : '' }}"
+                        @click="mobileMenuOpen = false">
+                        Forum Preferences
+                    </a>
 
                     <div class="border-t border-gray-200 my-2"></div>
                     <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">More</div>
@@ -488,6 +519,11 @@
                             class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('admin.*') ? 'text-blue-600 bg-blue-50' : '' }}"
                             @click="mobileMenuOpen = false">
                             {{ __('messages.admin') }}
+                        </a>
+                        <a href="{{ route('admin.forum.moderation.index') }}"
+                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('admin.forum.moderation.*') ? 'text-blue-600 bg-blue-50' : '' }}"
+                            @click="mobileMenuOpen = false">
+                            Forum Moderation
                         </a>
                     @endif
                 @endif

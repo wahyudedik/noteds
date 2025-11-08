@@ -292,98 +292,145 @@
                 </div>
             </div>
 
-            <!-- Public Notes -->
-            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.public_notes') }}</h2>
-                        <p class="text-sm text-gray-600 mt-1">All notes published by {{ $user->name }}</p>
-                    </div>
-                    @if ($publicNotes->count() > 0)
-                        <a href="{{ route('marketplace.index', ['seller' => $user->id]) }}"
-                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            View in Marketplace
-                        </a>
-                    @endif
+            <!-- Tabs -->
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
+                <div class="border-b border-gray-200">
+                    <nav class="flex -mb-px" aria-label="Tabs">
+                        <button onclick="showTab('notes')" id="tab-notes"
+                            class="tab-button px-6 py-4 text-sm font-medium border-b-2 border-blue-500 text-blue-600">
+                            {{ __('messages.public_notes') }} ({{ $stats['total_notes'] }})
+                        </button>
+                        <button onclick="showTab('posts')" id="tab-posts"
+                            class="tab-button px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                            Forum Posts ({{ $stats['total_posts'] }})
+                        </button>
+                    </nav>
                 </div>
-                <div class="p-6">
-                    @if ($publicNotes->count() > 0)
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            @foreach ($publicNotes as $note)
-                                <div
-                                    class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 group">
-                                    <!-- Thumbnail -->
-                                    @if ($note->hasThumbnails())
-                                        <div class="h-48 overflow-hidden">
-                                            <img src="{{ Storage::url($note->thumbnails[0]) }}"
-                                                alt="{{ $note->title }}"
-                                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                                        </div>
-                                    @endif
-                                    <div class="p-6">
-                                        <div class="mb-4">
-                                            <h3
-                                                class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
-                                                <a href="{{ route('marketplace.show', $note) }}">{{ $note->title }}</a>
-                                            </h3>
-                                            <p class="text-sm text-gray-600 line-clamp-3">{!! Str::limit(strip_tags($note->content), 100) !!}</p>
-                                        </div>
 
-                                        @if ($note->tags->count() > 0)
-                                            <div class="flex flex-wrap gap-2 mb-4">
-                                                @foreach ($note->tags->take(3) as $tag)
-                                                    <span
-                                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        {{ $tag->name }}
-                                                    </span>
-                                                @endforeach
+                <!-- Notes Tab Content -->
+                <div id="tab-content-notes" class="tab-content">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.public_notes') }}</h2>
+                            <p class="text-sm text-gray-600 mt-1">All notes published by {{ $user->name }}</p>
+                        </div>
+                        @if ($publicNotes->count() > 0)
+                            <a href="{{ route('marketplace.index', ['seller' => $user->id]) }}"
+                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                View in Marketplace
+                            </a>
+                        @endif
+                    </div>
+                    <div class="p-6">
+                        @if ($publicNotes->count() > 0)
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                @foreach ($publicNotes as $note)
+                                    <div
+                                        class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 group">
+                                        <!-- Thumbnail -->
+                                        @if ($note->hasThumbnails())
+                                            <div class="h-48 overflow-hidden">
+                                                <img src="{{ Storage::url($note->thumbnails[0]) }}"
+                                                    alt="{{ $note->title }}"
+                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                             </div>
                                         @endif
+                                        <div class="p-6">
+                                            <div class="mb-4">
+                                                <h3
+                                                    class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
+                                                    <a href="{{ route('marketplace.show', $note) }}">{{ $note->title }}</a>
+                                                </h3>
+                                                <p class="text-sm text-gray-600 line-clamp-3">{!! Str::limit(strip_tags($note->content), 100) !!}</p>
+                                            </div>
 
-                                        <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                                            @if ($note->average_rating > 0)
-                                                <div class="flex items-center gap-1">
-                                                    @for ($i = 1; $i <= 5; $i++)
-                                                        <svg class="w-3 h-3 {{ $i <= $note->average_rating ? 'text-yellow-400' : 'text-gray-300' }}"
-                                                            fill="currentColor" viewBox="0 0 20 20">
-                                                            <path
-                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                        </svg>
-                                                    @endfor
-                                                    <span class="text-xs text-gray-600">{{ $note->average_rating }}</span>
+                                            @if ($note->tags->count() > 0)
+                                                <div class="flex flex-wrap gap-2 mb-4">
+                                                    @foreach ($note->tags->take(3) as $tag)
+                                                        <span
+                                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            {{ $tag->name }}
+                                                        </span>
+                                                    @endforeach
                                                 </div>
                                             @endif
-                                            @if ($note->price > 0)
-                                                <span class="text-sm font-semibold text-yellow-600">Rp
-                                                    {{ number_format($note->price, 0, ',', '.') }}</span>
-                                            @else
-                                                <span class="text-xs text-gray-500">{{ __('messages.free') }}</span>
-                                            @endif
+
+                                            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                                                @if ($note->average_rating > 0)
+                                                    <div class="flex items-center gap-1">
+                                                        @for ($i = 1; $i <= 5; $i++)
+                                                            <svg class="w-3 h-3 {{ $i <= $note->average_rating ? 'text-yellow-400' : 'text-gray-300' }}"
+                                                                fill="currentColor" viewBox="0 0 20 20">
+                                                                <path
+                                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                            </svg>
+                                                        @endfor
+                                                        <span class="text-xs text-gray-600">{{ $note->average_rating }}</span>
+                                                    </div>
+                                                @endif
+                                                @if ($note->price > 0)
+                                                    <span class="text-sm font-semibold text-yellow-600">Rp
+                                                        {{ number_format($note->price, 0, ',', '.') }}</span>
+                                                @else
+                                                    <span class="text-xs text-gray-500">{{ __('messages.free') }}</span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endforeach
-                        </div>
+                                @endforeach
+                            </div>
 
-                        <div class="mt-6">
-                            {{ $publicNotes->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-12">
-                            <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <h3 class="mt-4 text-lg font-medium text-gray-900">{{ __('messages.no_public_notes_yet') }}
-                            </h3>
-                            <p class="mt-2 text-sm text-gray-500">{{ __('messages.user_hasnt_published_notes') }}</p>
-                        </div>
-                    @endif
+                            <div class="mt-6">
+                                {{ $publicNotes->links() }}
+                            </div>
+                        @else
+                            <div class="text-center py-12">
+                                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <h3 class="mt-4 text-lg font-medium text-gray-900">{{ __('messages.no_public_notes_yet') }}
+                                </h3>
+                                <p class="mt-2 text-sm text-gray-500">{{ __('messages.user_hasnt_published_notes') }}</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Posts Tab Content -->
+                <div id="tab-content-posts" class="tab-content hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h2 class="text-lg font-semibold text-gray-900">Forum Posts</h2>
+                        <p class="text-sm text-gray-600 mt-1">All forum posts by {{ $user->name }}</p>
+                    </div>
+                    <div class="p-6">
+                        @if ($userPosts->count() > 0)
+                            <div class="space-y-4">
+                                @foreach ($userPosts as $post)
+                                    @include('forum.partials.post-card', ['post' => $post])
+                                @endforeach
+                            </div>
+
+                            <div class="mt-6">
+                                {{ $userPosts->links() }}
+                            </div>
+                        @else
+                            <div class="text-center py-12">
+                                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                <h3 class="mt-4 text-lg font-medium text-gray-900">No posts yet</h3>
+                                <p class="mt-2 text-sm text-gray-500">This user hasn't posted anything in the forum yet.</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -391,6 +438,28 @@
 
     @push('scripts')
         <script>
+            // Tab switching
+            function showTab(tabName) {
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                
+                // Remove active state from all tabs
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.classList.remove('border-blue-500', 'text-blue-600');
+                    button.classList.add('border-transparent', 'text-gray-500');
+                });
+                
+                // Show selected tab content
+                document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+                
+                // Add active state to selected tab
+                const activeTab = document.getElementById(`tab-${tabName}`);
+                activeTab.classList.remove('border-transparent', 'text-gray-500');
+                activeTab.classList.add('border-blue-500', 'text-blue-600');
+            }
+
             // Copy to clipboard function
             function copyToClipboard(text) {
                 if (navigator.clipboard && navigator.clipboard.writeText) {

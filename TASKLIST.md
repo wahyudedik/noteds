@@ -132,7 +132,7 @@ Menambah sumber pendapatan dan benefit user premium dengan plugin AI Memory Plat
 - [x] Folder & tag system (enhanced) - ✅ Folder management UI + backend (nested folders, color coding), integrated di note forms
 - [x] Activity timeline & history tracking - ✅ Model `NoteActivity` + Service `NoteActivityService` implemented
 - [x] Multi-workspace UI (personal, tim, lembaga) - ✅ Workspace management UI + controller, integrated di MyNoteds dashboard
-- [ ] Authentication & role khusus untuk AI Memory Platform (bisa terpisah dari marketplace) - ⏸️ Skipped for now (current premium middleware is sufficient)
+- [x] Authentication & role khusus untuk mengelola workspace
 - [x] Semantic search endpoint - ✅ Fully implemented (`AiController::semanticSearch()` + `AiService::semanticSearch()`)
 - [x] Premium protection middleware - ✅ `EnsureUserHasPremium` middleware implemented & registered
 

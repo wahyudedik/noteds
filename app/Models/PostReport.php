@@ -7,30 +7,31 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class NoteViewHistory extends Model
+class PostReport extends Model
 {
     use HasFactory, HasUuids;
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'note_view_history';
-
     protected $fillable = [
+        'post_id',
         'user_id',
-        'note_id',
-        'viewed_at',
-        'ip_address',
-        'user_agent',
+        'reason',
+        'description',
+        'status',
+        'reviewed_by',
+        'reviewed_at',
+        'admin_notes',
     ];
 
     protected function casts(): array
     {
         return [
-            'viewed_at' => 'datetime',
+            'reviewed_at' => 'datetime',
         ];
+    }
+
+    public function post(): BelongsTo
+    {
+        return $this->belongsTo(Post::class);
     }
 
     public function user(): BelongsTo
@@ -38,8 +39,9 @@ class NoteViewHistory extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function note(): BelongsTo
+    public function reviewer(): BelongsTo
     {
-        return $this->belongsTo(Note::class);
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }
+

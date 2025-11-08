@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Models\AppNotification;
 use App\Models\User;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ForumNotificationMail;
 
 class NotificationService
 {
@@ -12,7 +15,7 @@ class NotificationService
      */
     public function create(User $user, string $type, string $title, string $message, ?string $link = null, ?array $data = null): AppNotification
     {
-        return AppNotification::create([
+        $notification = AppNotification::create([
             'user_id' => $user->id,
             'type' => $type,
             'title' => $title,
@@ -20,6 +23,10 @@ class NotificationService
             'link' => $link,
             'data' => $data,
         ]);
+
+        $this->sendForumEmailIfEnabled($user, $type, $title, $message, $link);
+
+        return $notification;
     }
 
     /**
@@ -145,6 +152,102 @@ class NotificationService
             route('wallet.index'),
             ['required_amount' => $requiredAmount, 'current_balance' => $currentBalance]
         );
+    }
+
+    /**
+     * Notify user about a like on their post.
+     */
+    public function notifyPostLiked(User $user, string $postId, string $likerName, string $postContent): AppNotification
+    {
+        return $this->create(
+            $user,
+            'forum_post_liked',
+            '❤️ Your post was liked',
+            "{$likerName} liked your post: " . Str::limit($postContent, 50),
+            route('forum.show', $postId),
+            ['post_id' => $postId, 'liker_name' => $likerName]
+        );
+    }
+
+    /**
+     * Notify user about a comment on their post.
+     */
+    public function notifyPostCommented(User $user, string $postId, string $commenterName, string $commentContent): AppNotification
+    {
+        return $this->create(
+            $user,
+            'forum_post_commented',
+            '💬 New comment on your post',
+            "{$commenterName} commented on your post: " . Str::limit($commentContent, 50),
+            route('forum.show', $postId),
+            ['post_id' => $postId, 'commenter_name' => $commenterName]
+        );
+    }
+
+    /**
+     * Notify user about a reply to their comment.
+     */
+    public function notifyCommentReplied(User $user, string $postId, string $replierName, string $replyContent): AppNotification
+    {
+        return $this->create(
+            $user,
+            'forum_comment_replied',
+            '💬 Reply to your comment',
+            "{$replierName} replied to your comment: " . Str::limit($replyContent, 50),
+            route('forum.show', $postId),
+            ['post_id' => $postId, 'replier_name' => $replierName]
+        );
+    }
+
+    /**
+     * Notify user about a like on their comment.
+     */
+    public function notifyCommentLiked(User $user, string $postId, string $likerName): AppNotification
+    {
+        return $this->create(
+            $user,
+            'forum_comment_liked',
+            '❤️ Your comment was liked',
+            "{$likerName} liked your comment",
+            route('forum.show', $postId),
+            ['post_id' => $postId, 'liker_name' => $likerName]
+        );
+    }
+
+    /**
+     * Notify user about a new follower.
+     */
+    public function notifyNewFollower(User $user, string $followerName): AppNotification
+    {
+        // Get follower user to get their username
+        $follower = User::where('name', $followerName)->first();
+        $followerUsername = $follower ? $follower->username : null;
+        
+        return $this->create(
+            $user,
+            'forum_new_follower',
+            '👤 New follower',
+            "{$followerName} started following you",
+            $followerUsername ? route('public.profile.show', $followerUsername) : null,
+            ['follower_name' => $followerName]
+        );
+    }
+
+    protected function sendForumEmailIfEnabled(User $user, string $type, string $title, string $message, ?string $link = null): void
+    {
+        if (!Str::startsWith($type, 'forum_')) {
+            return;
+        }
+
+        if (!$user->wantsForumEmail($type)) {
+            return;
+        }
+
+        if (empty($user->email)) {
+            return;
+        }
+
+        Mail::to($user->email)->queue(new ForumNotificationMail($title, $message, $link));
     }
 }
 

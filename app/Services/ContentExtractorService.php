@@ -6,12 +6,14 @@ use Smalot\PdfParser\Parser;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 use Exception;
 
 class ContentExtractorService
 {
     protected string $ollamaBaseUrl;
     protected string $ollamaModel;
+    protected int $cacheDuration = 86400; // 24 hours
 
     public function __construct()
     {
@@ -20,72 +22,84 @@ class ContentExtractorService
     }
 
     /**
-     * Extract text from PDF file
+     * Extract text from PDF file (with caching)
      */
     public function extractPdfText(string $filePath): ?array
     {
-        try {
-            $fullPath = Storage::disk('private')->path($filePath);
-            
-            if (!file_exists($fullPath)) {
-                return null;
-            }
-
-            $parser = new Parser();
-            $pdf = $parser->parseFile($fullPath);
-            
-            $text = $pdf->getText();
-            $details = $pdf->getDetails();
-            
-            return [
-                'text' => $text,
-                'pages' => $details['Pages'] ?? null,
-                'title' => $details['Title'] ?? null,
-                'author' => $details['Author'] ?? null,
-                'subject' => $details['Subject'] ?? null,
-                'metadata' => $details,
-            ];
-        } catch (Exception $e) {
-            Log::error('PDF extraction failed', [
-                'error' => $e->getMessage(),
-                'file_path' => $filePath,
-            ]);
+        // Create cache key based on file path and modification time
+        $fullPath = Storage::disk('private')->path($filePath);
+        
+        if (!file_exists($fullPath)) {
             return null;
         }
+
+        $fileMtime = filemtime($fullPath);
+        $cacheKey = 'pdf_extract_' . md5($filePath . '_' . $fileMtime);
+
+        return Cache::remember($cacheKey, $this->cacheDuration, function () use ($fullPath, $filePath) {
+            try {
+                $parser = new Parser();
+                $pdf = $parser->parseFile($fullPath);
+                
+                $text = $pdf->getText();
+                $details = $pdf->getDetails();
+                
+                return [
+                    'text' => $text,
+                    'pages' => $details['Pages'] ?? null,
+                    'title' => $details['Title'] ?? null,
+                    'author' => $details['Author'] ?? null,
+                    'subject' => $details['Subject'] ?? null,
+                    'metadata' => $details,
+                ];
+            } catch (Exception $e) {
+                Log::error('PDF extraction failed', [
+                    'error' => $e->getMessage(),
+                    'file_path' => $filePath,
+                ]);
+                return null;
+            }
+        });
     }
 
     /**
-     * Extract text from image using OCR (via Ollama vision model or Tesseract)
+     * Extract text from image using OCR (via Ollama vision model or Tesseract) with caching
      */
     public function extractImageText(string $filePath): ?array
     {
-        try {
-            $fullPath = Storage::disk('private')->path($filePath);
-            
-            if (!file_exists($fullPath)) {
-                return null;
-            }
-
-            // Try Ollama vision model first (if available)
-            $visionModel = config('services.ollama.vision_model', 'llava');
-            if ($this->isOllamaVisionModelAvailable($visionModel)) {
-                return $this->extractImageTextWithOllama($fullPath, $visionModel);
-            }
-
-            // Fallback: Try Tesseract OCR if available
-            if ($this->isTesseractAvailable()) {
-                return $this->extractImageTextWithTesseract($fullPath);
-            }
-
-            Log::warning('No OCR service available. Install Tesseract OCR or setup Ollama vision model.');
-            return null;
-        } catch (Exception $e) {
-            Log::error('Image OCR failed', [
-                'error' => $e->getMessage(),
-                'file_path' => $filePath,
-            ]);
+        $fullPath = Storage::disk('private')->path($filePath);
+        
+        if (!file_exists($fullPath)) {
             return null;
         }
+
+        // Create cache key based on file path and modification time
+        $fileMtime = filemtime($fullPath);
+        $cacheKey = 'ocr_extract_' . md5($filePath . '_' . $fileMtime);
+
+        return Cache::remember($cacheKey, $this->cacheDuration, function () use ($fullPath, $filePath) {
+            try {
+                // Try Ollama vision model first (if available)
+                $visionModel = config('services.ollama.vision_model', 'llava');
+                if ($this->isOllamaVisionModelAvailable($visionModel)) {
+                    return $this->extractImageTextWithOllama($fullPath, $visionModel);
+                }
+
+                // Fallback: Try Tesseract OCR if available
+                if ($this->isTesseractAvailable()) {
+                    return $this->extractImageTextWithTesseract($fullPath);
+                }
+
+                Log::warning('No OCR service available. Install Tesseract OCR or setup Ollama vision model.');
+                return null;
+            } catch (Exception $e) {
+                Log::error('Image OCR failed', [
+                    'error' => $e->getMessage(),
+                    'file_path' => $filePath,
+                ]);
+                return null;
+            }
+        });
     }
 
     /**
