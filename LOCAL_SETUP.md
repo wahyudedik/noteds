@@ -60,7 +60,13 @@ php artisan db:seed
 php artisan storage:link
 ```
 
-### 6. Frontend Assets
+### 6. Queue Worker (Email & Forum Notifications)
+```bash
+php artisan queue:work
+```
+> Jalankan di terminal terpisah selama development untuk memproses email notifikasi forum dan job background lainnya.
+
+### 7. Frontend Assets
 
 #### Using Herd - Recommended
 ```bash
@@ -88,7 +94,13 @@ php artisan serve
 
 Access: `http://localhost:8000`
 
-### 7. Development Tools
+### 8. Optional: Run Scheduler Locally
+```bash
+php artisan schedule:work
+```
+> Menjaga command terjadwal seperti `forum:publish-scheduled-posts` aktif selama pengembangan.
+
+### 9. Development Tools
 
 #### Laravel Telescope (Debugging)
 Access: `/telescope` (local only, admin only in production)
@@ -135,6 +147,11 @@ npm run build    # With Herd/Vite (production build)
 ### Subscription Auto-Renewal (Testing)
 ```bash
 php artisan subscriptions:renew
+```
+
+### Publish Scheduled Forum Posts (Testing)
+```bash
+php artisan forum:publish-scheduled-posts
 ```
 
 **Note:** This command is automatically scheduled to run daily at 00:00 WIB in production (see `routes/console.php`). In development, you can run it manually to test subscription renewal logic.

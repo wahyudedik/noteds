@@ -270,6 +270,16 @@ Menyiapkan aplikasi untuk rilis publik.
 - [x] Tag Suggestion Simulator ✅
 - [x] Price Benchmark Tool ✅
 
+### Forum System (Complete)
+- [x] Rich text posting dengan Quill (media upload, share notes)
+- [x] Full interaction: like, comment, nested replies, bookmark, share, pin, report
+- [x] Hashtags, mentions, search & trending feed (weighted score + cache)
+- [x] Post analytics dashboard (views, engagement charts, top posts)
+- [x] Post scheduling (future publish, badge, banner) + auto publish command
+- [x] Admin moderation panel (hide/unhide/delete/review reports)
+- [x] Email notifications (queued) dengan user preferences toggle
+- [x] Preferences UI (`/forum/preferences`) & navigation links
+
 ### Multi-Tier Content Protection
 - [x] Migration: `preview_content` (300 chars), `attachments` JSON, `file_count`
 - [x] Model: Attachments relationship, file storage
@@ -401,33 +411,17 @@ Menyiapkan aplikasi untuk rilis publik.
 
 ## 🎯 Next Priorities
 
-**Current Marketplace Platform:**
-1. ✅ AI Integration (Ollama) - Basic
-2. ✅ Referral System
-3. ✅ Notification System (SweetAlert2)
-4. ✅ Admin Manual Subscription Creation
-5. ✅ Admin Dashboard Analytics (Wallet, Referral, Notes, Revenue, Top Performers)
-6. ✅ Rich Text Editor (Quill) Integration
-7. ✅ Tag deletion bug fix
-8. ✅ Support Ticket System (Full implementation)
-9. ✅ Multi-Tier Content Protection (Complete - except optional virus scanning)
-10. ✅ Note History & Versioning System (Buyer history, Update history, Prevent delete)
-11. ✅ AI Chat untuk Seller Profile (Public feature - semua user bisa akses)
-12. ✅ Collections Enhancement (Add Purchased Notes)
-13. ✅ Resell Flow & One-Time Sale System (Original creator commission, Access control)
-14. ✅ Profile Features (Avatar upload, Share functionality, Open Graph tags)
-15. ✅ Buyer Analytics Dashboard (Purchase stats, Downloads, Completion rate)
-16. ⚠️ VPS Deployment
+**Immediate Focus**
+1. ✅ Marketplace, premium, AI, referral, support & forum ecosystems siap production
+2. 📦 Deployment readiness (VPS provisioning, queue workers, scheduler, Midtrans production switchover)
+3. 🧪 Final QA & Beta launch (end-to-end smoke tests, rollback plan, monitoring)
+4. 📝 Documentation & onboarding (VPS setup, local setup, tasklist kept in sync)
 
-**AI Memory Platform Plugin (Premium Feature):**
-1. ⚠️ Workspace System (Multi-user, Personal/Team/Organization)
-2. ⚠️ Semantic Search dengan Embeddings
-3. ⚠️ Natural Language Q&A ("Apa yang kubicarakan dengan Rina minggu lalu?")
-4. ⚠️ Context Linking antar Catatan
-5. ⚠️ Activity Timeline & History
-6. ⚠️ Auto Insights & Weekly Summaries
-7. ⚠️ Enhanced Folder & Tag System
-8. ⚠️ Separate Authentication/Role untuk AI Platform (optional, bisa terpisah dari marketplace)
+**AI Memory Platform Plugin (Roadmap)**
+1. ⚙️ Workspace upgrades (team/org roles, advanced permissions)
+2. 🧠 Enhanced semantic embeddings & knowledge graph
+3. 💬 Proactive insights (weekly digests, anomaly detection)
+4. 📅 Collaborative workflows (tasks, reminders, shared timelines)
 
 ---
 

@@ -122,6 +122,8 @@ MAIL_FROM_NAME="${APP_NAME}"
 # Can be configured via Admin Settings UI
 ```
 
+> Pastikan queue (`QUEUE_CONNECTION=database`) dan mailer sudah dikonfigurasi agar notifikasi forum & email berjalan lancar.
+
 ### 5. Midtrans Payment Gateway Setup
 
 Midtrans adalah payment gateway yang digunakan untuk memproses transaksi pembayaran (premium subscription, pembelian notes, dll).
@@ -429,6 +431,8 @@ sudo supervisorctl update
 sudo supervisorctl start noteds-worker:*
 ```
 
+> Queue workers memproses email notifikasi forum, job AI, serta tugas-tugas background lain. Pastikan service ini selalu aktif.
+
 ### 12. Scheduled Tasks (Cron)
 
 Edit crontab:
@@ -444,6 +448,7 @@ Add:
 **Note:** Laravel scheduler (`schedule:run`) will automatically run all scheduled tasks defined in `routes/console.php`, including:
 - Subscription auto-renewal (`subscriptions:renew`) - runs daily at 00:00 WIB
 - Featured notes expiry check (`featured:expire`) - runs daily at 01:00 WIB
+- Publish scheduled forum posts (`forum:publish-scheduled-posts`) - runs every minute
 
 #### Subscription Auto-Renewal Command
 
@@ -504,6 +509,28 @@ sudo -u www-data php artisan featured:expire
 - Featured notes are automatically hidden from display after expiry
 - Expired featured notes can be extended with a new payment request
 - Analytics data (impressions, clicks) are preserved after expiry
+
+#### Publish Scheduled Forum Posts
+
+The `php artisan forum:publish-scheduled-posts` command is scheduled to run every minute.
+
+**What it does:**
+- Checks forum posts with `is_published = false` and `scheduled_at <= now()`
+- Activates the post (sets `is_published=true`, clears `scheduled_at`, stamps `published_at`)
+- Ensures scheduled posts appear automatically without manual intervention
+
+**Manual execution (for testing):**
+```bash
+sudo -u www-data php artisan forum:publish-scheduled-posts
+```
+
+**Monitoring:**
+- Check Laravel logs: `tail -f storage/logs/laravel.log | grep publish-scheduled-posts`
+- Command output includes count of posts published
+
+**Important Notes:**
+- Requires queue/cron to run reliably (see steps 11 & 12)
+- Owners see scheduled indicators until publish time is reached
 
 ### 13. Ollama Setup (AI Features)
 
