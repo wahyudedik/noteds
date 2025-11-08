@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('ai_analyses')) {
+            return;
+        }
+
         Schema::table('ai_analyses', function (Blueprint $table) {
             // Add composite index for faster lookups
             $table->index(['user_id', 'note_id', 'analysis_type'], 'ai_analyses_user_note_type_idx');
@@ -28,6 +32,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('ai_analyses')) {
+            return;
+        }
+
         Schema::table('ai_analyses', function (Blueprint $table) {
             $table->dropIndex('ai_analyses_user_note_type_idx');
             $table->dropIndex('ai_analyses_note_id_idx');
