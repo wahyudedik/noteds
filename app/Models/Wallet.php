@@ -13,12 +13,14 @@ class Wallet extends Model
     protected $fillable = [
         'user_id',
         'balance',
+        'currency',
     ];
 
     protected function casts(): array
     {
         return [
             'balance' => 'decimal:2',
+            'currency' => 'string',
         ];
     }
 

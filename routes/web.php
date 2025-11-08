@@ -35,6 +35,8 @@ use App\Http\Controllers\NoteAttachmentController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\PostAnalyticsController;
 use App\Http\Controllers\ForumPreferenceController;
+use App\Http\Controllers\NoteConversationController;
+use App\Http\Controllers\NoteReviewReplyController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
@@ -93,6 +95,12 @@ Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purc
         Route::delete('/post/{post}', [\App\Http\Controllers\ForumController::class, 'destroy'])->name('destroy');
     });
 
+Route::middleware(['auth', 'username.setup'])->group(function () {
+    Route::get('/note-conversations', [NoteConversationController::class, 'index'])->name('note-conversations.index');
+    Route::get('/note-conversations/{conversation}', [NoteConversationController::class, 'show'])->name('note-conversations.show');
+    Route::post('/note-conversations/{conversation}', [NoteConversationController::class, 'store'])->name('note-conversations.store');
+});
+
     // Follow routes
     Route::middleware(['auth', 'username.setup'])->prefix('follow')->name('follow.')->group(function () {
         Route::post('/{user}', [\App\Http\Controllers\FollowController::class, 'follow'])->name('follow');
@@ -103,6 +111,8 @@ Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purc
 Route::post('/notes/{note}/reviews', [ReviewController::class, 'store'])->middleware(['auth', 'username.setup'])->name('reviews.store');
 Route::patch('/reviews/{review}', [ReviewController::class, 'update'])->middleware(['auth', 'username.setup'])->name('reviews.update');
 Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->middleware(['auth', 'username.setup'])->name('reviews.destroy');
+Route::post('/reviews/{review}/replies', [NoteReviewReplyController::class, 'store'])->middleware(['auth', 'username.setup'])->name('reviews.replies.store');
+Route::delete('/review-replies/{reply}', [NoteReviewReplyController::class, 'destroy'])->middleware(['auth', 'username.setup'])->name('reviews.replies.destroy');
 
 Route::get('/dashboard', function () {
     $user = auth()->user();

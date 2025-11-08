@@ -105,10 +105,10 @@
                                             <div class="mt-2 flex items-center gap-4 text-xs text-gray-500">
                                                 <a href="{{ route('public.profile.show', $view->note->user->username) }}" 
                                                    class="hover:text-blue-600 transition-colors duration-200">
-                                                    by {{ $view->note->user->name }}
+                                                    {{ __('messages.by_label') }} {{ $view->note->user->name }}
                                                 </a>
                                                 <span>•</span>
-                                                <span>Viewed {{ $view->viewed_at->diffForHumans() }}</span>
+                                                <span>{{ __('messages.viewed_time_ago', ['time' => $view->viewed_at->diffForHumans()]) }}</span>
                                                 @if($view->note->price > 0)
                                                     <span>•</span>
                                                     <span class="font-semibold text-green-600">
@@ -116,14 +116,14 @@
                                                     </span>
                                                 @else
                                                     <span>•</span>
-                                                    <span class="font-semibold text-gray-600">FREE</span>
+                                                    <span class="font-semibold text-gray-600">{{ __('messages.free') }}</span>
                                                 @endif
                                             </div>
                                         </div>
                                         <div class="flex-shrink-0">
                                             <a href="{{ route('marketplace.show', $view->note) }}" 
                                                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200">
-                                                View Note
+                                                {{ __('messages.view_note') }}
                                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                                 </svg>

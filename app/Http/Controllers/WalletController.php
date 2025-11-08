@@ -9,13 +9,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use App\Services\CurrencyService;
+use App\Services\NotificationService;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Transaction as MidtransTransaction;
 
 class WalletController extends Controller
 {
-    public function __construct()
+    public function __construct(
+        private NotificationService $notificationService,
+        private CurrencyService $currencyService
+    )
     {
         Config::$serverKey = config('services.midtrans.server_key');
         Config::$isProduction = config('services.midtrans.is_production', false);
@@ -30,8 +35,15 @@ class WalletController extends Controller
         // Ensure wallet exists
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $user->id],
-            ['balance' => 0]
+            [
+                'balance' => 0,
+                'currency' => $this->currencyService->getBaseCurrency(),
+            ]
         );
+        if ($wallet->currency !== $this->currencyService->getBaseCurrency()) {
+            $wallet->currency = $this->currencyService->getBaseCurrency();
+            $wallet->save();
+        }
 
         // Update user wallet_balance for backward compatibility
         $user->wallet_balance = $wallet->balance;
@@ -48,12 +60,33 @@ class WalletController extends Controller
 
     public function topup(Request $request): RedirectResponse
     {
+        $user = auth()->user();
+        $userCurrency = $this->currencyService->getUserCurrency($user);
+        $baseCurrency = $this->currencyService->getBaseCurrency();
+
         $request->validate([
-            'amount' => ['required', 'numeric', 'min:10000', 'max:100000000'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
         ]);
 
-        $user = auth()->user();
-        $amount = (float) $request->amount;
+        $inputAmount = (float) $request->amount;
+        $amount = $this->currencyService->convert($inputAmount, $userCurrency, $baseCurrency);
+
+        $minimumBaseTopup = 10000; // in base currency (IDR)
+        $maximumBaseTopup = 100000000;
+
+        if ($amount < $minimumBaseTopup) {
+            $minDisplay = currency($minimumBaseTopup, $userCurrency, $baseCurrency);
+            return redirect()->route('wallet.index')
+                ->with('error', __('messages.minimum_topup_amount', ['amount' => $minDisplay]));
+        }
+
+        if ($amount > $maximumBaseTopup) {
+            $maxDisplay = currency($maximumBaseTopup, $userCurrency, $baseCurrency);
+            return redirect()->route('wallet.index')
+                ->with('error', __('messages.maximum_topup_amount', ['amount' => $maxDisplay]));
+        }
+
+        $exchangeRate = $amount > 0 ? $amount / max($inputAmount, 0.00001) : null;
 
         // Check if Midtrans is configured
         if (empty(config('services.midtrans.server_key')) || empty(config('services.midtrans.client_key'))) {
@@ -63,8 +96,15 @@ class WalletController extends Controller
 
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $user->id],
-            ['balance' => 0]
+            [
+                'balance' => 0,
+                'currency' => $baseCurrency,
+            ]
         );
+        if ($wallet->currency !== $baseCurrency) {
+            $wallet->currency = $baseCurrency;
+            $wallet->save();
+        }
 
         // Create transaction record for top-up
         $transaction = Transaction::create([
@@ -73,6 +113,10 @@ class WalletController extends Controller
             'note_id' => null,
             'amount' => $amount,
             'commission' => 0,
+             'currency' => $baseCurrency,
+             'original_amount' => $inputAmount,
+             'original_currency' => $userCurrency,
+             'exchange_rate' => $exchangeRate,
             'status' => 'pending',
             'payment_method' => 'topup',
             'notes' => 'Top-up saldo wallet',
@@ -237,6 +281,9 @@ class WalletController extends Controller
 
     protected function handleTopupWebhook($transaction, $status, $fraudStatus, $grossAmount): void
     {
+        $successContext = null;
+        $failureContext = null;
+
         if ($status === 'settlement' || $status === 'capture') {
             if ($fraudStatus === 'accept') {
                 // Verify amount matches
@@ -249,7 +296,7 @@ class WalletController extends Controller
                     // Still process but log the mismatch
                 }
 
-                DB::transaction(function () use ($transaction, $grossAmount) {
+                DB::transaction(function () use ($transaction, $grossAmount, &$successContext) {
                     // Double-check transaction status to prevent duplicate processing
                     $transaction->refresh();
                     if ($transaction->status === 'success') {
@@ -260,10 +307,14 @@ class WalletController extends Controller
                     $transaction->status = 'success';
                     $transaction->save();
 
+                    $baseCurrency = $this->currencyService->getBaseCurrency();
                     $wallet = Wallet::firstOrCreate(
                         ['user_id' => $transaction->buyer_id],
-                        ['balance' => 0]
+                        ['balance' => 0, 'currency' => $baseCurrency]
                     );
+                    if ($wallet->currency !== $baseCurrency) {
+                        $wallet->currency = $baseCurrency;
+                    }
 
                     $wallet->balance += $grossAmount;
                     $wallet->save();
@@ -279,6 +330,12 @@ class WalletController extends Controller
                         'amount' => $grossAmount,
                         'new_balance' => $wallet->balance,
                     ]);
+
+                    $successContext = [
+                        'user' => $user,
+                        'amount' => (float) $grossAmount,
+                        'balance' => (float) $wallet->balance,
+                    ];
                 });
             } elseif ($fraudStatus === 'challenge') {
                 // Challenge status - payment is being reviewed
@@ -287,15 +344,41 @@ class WalletController extends Controller
                 Log::info('Transaction under challenge review', ['transaction_id' => $transaction->id]);
             }
         } elseif ($status === 'deny' || $status === 'expire' || $status === 'cancel') {
+            $originalStatus = $transaction->status;
             $transaction->status = 'failed';
             $transaction->save();
             Log::info('Transaction failed', [
                 'transaction_id' => $transaction->id,
                 'status' => $status,
             ]);
+            if ($originalStatus !== 'failed') {
+                $failureContext = [
+                    'user' => $transaction->buyer,
+                    'amount' => (float) $transaction->amount,
+                    'status' => $status,
+                ];
+            }
         } elseif ($status === 'pending') {
             $transaction->status = 'pending';
             $transaction->save();
+        }
+
+        if ($successContext) {
+            $this->notificationService->notifyTopupSuccess(
+                $successContext['user'],
+                $successContext['amount'],
+                $successContext['balance'],
+                $transaction->id
+            );
+        }
+
+        if ($failureContext && $failureContext['user']) {
+            $this->notificationService->notifyTopupFailed(
+                $failureContext['user'],
+                $failureContext['amount'],
+                $failureContext['status'],
+                $transaction->id
+            );
         }
     }
 
@@ -334,6 +417,9 @@ class WalletController extends Controller
             $fraudStatus = $midtransStatus->fraud_status ?? null;
             $grossAmount = $midtransStatus->gross_amount ?? null;
 
+            $successContext = null;
+            $failureContext = null;
+
             Log::info('Payment Finish - Checking Midtrans Status:', [
                 'order_id' => $orderId,
                 'transaction_status' => $transactionStatus,
@@ -351,7 +437,7 @@ class WalletController extends Controller
             if (in_array($transactionStatus, ['settlement', 'capture']) && $fraudStatus === 'accept') {
                 // Process top-up if this is a top-up transaction
                 if ($transaction->payment_method === 'topup') {
-                    DB::transaction(function () use ($transaction, $grossAmount) {
+                    DB::transaction(function () use ($transaction, $grossAmount, &$successContext) {
                         // Double-check to prevent duplicate processing
                         $transaction->refresh();
                         if ($transaction->status === 'success') {
@@ -362,10 +448,14 @@ class WalletController extends Controller
                         $transaction->status = 'success';
                         $transaction->save();
 
+                        $baseCurrency = $this->currencyService->getBaseCurrency();
                         $wallet = Wallet::firstOrCreate(
                             ['user_id' => $transaction->buyer_id],
-                            ['balance' => 0]
+                            ['balance' => 0, 'currency' => $baseCurrency]
                         );
+                        if ($wallet->currency !== $baseCurrency) {
+                            $wallet->currency = $baseCurrency;
+                        }
 
                         $wallet->balance += $grossAmount ?? $transaction->amount;
                         $wallet->save();
@@ -381,7 +471,22 @@ class WalletController extends Controller
                             'amount' => $grossAmount ?? $transaction->amount,
                             'new_balance' => $wallet->balance,
                         ]);
+
+                        $successContext = [
+                            'user' => $user,
+                            'amount' => (float) ($grossAmount ?? $transaction->amount),
+                            'balance' => (float) $wallet->balance,
+                        ];
                     });
+
+                    if ($successContext) {
+                    $this->notificationService->notifyTopupSuccess(
+                            $successContext['user'],
+                            $successContext['amount'],
+                            $successContext['balance'],
+                            $transaction->id
+                        );
+                    }
 
                     return redirect()->route('wallet.index')
                         ->with('success', 'Pembayaran berhasil! Saldo wallet telah diperbarui.');
@@ -403,7 +508,7 @@ class WalletController extends Controller
                     
                     // Process as success for sandbox Credit Card
                     if ($transaction->payment_method === 'topup') {
-                        DB::transaction(function () use ($transaction, $grossAmount) {
+                        DB::transaction(function () use ($transaction, $grossAmount, &$successContext) {
                             $transaction->refresh();
                             if ($transaction->status === 'success') {
                                 return;
@@ -412,10 +517,14 @@ class WalletController extends Controller
                             $transaction->status = 'success';
                             $transaction->save();
 
-                            $wallet = Wallet::firstOrCreate(
-                                ['user_id' => $transaction->buyer_id],
-                                ['balance' => 0]
-                            );
+                        $baseCurrency = $this->currencyService->getBaseCurrency();
+                        $wallet = Wallet::firstOrCreate(
+                            ['user_id' => $transaction->buyer_id],
+                            ['balance' => 0, 'currency' => $baseCurrency]
+                        );
+                        if ($wallet->currency !== $baseCurrency) {
+                            $wallet->currency = $baseCurrency;
+                        }
 
                             $wallet->balance += $grossAmount ?? $transaction->amount;
                             $wallet->save();
@@ -430,7 +539,22 @@ class WalletController extends Controller
                                 'amount' => $grossAmount ?? $transaction->amount,
                                 'new_balance' => $wallet->balance,
                             ]);
+
+                            $successContext = [
+                                'user' => $user,
+                                'amount' => (float) ($grossAmount ?? $transaction->amount),
+                                'balance' => (float) $wallet->balance,
+                            ];
                         });
+
+                        if ($successContext) {
+                            $this->notificationService->notifyTopupSuccess(
+                                $successContext['user'],
+                                $successContext['amount'],
+                                $successContext['balance'],
+                                $transaction->id
+                            );
+                        }
 
                         return redirect()->route('wallet.index')
                             ->with('success', 'Pembayaran berhasil! Saldo wallet telah diperbarui.');
@@ -451,8 +575,23 @@ class WalletController extends Controller
                 if ($transaction->status !== 'failed') {
                     $transaction->status = 'failed';
                     $transaction->save();
+
+                    $failureContext = [
+                        'user' => $transaction->buyer,
+                        'amount' => (float) $transaction->amount,
+                        'status' => $transactionStatus,
+                    ];
                 }
                 
+                if ($failureContext && $failureContext['user']) {
+                    $this->notificationService->notifyTopupFailed(
+                        $failureContext['user'],
+                        $failureContext['amount'],
+                        $failureContext['status'],
+                        $transaction->id
+                    );
+                }
+
                 return redirect()->route('wallet.index')
                     ->with('error', 'Pembayaran gagal atau dibatalkan. Silakan coba lagi.');
             } elseif ($fraudStatus === 'challenge') {
@@ -520,6 +659,15 @@ class WalletController extends Controller
                 if ($transaction->status === 'pending') {
                     $transaction->status = 'failed';
                     $transaction->save();
+
+                    if ($transaction->buyer) {
+                        $this->notificationService->notifyTopupFailed(
+                            $transaction->buyer,
+                            (float) $transaction->amount,
+                            $transactionStatus ?? 'error',
+                            $transaction->id
+                        );
+                    }
                 }
             }
         }

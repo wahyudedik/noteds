@@ -25,34 +25,34 @@
         @if(isset($analytics))
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
-                    <div class="text-sm font-medium text-gray-600 mb-1">Total Impressions</div>
+                    <div class="text-sm font-medium text-gray-600 mb-1">{{ __('featured.analytics_total_impressions') }}</div>
                     <div class="text-3xl font-bold text-blue-600">{{ number_format($analytics['total_impressions'], 0, ',', '.') }}</div>
                 </div>
                 <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
-                    <div class="text-sm font-medium text-gray-600 mb-1">Total Clicks</div>
+                    <div class="text-sm font-medium text-gray-600 mb-1">{{ __('featured.analytics_total_clicks') }}</div>
                     <div class="text-3xl font-bold text-green-600">{{ number_format($analytics['total_clicks'], 0, ',', '.') }}</div>
                 </div>
                 <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
-                    <div class="text-sm font-medium text-gray-600 mb-1">Average CTR</div>
+                    <div class="text-sm font-medium text-gray-600 mb-1">{{ __('featured.analytics_average_ctr') }}</div>
                     <div class="text-3xl font-bold text-purple-600">{{ $analytics['avg_ctr'] }}%</div>
                 </div>
                 <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
-                    <div class="text-sm font-medium text-gray-600 mb-1">Total Spent</div>
-                    <div class="text-3xl font-bold text-red-600">Rp {{ number_format($analytics['total_spent'], 0, ',', '.') }}</div>
+                    <div class="text-sm font-medium text-gray-600 mb-1">{{ __('featured.analytics_total_spent') }}</div>
+                    <div class="text-3xl font-bold text-red-600">{{ currency($analytics['total_spent']) }}</div>
                 </div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
-                    <div class="text-sm font-medium text-gray-600 mb-1">Active Featured</div>
+                    <div class="text-sm font-medium text-gray-600 mb-1">{{ __('featured.analytics_active_count') }}</div>
                     <div class="text-2xl font-bold text-orange-600">{{ $analytics['active_count'] }}</div>
                 </div>
                 <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
-                    <div class="text-sm font-medium text-gray-600 mb-1">Revenue from Featured</div>
-                    <div class="text-2xl font-bold text-green-600">Rp {{ number_format($analytics['revenue_from_featured'], 0, ',', '.') }}</div>
+                    <div class="text-sm font-medium text-gray-600 mb-1">{{ __('featured.analytics_revenue') }}</div>
+                    <div class="text-2xl font-bold text-green-600">{{ currency($analytics['revenue_from_featured']) }}</div>
                 </div>
                 <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
-                    <div class="text-sm font-medium text-gray-600 mb-1">ROI</div>
+                    <div class="text-sm font-medium text-gray-600 mb-1">{{ __('featured.analytics_roi') }}</div>
                     <div class="text-2xl font-bold {{ $analytics['roi'] >= 100 ? 'text-green-600' : ($analytics['roi'] > 0 ? 'text-yellow-600' : 'text-red-600') }}">
                         {{ $analytics['roi'] }}%
                     </div>
@@ -65,13 +65,13 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Note</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lokasi</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Durasi</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Harga</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Analytics</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('featured.table_note') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('featured.table_location') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('featured.table_duration') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('featured.table_price') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('featured.table_status') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('featured.table_analytics') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('featured.table_date') }}</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -83,32 +83,32 @@
                                     </a>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ ucfirst(str_replace('_', ' ', $featured->location)) }}
+                                    {{ __('featured.locations.' . $featured->location) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $featured->duration_days }} hari
+                                    {{ __('messages.day_count', ['count' => $featured->duration_days]) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    Rp {{ number_format($featured->price, 0, ',', '.') }}
+                                    {{ currency($featured->price) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($featured->status === 'pending')
-                                        <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">Pending</span>
+                                        <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">{{ __('featured.status_pending') }}</span>
                                     @elseif($featured->status === 'active')
-                                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Active</span>
+                                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">{{ __('featured.status_active') }}</span>
                                     @elseif($featured->status === 'expired')
-                                        <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">Expired</span>
+                                        <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">{{ __('featured.status_expired') }}</span>
                                     @else
-                                        <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Cancelled</span>
+                                        <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">{{ __('featured.status_cancelled') }}</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                     @if($featured->status === 'active' || $featured->status === 'expired')
                                         <div class="space-y-1">
-                                            <div>👁️ {{ number_format($featured->impressions, 0, ',', '.') }}</div>
-                                            <div>👆 {{ number_format($featured->clicks, 0, ',', '.') }}</div>
+                                        <div>👁️ {{ __('featured.impressions_label') }}: {{ number_format($featured->impressions, 0, ',', '.') }}</div>
+                                        <div>👆 {{ __('featured.clicks_label') }}: {{ number_format($featured->clicks, 0, ',', '.') }}</div>
                                             @if($featured->impressions > 0)
-                                                <div class="text-xs text-gray-500">CTR: {{ number_format(($featured->clicks / $featured->impressions) * 100, 2) }}%</div>
+                                                <div class="text-xs text-gray-500">{{ __('featured.ctr_label') }}: {{ number_format(($featured->clicks / $featured->impressions) * 100, 2) }}%</div>
                                             @endif
                                         </div>
                                     @else
@@ -129,9 +129,9 @@
             </div>
         @else
             <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-12 text-center">
-                <p class="text-gray-500 mb-4">Anda belum memiliki featured note request.</p>
+                <p class="text-gray-500 mb-4">{{ __('featured.no_featured_notes_message') }}</p>
                 <a href="{{ route('featured-notes.create') }}" class="inline-flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">
-                    Request Featured Note
+                    {{ __('featured.request_cta') }}
                 </a>
             </div>
         @endif

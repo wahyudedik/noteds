@@ -26,9 +26,10 @@
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <div class="text-sm font-medium text-gray-500">{{ __('messages.platform_revenue') }}</div>
-                    <div class="text-2xl font-bold text-green-600">Rp
-                        {{ number_format($stats['total_revenue'], 0, ',', '.') }}</div>
-                    <div class="text-xs text-gray-600 mt-1">{{ __('messages.balance') }}: Rp {{ number_format($platformBalance, 0, ',', '.') }}
+                    <div class="text-2xl font-bold text-green-600">
+                        {{ currency($stats['total_revenue']) }}</div>
+                    <div class="text-xs text-gray-600 mt-1">{{ __('messages.balance') }}:
+                        {{ currency($platformBalance) }}
                     </div>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
@@ -158,23 +159,23 @@
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
                     <div class="bg-blue-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-blue-600 uppercase">{{ __('messages.total_balance') }}</div>
-                        <div class="text-xl font-bold text-blue-900">Rp
-                            {{ number_format($walletStats['total_wallet_balance'], 0, ',', '.') }}</div>
+                        <div class="text-xl font-bold text-blue-900">
+                            {{ currency($walletStats['total_wallet_balance']) }}</div>
                     </div>
                     <div class="bg-green-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-green-600 uppercase">{{ __('messages.avg_balance') }}</div>
-                        <div class="text-xl font-bold text-green-900">Rp
-                            {{ number_format($walletStats['avg_wallet_balance'], 0, ',', '.') }}</div>
+                        <div class="text-xl font-bold text-green-900">
+                            {{ currency($walletStats['avg_wallet_balance']) }}</div>
                     </div>
                     <div class="bg-purple-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-purple-600 uppercase">{{ __('messages.total_transactions') }}</div>
-                        <div class="text-xl font-bold text-purple-900">Rp
-                            {{ number_format($walletStats['total_successful_transactions'], 0, ',', '.') }}</div>
+                        <div class="text-xl font-bold text-purple-900">
+                            {{ currency($walletStats['total_successful_transactions']) }}</div>
                     </div>
                     <div class="bg-red-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-red-600 uppercase">{{ __('messages.total_withdrawals') }}</div>
-                        <div class="text-xl font-bold text-red-900">Rp
-                            {{ number_format($walletStats['total_withdrawals'], 0, ',', '.') }}</div>
+                        <div class="text-xl font-bold text-red-900">
+                            {{ currency($walletStats['total_withdrawals']) }}</div>
                     </div>
                     <div class="bg-yellow-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-yellow-600 uppercase">{{ __('messages.total_wallets') }}</div>
@@ -206,8 +207,8 @@
                                         <td class="px-4 py-2 text-sm font-medium text-gray-500">#{{ $index + 1 }}</td>
                                         <td class="px-4 py-2 text-sm text-gray-900">{{ $user->name }}</td>
                                         <td class="px-4 py-2 text-sm text-gray-500">{{ $user->email }}</td>
-                                        <td class="px-4 py-2 text-sm font-bold text-right text-green-600">Rp
-                                            {{ number_format($user->wallet_balance, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-2 text-sm font-bold text-right text-green-600">
+                                            {{ currency($user->wallet_balance) }}</td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -236,18 +237,18 @@
                     </div>
                     <div class="bg-blue-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-blue-600 uppercase">{{ __('messages.signup_rewards') }}</div>
-                        <div class="text-xl font-bold text-blue-900">Rp
-                            {{ number_format($referralStats['total_signup_rewards'], 0, ',', '.') }}</div>
+                        <div class="text-xl font-bold text-blue-900">
+                            {{ currency($referralStats['total_signup_rewards']) }}</div>
                     </div>
                     <div class="bg-green-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-green-600 uppercase">{{ __('messages.transaction_commissions') }}</div>
-                        <div class="text-xl font-bold text-green-900">Rp
-                            {{ number_format($referralStats['total_transaction_commission'], 0, ',', '.') }}</div>
+                        <div class="text-xl font-bold text-green-900">
+                            {{ currency($referralStats['total_transaction_commission']) }}</div>
                     </div>
                     <div class="bg-yellow-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-yellow-600 uppercase">{{ __('messages.total_payout') }}</div>
-                        <div class="text-xl font-bold text-yellow-900">Rp
-                            {{ number_format($referralStats['total_referral_payout'], 0, ',', '.') }}</div>
+                        <div class="text-xl font-bold text-yellow-900">
+                            {{ currency($referralStats['total_referral_payout']) }}</div>
                     </div>
                 </div>
 
@@ -277,13 +278,11 @@
                                         <td class="px-4 py-2 text-sm text-gray-900">{{ $refData['user']->name }}</td>
                                         <td class="px-4 py-2 text-sm text-center">{{ $refData['total_referrals'] }}</td>
                                         <td class="px-4 py-2 text-sm text-center text-blue-600">
-                                            {{ $refData['signup_count'] }} (Rp
-                                            {{ number_format($refData['signup_total'], 0, ',', '.') }})</td>
+                                            {{ $refData['signup_count'] }} ({{ currency($refData['signup_total']) }})</td>
                                         <td class="px-4 py-2 text-sm text-center text-green-600">
-                                            {{ $refData['transaction_count'] }} (Rp
-                                            {{ number_format($refData['transaction_total'], 0, ',', '.') }})</td>
-                                        <td class="px-4 py-2 text-sm font-bold text-right text-purple-600">Rp
-                                            {{ number_format($refData['total_commission'], 0, ',', '.') }}</td>
+                                            {{ $refData['transaction_count'] }} ({{ currency($refData['transaction_total']) }})</td>
+                                        <td class="px-4 py-2 text-sm font-bold text-right text-purple-600">
+                                            {{ currency($refData['total_commission']) }}</td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -323,15 +322,13 @@
                                                 class="text-xs text-gray-500">{{ $refDetail['user']->email }}</span></td>
                                         <td class="px-4 py-2 text-sm text-center">{{ $refDetail['total_signups'] }}</td>
                                         <td class="px-4 py-2 text-sm text-center text-blue-600">
-                                            {{ $refDetail['signup_count'] }} × Rp
-                                            {{ number_format($refDetail['signup_total'], 0, ',', '.') }}</td>
+                                            {{ $refDetail['signup_count'] }} × {{ currency($refDetail['signup_total']) }}</td>
                                         <td class="px-4 py-2 text-sm text-center text-purple-600">
                                             {{ $refDetail['referred_buyers_count'] }}</td>
                                         <td class="px-4 py-2 text-sm text-center text-green-600">
-                                            {{ $refDetail['transaction_count'] }} × Rp
-                                            {{ number_format($refDetail['transaction_total'], 0, ',', '.') }}</td>
-                                        <td class="px-4 py-2 text-sm font-bold text-right text-purple-900">Rp
-                                            {{ number_format($refDetail['total_commission'], 0, ',', '.') }}</td>
+                                            {{ $refDetail['transaction_count'] }} × {{ currency($refDetail['transaction_total']) }}</td>
+                                        <td class="px-4 py-2 text-sm font-bold text-right text-purple-900">
+                                            {{ currency($refDetail['total_commission']) }}</td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -489,10 +486,10 @@
                                 <tr>
                                     <td class="px-4 py-2 text-sm text-gray-900">
                                         {{ \Carbon\Carbon::parse($day->date)->format('d M Y') }}</td>
-                                    <td class="px-4 py-2 text-sm font-medium text-right">Rp
-                                        {{ number_format($day->total_amount, 0, ',', '.') }}</td>
-                                    <td class="px-4 py-2 text-sm font-bold text-right text-green-600">Rp
-                                        {{ number_format($day->total_commission, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-2 text-sm font-medium text-right">
+                                        {{ currency($day->total_amount) }}</td>
+                                    <td class="px-4 py-2 text-sm font-bold text-right text-green-600">
+                                        {{ currency($day->total_commission) }}</td>
                                     <td class="px-4 py-2 text-sm text-center text-blue-600">{{ $day->transaction_count }}
                                     </td>
                                 </tr>
@@ -537,8 +534,8 @@
                                         <td class="px-4 py-2 text-sm text-gray-900">{{ $seller['user']->name }}</td>
                                         <td class="px-4 py-2 text-sm text-center text-blue-600">
                                             {{ $seller['sales_count'] }}</td>
-                                        <td class="px-4 py-2 text-sm font-bold text-right text-green-600">Rp
-                                            {{ number_format($seller['total_sales'], 0, ',', '.') }}</td>
+                                        <td class="px-4 py-2 text-sm font-bold text-right text-green-600">
+                                            {{ currency($seller['total_sales']) }}</td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -579,8 +576,8 @@
                                         <td class="px-4 py-2 text-sm text-gray-900">{{ $buyer['user']->name }}</td>
                                         <td class="px-4 py-2 text-sm text-center text-purple-600">
                                             {{ $buyer['purchase_count'] }}</td>
-                                        <td class="px-4 py-2 text-sm font-bold text-right text-red-600">Rp
-                                            {{ number_format($buyer['total_spent'], 0, ',', '.') }}</td>
+                                        <td class="px-4 py-2 text-sm font-bold text-right text-red-600">
+                                            {{ currency($buyer['total_spent']) }}</td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -645,7 +642,7 @@
                         <div class="bg-green-50 p-4 rounded-lg">
                             <div class="text-sm font-medium text-gray-600">{{ __('messages.total_topup_amount') }}</div>
                             <div class="text-2xl font-bold text-green-600">
-                                Rp {{ number_format($topupStats['total_topup_amount'], 0, ',', '.') }}
+                                {{ currency($topupStats['total_topup_amount']) }}
                             </div>
                             <div class="text-xs text-gray-500 mt-1">
                                 {{ __('messages.all_time') }}
@@ -654,13 +651,13 @@
                         <div class="bg-yellow-50 p-4 rounded-lg">
                             <div class="text-sm font-medium text-gray-600">{{ __('messages.today') }}</div>
                             <div class="text-xl font-bold text-yellow-600">
-                                Rp {{ number_format($topupStats['total_topup_today'], 0, ',', '.') }}
+                                {{ currency($topupStats['total_topup_today']) }}
                             </div>
                         </div>
                         <div class="bg-purple-50 p-4 rounded-lg">
                             <div class="text-sm font-medium text-gray-600">{{ __('messages.this_month') }}</div>
                             <div class="text-xl font-bold text-purple-600">
-                                Rp {{ number_format($topupStats['total_topup_this_month'], 0, ',', '.') }}
+                                {{ currency($topupStats['total_topup_this_month']) }}
                             </div>
                         </div>
                     </div>
@@ -688,7 +685,7 @@
                         <div class="bg-green-50 p-4 rounded-lg">
                             <div class="text-sm font-medium text-gray-600">{{ __('messages.total_midtrans_amount') }}</div>
                             <div class="text-2xl font-bold text-green-600">
-                                Rp {{ number_format($midtransStats['total_midtrans_amount'], 0, ',', '.') }}
+                                {{ currency($midtransStats['total_midtrans_amount']) }}
                             </div>
                             <div class="text-xs text-gray-500 mt-1">
                                 {{ __('messages.all_time') }}
@@ -697,20 +694,20 @@
                         <div class="bg-yellow-50 p-4 rounded-lg">
                             <div class="text-sm font-medium text-gray-600">{{ __('messages.today') }}</div>
                             <div class="text-xl font-bold text-yellow-600">
-                                Rp {{ number_format($midtransStats['total_midtrans_today'], 0, ',', '.') }}
+                                {{ currency($midtransStats['total_midtrans_today']) }}
                             </div>
                         </div>
                         <div class="bg-purple-50 p-4 rounded-lg">
                             <div class="text-sm font-medium text-gray-600">{{ __('messages.this_month') }}</div>
                             <div class="text-xl font-bold text-purple-600">
-                                Rp {{ number_format($midtransStats['total_midtrans_this_month'], 0, ',', '.') }}
+                                {{ currency($midtransStats['total_midtrans_this_month']) }}
                             </div>
                         </div>
                     </div>
                     <div class="bg-blue-50 p-4 rounded-lg">
                         <div class="text-sm font-medium text-gray-600">{{ __('messages.total_commission') }}</div>
                         <div class="text-xl font-bold text-blue-600">
-                            Rp {{ number_format($midtransStats['total_midtrans_commission'], 0, ',', '.') }}
+                            {{ currency($midtransStats['total_midtrans_commission']) }}
                         </div>
                         <div class="text-xs text-gray-500 mt-1">
                             {{ __('messages.from_midtrans_transactions') }}
@@ -748,7 +745,7 @@
                                             {{ $topup->midtrans_order_id ?? '-' }}
                                         </td>
                                         <td class="px-4 py-3 text-sm font-medium text-green-600">
-                                            Rp {{ number_format($topup->amount, 0, ',', '.') }}
+                                            {{ currency($topup->amount) }}
                                         </td>
                                         <td class="px-4 py-3 text-sm">
                                             @if ($topup->status === 'success')
@@ -793,10 +790,10 @@
                                             {{ $transaction->created_at->format('d M Y, H:i') }}</td>
                                         <td class="px-4 py-3 text-sm text-gray-900">{{ $transaction->buyer->name }}</td>
                                         <td class="px-4 py-3 text-sm text-gray-900">{{ $transaction->seller->name }}</td>
-                                        <td class="px-4 py-3 text-sm font-medium">Rp
-                                            {{ number_format($transaction->amount, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 text-sm text-green-600">Rp
-                                            {{ number_format($transaction->commission, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 text-sm font-medium">
+                                            {{ currency($transaction->amount, null, $transaction->currency ?? config('currency.base_currency')) }}</td>
+                                        <td class="px-4 py-3 text-sm text-green-600">
+                                            {{ currency($transaction->commission, null, $transaction->currency ?? config('currency.base_currency')) }}</td>
                                         <td class="px-4 py-3 text-sm">
                                             @if ($transaction->status === 'success')
                                                 <span
@@ -845,8 +842,8 @@
                                         <td class="px-4 py-3 text-sm text-gray-500">
                                             {{ $withdraw->created_at->format('d M Y, H:i') }}</td>
                                         <td class="px-4 py-3 text-sm text-gray-900">{{ $withdraw->user->name }}</td>
-                                        <td class="px-4 py-3 text-sm font-medium">Rp
-                                            {{ number_format($withdraw->amount, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 text-sm font-medium">
+                                            {{ currency($withdraw->amount) }}</td>
                                         <td class="px-4 py-3 text-sm text-gray-500">{{ $withdraw->bank_name }}</td>
                                         <td class="px-4 py-3 text-sm">
                                             @if ($withdraw->status === 'approved')

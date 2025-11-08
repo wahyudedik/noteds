@@ -10,9 +10,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use App\Services\NotificationService;
 
 class WithdrawController extends Controller
 {
+    public function __construct(private NotificationService $notificationService)
+    {
+    }
+
     public function index(Request $request): View
     {
         $withdraws = Withdraw::with(['user', 'processedBy'])
@@ -52,6 +57,8 @@ class WithdrawController extends Controller
                 ->with('error', 'Withdraw harus menunggu minimal 24 jam sebelum dapat disetujui. Sisa waktu: ' . (24 - $hoursSinceRequest) . ' jam.');
         }
 
+        $remainingBalance = null;
+
         try {
             DB::beginTransaction();
 
@@ -61,12 +68,17 @@ class WithdrawController extends Controller
             $withdraw->processed_at = now();
             $withdraw->save();
 
+            $baseCurrency = config('currency.base_currency', 'IDR');
+
             // If approved, deduct from wallet
             if ($request->status === 'approved') {
                 $wallet = Wallet::firstOrCreate(
                     ['user_id' => $withdraw->user_id],
-                    ['balance' => 0]
+                    ['balance' => 0, 'currency' => $baseCurrency]
                 );
+                if ($wallet->currency !== $baseCurrency) {
+                    $wallet->currency = $baseCurrency;
+                }
                 
                 // Sync wallet balance with user wallet_balance before checking
                 $user = $withdraw->user;
@@ -87,6 +99,8 @@ class WithdrawController extends Controller
                 $user->wallet_balance = $wallet->balance;
                 $user->save();
 
+                $remainingBalance = (float) $wallet->balance;
+
                 // Create transaction record for withdraw
                 Transaction::create([
                     'buyer_id' => $withdraw->user_id,
@@ -94,6 +108,10 @@ class WithdrawController extends Controller
                     'note_id' => null,
                     'amount' => $withdraw->amount,
                     'commission' => 0,
+                    'currency' => $baseCurrency,
+                    'original_amount' => $withdraw->amount,
+                    'original_currency' => $baseCurrency,
+                    'exchange_rate' => 1,
                     'status' => 'success',
                     'payment_method' => 'withdraw',
                     'notes' => 'Withdraw saldo: ' . $withdraw->amount,
@@ -103,6 +121,18 @@ class WithdrawController extends Controller
             DB::commit();
 
             $statusText = $request->status === 'approved' ? 'disetujui' : 'ditolak';
+
+            $withdraw->refresh()->loadMissing('user');
+            if ($withdraw->user) {
+                $this->notificationService->notifyWithdrawProcessed(
+                    $withdraw->user,
+                    $request->status,
+                    (float) $withdraw->amount,
+                    $request->admin_notes,
+                    $remainingBalance
+                );
+            }
+
             return redirect()->route('admin.withdraws.show', $withdraw)
                 ->with('success', "Withdraw berhasil {$statusText}.");
         } catch (\Exception $e) {

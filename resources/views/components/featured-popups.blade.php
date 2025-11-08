@@ -71,10 +71,10 @@
                         </p>
                         <div class="flex items-center justify-between">
                             @if ($note->price > 0)
-                                <span class="text-sm font-bold text-green-600">Rp
-                                    {{ number_format($note->price, 0, ',', '.') }}</span>
+                                <span class="text-sm font-bold text-green-600">
+                                    {{ currency($note->price) }}</span>
                             @else
-                                <span class="text-sm font-bold text-gray-600">FREE</span>
+                                <span class="text-sm font-bold text-gray-600">{{ __('messages.free') }}</span>
                             @endif
                             <a href="{{ route('marketplace.show', $note) }}"
                                 class="text-sm text-blue-600 hover:underline featured-click-tracking"
@@ -148,10 +148,10 @@
                         </p>
                         <div class="flex items-center justify-between">
                             @if ($note->price > 0)
-                                <span class="text-sm font-bold text-green-600">Rp
-                                    {{ number_format($note->price, 0, ',', '.') }}</span>
+                                <span class="text-sm font-bold text-green-600">
+                                    {{ currency($note->price) }}</span>
                             @else
-                                <span class="text-sm font-bold text-gray-600">FREE</span>
+                                <span class="text-sm font-bold text-gray-600">{{ __('messages.free') }}</span>
                             @endif
                             <a href="{{ route('marketplace.show', $note) }}"
                                 class="text-sm text-blue-600 hover:underline featured-click-tracking"
@@ -224,10 +224,9 @@
                         </h5>
                         <div class="flex items-center justify-between text-xs">
                             @if ($note->price > 0)
-                                <span class="font-bold text-green-600">Rp
-                                    {{ number_format($note->price, 0, ',', '.') }}</span>
+                                <span class="font-bold text-green-600">{{ currency($note->price) }}</span>
                             @else
-                                <span class="font-bold text-gray-600">FREE</span>
+                                <span class="font-bold text-gray-600">{{ __('messages.free') }}</span>
                             @endif
                             <a href="{{ route('marketplace.show', $note) }}"
                                 class="text-blue-600 hover:underline featured-click-tracking"

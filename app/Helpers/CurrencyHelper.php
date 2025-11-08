@@ -29,15 +29,21 @@ class CurrencyHelper
     /**
      * Format currency based on user's locale/currency preference
      */
-    public static function format(float $amount, ?string $currency = null): string
+    public static function format(float $amount, ?string $currency = null, ?string $fromCurrency = null): string
     {
-        $currency = $currency ?? self::getDefaultCurrency();
+        $currencyService = app(\App\Services\CurrencyService::class);
+        $targetCurrency = $currency ?? self::getDefaultCurrency();
+        $sourceCurrency = $fromCurrency ?? config('currency.base_currency', 'IDR');
 
-        if (!isset(self::$currencies[$currency])) {
-            $currency = 'USD'; // Fallback
+        if (!isset(self::$currencies[$targetCurrency])) {
+            $targetCurrency = 'USD'; // Fallback
         }
 
-        $config = self::$currencies[$currency];
+        if ($sourceCurrency !== $targetCurrency) {
+            $amount = $currencyService->convert($amount, $sourceCurrency, $targetCurrency);
+        }
+
+        $config = self::$currencies[$targetCurrency];
 
         $formatted = number_format(
             $amount,

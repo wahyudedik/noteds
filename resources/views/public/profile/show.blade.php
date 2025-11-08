@@ -285,8 +285,8 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500">{{ __('messages.total_revenue') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">Rp
-                                {{ number_format($stats['total_revenue'], 0, ',', '.') }}</p>
+                            <p class="text-2xl font-bold text-gray-900">
+                                {{ currency($stats['total_revenue']) }}</p>
                         </div>
                     </div>
                 </div>
@@ -373,8 +373,8 @@
                                                     </div>
                                                 @endif
                                                 @if ($note->price > 0)
-                                                    <span class="text-sm font-semibold text-yellow-600">Rp
-                                                        {{ number_format($note->price, 0, ',', '.') }}</span>
+                                                    <span class="text-sm font-semibold text-yellow-600">
+                                                        {{ currency($note->price) }}</span>
                                                 @else
                                                     <span class="text-xs text-gray-500">{{ __('messages.free') }}</span>
                                                 @endif

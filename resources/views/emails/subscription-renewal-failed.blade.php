@@ -30,20 +30,20 @@
                 <tr>
                     <td style="padding: 8px 0; font-weight: bold; color: #374151;">{{ __('messages.required_amount') }}:</td>
                     <td style="padding: 8px 0; text-align: right; color: #dc2626; font-size: 18px; font-weight: bold;">
-                        Rp {{ number_format($requiredAmount, 0, ',', '.') }}
+                        {{ currency($requiredAmount) }}
                     </td>
                 </tr>
                 <tr>
                     <td style="padding: 8px 0; font-weight: bold; color: #374151;">{{ __('messages.current_balance') }}:</td>
                     <td style="padding: 8px 0; text-align: right; color: #6b7280;">
-                        Rp {{ number_format($currentBalance, 0, ',', '.') }}
+                        {{ currency($currentBalance) }}
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2" style="padding-top: 12px; border-top: 1px solid #e5e7eb;">
                         <strong style="color: #dc2626;">
                             {{ __('messages.insufficient_amount') }}: 
-                            Rp {{ number_format($requiredAmount - $currentBalance, 0, ',', '.') }}
+                            {{ currency($requiredAmount - $currentBalance) }}
                         </strong>
                     </td>
                 </tr>

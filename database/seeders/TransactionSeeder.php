@@ -19,6 +19,7 @@ class TransactionSeeder extends Seeder
         // Get buyers and public notes
         $buyers = User::role('buyer')->get();
         $notes = Note::where('is_public', true)->where('status', 'active')->get();
+        $baseCurrency = config('currency.base_currency', 'IDR');
         
         if ($buyers->isEmpty() || $notes->isEmpty()) {
             return;
@@ -62,6 +63,10 @@ class TransactionSeeder extends Seeder
                 'commission' => $platformFee, // For backward compatibility
                 'platform_fee' => $platformFee,
                 'creator_commission' => $creatorCommission,
+                'currency' => $baseCurrency,
+                'original_amount' => $amount,
+                'original_currency' => $baseCurrency,
+                'exchange_rate' => 1,
                 'status' => 'success',
                 'payment_method' => 'wallet',
                 'notes' => 'Seeded transaction for testing',
@@ -84,6 +89,10 @@ class TransactionSeeder extends Seeder
                 'commission' => 0,
                 'platform_fee' => 0,
                 'creator_commission' => 0,
+                'currency' => $baseCurrency,
+                'original_amount' => $topupAmount,
+                'original_currency' => $baseCurrency,
+                'exchange_rate' => 1,
                 'status' => ['success', 'success', 'success', 'pending'][rand(0, 3)],
                 'payment_method' => 'topup',
                 'notes' => 'Seeded top-up transaction for testing',
@@ -104,6 +113,10 @@ class TransactionSeeder extends Seeder
                 'commission' => 0,
                 'platform_fee' => $featured->price, // Full amount as platform fee for ad
                 'creator_commission' => 0,
+                'currency' => $baseCurrency,
+                'original_amount' => $featured->price,
+                'original_currency' => $baseCurrency,
+                'exchange_rate' => 1,
                 'status' => $featured->status === 'active' ? 'success' : ($featured->status === 'pending' ? 'pending' : 'success'),
                 'payment_method' => 'wallet',
                 'notes' => 'Seeded featured note payment: ' . $featured->note->title . ' di ' . $featured->location . ' selama ' . $featured->duration_days . ' hari.',

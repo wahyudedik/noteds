@@ -3,6 +3,15 @@
 @section('title', __('messages.marketing_simulators'))
 
 @section('content')
+@php
+    $currencyService = app(\App\Services\CurrencyService::class);
+    $simulatorCurrency = $currencyService->getUserCurrency(auth()->user());
+    $localeMap = [
+        'IDR' => 'id-ID',
+        'USD' => 'en-US',
+    ];
+    $simulatorLocale = $localeMap[$simulatorCurrency] ?? 'en-US';
+@endphp
 <div class="py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
@@ -245,7 +254,7 @@
                     <div class="mb-4">
                         <div class="bg-indigo-50 rounded-lg p-4 text-center">
                             <p class="text-sm text-gray-600 mb-1">{{ __('messages.current_balance') }}</p>
-                            <p class="text-3xl font-bold text-indigo-700" id="wallet-balance">Rp 0</p>
+                            <p class="text-3xl font-bold text-indigo-700" id="wallet-balance">{{ currency(0) }}</p>
                         </div>
                     </div>
                     <form id="wallet-form" class="space-y-4">
@@ -306,9 +315,9 @@
                                         <span class="text-sm text-gray-600 ml-1">4.5</span>
                                     </div>
                                     <span class="text-xs text-gray-500">•</span>
-                                    <span class="text-xs text-gray-500">15 reviews</span>
+                                    <span class="text-xs text-gray-500">{{ __('messages.reviews_with_count', ['count' => 15]) }}</span>
                                 </div>
-                                <span class="text-sm font-semibold text-gray-900">Rp 0</span>
+                                <span class="text-sm font-semibold text-gray-900">{{ currency(0) }}</span>
                             </div>
                         </div>
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
@@ -400,7 +409,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.note_content') }}</label>
                         <textarea id="ai-content" rows="4" 
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500"
-                            placeholder="{{ __('messages.paste_note_content') }}">Laravel is a powerful PHP framework that makes web development easier. It provides elegant syntax, robust features, and a vibrant ecosystem. With Laravel, you can build applications quickly while maintaining code quality and following best practices.</textarea>
+                            placeholder="{{ __('messages.paste_note_content') }}">{{ __('messages.simulator_sample_summary') }}</textarea>
                     </div>
                     <button type="button" id="ai-generate" 
                         class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
@@ -440,7 +449,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.note_content') }}</label>
                         <textarea id="tag-content" rows="3" 
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500"
-                            placeholder="{{ __('messages.enter_note_content') }}">Learn how to build modern web applications using Laravel PHP framework. This tutorial covers routing, controllers, models, migrations, and more.</textarea>
+                            placeholder="{{ __('messages.enter_note_content') }}">{{ __('messages.simulator_sample_content') }}</textarea>
                     </div>
                     <button type="button" id="tag-suggest" 
                         class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
@@ -517,7 +526,7 @@
 
         <!-- CTA Section -->
         <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12 text-center text-white">
-            <h2 class="text-3xl font-bold mb-4">Ready to Start Earning?</h2>
+            <h2 class="text-3xl font-bold mb-4">{{ __('messages.simulator_ready_to_start') }}</h2>
             <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
                 Join thousands of creators sharing knowledge and monetizing their expertise on Noteds
             </p>
@@ -562,11 +571,16 @@ document.addEventListener('DOMContentLoaded', function() {
         marketAverageCompetitive: @json(__('messages.market_average_competitive')),
     };
     
-    // Format number to Rupiah
-    function formatRupiah(amount) {
-        return new Intl.NumberFormat('id-ID', {
+    const currencySettings = {
+        locale: @json($simulatorLocale),
+        currency: @json($simulatorCurrency),
+    };
+
+    // Format number to active currency
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat(currencySettings.locale, {
             style: 'currency',
-            currency: 'IDR',
+            currency: currencySettings.currency,
             minimumFractionDigits: 0
         }).format(amount);
     }
@@ -582,9 +596,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const commission = grossMonthly * 0.20; // 20% platform commission
         const netMonthly = grossMonthly - commission;
         
-        document.getElementById('earnings-monthly').textContent = formatRupiah(grossMonthly);
-        document.getElementById('earnings-yearly').textContent = formatRupiah(grossYearly);
-        document.getElementById('earnings-net').textContent = formatRupiah(netMonthly) + '/mo';
+        document.getElementById('earnings-monthly').textContent = formatCurrency(grossMonthly);
+        document.getElementById('earnings-yearly').textContent = formatCurrency(grossYearly);
+        document.getElementById('earnings-net').textContent = formatCurrency(netMonthly) + '/mo';
         document.getElementById('earnings-result').classList.remove('hidden');
     });
 
@@ -594,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const count = parseFloat(document.getElementById('referral-count').value) || 0;
         const avgTransaction = parseFloat(document.getElementById('referral-transaction').value) || 0;
         
-        // Signup reward: Rp 5,000 per referral
+        // Signup reward: 5,000 base currency per referral
         const signupReward = count * 5000;
         
         // Transaction commission: 5% of each transaction
@@ -603,9 +617,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const totalRewards = signupReward + totalCommission;
         
-        document.getElementById('referral-signup').textContent = formatRupiah(signupReward);
-        document.getElementById('referral-commission').textContent = formatRupiah(totalCommission);
-        document.getElementById('referral-total').textContent = formatRupiah(totalRewards);
+        document.getElementById('referral-signup').textContent = formatCurrency(signupReward);
+        document.getElementById('referral-commission').textContent = formatCurrency(totalCommission);
+        document.getElementById('referral-total').textContent = formatCurrency(totalRewards);
         document.getElementById('referral-result').classList.remove('hidden');
     });
 
@@ -656,7 +670,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function updateWalletBalance() {
-        document.getElementById('wallet-balance').textContent = formatRupiah(walletBalance);
+        document.getElementById('wallet-balance').textContent = formatCurrency(walletBalance);
     }
     
     function addWalletTransaction(type, amount, statusClass) {
@@ -683,7 +697,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span class="text-gray-500 ml-2">${t.timestamp}</span>
                 </div>
                 <span class="font-semibold ${t.statusClass === 'success' ? 'text-green-700' : 'text-orange-700'}">
-                    ${t.statusClass === 'success' ? '+' : '-'}${formatRupiah(t.amount)}
+                    ${t.statusClass === 'success' ? '+' : '-'}${formatCurrency(t.amount)}
                 </span>
             </div>
         `).join('');
@@ -812,8 +826,8 @@ document.addEventListener('DOMContentLoaded', function() {
             positionClass = 'text-blue-600';
         }
         
-        document.getElementById('benchmark-avg').textContent = formatRupiah(marketAvg);
-        document.getElementById('benchmark-yours').textContent = formatRupiah(yourPrice);
+        document.getElementById('benchmark-avg').textContent = formatCurrency(marketAvg);
+        document.getElementById('benchmark-yours').textContent = formatCurrency(yourPrice);
         document.getElementById('benchmark-position').textContent = position;
         document.getElementById('benchmark-position').className = 'font-bold ' + positionClass;
         document.getElementById('benchmark-result').classList.remove('hidden');

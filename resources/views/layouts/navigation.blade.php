@@ -52,6 +52,10 @@
                                     class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('forum.preferences.*') ? 'text-blue-600 bg-blue-50' : '' }}">
                                     Forum Preferences
                                 </a>
+                                <a href="{{ route('note-conversations.index') }}"
+                                    class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('note-conversations.*') ? 'text-blue-600 bg-blue-50' : '' }}">
+                                    Produk Chats
+                                </a>
 
                                 <!-- More Menu Dropdown -->
                                 <div class="relative" x-data="{ open: false }">
@@ -465,6 +469,11 @@
                         class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('forum.preferences.*') ? 'text-blue-600 bg-blue-50' : '' }}"
                         @click="mobileMenuOpen = false">
                         Forum Preferences
+                    </a>
+                    <a href="{{ route('note-conversations.index') }}"
+                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('note-conversations.*') ? 'text-blue-600 bg-blue-50' : '' }}"
+                        @click="mobileMenuOpen = false">
+                        Produk Chats
                     </a>
 
                     <div class="border-t border-gray-200 my-2"></div>

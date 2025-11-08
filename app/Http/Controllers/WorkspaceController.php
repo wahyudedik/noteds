@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Workspace;
+use App\Models\WorkspaceActivityLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -75,6 +76,11 @@ class WorkspaceController extends Controller
             'role' => 'admin',
             'is_active' => true,
             'joined_at' => now(),
+        ]);
+
+        WorkspaceActivityLog::record($workspace, 'workspace_created', $user, [
+            'workspace_name' => $workspace->name,
+            'type' => $workspace->type,
         ]);
 
         return redirect()->route('workspaces.index')
@@ -232,7 +238,15 @@ class WorkspaceController extends Controller
         }
 
         // Check wallet balance
-        $wallet = \App\Models\Wallet::firstOrCreate(['user_id' => $user->id], ['balance' => 0]);
+        $baseCurrency = config('currency.base_currency', 'IDR');
+        $wallet = \App\Models\Wallet::firstOrCreate(
+            ['user_id' => $user->id],
+            ['balance' => 0, 'currency' => $baseCurrency]
+        );
+        if ($wallet->currency !== $baseCurrency) {
+            $wallet->currency = $baseCurrency;
+            $wallet->save();
+        }
         if ($wallet->balance < $workspace->price) {
             return redirect()->route('workspaces.show', $workspace)
                 ->with('error', __('messages.insufficient_balance_to_purchase'))
@@ -240,7 +254,7 @@ class WorkspaceController extends Controller
         }
 
         // Purchase transaction
-        \Illuminate\Support\Facades\DB::transaction(function () use ($workspace, $user, $wallet) {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($workspace, $user, $wallet, $baseCurrency) {
             // Deduct from buyer wallet
             $wallet->balance -= $workspace->price;
             $wallet->save();
@@ -248,7 +262,13 @@ class WorkspaceController extends Controller
             $user->save();
 
             // Add to seller wallet
-            $sellerWallet = \App\Models\Wallet::firstOrCreate(['user_id' => $workspace->owner_id], ['balance' => 0]);
+            $sellerWallet = \App\Models\Wallet::firstOrCreate(
+                ['user_id' => $workspace->owner_id],
+                ['balance' => 0, 'currency' => $baseCurrency]
+            );
+            if ($sellerWallet->currency !== $baseCurrency) {
+                $sellerWallet->currency = $baseCurrency;
+            }
             $commission = $workspace->price * 0.20; // 20% commission
             $sellerAmount = $workspace->price - $commission;
             $sellerWallet->balance += $sellerAmount;
@@ -265,6 +285,10 @@ class WorkspaceController extends Controller
                 'note_id' => null,
                 'amount' => $workspace->price,
                 'commission' => $commission,
+                'currency' => $baseCurrency,
+                'original_amount' => $workspace->price,
+                'original_currency' => $baseCurrency,
+                'exchange_rate' => 1,
                 'status' => 'success',
                 'payment_method' => 'wallet',
                 'notes' => "Workspace purchase: {$workspace->name}",
@@ -367,6 +391,11 @@ class WorkspaceController extends Controller
                 'error' => $e->getMessage(),
             ]);
         }
+
+        WorkspaceActivityLog::record($workspace, 'invitation_sent', $user, [
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+        ]);
 
         return redirect()->route('workspaces.invite', $workspace)
             ->with('success', 'Invitation berhasil dikirim ke ' . $validated['email'] . '!')

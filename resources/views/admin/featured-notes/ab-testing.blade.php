@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Admin - A/B Testing Analytics')
+@section('title', __('featured.ab_testing_title'))
 
 @section('content')
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">A/B Testing Analytics</h2>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('featured.ab_testing_title') }}</h2>
             <div class="flex gap-4">
-                <a href="{{ route('admin.featured-notes.index') }}" class="text-blue-600 hover:text-blue-800">← Back to Featured Notes</a>
-                <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800">Dashboard</a>
+                <a href="{{ route('admin.featured-notes.index') }}" class="text-blue-600 hover:text-blue-800">← {{ __('messages.back_to_featured_notes') }}</a>
+                <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800">{{ __('messages.admin_dashboard') }}</a>
             </div>
         </div>
 
@@ -28,21 +28,21 @@
         @if(count($analytics) > 0)
             <div class="bg-white shadow-sm rounded-lg overflow-hidden">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Variant Performance Comparison</h3>
-                    <p class="text-sm text-gray-600 mt-1">Compare performance metrics across different variants and locations</p>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ __('featured.ab_testing_table_title') }}</h3>
+                    <p class="text-sm text-gray-600 mt-1">{{ __('featured.ab_testing_description') }}</p>
                 </div>
                 
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Variant</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Impressions</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clicks</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CTR (%)</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('featured.ab_testing_variant') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('featured.ab_testing_location') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('featured.ab_testing_requests') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('featured.impressions_label') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('featured.clicks_label') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('featured.ctr_label') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('featured.ab_testing_total_spent') }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -54,7 +54,7 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ ucfirst(str_replace('_', ' ', $data['location'])) }}
+                                        {{ __('featured.locations.' . $data['location']) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ $data['count'] }}
@@ -75,7 +75,7 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        Rp {{ number_format($data['total_spent'], 0, ',', '.') }}
+                                        {{ currency($data['total_spent']) }}
                                     </td>
                                 </tr>
                             @endforeach
@@ -87,19 +87,19 @@
             <!-- Summary Statistics -->
             <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="bg-white overflow-hidden shadow-sm rounded-lg p-4">
-                    <div class="text-sm text-gray-600">Total Variants</div>
+                    <div class="text-sm text-gray-600">{{ __('featured.ab_testing_total_variants') }}</div>
                     <div class="text-2xl font-bold text-gray-900">{{ count(array_unique(array_column($analytics, 'variant'))) }}</div>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm rounded-lg p-4">
-                    <div class="text-sm text-gray-600">Total Impressions</div>
+                    <div class="text-sm text-gray-600">{{ __('featured.ab_testing_total_impressions') }}</div>
                     <div class="text-2xl font-bold text-blue-600">{{ number_format(array_sum(array_column($analytics, 'impressions')), 0, ',', '.') }}</div>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm rounded-lg p-4">
-                    <div class="text-sm text-gray-600">Total Clicks</div>
+                    <div class="text-sm text-gray-600">{{ __('featured.ab_testing_total_clicks') }}</div>
                     <div class="text-2xl font-bold text-green-600">{{ number_format(array_sum(array_column($analytics, 'clicks')), 0, ',', '.') }}</div>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm rounded-lg p-4">
-                    <div class="text-sm text-gray-600">Average CTR</div>
+                    <div class="text-sm text-gray-600">{{ __('featured.ab_testing_average_ctr') }}</div>
                     @php
                         $totalImpressions = array_sum(array_column($analytics, 'impressions'));
                         $totalClicks = array_sum(array_column($analytics, 'clicks'));
@@ -115,10 +115,10 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                     </svg>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No A/B Testing Data Available</h3>
-                <p class="text-gray-600 mb-4">There are no featured notes with variants to analyze. Sellers need to create featured notes with variant labels to enable A/B testing.</p>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('featured.ab_testing_no_data_title') }}</h3>
+                <p class="text-gray-600 mb-4">{{ __('featured.ab_testing_no_data_message') }}</p>
                 <a href="{{ route('admin.featured-notes.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    View All Featured Notes
+                    {{ __('featured.ab_testing_view_all') }}
                 </a>
             </div>
         @endif

@@ -53,19 +53,36 @@ class RenewSubscriptions extends Command
         $renewed = 0;
         $expired = 0;
         $errors = 0;
+        $reminders = 0;
+
+        $currencyService = app(\App\Services\CurrencyService::class);
+        $baseCurrency = $currencyService->getBaseCurrency();
 
         foreach ($expiringSubscriptions as $subscription) {
             try {
                 $user = $subscription->user;
                 $wallet = Wallet::firstOrCreate(
                     ['user_id' => $user->id],
-                    ['balance' => 0]
+                    ['balance' => 0, 'currency' => $baseCurrency]
                 );
+                if ($wallet->currency !== $baseCurrency) {
+                    $wallet->currency = $baseCurrency;
+                    $wallet->save();
+                }
 
                 // Sync wallet balance
                 if ($wallet->balance != $user->wallet_balance) {
                     $wallet->balance = $user->wallet_balance;
                     $wallet->save();
+                }
+
+                $expiresTomorrow = $subscription->expired_at && $subscription->expired_at->isSameDay(now()->addDay());
+
+                if ($expiresTomorrow && $wallet->balance < $premiumPrice) {
+                    $notificationService->notifySubscriptionRenewalReminder($user, $premiumPrice, $wallet->balance);
+                    $reminders++;
+                    $this->info("ℹ︎ Sent renewal reminder to {$user->email} (balance insufficient)");
+                    continue;
                 }
 
                 // Check if wallet has sufficient balance
@@ -87,6 +104,10 @@ class RenewSubscriptions extends Command
                             'note_id' => null,
                             'amount' => $premiumPrice,
                             'commission' => 0,
+                            'currency' => $baseCurrency,
+                            'original_amount' => $premiumPrice,
+                            'original_currency' => $baseCurrency,
+                            'exchange_rate' => 1,
                             'status' => 'success',
                             'payment_method' => 'wallet',
                             'notes' => 'Premium subscription auto-renewal',
@@ -98,6 +119,7 @@ class RenewSubscriptions extends Command
 
                         // Send success notification
                         $notificationService->notifySubscriptionRenewed($user, $premiumPrice);
+                        $notificationService->maybeNotifyLowBalance($user, $wallet->balance);
                     });
 
                     $renewed++;
@@ -121,6 +143,7 @@ class RenewSubscriptions extends Command
 
                         // Send app notification
                         $notificationService->notifySubscriptionExpired($user, $premiumPrice, $currentBalance);
+                        $notificationService->maybeNotifyLowBalance($user, $currentBalance);
                     });
 
                     $expired++;
@@ -136,6 +159,7 @@ class RenewSubscriptions extends Command
         $this->info("\n=== Renewal Summary ===");
         $this->info("Renewed: {$renewed}");
         $this->info("Expired (insufficient balance): {$expired}");
+        $this->info("Reminders sent: {$reminders}");
         $this->info("Errors: {$errors}");
 
         return Command::SUCCESS;

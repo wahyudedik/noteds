@@ -27,13 +27,13 @@
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
-                            Add Purchased Notes
+                            {{ __('messages.collection_add_purchased_button') }}
                         </button>
                         <div x-show="open" @click.away="open = false" x-transition
                              class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 max-h-96 overflow-y-auto">
                             <div class="px-4 py-2 border-b border-gray-200">
-                                <p class="text-sm font-semibold text-gray-900">Select Notes to Add</p>
-                                <p class="text-xs text-gray-500 mt-1">{{ $purchasedNotes->count() }} purchased notes available</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ __('messages.collection_select_notes_title') }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ __('messages.collection_purchased_available', ['count' => $purchasedNotes->count()]) }}</p>
                             </div>
                             @foreach($purchasedNotes as $note)
                                 <form action="{{ route('collections.add-note', $collection) }}" method="POST" class="px-4 py-2 hover:bg-gray-50 transition-colors">
@@ -41,13 +41,13 @@
                                     <input type="hidden" name="note_id" value="{{ $note->id }}">
                                     <button type="submit" class="w-full text-left">
                                         <p class="text-sm font-medium text-gray-900 line-clamp-1">{{ $note->title }}</p>
-                                        <p class="text-xs text-gray-500 mt-1">by {{ $note->user->name }}</p>
+                                        <p class="text-xs text-gray-500 mt-1">{{ __('messages.by_label') }} {{ $note->user->name }}</p>
                                     </button>
                                 </form>
                             @endforeach
                             @if($purchasedNotes->count() === 0)
                                 <div class="px-4 py-4 text-center text-sm text-gray-500">
-                                    No purchased notes available
+                                    {{ __('messages.collection_no_purchased') }}
                                 </div>
                             @endif
                         </div>
@@ -57,7 +57,7 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    Browse Marketplace
+                    {{ __('messages.collection_browse_marketplace') }}
                 </a>
                 <a href="{{ route('collections.edit', $collection) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
                     Edit
@@ -87,18 +87,18 @@
                                             {{ currency($note->hasDiscount() ? $note->discount_price : $note->price) }}
                                         </span>
                                     @else
-                                        <span class="text-sm font-semibold text-blue-600">FREE</span>
+                                        <span class="text-sm font-semibold text-blue-600">{{ __('messages.free') }}</span>
                                     @endif
                                 </div>
                             </div>
                         </a>
                         
                         <div class="px-6 py-3 bg-gray-50 border-t border-gray-200">
-                            <form action="{{ route('collections.remove-note', ['collection' => $collection, 'note' => $note]) }}" method="POST" onsubmit="return confirm('Remove this note from collection?')">
+                            <form action="{{ route('collections.remove-note', ['collection' => $collection, 'note' => $note]) }}" method="POST" onsubmit="return confirm('{{ __('messages.collection_remove_confirm') }}')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">
-                                    Remove from Collection
+                                    {{ __('messages.collection_remove_button') }}
                                 </button>
                             </form>
                         </div>
@@ -110,19 +110,19 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No notes in this collection</h3>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('messages.collection_empty_title') }}</h3>
                 <p class="mt-1 text-sm text-gray-500 mb-4">
                     @if(isset($purchasedNotes) && $purchasedNotes->count() > 0)
-                        You have {{ $purchasedNotes->count() }} purchased notes. Click "Add Purchased Notes" above to add them to this collection.
+                        {{ __('messages.collection_empty_with_purchased', ['count' => $purchasedNotes->count(), 'button' => __('messages.collection_add_purchased_button')]) }}
                     @else
-                        Add notes from the marketplace to this collection, or purchase notes first.
+                        {{ __('messages.collection_empty_without_purchased') }}
                     @endif
                 </p>
                 <a href="{{ route('marketplace.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    Browse Marketplace
+                    {{ __('messages.collection_browse_marketplace') }}
                 </a>
             </div>
         @endif

@@ -38,7 +38,7 @@
                                 <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">{{ __('messages.buyer') }}</span>
                             @endif
                         </p>
-                        <p><strong>{{ __('messages.wallet_balance_label') }}:</strong> Rp {{ number_format($user->wallet_balance ?? 0, 0, ',', '.') }}</p>
+                        <p><strong>{{ __('messages.wallet_balance_label') }}:</strong> {{ currency($user->wallet_balance ?? 0) }}</p>
                         <p><strong>{{ __('messages.joined') }}:</strong> {{ $user->created_at->format('d M Y, H:i') }}</p>
                     </div>
                 </div>
@@ -74,7 +74,7 @@
                             @foreach($user->withdraws->take(5) as $withdraw)
                                 <tr>
                                     <td class="px-4 py-3 text-sm text-gray-500">{{ $withdraw->created_at->format('d M Y') }}</td>
-                                    <td class="px-4 py-3 text-sm font-medium">Rp {{ number_format($withdraw->amount, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 text-sm font-medium">{{ currency($withdraw->amount) }}</td>
                                     <td class="px-4 py-3 text-sm">
                                         @if($withdraw->status === 'approved')
                                             <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">{{ __('messages.approved') }}</span>

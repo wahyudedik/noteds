@@ -129,12 +129,16 @@ class FeaturedNoteController extends Controller
 
         try {
             DB::transaction(function () use ($featuredNote, $request) {
+                $baseCurrency = config('currency.base_currency', 'IDR');
                 // Refund to wallet
                 $user = $featuredNote->user;
                 $wallet = Wallet::firstOrCreate(
                     ['user_id' => $user->id],
-                    ['balance' => 0]
+                    ['balance' => 0, 'currency' => $baseCurrency]
                 );
+                if ($wallet->currency !== $baseCurrency) {
+                    $wallet->currency = $baseCurrency;
+                }
 
                 $wallet->balance += $featuredNote->price;
                 $wallet->save();

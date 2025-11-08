@@ -6,7 +6,9 @@ use App\Http\Requests\StoreNoteRequest;
 use App\Http\Requests\UpdateNoteRequest;
 use App\Models\Note;
 use App\Models\Tag;
+use App\Models\WorkspaceActivityLog;
 use App\Services\NoteActivityService;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -192,6 +194,14 @@ class NoteController extends Controller
         $note = Note::create($validated);
         $this->syncTags($note, $tags);
 
+        if ($workspace) {
+            WorkspaceActivityLog::record($workspace, 'note_added', $user, [
+                'note_id' => $note->id,
+                'note_title' => $note->title,
+                'folder_id' => $folder?->id,
+            ]);
+        }
+
         // Create note history record
         \App\Models\NoteHistory::create([
             'note_id' => $note->id,
@@ -205,6 +215,11 @@ class NoteController extends Controller
 
         // Log activity
         app(NoteActivityService::class)->logCreated($note, auth()->user());
+
+        if ($note->is_public && $note->status === 'active' && !$note->notificationMeta('published_notified_at')) {
+            app(NotificationService::class)->notifyNewNotePublished($note);
+            $note->setNotificationMetaValue('published_notified_at', now()->toIso8601String());
+        }
 
         // Redirect based on context
         if ($workspace) {
@@ -409,6 +424,14 @@ class NoteController extends Controller
         // Log tag changes if any
         if (!empty($addedTags) || !empty($removedTags)) {
             $activityService->logTagged($note, auth()->user(), $addedTags, $removedTags);
+        }
+
+        $wasPublicActive = ($oldData['is_public'] ?? false) && (($oldData['status'] ?? '') === 'active');
+        $nowPublicActive = $note->is_public && $note->status === 'active';
+
+        if ($nowPublicActive && (!$wasPublicActive || !$note->notificationMeta('published_notified_at'))) {
+            app(NotificationService::class)->notifyNewNotePublished($note);
+            $note->setNotificationMetaValue('published_notified_at', now()->toIso8601String());
         }
 
         return redirect()->route('notes.index')->with('success', 'Note updated successfully.');

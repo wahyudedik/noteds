@@ -77,7 +77,7 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        Rp {{ number_format($user->wallet_balance ?? 0, 0, ',', '.') }}
+                                        {{ currency($user->wallet_balance ?? 0) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $user->created_at->format('d M Y') }}

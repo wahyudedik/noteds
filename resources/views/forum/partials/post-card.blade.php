@@ -173,16 +173,16 @@
                                     <p class="text-sm text-gray-600 mt-1 line-clamp-2">{{ $post->note->summary }}</p>
                                 @endif
                                 <div class="mt-2 flex items-center space-x-4 text-xs text-gray-500">
-                                    <span>by {{ $post->note->user->name }}</span>
+                                    <span>{{ __('messages.by_label') }} {{ $post->note->user->name }}</span>
                                     @if($post->note->price > 0)
                                         <span class="font-semibold text-green-600">{{ currency($post->note->price) }}</span>
                                     @else
-                                        <span class="font-semibold text-gray-600">FREE</span>
+                                        <span class="font-semibold text-gray-600">{{ __('messages.free') }}</span>
                                     @endif
                                 </div>
                                 <a href="{{ route('marketplace.show', $post->note) }}" 
                                    class="mt-2 inline-block text-sm text-blue-600 hover:text-blue-700 font-medium">
-                                    View Note →
+                                    {{ __('messages.view_note') }} →
                                 </a>
                             </div>
                         </div>

@@ -3,6 +3,25 @@
 @section('title', __('messages.my_wallet'))
 
 @section('content')
+@php
+    $currencyService = app(\App\Services\CurrencyService::class);
+    $baseCurrency = $currencyService->getBaseCurrency();
+    $userCurrency = $currencyService->getUserCurrency(auth()->user());
+    $walletCurrency = $wallet->currency ?? $baseCurrency;
+    $currencyInfo = \App\Helpers\CurrencyHelper::getCurrencyInfo($userCurrency);
+    $topupMinBase = 10000;
+    $topupMaxBase = 100000000;
+    $topupMinDisplay = $currencyService->convert($topupMinBase, $baseCurrency, $userCurrency);
+    $topupMaxDisplay = $currencyService->convert($topupMaxBase, $baseCurrency, $userCurrency);
+    $withdrawMinBase = 50000;
+    $withdrawMinDisplay = $currencyService->convert($withdrawMinBase, $baseCurrency, $userCurrency);
+    $decimalPlaces = $currencyInfo['decimal_places'] ?? 0;
+    $stepValue = $decimalPlaces > 0 ? 1 / (10 ** $decimalPlaces) : 1;
+    $stepAttribute = number_format($stepValue, $decimalPlaces, '.', '');
+    $minAttribute = number_format($topupMinDisplay, $decimalPlaces, '.', '');
+    $maxAttribute = number_format($topupMaxDisplay, $decimalPlaces, '.', '');
+    $currencySymbol = $currencyInfo['symbol'] ?? '';
+@endphp
 <div class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
@@ -55,7 +74,9 @@
                             </div>
                             <div>
                                 <h3 class="text-sm font-medium text-gray-500 mb-1">{{ __('messages.wallet_balance_title') }}</h3>
-                                <p class="text-4xl font-bold text-green-600">Rp {{ number_format($wallet->balance, 0, ',', '.') }}</p>
+                                <p class="text-4xl font-bold text-green-600">
+                                    {{ currency($wallet->balance, $userCurrency, $walletCurrency) }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -63,11 +84,22 @@
                         <form action="{{ route('wallet.topup') }}" method="POST" class="flex gap-2 w-full sm:w-auto">
                             @csrf
                             <div class="relative flex-1">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 text-sm">Rp</span>
-                                </div>
-                                <input type="number" name="amount" min="10000" step="1000" :placeholder="__('messages.min_amount')" required
-                                    class="block w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 text-sm">{{ $currencySymbol }}</span>
+                            </div>
+                            <input
+                                type="number"
+                                name="amount"
+                                min="{{ $minAttribute }}"
+                                max="{{ $maxAttribute }}"
+                                step="{{ $stepAttribute }}"
+                                value="{{ old('amount') }}"
+                                placeholder="{{ __('messages.enter_amount') }}"
+                                required
+                                class="block w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                            <p class="mt-1 text-xs text-gray-500">
+                                {{ __('messages.minimum_topup_amount', ['amount' => currency($topupMinBase, $userCurrency, $baseCurrency)]) }}
+                            </p>
                             </div>
                             <button type="submit" class="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,7 +116,7 @@
                                 {{ __('messages.withdraw') }}
                             </a>
                         @else
-                            <button type="button" disabled title="{{ __('messages.minimum_withdraw') }}: Rp 50.000" class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gray-400 cursor-not-allowed shadow-sm transition-all duration-200 opacity-60">
+                            <button type="button" disabled title="{{ __('messages.minimum_withdraw', ['amount' => currency($withdrawMinBase, $userCurrency, $baseCurrency)]) }}" class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gray-400 cursor-not-allowed shadow-sm transition-all duration-200 opacity-60">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
@@ -162,14 +194,22 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
+                                            @php
+                                                $transactionCurrency = $transaction->currency ?? $baseCurrency;
+                                                $formattedAmount = currency($transaction->amount, $userCurrency, $transactionCurrency);
+                                            @endphp
                                             @if($transaction->buyer_id === auth()->id() && $transaction->seller_id === auth()->id())
-                                                <span class="text-sm font-bold text-green-600">+Rp {{ number_format($transaction->amount, 0, ',', '.') }}</span>
+                                                <span class="text-sm font-bold text-green-600">+{{ $formattedAmount }}</span>
                                             @elseif($transaction->buyer_id === auth()->id())
-                                                <span class="text-sm font-bold text-red-600">-Rp {{ number_format($transaction->amount, 0, ',', '.') }}</span>
+                                                <span class="text-sm font-bold text-red-600">-{{ $formattedAmount }}</span>
                                             @else
+                                                @php
+                                                    $netAmount = currency($transaction->amount - $transaction->commission, $userCurrency, $transactionCurrency);
+                                                    $commissionAmount = currency($transaction->commission, $userCurrency, $transactionCurrency);
+                                                @endphp
                                                 <div>
-                                                    <span class="text-sm font-bold text-green-600">+Rp {{ number_format(($transaction->amount - $transaction->commission), 0, ',', '.') }}</span>
-                                                    <p class="text-xs text-gray-500">Commission: Rp {{ number_format($transaction->commission, 0, ',', '.') }}</p>
+                                                    <span class="text-sm font-bold text-green-600">+{{ $netAmount }}</span>
+                                                    <p class="text-xs text-gray-500">Commission: {{ $commissionAmount }}</p>
                                                 </div>
                                             @endif
                                         </td>

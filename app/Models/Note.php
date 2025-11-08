@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use App\Models\NoteConversation;
 
 class Note extends Model
 {
@@ -44,6 +46,7 @@ class Note extends Model
             'thumbnails' => 'array',
             'file_count' => 'integer',
             'preview_percentage' => 'integer',
+            'notification_meta' => 'array',
         ];
     }
 
@@ -186,6 +189,11 @@ class Note extends Model
         return $this->hasMany(FeaturedNote::class);
     }
 
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(NoteConversation::class);
+    }
+
     /**
      * Get active featured note for this note.
      */
@@ -277,6 +285,28 @@ class Note extends Model
             return 0;
         }
         return count($this->thumbnails);
+    }
+
+    public function notificationMeta(string $key = null, $default = null)
+    {
+        $meta = $this->notification_meta ?? [];
+
+        if ($key === null) {
+            return $meta;
+        }
+
+        return data_get($meta, $key, $default);
+    }
+
+    public function setNotificationMetaValue(string $key, $value, bool $save = true): void
+    {
+        $meta = $this->notification_meta ?? [];
+        data_set($meta, $key, $value);
+        $this->notification_meta = $meta;
+
+        if ($save) {
+            $this->save();
+        }
     }
 
     /**

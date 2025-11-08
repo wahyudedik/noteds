@@ -66,7 +66,7 @@
                                 @if($subscription->approved_by)
                                     <div>
                                         <p class="text-sm text-gray-500">{{ __('messages.approved_by') }}</p>
-                                        <p class="text-base font-medium text-gray-900">{{ $subscription->approvedBy->name ?? 'Admin' }}</p>
+                                    <p class="text-base font-medium text-gray-900">{{ $subscription->approvedBy->name ?? __('messages.admin') }}</p>
                                     </div>
                                 @endif
                             </div>
@@ -98,7 +98,7 @@
                             <p class="text-base text-gray-600 mb-4">{{ __('messages.subscription_request_reviewed') }}</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <p class="text-sm text-gray-500">Submitted At</p>
+                                    <p class="text-sm text-gray-500">{{ __('messages.submitted_at') }}</p>
                                     <p class="text-base font-medium text-gray-900">{{ $subscription->created_at->format('d M Y, H:i') }}</p>
                                 </div>
                             </div>

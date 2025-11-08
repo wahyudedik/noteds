@@ -28,11 +28,18 @@ class FeaturedNoteController extends Controller
             ->latest()
             ->get();
 
+        $currencyService = app(\App\Services\CurrencyService::class);
+        $baseCurrency = $currencyService->getBaseCurrency();
+
         // Get wallet balance
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $user->id],
-            ['balance' => 0]
+            ['balance' => 0, 'currency' => $baseCurrency]
         );
+        if ($wallet->currency !== $baseCurrency) {
+            $wallet->currency = $baseCurrency;
+            $wallet->save();
+        }
 
         // Get pricing for each location and duration
         $pricing = $this->getPricing();
@@ -119,15 +126,25 @@ class FeaturedNoteController extends Controller
         // Check if custom duration
         $isCustomDuration = !in_array($validated['duration_days'], [7, 14, 30]);
 
+        $currencyService = app(\App\Services\CurrencyService::class);
+        $baseCurrency = $currencyService->getBaseCurrency();
+        $userCurrency = $currencyService->getUserCurrency($user);
+
         // Check wallet balance
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $user->id],
-            ['balance' => 0]
+            ['balance' => 0, 'currency' => $baseCurrency]
         );
+        if ($wallet->currency !== $baseCurrency) {
+            $wallet->currency = $baseCurrency;
+            $wallet->save();
+        }
 
         if ($wallet->balance < $finalPrice) {
+            $currentBalanceDisplay = currency($wallet->balance, $userCurrency, $baseCurrency);
+            $requiredDisplay = currency($finalPrice, $userCurrency, $baseCurrency);
             return redirect()->route('featured-notes.create', ['note_id' => $note->id])
-                ->with('error', 'Saldo wallet tidak cukup. Saldo: Rp ' . number_format($wallet->balance, 0, ',', '.') . ', Diperlukan: Rp ' . number_format($finalPrice, 0, ',', '.'))
+                ->with('error', __('messages.insufficient_wallet_balance', ['balance' => $currentBalanceDisplay, 'required' => $requiredDisplay]))
                 ->with('insufficient_balance', true);
         }
 
@@ -196,6 +213,10 @@ class FeaturedNoteController extends Controller
                     'note_id' => $note->id,
                     'amount' => $finalPrice,
                     'commission' => 0,
+                    'currency' => $baseCurrency,
+                    'original_amount' => $finalPrice,
+                    'original_currency' => $baseCurrency,
+                    'exchange_rate' => 1,
                     'platform_fee' => $finalPrice, // Full amount as platform fee for ad
                     'creator_commission' => 0,
                     'status' => $autoApprove ? 'success' : 'pending',

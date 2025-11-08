@@ -14,11 +14,11 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="text-sm font-medium text-gray-500">{{ __('messages.total_revenue') }}</div>
-                <div class="text-2xl font-bold text-green-600">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</div>
+                <div class="text-2xl font-bold text-green-600">{{ currency($totalRevenue) }}</div>
             </div>
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="text-sm font-medium text-gray-500">{{ __('messages.total_transaction_value') }}</div>
-                <div class="text-2xl font-bold text-blue-600">Rp {{ number_format($totalTransactions, 0, ',', '.') }}</div>
+                <div class="text-2xl font-bold text-blue-600">{{ currency($totalTransactions) }}</div>
             </div>
         </div>
 
@@ -85,10 +85,10 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        Rp {{ number_format($transaction->amount, 0, ',', '.') }}
+                                        {{ currency($transaction->amount, null, $transaction->currency ?? config('currency.base_currency')) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">
-                                        Rp {{ number_format($transaction->commission, 0, ',', '.') }}
+                                        {{ currency($transaction->commission, null, $transaction->currency ?? config('currency.base_currency')) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $transaction->payment_method ?? '-' }}

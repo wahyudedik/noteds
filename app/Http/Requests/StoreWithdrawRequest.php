@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\CurrencyService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,28 +24,33 @@ class StoreWithdrawRequest extends FormRequest
     public function rules(): array
     {
         $user = auth()->user();
-        $minBalance = 50000;
-        
+        $currencyService = app(CurrencyService::class);
+        $baseCurrency = $currencyService->getBaseCurrency();
+        $userCurrency = $currencyService->getUserCurrency($user);
+        $minBalanceBase = 50000;
+
         // Get wallet balance (sync if needed)
         $wallet = \App\Models\Wallet::firstOrCreate(
             ['user_id' => $user->id],
-            ['balance' => 0]
+            ['balance' => 0, 'currency' => $baseCurrency]
         );
-        
+
         // Sync wallet balance with user wallet_balance
         if ($wallet->balance != $user->wallet_balance) {
             $wallet->balance = $user->wallet_balance;
             $wallet->save();
         }
-        
-        $maxBalance = max($wallet->balance, $user->wallet_balance ?? 0);
+
+        $maxBalanceBase = max($wallet->balance, $user->wallet_balance ?? 0);
+        $minAmount = $currencyService->convert($minBalanceBase, $baseCurrency, $userCurrency);
+        $maxAmount = $currencyService->convert($maxBalanceBase, $baseCurrency, $userCurrency);
 
         return [
             'amount' => [
                 'required',
                 'numeric',
-                'min:' . $minBalance,
-                'max:' . $maxBalance,
+                'min:' . $minAmount,
+                'max:' . $maxAmount,
             ],
             'bank_name' => ['required', 'string', 'max:100'],
             'account_number' => ['required', 'string', 'max:50'],
@@ -57,9 +63,24 @@ class StoreWithdrawRequest extends FormRequest
      */
     public function messages(): array
     {
+        $currencyService = app(CurrencyService::class);
+        $baseCurrency = $currencyService->getBaseCurrency();
+        $userCurrency = $currencyService->getUserCurrency(auth()->user());
+        $minBalanceBase = 50000;
+        $minAmountDisplay = currency($minBalanceBase, $userCurrency, $baseCurrency);
+
         return [
-            'amount.min' => 'Minimum penarikan adalah Rp 50.000.',
+            'amount.min' => __('messages.minimum_withdraw_amount', ['amount' => $minAmountDisplay]),
             'amount.max' => 'Saldo wallet tidak mencukupi untuk penarikan ini.',
         ];
+    }
+
+    public function amountInBase(): float
+    {
+        $currencyService = app(CurrencyService::class);
+        $baseCurrency = $currencyService->getBaseCurrency();
+        $userCurrency = $currencyService->getUserCurrency(auth()->user());
+
+        return $currencyService->convert((float) $this->input('amount'), $userCurrency, $baseCurrency);
     }
 }

@@ -83,6 +83,31 @@
                 </div>
             @endif
 
+            @if ($conversation)
+                @php
+                    $otherUser = $conversation->buyer_id === auth()->id() ? $conversation->seller : $conversation->buyer;
+                    $lastMessage = $conversation->latestMessage;
+                @endphp
+                <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-blue-900 uppercase tracking-wide mb-1">Percakapan Produk</h3>
+                        <p class="text-sm text-blue-800">
+                            Chat pribadi dengan <strong>{{ $otherUser->name }}</strong> terkait produk ini.
+                            @if ($lastMessage)
+                                <span class="block mt-1 text-xs text-blue-700">
+                                    Pesan terakhir {{ $lastMessage->sender_id === auth()->id() ? 'Anda' : $lastMessage->sender->name }}:
+                                    “{{ \Illuminate\Support\Str::limit($lastMessage->message, 80) }}”
+                                </span>
+                            @endif
+                        </p>
+                    </div>
+                    <a href="{{ route('note-conversations.show', $conversation) }}"
+                        class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                        Buka Chat →
+                    </a>
+                </div>
+            @endif
+
             <!-- Note Details Card -->
             <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
                 <div class="p-6">
@@ -231,6 +256,29 @@
                                         <div
                                             class="text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                             View all notes →
+                                        </div>
+                                        <div class="mt-2 flex items-center gap-2">
+                                            @if (($sellerReviewStats['count'] ?? 0) > 0)
+                                                <div class="flex items-center gap-1">
+                                                    <div class="flex items-center">
+                                                        @for ($i = 1; $i <= 5; $i++)
+                                                            <svg class="w-4 h-4 {{ $i <= round($sellerReviewStats['average']) ? 'text-yellow-400' : 'text-gray-300' }}"
+                                                                fill="currentColor" viewBox="0 0 20 20">
+                                                                <path
+                                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                            </svg>
+                                                        @endfor
+                                                    </div>
+                                                    <span class="text-sm font-medium text-gray-800">
+                                                        {{ number_format($sellerReviewStats['average'], 1) }}
+                                                    </span>
+                                                    <span class="text-xs text-gray-500">
+                                                        ({{ $sellerReviewStats['count'] }} rating)
+                                                    </span>
+                                                </div>
+                                            @else
+                                                <span class="text-xs text-gray-500">Belum ada rating seller</span>
+                                            @endif
                                         </div>
                                     </div>
                                 </a>
@@ -849,71 +897,110 @@
                         @if ($note->total_reviews > 0)
                             <div class="space-y-6">
                                 @foreach ($reviews as $review)
-                                    <div class="flex gap-4 pb-6 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
-                                        <!-- Avatar -->
-                                        <div class="flex-shrink-0">
-                                            <div
-                                                class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                                @if ($review->user->avatar)
-                                                    @if (str_starts_with($review->user->avatar, 'http'))
-                                                        <img src="{{ $review->user->avatar }}"
-                                                            alt="{{ $review->user->name }}"
-                                                            class="w-10 h-10 rounded-full object-cover">
+                                    @php
+                                        $currentUser = auth()->user();
+                                        $canReplyToReview =
+                                            $currentUser &&
+                                            ($currentUser->id === $note->user_id ||
+                                                $currentUser->id === $review->user_id ||
+                                                $currentUser->hasRole('admin'));
+                                        $canDeleteReview = $currentUser && ($currentUser->id === $review->user_id || $currentUser->hasRole('admin'));
+                                    @endphp
+                                    <div id="review-{{ $review->id }}"
+                                        class="pb-6 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
+                                        <div class="flex gap-4" x-data="{ replyOpen: false }">
+                                            <div class="flex-shrink-0">
+                                                <div
+                                                    class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                                    @if ($review->user->avatar)
+                                                        @if (str_starts_with($review->user->avatar, 'http'))
+                                                            <img src="{{ $review->user->avatar }}"
+                                                                alt="{{ $review->user->name }}"
+                                                                class="w-10 h-10 rounded-full object-cover">
+                                                        @else
+                                                            <img src="{{ Storage::url($review->user->avatar) }}"
+                                                                alt="{{ $review->user->name }}"
+                                                                class="w-10 h-10 rounded-full object-cover">
+                                                        @endif
                                                     @else
-                                                        <img src="{{ Storage::url($review->user->avatar) }}"
-                                                            alt="{{ $review->user->name }}"
-                                                            class="w-10 h-10 rounded-full object-cover">
+                                                        <span
+                                                            class="text-sm font-semibold text-gray-600">{{ substr($review->user->name, 0, 1) }}</span>
                                                     @endif
-                                                @else
-                                                    <span
-                                                        class="text-sm font-semibold text-gray-600">{{ substr($review->user->name, 0, 1) }}</span>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        <!-- Review Content -->
-                                        <div class="flex-1">
-                                            <div class="flex items-start justify-between mb-2">
-                                                <div>
-                                                    <p class="text-sm font-semibold text-gray-900">
-                                                        {{ $review->user->name }}</p>
-                                                    <p class="text-xs text-gray-500">
-                                                        {{ localized_diff_for_humans($review->created_at) }}</p>
                                                 </div>
-                                                @if ($review->user_id === auth()->id())
-                                                    <div class="flex gap-2">
-                                                        <form action="{{ route('reviews.destroy', $review) }}"
-                                                            method="POST" class="delete-review-form">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
-                                                                class="text-xs text-red-600 hover:text-red-700 transition-colors duration-200">{{ __('messages.delete') }}</button>
-                                                        </form>
+                                            </div>
+
+                                            <div class="flex-1">
+                                                <div class="flex items-start justify-between mb-2">
+                                                    <div>
+                                                        <p class="text-sm font-semibold text-gray-900">
+                                                            {{ $review->user->name }}</p>
+                                                        <p class="text-xs text-gray-500">
+                                                            {{ localized_diff_for_humans($review->created_at) }}</p>
                                                     </div>
+                                                    <div class="flex items-center gap-3">
+                                                        @if ($canReplyToReview)
+                                                            <button type="button" @click="replyOpen = !replyOpen"
+                                                                class="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors">
+                                                                Balas
+                                                            </button>
+                                                        @endif
+                                                        @if ($canDeleteReview)
+                                                            <form action="{{ route('reviews.destroy', $review) }}"
+                                                                method="POST" class="delete-review-form"
+                                                                onsubmit="return confirm('Hapus review ini?');">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                    class="text-xs text-red-600 hover:text-red-700 transition-colors duration-200">{{ __('messages.delete') }}</button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex gap-0.5 mb-2">
+                                                    @for ($i = 1; $i <= 5; $i++)
+                                                        <svg class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}"
+                                                            fill="currentColor" viewBox="0 0 20 20">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                    @endfor
+                                                </div>
+
+                                                @if ($review->comment)
+                                                    <p class="text-sm text-gray-700 whitespace-pre-wrap">
+                                                        {{ $review->comment }}</p>
+                                                @endif
+
+                                                @if ($canReplyToReview)
+                                                    <form x-show="replyOpen" x-cloak
+                                                        action="{{ route('reviews.replies.store', $review) }}"
+                                                        method="POST" class="mt-4 space-y-2">
+                                                        @csrf
+                                                        <textarea name="message" rows="3" required maxlength="2000"
+                                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm"
+                                                            placeholder="Tulis balasan Anda untuk review ini"></textarea>
+                                                        <div class="flex justify-end">
+                                                            <button type="submit"
+                                                                class="inline-flex items-center px-4 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
+                                                                Kirim Balasan
+                                                            </button>
+                                                        </div>
+                                                    </form>
                                                 @endif
                                             </div>
-
-                                            <!-- Rating Stars -->
-                                            <div class="flex gap-0.5 mb-2">
-                                                @for ($i = 1; $i <= 5; $i++)
-                                                    <svg class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}"
-                                                        fill="currentColor" viewBox="0 0 20 20">
-                                                        <path
-                                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                    </svg>
-                                                @endfor
-                                            </div>
-
-                                            <!-- Comment -->
-                                            @if ($review->comment)
-                                                <p class="text-sm text-gray-700 whitespace-pre-wrap">
-                                                    {{ $review->comment }}</p>
-                                            @endif
                                         </div>
+
+                                        @if ($review->replies && $review->replies->count() > 0)
+                                            <div class="mt-4 space-y-4">
+                                                @foreach ($review->replies as $reply)
+                                                    @include('marketplace.partials.review-reply', ['reply' => $reply, 'review' => $review])
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
                                 @endforeach
 
-                                <!-- Pagination -->
                                 <div class="pt-4">
                                     {{ $reviews->links() }}
                                 </div>
@@ -926,6 +1013,14 @@
             @endif
         </div>
     </div>
+
+    @push('styles')
+        <style>
+            [x-cloak] {
+                display: none !important;
+            }
+        </style>
+    @endpush
 
     @push('scripts')
         <script>

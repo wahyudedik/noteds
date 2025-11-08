@@ -23,7 +23,7 @@
                     <!-- Marketplace Badge -->
                     @if($workspace->isForSale())
                         <div class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">
-                            💰 {{ __('messages.for_sale') }} - Rp {{ number_format($workspace->price, 0, ',', '.') }}
+                            💰 {{ __('messages.for_sale') }} - {{ currency($workspace->price) }}
                         </div>
                     @elseif($workspace->isSold())
                         <div class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-semibold">
@@ -82,7 +82,7 @@
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
-                                        {{ __('messages.buy_workspace') }} - Rp {{ number_format($workspace->price, 0, ',', '.') }}
+                                        {{ __('messages.buy_workspace') }} - {{ currency($workspace->price) }}
                                     </button>
                                 </form>
                             @endif

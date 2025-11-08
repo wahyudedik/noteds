@@ -14,17 +14,17 @@
             
             <!-- Share Marketplace Button -->
             <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-600">Share Marketplace:</span>
+                <span class="text-sm text-gray-600">{{ __('messages.share_marketplace') }}</span>
                 @php
                     $marketplaceUrl = route('marketplace.index');
-                    $marketplaceTitle = urlencode('Discover and Purchase Notes on ' . config('app.name'));
+                    $marketplaceTitle = urlencode(__('messages.marketplace_share_title', ['app' => config('app.name')]));
                 @endphp
                 
                 <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($marketplaceUrl) }}" 
                    target="_blank" 
                    rel="noopener noreferrer"
                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
-                   title="Share on Facebook">
+                   title="{{ __('messages.share_on_facebook') }}">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                     </svg>
@@ -34,7 +34,7 @@
                    target="_blank" 
                    rel="noopener noreferrer"
                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-500 text-white hover:bg-sky-600 transition-colors duration-200"
-                   title="Share on Twitter">
+                   title="{{ __('messages.share_on_twitter') }}">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
                     </svg>
@@ -44,7 +44,7 @@
                    target="_blank" 
                    rel="noopener noreferrer"
                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white hover:bg-green-600 transition-colors duration-200"
-                   title="Share on WhatsApp">
+                   title="{{ __('messages.share_on_whatsapp') }}">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                     </svg>
@@ -52,7 +52,7 @@
                 
                 <button onclick="copyToClipboard('{{ $marketplaceUrl }}')" 
                         class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-600 text-white hover:bg-gray-700 transition-colors duration-200"
-                        title="Copy link">
+                        title="{{ __('messages.copy_link') }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
@@ -94,13 +94,13 @@
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
                     </div>
                     <div>
-                        <label for="sort" class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                        <label for="sort" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.sort_by') }}</label>
                         <select name="sort" id="sort" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
-                            <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest</option>
-                            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest</option>
-                            <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
-                            <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
-                            <option value="rating" {{ request('sort') == 'rating' ? 'selected' : '' }}>Highest Rated</option>
+                            <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>{{ __('messages.sort_newest') }}</option>
+                            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>{{ __('messages.sort_oldest') }}</option>
+                            <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>{{ __('messages.sort_price_low_high') }}</option>
+                            <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>{{ __('messages.sort_price_high_low') }}</option>
+                            <option value="rating" {{ request('sort') == 'rating' ? 'selected' : '' }}>{{ __('messages.sort_highest_rated') }}</option>
                         </select>
                     </div>
                 </div>
@@ -136,9 +136,9 @@
                         <p class="text-white/90 mb-3">{{ Str::limit($featuredBanner->note->summary ?? strip_tags($featuredBanner->note->content), 100) }}</p>
                         <div class="flex items-center gap-4">
                             @if($featuredBanner->note->price > 0)
-                                <span class="text-white font-semibold">Rp {{ number_format($featuredBanner->note->price, 0, ',', '.') }}</span>
+                                <span class="text-white font-semibold">{{ currency($featuredBanner->note->price) }}</span>
                             @else
-                                <span class="text-white font-semibold">FREE</span>
+                                <span class="text-white font-semibold">{{ __('messages.free') }}</span>
                             @endif
                             <a href="{{ route('marketplace.show', $featuredBanner->note) }}" 
                                class="px-4 py-2 bg-white text-orange-600 font-semibold rounded-lg hover:bg-orange-50 transition featured-click-tracking" 
@@ -203,18 +203,18 @@
                                             @if($note->hasDiscount())
                                                 <div class="flex items-center gap-2">
                                                     <div class="flex flex-col">
-                                                        <span class="text-xs text-gray-500 line-through">Rp {{ number_format($note->price, 0, ',', '.') }}</span>
-                                                        <span class="text-lg font-bold text-green-600">Rp {{ number_format($note->discount_price, 0, ',', '.') }}</span>
+                                                        <span class="text-xs text-gray-500 line-through">{{ currency($note->price) }}</span>
+                                                        <span class="text-lg font-bold text-green-600">{{ currency($note->discount_price) }}</span>
                                                     </div>
                                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-500 text-white">
                                                         -{{ $note->discount_percent }}%
                                                     </span>
                                                 </div>
                                             @else
-                                                <span class="text-lg font-bold text-green-600">Rp {{ number_format($note->price, 0, ',', '.') }}</span>
+                                                <span class="text-lg font-bold text-green-600">{{ currency($note->price) }}</span>
                                             @endif
                                         @else
-                                            <span class="text-lg font-bold text-gray-600">FREE</span>
+                                            <span class="text-lg font-bold text-gray-600">{{ __('messages.free') }}</span>
                                         @endif
                                     </div>
                                     <a href="{{ route('public.profile.show', $note->user->username) }}" class="text-sm text-gray-600 hover:text-blue-600">
@@ -230,7 +230,7 @@
 
         <!-- Regular Notes Section -->
         <div class="mb-4">
-            <h2 class="text-xl font-bold text-gray-900">All Notes</h2>
+            <h2 class="text-xl font-bold text-gray-900">{{ __('messages.all_notes') }}</h2>
         </div>
 
         @if($notes->count() > 0)
@@ -280,8 +280,8 @@
                                     @if($note->hasDiscount())
                                         <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-yellow-100">
                                             <div class="flex flex-col items-end">
-                                                <span class="text-gray-500 line-through text-[10px]">Rp {{ number_format($note->price, 0, ',', '.') }}</span>
-                                                <span class="text-yellow-800 font-semibold">Rp {{ number_format($note->discount_price, 0, ',', '.') }}</span>
+                                                <span class="text-gray-500 line-through text-[10px]">{{ currency($note->price) }}</span>
+                                                <span class="text-yellow-800 font-semibold">{{ currency($note->discount_price) }}</span>
                                             </div>
                                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500 text-white">
                                                 -{{ $note->discount_percent }}%
@@ -289,7 +289,7 @@
                                         </div>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 font-semibold">
-                                            Rp {{ number_format($note->price, 0, ',', '.') }}
+                                            {{ currency($note->price) }}
                                         </span>
                                     @endif
                                 @else
@@ -303,7 +303,7 @@
                             <div class="flex items-center justify-between pt-4 border-t border-gray-200">
                                 <a href="{{ route('public.profile.show', $note->user->username) }}" 
                                    class="flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 group"
-                                   title="View all notes from {{ $note->user->name }}">
+                                   title="{{ __('messages.view_all_notes_from', ['name' => $note->user->name]) }}">
                                     <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center mr-2 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200">
                                         @if($note->user->avatar)
                                             @if(str_starts_with($note->user->avatar, 'http'))
@@ -321,16 +321,16 @@
                                             @if ($note->user->hasPremium())
                                                 <span
                                                     class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
-                                                    title="Premium Buyer">
+                                                    title="{{ __('messages.premium_buyer_badge') }}">
                                                     <svg class="w-2.5 h-2.5 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
                                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                     </svg>
-                                                    Premium
+                                                    {{ __('messages.premium_buyer_badge') }}
                                                 </span>
                                             @endif
                                         </div>
                                         @if($note->user->role === 'seller')
-                                            <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Seller">
+                                            <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="{{ __('messages.seller') }}">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
                                         @endif
@@ -339,7 +339,7 @@
                                 @if($note->user->role === 'seller' && $note->user->notes()->where('is_public', true)->where('status', 'active')->count() > 0)
                                     <a href="{{ route('public.profile.ai-chat', $note->user->username) }}"
                                         class="inline-flex items-center px-2 py-1 text-xs font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded hover:from-purple-700 hover:to-blue-700 transition-all duration-200"
-                                        title="Ask AI about {{ $note->user->name }}'s notes">
+                                        title="{{ __('messages.ask_ai_about_notes', ['name' => $note->user->name]) }}">
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                                         </svg>
@@ -385,7 +385,7 @@ function copyToClipboard(text) {
                     showConfirmButton: false
                 });
             } else {
-                alert('Link copied to clipboard!');
+                alert('{{ __('messages.link_copied') }}');
             }
         }).catch(function(err) {
             console.error('Failed to copy:', err);
@@ -416,7 +416,7 @@ function fallbackCopyToClipboard(text) {
                 showConfirmButton: false
             });
         } else {
-            alert('Link copied to clipboard!');
+            alert('{{ __('messages.link_copied') }}');
         }
     } catch (err) {
         console.error('Fallback copy failed:', err);

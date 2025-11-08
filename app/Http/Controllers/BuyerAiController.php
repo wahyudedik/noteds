@@ -7,6 +7,7 @@ use App\Models\PurchasedNote;
 use App\Models\AiAnalysis;
 use App\Services\AiService;
 use App\Services\ContentExtractorService;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -17,7 +18,8 @@ class BuyerAiController extends Controller
 {
     public function __construct(
         protected AiService $aiService,
-        protected ContentExtractorService $contentExtractor
+        protected ContentExtractorService $contentExtractor,
+        protected NotificationService $notificationService
     ) {}
 
     /**
@@ -140,6 +142,18 @@ class BuyerAiController extends Controller
             // Cache the result for faster future access
             Cache::put($cacheKey, $analysisData, now()->addDays(7));
 
+            $this->notificationService->notifyAiJobCompleted(
+                $user,
+                'analysis',
+                'Analisis AI Siap',
+                "Analisis AI untuk \"{$note->title}\" sudah tersedia.",
+                [
+                    'note_id' => $note->id,
+                    'analysis_type' => 'analyzer',
+                ],
+                route('marketplace.show', $note)
+            );
+
             return response()->json([
                 'success' => true,
                 'data' => $analysisData,
@@ -230,12 +244,26 @@ class BuyerAiController extends Controller
                         ])->values()->toArray();
                 }
 
-                return response()->json([
+                $response = [
                     'success' => true,
                     'answer' => $result['answer'],
                     'referenced_notes' => $referencedNotes,
                     'notes_searched' => $notes->count(),
-                ]);
+                ];
+
+                $this->notificationService->notifyAiJobCompleted(
+                    $user,
+                    'qa',
+                    'Jawaban AI Siap',
+                    'Jawaban untuk pertanyaan Anda sudah siap dipelajari.',
+                    [
+                        'question' => $question,
+                        'note_ids' => $noteIds,
+                    ],
+                    route('marketplace.index')
+                );
+
+                return response()->json($response);
             }
 
             return response()->json([
@@ -306,6 +334,19 @@ class BuyerAiController extends Controller
                 'content' => $studyMaterial['content'],
                 'item_count' => $studyMaterial['item_count'],
             ]);
+
+            $this->notificationService->notifyAiJobCompleted(
+                $user,
+                'study_material',
+                'Study Material Siap',
+                "Study material {$type} untuk \"{$note->title}\" berhasil dibuat.",
+                [
+                    'note_id' => $note->id,
+                    'type' => $type,
+                    'item_count' => $studyMaterial['item_count'],
+                ],
+                route('marketplace.show', $note)
+            );
 
             return response()->json([
                 'success' => true,
@@ -398,6 +439,16 @@ class BuyerAiController extends Controller
 
             // Cache comparison result for 24 hours
             Cache::put($cacheKey, $comparison, now()->addDay());
+
+            $this->notificationService->notifyAiJobCompleted(
+                $user,
+                'compare_notes',
+                'Perbandingan Note Siap',
+                'Hasil perbandingan note yang Anda pilih sudah siap ditinjau.',
+                [
+                    'note_ids' => $noteIds,
+                ]
+            );
 
             return response()->json([
                 'success' => true,
@@ -511,6 +562,18 @@ class BuyerAiController extends Controller
 
         // Cache recommendations for 1 hour
         Cache::put($cacheKey, $recommendedNotes->toArray(), now()->addHour());
+
+        $this->notificationService->notifyAiJobCompleted(
+            $user,
+            'recommendations',
+            'Rekomendasi Baru Siap',
+            "Kami menemukan {$recommendedNotes->count()} rekomendasi note berdasarkan pembelian Anda.",
+            [
+                'recommendation_count' => $recommendedNotes->count(),
+                'tags_used' => array_values($tags),
+            ],
+            route('marketplace.index')
+        );
 
         return response()->json([
             'success' => true,
@@ -729,6 +792,19 @@ class BuyerAiController extends Controller
                     $result['tables'] = $tablesResult;
                 }
             }
+
+            $this->notificationService->notifyAiJobCompleted(
+                $user,
+                'content_extraction',
+                'Ekstraksi Konten Selesai',
+                "Konten dari file {$filename} berhasil diekstrak.",
+                [
+                    'note_id' => $note->id,
+                    'filename' => $filename,
+                    'extract_type' => $extractType,
+                ],
+                route('marketplace.show', $note)
+            );
 
             return response()->json([
                 'success' => true,

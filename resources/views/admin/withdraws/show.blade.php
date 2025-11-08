@@ -30,14 +30,14 @@
                     <div class="space-y-2">
                         <p><strong>{{ __('messages.name') }}:</strong> {{ $withdraw->user->name }}</p>
                         <p><strong>{{ __('messages.email') }}:</strong> {{ $withdraw->user->email }}</p>
-                        <p><strong>{{ __('messages.current_balance') }}:</strong> Rp {{ number_format($withdraw->user->wallet_balance ?? 0, 0, ',', '.') }}</p>
+                        <p><strong>{{ __('messages.current_balance') }}:</strong> {{ currency($withdraw->user->wallet_balance ?? 0) }}</p>
                     </div>
                 </div>
 
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.withdraw_detail') }}</h3>
                     <div class="space-y-2">
-                        <p><strong>{{ __('messages.amount') }}:</strong> <span class="text-lg font-bold text-green-600">Rp {{ number_format($withdraw->amount, 0, ',', '.') }}</span></p>
+                        <p><strong>{{ __('messages.amount') }}:</strong> <span class="text-lg font-bold text-green-600">{{ currency($withdraw->amount) }}</span></p>
                         <p><strong>{{ __('messages.bank') }}:</strong> {{ $withdraw->bank_name }}</p>
                         <p><strong>{{ __('messages.account_number') }}:</strong> {{ $withdraw->account_number }}</p>
                         <p><strong>{{ __('messages.account_name') }}:</strong> {{ $withdraw->account_name }}</p>

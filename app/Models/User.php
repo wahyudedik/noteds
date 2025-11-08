@@ -3,17 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\DB;
+use App\Models\NoteConversation;
+use App\Models\NoteMessage;
+use App\Models\NoteReviewReply;
+use App\Models\NoteReview;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, HasUuids, Notifiable, HasRoles;
+
+    protected ?array $sellerReviewStatsCache = null;
 
     /**
      * The attributes that are mass assignable.
@@ -244,6 +252,54 @@ class User extends Authenticatable implements MustVerifyEmail
     public function notifications()
     {
         return $this->hasMany(AppNotification::class);
+    }
+
+    public function noteConversationsAsBuyer(): HasMany
+    {
+        return $this->hasMany(NoteConversation::class, 'buyer_id');
+    }
+
+    public function noteConversationsAsSeller(): HasMany
+    {
+        return $this->hasMany(NoteConversation::class, 'seller_id');
+    }
+
+    public function noteMessages(): HasMany
+    {
+        return $this->hasMany(NoteMessage::class, 'sender_id');
+    }
+
+    public function noteReviewReplies(): HasMany
+    {
+        return $this->hasMany(NoteReviewReply::class, 'user_id');
+    }
+
+    public function sellerReviewStats(): array
+    {
+        if ($this->sellerReviewStatsCache !== null) {
+            return $this->sellerReviewStatsCache;
+        }
+
+        $stats = DB::table('notes')
+            ->join('note_reviews', 'note_reviews.note_id', '=', 'notes.id')
+            ->where('notes.user_id', $this->id)
+            ->selectRaw('AVG(note_reviews.rating) as avg_rating, COUNT(note_reviews.id) as total_reviews')
+            ->first();
+
+        return $this->sellerReviewStatsCache = [
+            'average' => $stats && $stats->avg_rating !== null ? round((float) $stats->avg_rating, 1) : 0.0,
+            'count' => $stats ? (int) $stats->total_reviews : 0,
+        ];
+    }
+
+    public function sellerAverageRating(): float
+    {
+        return $this->sellerReviewStats()['average'];
+    }
+
+    public function sellerTotalReviews(): int
+    {
+        return $this->sellerReviewStats()['count'];
     }
 
     /**

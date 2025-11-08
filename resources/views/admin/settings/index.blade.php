@@ -485,8 +485,7 @@
                                 <div class="ml-3 flex-1">
                                     <p class="text-sm font-medium text-green-800 mb-1">Current Settings</p>
                                     <ul class="text-xs text-green-700 space-y-1">
-                                        <li>• Signup Reward: <strong>Rp
-                                                {{ number_format($referralSignupReward, 0, ',', '.') }}</strong></li>
+                                        <li>• Signup Reward: <strong>{{ currency($referralSignupReward) }}</strong></li>
                                         <li>• Transaction Commission: <strong>{{ $referralCommissionPercent }}%</strong>
                                         </li>
                                         <li>• Perubahan akan berlaku untuk referral baru dan transaksi baru</li>

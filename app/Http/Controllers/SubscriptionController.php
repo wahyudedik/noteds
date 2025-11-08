@@ -31,10 +31,16 @@ class SubscriptionController extends Controller
         }
 
         $user = auth()->user();
+        $currencyService = app(\App\Services\CurrencyService::class);
+        $baseCurrency = $currencyService->getBaseCurrency();
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $user->id],
-            ['balance' => 0]
+            ['balance' => 0, 'currency' => $baseCurrency]
         );
+        if ($wallet->currency !== $baseCurrency) {
+            $wallet->currency = $baseCurrency;
+            $wallet->save();
+        }
         
         // Sync wallet balance
         if ($wallet->balance != $user->wallet_balance) {
@@ -50,10 +56,17 @@ class SubscriptionController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $user = auth()->user();
+        $currencyService = app(\App\Services\CurrencyService::class);
+        $baseCurrency = $currencyService->getBaseCurrency();
+        $userCurrency = $currencyService->getUserCurrency($user);
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $user->id],
-            ['balance' => 0]
+            ['balance' => 0, 'currency' => $baseCurrency]
         );
+        if ($wallet->currency !== $baseCurrency) {
+            $wallet->currency = $baseCurrency;
+            $wallet->save();
+        }
         
         // Sync wallet balance
         if ($wallet->balance != $user->wallet_balance) {
@@ -72,12 +85,14 @@ class SubscriptionController extends Controller
 
         // Check wallet balance
         if ($wallet->balance < $premiumPrice) {
+            $currentBalanceDisplay = currency($wallet->balance, $userCurrency, $baseCurrency);
+            $requiredDisplay = currency($premiumPrice, $userCurrency, $baseCurrency);
             return redirect()->route('subscription.create')
-                ->with('error', 'Insufficient wallet balance. Please top up your wallet first.')
+                ->with('error', __('messages.insufficient_wallet_balance', ['balance' => $currentBalanceDisplay, 'required' => $requiredDisplay]))
                 ->with('insufficient_balance', true);
         }
 
-        DB::transaction(function () use ($user, $wallet, $premiumPrice) {
+        DB::transaction(function () use ($user, $wallet, $premiumPrice, $baseCurrency) {
             // Deduct from wallet
             $wallet->balance -= $premiumPrice;
             $wallet->save();
@@ -93,6 +108,10 @@ class SubscriptionController extends Controller
                 'note_id' => null,
                 'amount' => $premiumPrice,
                 'commission' => 0,
+                'currency' => $baseCurrency,
+                'original_amount' => $premiumPrice,
+                'original_currency' => $baseCurrency,
+                'exchange_rate' => 1,
                 'status' => 'success',
                 'payment_method' => 'wallet',
                 'notes' => 'Premium subscription payment',

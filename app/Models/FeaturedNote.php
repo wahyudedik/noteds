@@ -28,6 +28,7 @@ class FeaturedNote extends Model
         'clicks',
         'impressions',
         'admin_notes',
+        'reminder_sent_at',
     ];
 
     protected function casts(): array
@@ -42,6 +43,7 @@ class FeaturedNote extends Model
             'is_custom_duration' => 'boolean',
             'clicks' => 'integer',
             'impressions' => 'integer',
+            'reminder_sent_at' => 'datetime',
         ];
     }
 

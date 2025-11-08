@@ -35,7 +35,7 @@
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
-                                    Top Up Wallet →
+                                    {{ __('messages.top_up') }} →
                                 </a>
                             </div>
                         @endif
@@ -53,7 +53,7 @@
                     </div>
                     <h2 class="text-3xl font-bold text-gray-900 mb-2">{{ __('messages.upgrade_now') }}</h2>
                     <p class="text-base text-gray-600 mb-2">{{ __('messages.get_all_premium_features') }}</p>
-                    <p class="text-2xl font-bold text-green-600">Rp {{ number_format($premiumPrice, 0, ',', '.') }}</p>
+                    <p class="text-2xl font-bold text-green-600">{{ currency($premiumPrice) }}</p>
                 </div>
 
                 <!-- Wallet Balance Info -->
@@ -62,7 +62,7 @@
                         <div>
                             <p class="text-sm font-medium text-gray-700">{{ __('messages.wallet_balance_title') }}</p>
                             <p class="text-2xl font-bold {{ $wallet->balance >= $premiumPrice ? 'text-green-600' : 'text-red-600' }}">
-                                Rp {{ number_format($wallet->balance, 0, ',', '.') }}
+                                {{ currency($wallet->balance) }}
                             </p>
                         </div>
                         <div class="text-right">
@@ -81,7 +81,7 @@
                                     {{ __('messages.insufficient_balance') }}
                                 </div>
                                 <a href="{{ route('wallet.index') }}" class="mt-2 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-200">
-                                    {{ __('messages.top_up_now') }} →
+                                    {{ __('messages.top_up') }} →
                                 </a>
                             @endif
                         </div>

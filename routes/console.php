@@ -32,3 +32,21 @@ Schedule::command('forum:publish-scheduled-posts')
     ->everyMinute()
     ->timezone('Asia/Jakarta')
     ->description('Publish forum posts that have reached their scheduled time');
+
+Schedule::command('workspace:digest')
+    ->daily()
+    ->at('07:00')
+    ->timezone('Asia/Jakarta')
+    ->description('Send daily workspace activity digest to members.');
+
+Schedule::command('marketplace:daily-digest')
+    ->daily()
+    ->at('08:00')
+    ->timezone('Asia/Jakarta')
+    ->description('Send daily sales digest to sellers.');
+
+Schedule::command('featured:expiry-reminders')
+    ->daily()
+    ->at('09:00')
+    ->timezone('Asia/Jakarta')
+    ->description('Send reminders for featured notes that are about to expire.');

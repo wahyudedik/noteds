@@ -8,7 +8,9 @@ use App\Models\Tag;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Models\User;
+use App\Models\NoteConversation;
 use App\Services\ReferralService;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +18,10 @@ use Illuminate\View\View;
 
 class MarketplaceController extends Controller
 {
+    public function __construct(private NotificationService $notificationService)
+    {
+    }
+
     public function index(Request $request): View
     {
         // Get featured notes for marketplace grid
@@ -122,8 +128,14 @@ class MarketplaceController extends Controller
             }
         }
 
-        // Load reviews with pagination
-        $reviews = $note->reviews()->with('user')->latest()->paginate(10);
+        // Load reviews with replies
+        $reviews = $note->reviews()
+            ->with([
+                'user',
+                'replies',
+            ])
+            ->latest()
+            ->paginate(10);
 
         $canBuy = false;
         $alreadyPurchased = false;
@@ -192,7 +204,43 @@ class MarketplaceController extends Controller
             $premiumDiscountPrice = $basePrice - $premiumDiscount;
         }
         
-        return view('marketplace.show', compact('note', 'canBuy', 'alreadyPurchased', 'reviews', 'canReview', 'userReview', 'showFullContent', 'isNoteOwner', 'hasPurchasedBefore', 'premiumDiscountPercent', 'premiumDiscountPrice', 'basePrice'));
+        $conversation = null;
+        if (auth()->check()) {
+            $conversation = NoteConversation::with(['buyer', 'seller', 'latestMessage.sender'])
+                ->where('note_id', $note->id)
+                ->where(function ($query) use ($user) {
+                    $query->where('buyer_id', $user->id)
+                        ->orWhere('seller_id', $user->id);
+                })
+                ->orderByDesc('updated_at')
+                ->first();
+        }
+
+        $sellerReviewStats = [
+            'average' => 0,
+            'count' => 0,
+        ];
+
+        if ($note->user) {
+            $sellerReviewStats = $note->user->sellerReviewStats();
+        }
+
+        return view('marketplace.show', compact(
+            'note',
+            'canBuy',
+            'alreadyPurchased',
+            'reviews',
+            'canReview',
+            'userReview',
+            'showFullContent',
+            'isNoteOwner',
+            'hasPurchasedBefore',
+            'premiumDiscountPercent',
+            'premiumDiscountPrice',
+            'basePrice',
+            'conversation',
+            'sellerReviewStats'
+        ));
     }
 
     public function purchase(Note $note, ReferralService $referralService): RedirectResponse
@@ -251,15 +299,25 @@ class MarketplaceController extends Controller
         }
 
         // Ensure wallets exist
+        $baseCurrency = config('currency.base_currency', 'IDR');
+
         $buyerWallet = Wallet::firstOrCreate(
             ['user_id' => $buyer->id],
-            ['balance' => 0]
+            ['balance' => 0, 'currency' => $baseCurrency]
         );
+        if ($buyerWallet->currency !== $baseCurrency) {
+            $buyerWallet->currency = $baseCurrency;
+            $buyerWallet->save();
+        }
 
         $sellerWallet = Wallet::firstOrCreate(
             ['user_id' => $seller->id],
-            ['balance' => 0]
+            ['balance' => 0, 'currency' => $baseCurrency]
         );
+        if ($sellerWallet->currency !== $baseCurrency) {
+            $sellerWallet->currency = $baseCurrency;
+            $sellerWallet->save();
+        }
 
         // Sync wallet balance with user wallet_balance
         if ($buyerWallet->balance != $buyer->wallet_balance) {
@@ -270,6 +328,14 @@ class MarketplaceController extends Controller
         if ($buyerWallet->balance < $finalPrice) {
             return redirect()->route('marketplace.show', $note)->with('error', 'Saldo wallet tidak cukup. Silakan top-up terlebih dahulu.');
         }
+
+        $notificationData = [
+            'purchase' => null,
+            'sale' => null,
+            'commission' => [],
+            'low_balance' => [],
+            'popularity_check' => false,
+        ];
 
         try {
             DB::beginTransaction();
@@ -345,6 +411,11 @@ class MarketplaceController extends Controller
             $buyer->wallet_balance = $buyerWallet->balance;
             $buyer->save();
 
+            $notificationData['low_balance'][] = [
+                'user_id' => $buyer->id,
+                'balance' => (float) $buyer->wallet_balance,
+            ];
+
             // Add to seller
             $sellerWallet->balance += $sellerAmount;
             $sellerWallet->save();
@@ -363,10 +434,13 @@ class MarketplaceController extends Controller
                     $seller->save();
                 } else {
                     // Seller is different: original creator gets separate commission
-                    $creatorWallet = Wallet::firstOrCreate(
-                        ['user_id' => $originalCreator->id],
-                        ['balance' => 0]
-                    );
+                $creatorWallet = Wallet::firstOrCreate(
+                    ['user_id' => $originalCreator->id],
+                    ['balance' => 0, 'currency' => $baseCurrency]
+                );
+                if ($creatorWallet->currency !== $baseCurrency) {
+                    $creatorWallet->currency = $baseCurrency;
+                }
                     $creatorWallet->balance += $creatorCommission;
                     $creatorWallet->save();
                     $originalCreator->wallet_balance = $creatorWallet->balance;
@@ -377,10 +451,13 @@ class MarketplaceController extends Controller
             // Get or create admin wallet (platform wallet)
             $admin = User::where('role', 'admin')->first();
             if ($admin) {
-                $adminWallet = Wallet::firstOrCreate(
-                    ['user_id' => $admin->id],
-                    ['balance' => 0]
-                );
+            $adminWallet = Wallet::firstOrCreate(
+                ['user_id' => $admin->id],
+                ['balance' => 0, 'currency' => $baseCurrency]
+            );
+            if ($adminWallet->currency !== $baseCurrency) {
+                $adminWallet->currency = $baseCurrency;
+            }
                 $adminWallet->balance += $platformFee;
                 $adminWallet->save();
                 $admin->wallet_balance = $adminWallet->balance;
@@ -405,6 +482,10 @@ class MarketplaceController extends Controller
                 'note_id' => $note->id,
                 'amount' => $amount,
                 'commission' => $platformFee, // Keep for backward compatibility
+                'currency' => $baseCurrency,
+                'original_amount' => $amount,
+                'original_currency' => $baseCurrency,
+                'exchange_rate' => 1,
                 'platform_fee' => $platformFee,
                 'creator_commission' => $creatorCommission,
                 'status' => 'success',
@@ -433,6 +514,43 @@ class MarketplaceController extends Controller
                 'download_count' => 0,
             ]);
 
+            $notificationData['purchase'] = [
+                'buyer_id' => $buyer->id,
+                'note_id' => $note->id,
+                'amount' => $amount,
+                'transaction_id' => $transaction->id,
+            ];
+
+            $notificationData['sale'] = [
+                'seller_id' => $seller->id,
+                'note_id' => $note->id,
+                'amount' => $amount,
+                'buyer_name' => $buyer->name,
+                'transaction_id' => $transaction->id,
+            ];
+
+            if ($creatorCommission > 0 && $originalCreator && $originalCreator->id !== $seller->id) {
+                $notificationData['commission'][] = [
+                    'creator_id' => $originalCreator->id,
+                    'note_id' => $note->id,
+                    'amount' => $creatorCommission,
+                    'seller_id' => $seller->id,
+                ];
+            }
+
+            $notificationData['popularity_check'] = true;
+
+            NoteConversation::updateOrCreate(
+                [
+                    'note_id' => $note->id,
+                    'buyer_id' => $buyer->id,
+                    'seller_id' => $seller->id,
+                ],
+                [
+                    'last_message_at' => now(),
+                ]
+            );
+
             DB::commit();
 
             // Process transaction reward for referral (outside transaction to avoid deadlock)
@@ -445,6 +563,73 @@ class MarketplaceController extends Controller
                         'transaction_id' => $transaction->id,
                         'error' => $e->getMessage(),
                     ]);
+                }
+            }
+
+            $note = $note->fresh(['user']);
+
+            if ($notificationData['purchase']) {
+                $buyerForNotification = User::find($notificationData['purchase']['buyer_id']);
+                if ($buyerForNotification) {
+                    $this->notificationService->notifyPurchase(
+                        $buyerForNotification,
+                        $note,
+                        $notificationData['purchase']['amount'],
+                        $notificationData['purchase']['transaction_id']
+                    );
+                }
+            }
+
+            if ($notificationData['sale']) {
+                $sellerForNotification = User::find($notificationData['sale']['seller_id']);
+                if ($sellerForNotification) {
+                    $this->notificationService->notifySale(
+                        $sellerForNotification,
+                        $note,
+                        $notificationData['sale']['amount'],
+                        $notificationData['sale']['buyer_name']
+                    );
+                }
+            }
+
+            if (!empty($notificationData['commission'])) {
+                foreach ($notificationData['commission'] as $commissionData) {
+                    $creator = User::find($commissionData['creator_id']);
+                    $commissionSeller = User::find($commissionData['seller_id']);
+
+                    if ($creator) {
+                        $this->notificationService->notifyCreatorCommission(
+                            $creator,
+                            $note,
+                            $commissionData['amount'],
+                            $commissionSeller
+                        );
+                    }
+                }
+            }
+
+            if (!empty($notificationData['low_balance'])) {
+                foreach ($notificationData['low_balance'] as $lowBalance) {
+                    $lowUser = User::find($lowBalance['user_id']);
+                    if ($lowUser) {
+                        $this->notificationService->maybeNotifyLowBalance($lowUser, $lowBalance['balance']);
+                    }
+                }
+            }
+
+            if ($notificationData['popularity_check']) {
+                $previousMilestones = $note->notificationMeta('popularity_milestones', []);
+                $updatedMilestones = $previousMilestones;
+
+                foreach ($this->notificationService->getPopularityThresholds() as $threshold) {
+                    if ($note->purchase_count >= $threshold && !in_array($threshold, $updatedMilestones, true)) {
+                        $this->notificationService->notifyNotePopular($note, $threshold);
+                        $updatedMilestones[] = $threshold;
+                    }
+                }
+
+                if ($updatedMilestones !== $previousMilestones) {
+                    $note->setNotificationMetaValue('popularity_milestones', array_values(array_unique($updatedMilestones)));
                 }
             }
 

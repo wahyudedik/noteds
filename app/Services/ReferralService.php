@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\DB;
 
 class ReferralService
 {
+    public function __construct(private NotificationService $notificationService)
+    {
+    }
+
     /**
      * Get signup reward amount (dynamic from settings).
      */
@@ -42,6 +46,8 @@ class ReferralService
             return null;
         }
 
+        $baseCurrency = config('currency.base_currency', 'IDR');
+
         try {
             DB::beginTransaction();
 
@@ -63,8 +69,11 @@ class ReferralService
             // Sync Wallet model with user wallet_balance
             $referrerWallet = \App\Models\Wallet::firstOrCreate(
                 ['user_id' => $referrer->id],
-                ['balance' => 0]
+                ['balance' => 0, 'currency' => $baseCurrency]
             );
+            if ($referrerWallet->currency !== $baseCurrency) {
+                $referrerWallet->currency = $baseCurrency;
+            }
             $referrerWallet->balance = $referrer->wallet_balance;
             $referrerWallet->save();
             
@@ -72,6 +81,8 @@ class ReferralService
             $referral->update(['status' => 'paid']);
 
             DB::commit();
+
+            $this->notificationService->notifyReferralSignup($referrer, $referredUser, $signupReward);
 
             return $referral;
         } catch (\Exception $e) {
@@ -139,8 +150,11 @@ class ReferralService
             // Sync Wallet model with user wallet_balance
             $referrerWallet = \App\Models\Wallet::firstOrCreate(
                 ['user_id' => $referrer->id],
-                ['balance' => 0]
+                ['balance' => 0, 'currency' => $baseCurrency]
             );
+            if ($referrerWallet->currency !== $baseCurrency) {
+                $referrerWallet->currency = $baseCurrency;
+            }
             $referrerWallet->balance = $referrer->wallet_balance;
             $referrerWallet->save();
             
@@ -148,6 +162,10 @@ class ReferralService
             $referral->update(['status' => 'paid']);
 
             DB::commit();
+
+            if ($rewardAmount > 0) {
+                $this->notificationService->notifyReferralPurchase($referrer, $buyer, $rewardAmount, $commissionPercent);
+            }
 
             return $referral;
         } catch (\Exception $e) {

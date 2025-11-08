@@ -3,6 +3,22 @@
 @section('title', __('messages.withdraw_wallet'))
 
 @section('content')
+@php
+    $currencyService = app(\App\Services\CurrencyService::class);
+    $baseCurrency = $currencyService->getBaseCurrency();
+    $userCurrency = $currencyService->getUserCurrency(auth()->user());
+    $walletCurrency = $wallet->currency ?? $baseCurrency;
+    $currencyInfo = \App\Helpers\CurrencyHelper::getCurrencyInfo($userCurrency);
+    $decimalPlaces = $currencyInfo['decimal_places'] ?? 0;
+    $currencySymbol = $currencyInfo['symbol'] ?? '';
+    $withdrawMinBase = 50000;
+    $withdrawMinDisplay = currency($withdrawMinBase, $userCurrency, $baseCurrency);
+    $walletBalanceDisplay = currency($wallet->balance, $userCurrency, $walletCurrency);
+    $minInputValue = number_format($currencyService->convert($withdrawMinBase, $baseCurrency, $userCurrency), $decimalPlaces, '.', '');
+    $maxInputValue = number_format($currencyService->convert($wallet->balance, $walletCurrency, $userCurrency), $decimalPlaces, '.', '');
+    $stepValue = $decimalPlaces > 0 ? 1 / (10 ** $decimalPlaces) : 1;
+    $stepAttribute = number_format($stepValue, $decimalPlaces, '.', '');
+@endphp
 <div class="py-8 sm:py-12">
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Breadcrumb -->
@@ -32,8 +48,10 @@
                     </div>
                     <div class="ml-3 flex-1">
                         <h3 class="text-base font-medium text-yellow-800 mb-2">{{ __('messages.insufficient_balance') }}</h3>
-                        <p class="text-sm text-yellow-700 mb-3">{{ __('messages.minimum_withdraw') }}</p>
-                        <p class="text-sm font-medium text-gray-900">{{ __('messages.your_current_balance') }}: <span class="text-yellow-700">Rp {{ number_format($wallet->balance, 0, ',', '.') }}</span></p>
+                        <p class="text-sm text-yellow-700 mb-3">{{ __('messages.minimum_withdraw', ['amount' => $withdrawMinDisplay]) }}</p>
+                        <p class="text-sm font-medium text-gray-900">{{ __('messages.your_current_balance') }}:
+                            <span class="text-yellow-700">{{ $walletBalanceDisplay }}</span>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -60,12 +78,12 @@
                             </div>
                             <div class="ml-3 flex-1">
                                 <p class="text-sm font-medium text-blue-800">{{ __('messages.available_balance') }}</p>
-                                <p class="mt-1 text-2xl font-bold text-blue-900">Rp {{ number_format($wallet->balance, 0, ',', '.') }}</p>
+                                <p class="mt-1 text-2xl font-bold text-blue-900">{{ $walletBalanceDisplay }}</p>
                                 <p class="mt-2 text-xs text-blue-700">
                                     <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                                     </svg>
-                                    {{ __('messages.minimum_withdraw_info') }}
+                                    {{ __('messages.minimum_withdraw_info', ['amount' => $withdrawMinDisplay]) }}
                                 </p>
                             </div>
                         </div>
@@ -98,17 +116,17 @@
                         <!-- Amount -->
                         <div>
                             <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
-                                {{ __('messages.withdrawal_amount') }} (Rp) <span class="text-red-500">*</span>
+                                {{ __('messages.withdrawal_amount') }} ({{ $currencySymbol ?: $userCurrency }}) <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 text-sm">Rp</span>
+                                    <span class="text-gray-500 text-sm">{{ $currencySymbol }}</span>
                                 </div>
                                 <input type="number" name="amount" id="amount" 
                                     value="{{ old('amount') }}"
-                                    min="50000" 
-                                    max="{{ $wallet->balance }}" 
-                                    step="1000" 
+                                    min="{{ $minInputValue }}" 
+                                    max="{{ $maxInputValue }}" 
+                                    step="{{ $stepAttribute }}" 
                                     required
                                     :placeholder="__('messages.enter_withdrawal_amount')"
                                     class="block w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 @error('amount') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
@@ -122,7 +140,7 @@
                                 </p>
                             @enderror
                             <p class="mt-2 text-xs text-gray-500">
-                                {{ __('messages.range') }}: Rp 50.000 - Rp {{ number_format($wallet->balance, 0, ',', '.') }}
+                                {{ __('messages.range') }}: {{ $withdrawMinDisplay }} - {{ $walletBalanceDisplay }}
                             </p>
                         </div>
 

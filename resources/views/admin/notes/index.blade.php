@@ -65,7 +65,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         @if($note->price > 0)
-                                            Rp {{ number_format($note->price, 0, ',', '.') }}
+                                            {{ currency($note->price) }}
                                         @else
                                             <span class="text-gray-400">{{ __('messages.free') }}</span>
                                         @endif

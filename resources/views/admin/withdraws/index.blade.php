@@ -68,7 +68,7 @@
                                         <span class="text-xs text-gray-500">{{ $withdraw->user->email }}</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        Rp {{ number_format($withdraw->amount, 0, ',', '.') }}
+                                        {{ currency($withdraw->amount) }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-500">
                                         <div>{{ $withdraw->bank_name }}</div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\WorkspaceActivityLog;
 use App\Services\ReferralService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -142,6 +143,16 @@ class RegisteredUserController extends Controller
                 'is_active' => true,
                 'joined_at' => now(),
             ]);
+
+            WorkspaceActivityLog::record(
+                $invitation->workspace,
+                'member_joined',
+                $user,
+                [
+                    'role' => $invitation->role,
+                    'invited_by' => $invitation->invited_by,
+                ]
+            );
         }
 
         Auth::login($user);

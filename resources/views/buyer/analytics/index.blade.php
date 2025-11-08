@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Buyer Analytics')
+@section('title', __('buyer.analytics.title'))
 
 @section('content')
 <div class="py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-8">Buyer Analytics</h1>
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">{{ __('buyer.analytics.title') }}</h1>
 
         <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -17,7 +17,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Total Purchased</p>
+                        <p class="text-sm font-medium text-gray-600">{{ __('buyer.analytics.total_purchased') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ $totalPurchased }}</p>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Total Spent</p>
+                        <p class="text-sm font-medium text-gray-600">{{ __('buyer.analytics.total_spent') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ currency($totalSpent) }}</p>
                     </div>
                 </div>
@@ -45,7 +45,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Total Downloads</p>
+                        <p class="text-sm font-medium text-gray-600">{{ __('buyer.analytics.total_downloads') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ $totalDownloads }}</p>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Completion Rate</p>
+                        <p class="text-sm font-medium text-gray-600">{{ __('buyer.analytics.completion_rate') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ number_format($completionRate, 1) }}%</p>
                     </div>
                 </div>
@@ -69,9 +69,9 @@
         <!-- Recent Purchases -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-gray-900">Recent Purchases</h2>
+                <h2 class="text-xl font-bold text-gray-900">{{ __('buyer.analytics.recent_purchases') }}</h2>
                 <a href="{{ route('buyer-analytics.purchase-history') }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                    View All →
+                    {{ __('buyer.analytics.view_all') }}
                 </a>
             </div>
             @if($recentPurchases->count() > 0)
@@ -87,28 +87,34 @@
                                 <div class="ml-4 flex-1">
                                     <h3 class="text-sm font-semibold text-gray-900">{{ $purchase->note->title }}</h3>
                                     <p class="text-xs text-gray-600 mt-1">
-                                        Purchased on {{ $purchase->purchased_at->format('d M Y, H:i') }}
+                                        {{ __('buyer.analytics.purchased_on', [
+                                            'date' => $purchase->purchased_at->format('d M Y'),
+                                            'time' => $purchase->purchased_at->format('H:i')
+                                        ]) }}
                                     </p>
                                 </div>
                             </div>
                             <div class="text-right">
                                 <p class="text-sm font-semibold text-gray-900">{{ currency($purchase->purchase_price) }}</p>
                                 <a href="{{ route('marketplace.show', $purchase->note) }}" class="text-xs text-blue-600 hover:text-blue-700">
-                                    View →
+                                    {{ __('buyer.analytics.view_note') }}
                                 </a>
                             </div>
                         </div>
                     @endforeach
                 </div>
             @else
-                <p class="text-center text-gray-600 py-8">No purchases yet.</p>
+                <div class="text-center text-gray-600 py-8">
+                    <p class="font-medium">{{ __('buyer.analytics.empty_recent_title') }}</p>
+                    <p class="text-sm mt-1">{{ __('buyer.analytics.empty_recent_message') }}</p>
+                </div>
             @endif
         </div>
 
         <!-- Categories -->
         @if(isset($categories) && $categories->count() > 0 && $totalPurchased > 0)
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-6">Top Categories</h2>
+                <h2 class="text-xl font-bold text-gray-900 mb-6">{{ __('buyer.analytics.top_categories') }}</h2>
                 <div class="space-y-3">
                     @foreach($categories as $category)
                         <div class="flex items-center justify-between">

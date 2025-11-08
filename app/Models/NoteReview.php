@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\NoteReviewReply;
 
 class NoteReview extends Model
 {
@@ -32,5 +34,22 @@ class NoteReview extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function replies(): HasMany
+    {
+        return $this->hasMany(NoteReviewReply::class, 'review_id')
+            ->whereNull('parent_id')
+            ->with([
+                'user',
+                'children.user',
+                'children.children.user',
+            ])
+            ->orderBy('created_at');
+    }
+
+    public function allReplies(): HasMany
+    {
+        return $this->hasMany(NoteReviewReply::class, 'review_id');
     }
 }
