@@ -996,6 +996,8 @@
                         }
                     });
 
+                    const walletTopupUrl = '{{ route('wallet.index') }}';
+
                     // Get textarea element
                     const contentTextarea = document.getElementById('content');
 
@@ -1390,7 +1392,57 @@
                         });
                     }
 
-                    // Helper function to check premium requirement
+                    function formatAiCurrency(amount, currency = 'IDR') {
+                        const value = typeof amount === 'number' ? amount : parseFloat(amount ?? 0);
+                        if (Number.isNaN(value)) {
+                            return `${currency} 0`;
+                        }
+
+                        try {
+                            return new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
+                                currency: currency,
+                                minimumFractionDigits: currency === 'IDR' ? 0 : 2,
+                            }).format(value);
+                        } catch (error) {
+                            return `${currency} ${value.toLocaleString('id-ID')}`;
+                        }
+                    }
+
+                    function notifyAiUsageResult(payload, label) {
+                        if (!payload) {
+                            return;
+                        }
+
+                        const charged = Number(payload.charged ?? payload?.billing?.charged ?? 0);
+                        const billingCurrency = payload?.billing?.currency ?? payload.currency ?? 'IDR';
+                        const walletBalance = payload?.billing?.wallet_balance ?? payload.wallet_balance ?? null;
+                        const summary = payload?.usage_summary ?? payload?.billing?.usage_summary ?? null;
+
+                        if (charged > 0) {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Saldo Wallet Dipotong',
+                                text: `${label} berhasil. Saldo dipotong ${formatAiCurrency(charged, billingCurrency)}.` + (walletBalance !== null ? ` Sisa saldo: ${formatAiCurrency(walletBalance, billingCurrency)}.` : ''),
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 4000,
+                            });
+                        } else if (summary && summary.limit !== -1 && typeof summary.remaining_free !== 'undefined') {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Kuota Gratis Tersisa',
+                                text: `${label} berhasil. Sisa kuota gratis hari ini: ${summary.remaining_free}`,
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                            });
+                        }
+                    }
+
+                    // Helper function to check premium requirement / wallet balance
                     function checkPremiumRequirement(data) {
                         if (data.requires_premium) {
                             Swal.fire({
@@ -1408,6 +1460,29 @@
                             });
                             return true;
                         }
+
+                        if (data.requires_payment) {
+                            const amountText = formatAiCurrency(Number(data.amount || 0), data.currency || 'IDR');
+                            const balanceText = typeof data.wallet_balance !== 'undefined'
+                                ? formatAiCurrency(Number(data.wallet_balance || 0), data.currency || 'IDR')
+                                : null;
+
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Saldo Wallet Dibutuhkan',
+                                text: data.message || `Penggunaan fitur AI ini memerlukan biaya ${amountText}.` + (balanceText ? ` Saldo wallet kamu saat ini ${balanceText}.` : ''),
+                                showCancelButton: true,
+                                confirmButtonText: 'Top-up Wallet',
+                                cancelButtonText: 'Batal',
+                                confirmButtonColor: '#3085d6',
+                            }).then((result) => {
+                                if (result.isConfirmed && walletTopupUrl) {
+                                    window.location.href = walletTopupUrl;
+                                }
+                            });
+                            return true;
+                        }
+
                         return false;
                     }
 
@@ -1587,6 +1662,10 @@
                                     return;
                                 }
 
+                                if (data.success) {
+                                    notifyAiUsageResult(data, 'Cari Gambar Referensi');
+                                }
+
                                 if (data.success && data.images && data.images.length > 0) {
                                     // Display images
                                     imageResults.innerHTML = '';
@@ -1734,6 +1813,7 @@
                                 }
 
                                 if (data.success && data.image) {
+                                    notifyAiUsageResult(data, 'Generate Gambar AI');
                                     if (data.image.url) {
                                         generatedImage.src = data.image.url;
                                         generatedImageResult.classList.remove('hidden');
@@ -1858,6 +1938,7 @@
                                 }
 
                                 if (data.success && data.video) {
+                                    notifyAiUsageResult(data, 'Generate Video AI');
                                     if (data.video.type === 'script') {
                                         // Jika yang dihasilkan adalah script (dari Ollama)
                                         videoStatus.innerHTML = `

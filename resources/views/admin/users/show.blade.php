@@ -164,6 +164,53 @@
                 </div>
             </div>
         @endif
+
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.admin_action_logs') }}</h3>
+
+            @if($actionLogs->isEmpty())
+                <p class="text-sm text-gray-600">{{ __('messages.no_admin_actions_found') }}</p>
+            @else
+                <div class="space-y-4">
+                    @foreach($actionLogs as $log)
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="text-sm font-semibold text-gray-800">
+                                    {{ __('messages.admin_action_label') }}: {{ ucfirst(str_replace('_', ' ', $log->action)) }}
+                                </span>
+                                <span class="text-xs text-gray-500">
+                                    {{ __('messages.performed_at') }}: {{ $log->created_at->format('d M Y H:i') }}
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-600 mt-1">
+                                {{ __('messages.performed_by') }}: {{ $log->admin?->name ?? 'Admin' }}
+                            </p>
+                            @if($log->reason)
+                                <p class="text-xs text-red-600 mt-1">
+                                    {{ __('messages.admin_action_reason') }}: {{ $log->reason }}
+                                </p>
+                            @endif
+                            @php
+                                $previous = $log->metadata['previous_status'] ?? [];
+                                $current = $log->metadata['current_status'] ?? [];
+                            @endphp
+                            <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-gray-600">
+                                <div class="bg-white border rounded p-3">
+                                    <p class="font-semibold text-gray-700 mb-1">{{ __('messages.previous_status') }}</p>
+                                    <p>{{ __('messages.user_status_active') }}: {{ ($previous['is_active'] ?? false) ? __('messages.yes') : __('messages.no') }}</p>
+                                    <p>{{ __('messages.user_status_suspended') }}: {{ ($previous['suspended_at'] ?? null) ? __('messages.yes') : __('messages.no') }}</p>
+                                </div>
+                                <div class="bg-white border rounded p-3">
+                                    <p class="font-semibold text-gray-700 mb-1">{{ __('messages.current_status') }}</p>
+                                    <p>{{ __('messages.user_status_active') }}: {{ ($current['is_active'] ?? false) ? __('messages.yes') : __('messages.no') }}</p>
+                                    <p>{{ __('messages.user_status_suspended') }}: {{ ($current['suspended_at'] ?? null) ? __('messages.yes') : __('messages.no') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
     </div>
 </div>
 @endsection

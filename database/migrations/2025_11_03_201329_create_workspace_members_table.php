@@ -12,15 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('workspace_members', function (Blueprint $table) {
-            $table->uuid('workspace_id');
-            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('workspace_id')->constrained('workspaces')->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
             $table->string('role')->default('member'); // 'owner', 'admin', 'member'
             $table->boolean('is_active')->default(true);
             $table->timestamp('joined_at')->useCurrent();
             $table->timestamps();
 
-            $table->primary(['workspace_id', 'user_id']);
-            $table->foreign('workspace_id')->references('id')->on('workspaces')->onDelete('cascade');
+            $table->unique(['workspace_id', 'user_id']);
             $table->index(['workspace_id', 'role']);
         });
     }

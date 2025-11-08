@@ -24,19 +24,19 @@
         <div class="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
             <div class="flex items-start justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-gray-900">{{ $reply->user?->name ?? 'Pengguna' }}</p>
+                    <p class="text-sm font-semibold text-gray-900">{{ $reply->user?->name ?? __('messages.user_placeholder_name') }}</p>
                     <p class="text-xs text-gray-500">{{ localized_diff_for_humans($reply->created_at) }}</p>
                 </div>
                 <div class="flex items-center gap-3">
                     @if ($canReply)
                         <button type="button" @click="replyOpen = !replyOpen"
                             class="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors">
-                            Balas
+                            {{ __('messages.reply') }}
                         </button>
                     @endif
                     @if ($canDelete)
                         <form action="{{ route('reviews.replies.destroy', $reply) }}" method="POST"
-                            onsubmit="return confirm('Hapus balasan ini?');">
+                            onsubmit="return confirm('{{ __('messages.review_reply_delete_confirmation') }}');">
                             @csrf
                             @method('DELETE')
                             <button type="submit"
@@ -55,11 +55,11 @@
                     <input type="hidden" name="parent_id" value="{{ $reply->id }}">
                     <textarea name="message" rows="2" required maxlength="2000"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm"
-                        placeholder="Tulis balasan"></textarea>
+                        placeholder="{{ __('messages.review_reply_placeholder_short') }}"></textarea>
                     <div class="flex justify-end">
                         <button type="submit"
                             class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-                            Kirim
+                            {{ __('messages.review_reply_send') }}
                         </button>
                     </div>
                 </form>

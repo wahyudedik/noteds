@@ -415,6 +415,96 @@
                 </div>
             </div>
 
+            <!-- AI Usage Pricing Configuration -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-6">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                AI Usage Limits & Pricing
+                            </h3>
+                            <p class="text-sm text-gray-600 mt-1">
+                                Batasi pemakaian gratis harian dan atur tarif per penggunaan untuk fitur AI premium.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 space-y-6">
+                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
+                        @csrf
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="ai_free_usage_limit" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Batas Gratis Harian (per pengguna)
+                                </label>
+                                <input type="number" name="ai_free_usage_limit" id="ai_free_usage_limit"
+                                    value="{{ old('ai_free_usage_limit', $aiFreeUsageLimit) }}" min="-1" max="100"
+                                    class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
+                                <p class="mt-2 text-xs text-gray-500">
+                                    Nilai default <strong>3</strong>. Masukkan <code>-1</code> untuk akses tanpa batas gratis.
+                                </p>
+                            </div>
+                            <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                                <p class="text-xs uppercase tracking-wide text-indigo-600 font-semibold">Catatan</p>
+                                <p class="text-sm text-indigo-800 mt-2">
+                                    Setelah melewati kuota harian, sistem otomatis memotong saldo wallet pengguna sesuai tarif di bawah.
+                                </p>
+                                <p class="text-xs text-indigo-700 mt-2">
+                                    Mata uang dasar: <strong>{{ $baseCurrency }}</strong> ({{ $currencySymbol }}).
+                                </p>
+                            </div>
+                        </div>
+
+                        @php
+                            $aiFeatureLabels = [
+                                'image_search' => 'Cari Gambar Referensi (Unsplash)',
+                                'image_generate' => 'Generate Gambar dengan AI',
+                                'video_generate' => 'Generate Video dengan AI',
+                            ];
+                        @endphp
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            @foreach ($aiFeaturePrices as $feature => $price)
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <label for="ai_price_{{ $feature }}"
+                                        class="block text-sm font-medium text-gray-700 mb-2">
+                                        {{ $aiFeatureLabels[$feature] ?? ucwords(str_replace('_', ' ', $feature)) }}
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 text-sm">{{ $currencySymbol }}</span>
+                                        </div>
+                                        <input type="number" name="ai_price_{{ $feature }}"
+                                            id="ai_price_{{ $feature }}"
+                                            value="{{ old('ai_price_' . $feature, $price) }}"
+                                            min="0" step="1000"
+                                            class="block w-full pl-10 pr-3 py-2 border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 @error('ai_price_' . $feature) border-red-500 @enderror">
+                                    </div>
+                                    <p class="mt-2 text-xs text-gray-500">
+                                        Tarif per penggunaan setelah melewati kuota gratis. Kosongkan atau isi 0 untuk gratis.
+                                    </p>
+                                    @error('ai_price_' . $feature)
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="flex items-center justify-end pt-4 border-t border-gray-200">
+                            <button type="submit"
+                                class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+                                Simpan Pengaturan AI
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Marketplace Commission Configuration -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-6">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">

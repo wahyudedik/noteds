@@ -26,6 +26,13 @@ class CurrencyService
         return config('currency.supported_currencies', [$this->baseCurrency]);
     }
 
+    public function getCurrencySymbol(string $currency): string
+    {
+        $info = \App\Helpers\CurrencyHelper::getCurrencyInfo($currency);
+
+        return $info['symbol'] ?? $currency;
+    }
+
     public function getUserCurrency(?\App\Models\User $user = null): string
     {
         $user ??= auth()->user();

@@ -43,7 +43,7 @@ Platform di mana pengguna bisa:
 - Laravel Breeze
 
 **Frontend:**
-- Blade Templates
+- Blade Templates 
 - Tailwind CSS
 - Alpine.js
 - Vite 6.4.1
@@ -73,6 +73,8 @@ Platform di mana pengguna bisa:
 - ✅ User authentication (Breeze)
 - ✅ Notes CRUD with tagging & Rich Text Editor (Quill)
 - ✅ Marketplace with search & filters
+- ✅ Dynamic tax rules (country/category) & checkout tax breakdown
+- ✅ Minimum pricing & recommended price guidance (real-time on seller form)
 - ✅ Wallet system & transactions
 - ✅ Withdraw management
 - ✅ Rating & reviews
@@ -106,6 +108,8 @@ Platform di mana pengguna bisa:
 - ✅ Collections Enhancement
   - Add purchased notes to collections
   - Dropdown untuk memilih purchased notes
+- ✅ Duplicate content protection & resale guard (content hashing + purchase history checks)
+
 - ✅ Buyer Analytics Dashboard
   - Purchase statistics (total purchased, total spent)
   - Download statistics
@@ -357,6 +361,9 @@ composer pint
 - ✅ Resell Flow & One-Time Sale System (Original creator commission, Access control)
 - ✅ Profile Features (Avatar upload, Share functionality, Open Graph tags)
 - ✅ Buyer Analytics Dashboard (Purchase stats, Downloads, Completion rate)
+- ✅ Dynamic Tax & Pricing Controls (Tax rules, pricing guidance panel, tax notifications)
+- ✅ Tiered Commission System dengan admin reporting dashboard
+- ✅ Subscription auto-renew flow dengan sufficient/insufficient balance handling & notifications
 
 **In Progress:**
 - ⚠️ FASE 8: Deployment & Launch

@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Services\AiService;
+use App\Services\AiUsageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AiController extends Controller
 {
     public function __construct(
-        protected AiService $aiService
+        protected AiService $aiService,
+        protected AiUsageService $aiUsageService
     ) {}
 
     /**
@@ -445,6 +447,21 @@ class AiController extends Controller
             'limit' => 'nullable|integer|min:1|max:30',
         ]);
 
+        $user = $request->user();
+        $decision = $this->aiUsageService->checkAvailability($user, AiUsageService::FEATURE_IMAGE_SEARCH);
+
+        if (! $decision['allowed']) {
+            return response()->json([
+                'success' => false,
+                'message' => $decision['message'] ?? 'Saldo wallet kamu tidak mencukupi untuk menggunakan fitur AI ini.',
+                'requires_payment' => true,
+                'amount' => $decision['amount'],
+                'currency' => $decision['currency'],
+                'wallet_balance' => $decision['wallet_balance'] ?? null,
+                'usage_summary' => $decision['usage_summary'],
+            ], 402);
+        }
+
         try {
             $query = $request->input('query');
             $limit = $request->input('limit', 10);
@@ -452,10 +469,27 @@ class AiController extends Controller
             // Search images
             $images = $this->aiService->searchImages($query, $limit);
 
+            $billing = $this->aiUsageService->recordUsage(
+                $user,
+                AiUsageService::FEATURE_IMAGE_SEARCH,
+                $decision,
+                true,
+                [
+                    'query' => $query,
+                    'limit' => $limit,
+                    'total' => count($images),
+                ]
+            );
+
+            $usageSummary = $this->aiUsageService->getUsageSummary($user);
+
             return response()->json([
                 'success' => true,
                 'images' => $images,
                 'total' => count($images),
+                'billing' => $billing,
+                'usage_summary' => $usageSummary,
+                'charged' => $billing['charged'],
             ]);
         } catch (\Exception $e) {
             logger()->error('Image search error', [
@@ -467,6 +501,7 @@ class AiController extends Controller
                 'success' => false,
                 'message' => 'An error occurred while searching for images.',
                 'images' => [],
+                'usage_summary' => $decision['usage_summary'] ?? null,
             ], 500);
         }
     }
@@ -492,6 +527,21 @@ class AiController extends Controller
             'style' => 'nullable|string|in:vivid,natural',
         ]);
 
+        $user = $request->user();
+        $decision = $this->aiUsageService->checkAvailability($user, AiUsageService::FEATURE_IMAGE_GENERATE);
+
+        if (! $decision['allowed']) {
+            return response()->json([
+                'success' => false,
+                'message' => $decision['message'] ?? 'Saldo wallet kamu tidak mencukupi untuk menggunakan fitur AI ini.',
+                'requires_payment' => true,
+                'amount' => $decision['amount'],
+                'currency' => $decision['currency'],
+                'wallet_balance' => $decision['wallet_balance'] ?? null,
+                'usage_summary' => $decision['usage_summary'],
+            ], 402);
+        }
+
         try {
             $prompt = $request->input('prompt');
             $options = [
@@ -503,15 +553,33 @@ class AiController extends Controller
             $result = $this->aiService->generateImage($prompt, $options);
 
             if ($result) {
+                $billing = $this->aiUsageService->recordUsage(
+                    $user,
+                    AiUsageService::FEATURE_IMAGE_GENERATE,
+                    $decision,
+                    true,
+                    [
+                        'prompt_length' => mb_strlen($prompt),
+                        'size' => $options['size'],
+                        'style' => $options['style'],
+                    ]
+                );
+
+                $usageSummary = $this->aiUsageService->getUsageSummary($user);
+
                 return response()->json([
                     'success' => true,
                     'image' => $result,
+                    'billing' => $billing,
+                    'usage_summary' => $usageSummary,
+                    'charged' => $billing['charged'],
                 ]);
             }
 
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to generate image. Please ensure image generation API is configured.',
+                'usage_summary' => $decision['usage_summary'],
             ], 500);
         } catch (\Exception $e) {
             logger()->error('Image generation error', [
@@ -522,6 +590,7 @@ class AiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while generating image.',
+                'usage_summary' => $decision['usage_summary'],
             ], 500);
         }
     }
@@ -547,6 +616,21 @@ class AiController extends Controller
             'ratio' => 'nullable|string|in:16:9,9:16,1:1',
         ]);
 
+        $user = $request->user();
+        $decision = $this->aiUsageService->checkAvailability($user, AiUsageService::FEATURE_VIDEO_GENERATE);
+
+        if (! $decision['allowed']) {
+            return response()->json([
+                'success' => false,
+                'message' => $decision['message'] ?? 'Saldo wallet kamu tidak mencukupi untuk menggunakan fitur AI ini.',
+                'requires_payment' => true,
+                'amount' => $decision['amount'],
+                'currency' => $decision['currency'],
+                'wallet_balance' => $decision['wallet_balance'] ?? null,
+                'usage_summary' => $decision['usage_summary'],
+            ], 402);
+        }
+
         try {
             $prompt = $request->input('prompt');
             $options = [
@@ -558,15 +642,34 @@ class AiController extends Controller
             $result = $this->aiService->generateVideo($prompt, $options);
 
             if ($result) {
+                $billing = $this->aiUsageService->recordUsage(
+                    $user,
+                    AiUsageService::FEATURE_VIDEO_GENERATE,
+                    $decision,
+                    true,
+                    [
+                        'prompt_length' => mb_strlen($prompt),
+                        'duration' => $options['duration'],
+                        'ratio' => $options['ratio'],
+                        'result_keys' => array_keys((array) $result),
+                    ]
+                );
+
+                $usageSummary = $this->aiUsageService->getUsageSummary($user);
+
                 return response()->json([
                     'success' => true,
                     'video' => $result,
+                    'billing' => $billing,
+                    'usage_summary' => $usageSummary,
+                    'charged' => $billing['charged'],
                 ]);
             }
 
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to generate video. Please ensure video generation API is configured.',
+                'usage_summary' => $decision['usage_summary'],
             ], 500);
         } catch (\Exception $e) {
             logger()->error('Video generation error', [
@@ -577,6 +680,7 @@ class AiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while generating video.',
+                'usage_summary' => $decision['usage_summary'],
             ], 500);
         }
     }

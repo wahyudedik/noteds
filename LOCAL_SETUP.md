@@ -54,6 +54,7 @@ OLLAMA_MODEL=llama3.2
 php artisan migrate
 php artisan db:seed
 ```
+> Seeder paket sudah mencakup tax rules default, commission tiers, price guidance, dan halaman legal (Privacy Policy, Terms & Conditions). Jika ingin mengulang sebagian, gunakan kelas seeder spesifik, misalnya `php artisan db:seed --class=TaxRuleSeeder`.
 
 ### 5. Storage Link
 ```bash
@@ -116,6 +117,7 @@ composer pint
 #### Pest Testing
 ```bash
 ./vendor/bin/pest
+php artisan test --filter=subscription_renewal_command  # Verifikasi alur auto-renew premium (saldo cukup & kurang)
 ```
 
 ## 🔧 Common Commands

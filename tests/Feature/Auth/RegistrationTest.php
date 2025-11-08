@@ -12,8 +12,12 @@ test('new users can register', function () {
         'email' => 'test@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
+        'role' => 'buyer',
     ]);
 
+    $response->assertSessionHasNoErrors();
+    expect(\App\Models\User::where('email', 'test@example.com')->exists())->toBeTrue();
+    expect(auth()->user())->not->toBeNull();
     $this->assertAuthenticated();
     $response->assertRedirect(route('dashboard', absolute: false));
 });

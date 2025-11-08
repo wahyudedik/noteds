@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Models\Tag;
 use App\Models\TaxRule;
+use App\Services\CurrencyService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -49,6 +50,14 @@ class SettingsController extends Controller
         $featuredLocationLabels = Setting::getFeaturedLocationLabels();
         $featuredDurations = Setting::getFeaturedDurations();
 
+        // AI usage configuration
+        $aiFreeUsageLimit = Setting::getAiFreeUsageLimit();
+        $aiFeaturePrices = Setting::getAiFeaturePrices();
+        $currencyService = app(CurrencyService::class);
+        $baseCurrency = $currencyService->getBaseCurrency();
+        $currencyInfo = \App\Helpers\CurrencyHelper::getCurrencyInfo($baseCurrency);
+        $currencySymbol = $currencyInfo['symbol'] ?? $baseCurrency;
+
         return view('admin.settings.index', compact(
             'settings',
             's3Settings',
@@ -67,7 +76,11 @@ class SettingsController extends Controller
             'availableTags',
             'featuredPricing',
             'featuredLocationLabels',
-            'featuredDurations'
+            'featuredDurations',
+            'aiFreeUsageLimit',
+            'aiFeaturePrices',
+            'currencySymbol',
+            'baseCurrency'
         ));
     }
 
@@ -93,6 +106,10 @@ class SettingsController extends Controller
             'premium_buyer_discount_percent' => 'nullable|numeric|min:0|max:50',
             'tax_default_percent' => 'nullable|numeric|min:0|max:100',
             'tax_inclusive_default' => 'nullable|boolean',
+            'ai_free_usage_limit' => 'nullable|integer|min:-1|max:100',
+            'ai_price_image_search' => 'nullable|numeric|min:0|max:10000000',
+            'ai_price_image_generate' => 'nullable|numeric|min:0|max:10000000',
+            'ai_price_video_generate' => 'nullable|numeric|min:0|max:10000000',
             'min_price_default' => 'nullable|numeric|min:0|max:100000000',
             'recommended_price_multiplier' => 'nullable|numeric|min:0|max:10',
             'featured_price.*.*' => 'nullable|numeric|min:0|max:100000000',
@@ -224,6 +241,34 @@ class SettingsController extends Controller
             );
         }
 
+        if ($request->has('ai_free_usage_limit')) {
+            Setting::setSetting(
+                'ai_free_usage_limit',
+                $request->input('ai_free_usage_limit', Setting::getAiFreeUsageLimit()),
+                'number',
+                'ai',
+                'Daily free usage limit for premium AI utilities'
+            );
+        }
+
+        $aiPriceFields = [
+            'image_search' => 'ai_price_image_search',
+            'image_generate' => 'ai_price_image_generate',
+            'video_generate' => 'ai_price_video_generate',
+        ];
+
+        foreach ($aiPriceFields as $feature => $fieldName) {
+            if ($request->has($fieldName)) {
+                Setting::setSetting(
+                    'ai_price_' . $feature,
+                    $request->input($fieldName, Setting::getAiFeaturePrice($feature)),
+                    'number',
+                    'ai',
+                    'Per-use pricing for premium AI feature: ' . str_replace('_', ' ', $feature)
+                );
+            }
+        }
+
         $message = 'Settings updated successfully.';
         $updates = [];
 
@@ -261,6 +306,19 @@ class SettingsController extends Controller
 
         if ($request->has('recommended_price_multiplier')) {
             $updates[] = 'Recommended price multiplier updated to ' . $request->input('recommended_price_multiplier') . 'x';
+        }
+
+        if ($request->has('ai_free_usage_limit')) {
+            $limitValue = $request->input('ai_free_usage_limit');
+            $limitLabel = (int) $limitValue === -1 ? 'unlimited' : $limitValue . ' uses/day';
+            $updates[] = 'AI free usage limit set to ' . $limitLabel;
+        }
+
+        foreach ($aiPriceFields as $feature => $fieldName) {
+            if ($request->has($fieldName)) {
+                $priceValue = (float) $request->input($fieldName);
+                $updates[] = 'AI pricing for ' . str_replace('_', ' ', $feature) . ' updated to Rp ' . number_format($priceValue, 0, ',', '.');
+            }
         }
 
         // Update featured notes pricing

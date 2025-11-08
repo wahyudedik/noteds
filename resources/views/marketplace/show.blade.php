@@ -420,7 +420,7 @@
                                 <!-- Reading Progress Bar -->
                                 <div id="reading-progress-container" class="mb-4">
                                     <div class="flex items-center justify-between mb-2">
-                                        <span class="text-sm font-medium text-gray-700">Reading Progress</span>
+                                        <span class="text-sm font-medium text-gray-700">{{ __('messages.reading_progress') }}</span>
                                         <span id="progress-percentage" class="text-sm font-semibold text-blue-600">0%</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-2.5">
@@ -441,7 +441,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                             </svg>
-                                            Add Bookmark
+                                            {{ __('messages.add_bookmark') }}
                                         </button>
                                         <div class="flex items-center space-x-2">
                                             <a href="{{ route('export.pdf', $note) }}"
@@ -451,7 +451,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
-                                                Export PDF
+                                                {{ __('messages.export_pdf') }}
                                             </a>
                                             <a href="{{ route('export.docx', $note) }}"
                                                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
@@ -460,7 +460,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
-                                                Export DOCX
+                                                {{ __('messages.export_docx') }}
                                             </a>
                                             <a href="{{ route('export.markdown', $note) }}"
                                                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
@@ -469,7 +469,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                                 </svg>
-                                                Export MD
+                                                {{ __('messages.export_md') }}
                                             </a>
                                         </div>
                                     </div>
@@ -485,11 +485,11 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                                 </svg>
-                                                Bookmarks
+                                                {{ __('messages.bookmarks') }}
                                             </h4>
                                             <button type="button" onclick="toggleBookmarks()"
                                                 class="text-sm text-purple-700 hover:text-purple-900">
-                                                <span id="bookmarks-toggle-text">Show</span>
+                                                <span id="bookmarks-toggle-text">{{ __('messages.bookmarks_toggle_show') }}</span>
                                             </button>
                                         </div>
                                         <div id="bookmarks-list" class="space-y-2">
@@ -519,7 +519,7 @@
                                     @foreach ($note->attachments as $attachment)
                                         @php
                                             $filename = is_array($attachment)
-                                                ? $attachment['filename'] ?? 'Unknown'
+                                                ? ($attachment['filename'] ?? __('messages.unknown_file_name'))
                                                 : basename($attachment);
                                         @endphp
                                         <a href="{{ route('notes.attachments.download', ['note' => $note->id, 'filename' => $filename]) }}"
@@ -554,7 +554,7 @@
                                 <div class="grid grid-cols-2 md:grid-cols-{{ min($note->getThumbnailCount(), 5) }} gap-4">
                                     @foreach ($note->thumbnails as $thumbnail)
                                         <div class="relative group">
-                                            <img src="{{ Storage::url($thumbnail) }}" alt="Thumbnail"
+                                            <img src="{{ Storage::url($thumbnail) }}" alt="{{ __('messages.note_thumbnail_alt') }}"
                                                 class="w-full h-48 object-cover rounded-lg border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
                                         </div>
                                     @endforeach
@@ -601,11 +601,13 @@
                                             {{ __('messages.full_content_available_after_purchase') }}</p>
                                         <p class="text-xs text-gray-600">{{ __('messages.buy_note_to_unlock') }}</p>
                                         @if ($note->preview_percentage > 0 && isset($visibleLines) && isset($totalLines))
-                                            <p class="text-xs text-gray-500 mt-1">Preview: {{ $visibleLines }} dari
-                                                {{ $totalLines }} baris ({{ $note->preview_percentage }}%)</p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                {{ __('messages.preview_lines_detail', ['visible' => $visibleLines, 'total' => $totalLines, 'percentage' => $note->preview_percentage]) }}
+                                            </p>
                                         @elseif($note->preview_percentage > 0)
-                                            <p class="text-xs text-gray-500 mt-1">Preview:
-                                                {{ $note->preview_percentage }}% konten</p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                {{ __('messages.preview_percentage_detail', ['percentage' => $note->preview_percentage]) }}
+                                            </p>
                                         @endif
                                     </div>
                                 </div>
@@ -641,9 +643,8 @@
                                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                     clip-rule="evenodd" />
                                             </svg>
-                                            <span>{{ $note->file_count }} {{ __('messages.downloadable_files') }} <span
-                                                    class="text-xs text-gray-600">(Terkunci sebelum
-                                                    pembelian)</span></span>
+                                            <span>{{ $note->file_count }} {{ __('messages.downloadable_files') }}
+                                                <span class="text-xs text-gray-600">({{ __('messages.locked_until_purchase') }})</span></span>
                                         </li>
                                     @endif
                                     <li class="flex items-start">
@@ -703,7 +704,7 @@
                                     </div>
                                     <a href="{{ route('notes.show', $note) }}"
                                         class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200">
-                                        View full note →
+                                        {{ __('messages.view_full_note_arrow') }}
                                     </a>
                                 </div>
 
@@ -716,7 +717,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                             </svg>
-                                            Add to Collection
+                                            {{ __('messages.add_to_collection') }}
                                         </button>
                                     </div>
                                 @endif
@@ -733,17 +734,19 @@
                                         </svg>
                                         @php
                                             $displayPrice = $premiumDiscountPrice ?? ($note->hasDiscount() ? $note->discount_price : $note->price);
+                                            $formattedDisplayPrice = currency($displayPrice);
                                         @endphp
-                                        Buy Note ({{ currency($displayPrice) }})
+                                        {{ __('messages.buy_note_price', ['price' => $formattedDisplayPrice]) }}
                                         @if(isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
                                             <span class="ml-2 text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full">
-                                                -{{ $premiumDiscountPercent }}% Premium
+                                                -{{ $premiumDiscountPercent }}% {{ __('messages.premium_badge_label') }}
                                             </span>
                                         @endif
                                     </button>
                                 </form>
                                 <p class="text-sm text-gray-600 mt-3">
-                                    Your wallet balance: <strong
+                                    {{ __('messages.wallet_balance_label') }}
+                                    <strong
                                         class="font-semibold text-gray-900">{{ currency(auth()->user()->wallet_balance, auth()->user()->currency) }}</strong>
                                     @php
                                         $finalPrice = $premiumDiscountPrice ?? ($note->hasDiscount() ? $note->discount_price : $note->price);
@@ -754,13 +757,14 @@
                                                 <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                 </svg>
-                                                Premium Discount: Save {{ currency($basePrice - $finalPrice) }} ({{ $premiumDiscountPercent }}%)
+                                                {{ __('messages.premium_discount_badge', ['amount' => currency($basePrice - $finalPrice), 'percent' => $premiumDiscountPercent]) }}
                                             </span>
                                         </div>
                                     @endif
                                     @if (auth()->user()->wallet_balance < $finalPrice)
-                                        <span class="text-red-600 font-medium">(Insufficient:
-                                            {{ currency($finalPrice - auth()->user()->wallet_balance, auth()->user()->currency) }})</span>
+                                        <span class="text-red-600 font-medium">
+                                            {{ __('messages.wallet_insufficient_amount', ['amount' => currency($finalPrice - auth()->user()->wallet_balance, auth()->user()->currency)]) }}
+                                        </span>
                                     @endif
                                 </p>
                             </div>
@@ -775,10 +779,8 @@
                                                 clip-rule="evenodd" />
                                         </svg>
                                         <div>
-                                            <p class="text-sm font-medium text-yellow-800 mb-1">Fitur ini hanya tersedia untuk
-                                                Buyer</p>
-                                            <p class="text-xs text-yellow-700">Sebagai Seller, Anda tidak dapat membeli note.
-                                                Jika ingin membeli, silakan buat akun Buyer dengan email berbeda.</p>
+                                            <p class="text-sm font-medium text-yellow-800 mb-1">{{ __('messages.seller_cannot_purchase_title') }}</p>
+                                            <p class="text-xs text-yellow-700">{{ __('messages.seller_cannot_purchase_description') }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -786,10 +788,10 @@
                         @elseif($note->user_id === auth()->id())
                             <div class="mt-6 pt-6 border-t border-gray-200">
                                 @if (auth()->user()->role === 'seller')
-                                    <p class="text-gray-600 mb-3">This is your note.</p>
+                                    <p class="text-gray-600 mb-3">{{ __('messages.note_owner_message') }}</p>
                                     <a href="{{ route('notes.edit', $note) }}"
                                         class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200">
-                                        Edit this note →
+                                        {{ __('messages.edit_note_arrow') }}
                                     </a>
                                 @elseif(auth()->user()->role === 'buyer')
                                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -801,27 +803,23 @@
                                                     clip-rule="evenodd" />
                                             </svg>
                                             <div>
-                                                <p class="text-sm font-medium text-blue-800 mb-1">You own this note</p>
+                                                <p class="text-sm font-medium text-blue-800 mb-1">{{ __('messages.buyer_owns_note_title') }}</p>
                                                 <p class="text-xs text-blue-700 mb-2">
-                                                    You can resell this note to other buyers. The original creator will receive
-                                                    commission from each sale.
+                                                    {{ __('messages.buyer_owns_note_description') }}
                                                 </p>
                                                 <div class="bg-yellow-100 border border-yellow-300 rounded p-2 mt-2">
                                                     <p class="text-xs font-semibold text-yellow-800 mb-1">
-                                                        ⚠️ Important: One-Time Sale
+                                                        {{ __('messages.buyer_resale_warning_title') }}
                                                     </p>
                                                     <p class="text-xs text-yellow-700">
-                                                        Once you sell this note, you will <strong>permanently lose
-                                                            access</strong> to it.
-                                                        This is a one-time sale - make sure you've read and saved everything you
-                                                        need before selling.
+                                                        {!! __('messages.buyer_resale_warning_description') !!}
                                                     </p>
                                                 </div>
                                                 @if ($note->originalCreator)
                                                     <p class="text-xs text-blue-600 mt-2">
-                                                        Original creator: <strong>{{ $note->originalCreator->name }}</strong>
+                                                        {!! __('messages.original_creator_notice', ['name' => '<strong>' . e($note->originalCreator->name) . '</strong>']) !!}
                                                         @if ($note->originalCreator->id !== auth()->id())
-                                                            (will receive commission on resale)
+                                                            {{ __('messages.original_creator_commission_note') }}
                                                         @endif
                                                     </p>
                                                 @endif
@@ -829,9 +827,7 @@
                                         </div>
                                     </div>
                                     <p class="text-sm text-gray-600 mt-3">
-                                        Other buyers can purchase this note from you. When they do, you'll receive the sale
-                                        amount (minus platform fee and original creator commission), but you will <strong>no
-                                            longer be able to access this note</strong>.
+                                        {!! __('messages.buyer_resale_notice') !!}
                                     </p>
                                 @endif
                             </div>
@@ -846,11 +842,9 @@
                                                 clip-rule="evenodd" />
                                         </svg>
                                         <div>
-                                            <p class="text-sm font-medium text-yellow-800 mb-1">Access Revoked</p>
+                                            <p class="text-sm font-medium text-yellow-800 mb-1">{{ __('messages.access_revoked_title') }}</p>
                                             <p class="text-xs text-yellow-700">
-                                                You previously purchased this note, but you have sold it to another buyer.
-                                                You <strong>no longer have access</strong> to this note. This is a one-time sale
-                                                - once sold, access is permanently transferred to the new owner.
+                                                {!! __('messages.access_revoked_description') !!}
                                             </p>
                                         </div>
                                     </div>
@@ -864,7 +858,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <span class="text-green-800 font-semibold">This note is free! Enjoy reading.</span>
+                                    <span class="text-green-800 font-semibold">{{ __('messages.note_free_enjoy') }}</span>
                                 </div>
                             </div>
                         @endif
@@ -982,13 +976,13 @@
                                                         @if ($canReplyToReview)
                                                             <button type="button" @click="replyOpen = !replyOpen"
                                                                 class="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors">
-                                                                Balas
+                                                                {{ __('messages.reply') }}
                                                             </button>
                                                         @endif
                                                         @if ($canDeleteReview)
                                                             <form action="{{ route('reviews.destroy', $review) }}"
                                                                 method="POST" class="delete-review-form"
-                                                                onsubmit="return confirm('Hapus review ini?');">
+                                                                onsubmit="return confirm('{{ __('messages.review_delete_confirmation') }}');">
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <button type="submit"
@@ -1020,11 +1014,11 @@
                                                         @csrf
                                                         <textarea name="message" rows="3" required maxlength="2000"
                                                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm"
-                                                            placeholder="Tulis balasan Anda untuk review ini"></textarea>
+                                                            placeholder="{{ __('messages.review_reply_placeholder') }}"></textarea>
                                                         <div class="flex justify-end">
                                                             <button type="submit"
                                                                 class="inline-flex items-center px-4 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-                                                                Kirim Balasan
+                                                                {{ __('messages.review_reply_submit') }}
                                                             </button>
                                                         </div>
                                                     </form>
@@ -1065,6 +1059,37 @@
 
     @push('scripts')
         <script>
+            const copyTranslations = @json([
+                'success_title' => __('messages.copy_link_success_title'),
+                'success_message' => __('messages.copy_link_success_message'),
+                'error_message' => __('messages.copy_link_error_message'),
+                'error_title' => __('messages.error'),
+            ]);
+
+            const reportTranslations = @json([
+                'title' => __('messages.report_modal_title'),
+                'reason_label' => __('messages.report_reason_label'),
+                'reason_placeholder' => __('messages.report_reason_placeholder'),
+                'option_spam' => __('messages.report_reason_spam'),
+                'option_harassment' => __('messages.report_reason_harassment'),
+                'option_inappropriate' => __('messages.report_reason_inappropriate'),
+                'option_fraud' => __('messages.report_reason_fraud'),
+                'option_copyright' => __('messages.report_reason_copyright'),
+                'option_other' => __('messages.report_reason_other'),
+                'description_label' => __('messages.report_description_label'),
+                'description_placeholder' => __('messages.report_description_placeholder'),
+                'submit' => __('messages.report_submit_button'),
+                'cancel' => __('messages.cancel'),
+                'validation_reason' => __('messages.report_validation_reason'),
+                'success_title' => __('messages.report_success_title'),
+                'success_message' => __('messages.report_success_message'),
+                'success_alert' => __('messages.report_success_alert'),
+                'error_title' => __('messages.error'),
+                'error_message' => __('messages.report_error_message'),
+                'prompt_reason' => __('messages.report_prompt_reason'),
+                'prompt_description' => __('messages.report_prompt_description'),
+            ]);
+
             // Copy to clipboard function
             function copyToClipboard(text) {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1072,13 +1097,13 @@
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Link Copied!',
-                                text: 'The link has been copied to your clipboard.',
+                                title: copyTranslations.success_title,
+                                text: copyTranslations.success_message,
                                 timer: 2000,
                                 showConfirmButton: false
                             });
                         } else {
-                            alert('Link copied to clipboard!');
+                            alert(copyTranslations.success_message);
                         }
                     }).catch(function(err) {
                         console.error('Failed to copy:', err);
@@ -1104,17 +1129,21 @@
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'success',
-                            title: 'Link Copied!',
-                            text: 'The link has been copied to your clipboard.',
+                            title: copyTranslations.success_title,
+                            text: copyTranslations.success_message,
                             timer: 2000,
                             showConfirmButton: false
                         });
                     } else {
-                        alert('Link copied to clipboard!');
+                        alert(copyTranslations.success_message);
                     }
                 } catch (err) {
                     console.error('Fallback copy failed:', err);
-                    alert('Failed to copy link. Please copy manually.');
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire(copyTranslations.error_title, copyTranslations.error_message, 'error');
+                    } else {
+                        alert(copyTranslations.error_message);
+                    }
                 }
                 document.body.removeChild(textArea);
             }
@@ -1124,38 +1153,38 @@
             function showNoteReportModal() {
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
-                        title: 'Report Note',
+                        title: reportTranslations.title,
                         html: `
                             <form id="noteReportForm" class="text-left">
                                 <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Reason</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">${reportTranslations.reason_label}</label>
                                     <select id="noteReportReason" name="reason" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" required>
-                                        <option value="">Select a reason</option>
-                                        <option value="spam">Spam</option>
-                                        <option value="harassment">Harassment</option>
-                                        <option value="inappropriate">Inappropriate Content</option>
-                                        <option value="fraud">Fraud / Scam</option>
-                                        <option value="copyright">Copyright Violation</option>
-                                        <option value="other">Other</option>
+                                        <option value="">${reportTranslations.reason_placeholder}</option>
+                                        <option value="spam">${reportTranslations.option_spam}</option>
+                                        <option value="harassment">${reportTranslations.option_harassment}</option>
+                                        <option value="inappropriate">${reportTranslations.option_inappropriate}</option>
+                                        <option value="fraud">${reportTranslations.option_fraud}</option>
+                                        <option value="copyright">${reportTranslations.option_copyright}</option>
+                                        <option value="other">${reportTranslations.option_other}</option>
                                     </select>
                                 </div>
                                 <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
-                                    <textarea id="noteReportDescription" name="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Provide additional context (max 1000 characters)" maxlength="1000"></textarea>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">${reportTranslations.description_label}</label>
+                                    <textarea id="noteReportDescription" name="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="${reportTranslations.description_placeholder}" maxlength="1000"></textarea>
                                 </div>
                             </form>
                         `,
                         showCancelButton: true,
-                        confirmButtonText: 'Submit Report',
+                        confirmButtonText: reportTranslations.submit,
                         confirmButtonColor: '#dc2626',
-                        cancelButtonText: 'Cancel',
+                        cancelButtonText: reportTranslations.cancel,
                         focusConfirm: false,
                         preConfirm: () => {
                             const reason = document.getElementById('noteReportReason').value;
                             const description = document.getElementById('noteReportDescription').value;
 
                             if (!reason) {
-                                Swal.showValidationMessage('Please select a reason');
+                                Swal.showValidationMessage(reportTranslations.validation_reason);
                                 return false;
                             }
 
@@ -1167,9 +1196,9 @@
                         }
                     });
                 } else {
-                    const reason = prompt('Reason for reporting (spam, harassment, inappropriate, fraud, copyright, other):');
+                    const reason = prompt(reportTranslations.prompt_reason);
                     if (reason) {
-                        const description = prompt('Additional details (optional):');
+                        const description = prompt(reportTranslations.prompt_description);
                         submitNoteReport(reason, description || '');
                     }
                 }
@@ -1193,7 +1222,7 @@
                 })
                     .then(async (response) => {
                         if (!response.ok) {
-                            let message = 'Failed to submit report. Please try again.';
+                            let message = reportTranslations.error_message;
                             try {
                                 const data = await response.json();
                                 message = data.message || message;
@@ -1208,20 +1237,20 @@
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Report Submitted',
-                                text: data.message || 'Thank you for reporting. Our team will review it shortly.',
+                                title: reportTranslations.success_title,
+                                text: data.message || reportTranslations.success_message,
                                 timer: 3000,
                                 showConfirmButton: false
                             });
                         } else {
-                            alert(data.message || 'Report submitted successfully.');
+                            alert(data.message || reportTranslations.success_alert);
                         }
                     })
                     .catch((error) => {
                         if (typeof Swal !== 'undefined') {
-                            Swal.fire('Error', error.message || 'Failed to submit report.', 'error');
+                            Swal.fire(reportTranslations.error_title, error.message || reportTranslations.error_message, 'error');
                         } else {
-                            alert(error.message || 'Failed to submit report.');
+                            alert(error.message || reportTranslations.error_message);
                         }
                     });
             }
@@ -1312,11 +1341,11 @@
                     if (collections.length === 0) {
                         Swal.fire({
                             icon: 'info',
-                            title: 'No Collections',
-                            text: 'Create a collection first to save notes.',
+                            title: '{{ __('messages.no_collections_title') }}',
+                            text: '{{ __('messages.no_collections_message') }}',
                             showCancelButton: true,
-                            confirmButtonText: 'Create Collection',
-                            cancelButtonText: 'Cancel'
+                            confirmButtonText: '{{ __('messages.create_collection_button') }}',
+                            cancelButtonText: '{{ __('messages.cancel') }}'
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 window.location.href = '{{ route('collections.create') }}';
@@ -1326,16 +1355,16 @@
                     }
 
                     Swal.fire({
-                        title: 'Add to Collection',
+                        title: '{{ __('messages.collection_modal_title') }}',
                         input: 'select',
                         inputOptions: Object.fromEntries(collections.map(c => [c.id, c.name])),
-                        inputPlaceholder: 'Select a collection',
+                        inputPlaceholder: '{{ __('messages.collection_modal_placeholder') }}',
                         showCancelButton: true,
-                        confirmButtonText: 'Add',
-                        cancelButtonText: 'Cancel',
+                        confirmButtonText: '{{ __('messages.collection_modal_confirm') }}',
+                        cancelButtonText: '{{ __('messages.cancel') }}',
                         inputValidator: (value) => {
                             if (!value) {
-                                return 'Please select a collection';
+                                return '{{ __('messages.collection_modal_validation') }}';
                             }
                         }
                     }).then((result) => {
@@ -1432,6 +1461,30 @@
                 .catch(error => console.error('Error saving progress:', error));
                 }
 
+                const bookmarkTranslations = @json([
+                    'empty' => __('messages.bookmarks_empty', ['action' => __('messages.add_bookmark')]),
+                    'default_title' => __('messages.bookmark_default_title'),
+                    'go_to' => __('messages.bookmark_go_to'),
+                    'delete' => __('messages.bookmark_delete'),
+                    'modal_title' => __('messages.bookmark_modal_title'),
+                    'modal_title_placeholder' => __('messages.bookmark_modal_title_placeholder'),
+                    'modal_note_placeholder' => __('messages.bookmark_modal_note_placeholder'),
+                    'modal_confirm' => __('messages.bookmark_modal_confirm'),
+                    'cancel' => __('messages.cancel'),
+                    'success_title' => __('messages.bookmark_success_title'),
+                    'success_message' => __('messages.bookmark_success_message'),
+                    'error_title' => __('messages.bookmark_error_title'),
+                    'error_message' => __('messages.bookmark_error_message'),
+                    'delete_confirm_title' => __('messages.bookmark_delete_confirm_title'),
+                    'delete_confirm_text' => __('messages.bookmark_delete_confirm_text'),
+                    'delete_confirm_button' => __('messages.bookmark_delete_confirm_button'),
+                    'delete_success_title' => __('messages.bookmark_delete_success_title'),
+                    'delete_success_message' => __('messages.bookmark_delete_success_message'),
+                    'delete_error_message' => __('messages.bookmark_delete_error_message'),
+                    'show' => __('messages.bookmarks_toggle_show'),
+                    'hide' => __('messages.bookmarks_toggle_hide'),
+                ]);
+
                 // Bookmarks functionality
                 let bookmarks = [];
                 let bookmarksVisible = false;
@@ -1459,7 +1512,7 @@
                 if (!bookmarksList) return;
 
                 if (bookmarks.length === 0) {
-                bookmarksList.innerHTML = '<p class="text-sm text-gray-600">No bookmarks yet. Click "Add Bookmark" to create one.</p>';
+                bookmarksList.innerHTML = `<p class="text-sm text-gray-600">${bookmarkTranslations.empty}</p>`;
                 return;
                 }
 
@@ -1467,21 +1520,21 @@
                 <div
                     class="flex items-start justify-between p-2 bg-white rounded border border-purple-200 hover:bg-purple-50 transition-colors">
                     <div class="flex-1">
-                        <h5 class="text-sm font-medium text-gray-900">${bookmark.title || 'Bookmark'}</h5>
+                        <h5 class="text-sm font-medium text-gray-900">${bookmark.title || bookmarkTranslations.default_title}</h5>
                         ${bookmark.section_text ? `<p class="text-xs text-gray-600 mt-1 line-clamp-2">
                             ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
                         ${bookmark.note_text ? `<p class="text-xs text-purple-700 mt-1">${bookmark.note_text}</p>` : ''}
                     </div>
                     <div class="flex items-center space-x-2 ml-3">
                         <button onclick="scrollToBookmark(${bookmark.position})" class="text-xs text-blue-600 hover:text-blue-800"
-                            title="Go to bookmark">
+                            title="${bookmarkTranslations.go_to}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
                         </button>
                         <button onclick="deleteBookmark('${bookmark.id}')" class="text-xs text-red-600 hover:text-red-800"
-                            title="Delete bookmark">
+                            title="${bookmarkTranslations.delete}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1499,7 +1552,7 @@
                 bookmarksVisible = !bookmarksVisible;
                 section.classList.toggle('hidden', !bookmarksVisible);
                 if (toggleText) {
-                toggleText.textContent = bookmarksVisible ? 'Hide' : 'Show';
+                toggleText.textContent = bookmarksVisible ? bookmarkTranslations.hide : bookmarkTranslations.show;
                 }
                 }
                 }
@@ -1521,18 +1574,18 @@
 
                 if (typeof Swal !== 'undefined') {
                 Swal.fire({
-                title: 'Add Bookmark',
+                title: bookmarkTranslations.modal_title,
                 html: `
-                <input id="bookmark-title" class="swal2-input" placeholder="Bookmark title (optional)"
+                <input id="bookmark-title" class="swal2-input" placeholder="${bookmarkTranslations.modal_title_placeholder.replace(/"/g, '&quot;')}"
                     value="${selectedText.substring(0, 50) || ''}">
-                <textarea id="bookmark-note" class="swal2-textarea" placeholder="Add a note about this bookmark (optional)"></textarea>
+                <textarea id="bookmark-note" class="swal2-textarea" placeholder="${bookmarkTranslations.modal_note_placeholder.replace(/"/g, '&quot;')}"></textarea>
                 `,
                 showCancelButton: true,
-                confirmButtonText: 'Add Bookmark',
-                cancelButtonText: 'Cancel',
+                confirmButtonText: bookmarkTranslations.modal_confirm,
+                cancelButtonText: bookmarkTranslations.cancel,
                 preConfirm: () => {
                 return {
-                title: document.getElementById('bookmark-title').value || 'Bookmark',
+                title: document.getElementById('bookmark-title').value || bookmarkTranslations.default_title,
                 note_text: document.getElementById('bookmark-note').value || null,
                 section_text: selectedText || null,
                 position: position
@@ -1561,18 +1614,18 @@
                 if (data.success) {
                 loadBookmarks();
                 if (typeof Swal !== 'undefined') {
-                Swal.fire('Success', 'Bookmark added!', 'success');
+                Swal.fire(bookmarkTranslations.success_title, bookmarkTranslations.success_message, 'success');
                 }
                 } else {
                 if (typeof Swal !== 'undefined') {
-                Swal.fire('Error', data.message || 'Failed to add bookmark', 'error');
+                Swal.fire(bookmarkTranslations.error_title, data.message || bookmarkTranslations.error_message, 'error');
                 }
                 }
                 })
                 .catch(error => {
                 console.error('Error creating bookmark:', error);
                 if (typeof Swal !== 'undefined') {
-                Swal.fire('Error', 'Failed to add bookmark', 'error');
+                Swal.fire(bookmarkTranslations.error_title, bookmarkTranslations.error_message, 'error');
                 }
                 });
                 }
@@ -1580,12 +1633,12 @@
                 function deleteBookmark(bookmarkId) {
                 if (typeof Swal !== 'undefined') {
                 Swal.fire({
-                title: 'Delete Bookmark?',
-                text: 'Are you sure you want to delete this bookmark?',
+                title: bookmarkTranslations.delete_confirm_title,
+                text: bookmarkTranslations.delete_confirm_text,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, delete it',
-                cancelButtonText: 'Cancel'
+                confirmButtonText: bookmarkTranslations.delete_confirm_button,
+                cancelButtonText: bookmarkTranslations.cancel
                 }).then((result) => {
                 if (result.isConfirmed) {
                 fetch(`/bookmarks/${bookmarkId}`, {
@@ -1599,14 +1652,14 @@
                 .then(data => {
                 if (data.success) {
                 loadBookmarks();
-                Swal.fire('Deleted', 'Bookmark deleted successfully', 'success');
+                Swal.fire(bookmarkTranslations.delete_success_title, bookmarkTranslations.delete_success_message, 'success');
                 } else {
-                Swal.fire('Error', data.message || 'Failed to delete bookmark', 'error');
+                Swal.fire(bookmarkTranslations.error_title, data.message || bookmarkTranslations.delete_error_message, 'error');
                 }
                 })
                 .catch(error => {
                 console.error('Error deleting bookmark:', error);
-                Swal.fire('Error', 'Failed to delete bookmark', 'error');
+                Swal.fire(bookmarkTranslations.error_title, bookmarkTranslations.delete_error_message, 'error');
                 });
                 }
                 });

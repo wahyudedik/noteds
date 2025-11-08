@@ -23,6 +23,7 @@ class Transaction extends Model
         'original_amount',
         'original_currency',
         'exchange_rate',
+        'commission_tier_id',
         'tax_percent',
         'tax_amount',
         'tax_inclusive',
@@ -50,6 +51,11 @@ class Transaction extends Model
             'tax_country_code' => 'string',
             'status' => 'string',
         ];
+    }
+
+    public function commissionTier(): BelongsTo
+    {
+        return $this->belongsTo(CommissionTier::class);
     }
 
     public function buyer(): BelongsTo

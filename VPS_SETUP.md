@@ -314,6 +314,8 @@ sudo -u www-data php artisan migrate --force
 # Seed database dengan initial data (admin user, dll)
 sudo -u www-data php artisan db:seed --force
 ```
+> Seeder default akan mengisi tax rules dasar, commission tiers (Starter/Growth/Pro), price guidance settings, dan halaman legal wajib. Jika perlu memperbarui subset data saja, jalankan seeder per kelas:  
+> `sudo -u www-data php artisan db:seed --class=TaxRuleSeeder --force` atau `CommissionTierSeeder`, dll.
 
 **Catatan Migrations:**
 - Pastikan semua migrations berhasil dijalankan
@@ -598,6 +600,8 @@ cd /var/www/noteds
 sudo git pull origin main
 sudo -u www-data composer install --no-dev --optimize-autoloader
 sudo -u www-data php artisan migrate --force
+# Optional: re-seed business rules (tax/commission) if there were changes in config
+# sudo -u www-data php artisan db:seed --class=CommissionTierSeeder --force
 sudo -u www-data npm run build
 sudo -u www-data php artisan optimize  # Laravel 12: combines config, route, view cache
 sudo supervisorctl restart noteds-worker:*
@@ -686,6 +690,7 @@ See `.github/workflows/deploy.yml` (create if needed)
   - [ ] Verifikasi saldo wallet ter-update
   - [ ] Verifikasi webhook diterima (cek di Midtrans Dashboard → Transactions)
   - [ ] Verifikasi transaction status ter-update di database
+  - [ ] Jalankan sanity test penting: `php artisan test --filter=subscription_renewal_command`
 
 - [ ] **Monitoring Setup:**
   - [ ] Laravel logs monitoring: `tail -f storage/logs/laravel.log`

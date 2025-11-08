@@ -113,6 +113,8 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'role' => $request->role,
             'referred_by' => $referrer?->id,
+            'is_active' => true,
+            'suspended_at' => null,
         ]);
         
         // Assign Spatie role
@@ -155,7 +157,8 @@ class RegisteredUserController extends Controller
             );
         }
 
-        Auth::login($user);
+        Auth::guard('web')->login($user);
+        $request->session()->regenerate();
 
         // Redirect based on role
         if ($request->role === 'user_workspaces') {

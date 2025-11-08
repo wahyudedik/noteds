@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Models\User;
 use App\Models\NoteConversation;
+use App\Services\CommissionService;
 use App\Services\ReferralService;
 use App\Services\TaxService;
 use App\Services\NotificationService;
@@ -255,7 +256,7 @@ class MarketplaceController extends Controller
         ));
     }
 
-    public function purchase(Note $note, ReferralService $referralService, TaxService $taxService): RedirectResponse
+    public function purchase(Note $note, ReferralService $referralService, TaxService $taxService, CommissionService $commissionService): RedirectResponse
     {
         if (!$note->is_public || $note->status !== 'active') {
             return redirect()->route('marketplace.index')->with('error', 'Catatan tidak tersedia untuk dibeli.');
@@ -358,14 +359,16 @@ class MarketplaceController extends Controller
             'popularity_check' => false,
         ];
 
+        $commissionTier = $commissionService->resolveTierForSeller($seller);
+
         try {
             DB::beginTransaction();
 
             $amount = $buyerPaysAmount;
             
-            // Get commission rates from settings
-            $platformCommissionPercent = Setting::getSetting('platform_commission_percent', 'marketplace', 20);
-            $creatorCommissionPercent = Setting::getSetting('creator_commission_percent', 'marketplace', 0);
+            // Get commission rates based on seller tier (fallback to settings)
+            $platformCommissionPercent = $commissionTier?->platform_fee_percent ?? Setting::getSetting('platform_commission_percent', 'marketplace', 20);
+            $creatorCommissionPercent = $commissionTier?->creator_commission_percent ?? Setting::getSetting('creator_commission_percent', 'marketplace', 0);
             
             // Platform fee (always deducted from every transaction)
             $platformFee = $priceExcludingTax * ($platformCommissionPercent / 100);
@@ -510,6 +513,7 @@ class MarketplaceController extends Controller
                 'exchange_rate' => 1,
                 'platform_fee' => $platformFee,
                 'creator_commission' => $creatorCommission,
+                'commission_tier_id' => $commissionTier?->id,
                 'tax_percent' => $taxBreakdown['tax_percent'],
                 'tax_amount' => $taxAmount,
                 'tax_inclusive' => $taxBreakdown['tax_inclusive'],
@@ -555,8 +559,11 @@ class MarketplaceController extends Controller
                     'tax_amount' => $taxAmount,
                     'tax_percent' => $taxBreakdown['tax_percent'],
                     'tax_inclusive' => $taxBreakdown['tax_inclusive'],
+                    'platform_fee_percent' => $platformCommissionPercent,
+                    'creator_commission_percent' => $creatorCommissionPercent,
                     'total' => $amount,
                     'currency' => $baseCurrency,
+                    'commission_tier' => $commissionTier?->name,
                 ],
             ];
 
@@ -573,9 +580,12 @@ class MarketplaceController extends Controller
                     'tax_inclusive' => $taxBreakdown['tax_inclusive'],
                     'platform_fee' => $platformFee,
                     'creator_commission' => $creatorCommission,
+                    'platform_fee_percent' => $platformCommissionPercent,
+                    'creator_commission_percent' => $creatorCommissionPercent,
                     'net_amount' => $sellerNetAmount,
                     'total' => $amount,
                     'currency' => $baseCurrency,
+                    'commission_tier' => $commissionTier?->name,
                 ],
             ];
 

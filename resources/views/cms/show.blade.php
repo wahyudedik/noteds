@@ -13,7 +13,7 @@
         <!-- Content -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
             <div class="prose max-w-none text-gray-700">
-                {!! nl2br(e($cmsPage->content)) !!}
+                {!! $cmsPage->content !!}
             </div>
         </div>
 

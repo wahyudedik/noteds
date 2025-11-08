@@ -200,6 +200,55 @@ class Setting extends Model
     }
 
     /**
+     * Get AI free usage limit per user per day (-1 for unlimited).
+     */
+    public static function getAiFreeUsageLimit(): int
+    {
+        $limit = self::getSetting('ai_free_usage_limit', 'ai', 3);
+
+        return $limit === null ? 3 : (int) $limit;
+    }
+
+    /**
+     * Get configured price for a specific AI feature.
+     */
+    public static function getAiFeaturePrice(string $feature): float
+    {
+        $defaults = [
+            'image_search' => 2000,
+            'image_generate' => 10000,
+            'video_generate' => 25000,
+        ];
+
+        $default = $defaults[$feature] ?? 0;
+        $price = self::getSetting('ai_price_' . $feature, 'ai', $default);
+
+        return is_numeric($price) ? (float) $price : (float) $default;
+    }
+
+    /**
+     * Get price configuration for all AI features.
+     *
+     * @return array<string, float>
+     */
+    public static function getAiFeaturePrices(): array
+    {
+        $features = [
+            'image_search',
+            'image_generate',
+            'video_generate',
+        ];
+
+        $prices = [];
+
+        foreach ($features as $feature) {
+            $prices[$feature] = self::getAiFeaturePrice($feature);
+        }
+
+        return $prices;
+    }
+
+    /**
      * Get default tax percent.
      */
     public static function getDefaultTaxPercent(): float

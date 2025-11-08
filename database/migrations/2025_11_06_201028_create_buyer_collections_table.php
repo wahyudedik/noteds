@@ -24,7 +24,6 @@ return new class extends Migration
         });
 
         Schema::create('buyer_collection_notes', function (Blueprint $table) {
-            $table->uuid('id')->primary();
             $table->foreignUuid('collection_id')->constrained('buyer_collections')->onDelete('cascade');
             $table->foreignUuid('note_id')->constrained()->onDelete('cascade');
             $table->integer('order')->default(0);
@@ -32,7 +31,7 @@ return new class extends Migration
 
             // Unique constraint: one note can only be in a collection once
             $table->unique(['collection_id', 'note_id']);
-            
+
             $table->index('collection_id');
             $table->index('note_id');
         });

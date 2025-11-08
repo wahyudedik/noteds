@@ -202,121 +202,102 @@
             </footer>
         </div>
         
-        <!-- Flash Messages with SweetAlert2 -->
-        @if(session('success'))
+        <!-- Global SweetAlert2 Toast Helper -->
+        @push('scripts')
+        <script>
+            (function initNotedsToast() {
+                if (typeof Swal === 'undefined') {
+                    return setTimeout(initNotedsToast, 100);
+                }
+
+                if (window.NotedsToast) {
+                    return;
+                }
+
+                const toastMixin = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3200,
+                    timerProgressBar: true,
+                });
+
+                window.NotedsToast = function(icon, title, options = {}) {
+                    if (!title) {
+                        return;
+                    }
+
+                    const navigation = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || null;
+                    const isBackForward = navigation
+                        ? navigation.type === 'back_forward'
+                        : (performance.navigation && performance.navigation.type === 2);
+
+                    if (isBackForward && options.skipBackForward !== false) {
+                        return;
+                    }
+
+                    const fireOptions = Object.assign({
+                        icon: icon || 'info',
+                        title,
+                    }, options);
+
+                    toastMixin.fire(fireOptions);
+                };
+            })();
+        </script>
+        @endpush
+
+        <!-- Flash Messages with SweetAlert2 Toast -->
+        @if (session('success'))
             @push('scripts')
             <script>
-                (function() {
-                    function showSuccess() {
-                        if (typeof Swal !== 'undefined' && Swal.fire) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: '{{ session('success') }}',
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true
-                            });
-                        } else {
-                            // Fallback: wait for Swal to load
-                            setTimeout(showSuccess, 100);
-                        }
-                    }
-                    if (document.readyState === 'loading') {
-                        document.addEventListener('DOMContentLoaded', showSuccess);
+                (function showFlashSuccess() {
+                    if (typeof window.NotedsToast === 'function') {
+                        window.NotedsToast('success', @json(session('success')), { skipBackForward: true });
                     } else {
-                        showSuccess();
+                        setTimeout(showFlashSuccess, 100);
                     }
                 })();
             </script>
             @endpush
         @endif
 
-        @if(session('error'))
+        @if (session('error'))
             @push('scripts')
             <script>
-                (function() {
-                    function showError() {
-                        if (typeof Swal !== 'undefined' && Swal.fire) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: '{{ session('error') }}',
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true
-                            });
-                        } else {
-                            // Fallback: wait for Swal to load
-                            setTimeout(showError, 100);
-                        }
-                    }
-                    if (document.readyState === 'loading') {
-                        document.addEventListener('DOMContentLoaded', showError);
+                (function showFlashError() {
+                    if (typeof window.NotedsToast === 'function') {
+                        window.NotedsToast('error', @json(session('error')), { skipBackForward: true });
                     } else {
-                        showError();
+                        setTimeout(showFlashError, 100);
                     }
                 })();
             </script>
             @endpush
         @endif
 
-        @if(session('warning'))
+        @if (session('warning'))
             @push('scripts')
             <script>
-                (function() {
-                    function showWarning() {
-                        if (typeof Swal !== 'undefined' && Swal.fire) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: '{{ session('warning') }}',
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true
-                            });
-                        } else {
-                            // Fallback: wait for Swal to load
-                            setTimeout(showWarning, 100);
-                        }
-                    }
-                    if (document.readyState === 'loading') {
-                        document.addEventListener('DOMContentLoaded', showWarning);
+                (function showFlashWarning() {
+                    if (typeof window.NotedsToast === 'function') {
+                        window.NotedsToast('warning', @json(session('warning')), { skipBackForward: true });
                     } else {
-                        showWarning();
+                        setTimeout(showFlashWarning, 100);
                     }
                 })();
             </script>
             @endpush
         @endif
 
-        @if(session('info'))
+        @if (session('info'))
             @push('scripts')
             <script>
-                (function() {
-                    function showInfo() {
-                        if (typeof Swal !== 'undefined' && Swal.fire) {
-                            Swal.fire({
-                                icon: 'info',
-                                title: '{{ session('info') }}',
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true
-                            });
-                        } else {
-                            // Fallback: wait for Swal to load
-                            setTimeout(showInfo, 100);
-                        }
-                    }
-                    if (document.readyState === 'loading') {
-                        document.addEventListener('DOMContentLoaded', showInfo);
+                (function showFlashInfo() {
+                    if (typeof window.NotedsToast === 'function') {
+                        window.NotedsToast('info', @json(session('info')), { skipBackForward: true });
                     } else {
-                        showInfo();
+                        setTimeout(showFlashInfo, 100);
                     }
                 })();
             </script>

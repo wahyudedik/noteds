@@ -435,6 +435,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get AI feature usage records.
+     */
+    public function aiFeatureUsages(): HasMany
+    {
+        return $this->hasMany(AiFeatureUsage::class);
+    }
+
+    /**
      * Get buyer collections (wishlist).
      */
     public function collections()

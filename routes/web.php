@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\TransactionController as AdminTransactionControll
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawController as AdminWithdrawController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\CommissionTierController as AdminCommissionTierController;
 use App\Http\Controllers\Admin\PostModerationController;
 use App\Http\Controllers\Admin\NoteModerationController;
 use App\Http\Controllers\Admin\AccountModerationController;
@@ -293,6 +294,7 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::post('/users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');
     Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
     Route::post('/users/{user}/release', [UserController::class, 'release'])->name('users.release');
+    Route::resource('commission-tiers', AdminCommissionTierController::class)->except(['show']);
     Route::resource('faqs', AdminFaqController::class);
     Route::resource('cms-pages', AdminCmsPageController::class);
     Route::get('/transactions', [AdminTransactionController::class, 'index'])->name('transactions.index');

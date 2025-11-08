@@ -23,7 +23,6 @@ return new class extends Migration
         });
 
         Schema::create('post_hashtags', function (Blueprint $table) {
-            $table->uuid('id')->primary();
             $table->foreignUuid('post_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('hashtag_id')->constrained()->onDelete('cascade');
             $table->timestamps();
@@ -34,7 +33,6 @@ return new class extends Migration
         });
 
         Schema::create('post_mentions', function (Blueprint $table) {
-            $table->uuid('id')->primary();
             $table->foreignUuid('post_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\AdminActionLog;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,8 +44,13 @@ class UserController extends Controller
     public function show(User $user): View
     {
         $user->load(['wallet', 'notes', 'withdraws', 'transactionsAsBuyer', 'transactionsAsSeller']);
+        $actionLogs = AdminActionLog::with('admin')
+            ->where('target_user_id', $user->id)
+            ->latest()
+            ->take(30)
+            ->get();
 
-        return view('admin.users.show', compact('user'));
+        return view('admin.users.show', compact('user', 'actionLogs'));
     }
 
     /**
@@ -107,23 +113,37 @@ class UserController extends Controller
             'reason' => ['nullable', 'string', 'max:255'],
         ]);
 
+        $reason = $request->input('reason');
+        $oldStatus = [
+            'is_active' => $user->is_active,
+            'suspended_at' => $user->suspended_at,
+        ];
+
         $user->update([
             'is_active' => false,
             'suspended_at' => null,
         ]);
 
-        $this->notificationService->notifyAccountSuspended($user, $request->input('reason'), Auth::user());
+        $this->logAdminAction($user, 'deactivate', $reason, $oldStatus);
+
+        $this->notificationService->notifyAccountSuspended($user, $reason, Auth::user());
 
         return back()->with('success', 'User dinonaktifkan.');
     }
 
     public function activate(User $user): RedirectResponse
     {
+        $oldStatus = [
+            'is_active' => $user->is_active,
+            'suspended_at' => $user->suspended_at,
+        ];
+
         $user->update([
             'is_active' => true,
             'suspended_at' => null,
         ]);
 
+        $this->logAdminAction($user, 'activate', null, $oldStatus);
         $this->notificationService->notifyAccountReactivated($user, Auth::user());
 
         return back()->with('success', 'User diaktifkan.');
@@ -139,23 +159,36 @@ class UserController extends Controller
             'reason' => ['nullable', 'string', 'max:255'],
         ]);
 
+        $reason = $request->input('reason');
+        $oldStatus = [
+            'is_active' => $user->is_active,
+            'suspended_at' => $user->suspended_at,
+        ];
+
         $user->update([
             'is_active' => false,
             'suspended_at' => now(),
         ]);
 
-        $this->notificationService->notifyAccountSuspended($user, $request->input('reason'), Auth::user());
+        $this->logAdminAction($user, 'suspend', $reason, $oldStatus);
+        $this->notificationService->notifyAccountSuspended($user, $reason, Auth::user());
 
         return back()->with('success', 'User disuspend.');
     }
 
     public function release(User $user): RedirectResponse
     {
+        $oldStatus = [
+            'is_active' => $user->is_active,
+            'suspended_at' => $user->suspended_at,
+        ];
+
         $user->update([
             'is_active' => true,
             'suspended_at' => null,
         ]);
 
+        $this->logAdminAction($user, 'release_suspend', null, $oldStatus);
         $this->notificationService->notifyAccountReactivated($user, Auth::user());
 
         return back()->with('success', 'Suspend akun dicabut.');
@@ -172,5 +205,28 @@ class UserController extends Controller
         }
 
         return null;
+    }
+
+    private function logAdminAction(User $target, string $action, ?string $reason = null, array $previousStatus = []): void
+    {
+        $admin = Auth::user();
+
+        if (! $admin) {
+            return;
+        }
+
+        AdminActionLog::create([
+            'admin_id' => $admin->id,
+            'target_user_id' => $target->id,
+            'action' => $action,
+            'reason' => $reason,
+            'metadata' => [
+                'previous_status' => $previousStatus,
+                'current_status' => [
+                    'is_active' => $target->fresh()->is_active,
+                    'suspended_at' => $target->suspended_at,
+                ],
+            ],
+        ]);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -19,18 +18,35 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             AdminSeeder::class,
             SettingSeeder::class,
+            ExchangeRateSeeder::class,
+            CommissionTierSeeder::class,
+            TaxRuleSeeder::class,
             UserSeeder::class,
-            NoteSeeder::class,
-            WorkspaceSeeder::class,
-            FolderSeeder::class,
-            FeaturedNoteSeeder::class,
-            TransactionSeeder::class,
+            WalletSeeder::class,
             ReferralCodeSeeder::class,
+            ReferralSeeder::class,
+            WorkspaceSeeder::class,
+            WorkspaceCollaborationSeeder::class,
+            FolderSeeder::class,
+            NoteSeeder::class,
+            StudyMaterialSeeder::class,
+            AiAnalysisSeeder::class,
+            DocumentationSeeder::class,
+            LandingPageSectionSeeder::class,
+            CmsPageSeeder::class,
             FaqSeeder::class,
             SocialMediaLinkSeeder::class,
-            TaxRuleSeeder::class,
-            CmsPageSeeder::class,
-            LandingPageSectionSeeder::class,
+            FeaturedNoteSeeder::class,
+            TransactionSeeder::class,
+            PurchasedNoteSeeder::class,
+            NoteEngagementSeeder::class,
+            NoteReviewSeeder::class,
+            NoteCollaborationSeeder::class,
+            NoteReportSeeder::class,
+            SupportSeeder::class,
+            AppNotificationSeeder::class,
+            SocialFeatureSeeder::class,
+            WithdrawSeeder::class,
         ]);
     }
 }

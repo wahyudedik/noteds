@@ -262,6 +262,9 @@ class NotificationService
                 $percentLabel = isset($breakdown['tax_percent']) ? "{$breakdown['tax_percent']}%" : '';
                 $lines[] = 'Tax' . ($percentLabel ? " ({$percentLabel})" : '') . ': ' . $this->formatCurrency((float) $breakdown['tax_amount']) . '.';
             }
+            if (!empty($breakdown['commission_tier'])) {
+                $lines[] = 'Commission tier: ' . $breakdown['commission_tier'] . '.';
+            }
         }
 
         $lines[] = 'Total Paid: ' . $this->formatCurrency($breakdown['total'] ?? $amount) . '.';
@@ -307,6 +310,9 @@ class NotificationService
             }
             if (isset($breakdown['net_amount'])) {
                 $lines[] = 'Net received: ' . $this->formatCurrency((float) $breakdown['net_amount']) . '.';
+            }
+            if (!empty($breakdown['commission_tier'])) {
+                $lines[] = 'Commission tier: ' . $breakdown['commission_tier'] . '.';
             }
         }
 

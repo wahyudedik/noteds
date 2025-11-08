@@ -88,7 +88,7 @@ class RenewSubscriptions extends Command
                 // Check if wallet has sufficient balance
                 if ($wallet->balance >= $premiumPrice) {
                     // Auto-renew subscription
-                    DB::transaction(function () use ($subscription, $user, $wallet, $premiumPrice, $notificationService) {
+                    DB::transaction(function () use ($subscription, $user, $wallet, $premiumPrice, $notificationService, $baseCurrency) {
                         // Deduct from wallet
                         $wallet->balance -= $premiumPrice;
                         $wallet->save();
