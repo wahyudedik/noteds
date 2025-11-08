@@ -11,11 +11,15 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawController as AdminWithdrawController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\PostModerationController;
+use App\Http\Controllers\Admin\NoteModerationController;
+use App\Http\Controllers\Admin\AccountModerationController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicCmsPageController;
 use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\NoteReportController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\UserReportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\ReferralController;
@@ -99,6 +103,9 @@ Route::middleware(['auth', 'username.setup'])->group(function () {
     Route::get('/note-conversations', [NoteConversationController::class, 'index'])->name('note-conversations.index');
     Route::get('/note-conversations/{conversation}', [NoteConversationController::class, 'show'])->name('note-conversations.show');
     Route::post('/note-conversations/{conversation}', [NoteConversationController::class, 'store'])->name('note-conversations.store');
+
+    Route::post('/notes/{note}/report', [NoteReportController::class, 'store'])->name('notes.report');
+    Route::post('/users/{user}/report', [UserReportController::class, 'store'])->name('users.report');
 });
 
     // Follow routes
@@ -310,6 +317,16 @@ Route::prefix('admin')->middleware(['auth', 'role:admin', 'username.setup'])->na
     Route::post('/forum/moderation/{post}/unhide', [PostModerationController::class, 'unhide'])->name('forum.moderation.unhide');
     Route::delete('/forum/moderation/{post}', [PostModerationController::class, 'destroy'])->name('forum.moderation.destroy');
     Route::post('/forum/moderation/report/{report}/status', [PostModerationController::class, 'updateReportStatus'])->name('forum.moderation.report.status');
+
+    Route::get('/notes/moderation', [NoteModerationController::class, 'index'])->name('notes.moderation.index');
+    Route::get('/notes/moderation/{note}', [NoteModerationController::class, 'show'])->name('notes.moderation.show');
+    Route::post('/notes/moderation/{note}/suspend', [NoteModerationController::class, 'suspend'])->name('notes.moderation.suspend');
+    Route::post('/notes/moderation/{note}/activate', [NoteModerationController::class, 'activate'])->name('notes.moderation.activate');
+    Route::post('/notes/moderation/report/{report}/status', [NoteModerationController::class, 'updateReportStatus'])->name('notes.moderation.report.status');
+
+    Route::get('/accounts/moderation', [AccountModerationController::class, 'index'])->name('accounts.moderation.index');
+    Route::get('/accounts/moderation/{user}', [AccountModerationController::class, 'show'])->name('accounts.moderation.show');
+    Route::post('/accounts/moderation/report/{report}/status', [AccountModerationController::class, 'updateReportStatus'])->name('accounts.moderation.report.status');
 
     // Featured Notes Admin routes
     Route::get('/featured-notes', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'index'])->name('featured-notes.index');

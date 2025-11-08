@@ -124,6 +124,14 @@
                                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('admin.forum.moderation.*') ? 'bg-blue-50 text-blue-600' : '' }}">
                                                 Forum Moderation
                                             </a>
+                                            <a href="{{ route('admin.notes.moderation.index') }}"
+                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('admin.notes.moderation.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                                                Note Moderation
+                                            </a>
+                                            <a href="{{ route('admin.accounts.moderation.index') }}"
+                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('admin.accounts.moderation.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                                                Account Moderation
+                                            </a>
                                         @endif
                                     </div>
                                 </div>
@@ -533,6 +541,16 @@
                             class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('admin.forum.moderation.*') ? 'text-blue-600 bg-blue-50' : '' }}"
                             @click="mobileMenuOpen = false">
                             Forum Moderation
+                        </a>
+                        <a href="{{ route('admin.notes.moderation.index') }}"
+                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('admin.notes.moderation.*') ? 'text-blue-600 bg-blue-50' : '' }}"
+                            @click="mobileMenuOpen = false">
+                            Note Moderation
+                        </a>
+                        <a href="{{ route('admin.accounts.moderation.index') }}"
+                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('admin.accounts.moderation.*') ? 'text-blue-600 bg-blue-50' : '' }}"
+                            @click="mobileMenuOpen = false">
+                            Account Moderation
                         </a>
                     @endif
                 @endif

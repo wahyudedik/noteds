@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use App\Models\NoteConversation;
+use App\Models\NoteReport;
 
 class Note extends Model
 {
@@ -355,6 +356,11 @@ class Note extends Model
     public function noteDownloads()
     {
         return $this->hasMany(NoteDownload::class);
+    }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(NoteReport::class);
     }
 
     /**

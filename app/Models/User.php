@@ -15,6 +15,8 @@ use App\Models\NoteConversation;
 use App\Models\NoteMessage;
 use App\Models\NoteReviewReply;
 use App\Models\NoteReview;
+use App\Models\NoteReport;
+use App\Models\UserReport;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -272,6 +274,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public function noteReviewReplies(): HasMany
     {
         return $this->hasMany(NoteReviewReply::class, 'user_id');
+    }
+
+    public function noteReports(): HasMany
+    {
+        return $this->hasMany(NoteReport::class, 'user_id');
+    }
+
+    public function accountReports(): HasMany
+    {
+        return $this->hasMany(UserReport::class, 'reported_user_id');
+    }
+
+    public function submittedAccountReports(): HasMany
+    {
+        return $this->hasMany(UserReport::class, 'user_id');
     }
 
     public function sellerReviewStats(): array
