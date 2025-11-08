@@ -42,12 +42,16 @@ class Setting extends Model
      */
     public function setValueAttribute($value)
     {
-        if ($this->type === 'boolean') {
+        $type = $this->attributes['type'] ?? $this->type;
+
+        if ($type === 'boolean') {
             $this->attributes['value'] = $value ? '1' : '0';
-        } elseif ($this->type === 'json') {
+        } elseif ($type === 'json') {
             $this->attributes['value'] = json_encode($value);
+        } elseif ($type === 'number') {
+            $this->attributes['value'] = is_numeric($value) ? (string) $value : '0';
         } else {
-            $this->attributes['value'] = (string) $value;
+            $this->attributes['value'] = is_array($value) ? json_encode($value) : (string) $value;
         }
     }
 
@@ -193,6 +197,105 @@ class Setting extends Model
             ->first();
 
         return $percent && is_numeric($percent->value) ? (float) $percent->value : 10.0; // Default 10%
+    }
+
+    /**
+     * Get default tax percent.
+     */
+    public static function getDefaultTaxPercent(): float
+    {
+        $percent = static::where('key', 'tax_default_percent')
+            ->where('group', 'marketplace')
+            ->first();
+
+        return $percent && is_numeric($percent->value) ? (float) $percent->value : 0.0;
+    }
+
+    /**
+     * Determine if tax is inclusive by default.
+     */
+    public static function isTaxInclusiveDefault(): bool
+    {
+        $inclusive = static::where('key', 'tax_inclusive_default')
+            ->where('group', 'marketplace')
+            ->first();
+
+        return $inclusive ? (bool) $inclusive->value : true;
+    }
+
+    /**
+     * Get default minimum price for paid notes.
+     */
+    public static function getDefaultMinPrice(): float
+    {
+        $setting = static::where('key', 'min_price_default')
+            ->where('group', 'marketplace')
+            ->first();
+
+        return $setting && is_numeric($setting->value) ? (float) $setting->value : 0.0;
+    }
+
+    /**
+     * Get recommended price multiplier.
+     */
+    public static function getRecommendedPriceMultiplier(): float
+    {
+        $setting = static::where('key', 'recommended_price_multiplier')
+            ->where('group', 'marketplace')
+            ->first();
+
+        return $setting && is_numeric($setting->value) ? (float) $setting->value : 1.0;
+    }
+
+    /**
+     * Get list of category-specific minimum prices.
+     */
+    public static function getCategoryMinPriceList(): array
+    {
+        $setting = static::where('key', 'min_price_categories')
+            ->where('group', 'marketplace')
+            ->first();
+
+        $rules = is_array($setting?->value) ? $setting->value : [];
+
+        return array_map(function ($rule) {
+            return [
+                'tag_slug' => $rule['tag_slug'] ?? null,
+                'tag_name' => $rule['tag_name'] ?? null,
+                'min_price' => isset($rule['min_price']) ? (float) $rule['min_price'] : 0.0,
+            ];
+        }, $rules);
+    }
+
+    /**
+     * Get associative array of category minimum prices indexed by slug.
+     */
+    public static function getCategoryMinPrices(): array
+    {
+        $rules = self::getCategoryMinPriceList();
+
+        $mapped = [];
+        foreach ($rules as $rule) {
+            if (!empty($rule['tag_slug'])) {
+                $mapped[$rule['tag_slug']] = $rule['min_price'];
+            }
+        }
+
+        return $mapped;
+    }
+
+    /**
+     * Persist category-specific minimum prices.
+     */
+    public static function setCategoryMinPriceList(array $rules): void
+    {
+        static::setSetting(
+            'min_price_categories',
+            $rules,
+            'json',
+            'marketplace',
+            'Category-specific minimum prices for notes'
+        );
     }
 
     /**

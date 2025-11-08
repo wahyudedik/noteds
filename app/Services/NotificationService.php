@@ -248,18 +248,36 @@ class NotificationService
     /**
      * Notify user about a new purchase.
      */
-    public function notifyPurchase(User $user, Note $note, float $amount, string $transactionId): AppNotification
+    public function notifyPurchase(User $user, Note $note, float $amount, string $transactionId, array $breakdown = []): AppNotification
     {
+        $lines = [
+            "You successfully purchased: {$note->title}.",
+        ];
+
+        if (!empty($breakdown)) {
+            if (isset($breakdown['subtotal'])) {
+                $lines[] = 'Subtotal: ' . $this->formatCurrency((float) $breakdown['subtotal']) . '.';
+            }
+            if (isset($breakdown['tax_amount'])) {
+                $percentLabel = isset($breakdown['tax_percent']) ? "{$breakdown['tax_percent']}%" : '';
+                $lines[] = 'Tax' . ($percentLabel ? " ({$percentLabel})" : '') . ': ' . $this->formatCurrency((float) $breakdown['tax_amount']) . '.';
+            }
+        }
+
+        $lines[] = 'Total Paid: ' . $this->formatCurrency($breakdown['total'] ?? $amount) . '.';
+        $message = implode(' ', $lines);
+
         return $this->create(
             $user,
             'purchase',
             '✅ Purchase Successful!',
-            "You successfully purchased: {$note->title} for {$this->formatCurrency($amount)}",
+            $message,
             route('marketplace.show', $note),
             [
                 'transaction_id' => $transactionId,
                 'note_id' => $note->id,
                 'amount' => $amount,
+                'breakdown' => $breakdown,
             ]
         );
     }
@@ -267,18 +285,83 @@ class NotificationService
     /**
      * Notify seller about a new sale.
      */
-    public function notifySale(User $seller, Note $note, float $amount, string $buyerName): AppNotification
+    public function notifySale(User $seller, Note $note, float $amount, string $buyerName, array $breakdown = []): AppNotification
     {
+        $lines = [
+            "{$buyerName} purchased your note: {$note->title}.",
+        ];
+
+        if (!empty($breakdown)) {
+            if (isset($breakdown['subtotal'])) {
+                $lines[] = 'Subtotal: ' . $this->formatCurrency((float) $breakdown['subtotal']) . '.';
+            }
+            if (isset($breakdown['tax_amount'])) {
+                $percentLabel = isset($breakdown['tax_percent']) ? "{$breakdown['tax_percent']}%" : '';
+                $lines[] = 'Tax' . ($percentLabel ? " ({$percentLabel})" : '') . ': ' . $this->formatCurrency((float) $breakdown['tax_amount']) . '.';
+            }
+            if (isset($breakdown['platform_fee'])) {
+                $lines[] = 'Platform fee: ' . $this->formatCurrency((float) $breakdown['platform_fee']) . '.';
+            }
+            if (isset($breakdown['creator_commission']) && (float) $breakdown['creator_commission'] > 0) {
+                $lines[] = 'Creator commission: ' . $this->formatCurrency((float) $breakdown['creator_commission']) . '.';
+            }
+            if (isset($breakdown['net_amount'])) {
+                $lines[] = 'Net received: ' . $this->formatCurrency((float) $breakdown['net_amount']) . '.';
+            }
+        }
+
+        $lines[] = 'Total sale: ' . $this->formatCurrency($breakdown['total'] ?? $amount) . '.';
+        $message = implode(' ', $lines);
+
         return $this->create(
             $seller,
             'sale',
             '💰 New Sale!',
-            "{$buyerName} purchased your note: {$note->title} for {$this->formatCurrency($amount)}",
+            $message,
             route('notes.index'),
             [
                 'buyer_name' => $buyerName,
                 'note_id' => $note->id,
                 'amount' => $amount,
+                'breakdown' => $breakdown,
+            ]
+        );
+    }
+
+    public function notifyAccountSuspended(User $user, ?string $reason = null, ?User $admin = null): AppNotification
+    {
+        $title = '🚫 ' . __('messages.account_suspended_title');
+        $adminName = $admin?->name ?? 'Admin';
+        $reasonSuffix = $reason ? ' ' . __('messages.account_action_reason', ['reason' => $reason]) : '';
+        $message = __('messages.account_suspended_notification', ['admin' => $adminName]) . $reasonSuffix;
+
+        return $this->create(
+            $user,
+            'account_suspended',
+            $title,
+            $message,
+            null,
+            [
+                'reason' => $reason,
+                'admin_id' => $admin?->id,
+            ]
+        );
+    }
+
+    public function notifyAccountReactivated(User $user, ?User $admin = null): AppNotification
+    {
+        $title = '✅ ' . __('messages.account_reactivated_title');
+        $adminName = $admin?->name ?? 'Admin';
+        $message = __('messages.account_reactivated_notification', ['admin' => $adminName]);
+
+        return $this->create(
+            $user,
+            'account_reactivated',
+            $title,
+            $message,
+            route('login'),
+            [
+                'admin_id' => $admin?->id,
             ]
         );
     }

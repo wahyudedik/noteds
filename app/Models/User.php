@@ -49,6 +49,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'bank_account_number',
         'bank_account_name',
         'forum_email_preferences',
+        'is_active',
+        'suspended_at',
     ];
 
     /**
@@ -73,6 +75,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'wallet_balance' => 'decimal:2',
             'forum_email_preferences' => 'array',
+            'is_active' => 'boolean',
+            'suspended_at' => 'datetime',
         ];
     }
 
@@ -99,6 +103,26 @@ class User extends Authenticatable implements MustVerifyEmail
             'comment_liked' => true,
             'new_follower' => true,
         ];
+    }
+
+    public function isSuspended(): bool
+    {
+        return (bool) $this->suspended_at;
+    }
+
+    public function isDeactivated(): bool
+    {
+        return ! $this->is_active;
+    }
+
+    public function isAccessible(): bool
+    {
+        return $this->is_active && ! $this->isSuspended();
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true)->whereNull('suspended_at');
     }
 
     public function wantsForumEmail(string $type): bool
@@ -165,7 +189,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $owned = $this->ownedWorkspaces()->get();
         $member = $this->workspaces()->get();
-        
+
         return $owned->merge($member)->unique('id');
     }
 
@@ -177,14 +201,14 @@ class User extends Authenticatable implements MustVerifyEmail
         $workspace = $this->ownedWorkspaces()
             ->where('type', 'personal')
             ->first();
-        
+
         if (!$workspace) {
             $workspace = $this->ownedWorkspaces()->create([
                 'name' => $this->name . "'s Workspace",
                 'type' => 'personal',
                 'description' => 'Personal workspace',
             ]);
-            
+
             // Add user as owner member
             $workspace->memberRecords()->create([
                 'user_id' => $this->id,
@@ -192,7 +216,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 'is_active' => true,
             ]);
         }
-        
+
         return $workspace;
     }
 
@@ -362,7 +386,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($this->hasRole('admin')) {
             return true;
         }
-        
+
         return $this->subscription && $this->subscription->isPremium();
     }
 
@@ -375,11 +399,11 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($this->hasRole('admin')) {
             return -1; // Unlimited
         }
-        
+
         if ($this->hasPremium()) {
             return -1; // Unlimited
         }
-        
+
         return 10; // Basic plan: 10 notes
     }
 
@@ -392,13 +416,13 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($this->hasRole('admin')) {
             return true;
         }
-        
+
         $limit = $this->getNoteCreationLimit();
-        
+
         if ($limit === -1) {
             return true; // Unlimited
         }
-        
+
         return $this->notes()->count() < $limit;
     }
 

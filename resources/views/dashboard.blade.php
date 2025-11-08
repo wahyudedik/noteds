@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', __('messages.dashboard_title'))
 
 @section('content')
 <div class="py-8 sm:py-12">
@@ -24,7 +24,7 @@
                             </span>
                         @endif
                     </div>
-                    <p class="mt-2 text-base text-gray-600">{{ __('messages.dashboard_subtitle', [], app()->getLocale()) ?: "Here's what's happening with your notes today." }}</p>
+                    <p class="mt-2 text-base text-gray-600">{{ __('messages.dashboard_subtitle') }}</p>
                 </div>
                 
                 <!-- Currency & Timezone Selector -->
@@ -33,8 +33,8 @@
                     <form action="{{ route('locale.set-currency') }}" method="POST" class="inline">
                         @csrf
                         <select name="currency" onchange="this.form.submit()" class="text-sm rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                            <option value="IDR" {{ (auth()->user()->currency ?? 'IDR') === 'IDR' ? 'selected' : '' }}>Rp IDR</option>
-                            <option value="USD" {{ (auth()->user()->currency ?? 'IDR') === 'USD' ? 'selected' : '' }}>$ USD</option>
+                            <option value="IDR" {{ (auth()->user()->currency ?? 'IDR') === 'IDR' ? 'selected' : '' }}>{{ __('messages.currency_option_idr') }}</option>
+                            <option value="USD" {{ (auth()->user()->currency ?? 'IDR') === 'USD' ? 'selected' : '' }}>{{ __('messages.currency_option_usd') }}</option>
                         </select>
                     </form>
                     
@@ -42,9 +42,9 @@
                     <form action="{{ route('locale.set-timezone') }}" method="POST" class="inline">
                         @csrf
                         <select name="timezone" onchange="this.form.submit()" class="text-sm rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                            <option value="Asia/Jakarta" {{ (auth()->user()->timezone ?? 'Asia/Jakarta') === 'Asia/Jakarta' ? 'selected' : '' }}>WIB (Jakarta)</option>
-                            <option value="Asia/Riyadh" {{ (auth()->user()->timezone ?? 'Asia/Jakarta') === 'Asia/Riyadh' ? 'selected' : '' }}>AST (Riyadh)</option>
-                            <option value="UTC" {{ (auth()->user()->timezone ?? 'Asia/Jakarta') === 'UTC' ? 'selected' : '' }}>UTC</option>
+                            <option value="Asia/Jakarta" {{ (auth()->user()->timezone ?? 'Asia/Jakarta') === 'Asia/Jakarta' ? 'selected' : '' }}>{{ __('messages.timezone_option_wib') }}</option>
+                            <option value="Asia/Riyadh" {{ (auth()->user()->timezone ?? 'Asia/Jakarta') === 'Asia/Riyadh' ? 'selected' : '' }}>{{ __('messages.timezone_option_ast') }}</option>
+                            <option value="UTC" {{ (auth()->user()->timezone ?? 'Asia/Jakarta') === 'UTC' ? 'selected' : '' }}>{{ __('messages.timezone_option_utc') }}</option>
                         </select>
                     </form>
                 </div>
@@ -61,7 +61,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">{{ __('messages.total_notes', [], app()->getLocale()) ?: 'Total Notes' }}</p>
+                        <p class="text-sm font-medium text-gray-500">{{ __('messages.total_notes') }}</p>
                         <p class="text-2xl font-bold text-gray-900">
                             {{ auth()->user()->notes()->count() }}
                             @if(!auth()->user()->hasPremium())
@@ -69,9 +69,9 @@
                             @endif
                         </p>
                         @if(!auth()->user()->hasPremium())
-                            <p class="text-xs text-gray-500 mt-1">{{ __('messages.basic_plan', [], app()->getLocale()) ?: 'Basic Plan' }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('messages.basic_plan') }}</p>
                         @else
-                            <p class="text-xs text-green-600 mt-1">✓ {{ __('messages.unlimited', [], app()->getLocale()) ?: 'Unlimited' }}</p>
+                            <p class="text-xs text-green-600 mt-1">✓ {{ __('messages.unlimited') }}</p>
                         @endif
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">{{ __('messages.public_notes', [], app()->getLocale()) ?: 'Public Notes' }}</p>
+                        <p class="text-sm font-medium text-gray-500">{{ __('messages.public_notes') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ auth()->user()->notes()->where('is_public', true)->count() }}</p>
                     </div>
                 </div>
@@ -99,7 +99,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">{{ __('messages.wallet_balance', [], app()->getLocale()) ?: 'Wallet Balance' }}</p>
+                        <p class="text-sm font-medium text-gray-500">{{ __('messages.wallet_balance') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ currency(auth()->user()->wallet_balance ?? 0, auth()->user()->currency) }}</p>
                     </div>
                 </div>
@@ -198,11 +198,11 @@
                                         <span class="text-xs text-gray-500">{{ localized_diff_for_humans($note->created_at) }}</span>
                                     </div>
                                 </div>
-                                <div class="ml-4">
-                                    <a href="{{ route('notes.show', $note) }}" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                                        {{ __('messages.view') }} →
-                                    </a>
-                                </div>
+                    <div class="ml-4">
+                        <a href="{{ route('notes.show', $note) }}" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                            {{ __('messages.view') }} →
+                        </a>
+                    </div>
                             </div>
                         </div>
                     @endforeach
@@ -228,7 +228,7 @@
                     </div>
                 @else
                     <div class="mt-6">
-                        <p class="text-sm text-gray-600 mb-3">Fitur ini hanya tersedia untuk Seller. Jika ingin menjual note, silakan buat akun Seller dengan email berbeda.</p>
+                        <p class="text-sm text-gray-600 mb-3">{{ __('messages.seller_only_feature_notice') }}</p>
                     </div>
                 @endif
             </div>

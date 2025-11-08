@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Note>
@@ -16,10 +17,17 @@ class NoteFactory extends Factory
      */
     public function definition(): array
     {
+        $content = fake()->paragraphs(3, true);
+        $normalized = Str::of(strip_tags($content))
+            ->lower()
+            ->replaceMatches('/\s+/u', ' ')
+            ->trim();
+
         return [
             'user_id' => \App\Models\User::factory(),
             'title' => fake()->sentence(),
-            'content' => fake()->paragraphs(3, true),
+            'content' => $content,
+            'content_hash' => hash('sha256', (string) $normalized),
             'summary' => fake()->sentence(),
             'preview_content' => fake()->paragraph(),
             'price' => fake()->randomFloat(2, 0, 100000),

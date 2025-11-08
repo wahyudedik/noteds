@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $note->title . ' - Marketplace')
+@section('title', __('messages.marketplace_page_title', ['title' => $note->title]))
 
 @push('meta')
     @php
@@ -90,12 +90,14 @@
                 @endphp
                 <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <h3 class="text-sm font-semibold text-blue-900 uppercase tracking-wide mb-1">Percakapan Produk</h3>
+                        <h3 class="text-sm font-semibold text-blue-900 uppercase tracking-wide mb-1">{{ __('messages.product_conversation_title') }}</h3>
                         <p class="text-sm text-blue-800">
-                            Chat pribadi dengan <strong>{{ $otherUser->name }}</strong> terkait produk ini.
+                            {!! __('messages.product_conversation_description', ['name' => '<strong>' . e($otherUser->name) . '</strong>']) !!}
                             @if ($lastMessage)
                                 <span class="block mt-1 text-xs text-blue-700">
-                                    Pesan terakhir {{ $lastMessage->sender_id === auth()->id() ? 'Anda' : $lastMessage->sender->name }}:
+                                    {{ $lastMessage->sender_id === auth()->id()
+                                        ? __('messages.product_conversation_last_message_you')
+                                        : __('messages.product_conversation_last_message_other', ['name' => $lastMessage->sender->name]) }}
                                     “{{ \Illuminate\Support\Str::limit($lastMessage->message, 80) }}”
                                 </span>
                             @endif
@@ -103,7 +105,7 @@
                     </div>
                     <a href="{{ route('note-conversations.show', $conversation) }}"
                         class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
-                        Buka Chat →
+                        {{ __('messages.product_conversation_open_chat') }}
                     </a>
                 </div>
             @endif
@@ -183,6 +185,32 @@
                                 {{ __('messages.free') }}
                             </span>
                         @endif
+
+                        @if ($taxPreview)
+                            <div class="w-full mt-3 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-gray-700">
+                                <div class="flex justify-between">
+                                    <span>{{ __('messages.tax_subtotal_label') }}</span>
+                                    <span class="font-medium text-gray-900">{{ currency($taxPreview['price_excluding_tax']) }}</span>
+                                </div>
+                                <div class="flex justify-between mt-1">
+                                    <span>
+                                        {{ __('messages.tax_label') }} ({{ $taxPreview['tax_percent'] }}%)
+                                        {!! $taxPreview['tax_inclusive'] ? '<span class="text-xs text-emerald-600 font-semibold ml-1">'.__('messages.tax_inclusive_badge').'</span>' : '' !!}
+                                    </span>
+                                    <span class="font-medium text-gray-900">{{ currency($taxPreview['tax_amount']) }}</span>
+                                </div>
+                                <div class="flex justify-between mt-2 border-t border-slate-200 pt-2">
+                                    <span class="font-semibold text-gray-900">{{ __('messages.tax_total_label') }}</span>
+                                    <span class="font-semibold text-gray-900">{{ currency($taxPreview['total_amount']) }}</span>
+                                </div>
+                                <p class="mt-2 text-xs text-gray-500">
+                                    {{ $taxPreview['tax_inclusive'] ? __('messages.tax_inclusive_help') : __('messages.tax_exclusive_help') }}
+                                    @if (!empty($taxPreview['country_code']))
+                                        <span class="font-semibold text-gray-600">({{ strtoupper($taxPreview['country_code']) }})</span>
+                                    @endif
+                                </p>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Title -->
@@ -206,7 +234,7 @@
                             <div class="flex items-center gap-4 flex-wrap">
                                 <a href="{{ route('public.profile.show', $note->user->username) }}"
                                     class="flex items-center hover:text-blue-600 transition-colors duration-200 group"
-                                    title="View all notes from {{ $note->user->name }}">
+                                    title="{{ __('messages.view_all_notes_from', ['name' => $note->user->name]) }}">
                                     <div
                                         class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200">
                                         @if ($note->user->avatar)
@@ -230,11 +258,11 @@
                                             @if ($note->user->hasPremium())
                                                 <span
                                                     class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
-                                                    title="Premium Buyer">
+                                                    title="{{ __('messages.premium_buyer_badge') }}">
                                                     <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
                                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                     </svg>
-                                                    Premium
+                                                    {{ __('messages.premium_badge_label') }}
                                                 </span>
                                             @endif
                                             @if ($note->user->role === 'seller')
@@ -246,7 +274,7 @@
                                                             stroke-width="2"
                                                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                     </svg>
-                                                    Seller
+                                                    {{ __('messages.seller') }}
                                                 </span>
                                             @endif
                                         </div>
@@ -255,7 +283,7 @@
                                         @endif
                                         <div
                                             class="text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                            View all notes →
+                                            {{ __('messages.view_all_notes_arrow') }}
                                         </div>
                                         <div class="mt-2 flex items-center gap-2">
                                             @if (($sellerReviewStats['count'] ?? 0) > 0)
@@ -273,11 +301,11 @@
                                                         {{ number_format($sellerReviewStats['average'], 1) }}
                                                     </span>
                                                     <span class="text-xs text-gray-500">
-                                                        ({{ $sellerReviewStats['count'] }} rating)
+                                                        ({{ trans_choice('messages.rating_count', $sellerReviewStats['count'], ['count' => $sellerReviewStats['count']]) }})
                                                     </span>
                                                 </div>
                                             @else
-                                                <span class="text-xs text-gray-500">Belum ada rating seller</span>
+                                                <span class="text-xs text-gray-500">{{ __('messages.seller_no_ratings_yet') }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -287,13 +315,13 @@
                                         $note->user->notes()->where('is_public', true)->where('status', 'active')->count() > 0)
                                     <a href="{{ route('public.profile.ai-chat', $note->user->username) }}"
                                         class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-sm hover:shadow-md"
-                                        title="Ask AI about {{ $note->user->name }}'s notes">
+                                        title="{{ __('messages.ask_ai_about_notes', ['name' => $note->user->name]) }}">
                                         <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                                         </svg>
-                                        Ask AI
+                                        {{ __('messages.ask_ai_button') }}
                                     </a>
                                 @endif
                                 <div class="text-xs text-gray-500">
@@ -308,7 +336,7 @@
 
                             <!-- Share Buttons -->
                             <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-500 mr-2">Share:</span>
+                                <span class="text-xs text-gray-500 mr-2">{{ __('messages.share_label') }}</span>
                                 @php
                                     $shareUrl = route('marketplace.show', $note);
                                     $shareTitle = urlencode($note->title);
@@ -319,7 +347,7 @@
                                 <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl) }}"
                                     target="_blank" rel="noopener noreferrer"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
-                                    title="Share on Facebook">
+                                    title="{{ __('messages.share_on_facebook') }}">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path
                                             d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -330,7 +358,7 @@
                                 <a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}&text={{ $shareTitle }}"
                                     target="_blank" rel="noopener noreferrer"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-500 text-white hover:bg-sky-600 transition-colors duration-200"
-                                    title="Share on Twitter">
+                                    title="{{ __('messages.share_on_twitter') }}">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path
                                             d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
@@ -341,7 +369,7 @@
                                 <a href="https://wa.me/?text={{ $shareTitle }}%20{{ urlencode($shareUrl) }}"
                                     target="_blank" rel="noopener noreferrer"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white hover:bg-green-600 transition-colors duration-200"
-                                    title="Share on WhatsApp">
+                                    title="{{ __('messages.share_on_whatsapp') }}">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path
                                             d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
@@ -352,7 +380,7 @@
                                 <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode($shareUrl) }}"
                                     target="_blank" rel="noopener noreferrer"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-700 text-white hover:bg-blue-800 transition-colors duration-200"
-                                    title="Share on LinkedIn">
+                                    title="{{ __('messages.share_on_linkedin') }}">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path
                                             d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
@@ -362,7 +390,7 @@
                                 <!-- Copy Link -->
                                 <button onclick="copyToClipboard('{{ $shareUrl }}')"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-600 text-white hover:bg-gray-700 transition-colors duration-200"
-                                    title="Copy link">
+                                    title="{{ __('messages.copy_link') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -371,14 +399,14 @@
                                 @auth
                                     <button type="button" onclick="showNoteReportModal()"
                                         class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
-                                        title="Report this note">
-                                        Report Note
+                                        title="{{ __('messages.report_note_tooltip') }}">
+                                        {{ __('messages.report_note') }}
                                     </button>
                                 @else
                                     <a href="{{ route('login') }}"
                                         class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
-                                        title="Login to report this note">
-                                        Report Note
+                                        title="{{ __('messages.report_note_login_tooltip') }}">
+                                        {{ __('messages.report_note') }}
                                     </a>
                                 @endauth
                             </div>

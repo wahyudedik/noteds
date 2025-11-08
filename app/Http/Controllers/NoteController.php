@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreNoteRequest;
 use App\Http\Requests\UpdateNoteRequest;
 use App\Models\Note;
+use App\Models\PurchasedNote;
 use App\Models\Tag;
+use App\Models\Setting;
+use App\Models\Transaction;
+use App\Models\User;
 use App\Models\WorkspaceActivityLog;
 use App\Services\NoteActivityService;
 use App\Services\NotificationService;
@@ -76,7 +80,17 @@ class NoteController extends Controller
             }
         }
 
-        return view('notes.create', compact('tags', 'folders', 'workspaces', 'selectedWorkspace', 'selectedFolder'));
+        $defaultMinPrice = Setting::getDefaultMinPrice();
+        $priceGuidance = [
+            'min_default' => $defaultMinPrice,
+            'recommended_multiplier' => Setting::getRecommendedPriceMultiplier(),
+            'recommended_price' => $defaultMinPrice > 0
+                ? round($defaultMinPrice * Setting::getRecommendedPriceMultiplier())
+                : null,
+            'category_rules' => Setting::getCategoryMinPriceList(),
+        ];
+
+        return view('notes.create', compact('tags', 'folders', 'workspaces', 'selectedWorkspace', 'selectedFolder', 'priceGuidance'));
     }
 
     /**
@@ -129,6 +143,19 @@ class NoteController extends Controller
         $validated['is_public'] = $request->has('is_public');
         $validated['status'] = $validated['status'] ?? 'active';
         $validated['is_sold'] = false; // New notes are not sold yet
+
+        $contentHash = $this->generateContentHash($validated['content'] ?? '');
+        if ($duplicate = $this->detectUnauthorizedResale($contentHash, $user)) {
+            return redirect()->route('notes.create')
+                ->withInput()
+                ->withErrors([
+                    'content' => __('messages.note_content_duplicate', [
+                        'title' => $duplicate->title,
+                        'seller' => optional($duplicate->originalCreator)->name ?? optional($duplicate->user)->name ?? __('messages.another_seller'),
+                    ]),
+                ]);
+        }
+        $validated['content_hash'] = $contentHash;
         
         // Handle workspace and folder
         $workspace = null;
@@ -295,7 +322,17 @@ class NoteController extends Controller
             $workspaces = $user->allWorkspaces();
         }
 
-        return view('notes.edit', compact('note', 'tags', 'folders', 'workspaces'));
+        $defaultMinPrice = Setting::getDefaultMinPrice();
+        $priceGuidance = [
+            'min_default' => $defaultMinPrice,
+            'recommended_multiplier' => Setting::getRecommendedPriceMultiplier(),
+            'recommended_price' => $defaultMinPrice > 0
+                ? round($defaultMinPrice * Setting::getRecommendedPriceMultiplier())
+                : null,
+            'category_rules' => Setting::getCategoryMinPriceList(),
+        ];
+
+        return view('notes.edit', compact('note', 'tags', 'folders', 'workspaces', 'priceGuidance'));
     }
 
     /**
@@ -335,6 +372,21 @@ class NoteController extends Controller
         if (empty($validated['preview_content'])) {
             $content = strip_tags($validated['content']);
             $validated['preview_content'] = Str::limit($content, 300);
+        }
+
+        $contentHash = $this->generateContentHash($validated['content'] ?? '');
+        if ($contentHash !== $note->content_hash) {
+            if ($duplicate = $this->detectUnauthorizedResale($contentHash, $user, $note->id)) {
+                return redirect()->route('notes.edit', $note)
+                    ->withInput()
+                    ->withErrors([
+                        'content' => __('messages.note_content_duplicate', [
+                            'title' => $duplicate->title,
+                            'seller' => optional($duplicate->originalCreator)->name ?? optional($duplicate->user)->name ?? __('messages.another_seller'),
+                        ]),
+                    ]);
+            }
+            $validated['content_hash'] = $contentHash;
         }
 
         // Handle file uploads (merge with existing)
@@ -573,5 +625,54 @@ class NoteController extends Controller
         }
 
         return $thumbnails;
+    }
+
+    private function generateContentHash(?string $content): string
+    {
+        $normalized = Str::of(strip_tags($content ?? ''))
+            ->lower()
+            ->replaceMatches('/\s+/u', ' ')
+            ->trim();
+
+        return hash('sha256', (string) $normalized);
+    }
+
+    private function detectUnauthorizedResale(string $contentHash, User $user, ?string $ignoreNoteId = null): ?Note
+    {
+        if (empty($contentHash)) {
+            return null;
+        }
+
+        $duplicate = Note::query()
+            ->where('content_hash', $contentHash)
+            ->when($ignoreNoteId, fn ($query) => $query->where('id', '!=', $ignoreNoteId))
+            ->where(function ($query) use ($user) {
+                $query->whereNull('original_creator_id')
+                    ->orWhere('original_creator_id', '!=', $user->id);
+            })
+            ->first();
+
+        if (!$duplicate) {
+            return null;
+        }
+
+        if ($duplicate->user_id === $user->id) {
+            return null;
+        }
+
+        $hasPurchased = PurchasedNote::where('user_id', $user->id)
+            ->where('note_id', $duplicate->id)
+            ->exists();
+
+        $wasBuyer = Transaction::where('buyer_id', $user->id)
+            ->where('note_id', $duplicate->id)
+            ->where('status', 'success')
+            ->exists();
+
+        if ($hasPurchased || $wasBuyer) {
+            return $duplicate;
+        }
+
+        return null;
     }
 }

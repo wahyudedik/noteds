@@ -129,13 +129,20 @@ class NoteSeeder extends Seeder
                     }
                 }
 
+                $content = $template['content'];
+                $normalized = Str::of(strip_tags($content))
+                    ->lower()
+                    ->replaceMatches('/\s+/u', ' ')
+                    ->trim();
+
                 $note = Note::create([
                     'user_id' => $seller->id,
                     'original_creator_id' => $seller->id, // Set original creator
                     'workspace_id' => $workspaceId,
                     'folder_id' => $folderId,
                     'title' => $template['title'] . ($i > 0 ? ' ' . ($i + 1) : ''),
-                    'content' => $template['content'],
+                    'content' => $content,
+                    'content_hash' => hash('sha256', (string) $normalized),
                     'price' => $template['price'] + rand(-20000, 20000),
                     'is_public' => rand(0, 100) > 20, // 80% public
                     'status' => ['active', 'active', 'active', 'active', 'inactive'][rand(0, 4)],

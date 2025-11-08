@@ -50,6 +50,20 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        $user = Auth::user();
+
+        if ($user && (! $user->is_active || $user->isSuspended())) {
+            Auth::logout();
+
+            $message = $user->isSuspended()
+                ? trans('auth.suspended')
+                : trans('auth.inactive');
+
+            throw ValidationException::withMessages([
+                'email' => $message,
+            ]);
+        }
     }
 
     /**

@@ -319,6 +319,50 @@
                             @error('price')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
+                            @if (!empty($priceGuidance))
+                                <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4 text-xs text-blue-800 space-y-2">
+                                    @if (!empty($priceGuidance['min_default']))
+                                        <p class="flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5a1 1 0 112 0v1.528a6 6 0 014.472 9.472l.764.764a1 1 0 01-1.414 1.414l-.764-.764A6 6 0 1111 6.528V5z" />
+                                            </svg>
+                                            <span>{!! __('messages.price_guidance_minimum_default', ['amount' => '<strong id="price-guidance-min-default">' . currency($priceGuidance['min_default']) . '</strong>']) !!}</span>
+                                        </p>
+                                    @endif
+                                    <p class="flex items-center gap-2 {{ empty($priceGuidance['recommended_price']) ? 'hidden' : '' }}" id="price-guidance-recommended-row">
+                                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        <span>{!! __('messages.price_guidance_recommended', [
+                                            'amount' => '<strong id="price-guidance-recommended">' . ($priceGuidance['recommended_price'] ? currency($priceGuidance['recommended_price']) : '—') . '</strong>',
+                                            'multiplier' => $priceGuidance['recommended_multiplier'],
+                                        ]) !!}</span>
+                                    </p>
+                                    <p class="flex items-center gap-2 hidden" id="price-guidance-selected-row">
+                                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 6h16M4 12h16M4 18h16" />
+                                        </svg>
+                                        <span id="price-guidance-selected" data-template="{{ __('messages.price_guidance_selected_min', ['amount' => ':amount']) }}"></span>
+                                    </p>
+                                    <p class="text-xs font-semibold text-red-600 hidden" id="price-guidance-warning" data-template="{{ __('messages.price_guidance_warning_below', ['amount' => ':amount']) }}"></p>
+                                    @if (!empty($priceGuidance['category_rules']))
+                                        <div>
+                                            <p class="font-semibold text-blue-900">{{ __('messages.price_guidance_category_heading') }}</p>
+                                            <ul class="mt-1 space-y-1 text-blue-700">
+                                                @foreach ($priceGuidance['category_rules'] as $rule)
+                                                    <li>• {!! __('messages.price_guidance_category_item', [
+                                                        'category' => '<strong>' . e($rule['tag_name'] ?? $rule['tag_slug']) . '</strong>',
+                                                        'amount' => '<strong>' . currency($rule['min_price']) . '</strong>',
+                                                    ]) !!}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
 
                             <!-- Discount Price -->
                             <div class="mt-4" id="discount-price-wrapper" style="display: {{ old('discount_price', $note->discount_price) || old('price', $note->price) > 0 ? 'block' : 'none' }};">
@@ -651,6 +695,115 @@ document.addEventListener('DOMContentLoaded', function() {
     const discountPriceInput = document.getElementById('discount_price');
     const discountPreview = document.getElementById('discount-preview');
     const discountPercent = document.getElementById('discount-percent');
+const priceGuidanceData = @json($priceGuidance);
+const priceGuidanceMinDefaultEl = document.getElementById('price-guidance-min-default');
+const priceGuidanceRecommendedRow = document.getElementById('price-guidance-recommended-row');
+const priceGuidanceRecommendedEl = document.getElementById('price-guidance-recommended');
+const priceGuidanceSelectedRow = document.getElementById('price-guidance-selected-row');
+const priceGuidanceSelectedEl = document.getElementById('price-guidance-selected');
+const priceGuidanceWarningEl = document.getElementById('price-guidance-warning');
+const baseCurrency = 'IDR';
+const locale = document.documentElement.lang === 'en' ? 'en-ID' : 'id-ID';
+const currencyFormatter = typeof Intl !== 'undefined'
+    ? new Intl.NumberFormat(locale, { style: 'currency', currency: baseCurrency, maximumFractionDigits: 0 })
+    : null;
+const minDefaultPrice = parseFloat(priceGuidanceData?.min_default ?? 0) || 0;
+const recommendedMultiplier = parseFloat(priceGuidanceData?.recommended_multiplier ?? 0) || 0;
+const categoryMinRules = Array.isArray(priceGuidanceData?.category_rules) ? priceGuidanceData.category_rules : [];
+
+function formatCurrency(amount) {
+    if (!currencyFormatter) {
+        return 'Rp ' + Number(amount || 0).toLocaleString('id-ID');
+    }
+    return currencyFormatter.format(Math.max(0, amount || 0));
+}
+
+function slugify(text) {
+    return (text || '')
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+function getSelectedTagValues() {
+    return Array.from(tagsContainer.querySelectorAll('input[type="hidden"]'))
+        .map(input => input.value || '')
+        .filter(Boolean);
+}
+
+function getEffectiveMinimum(tags) {
+    let minPrice = minDefaultPrice;
+    if (!tags.length || !categoryMinRules.length) {
+        return minPrice;
+    }
+
+    const ruleMap = categoryMinRules.reduce((acc, rule) => {
+        if (rule?.tag_slug) {
+            acc[rule.tag_slug] = parseFloat(rule.min_price ?? 0) || 0;
+        }
+        return acc;
+    }, {});
+
+    tags.forEach(tagName => {
+        const slug = slugify(tagName);
+        if (slug && ruleMap[slug]) {
+            minPrice = Math.max(minPrice, ruleMap[slug]);
+        }
+    });
+
+    return minPrice;
+}
+
+function updatePriceGuidanceUI() {
+    if (!priceGuidanceData) {
+        return;
+    }
+
+    const tags = getSelectedTagValues();
+    const effectiveMin = getEffectiveMinimum(tags);
+    const recommendedPrice = recommendedMultiplier > 0 ? Math.round(effectiveMin * recommendedMultiplier) : null;
+    const currentPrice = parseFloat(priceInput?.value || 0) || 0;
+
+    if (priceGuidanceMinDefaultEl) {
+        priceGuidanceMinDefaultEl.textContent = formatCurrency(minDefaultPrice);
+    }
+
+    if (priceGuidanceRecommendedRow && priceGuidanceRecommendedEl) {
+        if (recommendedPrice && recommendedPrice > 0) {
+            priceGuidanceRecommendedRow.classList.remove('hidden');
+            priceGuidanceRecommendedEl.textContent = formatCurrency(recommendedPrice);
+        } else {
+            priceGuidanceRecommendedRow.classList.add('hidden');
+        }
+    }
+
+    if (priceGuidanceSelectedRow && priceGuidanceSelectedEl) {
+        const template = priceGuidanceSelectedEl.getAttribute('data-template') || '';
+        if (effectiveMin > minDefaultPrice) {
+            priceGuidanceSelectedRow.classList.remove('hidden');
+            priceGuidanceSelectedEl.innerHTML = template.replace(':amount', '<strong>' + formatCurrency(effectiveMin) + '</strong>');
+        } else {
+            priceGuidanceSelectedRow.classList.add('hidden');
+            priceGuidanceSelectedEl.innerHTML = '';
+        }
+    }
+
+    if (priceGuidanceWarningEl) {
+        const template = priceGuidanceWarningEl.getAttribute('data-template') || '';
+        if (currentPrice > 0 && currentPrice < effectiveMin) {
+            priceGuidanceWarningEl.classList.remove('hidden');
+            priceGuidanceWarningEl.innerHTML = template.replace(':amount', '<strong>' + formatCurrency(effectiveMin) + '</strong>');
+        } else {
+            priceGuidanceWarningEl.classList.add('hidden');
+            priceGuidanceWarningEl.innerHTML = '';
+        }
+    }
+}
 
     function updateDiscountPreview() {
         const price = parseFloat(priceInput.value) || 0;
@@ -670,6 +823,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             discountPreview.classList.add('hidden');
         }
+
+    updatePriceGuidanceUI();
     }
 
     if (priceInput && previewContentWrapper) {
@@ -695,6 +850,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial check
     updateDiscountPreview();
+updatePriceGuidanceUI();
 
     // File upload preview
     const fileInput = document.getElementById('attachments');
@@ -752,6 +908,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const tagItem = e.target.closest('.tag-item');
             if (tagItem) {
                 tagItem.remove();
+                updatePriceGuidanceUI();
             }
         }
     });
@@ -774,6 +931,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </button>
         `;
         tagsContainer.appendChild(tagItem);
+    updatePriceGuidanceUI();
     }
 });
 </script>

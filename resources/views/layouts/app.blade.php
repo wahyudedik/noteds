@@ -137,6 +137,16 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a href="{{ route('cms.show', ['cmsPage' => 'privacy-policy']) }}" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
+                                        {{ __('messages.privacy_policy') }}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('cms.show', ['cmsPage' => 'terms-and-conditions']) }}" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
+                                        {{ __('messages.terms_and_conditions') }}
+                                    </a>
+                                </li>
+                                <li>
                                     <a href="mailto:info@noteds.com" class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
                                         info@noteds.com
                                     </a>

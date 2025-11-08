@@ -61,6 +61,51 @@ class SettingSeeder extends Seeder
             ]
         );
 
+        Setting::updateOrCreate(
+            ['key' => 'tax_default_percent', 'group' => 'marketplace'],
+            [
+                'value' => '11',
+                'type' => 'number',
+                'description' => 'Default tax percentage applied when no country-specific rule is found',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'tax_inclusive_default', 'group' => 'marketplace'],
+            [
+                'value' => '1',
+                'type' => 'boolean',
+                'description' => 'Indicates whether listed prices already include tax by default',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'min_price_default', 'group' => 'marketplace'],
+            [
+                'value' => '50000',
+                'type' => 'number',
+                'description' => 'Minimum default price for paid notes in Rupiah',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'recommended_price_multiplier', 'group' => 'marketplace'],
+            [
+                'value' => '1.5',
+                'type' => 'number',
+                'description' => 'Suggested multiplier applied to minimum price for recommended pricing guidance',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'min_price_categories', 'group' => 'marketplace'],
+            [
+                'value' => [],
+                'type' => 'json',
+                'description' => 'Category-specific minimum prices for notes',
+            ]
+        );
+
         // Premium buyer exclusive discount
         Setting::updateOrCreate(
             ['key' => 'premium_buyer_discount_percent', 'group' => 'marketplace'],

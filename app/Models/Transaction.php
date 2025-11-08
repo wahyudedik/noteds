@@ -23,6 +23,10 @@ class Transaction extends Model
         'original_amount',
         'original_currency',
         'exchange_rate',
+        'tax_percent',
+        'tax_amount',
+        'tax_inclusive',
+        'tax_country_code',
         'status',
         'payment_method',
         'midtrans_order_id',
@@ -40,6 +44,10 @@ class Transaction extends Model
             'original_amount' => 'decimal:2',
             'original_currency' => 'string',
             'exchange_rate' => 'decimal:6',
+            'tax_percent' => 'decimal:2',
+            'tax_amount' => 'decimal:2',
+            'tax_inclusive' => 'boolean',
+            'tax_country_code' => 'string',
             'status' => 'string',
         ];
     }

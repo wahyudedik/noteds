@@ -53,6 +53,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.name') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.email') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.role') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.balance') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.joined') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.action') }}</th>
@@ -76,6 +77,21 @@
                                             <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">{{ __('messages.buyer') }}</span>
                                         @endif
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        @if($user->suspended_at)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                                {{ __('messages.user_status_suspended') }}
+                                            </span>
+                                        @elseif(! $user->is_active)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
+                                                {{ __('messages.user_status_inactive') }}
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                                {{ __('messages.user_status_active') }}
+                                            </span>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ currency($user->wallet_balance ?? 0) }}
                                     </td>
@@ -83,8 +99,33 @@
                                         {{ $user->created_at->format('d M Y') }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <a href="{{ route('admin.users.show', $user) }}" class="text-blue-600 hover:text-blue-800 mr-3">{{ __('messages.view') }}</a>
-                                        <a href="{{ route('admin.users.edit', $user) }}" class="text-green-600 hover:text-green-800">{{ __('messages.edit') }}</a>
+                                        <div class="flex flex-wrap items-center gap-3">
+                                            <a href="{{ route('admin.users.show', $user) }}" class="text-blue-600 hover:text-blue-800">{{ __('messages.view') }}</a>
+                                            <a href="{{ route('admin.users.edit', $user) }}" class="text-green-600 hover:text-green-800">{{ __('messages.edit') }}</a>
+
+                                            @if($user->id !== auth()->id())
+                                                @if($user->isAccessible())
+                                                    <form method="POST" action="{{ route('admin.users.deactivate', $user) }}" class="inline-flex items-center gap-2" onsubmit="return confirm('{{ __('messages.confirm_deactivate_user') }}');">
+                                                        @csrf
+                                                        <button type="submit" class="text-yellow-600 hover:text-yellow-800">{{ __('messages.deactivate') }}</button>
+                                                    </form>
+                                                    <form method="POST" action="{{ route('admin.users.suspend', $user) }}" class="inline-flex items-center gap-2" onsubmit="return confirm('{{ __('messages.confirm_suspend_user') }}');">
+                                                        @csrf
+                                                        <button type="submit" class="text-red-600 hover:text-red-800">{{ __('messages.suspend') }}</button>
+                                                    </form>
+                                                @elseif($user->suspended_at)
+                                                    <form method="POST" action="{{ route('admin.users.release', $user) }}" class="inline-flex items-center gap-2" onsubmit="return confirm('{{ __('messages.confirm_release_user') }}');">
+                                                        @csrf
+                                                        <button type="submit" class="text-green-600 hover:text-green-800">{{ __('messages.release_suspend') }}</button>
+                                                    </form>
+                                                @else
+                                                    <form method="POST" action="{{ route('admin.users.activate', $user) }}" class="inline-flex items-center gap-2" onsubmit="return confirm('{{ __('messages.confirm_activate_user') }}');">
+                                                        @csrf
+                                                        <button type="submit" class="text-green-600 hover:text-green-800">{{ __('messages.activate') }}</button>
+                                                    </form>
+                                                @endif
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

@@ -14,17 +14,19 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         $admin = User::updateOrCreate(
-            ['email' => 'admin@noteds.com'],
+            ['email' => 'info@noteds.com'],
             [
                 'name' => 'Admin',
                 'username' => 'admin',
-                'password' => bcrypt('password'),
+                'password' => bcrypt('Wahyu123456789@'),
                 'email_verified_at' => now(),
                 'role' => 'admin',
                 'wallet_balance' => 1000000, // Platform wallet
                 'avatar' => 'https://ui-avatars.com/api/?name=Admin',
                 'bio' => 'System Administrator',
                 'location' => 'Bandung, Indonesia',
+                'is_active' => true,
+                'suspended_at' => null,
             ]
         );
 

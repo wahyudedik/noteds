@@ -4,12 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private NotificationService $notificationService
+    ) {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -88,5 +95,82 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User berhasil dihapus.');
+    }
+
+    public function deactivate(Request $request, User $user): RedirectResponse
+    {
+        if ($message = $this->guardAgainstSelfOrLastAdmin($user)) {
+            return back()->with('error', $message);
+        }
+
+        $request->validate([
+            'reason' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $user->update([
+            'is_active' => false,
+            'suspended_at' => null,
+        ]);
+
+        $this->notificationService->notifyAccountSuspended($user, $request->input('reason'), Auth::user());
+
+        return back()->with('success', 'User dinonaktifkan.');
+    }
+
+    public function activate(User $user): RedirectResponse
+    {
+        $user->update([
+            'is_active' => true,
+            'suspended_at' => null,
+        ]);
+
+        $this->notificationService->notifyAccountReactivated($user, Auth::user());
+
+        return back()->with('success', 'User diaktifkan.');
+    }
+
+    public function suspend(Request $request, User $user): RedirectResponse
+    {
+        if ($message = $this->guardAgainstSelfOrLastAdmin($user)) {
+            return back()->with('error', $message);
+        }
+
+        $request->validate([
+            'reason' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $user->update([
+            'is_active' => false,
+            'suspended_at' => now(),
+        ]);
+
+        $this->notificationService->notifyAccountSuspended($user, $request->input('reason'), Auth::user());
+
+        return back()->with('success', 'User disuspend.');
+    }
+
+    public function release(User $user): RedirectResponse
+    {
+        $user->update([
+            'is_active' => true,
+            'suspended_at' => null,
+        ]);
+
+        $this->notificationService->notifyAccountReactivated($user, Auth::user());
+
+        return back()->with('success', 'Suspend akun dicabut.');
+    }
+
+    private function guardAgainstSelfOrLastAdmin(User $user): ?string
+    {
+        if ($user->id === Auth::id()) {
+            return 'Anda tidak dapat melakukan tindakan ini pada akun Anda sendiri.';
+        }
+
+        if ($user->role === 'admin' && User::where('role', 'admin')->where('id', '!=', $user->id)->count() === 0) {
+            return 'Tidak dapat menonaktifkan atau mensuspend admin terakhir.';
+        }
+
+        return null;
     }
 }

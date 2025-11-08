@@ -22,6 +22,12 @@
             </div>
         @endif
 
+        @if(session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -29,7 +35,7 @@
                     <div class="space-y-2">
                         <p><strong>{{ __('messages.name') }}:</strong> {{ $user->name }}</p>
                         <p><strong>{{ __('messages.email') }}:</strong> {{ $user->email }}</p>
-                        <p><strong>{{ __('messages.role') }}:</strong> 
+                        <p><strong>{{ __('messages.role') }}:</strong>
                             @if($user->role === 'admin')
                                 <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">{{ __('messages.admin') }}</span>
                             @elseif($user->role === 'seller')
@@ -40,6 +46,25 @@
                         </p>
                         <p><strong>{{ __('messages.wallet_balance_label') }}:</strong> {{ currency($user->wallet_balance ?? 0) }}</p>
                         <p><strong>{{ __('messages.joined') }}:</strong> {{ $user->created_at->format('d M Y, H:i') }}</p>
+                        <p>
+                            <strong>{{ __('messages.status') }}:</strong>
+                            @if($user->suspended_at)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                    {{ __('messages.user_status_suspended') }}
+                                </span>
+                                <span class="block text-xs text-gray-500 mt-1">
+                                    {{ __('messages.suspended_at_label') }}: {{ $user->suspended_at->format('d M Y H:i') }}
+                                </span>
+                            @elseif(! $user->is_active)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
+                                    {{ __('messages.user_status_inactive') }}
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                    {{ __('messages.user_status_active') }}
+                                </span>
+                            @endif
+                        </p>
                     </div>
                 </div>
 
@@ -57,7 +82,55 @@
             </div>
         </div>
 
-        <!-- Recent Withdraws -->
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.account_actions') }}</h3>
+
+            @if($user->id === auth()->id())
+                <p class="text-sm text-gray-600">{{ __('messages.cannot_modify_self_status') }}</p>
+            @else
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <form method="POST" action="{{ route('admin.users.deactivate', $user) }}" class="border rounded-lg p-4 shadow-sm space-y-3" onsubmit="return confirm('{{ __('messages.confirm_deactivate_user') }}');">
+                        @csrf
+                        <h4 class="text-sm font-semibold text-gray-800">{{ __('messages.deactivate_account') }}</h4>
+                        <p class="text-xs text-gray-600">{{ __('messages.deactivate_account_help') }}</p>
+                        <input type="text" name="reason" placeholder="{{ __('messages.optional_reason_placeholder') }}"
+                            class="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500">
+                        <button type="submit" class="mt-2 inline-flex items-center px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-semibold rounded-md">
+                            {{ __('messages.deactivate') }}
+                        </button>
+                    </form>
+
+                    <form method="POST" action="{{ $user->suspended_at ? route('admin.users.release', $user) : route('admin.users.suspend', $user) }}" class="border rounded-lg p-4 shadow-sm space-y-3" onsubmit="return confirm('{{ $user->suspended_at ? __('messages.confirm_release_user') : __('messages.confirm_suspend_user') }}');">
+                        @csrf
+                        @if($user->suspended_at)
+                            <h4 class="text-sm font-semibold text-gray-800">{{ __('messages.release_suspend') }}</h4>
+                            <p class="text-xs text-gray-600">{{ __('messages.release_suspend_help') }}</p>
+                            <button type="submit" class="mt-2 inline-flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-md">
+                                {{ __('messages.release_suspend') }}
+                            </button>
+                        @else
+                            <h4 class="text-sm font-semibold text-gray-800">{{ __('messages.suspend_account') }}</h4>
+                            <p class="text-xs text-gray-600">{{ __('messages.suspend_account_help') }}</p>
+                            <input type="text" name="reason" placeholder="{{ __('messages.optional_reason_placeholder') }}"
+                                class="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                            <button type="submit" class="mt-2 inline-flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-md">
+                                {{ __('messages.suspend') }}
+                            </button>
+                        @endif
+                    </form>
+                </div>
+
+                @if(!$user->isAccessible())
+                    <form method="POST" action="{{ route('admin.users.activate', $user) }}" class="mt-4" onsubmit="return confirm('{{ __('messages.confirm_activate_user') }}');">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-md">
+                            {{ __('messages.activate_account') }}
+                        </button>
+                    </form>
+                @endif
+            @endif
+        </div>
+
         @if($user->withdraws->count() > 0)
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.recent_withdraws') }}</h3>

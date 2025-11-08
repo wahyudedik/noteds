@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Setting;
+use Illuminate\Support\Str;
 
 class UpdateNoteRequest extends FormRequest
 {
@@ -102,6 +104,29 @@ class UpdateNoteRequest extends FormRequest
                     $validator->errors()->add('discount_price', 'Harga diskon harus lebih murah dari harga normal.');
                 } elseif ($discountPrice < 0) {
                     $validator->errors()->add('discount_price', 'Harga diskon tidak boleh negatif.');
+                }
+            }
+
+            $price = (float) $this->input('price', 0);
+            if ($price > 0) {
+                $minPrice = Setting::getDefaultMinPrice();
+                $categoryRules = Setting::getCategoryMinPrices();
+                $tags = collect($this->input('tags', []))
+                    ->map(fn ($tag) => Str::slug($tag))
+                    ->filter()
+                    ->all();
+
+                foreach ($tags as $slug) {
+                    if (isset($categoryRules[$slug])) {
+                        $minPrice = max($minPrice, $categoryRules[$slug]);
+                    }
+                }
+
+                if ($price < $minPrice) {
+                    $formattedMinPrice = 'Rp ' . number_format($minPrice, 0, ',', '.');
+                    $validator->errors()->add('price', __('messages.price_below_minimum', [
+                        'amount' => $formattedMinPrice,
+                    ]));
                 }
             }
         });

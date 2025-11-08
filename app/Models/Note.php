@@ -22,6 +22,7 @@ class Note extends Model
         'workspace_id',
         'title',
         'content',
+        'content_hash',
         'summary',
         'preview_content',
         'preview_percentage',

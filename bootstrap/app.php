@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
+            \App\Http\Middleware\EnsureUserIsActive::class,
             \App\Http\Middleware\SetLocale::class,
         ]);
         
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'seller' => \App\Http\Middleware\EnsureSellerRole::class,
             'workspace.user' => \App\Http\Middleware\EnsureWorkspaceUser::class,
             'throttle.ai' => \App\Http\Middleware\ThrottleAiRequests::class,
+            'active' => \App\Http\Middleware\EnsureUserIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

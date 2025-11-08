@@ -34,6 +34,8 @@ use App\Http\Controllers\Admin\ExchangeRateController;
 use App\Http\Controllers\Admin\DocumentationController as AdminDocumentationController;
 use App\Http\Controllers\Admin\LandingPageController as AdminLandingPageController;
 use App\Http\Controllers\Admin\SocialMediaController as AdminSocialMediaController;
+use App\Http\Controllers\Admin\TaxRuleController as AdminTaxRuleController;
+use App\Http\Controllers\Admin\PriceRuleController as AdminPriceRuleController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\NoteAttachmentController;
 use App\Http\Controllers\WelcomeController;
@@ -47,8 +49,8 @@ Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 // Locale & i18n routes
 Route::get('/locale/{locale}', [LocaleController::class, 'switchLocale'])->name('locale.switch');
-Route::post('/locale/currency', [LocaleController::class, 'setCurrency'])->middleware(['auth', 'username.setup'])->name('locale.set-currency');
-Route::post('/locale/timezone', [LocaleController::class, 'setTimezone'])->middleware(['auth', 'username.setup'])->name('locale.set-timezone');
+Route::post('/locale/currency', [LocaleController::class, 'setCurrency'])->middleware(['auth', 'verified', 'username.setup'])->name('locale.set-currency');
+Route::post('/locale/timezone', [LocaleController::class, 'setTimezone'])->middleware(['auth', 'verified', 'username.setup'])->name('locale.set-timezone');
 
 // Simulators (public for marketing)
 Route::get('/simulators', [SimulatorController::class, 'index'])->name('simulators.index');
@@ -69,7 +71,7 @@ Route::get('/page/{cmsPage}', [PublicCmsPageController::class, 'show'])->name('c
 // Marketplace routes
 Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
 Route::get('/marketplace/{note}', [MarketplaceController::class, 'show'])->name('marketplace.show');
-Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purchase'])->middleware(['auth', 'username.setup', 'buyer'])->name('marketplace.purchase');
+Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purchase'])->middleware(['auth', 'verified', 'username.setup', 'buyer'])->name('marketplace.purchase');
 
     // Public profile routes
     Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('public.profile.show');
@@ -77,7 +79,7 @@ Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purc
     Route::post('/u/{username}/ai-chat/ask', [PublicProfileController::class, 'askSeller'])->name('public.profile.ai-chat.ask');
 
     // Forum routes - Available for all authenticated users
-    Route::middleware(['auth', 'username.setup'])->prefix('forum')->name('forum.')->group(function () {
+    Route::middleware(['auth', 'verified', 'username.setup'])->prefix('forum')->name('forum.')->group(function () {
         Route::get('/', [\App\Http\Controllers\ForumController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\ForumController::class, 'store'])->name('store');
         Route::get('/analytics', [PostAnalyticsController::class, 'index'])->name('analytics');
@@ -99,7 +101,7 @@ Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purc
         Route::delete('/post/{post}', [\App\Http\Controllers\ForumController::class, 'destroy'])->name('destroy');
     });
 
-Route::middleware(['auth', 'username.setup'])->group(function () {
+Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
     Route::get('/note-conversations', [NoteConversationController::class, 'index'])->name('note-conversations.index');
     Route::get('/note-conversations/{conversation}', [NoteConversationController::class, 'show'])->name('note-conversations.show');
     Route::post('/note-conversations/{conversation}', [NoteConversationController::class, 'store'])->name('note-conversations.store');
@@ -109,17 +111,17 @@ Route::middleware(['auth', 'username.setup'])->group(function () {
 });
 
     // Follow routes
-    Route::middleware(['auth', 'username.setup'])->prefix('follow')->name('follow.')->group(function () {
+    Route::middleware(['auth', 'verified', 'username.setup'])->prefix('follow')->name('follow.')->group(function () {
         Route::post('/{user}', [\App\Http\Controllers\FollowController::class, 'follow'])->name('follow');
         Route::delete('/{user}', [\App\Http\Controllers\FollowController::class, 'unfollow'])->name('unfollow');
     });
 
 // Review routes
-Route::post('/notes/{note}/reviews', [ReviewController::class, 'store'])->middleware(['auth', 'username.setup'])->name('reviews.store');
-Route::patch('/reviews/{review}', [ReviewController::class, 'update'])->middleware(['auth', 'username.setup'])->name('reviews.update');
-Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->middleware(['auth', 'username.setup'])->name('reviews.destroy');
-Route::post('/reviews/{review}/replies', [NoteReviewReplyController::class, 'store'])->middleware(['auth', 'username.setup'])->name('reviews.replies.store');
-Route::delete('/review-replies/{reply}', [NoteReviewReplyController::class, 'destroy'])->middleware(['auth', 'username.setup'])->name('reviews.replies.destroy');
+Route::post('/notes/{note}/reviews', [ReviewController::class, 'store'])->middleware(['auth', 'verified', 'username.setup'])->name('reviews.store');
+Route::patch('/reviews/{review}', [ReviewController::class, 'update'])->middleware(['auth', 'verified', 'username.setup'])->name('reviews.update');
+Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->middleware(['auth', 'verified', 'username.setup'])->name('reviews.destroy');
+Route::post('/reviews/{review}/replies', [NoteReviewReplyController::class, 'store'])->middleware(['auth', 'verified', 'username.setup'])->name('reviews.replies.store');
+Route::delete('/review-replies/{reply}', [NoteReviewReplyController::class, 'destroy'])->middleware(['auth', 'verified', 'username.setup'])->name('reviews.replies.destroy');
 
 Route::get('/dashboard', function () {
     $user = auth()->user();
@@ -138,7 +140,7 @@ Route::middleware('auth')->prefix('setup-username')->name('setup-username.')->gr
     Route::post('/', [\App\Http\Controllers\SetupUsernameController::class, 'store'])->name('store');
 });
 
-Route::middleware(['auth', 'username.setup', 'workspace.user'])->group(function () {
+Route::middleware(['auth', 'verified', 'username.setup', 'workspace.user'])->group(function () {
     // Notes routes - for sellers and workspace users
     // Check is done in NoteController and middleware
     Route::resource('notes', NoteController::class);
@@ -158,7 +160,7 @@ Route::middleware(['auth', 'username.setup', 'workspace.user'])->group(function 
 
     // Workspaces (Premium feature - multi workspace)
     // Workspace users can access workspaces even without premium
-    Route::middleware(['auth', 'username.setup'])->group(function () {
+    Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
         // Check access in WorkspaceController
         Route::resource('workspaces', \App\Http\Controllers\WorkspaceController::class);
         Route::get('/workspaces/{workspace}/invite', [\App\Http\Controllers\WorkspaceController::class, 'invite'])->name('workspaces.invite');
@@ -284,9 +286,13 @@ Route::middleware(['auth', 'username.setup', 'workspace.user'])->group(function 
 });
 
 // Admin routes
-Route::prefix('admin')->middleware(['auth', 'role:admin', 'username.setup'])->name('admin.')->group(function () {
+Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.setup'])->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', UserController::class);
+    Route::post('/users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
+    Route::post('/users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');
+    Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
+    Route::post('/users/{user}/release', [UserController::class, 'release'])->name('users.release');
     Route::resource('faqs', AdminFaqController::class);
     Route::resource('cms-pages', AdminCmsPageController::class);
     Route::get('/transactions', [AdminTransactionController::class, 'index'])->name('transactions.index');
@@ -310,6 +316,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin', 'username.setup'])->na
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
     Route::post('/settings/test-s3', [AdminSettingsController::class, 'testS3'])->name('settings.test-s3');
+    Route::post('/tax-rules', [AdminTaxRuleController::class, 'store'])->name('tax-rules.store');
+    Route::put('/tax-rules/{taxRule}', [AdminTaxRuleController::class, 'update'])->name('tax-rules.update');
+    Route::delete('/tax-rules/{taxRule}', [AdminTaxRuleController::class, 'destroy'])->name('tax-rules.destroy');
+    Route::post('/price-rules', [AdminPriceRuleController::class, 'store'])->name('price-rules.store');
+    Route::put('/price-rules/{tagSlug}', [AdminPriceRuleController::class, 'update'])->name('price-rules.update');
+    Route::delete('/price-rules/{tagSlug}', [AdminPriceRuleController::class, 'destroy'])->name('price-rules.destroy');
 
     Route::get('/forum/moderation', [PostModerationController::class, 'index'])->name('forum.moderation.index');
     Route::get('/forum/moderation/{post}', [PostModerationController::class, 'show'])->name('forum.moderation.show');
@@ -340,7 +352,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin', 'username.setup'])->na
 Route::get('/docs', [DocumentationController::class, 'index'])->name('docs.index');
 Route::get('/docs/{category}', [DocumentationController::class, 'category'])->name('docs.category');
 Route::get('/docs/{category}/{documentation:slug}', [DocumentationController::class, 'show'])->name('docs.show');
-Route::post('/docs/{category}/{documentation:slug}/helpful', [DocumentationController::class, 'markHelpful'])->middleware(['auth', 'username.setup'])->name('docs.helpful');
+Route::post('/docs/{category}/{documentation:slug}/helpful', [DocumentationController::class, 'markHelpful'])->middleware(['auth', 'verified', 'username.setup'])->name('docs.helpful');
 
 // Midtrans Webhook & Payment Callback Routes (no auth required, CSRF exempt)
 Route::post('/wallet/webhook', [WalletController::class, 'webhook'])

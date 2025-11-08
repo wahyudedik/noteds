@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Models\Tag;
+use App\Models\TaxRule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -34,6 +36,13 @@ class SettingsController extends Controller
 
         // Get premium buyer discount
         $premiumBuyerDiscountPercent = Setting::getPremiumBuyerDiscountPercent();
+        $defaultTaxPercent = Setting::getDefaultTaxPercent();
+        $taxInclusiveDefault = Setting::isTaxInclusiveDefault();
+        $taxRules = TaxRule::orderBy('country_name')->get();
+        $minPriceDefault = Setting::getDefaultMinPrice();
+        $recommendedPriceMultiplier = Setting::getRecommendedPriceMultiplier();
+        $categoryMinPriceRules = Setting::getCategoryMinPriceList();
+        $availableTags = Tag::orderBy('name')->get();
 
         // Get featured notes pricing
         $featuredPricing = Setting::getFeaturedPricing();
@@ -49,6 +58,13 @@ class SettingsController extends Controller
             'platformCommissionPercent',
             'creatorCommissionPercent',
             'premiumBuyerDiscountPercent',
+            'defaultTaxPercent',
+            'taxInclusiveDefault',
+            'taxRules',
+            'minPriceDefault',
+            'recommendedPriceMultiplier',
+            'categoryMinPriceRules',
+            'availableTags',
             'featuredPricing',
             'featuredLocationLabels',
             'featuredDurations'
@@ -75,6 +91,10 @@ class SettingsController extends Controller
             'platform_commission_percent' => 'nullable|numeric|min:0|max:100',
             'creator_commission_percent' => 'nullable|numeric|min:0|max:100',
             'premium_buyer_discount_percent' => 'nullable|numeric|min:0|max:50',
+            'tax_default_percent' => 'nullable|numeric|min:0|max:100',
+            'tax_inclusive_default' => 'nullable|boolean',
+            'min_price_default' => 'nullable|numeric|min:0|max:100000000',
+            'recommended_price_multiplier' => 'nullable|numeric|min:0|max:10',
             'featured_price.*.*' => 'nullable|numeric|min:0|max:100000000',
         ]);
 
@@ -164,6 +184,46 @@ class SettingsController extends Controller
             );
         }
 
+        if ($request->has('tax_default_percent')) {
+            Setting::setSetting(
+                'tax_default_percent',
+                $request->input('tax_default_percent', Setting::getDefaultTaxPercent()),
+                'number',
+                'marketplace',
+                'Default tax percentage applied when no country-specific rule is found'
+            );
+        }
+
+        if ($request->has('tax_inclusive_default')) {
+            Setting::setSetting(
+                'tax_inclusive_default',
+                $request->boolean('tax_inclusive_default'),
+                'boolean',
+                'marketplace',
+                'Indicates whether listed prices already include tax by default'
+            );
+        }
+
+        if ($request->has('min_price_default')) {
+            Setting::setSetting(
+                'min_price_default',
+                $request->input('min_price_default', Setting::getDefaultMinPrice()),
+                'number',
+                'marketplace',
+                'Minimum default price for paid notes in Rupiah'
+            );
+        }
+
+        if ($request->has('recommended_price_multiplier')) {
+            Setting::setSetting(
+                'recommended_price_multiplier',
+                $request->input('recommended_price_multiplier', Setting::getRecommendedPriceMultiplier()),
+                'number',
+                'marketplace',
+                'Suggested multiplier applied to minimum price for recommended pricing guidance'
+            );
+        }
+
         $message = 'Settings updated successfully.';
         $updates = [];
 
@@ -185,6 +245,22 @@ class SettingsController extends Controller
 
         if ($request->has('creator_commission_percent')) {
             $updates[] = 'Creator commission updated to ' . $request->input('creator_commission_percent') . '%';
+        }
+
+        if ($request->has('tax_default_percent')) {
+            $updates[] = 'Default tax percentage updated to ' . $request->input('tax_default_percent') . '%';
+        }
+
+        if ($request->has('tax_inclusive_default')) {
+            $updates[] = 'Default tax inclusion set to ' . ($request->boolean('tax_inclusive_default') ? 'inclusive' : 'exclusive');
+        }
+
+        if ($request->has('min_price_default')) {
+            $updates[] = 'Default minimum price updated to Rp ' . number_format($request->input('min_price_default', 0), 0, ',', '.');
+        }
+
+        if ($request->has('recommended_price_multiplier')) {
+            $updates[] = 'Recommended price multiplier updated to ' . $request->input('recommended_price_multiplier') . 'x';
         }
 
         // Update featured notes pricing

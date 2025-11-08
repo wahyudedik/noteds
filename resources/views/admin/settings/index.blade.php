@@ -17,6 +17,155 @@
                 <p class="text-gray-600 mt-1">{{ __('messages.configure_system_wide_settings') }}</p>
             </div>
 
+            <!-- Pricing Guidance Configuration -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-6">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 10h11M9 21V3m5 18v-7m4 7v-4" />
+                                </svg>
+                                Pricing Guidance Settings
+                            </h3>
+                            <p class="text-sm text-gray-600 mt-1">
+                                Tetapkan batas harga minimum dan rekomendasi harga untuk setiap kategori note.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 space-y-8">
+                    <form action="{{ route('admin.settings.update') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        @csrf
+                        <div>
+                            <label for="min_price_default" class="block text-sm font-medium text-gray-700 mb-2">
+                                Default Minimum Price (Rp)
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 sm:text-sm">Rp</span>
+                                </div>
+                                <input type="number" name="min_price_default" id="min_price_default"
+                                    value="{{ old('min_price_default', $minPriceDefault) }}" min="0" step="1000"
+                                    class="mt-1 block w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500">
+                                Harga minimum untuk semua note berbayar (jika tidak ada aturan kategori khusus).
+                            </p>
+                        </div>
+                        <div>
+                            <label for="recommended_price_multiplier" class="block text-sm font-medium text-gray-700 mb-2">
+                                Recommended Price Multiplier (x)
+                            </label>
+                            <input type="number" name="recommended_price_multiplier" id="recommended_price_multiplier"
+                                value="{{ old('recommended_price_multiplier', $recommendedPriceMultiplier) }}" min="0" max="10" step="0.1"
+                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                            <p class="mt-2 text-xs text-gray-500">
+                                Multiplikator yang digunakan untuk menghitung harga rekomendasi (contoh: 1.5 × minimum).
+                            </p>
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition">
+                                Simpan Pengaturan
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="border-t border-gray-200 pt-6">
+                        <h4 class="text-sm font-semibold text-gray-800 mb-3">Kategori dengan Minimum Price Khusus</h4>
+                        <form action="{{ route('admin.price-rules.store') }}" method="POST"
+                            class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end mb-4">
+                            @csrf
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Tag / Kategori</label>
+                                <select name="tag_id" required
+                                    class="block w-full py-2 px-3 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                    <option value="">Pilih Tag</option>
+                                    @foreach ($availableTags as $tag)
+                                        <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Minimum Price (Rp)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 sm:text-sm">Rp</span>
+                                    </div>
+                                    <input type="number" name="min_price" min="0" step="1000" required placeholder="75000"
+                                        class="block w-full pl-10 py-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button type="submit"
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition">
+                                    Tambah Aturan
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">Kategori</th>
+                                        <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">Minimum Price</th>
+                                        <th class="px-4 py-2 text-right font-medium text-gray-600 uppercase tracking-wider">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @forelse ($categoryMinPriceRules as $rule)
+                                        <tr>
+                                            <td class="px-4 py-2">
+                                                <div class="font-semibold text-gray-900">{{ $rule['tag_name'] ?? $rule['tag_slug'] }}</div>
+                                                <div class="text-xs text-gray-500 uppercase">{{ $rule['tag_slug'] }}</div>
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <form action="{{ route('admin.price-rules.update', $rule['tag_slug']) }}" method="POST" class="inline-flex items-center gap-2">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div class="relative">
+                                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                            <span class="text-gray-500 sm:text-xs">Rp</span>
+                                                        </div>
+                                                        <input type="number" name="min_price"
+                                                            value="{{ old('min_price_'.$rule['tag_slug'], $rule['min_price']) }}"
+                                                            min="0" step="1000"
+                                                            class="w-32 pl-8 py-1 border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                                    </div>
+                                                    <button type="submit"
+                                                        class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition">
+                                                        Update
+                                                    </button>
+                                                </form>
+                                            </td>
+                                            <td class="px-4 py-2 text-right">
+                                                <form action="{{ route('admin.price-rules.destroy', $rule['tag_slug']) }}" method="POST" onsubmit="return confirm('Hapus aturan harga kategori ini?')" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        class="inline-flex items-center px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-600 text-xs font-medium rounded-md transition">
+                                                        Hapus
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">
+                                                Belum ada aturan harga kategori yang ditambahkan.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             @if (session('success'))
                 <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg mb-6">
                     <div class="flex">
@@ -363,6 +512,63 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
+
+                            <!-- Default Tax Percent -->
+                            <div>
+                                <label for="tax_default_percent"
+                                    class="block text-sm font-medium text-gray-700 mb-2">
+                                    Default Tax (%) <span class="text-orange-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="number" name="tax_default_percent" id="tax_default_percent"
+                                        value="{{ old('tax_default_percent', $defaultTaxPercent ?? 0) }}" min="0"
+                                        max="100" step="0.1" required placeholder="11"
+                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('tax_default_percent') border-red-500 @enderror">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 text-sm">%</span>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-xs text-gray-500">
+                                    Digunakan jika tidak ada aturan pajak khusus negara yang cocok.
+                                </p>
+                                @error('tax_default_percent')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Tax Inclusion Toggle -->
+                            <div>
+                                <span class="block text-sm font-medium text-gray-700 mb-2">
+                                    Default Tax Inclusion
+                                </span>
+                                <input type="hidden" name="tax_inclusive_default" value="0">
+                                <label for="tax_inclusive_default_toggle"
+                                    class="inline-flex items-center space-x-2 cursor-pointer">
+                                    <span class="relative">
+                                        <input type="checkbox" id="tax_inclusive_default_toggle"
+                                            name="tax_inclusive_default" value="1"
+                                            class="sr-only peer" {{ old('tax_inclusive_default', $taxInclusiveDefault) ? 'checked' : '' }}>
+                                        <div
+                                            class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-orange-500 peer-checked:bg-orange-600 transition-colors">
+                                        </div>
+                                        <div
+                                            class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-5">
+                                        </div>
+                                    </span>
+                                    @php
+                                        $taxStateKey = old('tax_inclusive_default', $taxInclusiveDefault) ? 'on' : 'off';
+                                    @endphp
+                                    <span class="text-sm text-gray-700">
+                                        {{ __('messages.tax_inclusive_label', ['value' => __('messages.tax_inclusive_state_' . $taxStateKey)]) }}
+                                    </span>
+                                </label>
+                                <p class="mt-2 text-xs text-gray-500">
+                                    Jika aktif, harga yang ditampilkan dianggap sudah termasuk pajak dan sistem akan menghitung komponen pajak secara otomatis.
+                                </p>
+                                @error('tax_inclusive_default')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
                         <!-- Info Box -->
@@ -399,6 +605,150 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Tax Rules Configuration -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-6">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 10h2l3 9a1 1 0 001 .707h8a1 1 0 001-.707l3-9h2" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 10a4 4 0 10-8 0" />
+                                </svg>
+                                Tax Rules
+                            </h3>
+                            <p class="text-sm text-gray-600 mt-1">
+                                Atur persentase pajak per negara dan kategori catatan. Sistem otomatis menggunakan aturan yang aktif.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 space-y-8">
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-800 mb-3">Tambah Aturan Pajak</h4>
+                        <form action="{{ route('admin.tax-rules.store') }}" method="POST"
+                            class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                            @csrf
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Country Code</label>
+                                <input type="text" name="country_code" maxlength="3" required placeholder="ID"
+                                    class="block w-full py-2 px-3 border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-sm uppercase">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Country Name</label>
+                                <input type="text" name="country_name" required placeholder="Indonesia"
+                                    class="block w-full py-2 px-3 border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Note Category (optional)</label>
+                                <input type="text" name="note_category" placeholder="e.g. technology"
+                                    class="block w-full py-2 px-3 border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Tax (%)</label>
+                                <input type="number" name="tax_percent" min="0" max="100" step="0.1" required placeholder="11"
+                                    class="block w-full py-2 px-3 border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-sm">
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="is_inclusive" value="1" class="h-4 w-4 text-emerald-600 border-gray-300 rounded" checked>
+                                    <span class="ml-2 text-xs text-gray-700">Inclusive</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="is_active" value="1" class="h-4 w-4 text-emerald-600 border-gray-300 rounded" checked>
+                                    <span class="ml-2 text-xs text-gray-700">Active</span>
+                                </div>
+                                <button type="submit"
+                                    class="ml-auto inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-md shadow-sm transition">
+                                    Add Rule
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-6">
+                        <h4 class="text-sm font-semibold text-gray-800 mb-3">Daftar Aturan Pajak Aktif</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">Negara</th>
+                                        <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">Kategori</th>
+                                        <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">Tax (%)</th>
+                                        <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">Inclusive</th>
+                                        <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">Status</th>
+                                        <th class="px-4 py-2 text-right font-medium text-gray-600 uppercase tracking-wider">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @forelse ($taxRules as $rule)
+                                        <tr>
+                                            <td class="px-4 py-2">
+                                                <div class="font-semibold text-gray-900">{{ $rule->country_name }}</div>
+                                                <div class="text-xs text-gray-500 uppercase">{{ $rule->country_code }}</div>
+                                            </td>
+                                            <td class="px-4 py-2 text-gray-700">
+                                                {{ $rule->note_category ?? 'Semua Kategori' }}
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <form action="{{ route('admin.tax-rules.update', $rule) }}" method="POST" class="inline-flex items-center gap-2">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="number" name="tax_percent" value="{{ old("tax_percent_{$rule->id}", $rule->tax_percent) }}"
+                                                        min="0" max="100" step="0.1"
+                                                        class="w-24 py-1 px-2 border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 text-sm">
+                                                    <input type="hidden" name="note_category" value="{{ $rule->note_category }}">
+                                                    <input type="hidden" name="country_name" value="{{ $rule->country_name }}">
+                                                    <input type="hidden" name="is_inclusive" value="0">
+                                                    <input type="checkbox" name="is_inclusive" value="1"
+                                                        class="h-4 w-4 text-emerald-600 border-gray-300 rounded"
+                                                        {{ $rule->is_inclusive ? 'checked' : '' }}>
+                                                    <input type="hidden" name="is_active" value="0">
+                                                    <input type="checkbox" name="is_active" value="1"
+                                                        class="h-4 w-4 text-emerald-600 border-gray-300 rounded"
+                                                        {{ $rule->is_active ? 'checked' : '' }}>
+                                                    <button type="submit"
+                                                        class="ml-2 inline-flex items-center px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-md transition">
+                                                        Update
+                                                    </button>
+                                                </form>
+                                            </td>
+                                            <td class="px-4 py-2 text-gray-700">
+                                                {{ $rule->is_inclusive ? 'Inclusive' : 'Exclusive' }}
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $rule->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600' }}">
+                                                    {{ $rule->is_active ? 'Active' : 'Inactive' }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-2 text-right">
+                                                <form action="{{ route('admin.tax-rules.destroy', $rule) }}" method="POST" onsubmit="return confirm('Hapus aturan pajak ini?')" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        class="inline-flex items-center px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-600 text-xs font-medium rounded-md transition">
+                                                        Hapus
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="px-4 py-4 text-center text-sm text-gray-500">
+                                                Belum ada aturan pajak yang terdaftar.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
 

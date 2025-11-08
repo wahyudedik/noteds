@@ -10,6 +10,7 @@ use App\Models\Wallet;
 use App\Models\User;
 use App\Models\NoteConversation;
 use App\Services\ReferralService;
+use App\Services\TaxService;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -225,6 +226,16 @@ class MarketplaceController extends Controller
             $sellerReviewStats = $note->user->sellerReviewStats();
         }
 
+        $taxPreview = null;
+        if ($basePrice > 0) {
+            $taxService = app(TaxService::class);
+            $taxContext = $taxService->resolveTaxForPurchase($note, auth()->user());
+            $taxPreview = array_merge(
+                $taxService->calculateAmounts((float) ($premiumDiscountPrice ?? $basePrice), $taxContext),
+                ['country_code' => $taxContext['country_code'] ?? null]
+            );
+        }
+
         return view('marketplace.show', compact(
             'note',
             'canBuy',
@@ -239,11 +250,12 @@ class MarketplaceController extends Controller
             'premiumDiscountPrice',
             'basePrice',
             'conversation',
-            'sellerReviewStats'
+            'sellerReviewStats',
+            'taxPreview'
         ));
     }
 
-    public function purchase(Note $note, ReferralService $referralService): RedirectResponse
+    public function purchase(Note $note, ReferralService $referralService, TaxService $taxService): RedirectResponse
     {
         if (!$note->is_public || $note->status !== 'active') {
             return redirect()->route('marketplace.index')->with('error', 'Catatan tidak tersedia untuk dibeli.');
@@ -298,6 +310,15 @@ class MarketplaceController extends Controller
             return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
         }
 
+        $taxContext = $taxService->resolveTaxForPurchase($note, $buyer);
+        $taxBreakdown = $taxService->calculateAmounts((float) $finalPrice, $taxContext);
+        $buyerPaysAmount = $taxBreakdown['total_amount'];
+        $priceExcludingTax = $taxBreakdown['price_excluding_tax'];
+
+        if ($buyerPaysAmount <= 0) {
+            return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
+        }
+
         // Ensure wallets exist
         $baseCurrency = config('currency.base_currency', 'IDR');
 
@@ -325,7 +346,7 @@ class MarketplaceController extends Controller
             $buyerWallet->save();
         }
 
-        if ($buyerWallet->balance < $finalPrice) {
+        if ($buyerWallet->balance < $buyerPaysAmount) {
             return redirect()->route('marketplace.show', $note)->with('error', 'Saldo wallet tidak cukup. Silakan top-up terlebih dahulu.');
         }
 
@@ -340,14 +361,14 @@ class MarketplaceController extends Controller
         try {
             DB::beginTransaction();
 
-            $amount = $finalPrice;
+            $amount = $buyerPaysAmount;
             
             // Get commission rates from settings
             $platformCommissionPercent = Setting::getSetting('platform_commission_percent', 'marketplace', 20);
             $creatorCommissionPercent = Setting::getSetting('creator_commission_percent', 'marketplace', 0);
             
             // Platform fee (always deducted from every transaction)
-            $platformFee = $amount * ($platformCommissionPercent / 100);
+            $platformFee = $priceExcludingTax * ($platformCommissionPercent / 100);
             
             // Original creator commission (always for original creator in every transaction)
             // Original creator gets commission every time the note is sold, regardless of seller
@@ -394,16 +415,17 @@ class MarketplaceController extends Controller
                 $note->original_creator_id = $originalCreator->id;
             }
             
+            $taxAmount = $taxBreakdown['tax_amount'];
             $creatorCommission = 0;
             if ($originalCreator && $creatorCommissionPercent > 0) {
                 // Original creator always gets commission (if setting is > 0)
                 // Even if seller is the original creator, they still get commission separately
-                $creatorCommission = $amount * ($creatorCommissionPercent / 100);
+                $creatorCommission = $priceExcludingTax * ($creatorCommissionPercent / 100);
             }
             
             // Seller gets: amount - platform_fee - creator_commission
             // If seller is original creator, they get seller amount + creator commission (total = amount - platform fee)
-            $sellerAmount = $amount - $platformFee - $creatorCommission;
+            $sellerAmount = $priceExcludingTax - $platformFee - $creatorCommission;
 
             // Deduct from buyer
             $buyerWallet->balance -= $amount;
@@ -458,7 +480,7 @@ class MarketplaceController extends Controller
             if ($adminWallet->currency !== $baseCurrency) {
                 $adminWallet->currency = $baseCurrency;
             }
-                $adminWallet->balance += $platformFee;
+                $adminWallet->balance += $platformFee + $taxAmount;
                 $adminWallet->save();
                 $admin->wallet_balance = $adminWallet->balance;
                 $admin->save();
@@ -488,6 +510,10 @@ class MarketplaceController extends Controller
                 'exchange_rate' => 1,
                 'platform_fee' => $platformFee,
                 'creator_commission' => $creatorCommission,
+                'tax_percent' => $taxBreakdown['tax_percent'],
+                'tax_amount' => $taxAmount,
+                'tax_inclusive' => $taxBreakdown['tax_inclusive'],
+                'tax_country_code' => $taxContext['country_code'] ?? null,
                 'status' => 'success',
                 'payment_method' => 'wallet',
                 'notes' => 'Pembelian catatan: ' . $note->title,
@@ -514,11 +540,24 @@ class MarketplaceController extends Controller
                 'download_count' => 0,
             ]);
 
+            $sellerNetAmount = $sellerAmount;
+            if ($originalCreator && $originalCreator->id === $seller->id) {
+                $sellerNetAmount += $creatorCommission;
+            }
+
             $notificationData['purchase'] = [
                 'buyer_id' => $buyer->id,
                 'note_id' => $note->id,
                 'amount' => $amount,
                 'transaction_id' => $transaction->id,
+                'breakdown' => [
+                    'subtotal' => $priceExcludingTax,
+                    'tax_amount' => $taxAmount,
+                    'tax_percent' => $taxBreakdown['tax_percent'],
+                    'tax_inclusive' => $taxBreakdown['tax_inclusive'],
+                    'total' => $amount,
+                    'currency' => $baseCurrency,
+                ],
             ];
 
             $notificationData['sale'] = [
@@ -527,6 +566,17 @@ class MarketplaceController extends Controller
                 'amount' => $amount,
                 'buyer_name' => $buyer->name,
                 'transaction_id' => $transaction->id,
+                'breakdown' => [
+                    'subtotal' => $priceExcludingTax,
+                    'tax_amount' => $taxAmount,
+                    'tax_percent' => $taxBreakdown['tax_percent'],
+                    'tax_inclusive' => $taxBreakdown['tax_inclusive'],
+                    'platform_fee' => $platformFee,
+                    'creator_commission' => $creatorCommission,
+                    'net_amount' => $sellerNetAmount,
+                    'total' => $amount,
+                    'currency' => $baseCurrency,
+                ],
             ];
 
             if ($creatorCommission > 0 && $originalCreator && $originalCreator->id !== $seller->id) {
@@ -575,7 +625,8 @@ class MarketplaceController extends Controller
                         $buyerForNotification,
                         $note,
                         $notificationData['purchase']['amount'],
-                        $notificationData['purchase']['transaction_id']
+                        $notificationData['purchase']['transaction_id'],
+                        $notificationData['purchase']['breakdown'] ?? []
                     );
                 }
             }
@@ -587,7 +638,8 @@ class MarketplaceController extends Controller
                         $sellerForNotification,
                         $note,
                         $notificationData['sale']['amount'],
-                        $notificationData['sale']['buyer_name']
+                        $notificationData['sale']['buyer_name'],
+                        $notificationData['sale']['breakdown'] ?? []
                     );
                 }
             }
