@@ -22,6 +22,80 @@
             </div>
         @endif
 
+        <!-- Pricing Configuration Shortcut -->
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-yellow-200 mb-6">
+            <div class="px-6 py-4 border-b border-yellow-100 bg-yellow-50 flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                        Featured Notes Pricing
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-1">Atur harga iklan featured notes per lokasi dan durasi langsung dari halaman manajemen.</p>
+                </div>
+                <a href="{{ route('admin.settings.index') }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Go to Full Settings →</a>
+            </div>
+            <div class="p-6">
+                <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
+                    @csrf
+                    <input type="hidden" name="redirect_to" value="{{ route('admin.featured-notes.index') }}">
+
+                    <div class="space-y-4">
+                        @foreach ($featuredLocationLabels as $location => $label)
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="text-md font-semibold text-gray-900">{{ $label }}</h4>
+                                    <span class="text-xs text-gray-500">Location key: {{ $location }}</span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    @foreach ($featuredDurations as $duration)
+                                        <div>
+                                            <label for="featured_price_{{ $location }}_{{ $duration }}"
+                                                class="block text-sm font-medium text-gray-700 mb-2">
+                                                {{ $duration }} Hari
+                                            </label>
+                                            <div class="relative">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <span class="text-gray-500 text-sm">Rp</span>
+                                                </div>
+                                                <input type="number"
+                                                    name="featured_price[{{ $location }}][{{ $duration }}]"
+                                                    id="featured_price_{{ $location }}_{{ $duration }}"
+                                                    value="{{ old(\"featured_price.{$location}.{$duration}\", $featuredPricing[$location][$duration] ?? 0) }}"
+                                                    min="0" step="1000" required
+                                                    class="block w-full pl-10 pr-3 py-2 border-gray-300 rounded-lg shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 @error(\"featured_price.{$location}.{$duration}\") border-red-500 @enderror">
+                                            </div>
+                                            @error("featured_price.{$location}.{$duration}")
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
+                        <p class="font-medium mb-1">Catatan:</p>
+                        <ul class="space-y-1 text-xs">
+                            <li>• Perubahan harga hanya berlaku untuk request baru.</li>
+                            <li>• Request yang sedang berjalan tetap menggunakan harga lama.</li>
+                            <li>• Pastikan harga kompetitif untuk tiap lokasi agar seller tertarik.</li>
+                        </ul>
+                    </div>
+
+                    <div class="flex items-center justify-end pt-4 border-t border-gray-200">
+                        <button type="submit"
+                            class="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors">
+                            Update Pricing
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Statistics -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
             <div class="bg-white overflow-hidden shadow-sm rounded-lg p-4">

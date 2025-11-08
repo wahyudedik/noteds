@@ -36,9 +36,23 @@ class SettingsController extends Controller
         $premiumBuyerDiscountPercent = Setting::getPremiumBuyerDiscountPercent();
 
         // Get featured notes pricing
-        $featuredPricing = $this->getFeaturedPricing();
+        $featuredPricing = Setting::getFeaturedPricing();
+        $featuredLocationLabels = Setting::getFeaturedLocationLabels();
+        $featuredDurations = Setting::getFeaturedDurations();
 
-        return view('admin.settings.index', compact('settings', 's3Settings', 'premiumPrice', 'referralSignupReward', 'referralCommissionPercent', 'platformCommissionPercent', 'creatorCommissionPercent', 'premiumBuyerDiscountPercent', 'featuredPricing'));
+        return view('admin.settings.index', compact(
+            'settings',
+            's3Settings',
+            'premiumPrice',
+            'referralSignupReward',
+            'referralCommissionPercent',
+            'platformCommissionPercent',
+            'creatorCommissionPercent',
+            'premiumBuyerDiscountPercent',
+            'featuredPricing',
+            'featuredLocationLabels',
+            'featuredDurations'
+        ));
     }
 
     /**
@@ -209,7 +223,9 @@ class SettingsController extends Controller
             $message = 'Settings updated successfully. ' . implode('. ', $updates) . '.';
         }
 
-        return redirect()->route('admin.settings.index')
+        $redirectTo = $request->input('redirect_to');
+
+        return redirect()->to($redirectTo ?: route('admin.settings.index'))
             ->with('success', $message);
     }
 
@@ -247,41 +263,4 @@ class SettingsController extends Controller
         }
     }
 
-    /**
-     * Get featured notes pricing from settings.
-     */
-    private function getFeaturedPricing(): array
-    {
-        $locations = [
-            'landing_hero',
-            'landing_carousel',
-            'marketplace_banner',
-            'marketplace_grid',
-            'popup_welcome',
-            'popup_exit',
-            'popup_interstitial',
-        ];
-        $durations = [7, 14, 30];
-        $pricing = [];
-
-        $defaults = [
-            'landing_hero' => [7 => 150000, 14 => 280000, 30 => 500000],
-            'landing_carousel' => [7 => 100000, 14 => 180000, 30 => 350000],
-            'marketplace_banner' => [7 => 75000, 14 => 140000, 30 => 250000],
-            'marketplace_grid' => [7 => 50000, 14 => 90000, 30 => 150000],
-            'popup_welcome' => [7 => 100000, 14 => 180000, 30 => 350000],
-            'popup_exit' => [7 => 80000, 14 => 150000, 30 => 280000],
-            'popup_interstitial' => [7 => 60000, 14 => 110000, 30 => 200000],
-        ];
-
-        foreach ($locations as $location) {
-            foreach ($durations as $duration) {
-                $key = "featured_price_{$location}_{$duration}";
-                $price = Setting::getSetting($key, 'featured_notes', $defaults[$location][$duration] ?? 50000);
-                $pricing[$location][$duration] = (float) $price;
-            }
-        }
-
-        return $pricing;
-    }
 }

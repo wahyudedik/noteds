@@ -527,25 +527,12 @@
                     <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
                         @csrf
 
-                        @php
-                            $locationLabels = [
-                                'landing_hero' => 'Landing Hero',
-                                'landing_carousel' => 'Landing Carousel',
-                                'marketplace_banner' => 'Marketplace Banner',
-                                'marketplace_grid' => 'Marketplace Grid',
-                                'popup_welcome' => 'Popup Welcome',
-                                'popup_exit' => 'Popup Exit Intent',
-                                'popup_interstitial' => 'Popup Interstitial',
-                            ];
-                            $durations = [7, 14, 30];
-                        @endphp
-
                         <div class="space-y-6">
-                            @foreach ($locationLabels as $location => $label)
+                            @foreach ($featuredLocationLabels as $location => $label)
                                 <div class="border border-gray-200 rounded-lg p-4">
                                     <h4 class="text-md font-semibold text-gray-900 mb-4">{{ $label }}</h4>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        @foreach ($durations as $duration)
+                                        @foreach ($featuredDurations as $duration)
                                             <div>
                                                 <label for="featured_price_{{ $location }}_{{ $duration }}"
                                                     class="block text-sm font-medium text-gray-700 mb-2">

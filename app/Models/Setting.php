@@ -194,4 +194,66 @@ class Setting extends Model
 
         return $percent && is_numeric($percent->value) ? (float) $percent->value : 10.0; // Default 10%
     }
+
+    /**
+     * Get featured notes location labels.
+     */
+    public static function getFeaturedLocationLabels(): array
+    {
+        return [
+            'landing_hero' => 'Landing Hero',
+            'landing_carousel' => 'Landing Carousel',
+            'marketplace_banner' => 'Marketplace Banner',
+            'marketplace_grid' => 'Marketplace Grid',
+            'popup_welcome' => 'Popup Welcome',
+            'popup_exit' => 'Popup Exit Intent',
+            'popup_interstitial' => 'Popup Interstitial',
+        ];
+    }
+
+    /**
+     * Get available durations (in days) for featured notes.
+     */
+    public static function getFeaturedDurations(): array
+    {
+        return [7, 14, 30];
+    }
+
+    /**
+     * Default pricing for featured notes per location/duration.
+     */
+    public static function getDefaultFeaturedPricing(): array
+    {
+        return [
+            'landing_hero' => [7 => 150000, 14 => 280000, 30 => 500000],
+            'landing_carousel' => [7 => 100000, 14 => 180000, 30 => 350000],
+            'marketplace_banner' => [7 => 75000, 14 => 140000, 30 => 250000],
+            'marketplace_grid' => [7 => 50000, 14 => 90000, 30 => 150000],
+            'popup_welcome' => [7 => 100000, 14 => 180000, 30 => 350000],
+            'popup_exit' => [7 => 80000, 14 => 150000, 30 => 280000],
+            'popup_interstitial' => [7 => 60000, 14 => 110000, 30 => 200000],
+        ];
+    }
+
+    /**
+     * Retrieve featured notes pricing configuration.
+     */
+    public static function getFeaturedPricing(): array
+    {
+        $locations = array_keys(self::getFeaturedLocationLabels());
+        $durations = self::getFeaturedDurations();
+        $defaults = self::getDefaultFeaturedPricing();
+        $pricing = [];
+
+        foreach ($locations as $location) {
+            foreach ($durations as $duration) {
+                $key = "featured_price_{$location}_{$duration}";
+                $default = $defaults[$location][$duration] ?? 50000;
+                $price = self::getSetting($key, 'featured_notes', $default);
+                $pricing[$location][$duration] = (float) $price;
+            }
+        }
+
+        return $pricing;
+    }
 }

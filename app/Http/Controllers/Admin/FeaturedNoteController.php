@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\FeaturedNote;
+use App\Models\Setting;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Http\RedirectResponse;
@@ -41,7 +42,17 @@ class FeaturedNoteController extends Controller
                 ->sum('price'),
         ];
 
-        return view('admin.featured-notes.index', compact('featuredNotes', 'stats'));
+        $featuredPricing = Setting::getFeaturedPricing();
+        $featuredLocationLabels = Setting::getFeaturedLocationLabels();
+        $featuredDurations = Setting::getFeaturedDurations();
+
+        return view('admin.featured-notes.index', compact(
+            'featuredNotes',
+            'stats',
+            'featuredPricing',
+            'featuredLocationLabels',
+            'featuredDurations'
+        ));
     }
 
     /**
