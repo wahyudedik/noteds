@@ -26,6 +26,16 @@ class WelcomeController extends Controller
             })
             ->values(); // Re-index array to ensure valid collection
 
+        // Extract CMS highlight section (only the first active one)
+        $cmsHighlightSection = $sections->first(function ($section) {
+            return $section->section_type === 'cms_pages';
+        });
+
+        // Remove CMS highlight section from general collection to avoid double rendering
+        $sections = $sections->reject(function ($section) {
+            return $section->section_type === 'cms_pages';
+        });
+
         // Group sections by type for easier rendering
         $groupedSections = $sections->groupBy('section_type');
 
@@ -55,11 +65,27 @@ class WelcomeController extends Controller
             }
         }
 
-        $latestCmsPages = CmsPage::active()
-            ->latest()
-            ->limit(3)
-            ->get();
+        $highlightedCmsPages = collect();
 
-        return view('welcome', compact('sections', 'groupedSections', 'featuredHero', 'featuredCarousel', 'latestCmsPages'));
+        if ($cmsHighlightSection) {
+            $limit = (int) data_get($cmsHighlightSection->content, 'limit', 3);
+            if ($limit <= 0) {
+                $limit = 3;
+            }
+
+            $highlightedCmsPages = CmsPage::active()
+                ->latest()
+                ->limit($limit)
+                ->get();
+        }
+
+        return view('welcome', compact(
+            'sections',
+            'groupedSections',
+            'featuredHero',
+            'featuredCarousel',
+            'cmsHighlightSection',
+            'highlightedCmsPages'
+        ));
     }
 }

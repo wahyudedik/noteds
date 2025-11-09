@@ -256,6 +256,11 @@ document.addEventListener('DOMContentLoaded', function() {
         signIn: @json(__('messages.sign_in')),
         upgradeToPremium: @json(__('messages.upgrade_to_premium')),
         claimNow: @json(__('messages.claim_now')),
+        cmsHighlightSettings: @json(__('messages.cms_highlight_settings')),
+        cmsHighlightLimitLabel: @json(__('messages.cms_highlight_limit_label')),
+        cmsHighlightButtonTextLabel: @json(__('messages.cms_highlight_button_text_label')),
+        cmsHighlightButtonLinkLabel: @json(__('messages.cms_highlight_button_link_label')),
+        cmsHighlightDefaultButton: @json(__('messages.cms_highlight_default_button')),
     };
     
     const sectionTypeSelect = document.getElementById('section_type');
@@ -264,6 +269,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const promoDates = document.getElementById('promo-dates');
     
     let contentData = {};
+    const initialContent = (() => {
+        try {
+            return JSON.parse(contentInput.value || '{}');
+        } catch (e) {
+            return {};
+        }
+    })();
 
     // Content builder templates for different section types
     const templates = {
@@ -445,6 +457,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     cta_text: document.querySelector('[name="cta_text"]')?.value || '',
                     cta_link: document.querySelector('[name="cta_link"]')?.value || '',
                     discount_code: document.querySelector('[name="discount_code"]')?.value || '',
+                };
+            }
+        },
+        cms_pages: {
+            html: `
+                <div class="space-y-4">
+                    <p class="text-sm font-medium text-gray-700">${translations.cmsHighlightSettings}</p>
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">${translations.cmsHighlightLimitLabel}</label>
+                        <input type="number" name="cms_limit" class="w-full rounded border-gray-300 text-sm" min="1" max="12" value="${initialContent.limit ?? 3}">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">${translations.cmsHighlightButtonTextLabel}</label>
+                        <input type="text" name="cms_button_text" class="w-full rounded border-gray-300 text-sm" placeholder="${translations.cmsHighlightDefaultButton}" value="${initialContent.button_text ?? translations.cmsHighlightDefaultButton}">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">${translations.cmsHighlightButtonLinkLabel}</label>
+                        <input type="text" name="cms_button_link" class="w-full rounded border-gray-300 text-sm" placeholder="/page" value="${initialContent.button_link ?? ''}">
+                    </div>
+                </div>
+            `,
+            getData: function() {
+                const limitValue = parseInt(document.querySelector('[name="cms_limit"]')?.value, 10);
+                return {
+                    limit: Number.isFinite(limitValue) && limitValue > 0 ? limitValue : 3,
+                    button_text: document.querySelector('[name="cms_button_text"]')?.value || translations.cmsHighlightDefaultButton,
+                    button_link: document.querySelector('[name="cms_button_link"]')?.value || '',
                 };
             }
         },

@@ -32,6 +32,7 @@ class LandingPageController extends Controller
             'trust_indicators' => 'Trust Indicators',
             'testimonials' => 'Testimonials',
             'promo' => 'Promotional Section',
+            'cms_pages' => 'CMS Highlight',
             'custom' => 'Custom Section',
         ];
 
@@ -51,6 +52,7 @@ class LandingPageController extends Controller
             'trust_indicators' => 'Trust Indicators',
             'testimonials' => 'Testimonials',
             'promo' => 'Promotional Section',
+            'cms_pages' => 'CMS Highlight',
             'custom' => 'Custom Section',
         ];
 
@@ -94,6 +96,7 @@ class LandingPageController extends Controller
             'trust_indicators' => 'Trust Indicators',
             'testimonials' => 'Testimonials',
             'promo' => 'Promotional Section',
+            'cms_pages' => 'CMS Highlight',
             'custom' => 'Custom Section',
         ];
 

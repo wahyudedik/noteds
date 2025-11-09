@@ -22,7 +22,7 @@ class UpdateLandingPageSectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'section_type' => ['required', 'in:hero,features,how_it_works,premium_benefits,trust_indicators,testimonials,promo,custom'],
+            'section_type' => ['required', 'in:hero,features,how_it_works,premium_benefits,trust_indicators,testimonials,promo,cms_pages,custom'],
             'title' => ['nullable', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'array'],

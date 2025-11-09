@@ -116,6 +116,7 @@ class LandingPageSection extends Model
             'trust_indicators' => 'Trust Indicators',
             'testimonials' => 'Testimonials',
             'promo' => 'Promotional Section',
+            'cms_pages' => 'CMS Highlight',
             'custom' => 'Custom Section',
             default => ucfirst(str_replace('_', ' ', $this->section_type)),
         };

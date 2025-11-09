@@ -199,17 +199,41 @@
         @endif
 
         <!-- CMS Pages Highlight -->
-        @if(isset($latestCmsPages) && $latestCmsPages->count() > 0)
-            <section class="py-16 lg:py-20 border-b border-gray-100 bg-white">
+        @if(isset($cmsHighlightSection, $highlightedCmsPages) && $cmsHighlightSection && $highlightedCmsPages->count() > 0)
+            @php
+                $bgClass = $cmsHighlightSection->background_color;
+                $textClass = $cmsHighlightSection->text_color;
+                $alignment = $cmsHighlightSection->alignment ?? 'left';
+                $buttonText = data_get($cmsHighlightSection->content, 'button_text') ?: __('messages.cms_highlight_default_button');
+                $buttonLink = data_get($cmsHighlightSection->content, 'button_link') ?: route('cms.index');
+                $title = $cmsHighlightSection->title ?: __('messages.cms_pages');
+                $subtitle = $cmsHighlightSection->subtitle ?: __('messages.cms_pages_intro');
+                $headingClass = \Illuminate\Support\Str::startsWith($textClass, 'text-') ? $textClass : 'text-gray-900';
+                $paragraphClass = \Illuminate\Support\Str::startsWith($textClass, 'text-') ? $textClass : 'text-gray-600';
+                $inlineTextColor = ($textClass && !\Illuminate\Support\Str::startsWith($textClass, 'text-')) ? $textClass : null;
+                $sectionAlignmentClass = match($alignment) {
+                    'center' => 'text-center',
+                    'right' => 'text-right',
+                    default => 'text-left',
+                };
+            @endphp
+            <section class="py-16 lg:py-20 border-b border-gray-100 {{ \Illuminate\Support\Str::startsWith($bgClass, 'bg-') ? $bgClass : '' }}"
+                @if($bgClass && !\Illuminate\Support\Str::startsWith($bgClass, 'bg-')) style="background-color: {{ $bgClass }};" @endif>
                 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
-                        <div>
-                            <h2 class="text-3xl font-semibold text-gray-900">{{ __('messages.cms_pages') }}</h2>
-                            <p class="mt-2 text-sm text-gray-600">{{ __('messages.cms_pages_intro') }}</p>
+                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 {{ $sectionAlignmentClass }}">
+                        <div class="{{ $sectionAlignmentClass }} w-full md:w-auto">
+                            <h2 class="text-3xl font-semibold {{ $headingClass }}"
+                                @if($inlineTextColor) style="color: {{ $inlineTextColor }};" @endif>
+                                {{ $title }}
+                            </h2>
+                            <p class="mt-2 text-sm {{ $paragraphClass }}"
+                                @if($inlineTextColor) style="color: {{ $inlineTextColor }};" @endif>
+                                {{ $subtitle }}
+                            </p>
                         </div>
-                        <a href="{{ route('cms.index') }}"
+                        <a href="{{ $buttonLink }}"
                             class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700">
-                            {{ __('messages.view_all') }}
+                            {{ $buttonText }}
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M13.5 4.5 21 12l-7.5 7.5m6-7.5H3" />
@@ -217,11 +241,11 @@
                         </a>
                     </div>
                     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        @foreach($latestCmsPages as $page)
+                        @foreach($highlightedCmsPages as $page)
                             <article class="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm hover:shadow-lg hover:border-blue-200 transition">
                                 <div class="flex items-center justify-between mb-4">
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700">
-                                        {{ __('messages.cms_pages') }}
+                                        {{ __('messages.cms_highlight_badge') }}
                                     </span>
                                     <span class="text-xs text-gray-400">{{ $page->updated_at?->format('M d, Y') }}</span>
                                 </div>

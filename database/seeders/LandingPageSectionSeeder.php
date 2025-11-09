@@ -279,6 +279,27 @@ class LandingPageSectionSeeder extends Seeder
             'valid_until' => null,
         ];
 
+        // 9. CMS Highlight Section
+        $sections[] = [
+            'created_by' => $admin->id,
+            'section_type' => 'cms_pages',
+            'title' => 'Pusat Informasi Resmi',
+            'subtitle' => 'Baca kebijakan, panduan, dan pembaruan penting untuk komunitas Noteds.',
+            'content' => [
+                'limit' => 3,
+                'button_text' => 'Lihat Semua Halaman',
+                'button_link' => '/page',
+            ],
+            'image_url' => null,
+            'background_color' => '#FFFFFF',
+            'text_color' => '#111827',
+            'alignment' => 'left',
+            'order' => 9,
+            'is_active' => true,
+            'valid_from' => null,
+            'valid_until' => null,
+        ];
+
         // Create sections
         $createdCount = 0;
         foreach ($sections as $sectionData) {
