@@ -198,6 +198,58 @@
             </section>
         @endif
 
+        <!-- CMS Pages Highlight -->
+        @if(isset($latestCmsPages) && $latestCmsPages->count() > 0)
+            <section class="py-16 lg:py-20 border-b border-gray-100 bg-white">
+                <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+                        <div>
+                            <h2 class="text-3xl font-semibold text-gray-900">{{ __('messages.cms_pages') }}</h2>
+                            <p class="mt-2 text-sm text-gray-600">{{ __('messages.cms_pages_intro') }}</p>
+                        </div>
+                        <a href="{{ route('cms.index') }}"
+                            class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700">
+                            {{ __('messages.view_all') }}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M13.5 4.5 21 12l-7.5 7.5m6-7.5H3" />
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        @foreach($latestCmsPages as $page)
+                            <article class="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm hover:shadow-lg hover:border-blue-200 transition">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700">
+                                        {{ __('messages.cms_pages') }}
+                                    </span>
+                                    <span class="text-xs text-gray-400">{{ $page->updated_at?->format('M d, Y') }}</span>
+                                </div>
+                                <a href="{{ route('cms.show', $page) }}" class="block group-hover:text-blue-600 transition">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                                        {{ $page->title }}
+                                    </h3>
+                                    <p class="text-sm text-gray-600 line-clamp-3">
+                                        {{ \Illuminate\Support\Str::limit(strip_tags($page->content), 160) }}
+                                    </p>
+                                </a>
+                                <div class="mt-6">
+                                    <a href="{{ route('cms.show', $page) }}"
+                                        class="text-sm font-medium text-blue-600 hover:text-blue-700 inline-flex items-center gap-1">
+                                        {{ __('messages.view') }}
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+        @endif
+
         <!-- Dynamic Landing Page Sections -->
         @if (isset($groupedSections) && $groupedSections->count() > 0)
             @foreach ($groupedSections as $sectionType => $sections)

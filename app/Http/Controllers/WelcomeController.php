@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LandingPageSection;
+use App\Models\CmsPage;
 use Illuminate\View\View;
 
 class WelcomeController extends Controller
@@ -54,6 +55,11 @@ class WelcomeController extends Controller
             }
         }
 
-        return view('welcome', compact('sections', 'groupedSections', 'featuredHero', 'featuredCarousel'));
+        $latestCmsPages = CmsPage::active()
+            ->latest()
+            ->limit(3)
+            ->get();
+
+        return view('welcome', compact('sections', 'groupedSections', 'featuredHero', 'featuredCarousel', 'latestCmsPages'));
     }
 }

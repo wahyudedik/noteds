@@ -782,6 +782,7 @@ return [
     'settings' => 'الإعدادات',
     'documentations' => 'التوثيق',
     'cms_pages' => 'صفحات CMS',
+'cms_pages_intro' => 'استكشف صفحات السياسات والأدلة والمعلومات المنسقة لدينا.',
     'landing_page' => 'الصفحة الرئيسية',
     'social_media' => 'وسائل التواصل الاجتماعي',
     'wallet_analytics' => 'تحليلات المحفظة',

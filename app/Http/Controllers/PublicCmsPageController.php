@@ -9,6 +9,18 @@ use Illuminate\View\View;
 class PublicCmsPageController extends Controller
 {
     /**
+     * Display a listing of active CMS pages.
+     */
+    public function index(): View
+    {
+        $pages = CmsPage::active()
+            ->latest()
+            ->paginate(12);
+
+        return view('cms.index', compact('pages'));
+    }
+
+    /**
      * Display the specified CMS page.
      */
     public function show(CmsPage $cmsPage): View

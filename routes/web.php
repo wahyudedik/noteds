@@ -67,6 +67,7 @@ Route::get('/faq', function () {
 })->name('faq');
 
 // CMS Pages (public - dynamic from database)
+Route::get('/page', [PublicCmsPageController::class, 'index'])->name('cms.index');
 Route::get('/page/{cmsPage}', [PublicCmsPageController::class, 'show'])->name('cms.show');
 
 // Marketplace routes

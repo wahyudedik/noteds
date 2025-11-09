@@ -821,6 +821,7 @@ return [
     'settings' => 'Settings',
     'documentations' => 'Documentations',
     'cms_pages' => 'CMS Pages',
+'cms_pages_intro' => 'Explore curated policy pages, guides, and helpful information.',
     'landing_page' => 'Landing Page',
     'social_media' => 'Social Media',
     'wallet_analytics' => 'Wallet Analytics',

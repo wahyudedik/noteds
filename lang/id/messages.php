@@ -821,6 +821,7 @@ return [
     'settings' => 'Pengaturan',
     'documentations' => 'Dokumentasi',
     'cms_pages' => 'Halaman CMS',
+'cms_pages_intro' => 'Jelajahi halaman kebijakan, panduan, dan informasi yang telah kami kurasi.',
     'landing_page' => 'Halaman Depan',
     'social_media' => 'Media Sosial',
     'wallet_analytics' => 'Analitik Dompet',
