@@ -37,7 +37,7 @@
                     @endif
                 </div>
                 @if($documentation->icon)
-                    <span class="text-4xl">{{ $documentation->icon }}</span>
+                    <iconify-icon icon="{{ $documentation->icon }}" width="32" height="32" class="text-blue-500"></iconify-icon>
                 @endif
             </div>
 
@@ -96,12 +96,16 @@
                 </h3>
                 <ul class="space-y-2">
                     @foreach($documentation->links as $link)
+                        @php
+                            $linkUrl = is_array($link) ? ($link['url'] ?? '#') : $link;
+                            $linkTitle = is_array($link) ? ($link['title'] ?? ($link['url'] ?? $link)) : $link;
+                        @endphp
                         <li>
-                            <a href="{{ $link['url'] ?? '#' }}" target="_blank" rel="noopener noreferrer" class="flex items-center text-blue-600 hover:text-blue-700 transition-colors duration-200">
+                            <a href="{{ $linkUrl }}" target="_blank" rel="noopener noreferrer" class="flex items-center text-blue-600 hover:text-blue-700 transition-colors duration-200">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                 </svg>
-                                {{ $link['title'] ?? $link['url'] }}
+                                {{ $linkTitle }}
                             </a>
                         </li>
                     @endforeach

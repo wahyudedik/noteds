@@ -782,6 +782,7 @@ return [
     'register' => 'Daftar',
     'logout' => 'Keluar',
     'my_profile' => 'Profil Saya',
+    'view_public_profile' => 'Lihat Profil Publik',
     'support_ticket' => 'Tiket Dukungan',
     'telescope' => 'Telescope',
     'notifications' => 'Notifikasi',

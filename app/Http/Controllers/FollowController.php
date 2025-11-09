@@ -7,6 +7,7 @@ use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class FollowController extends Controller
 {
@@ -38,7 +39,7 @@ class FollowController extends Controller
             return redirect()->back()->with('error', 'You are already following this user.');
         }
 
-        $follower->following()->attach($user->id);
+        $follower->following()->attach($user->id, ['id' => (string) Str::uuid()]);
 
         // Notify the user being followed
         $notificationService = app(NotificationService::class);

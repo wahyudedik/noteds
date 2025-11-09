@@ -745,6 +745,7 @@ return [
     'register' => 'التسجيل',
     'logout' => 'تسجيل الخروج',
     'my_profile' => 'ملفي الشخصي',
+    'view_public_profile' => 'عرض الملف الشخصي العام',
     'support_ticket' => 'تذكرة الدعم',
     'telescope' => 'Telescope',
     'notifications' => 'الإشعارات',

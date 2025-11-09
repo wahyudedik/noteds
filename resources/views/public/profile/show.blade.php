@@ -191,6 +191,38 @@
                                 </button>
                                 @auth
                                     @if(auth()->id() !== $user->id)
+                                        @if(auth()->user()->isFollowing($user))
+                                            <form action="{{ route('follow.unfollow', $user) }}" method="POST" class="inline-flex">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200"
+                                                    title="Unfollow this account">
+                                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" />
+                                                    </svg>
+                                                    Following
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('follow.follow', $user) }}" method="POST" class="inline-flex">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
+                                                    title="Follow this account">
+                                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6" />
+                                                    </svg>
+                                                    Follow
+                                                </button>
+                                            </form>
+                                        @endif
+                                        <button type="button" onclick="showAccountReportModal()"
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors duration-200"
+                                            title="Report this account">
+                                            Report Account
+                                        </button>
+                                    @else
                                         <button type="button" onclick="showAccountReportModal()"
                                             class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors duration-200"
                                             title="Report this account">
@@ -198,6 +230,11 @@
                                         </button>
                                     @endif
                                 @else
+                                    <a href="{{ route('login') }}"
+                                        class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
+                                        title="Login to follow this account">
+                                        Follow
+                                    </a>
                                     <a href="{{ route('login') }}"
                                         class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors duration-200"
                                         title="Login to report this account">

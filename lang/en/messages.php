@@ -782,6 +782,7 @@ return [
     'register' => 'Register',
     'logout' => 'Logout',
     'my_profile' => 'My Profile',
+    'view_public_profile' => 'View Public Profile',
     'support_ticket' => 'Support Ticket',
     'telescope' => 'Telescope',
     'notifications' => 'Notifications',

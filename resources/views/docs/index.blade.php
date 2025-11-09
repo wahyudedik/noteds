@@ -95,7 +95,7 @@
                                         {{ $doc->category_label }}
                                     </span>
                                     @if($doc->icon)
-                                        <span class="text-xl">{{ $doc->icon }}</span>
+                                        <iconify-icon icon="{{ $doc->icon }}" width="22" height="22" class="text-blue-500"></iconify-icon>
                                     @endif
                                 </div>
                                 <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">

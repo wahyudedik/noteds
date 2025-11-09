@@ -23,6 +23,9 @@
         <style>[x-cloak]{display:none !important;}</style>
         @stack('styles')
         
+        <!-- Iconify Icons -->
+        <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js" defer></script>
+        
         <!-- Expose Laravel translation helper to Alpine.js -->
         <script>
             // Load all translations from messages file
@@ -237,10 +240,16 @@
                         return;
                     }
 
+                    const { skipBackForward, ...restOptions } = options || {};
+
+                    if (isBackForward && skipBackForward !== false) {
+                        return;
+                    }
+
                     const fireOptions = Object.assign({
                         icon: icon || 'info',
                         title,
-                    }, options);
+                    }, restOptions);
 
                     toastMixin.fire(fireOptions);
                 };

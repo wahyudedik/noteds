@@ -7,6 +7,7 @@ use App\Models\SupportTicket;
 use App\Models\SupportTicketReply;
 use App\Models\User;
 use App\Services\NotificationService;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -22,7 +23,7 @@ class TicketController extends Controller
      */
     public function index(Request $request): View
     {
-        $tickets = SupportTicket::with(['user', 'assignedAdmin'])
+        $ticketsQuery = SupportTicket::with(['user', 'assignedAdmin'])
             ->when($request->status, function ($query) use ($request) {
                 return $query->where('status', $request->status);
             })
@@ -31,7 +32,8 @@ class TicketController extends Controller
             })
             ->when($request->premium_only, function ($query) {
                 return $query->whereHas('user', function ($q) {
-                    $q->where('premium_expires_at', '>', now());
+                    $q->whereNotNull('premium_expires_at')
+                        ->where('premium_expires_at', '>', now());
                 });
             })
             ->when($request->search, function ($query) use ($request) {
@@ -41,11 +43,21 @@ class TicketController extends Controller
                         $q->where('name', 'like', '%' . $request->search . '%')
                             ->orWhere('email', 'like', '%' . $request->search . '%');
                     });
-            })
-            ->orderByRaw("CASE 
-                WHEN EXISTS (SELECT 1 FROM users WHERE users.id = support_tickets.user_id AND users.premium_expires_at > NOW()) THEN 0 
+            });
+
+        if (Schema::hasColumn('users', 'premium_expires_at')) {
+            $ticketsQuery->orderByRaw("CASE 
+                WHEN EXISTS (
+                    SELECT 1 FROM users 
+                    WHERE users.id = support_tickets.user_id 
+                        AND users.premium_expires_at IS NOT NULL 
+                        AND users.premium_expires_at > NOW()
+                ) THEN 0 
                 ELSE 1 
-            END")
+            END");
+        }
+
+        $tickets = $ticketsQuery
             ->orderBy('priority', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(20)

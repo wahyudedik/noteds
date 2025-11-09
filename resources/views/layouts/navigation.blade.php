@@ -200,28 +200,28 @@
                             <a href="{{ $link['href'] }}"
                                 class="{{ $desktopLinkClasses }} {{ $link['active'] ? $desktopActiveClasses : '' }}">
                                 {{ $link['label'] }}
-                            </a>
+                                </a>
                         @endforeach
 
                         @if ($user && $user->role !== 'user_workspaces' && (!empty($moreLinks) || !empty($adminMoreLinks)))
-                            <!-- More Menu Dropdown -->
-                            <div class="relative" x-data="{ open: false }">
-                                <button @click="open = !open"
+                                <!-- More Menu Dropdown -->
+                                <div class="relative" x-data="{ open: false }">
+                                    <button @click="open = !open"
                                     class="{{ $desktopLinkClasses }} flex items-center gap-1 {{ $moreIsActive ? $desktopActiveClasses : '' }}">
-                                    More
-                                    <svg class="w-4 h-4" :class="{ 'rotate-180': open }" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
+                                        More
+                                        <svg class="w-4 h-4" :class="{ 'rotate-180': open }" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
                                 <div x-show="open" x-cloak @click.away="open = false" x-transition
-                                    class="absolute left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+                                        class="absolute left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
                                     @foreach ($moreLinks as $link)
                                         <a href="{{ $link['href'] }}"
                                             class="{{ $dropdownLinkClasses }} {{ $link['active'] ? $dropdownActiveClasses : '' }}">
                                             {{ $link['label'] }}
-                                        </a>
+                                                </a>
                                     @endforeach
 
                                     @if (!empty($adminMoreLinks))
@@ -238,10 +238,10 @@
                                                 {{ $link['label'] }}
                                             </a>
                                         @endforeach
-                                    @endif
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
                     </nav>
 
                     <!-- Mobile Menu Button -->
@@ -439,6 +439,17 @@
                                 <!-- Dropdown Menu -->
                                 <div x-show="open" x-cloak @click.away="open = false" x-transition
                                     class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                                    <a href="{{ route('public.profile.show', auth()->user()->username) }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 7a4 4 0 110 8 4 4 0 010-8zm0 10c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z" />
+                                            </svg>
+                                            {{ __('messages.view_public_profile') }}
+                                        </div>
+                                    </a>
                                     <a href="{{ route('profile.edit') }}"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
                                         <div class="flex items-center">
@@ -536,25 +547,25 @@
             @foreach ($primaryLinks as $link)
                 <a href="{{ $link['href'] }}"
                     class="{{ $mobileLinkClasses }} {{ $link['active'] ? $mobileActiveClasses : '' }}"
-                    @click="mobileMenuOpen = false">
+                @click="mobileMenuOpen = false">
                     {{ $link['label'] }}
-                </a>
+                    </a>
             @endforeach
 
             @if ($user && $user->role !== 'user_workspaces' && (!empty($moreLinks) || !empty($adminMoreLinks)))
-                <div class="border-t border-gray-200 my-2"></div>
-                <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">More</div>
+                    <div class="border-t border-gray-200 my-2"></div>
+                    <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">More</div>
 
                 @foreach ($moreLinks as $link)
                     <a href="{{ $link['href'] }}"
                         class="{{ $mobileLinkClasses }} {{ $link['active'] ? $mobileActiveClasses : '' }}"
                         @click="mobileMenuOpen = false">
                         {{ $link['label'] }}
-                    </a>
+                        </a>
                 @endforeach
 
                 @if (!empty($adminMoreLinks))
-                    <div class="border-t border-gray-200 my-2"></div>
+                        <div class="border-t border-gray-200 my-2"></div>
                     <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</div>
 
                     @foreach ($adminMoreLinks as $link)

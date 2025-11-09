@@ -17,15 +17,31 @@
         </div>
 
         @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {{ session('success') }}
-            </div>
+            @push('scripts')
+            <script>
+                (function () {
+                    if (typeof window.NotedsToast === 'function') {
+                        window.NotedsToast('success', @json(session('success')), { skipBackForward: true });
+                    } else {
+                        setTimeout(arguments.callee, 100);
+                    }
+                })();
+            </script>
+            @endpush
         @endif
 
         @if(session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {{ session('error') }}
-            </div>
+            @push('scripts')
+            <script>
+                (function () {
+                    if (typeof window.NotedsToast === 'function') {
+                        window.NotedsToast('error', @json(session('error')), { skipBackForward: true });
+                    } else {
+                        setTimeout(arguments.callee, 100);
+                    }
+                })();
+            </script>
+            @endpush
         @endif
 
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
@@ -89,7 +105,7 @@
                 <p class="text-sm text-gray-600">{{ __('messages.cannot_modify_self_status') }}</p>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <form method="POST" action="{{ route('admin.users.deactivate', $user) }}" class="border rounded-lg p-4 shadow-sm space-y-3" onsubmit="return confirm('{{ __('messages.confirm_deactivate_user') }}');">
+                    <form method="POST" action="{{ route('admin.users.deactivate', $user) }}" class="border rounded-lg p-4 shadow-sm space-y-3" onsubmit="return confirmDeactivate(this);">
                         @csrf
                         <h4 class="text-sm font-semibold text-gray-800">{{ __('messages.deactivate_account') }}</h4>
                         <p class="text-xs text-gray-600">{{ __('messages.deactivate_account_help') }}</p>
@@ -100,7 +116,7 @@
                         </button>
                     </form>
 
-                    <form method="POST" action="{{ $user->suspended_at ? route('admin.users.release', $user) : route('admin.users.suspend', $user) }}" class="border rounded-lg p-4 shadow-sm space-y-3" onsubmit="return confirm('{{ $user->suspended_at ? __('messages.confirm_release_user') : __('messages.confirm_suspend_user') }}');">
+                    <form method="POST" action="{{ $user->suspended_at ? route('admin.users.release', $user) : route('admin.users.suspend', $user) }}" class="border rounded-lg p-4 shadow-sm space-y-3" onsubmit="return confirmSuspend(this, {{ $user->suspended_at ? 'true' : 'false' }});">
                         @csrf
                         @if($user->suspended_at)
                             <h4 class="text-sm font-semibold text-gray-800">{{ __('messages.release_suspend') }}</h4>
@@ -121,7 +137,7 @@
                 </div>
 
                 @if(!$user->isAccessible())
-                    <form method="POST" action="{{ route('admin.users.activate', $user) }}" class="mt-4" onsubmit="return confirm('{{ __('messages.confirm_activate_user') }}');">
+                    <form method="POST" action="{{ route('admin.users.activate', $user) }}" class="mt-4" onsubmit="return confirmActivate(this);">
                         @csrf
                         <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-md">
                             {{ __('messages.activate_account') }}
@@ -214,4 +230,82 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function confirmDeactivate(form) {
+        if (typeof Swal === 'undefined') {
+            return confirm(@json(__('messages.confirm_deactivate_user')));
+        }
+
+        Swal.fire({
+            icon: 'warning',
+            title: @json(__('messages.deactivate_account')),
+            text: @json(__('messages.confirm_deactivate_user')),
+            showCancelButton: true,
+            confirmButtonColor: '#d97706',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: @json(__('messages.deactivate')),
+            cancelButtonText: @json(__('messages.cancel')),
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+
+        return false;
+    }
+
+    function confirmSuspend(form, isRelease) {
+        if (typeof Swal === 'undefined') {
+            return confirm(isRelease ? @json(__('messages.confirm_release_user')) : @json(__('messages.confirm_suspend_user')));
+        }
+
+        const title = isRelease ? @json(__('messages.release_suspend')) : @json(__('messages.suspend_account'));
+        const text = isRelease ? @json(__('messages.confirm_release_user')) : @json(__('messages.confirm_suspend_user'));
+        const confirmText = isRelease ? @json(__('messages.release_suspend')) : @json(__('messages.suspend'));
+        const confirmColor = isRelease ? '#2563eb' : '#dc2626';
+
+        Swal.fire({
+            icon: 'warning',
+            title,
+            text,
+            showCancelButton: true,
+            confirmButtonColor: confirmColor,
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: confirmText,
+            cancelButtonText: @json(__('messages.cancel')),
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+
+        return false;
+    }
+
+    function confirmActivate(form) {
+        if (typeof Swal === 'undefined') {
+            return confirm(@json(__('messages.confirm_activate_user')));
+        }
+
+        Swal.fire({
+            icon: 'question',
+            title: @json(__('messages.activate_account')),
+            text: @json(__('messages.confirm_activate_user')),
+            showCancelButton: true,
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: @json(__('messages.activate_account')),
+            cancelButtonText: @json(__('messages.cancel')),
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+
+        return false;
+    }
+</script>
+@endpush
 

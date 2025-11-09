@@ -52,7 +52,9 @@
                     <a href="{{ route('docs.show', [$doc->category, $doc->slug]) }}" class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 group">
                         <div class="p-6">
                             @if($doc->icon)
-                                <div class="text-3xl mb-3">{{ $doc->icon }}</div>
+                                <div class="text-3xl mb-3 text-blue-500">
+                                    <iconify-icon icon="{{ $doc->icon }}" width="28" height="28"></iconify-icon>
+                                </div>
                             @endif
                             <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
                                 {{ $doc->title }}

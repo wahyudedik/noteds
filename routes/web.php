@@ -112,6 +112,10 @@ Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
 });
 
     // Follow routes
+    Route::get('/follow/{user}', function (\App\Models\User $user) {
+        return redirect()->route('public.profile.show', $user->username);
+    })->name('follow.view');
+
     Route::middleware(['auth', 'verified', 'username.setup'])->prefix('follow')->name('follow.')->group(function () {
         Route::post('/{user}', [\App\Http\Controllers\FollowController::class, 'follow'])->name('follow');
         Route::delete('/{user}', [\App\Http\Controllers\FollowController::class, 'unfollow'])->name('unfollow');
