@@ -61,7 +61,7 @@
             <div class="mt-6 p-5 border border-gray-200 rounded-lg bg-gray-50">
                 <div class="flex items-center gap-3 mb-3">
                     <div class="text-sm font-semibold text-gray-900">{{ $post->user->name }}</div>
-                    <div class="text-xs text-gray-500">@{{ $post->user->username }}</div>
+                    <div class="text-xs text-gray-500">{{ '@' . $post->user->username }}</div>
                 </div>
                 <div class="text-gray-800 whitespace-pre-wrap leading-relaxed">{{ $post->content }}</div>
                 @if($post->note)
@@ -100,7 +100,7 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">{{ $report->user->name }}</div>
-                                    <div class="text-xs text-gray-500">@{{ $report->user->username }}</div>
+                                    <div class="text-xs text-gray-500">{{ '@' . $report->user->username }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm capitalize">{{ $report->reason }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-700 max-w-sm">

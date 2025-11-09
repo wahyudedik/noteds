@@ -83,7 +83,7 @@ class HashtagMentionService
 
         $wrappedHtml = '<div>' . $content . '</div>';
         $document->loadHTML(
-            mb_convert_encoding($wrappedHtml, 'HTML-ENTITIES', 'UTF-8'),
+            '<?xml encoding="UTF-8"?>' . $wrappedHtml,
             LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
         );
 

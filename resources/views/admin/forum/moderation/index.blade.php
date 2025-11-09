@@ -82,7 +82,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">{{ $post->user->name }}</div>
-                                    <div class="text-sm text-gray-500">@{{ $post->user->username }}</div>
+                                    <div class="text-sm text-gray-500">{{ '@' . $post->user->username }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-2">

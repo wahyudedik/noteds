@@ -124,6 +124,16 @@
                         </svg>
                         <span class="text-sm font-medium text-teal-900">{{ __('messages.documentations') }}</span>
                     </a>
+                    <a href="{{ route('admin.cms-pages.index') }}"
+                        class="flex items-center p-4 bg-sky-50 rounded-lg hover:bg-sky-100 transition-colors">
+                        <svg class="w-5 h-5 mr-2 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 20h9" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 4H8a2 2 0 00-2 2v14l6-3 6 3V6a2 2 0 00-2-2z" />
+                        </svg>
+                        <span class="text-sm font-medium text-sky-900">{{ __('messages.cms_pages') }}</span>
+                    </a>
                     <a href="{{ route('admin.landing-page.index') }}"
                         class="flex items-center p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors">
                         <svg class="w-5 h-5 mr-2 text-pink-600" fill="none" stroke="currentColor"

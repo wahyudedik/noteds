@@ -7,6 +7,8 @@ use App\Models\Note;
 use App\Models\NoteReport;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class NoteModerationController extends Controller
@@ -70,6 +72,16 @@ class NoteModerationController extends Controller
             'status' => 'inactive',
         ]);
 
+        // Deactivate featured placements immediately
+        $note->featuredNotes()
+            ->whereIn('status', ['active', 'pending'])
+            ->update([
+                'status' => 'cancelled',
+                'end_date' => now(),
+            ]);
+
+        Cache::forget('marketplace_featured_notes');
+
         return back()->with('success', 'Note has been set to inactive.');
     }
 
@@ -78,6 +90,20 @@ class NoteModerationController extends Controller
         $note->update([
             'status' => 'active',
         ]);
+
+        // Reactivate featured placements only if within original schedule
+        $note->featuredNotes()
+            ->where('status', 'cancelled')
+            ->where(function ($query) {
+                $query->whereNull('end_date')
+                    ->orWhere('end_date', '>=', now());
+            })
+            ->update([
+                'status' => 'active',
+                'end_date' => DB::raw('CASE WHEN end_date < NOW() THEN NULL ELSE end_date END'),
+            ]);
+
+        Cache::forget('marketplace_featured_notes');
 
         return back()->with('success', 'Note has been reactivated.');
     }

@@ -94,7 +94,21 @@ class MarketplaceController extends Controller
     public function show(Note $note): View
     {
         if (!$note->is_public || $note->status !== 'active') {
-            abort(404);
+            $note->load('user');
+
+            $pendingReports = $note->reports()
+                ->where('status', 'pending')
+                ->count();
+
+            $isOwner = auth()->check() && auth()->id() === $note->user_id;
+
+            return view('marketplace.note-unavailable', [
+                'note' => $note,
+                'pendingReports' => $pendingReports,
+                'isOwner' => $isOwner,
+                'status' => $note->status,
+                'isPublic' => $note->is_public,
+            ]);
         }
 
         $note->load('tags', 'user', 'originalCreator', 'reviews.user', 'transactions');

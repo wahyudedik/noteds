@@ -20,6 +20,7 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <style>[x-cloak]{display:none !important;}</style>
         @stack('styles')
         
         <!-- Expose Laravel translation helper to Alpine.js -->

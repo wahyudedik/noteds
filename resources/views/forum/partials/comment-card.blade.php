@@ -1,9 +1,15 @@
+@php use Illuminate\Support\Str; @endphp
+
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
     <div class="flex items-start space-x-3">
         <!-- User Avatar -->
         <a href="{{ route('public.profile.show', $comment->user->username) }}" class="flex-shrink-0">
             @if($comment->user->avatar)
-                <img src="{{ Storage::url($comment->user->avatar) }}" 
+                @php
+                    $commentAvatar = $comment->user->avatar;
+                    $commentAvatarUrl = Str::startsWith($commentAvatar, ['http://', 'https://']) ? $commentAvatar : Storage::url($commentAvatar);
+                @endphp
+                <img src="{{ $commentAvatarUrl }}" 
                      alt="{{ $comment->user->name }}"
                      class="w-10 h-10 rounded-full object-cover">
             @else
@@ -58,9 +64,9 @@
                 @auth
                     <button type="button" 
                             onclick="likeComment('{{ $comment->id }}')"
-                            class="text-xs text-gray-600 hover:text-red-600 transition-colors duration-200 {{ $isLiked ? 'text-red-600' : '' }}"
+                            class="text-xs text-gray-600 hover:text-red-600 transition-colors duration-200 {{ !empty($comment->is_liked) ? 'text-red-600' : '' }}"
                             id="likeCommentBtn-{{ $comment->id }}">
-                        <svg class="w-4 h-4 inline mr-1" fill="{{ $isLiked ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 inline mr-1" fill="{{ !empty($comment->is_liked) ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                         <span id="commentLikesCount-{{ $comment->id }}">{{ $comment->likes_count }}</span>

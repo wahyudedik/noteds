@@ -379,7 +379,7 @@ Menyiapkan aplikasi untuk rilis publik.
 - Settings hanya bisa diubah oleh admin role
 - Test connection tidak upload file, hanya verify credentials
 
-### REST API & Mobile
+### REST API & Mobile (pending dulu/optional)
 - [ ] REST API publik
 - [ ] Versi mobile: Flutter app
 

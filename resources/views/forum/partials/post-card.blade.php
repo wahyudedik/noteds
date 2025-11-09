@@ -4,310 +4,339 @@
 @endphp
 
 @include('forum.partials.quill-assets')
+@php use Illuminate\Support\Str; @endphp
 
-<div class="bg-white rounded-lg shadow-sm border {{ $post->is_pinned ? 'border-yellow-400 border-2' : 'border-gray-200' }} p-6 hover:shadow-md transition-shadow duration-200">
-    <!-- Post Header -->
-    <div class="flex items-start justify-between mb-4">
-        @if($post->is_pinned)
-            <div class="flex items-center gap-2 mb-2">
-                <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-                </svg>
-                <span class="text-xs font-medium text-yellow-600">Pinned</span>
-            </div>
-        @endif
-        @if($post->is_hidden)
-            <div class="flex items-center gap-2 mb-2">
-                <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-5a1 1 0 112 0v2a1 1 0 11-2 0v-2zm0-6a1 1 0 112 0v3a1 1 0 11-2 0V7z" clip-rule="evenodd" />
-                </svg>
-                <span class="text-xs font-medium text-red-600">Hidden (visible to you and admins only)</span>
-            </div>
-        @endif
-        @if(!$post->is_published && $post->scheduled_at)
-            <div class="flex items-center gap-2 mb-2">
-                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l3 3" />
-                    <circle cx="12" cy="12" r="9" stroke-width="2"></circle>
-                </svg>
-                <span class="text-xs font-medium text-amber-600">Scheduled for {{ $post->scheduled_at->timezone(config('app.timezone'))->format('d M Y, H:i') }}</span>
-            </div>
-        @endif
-        <div class="flex items-start space-x-3 flex-1">
-            <!-- User Avatar -->
-            <a href="{{ route('public.profile.show', $post->user->username) }}" class="flex-shrink-0">
-                @if($post->user->avatar)
-                    <img src="{{ Storage::url($post->user->avatar) }}" 
-                         alt="{{ $post->user->name }}"
-                         class="w-12 h-12 rounded-full object-cover">
-                @else
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold">
-                        {{ strtoupper(substr($post->user->name, 0, 1)) }}
+<div class="relative overflow-hidden rounded-2xl border {{ $post->is_pinned ? 'border-amber-300' : 'border-slate-200' }} bg-white/90 p-6 shadow-sm transition hover:shadow-xl">
+    @if($post->is_pinned)
+        <span class="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+            <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+            </svg>
+            Pinned
+        </span>
+    @endif
+
+    <div class="flex flex-col gap-4">
+        <!-- Status Badges -->
+        <div class="flex flex-wrap items-center gap-2 text-xs font-medium">
+            @if($post->is_hidden)
+                <span class="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-red-600">
+                    <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-5a1 1 0 112 0v2a1 1 0 11-2 0v-2zm0-6a1 1 0 112 0v3a1 1 0 11-2 0V7z" clip-rule="evenodd" />
+                    </svg>
+                    Hidden (Only you & admin)
+                </span>
+            @endif
+            @if(!$post->is_published && $post->scheduled_at)
+                <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-amber-600">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l3 3" />
+                        <circle cx="12" cy="12" r="9" stroke-width="2"></circle>
+                    </svg>
+                    Scheduled · {{ $post->scheduled_at->timezone(config('app.timezone'))->format('d M Y, H:i') }}
+                </span>
+            @endif
+        </div>
+
+        <!-- Header -->
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="flex flex-1 items-start gap-3">
+                <!-- Avatar -->
+                <a href="{{ route('public.profile.show', $post->user->username) }}" class="flex-shrink-0">
+                    @if($post->user->avatar)
+                        @php
+                            $avatar = $post->user->avatar;
+                            $avatarUrl = Str::startsWith($avatar, ['http://', 'https://']) ? $avatar : Storage::url($avatar);
+                        @endphp
+                        <img src="{{ $avatarUrl }}"
+                             alt="{{ $post->user->name }}"
+                             class="h-12 w-12 rounded-full object-cover ring-2 ring-blue-100">
+                    @else
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 text-sm font-semibold text-white ring-2 ring-blue-100">
+                            {{ strtoupper(substr($post->user->name, 0, 1)) }}
+                        </div>
+                    @endif
+                </a>
+
+                <!-- Meta -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <a href="{{ route('public.profile.show', $post->user->username) }}"
+                           class="text-sm font-semibold text-slate-900 hover:text-blue-600">
+                            {{ $post->user->name }}
+                        </a>
+                        <span class="text-xs text-slate-400">{{ '@' . $post->user->username }}</span>
+                        <span class="text-slate-300">•</span>
+                        <span class="text-xs text-slate-500">{{ $post->created_at->diffForHumans() }}</span>
+                        @if($post->visibility === 'followers')
+                            <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-[0.7rem] font-medium text-blue-600">
+                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-3-3h-1M9 20h6M9 20H4v-2a3 3 0 013-3h1m2-6a3 3 0 116 0 3 3 0 01-6 0z" />
+                                </svg>
+                                Followers only
+                            </span>
+                        @elseif($post->visibility === 'private')
+                            <span class="inline-flex items-center gap-1 rounded-full bg-purple-50 px-3 py-1 text-[0.7rem] font-medium text-purple-600">
+                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.657-1.343-3-3-3S6 9.343 6 11v2H4v8h16v-8h-2v-2c0-1.657-1.343-3-3-3s-3 1.343-3 3v2h-2v-2z" />
+                                </svg>
+                                Private
+                            </span>
+                        @endif
                     </div>
-                @endif
-            </a>
 
-            <!-- User Info & Post Meta -->
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center space-x-2 flex-wrap">
-                    <a href="{{ route('public.profile.show', $post->user->username) }}" 
-                       class="font-semibold text-gray-900 hover:text-blue-600 transition-colors duration-200">
-                        {{ $post->user->name }}
-                    </a>
-                    <span class="text-gray-500 text-sm">@{{ $post->user->username }}</span>
-                    <span class="text-gray-400">·</span>
-                    <span class="text-gray-500 text-sm">{{ $post->created_at->diffForHumans() }}</span>
-                    @if($post->visibility === 'followers')
-                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-3-3h-1M9 20h6M9 20H4v-2a3 3 0 013-3h1m2-6a3 3 0 116 0 3 3 0 01-6 0z" />
-                            </svg>
-                            Followers only
-                        </span>
-                    @elseif($post->visibility === 'private')
-                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium text-purple-700 bg-purple-100 rounded-full">
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.657-1.343-3-3-3S6 9.343 6 11v2H4v8h16v-8h-2v-2c0-1.657-1.343-3-3-3s-3 1.343-3 3v2h-2v-2z" />
-                            </svg>
-                            Private
-                        </span>
+                    <!-- Content -->
+                    <div class="forum-post-content mt-3 text-sm leading-relaxed text-slate-700 whitespace-pre-wrap break-words" id="postContent-{{ $post->id }}">
+                        {!! app(\App\Services\HashtagMentionService::class)->formatContent($post->content) !!}
+                    </div>
+
+                    <!-- Hashtags -->
+                    @if ($post->hashtags && $post->hashtags->count() > 0)
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            @foreach ($post->hashtags as $hashtag)
+                                <a href="{{ route('forum.hashtag', $hashtag->slug) }}"
+                                   class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100">
+                                    #{{ $hashtag->name }}
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <!-- Media -->
+                    @if ($post->media && $post->media->count() > 0)
+                        @php
+                            $columnCount = min($post->media->count(), 3);
+                            $columnClass = [
+                                1 => 'sm:grid-cols-1',
+                                2 => 'sm:grid-cols-2',
+                                3 => 'sm:grid-cols-3',
+                            ][$columnCount];
+                        @endphp
+                        <div class="mt-4 grid gap-3 {{ $columnClass }} rounded-2xl">
+                            @foreach ($post->media as $media)
+                                <figure class="group relative overflow-hidden rounded-2xl border border-slate-100">
+                                    @php
+                                        $mediaPath = $media->file_path;
+                                        $mediaUrl = Str::startsWith($mediaPath, ['http://', 'https://']) ? $mediaPath : Storage::url($mediaPath);
+                                    @endphp
+                                    <img src="{{ $mediaUrl }}"
+                                         alt="Post media"
+                                         class="h-48 w-full object-cover transition duration-200 group-hover:scale-[1.02] group-hover:opacity-90"
+                                         onclick="openImageModal('{{ $mediaUrl }}')">
+                                    <figcaption class="pointer-events-none absolute inset-0 hidden items-center justify-center bg-slate-900/40 text-xs font-medium text-white group-hover:flex">Lihat detail</figcaption>
+                                </figure>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <!-- Edit Form -->
+                    @auth
+                        @if(auth()->id() === $post->user_id)
+                            <div id="editPostForm-{{ $post->id }}" class="mt-4 hidden">
+                                <form action="{{ route('forum.update', $post) }}" method="POST" onsubmit="return submitEditPost(event, '{{ $post->id }}')">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="content" id="editContentInput-{{ $post->id }}" value="{{ $post->content }}">
+                                    <div id="editContentEditor-{{ $post->id }}" class="forum-quill-editor rounded-2xl border border-slate-200 bg-white"></div>
+                                    @if(is_null($post->parent_id))
+                                        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label class="mb-2 block text-sm font-semibold text-slate-700">Visibilitas Post</label>
+                                                <select name="visibility" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                                                    <option value="public" {{ $post->visibility === 'public' ? 'selected' : '' }}>Publik</option>
+                                                    <option value="followers" {{ $post->visibility === 'followers' ? 'selected' : '' }}>Followers saja</option>
+                                                    <option value="private" {{ $post->visibility === 'private' ? 'selected' : '' }}>Pribadi</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="mb-2 block text-sm font-semibold text-slate-700">Jadwalkan ulang</label>
+                                                <input type="datetime-local"
+                                                       name="scheduled_for"
+                                                       value="{{ optional($post->scheduled_at)->format('Y-m-d\TH:i') }}"
+                                                       min="{{ now()->format('Y-m-d\TH:i') }}"
+                                                       class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                                            </div>
+                                        </div>
+                                    @endif
+                                    @if($post->note_id)
+                                        <input type="hidden" name="note_id" value="{{ $post->note_id }}">
+                                    @endif
+                                    <div class="mt-4 flex items-center justify-end gap-2">
+                                        <button type="button"
+                                                onclick="cancelEditPost('{{ $post->id }}')"
+                                                class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">
+                                            Batal
+                                        </button>
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+                                            Simpan
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        @endif
+                    @endauth
+
+                    <!-- Shared Note -->
+                    @if($post->note)
+                        <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-blue-50/60">
+                            <div class="flex items-start gap-4">
+                                @if($post->note->hasThumbnails())
+                                    @php
+                                        $thumb = $post->note->thumbnails[0];
+                                        $thumbUrl = Str::startsWith($thumb, ['http://', 'https://']) ? $thumb : Storage::url($thumb);
+                                    @endphp
+                                    <img src="{{ $thumbUrl }}"
+                                         alt="{{ $post->note->title }}"
+                                         class="h-20 w-20 flex-shrink-0 rounded-xl object-cover shadow-sm">
+                                @else
+                                    <div class="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 text-white shadow-sm">
+                                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                @endif
+                                <div class="min-w-0 flex-1">
+                                    <h4 class="text-sm font-semibold text-slate-900 line-clamp-1">{{ $post->note->title }}</h4>
+                                    @if($post->note->summary)
+                                        <p class="mt-1 text-xs text-slate-600 line-clamp-2">{{ $post->note->summary }}</p>
+                                    @endif
+                                    <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                                        <span>{{ __('messages.by_label') }} {{ $post->note->user->name }}</span>
+                                        @if($post->note->price > 0)
+                                            <span class="rounded-full bg-green-100 px-2 py-0.5 font-semibold text-green-600">{{ currency($post->note->price) }}</span>
+                                        @else
+                                            <span class="rounded-full bg-slate-200 px-2 py-0.5 font-semibold text-slate-600">{{ __('messages.free') }}</span>
+                                        @endif
+                                    </div>
+                                    <a href="{{ route('marketplace.show', $post->note) }}"
+                                       class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700">
+                                        {{ __('messages.view_note') }}
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     @endif
                 </div>
+            </div>
 
-                <!-- Post Content -->
-                <div class="mt-2 text-gray-900 whitespace-pre-wrap break-words" id="postContent-{{ $post->id }}">
-                    {!! app(\App\Services\HashtagMentionService::class)->formatContent($post->content) !!}
-                </div>
-
-                <!-- Hashtags -->
-                @if ($post->hashtags && $post->hashtags->count() > 0)
-                    <div class="mt-3 flex flex-wrap gap-2">
-                        @foreach ($post->hashtags as $hashtag)
-                            <a href="{{ route('forum.hashtag', $hashtag->slug) }}" 
-                               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors duration-200">
-                                #{{ $hashtag->name }}
-                            </a>
-                        @endforeach
-                    </div>
-                @endif
-
-                <!-- Post Media -->
-                @if ($post->media && $post->media->count() > 0)
-                    <div class="mt-4 grid grid-cols-{{ min($post->media->count(), 3) }} gap-2">
-                        @foreach ($post->media as $media)
-                            <div class="relative">
-                                <img src="{{ Storage::url($media->file_path) }}" 
-                                     alt="Post media" 
-                                     class="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                                     onclick="openImageModal('{{ Storage::url($media->file_path) }}')">
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-
-                <!-- Edit Post Form (Hidden by default) -->
-                @auth
-                    @if(auth()->id() === $post->user_id)
-                        <div id="editPostForm-{{ $post->id }}" class="mt-2 hidden">
-                            <form action="{{ route('forum.update', $post) }}" method="POST" onsubmit="return submitEditPost(event, '{{ $post->id }}')">
+            <!-- Post Actions Menu -->
+            @auth
+                @if(auth()->id() === $post->user_id)
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                            </svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition
+                             class="absolute right-0 mt-2 w-48 rounded-xl border border-slate-100 bg-white py-2 shadow-xl">
+                            <button onclick="togglePin('{{ $post->id }}', {{ $post->is_pinned ? 'true' : 'false' }})"
+                                    class="block w-full px-4 py-2 text-left text-sm text-slate-600 transition hover:bg-slate-50">
+                                {{ $post->is_pinned ? 'Lepas pin' : 'Pin post' }}
+                            </button>
+                            <button onclick="editPost('{{ $post->id }}')"
+                                    class="block w-full px-4 py-2 text-left text-sm text-slate-600 transition hover:bg-slate-50">
+                                Edit
+                            </button>
+                            <form action="{{ route('forum.destroy', $post) }}" method="POST" class="inline">
                                 @csrf
-                                @method('PUT')
-                                <input type="hidden" name="content" id="editContentInput-{{ $post->id }}" value="{{ $post->content }}">
-                                <div id="editContentEditor-{{ $post->id }}" class="forum-quill-editor border border-gray-300 rounded-lg bg-white"></div>
-                                @if(is_null($post->parent_id))
-                                    <div class="mt-3">
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Post Visibility</label>
-                                        <select name="visibility" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                            <option value="public" {{ $post->visibility === 'public' ? 'selected' : '' }}>Public — everyone can see</option>
-                                            <option value="followers" {{ $post->visibility === 'followers' ? 'selected' : '' }}>Followers Only</option>
-                                            <option value="private" {{ $post->visibility === 'private' ? 'selected' : '' }}>Private — only you</option>
-                                        </select>
-                                    </div>
-                                    <div class="mt-3">
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Schedule Post (optional)</label>
-                                        <input type="datetime-local"
-                                               name="scheduled_for"
-                                               value="{{ optional($post->scheduled_at)->format('Y-m-d\TH:i') }}"
-                                               min="{{ now()->format('Y-m-d\TH:i') }}"
-                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <p class="mt-1 text-xs text-gray-500">Leave empty to publish immediately. Set a future time to reschedule this post.</p>
-                                    </div>
-                                @endif
-                                @if($post->note_id)
-                                    <input type="hidden" name="note_id" value="{{ $post->note_id }}">
-                                @endif
-                                <div class="mt-2 flex items-center justify-end space-x-2">
-                                    <button type="button" 
-                                            onclick="cancelEditPost('{{ $post->id }}')"
-                                            class="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                                        Cancel
-                                    </button>
-                                    <button type="submit" 
-                                            class="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                                        Save
-                                    </button>
-                                </div>
+                                @method('DELETE')
+                                <button type="submit"
+                                        onclick="return confirm('Are you sure you want to delete this post?')"
+                                        class="block w-full px-4 py-2 text-left text-sm text-red-600 transition hover:bg-red-50">
+                                    Delete
+                                </button>
                             </form>
                         </div>
-                    @endif
-                @endauth
-
-                <!-- Shared Note Card -->
-                @if($post->note)
-                    <div class="mt-4 border border-gray-200 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-                        <div class="flex items-start space-x-4">
-                            @if($post->note->hasThumbnails())
-                                <img src="{{ Storage::url($post->note->thumbnails[0]) }}" 
-                                     alt="{{ $post->note->title }}"
-                                     class="w-20 h-20 rounded-lg object-cover flex-shrink-0">
-                            @else
-                                <div class="w-20 h-20 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                            @endif
-                            <div class="flex-1 min-w-0">
-                                <h4 class="font-semibold text-gray-900 truncate">{{ $post->note->title }}</h4>
-                                @if($post->note->summary)
-                                    <p class="text-sm text-gray-600 mt-1 line-clamp-2">{{ $post->note->summary }}</p>
-                                @endif
-                                <div class="mt-2 flex items-center space-x-4 text-xs text-gray-500">
-                                    <span>{{ __('messages.by_label') }} {{ $post->note->user->name }}</span>
-                                    @if($post->note->price > 0)
-                                        <span class="font-semibold text-green-600">{{ currency($post->note->price) }}</span>
-                                    @else
-                                        <span class="font-semibold text-gray-600">{{ __('messages.free') }}</span>
-                                    @endif
-                                </div>
-                                <a href="{{ route('marketplace.show', $post->note) }}" 
-                                   class="mt-2 inline-block text-sm text-blue-600 hover:text-blue-700 font-medium">
-                                    {{ __('messages.view_note') }} →
-                                </a>
-                            </div>
+                    </div>
+                @else
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="rounded-full bg-slate-100 p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-500" title="Report post">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition
+                             class="absolute right-0 mt-2 w-60 rounded-xl border border-slate-100 bg-white py-2 shadow-xl">
+                            <button onclick="showReportModal('{{ $post->id }}')"
+                                    class="block w-full px-4 py-2 text-left text-sm text-red-600 transition hover:bg-red-50">
+                                Laporkan Post
+                            </button>
                         </div>
                     </div>
                 @endif
+            @endauth
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+            <div class="flex flex-wrap items-center gap-4">
+                @auth
+                    <button type="button"
+                            onclick="likePost('{{ $post->id }}')"
+                            class="group inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition {{ $isLiked ? 'text-red-600 bg-red-50' : 'text-slate-500 hover:bg-slate-100 hover:text-red-600' }}"
+                            id="likeBtn-{{ $post->id }}">
+                        <svg class="h-5 w-5" fill="{{ $isLiked ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        <span class="min-w-[1.5rem] text-left" id="likesCount-{{ $post->id }}">{{ $post->likes_count }}</span>
+                    </button>
+                @else
+                    <a href="{{ route('login') }}" class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-red-600">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        <span>{{ $post->likes_count }}</span>
+                    </a>
+                @endauth
+
+                <a href="{{ route('forum.show', $post) }}"
+                   class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-blue-600">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <span>{{ $post->comments_count }}</span>
+                </a>
+
+                @auth
+                    <a href="{{ route('forum.show', $post) }}#reply"
+                       class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-blue-600">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                        </svg>
+                        <span>Reply</span>
+                    </a>
+                @endauth
+            </div>
+
+            <div class="flex items-center gap-3">
+                @auth
+                    <button type="button"
+                            onclick="toggleBookmark('{{ $post->id }}')"
+                            class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-slate-500 transition hover:bg-yellow-50 hover:text-yellow-600"
+                            title="Bookmark post"
+                            id="bookmarkBtn-{{ $post->id }}">
+                        <svg class="h-5 w-5" fill="{{ ($post->is_bookmarked ?? false) ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                    </button>
+                @endauth
+
+                <button type="button"
+                        onclick="sharePost('{{ $post->id }}')"
+                        class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-blue-600"
+                        title="Share post">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    <span id="sharesCount-{{ $post->id }}">{{ $post->shares_count ?? 0 }}</span>
+                </button>
             </div>
         </div>
-
-        <!-- Post Actions Menu -->
-        @auth
-            @if(auth()->id() === $post->user_id)
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                        </svg>
-                    </button>
-                    <div x-show="open" @click.away="open = false" x-transition
-                        class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                        <button onclick="togglePin('{{ $post->id }}', {{ $post->is_pinned ? 'true' : 'false' }})" 
-                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
-                            {{ $post->is_pinned ? 'Unpin' : 'Pin' }} Post
-                        </button>
-                        <button onclick="editPost('{{ $post->id }}')" 
-                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
-                            Edit
-                        </button>
-                        <form action="{{ route('forum.destroy', $post) }}" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" 
-                                onclick="return confirm('Are you sure you want to delete this post?')"
-                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150">
-                                Delete
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            @else
-                <!-- Report Button for other users -->
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="text-gray-400 hover:text-red-600 transition-colors duration-200" title="Report post">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </button>
-                    <div x-show="open" @click.away="open = false" x-transition
-                        class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                        <button onclick="showReportModal('{{ $post->id }}')" 
-                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150">
-                            Report Post
-                        </button>
-                    </div>
-                </div>
-            @endif
-        @endauth
-    </div>
-
-    <!-- Post Actions -->
-    <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-        <div class="flex items-center space-x-6">
-            <!-- Like Button -->
-            @auth
-                <button type="button" 
-                        onclick="likePost('{{ $post->id }}')"
-                        class="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors duration-200 {{ $isLiked ? 'text-red-600' : '' }}"
-                        id="likeBtn-{{ $post->id }}">
-                    <svg class="w-5 h-5" fill="{{ $isLiked ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    <span class="text-sm font-medium" id="likesCount-{{ $post->id }}">{{ $post->likes_count }}</span>
-                </button>
-            @else
-                <a href="{{ route('login') }}" class="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors duration-200">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    <span class="text-sm font-medium">{{ $post->likes_count }}</span>
-                </a>
-            @endauth
-
-            <!-- Comment Button -->
-            <a href="{{ route('forum.show', $post) }}" 
-               class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                <span class="text-sm font-medium">{{ $post->comments_count }}</span>
-            </a>
-
-            <!-- Reply Button -->
-            @auth
-                <a href="{{ route('forum.show', $post) }}#reply" 
-                   class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                    </svg>
-                    <span class="text-sm font-medium">Reply</span>
-                </a>
-            @endauth
-        </div>
-
-        <!-- Bookmark Button -->
-        @auth
-            <button type="button" 
-                    onclick="toggleBookmark('{{ $post->id }}')"
-                    class="flex items-center space-x-1 text-gray-600 hover:text-yellow-600 transition-colors duration-200"
-                    title="Bookmark post"
-                    id="bookmarkBtn-{{ $post->id }}">
-                <svg class="w-5 h-5" fill="{{ ($post->is_bookmarked ?? false) ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-            </button>
-        @endauth
-
-        <!-- Share Button -->
-        <button type="button" 
-                onclick="sharePost('{{ $post->id }}')"
-                class="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors duration-200"
-                title="Share post">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-            </svg>
-            <span class="text-sm font-medium" id="sharesCount-{{ $post->id }}">{{ $post->shares_count ?? 0 }}</span>
-        </button>
     </div>
 </div>
 
@@ -402,40 +431,88 @@
 
         function sharePost(postId) {
             const url = `${window.location.origin}/forum/post/${postId}`;
+            const title = document.title || 'Noteds';
 
-            fetch(`/forum/post/${postId}/share`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const sharesCount = document.getElementById(`sharesCount-${postId}`);
-                    if (sharesCount) {
-                        sharesCount.textContent = data.shares_count;
+            const recordShare = () =>
+                fetch(`/forum/post/${postId}/share`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
                     }
-                }
-            })
-            .catch(error => {
-                console.error('Error tracking share:', error);
-            });
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data?.success) {
+                            const sharesCount = document.getElementById(`sharesCount-${postId}`);
+                            if (sharesCount) {
+                                sharesCount.textContent = data.shares_count ?? Number(sharesCount.textContent || 0) + 1;
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error tracking share:', error));
 
             if (navigator.share) {
-                navigator.share({
-                    title: 'Check out this post on Noteds',
-                    url: url
-                }).catch(() => {});
+                navigator
+                    .share({
+                        title,
+                        text: 'Cek postingan menarik di Noteds!',
+                        url
+                    })
+                    .then(recordShare)
+                    .catch(err => {
+                        if (err && err.name === 'AbortError') {
+                            return;
+                        }
+                        fallbackShare(url, recordShare);
+                    });
             } else {
-                navigator.clipboard.writeText(url).then(() => {
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire('Copied!', 'Post link copied to clipboard', 'success');
-                    } else {
-                        alert('Link copied to clipboard!');
-                    }
-                });
+                fallbackShare(url, recordShare);
+            }
+        }
+
+        function fallbackShare(url, onSuccess) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard
+                    .writeText(url)
+                    .then(() => {
+                        if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Link disalin',
+                            text: 'Bagikan link ini ke temanmu!',
+                            toast: true,
+                            position: 'top-end',
+                            timer: 3000,
+                            timerProgressBar: true,
+                            showConfirmButton: false,
+                        });
+                        } else {
+                            alert('Link disalin ke clipboard. Bagikan ke temanmu!');
+                        }
+                        onSuccess();
+                    })
+                    .catch(() => promptShare(url, onSuccess));
+            } else {
+                promptShare(url, onSuccess);
+            }
+        }
+
+        function promptShare(url, onSuccess) {
+            const result = prompt('Bagikan link post ini:', url);
+            if (typeof result === 'string') {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Link siap dibagikan!',
+                        toast: true,
+                        position: 'top-end',
+                        timer: 2000,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                    });
+                }
+                onSuccess();
             }
         }
 

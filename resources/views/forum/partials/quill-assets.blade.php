@@ -7,6 +7,28 @@
                 max-height: 400px;
                 overflow-y: auto;
             }
+
+            .forum-post-content p {
+                margin: 0 0 0.75rem;
+            }
+
+            .forum-post-content p:last-child {
+                margin-bottom: 0;
+            }
+
+            .forum-post-content ul,
+            .forum-post-content ol {
+                margin: 0.75rem 0 0.75rem 1.25rem;
+            }
+
+            .forum-post-content a {
+                color: #2563eb;
+                text-decoration: none;
+            }
+
+            .forum-post-content a:hover {
+                text-decoration: underline;
+            }
         </style>
     @endpush
 

@@ -1,5 +1,190 @@
 <div x-data="{ mobileMenuOpen: false }" class="relative">
-    <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
+    @php
+        $user = auth()->user();
+        $isAdmin = $user?->hasRole('admin');
+        $isSeller = $user?->role === 'seller';
+        $isBuyer = $user?->role === 'buyer';
+        $isSellerOrAdmin = $user && ($isSeller || $isAdmin);
+        $isBuyerOrAdmin = $user && ($isBuyer || $isAdmin);
+        $hasPremium = $user?->hasPremium();
+
+        $desktopLinkClasses =
+            'px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200';
+        $desktopActiveClasses = 'text-blue-600 bg-blue-50';
+        $dropdownLinkClasses = 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150';
+        $dropdownActiveClasses = 'bg-blue-50 text-blue-600';
+        $mobileLinkClasses =
+            'block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200';
+        $mobileActiveClasses = 'text-blue-600 bg-blue-50';
+
+        $primaryLinks = [
+            [
+                'label' => __('messages.home'),
+                'href' => url('/'),
+                'active' => request()->routeIs('welcome'),
+            ],
+        ];
+
+        $moreLinks = [];
+        $adminMoreLinks = [];
+
+        if ($user) {
+            if ($user->role === 'user_workspaces') {
+                $primaryLinks[] = [
+                    'label' => 'Workspaces',
+                    'href' => route('workspaces.index'),
+                    'active' => request()->routeIs('workspaces.*'),
+                ];
+            } else {
+                $primaryLinks[] = [
+                    'label' => __('messages.dashboard'),
+                    'href' => route('dashboard'),
+                    'active' => request()->routeIs('dashboard'),
+                ];
+
+                if ($isSellerOrAdmin) {
+                    $primaryLinks[] = [
+                        'label' => __('messages.notes'),
+                        'href' => route('notes.index'),
+                        'active' => request()->routeIs('notes.*'),
+                    ];
+                }
+
+                $primaryLinks[] = [
+                    'label' => __('messages.wallet'),
+                    'href' => route('wallet.index'),
+                    'active' => request()->routeIs('wallet.*'),
+                ];
+
+                $primaryLinks[] = [
+                    'label' => __('messages.marketplace'),
+                    'href' => route('marketplace.index'),
+                    'active' => request()->routeIs('marketplace.*'),
+                ];
+
+                $primaryLinks[] = [
+                    'label' => 'Forum',
+                    'href' => route('forum.index'),
+                    'active' => request()->routeIs('forum.*') && !request()->routeIs('forum.analytics'),
+                ];
+
+                $primaryLinks[] = [
+                    'label' => 'Forum Analytics',
+                    'href' => route('forum.analytics'),
+                    'active' => request()->routeIs('forum.analytics'),
+                ];
+
+                $primaryLinks[] = [
+                    'label' => 'Forum Preferences',
+                    'href' => route('forum.preferences.edit'),
+                    'active' => request()->routeIs('forum.preferences.*'),
+                ];
+
+                $primaryLinks[] = [
+                    'label' => 'Produk Chats',
+                    'href' => route('note-conversations.index'),
+                    'active' => request()->routeIs('note-conversations.*'),
+                ];
+
+                if ($isSellerOrAdmin) {
+                    $moreLinks[] = [
+                        'label' => 'Featured',
+                        'href' => route('featured-notes.index'),
+                        'active' => request()->routeIs('featured-notes.*'),
+                    ];
+                }
+
+                if (!$isAdmin) {
+                    $moreLinks[] = [
+                        'label' => __('messages.subscription'),
+                        'href' => route('subscription.index'),
+                        'active' => request()->routeIs('subscription.*'),
+                    ];
+                }
+
+                $moreLinks[] = [
+                    'label' => __('messages.referral'),
+                    'href' => route('referral.index'),
+                    'active' => request()->routeIs('referral.*'),
+                ];
+
+                if ($hasPremium) {
+                    $moreLinks[] = [
+                        'label' => __('messages.mynoteds'),
+                        'href' => route('mynoteds.index'),
+                        'active' => request()->routeIs('mynoteds.*'),
+                    ];
+
+                    if ($isBuyerOrAdmin) {
+                        $moreLinks[] = [
+                            'label' => 'Collections',
+                            'href' => route('collections.index'),
+                            'active' => request()->routeIs('collections.*'),
+                        ];
+
+                        $moreLinks[] = [
+                            'label' => 'Analytics',
+                            'href' => route('buyer-analytics.index'),
+                            'active' => request()->routeIs('buyer-analytics.*'),
+                        ];
+
+                        $moreLinks[] = [
+                            'label' => 'Reading History',
+                            'href' => route('reading-history.index'),
+                            'active' => request()->routeIs('reading-history.*'),
+                        ];
+
+                        $moreLinks[] = [
+                            'label' => 'Batch Download',
+                            'href' => route('batch-download.index'),
+                            'active' => request()->routeIs('batch-download.*'),
+                        ];
+                    }
+                }
+
+                $moreLinks[] = [
+                    'label' => __('messages.simulators'),
+                    'href' => route('simulators.index'),
+                    'active' => request()->routeIs('simulators.*'),
+                ];
+
+                if ($isAdmin) {
+                    $adminMoreLinks[] = [
+                        'label' => __('messages.admin'),
+                        'href' => route('admin.dashboard'),
+                        'active' => request()->routeIs('admin.*'),
+                    ];
+
+                    $adminMoreLinks[] = [
+                        'label' => 'Forum Moderation',
+                        'href' => route('admin.forum.moderation.index'),
+                        'active' => request()->routeIs('admin.forum.moderation.*'),
+                    ];
+
+                    $adminMoreLinks[] = [
+                        'label' => 'Note Moderation',
+                        'href' => route('admin.notes.moderation.index'),
+                        'active' => request()->routeIs('admin.notes.moderation.*'),
+                    ];
+
+                    $adminMoreLinks[] = [
+                        'label' => 'Account Moderation',
+                        'href' => route('admin.accounts.moderation.index'),
+                        'active' => request()->routeIs('admin.accounts.moderation.*'),
+                    ];
+                }
+            }
+        }
+
+        $moreIsActive = false;
+        foreach (array_merge($moreLinks, $adminMoreLinks) as $link) {
+            if ($link['active']) {
+                $moreIsActive = true;
+                break;
+            }
+        }
+    @endphp
+    <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40" x-cloak>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex h-16 items-center justify-between">
                 <div class="flex items-center gap-4 sm:gap-6">
@@ -11,132 +196,52 @@
 
                     <!-- Desktop Navigation -->
                     <nav class="hidden lg:flex items-center gap-1">
-                        <a href="/"
-                            class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('welcome') ? 'text-blue-600 bg-blue-50' : '' }}">
-                            {{ __('messages.home') }}
-                        </a>
-                        @auth
-                            @if (auth()->user()->role === 'user_workspaces')
-                                <a href="{{ route('workspaces.index') }}"
-                                    class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('workspaces.*') ? 'text-blue-600 bg-blue-50' : '' }}">
-                                    Workspaces
-                                </a>
-                            @else
-                                <a href="{{ route('dashboard') }}"
-                                    class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('dashboard') ? 'text-blue-600 bg-blue-50' : '' }}">
-                                    {{ __('messages.dashboard') }}
-                                </a>
-                                @if (auth()->user()->role === 'seller' || auth()->user()->hasRole('admin'))
-                                    <a href="{{ route('notes.index') }}"
-                                        class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('notes.*') ? 'text-blue-600 bg-blue-50' : '' }}">
-                                        {{ __('messages.notes') }}
-                                    </a>
-                                @endif
-                                <a href="{{ route('wallet.index') }}"
-                                    class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('wallet.*') ? 'text-blue-600 bg-blue-50' : '' }}">
-                                    {{ __('messages.wallet') }}
-                                </a>
-                                <a href="{{ route('marketplace.index') }}"
-                                    class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('marketplace.*') ? 'text-blue-600 bg-blue-50' : '' }}">
-                                    {{ __('messages.marketplace') }}
-                                </a>
-                                <a href="{{ route('forum.index') }}"
-                                    class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ (request()->routeIs('forum.*') && !request()->routeIs('forum.analytics')) ? 'text-blue-600 bg-blue-50' : '' }}">
-                                    Forum
-                                </a>
-                                <a href="{{ route('forum.analytics') }}"
-                                    class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('forum.analytics') ? 'text-blue-600 bg-blue-50' : '' }}">
-                                    Forum Analytics
-                                </a>
-                                <a href="{{ route('forum.preferences.edit') }}"
-                                    class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('forum.preferences.*') ? 'text-blue-600 bg-blue-50' : '' }}">
-                                    Forum Preferences
-                                </a>
-                                <a href="{{ route('note-conversations.index') }}"
-                                    class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('note-conversations.*') ? 'text-blue-600 bg-blue-50' : '' }}">
-                                    Produk Chats
-                                </a>
+                        @foreach ($primaryLinks as $link)
+                            <a href="{{ $link['href'] }}"
+                                class="{{ $desktopLinkClasses }} {{ $link['active'] ? $desktopActiveClasses : '' }}">
+                                {{ $link['label'] }}
+                            </a>
+                        @endforeach
 
-                                <!-- More Menu Dropdown -->
-                                <div class="relative" x-data="{ open: false }">
-                                    <button @click="open = !open"
-                                        class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 flex items-center gap-1 {{ request()->routeIs(['featured-notes.*', 'subscription.*', 'referral.*', 'mynoteds.*', 'collections.*', 'buyer-analytics.*', 'reading-history.*', 'batch-download.*', 'simulators.*']) ? 'text-blue-600 bg-blue-50' : '' }}">
-                                        More
-                                        <svg class="w-4 h-4" :class="{ 'rotate-180': open }" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
-                                    <div x-show="open" @click.away="open = false" x-transition
-                                        class="absolute left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                                        @if (auth()->user()->role === 'seller' || auth()->user()->hasRole('admin'))
-                                            <a href="{{ route('featured-notes.index') }}"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('featured-notes.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                                Featured
-                                            </a>
-                                        @endif
-                                        @if (!auth()->user()->hasRole('admin'))
-                                            <a href="{{ route('subscription.index') }}"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('subscription.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                                {{ __('messages.subscription') }}
-                                            </a>
-                                        @endif
-                                        <a href="{{ route('referral.index') }}"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('referral.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                            {{ __('messages.referral') }}
+                        @if ($user && $user->role !== 'user_workspaces' && (!empty($moreLinks) || !empty($adminMoreLinks)))
+                            <!-- More Menu Dropdown -->
+                            <div class="relative" x-data="{ open: false }">
+                                <button @click="open = !open"
+                                    class="{{ $desktopLinkClasses }} flex items-center gap-1 {{ $moreIsActive ? $desktopActiveClasses : '' }}">
+                                    More
+                                    <svg class="w-4 h-4" :class="{ 'rotate-180': open }" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                                <div x-show="open" x-cloak @click.away="open = false" x-transition
+                                    class="absolute left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+                                    @foreach ($moreLinks as $link)
+                                        <a href="{{ $link['href'] }}"
+                                            class="{{ $dropdownLinkClasses }} {{ $link['active'] ? $dropdownActiveClasses : '' }}">
+                                            {{ $link['label'] }}
                                         </a>
-                                        @if (auth()->user()->hasPremium())
-                                            <a href="{{ route('mynoteds.index') }}"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('mynoteds.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                                {{ __('messages.mynoteds') }}
-                                            </a>
-                                            @if (auth()->user()->role === 'buyer' || auth()->user()->hasRole('admin'))
-                                                <a href="{{ route('collections.index') }}"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('collections.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                                    Collections
-                                                </a>
-                                                <a href="{{ route('buyer-analytics.index') }}"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('buyer-analytics.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                                    Analytics
-                                                </a>
-                                                <a href="{{ route('reading-history.index') }}"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('reading-history.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                                    Reading History
-                                                </a>
-                                                <a href="{{ route('batch-download.index') }}"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('batch-download.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                                    Batch Download
-                                                </a>
-                                            @endif
-                                        @endif
-                                        <a href="{{ route('simulators.index') }}"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('simulators.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                            {{ __('messages.simulators') }}
-                                        </a>
-                                        @if (auth()->user()->hasRole('admin'))
+                                    @endforeach
+
+                                    @if (!empty($adminMoreLinks))
+                                        @if (!empty($moreLinks))
                                             <div class="border-t border-gray-200 my-1"></div>
-                                            <a href="{{ route('admin.dashboard') }}"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('admin.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                                {{ __('messages.admin') }}
-                                            </a>
-                                            <a href="{{ route('admin.forum.moderation.index') }}"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('admin.forum.moderation.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                                Forum Moderation
-                                            </a>
-                                            <a href="{{ route('admin.notes.moderation.index') }}"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('admin.notes.moderation.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                                Note Moderation
-                                            </a>
-                                            <a href="{{ route('admin.accounts.moderation.index') }}"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 {{ request()->routeIs('admin.accounts.moderation.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                                                Account Moderation
-                                            </a>
                                         @endif
-                                    </div>
+                                        <div
+                                            class="px-4 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                            Admin
+                                        </div>
+                                        @foreach ($adminMoreLinks as $link)
+                                            <a href="{{ $link['href'] }}"
+                                                class="{{ $dropdownLinkClasses }} {{ $link['active'] ? $dropdownActiveClasses : '' }}">
+                                                {{ $link['label'] }}
+                                            </a>
+                                        @endforeach
+                                    @endif
                                 </div>
-                            @endif
-                        @endauth
+                            </div>
+                        @endif
                     </nav>
 
                     <!-- Mobile Menu Button -->
@@ -165,7 +270,7 @@
                             </svg>
                             <span class="hidden sm:inline">{{ strtoupper(app()->getLocale()) }}</span>
                         </button>
-                        <div x-show="open" @click.away="open = false" x-transition
+                        <div x-show="open" x-cloak @click.away="open = false" x-transition
                             class="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
                             <a href="{{ route('locale.switch', 'en') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ app()->getLocale() === 'en' ? 'bg-blue-50 text-blue-600' : '' }}">
@@ -202,7 +307,7 @@
                                 </button>
 
                                 <!-- Notifications Dropdown -->
-                                <div x-show="open" @click.away="open = false" x-transition
+                                <div x-show="open" x-cloak @click.away="open = false" x-transition
                                     class="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 max-h-96 overflow-y-auto">
                                     <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
                                         <h3 class="text-sm font-semibold text-gray-900">{{ __('messages.notifications') }}
@@ -332,7 +437,7 @@
                                 </button>
 
                                 <!-- Dropdown Menu -->
-                                <div x-show="open" @click.away="open = false" x-transition
+                                <div x-show="open" x-cloak @click.away="open = false" x-transition
                                     class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                                     <a href="{{ route('profile.edit') }}"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
@@ -428,133 +533,39 @@
         x-transition:leave-end="opacity-0 -translate-y-1" @click.away="mobileMenuOpen = false"
         class="lg:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50 max-h-[calc(100vh-4rem)] overflow-y-auto">
         <div class="px-4 py-4 space-y-1">
-            <a href="/"
-                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('welcome') ? 'text-blue-600 bg-blue-50' : '' }}"
-                @click="mobileMenuOpen = false">
-                {{ __('messages.home') }}
-            </a>
-            @auth
-                @if (auth()->user()->role === 'user_workspaces')
-                    <a href="{{ route('workspaces.index') }}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('workspaces.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                        @click="mobileMenuOpen = false">
-                        Workspaces
-                    </a>
-                @else
-                    <a href="{{ route('dashboard') }}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('dashboard') ? 'text-blue-600 bg-blue-50' : '' }}"
-                        @click="mobileMenuOpen = false">
-                        {{ __('messages.dashboard') }}
-                    </a>
-                    @if (auth()->user()->role === 'seller' || auth()->user()->hasRole('admin'))
-                        <a href="{{ route('notes.index') }}"
-                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('notes.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                            @click="mobileMenuOpen = false">
-                            {{ __('messages.notes') }}
-                        </a>
-                    @endif
-                    <a href="{{ route('wallet.index') }}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('wallet.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                        @click="mobileMenuOpen = false">
-                        {{ __('messages.wallet') }}
-                    </a>
-                    <a href="{{ route('marketplace.index') }}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('marketplace.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                        @click="mobileMenuOpen = false">
-                        {{ __('messages.marketplace') }}
-                    </a>
-                    <a href="{{ route('forum.index') }}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ (request()->routeIs('forum.*') && !request()->routeIs('forum.analytics')) ? 'text-blue-600 bg-blue-50' : '' }}"
-                        @click="mobileMenuOpen = false">
-                        Forum
-                    </a>
-                    <a href="{{ route('forum.analytics') }}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('forum.analytics') ? 'text-blue-600 bg-blue-50' : '' }}"
-                        @click="mobileMenuOpen = false">
-                        Forum Analytics
-                    </a>
-                    <a href="{{ route('forum.preferences.edit') }}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('forum.preferences.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                        @click="mobileMenuOpen = false">
-                        Forum Preferences
-                    </a>
-                    <a href="{{ route('note-conversations.index') }}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('note-conversations.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                        @click="mobileMenuOpen = false">
-                        Produk Chats
-                    </a>
+            @foreach ($primaryLinks as $link)
+                <a href="{{ $link['href'] }}"
+                    class="{{ $mobileLinkClasses }} {{ $link['active'] ? $mobileActiveClasses : '' }}"
+                    @click="mobileMenuOpen = false">
+                    {{ $link['label'] }}
+                </a>
+            @endforeach
 
+            @if ($user && $user->role !== 'user_workspaces' && (!empty($moreLinks) || !empty($adminMoreLinks)))
+                <div class="border-t border-gray-200 my-2"></div>
+                <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">More</div>
+
+                @foreach ($moreLinks as $link)
+                    <a href="{{ $link['href'] }}"
+                        class="{{ $mobileLinkClasses }} {{ $link['active'] ? $mobileActiveClasses : '' }}"
+                        @click="mobileMenuOpen = false">
+                        {{ $link['label'] }}
+                    </a>
+                @endforeach
+
+                @if (!empty($adminMoreLinks))
                     <div class="border-t border-gray-200 my-2"></div>
-                    <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">More</div>
+                    <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</div>
 
-                    @if (auth()->user()->role === 'seller' || auth()->user()->hasRole('admin'))
-                        <a href="{{ route('featured-notes.index') }}"
-                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('featured-notes.*') ? 'text-blue-600 bg-blue-50' : '' }}"
+                    @foreach ($adminMoreLinks as $link)
+                        <a href="{{ $link['href'] }}"
+                            class="{{ $mobileLinkClasses }} {{ $link['active'] ? $mobileActiveClasses : '' }}"
                             @click="mobileMenuOpen = false">
-                            Featured
+                            {{ $link['label'] }}
                         </a>
-                    @endif
-                    @if (!auth()->user()->hasRole('admin'))
-                        <a href="{{ route('subscription.index') }}"
-                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('subscription.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                            @click="mobileMenuOpen = false">
-                            {{ __('messages.subscription') }}
-                        </a>
-                    @endif
-                    <a href="{{ route('referral.index') }}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('referral.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                        @click="mobileMenuOpen = false">
-                        {{ __('messages.referral') }}
-                    </a>
-                    @if (auth()->user()->hasPremium())
-                        <a href="{{ route('mynoteds.index') }}"
-                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('mynoteds.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                            @click="mobileMenuOpen = false">
-                            {{ __('messages.mynoteds') }}
-                        </a>
-                        @if (auth()->user()->role === 'buyer' || auth()->user()->hasRole('admin'))
-                            <a href="{{ route('collections.index') }}"
-                                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('collections.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                                @click="mobileMenuOpen = false">
-                                Collections
-                            </a>
-                            <a href="{{ route('buyer-analytics.index') }}"
-                                class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('buyer-analytics.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                                @click="mobileMenuOpen = false">
-                                Analytics
-                            </a>
-                        @endif
-                    @endif
-                    <a href="{{ route('simulators.index') }}"
-                        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('simulators.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                        @click="mobileMenuOpen = false">
-                        {{ __('messages.simulators') }}
-                    </a>
-                    @if (auth()->user()->hasRole('admin'))
-                        <div class="border-t border-gray-200 my-2"></div>
-                        <a href="{{ route('admin.dashboard') }}"
-                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('admin.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                            @click="mobileMenuOpen = false">
-                            {{ __('messages.admin') }}
-                        </a>
-                        <a href="{{ route('admin.forum.moderation.index') }}"
-                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('admin.forum.moderation.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                            @click="mobileMenuOpen = false">
-                            Forum Moderation
-                        </a>
-                        <a href="{{ route('admin.notes.moderation.index') }}"
-                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('admin.notes.moderation.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                            @click="mobileMenuOpen = false">
-                            Note Moderation
-                        </a>
-                        <a href="{{ route('admin.accounts.moderation.index') }}"
-                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200 {{ request()->routeIs('admin.accounts.moderation.*') ? 'text-blue-600 bg-blue-50' : '' }}"
-                            @click="mobileMenuOpen = false">
-                            Account Moderation
-                        </a>
-                    @endif
+                    @endforeach
                 @endif
-            @endauth
+            @endif
         </div>
     </div>
 </div>

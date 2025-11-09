@@ -59,7 +59,7 @@
                     <div class="flex items-center gap-3 text-sm text-gray-700">
                         <div>
                             <span class="font-medium text-gray-900">Owner:</span>
-                            {{ $note->user->name }} (@{{ $note->user->username }})
+                            {{ $note->user->name }} ({{ '@' . $note->user->username }})
                         </div>
                         <div>
                             <span class="font-medium text-gray-900">Visibility:</span>
@@ -108,7 +108,7 @@
                                 </div>
                                 <div class="text-sm text-gray-600 mb-2">
                                     <span class="font-semibold text-gray-900">Reported by:</span>
-                                    {{ $report->user->name }} (@{{ $report->user->username }})
+                                    {{ $report->user->name }} ({{ '@' . $report->user->username }})
                                 </div>
                                 @if($report->description)
                                     <div class="mt-2 text-sm text-gray-800">

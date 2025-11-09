@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class PostBookmarkController extends Controller
@@ -52,7 +53,7 @@ class PostBookmarkController extends Controller
             $message = 'Post removed from bookmarks.';
             $bookmarked = false;
         } else {
-            $user->bookmarkedPosts()->attach($post->id);
+            $user->bookmarkedPosts()->attach($post->id, ['id' => (string) Str::uuid()]);
             $message = 'Post bookmarked successfully.';
             $bookmarked = true;
         }

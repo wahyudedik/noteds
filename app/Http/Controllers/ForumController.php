@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class ForumController extends Controller
@@ -342,7 +343,7 @@ class ForumController extends Controller
             ]);
         } else {
             // Like
-            $post->likes()->attach($user->id);
+            $post->likes()->attach($user->id, ['id' => (string) Str::uuid()]);
             $post->increment('likes_count');
             
             // Notify post owner (if not the user themselves)
@@ -431,7 +432,14 @@ class ForumController extends Controller
      */
     public function updateComment(Request $request, PostComment $comment): JsonResponse
     {
-        $this->authorize('update', $comment);
+        $user = $request->user();
+
+        if ($user->id !== $comment->user_id && !$user->hasRole('admin')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not allowed to update this comment.',
+            ], 403);
+        }
 
         $validated = $request->validate([
             'content' => 'required|string|max:2000',
@@ -453,7 +461,14 @@ class ForumController extends Controller
      */
     public function destroyComment(PostComment $comment): JsonResponse
     {
-        $this->authorize('delete', $comment);
+        $user = auth()->user();
+
+        if ($user->id !== $comment->user_id && !$user->hasRole('admin')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not allowed to delete this comment.',
+            ], 403);
+        }
 
         $post = $comment->post;
         
@@ -497,7 +512,7 @@ class ForumController extends Controller
             ]);
         } else {
             // Like
-            $comment->likes()->attach($user->id);
+            $comment->likes()->attach($user->id, ['id' => (string) Str::uuid()]);
             $comment->increment('likes_count');
             
             // Notify comment owner (if not the user themselves)

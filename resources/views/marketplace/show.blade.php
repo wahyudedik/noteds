@@ -1059,14 +1059,14 @@
 
     @push('scripts')
         <script>
-            const copyTranslations = @json([
+            const copyTranslations = @js([
                 'success_title' => __('messages.copy_link_success_title'),
                 'success_message' => __('messages.copy_link_success_message'),
                 'error_message' => __('messages.copy_link_error_message'),
                 'error_title' => __('messages.error'),
             ]);
 
-            const reportTranslations = @json([
+            const reportTranslations = @js([
                 'title' => __('messages.report_modal_title'),
                 'reason_label' => __('messages.report_reason_label'),
                 'reason_placeholder' => __('messages.report_reason_placeholder'),
@@ -1461,7 +1461,7 @@
                 .catch(error => console.error('Error saving progress:', error));
                 }
 
-                const bookmarkTranslations = @json([
+                const bookmarkTranslations = @js([
                     'empty' => __('messages.bookmarks_empty', ['action' => __('messages.add_bookmark')]),
                     'default_title' => __('messages.bookmark_default_title'),
                     'go_to' => __('messages.bookmark_go_to'),

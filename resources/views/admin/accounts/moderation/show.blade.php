@@ -21,7 +21,7 @@
                     <div>
                         <h2 class="text-2xl font-semibold text-gray-900">{{ $user->name }}</h2>
                         <div class="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                            <span>Username: @{{ $user->username }}</span>
+                            <span>Username: {{ '@' . $user->username }}</span>
                             <span>Email: {{ $user->email }}</span>
                             <span>Joined {{ $user->created_at->format('d M Y') }}</span>
                         </div>
@@ -65,7 +65,7 @@
                                 </div>
                                 <div class="text-sm text-gray-600 mb-2">
                                     <span class="font-semibold text-gray-900">Reported by:</span>
-                                    {{ $report->reporter->name }} (@{{ $report->reporter->username }})
+                                    {{ $report->reporter->name }} ({{ '@' . $report->reporter->username }})
                                 </div>
                                 @if($report->description)
                                     <div class="mt-2 text-sm text-gray-800">

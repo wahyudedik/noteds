@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\PostView;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class PostAnalyticsController extends Controller
@@ -52,14 +53,21 @@ class PostAnalyticsController extends Controller
         $topPosts = collect();
         if ($postIds->isNotEmpty()) {
             $topPosts = Post::whereIn('id', $postIds)
-                ->select(['id', 'title', 'views_count', 'likes_count', 'comments_count', 'shares_count', 'created_at'])
+                ->select(['id', 'content', 'views_count', 'likes_count', 'comments_count', 'shares_count', 'created_at'])
                 ->orderByDesc('views_count')
                 ->limit(5)
-                ->get();
+                ->get()
+                ->map(function (Post $post) {
+                    $plain = strip_tags($post->content ?? '');
+                    $title = Str::of($plain)->squish()->limit(60, '…');
+                    $post->summary = $title->isEmpty() ? 'Untitled Post' : (string) $title;
+
+                    return $post;
+                });
         }
 
         $engagementChart = [
-            'labels' => $topPosts->pluck('title')->map(fn ($title) => (string) str($title ?? 'Untitled Post')->limit(30)),
+            'labels' => $topPosts->pluck('summary'),
             'views' => $topPosts->pluck('views_count'),
             'likes' => $topPosts->pluck('likes_count'),
             'comments' => $topPosts->pluck('comments_count'),

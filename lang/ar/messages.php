@@ -780,6 +780,7 @@ return [
     'support_tickets' => 'تذاكر الدعم',
     'settings' => 'الإعدادات',
     'documentations' => 'التوثيق',
+    'cms_pages' => 'صفحات CMS',
     'landing_page' => 'الصفحة الرئيسية',
     'social_media' => 'وسائل التواصل الاجتماعي',
     'wallet_analytics' => 'تحليلات المحفظة',
