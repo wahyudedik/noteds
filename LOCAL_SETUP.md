@@ -475,6 +475,8 @@ npm install
 
 ## 🆕 Recent Features Added
 
+- SweetAlert2 toasts & confirmation modals have been propagated to profile, admin user management, and support ticket flows. Remember to rerun `npm run dev` (or `npm run build`) after pulling to ensure the updated bundle is served.
+
 ### Note History & Versioning
 - Seller bisa lihat buyer history (semua buyer yang pernah membeli note)
 - Seller bisa lihat update history (timeline semua perubahan note)

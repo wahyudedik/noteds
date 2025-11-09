@@ -254,6 +254,7 @@ Menyiapkan aplikasi untuk rilis publik.
 - [x] Avatar upload (file atau URL) - ✅ User bisa upload foto atau gunakan URL
 - [x] Avatar storage - ✅ File disimpan di `storage/app/public/avatars/{user_id}/`
 - [x] Share functionality untuk profile seller - ✅ Share buttons (Facebook, Twitter, WhatsApp, LinkedIn, Copy Link)
+- [x] Follow / Unfollow system di public profile + dropdown akses cepat ke profil publik
 - [x] Share functionality untuk marketplace - ✅ Share buttons di marketplace index dan detail note
 - [x] Open Graph meta tags - ✅ Untuk better social media preview
 - [x] Twitter Card meta tags - ✅ Untuk better Twitter preview
