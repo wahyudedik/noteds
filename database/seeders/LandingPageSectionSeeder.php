@@ -61,7 +61,7 @@ class LandingPageSectionSeeder extends Seeder
                 ],
                 [
                     'icon' => '💰',
-                    'title' => 'Jual Catatan Anda',
+                    'title' => 'Jual Catatan Anda', 
                     'description' => 'Monetize pengetahuan Anda dengan menjual catatan ke pengguna lain di marketplace.',
                 ],
                 [

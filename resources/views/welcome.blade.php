@@ -84,7 +84,9 @@
                         <div
                             class="relative rounded-3xl border border-slate-200 bg-white/80 shadow-xl shadow-blue-100/50 backdrop-blur-xl p-6 sm:p-8">
                             @if (isset($featuredHero) && $featuredHero)
-                                @php($note = $featuredHero->note)
+                                @php
+                                    $note = $featuredHero->note;
+                                @endphp
                                 <div class="space-y-5">
                                     <div class="flex items-center justify-between">
                                         <span
@@ -204,7 +206,9 @@
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         @foreach ($featuredCarousel as $featured)
-                            @php($note = $featured->note)
+                            @php
+                                $note = $featured->note;
+                            @endphp
                             <a href="{{ route('marketplace.show', $note) }}"
                                 class="group block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg featured-click-tracking"
                                 data-featured-id="{{ $featured->id }}">
@@ -242,7 +246,9 @@
         @endif
 
         <!-- CMS Pages Highlight -->
-        @php($utilityBgClass = '')
+        @php
+            $utilityBgClass = '';
+        @endphp
         @if (isset($cmsHighlightSection, $highlightedCmsPages) && $cmsHighlightSection && $highlightedCmsPages->count() > 0)
             @php
                 $bgClass = $cmsHighlightSection->background_color ?? '';
