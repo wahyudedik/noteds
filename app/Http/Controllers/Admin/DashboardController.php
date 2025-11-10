@@ -10,7 +10,9 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\Withdraw;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -291,6 +293,95 @@ class DashboardController extends Controller
             ->groupBy('type')
             ->get();
 
+        // Sale Mode Analytics
+        $saleModeStats = [
+            // Notes count by sale mode
+            'scarcity_notes' => Note::where('sale_mode', 'scarcity')->count(),
+            'standard_notes' => Note::where('sale_mode', 'standard')->count(),
+            'total_with_sale_mode' => Note::whereNotNull('sale_mode')->count(),
+            
+            // Transactions by sale mode (via notes)
+            'scarcity_transactions' => Transaction::where('status', 'success')
+                ->whereHas('note', function($q) {
+                    $q->where('sale_mode', 'scarcity');
+                })
+                ->count(),
+            'standard_transactions' => Transaction::where('status', 'success')
+                ->whereHas('note', function($q) {
+                    $q->where('sale_mode', 'standard');
+                })
+                ->count(),
+            
+            // Revenue by sale mode
+            'scarcity_revenue' => Transaction::where('status', 'success')
+                ->whereHas('note', function($q) {
+                    $q->where('sale_mode', 'scarcity');
+                })
+                ->sum('platform_fee'),
+            'standard_revenue' => Transaction::where('status', 'success')
+                ->whereHas('note', function($q) {
+                    $q->where('sale_mode', 'standard');
+                })
+                ->sum('platform_fee'),
+            
+            // Total amount by sale mode
+            'scarcity_total_amount' => Transaction::where('status', 'success')
+                ->whereHas('note', function($q) {
+                    $q->where('sale_mode', 'scarcity');
+                })
+                ->sum('amount'),
+            'standard_total_amount' => Transaction::where('status', 'success')
+                ->whereHas('note', function($q) {
+                    $q->where('sale_mode', 'standard');
+                })
+                ->sum('amount'),
+            
+            // Creator commission (only scarcity mode)
+            'scarcity_creator_commission' => Transaction::where('status', 'success')
+                ->whereHas('note', function($q) {
+                    $q->where('sale_mode', 'scarcity');
+                })
+                ->sum('creator_commission'),
+            
+            // Resale statistics (scarcity mode only)
+            'resale_count' => Transaction::where('status', 'success')
+                ->whereNotNull('resale_price')
+                ->whereHas('note', function($q) {
+                    $q->where('sale_mode', 'scarcity');
+                })
+                ->count(),
+            'resale_revenue' => Transaction::where('status', 'success')
+                ->whereNotNull('resale_price')
+                ->whereHas('note', function($q) {
+                    $q->where('sale_mode', 'scarcity');
+                })
+                ->sum('platform_fee'),
+            
+            // Repurchase statistics (simplified - count transactions with grace_period_ends_at where buyer has previous transaction)
+            'repurchase_count' => DB::table('transactions as t1')
+                ->join('notes', 't1.note_id', '=', 'notes.id')
+                ->where('t1.status', 'success')
+                ->where('notes.sale_mode', 'scarcity')
+                ->whereNotNull('t1.grace_period_ends_at')
+                ->whereExists(function($query) {
+                    $query->select(DB::raw(1))
+                        ->from('transactions as t2')
+                        ->whereColumn('t2.note_id', 't1.note_id')
+                        ->whereColumn('t2.buyer_id', 't1.buyer_id')
+                        ->where('t2.status', 'success')
+                        ->where('t2.id', '<', DB::raw('t1.id'));
+                })
+                ->count(),
+        ];
+
+        // Calculate averages
+        $saleModeStats['scarcity_avg_price'] = $saleModeStats['scarcity_transactions'] > 0 
+            ? $saleModeStats['scarcity_total_amount'] / $saleModeStats['scarcity_transactions'] 
+            : 0;
+        $saleModeStats['standard_avg_price'] = $saleModeStats['standard_transactions'] > 0 
+            ? $saleModeStats['standard_total_amount'] / $saleModeStats['standard_transactions'] 
+            : 0;
+
         return view('admin.dashboard', compact(
             'stats',
             'platformBalance',
@@ -311,7 +402,137 @@ class DashboardController extends Controller
             'topupHistory',
             'topupStats',
             'midtransStats',
-            'topupByType'
+            'topupByType',
+            'saleModeStats'
+        ));
+    }
+
+    public function repurchaseReport(Request $request): View
+    {
+        // Get date range from request or default to last 30 days
+        $startDate = $request->input('start_date', now()->subDays(30)->format('Y-m-d'));
+        $endDate = $request->input('end_date', now()->format('Y-m-d'));
+
+        // Get all repurchase transactions (transactions where buyer has previous transaction for same note)
+        $repurchaseTransactions = Transaction::with(['buyer', 'seller', 'note', 'originalCreator'])
+            ->where('status', 'success')
+            ->whereHas('note', function($q) {
+                $q->where('sale_mode', 'scarcity');
+            })
+            ->whereNotNull('grace_period_ends_at')
+            ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+            ->whereExists(function($query) {
+                $query->select(DB::raw(1))
+                    ->from('transactions as t2')
+                    ->whereColumn('t2.note_id', 'transactions.note_id')
+                    ->whereColumn('t2.buyer_id', 'transactions.buyer_id')
+                    ->where('t2.status', 'success')
+                    ->where('t2.id', '<', DB::raw('transactions.id'));
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Calculate statistics
+        $totalRepurchases = $repurchaseTransactions->count();
+        $totalRepurchaseRevenue = $repurchaseTransactions->sum('platform_fee');
+        $totalRepurchaseAmount = $repurchaseTransactions->sum('amount');
+        $avgRepurchasePrice = $totalRepurchases > 0 ? $totalRepurchaseAmount / $totalRepurchases : 0;
+
+        // Calculate average time to repurchase
+        $repurchaseTimes = [];
+        foreach ($repurchaseTransactions as $repurchase) {
+            $firstPurchase = Transaction::where('note_id', $repurchase->note_id)
+                ->where('buyer_id', $repurchase->buyer_id)
+                ->where('status', 'success')
+                ->where('id', '<', $repurchase->id)
+                ->orderBy('created_at', 'asc')
+                ->first();
+            
+            if ($firstPurchase) {
+                $daysDiff = $repurchase->created_at->diffInDays($firstPurchase->created_at);
+                $repurchaseTimes[] = $daysDiff;
+            }
+        }
+        $avgTimeToRepurchase = count($repurchaseTimes) > 0 ? array_sum($repurchaseTimes) / count($repurchaseTimes) : 0;
+
+        // Get total scarcity transactions for repurchase rate calculation
+        $totalScarcityTransactions = Transaction::where('status', 'success')
+            ->whereHas('note', function($q) {
+                $q->where('sale_mode', 'scarcity');
+            })
+            ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+            ->count();
+        
+        $repurchaseRate = $totalScarcityTransactions > 0 
+            ? ($totalRepurchases / $totalScarcityTransactions * 100) 
+            : 0;
+
+        // Group by note
+        $repurchasesByNote = $repurchaseTransactions->groupBy('note_id')->map(function($transactions) {
+            return [
+                'note' => $transactions->first()->note,
+                'count' => $transactions->count(),
+                'revenue' => $transactions->sum('platform_fee'),
+                'total_amount' => $transactions->sum('amount'),
+            ];
+        })->sortByDesc('count')->take(10);
+
+        // Group by buyer
+        $repurchasesByBuyer = $repurchaseTransactions->groupBy('buyer_id')->map(function($transactions) {
+            return [
+                'buyer' => $transactions->first()->buyer,
+                'count' => $transactions->count(),
+                'total_spent' => $transactions->sum('amount'),
+            ];
+        })->sortByDesc('count')->take(10);
+
+        // Repurchases within grace period vs after grace period
+        $withinGracePeriod = $repurchaseTransactions->filter(function($transaction) {
+            if (!$transaction->grace_period_ends_at) return false;
+            $firstPurchase = Transaction::where('note_id', $transaction->note_id)
+                ->where('buyer_id', $transaction->buyer_id)
+                ->where('status', 'success')
+                ->where('id', '<', $transaction->id)
+                ->orderBy('created_at', 'asc')
+                ->first();
+            
+            if (!$firstPurchase || !$firstPurchase->grace_period_ends_at) return false;
+            return $transaction->created_at->lte($firstPurchase->grace_period_ends_at);
+        });
+
+        $afterGracePeriod = $repurchaseTransactions->filter(function($transaction) {
+            if (!$transaction->grace_period_ends_at) return false;
+            $firstPurchase = Transaction::where('note_id', $transaction->note_id)
+                ->where('buyer_id', $transaction->buyer_id)
+                ->where('status', 'success')
+                ->where('id', '<', $transaction->id)
+                ->orderBy('created_at', 'asc')
+                ->first();
+            
+            if (!$firstPurchase || !$firstPurchase->grace_period_ends_at) return true;
+            return $transaction->created_at->gt($firstPurchase->grace_period_ends_at);
+        });
+
+        $stats = [
+            'total_repurchases' => $totalRepurchases,
+            'total_revenue' => $totalRepurchaseRevenue,
+            'total_amount' => $totalRepurchaseAmount,
+            'avg_price' => $avgRepurchasePrice,
+            'avg_time_days' => round($avgTimeToRepurchase, 1),
+            'repurchase_rate' => round($repurchaseRate, 2),
+            'within_grace_period' => $withinGracePeriod->count(),
+            'after_grace_period' => $afterGracePeriod->count(),
+            'within_grace_period_revenue' => $withinGracePeriod->sum('platform_fee'),
+            'after_grace_period_revenue' => $afterGracePeriod->sum('platform_fee'),
+        ];
+
+        return view('admin.repurchase-report', compact(
+            'repurchaseTransactions',
+            'stats',
+            'repurchasesByNote',
+            'repurchasesByBuyer',
+            'startDate',
+            'endDate'
         ));
     }
 }

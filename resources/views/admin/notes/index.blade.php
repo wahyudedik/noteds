@@ -12,7 +12,7 @@
 
         <!-- Filter -->
         <div class="bg-white shadow-sm rounded-lg p-4 mb-6">
-            <form method="GET" action="{{ route('admin.notes.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <form method="GET" action="{{ route('admin.notes.index') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <input type="text" name="search" value="{{ request('search') }}" :placeholder="__('messages.search_title_or_content')"
                     class="rounded-md border-gray-300 shadow-sm">
                 <select name="is_public" class="rounded-md border-gray-300 shadow-sm">
@@ -26,11 +26,16 @@
                     <option value="sold" {{ request('status') === 'sold' ? 'selected' : '' }}>{{ __('messages.sold') }}</option>
                     <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>{{ __('messages.inactive') }}</option>
                 </select>
+                <select name="sale_mode" class="rounded-md border-gray-300 shadow-sm">
+                    <option value="">Semua Sale Mode</option>
+                    <option value="scarcity" {{ request('sale_mode') === 'scarcity' ? 'selected' : '' }}>Scarcity Mode</option>
+                    <option value="standard" {{ request('sale_mode') === 'standard' ? 'selected' : '' }}>Standard Mode</option>
+                </select>
                 <div class="flex gap-2">
                     <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                         {{ __('messages.filter') }}
                     </button>
-                    @if(request()->hasAny(['search', 'is_public', 'status']))
+                    @if(request()->hasAny(['search', 'is_public', 'status', 'sale_mode']))
                         <a href="{{ route('admin.notes.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
                             {{ __('messages.clear') }}
                         </a>
@@ -48,6 +53,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.title') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.owner') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.price') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sale Mode</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.visibility') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.created') }}</th>
@@ -68,6 +74,17 @@
                                             {{ currency($note->price) }}
                                         @else
                                             <span class="text-gray-400">{{ __('messages.free') }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($note->sale_mode)
+                                            @if($note->isScarcityMode())
+                                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Scarcity</span>
+                                            @elseif($note->isStandardMode())
+                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Standard</span>
+                                            @endif
+                                        @else
+                                            <span class="text-gray-400 text-xs">-</span>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">

@@ -22,6 +22,9 @@ class NoteController extends Controller
             ->when($request->status, function ($query) use ($request) {
                 return $query->where('status', $request->status);
             })
+            ->when($request->sale_mode, function ($query) use ($request) {
+                return $query->where('sale_mode', $request->sale_mode);
+            })
             ->latest()
             ->paginate(20)
             ->withQueryString();

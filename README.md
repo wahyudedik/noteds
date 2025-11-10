@@ -101,6 +101,14 @@ Platform di mana pengguna bisa:
   - Buyer history untuk seller (list semua buyer yang pernah membeli)
   - Update history dengan versioning (detail perubahan setiap update)
   - Prevent delete jika note sudah dijual
+- ✅ Sale Mode System
+  - **Scarcity Mode**: One-time purchase, buyer bisa resell, original creator dapat komisi, grace period untuk repurchase
+  - **Standard Mode**: Multiple sales, buyer tidak bisa resell, tidak ada komisi, ownership tetap dengan seller
+  - Grace period untuk pembelian ulang (configurable, default: 30 hari)
+  - Relist price multiplier untuk pembelian ulang setelah grace period (default: 1.5x)
+  - Buyer bisa set harga custom saat resell
+  - Admin analytics & repurchase report dashboard
+  - Comprehensive test suite (unit & feature tests)
 - ✅ Resell Flow & One-Time Sale System
   - Original creator commission tracking
   - One-time sale rule (buyer yang sudah menjual tidak bisa akses lagi)
@@ -164,22 +172,41 @@ Platform di mana pengguna bisa:
 - Option 3: **Hybrid** → Mix gratis untuk branding, premium untuk advanced content
 
 **⚠️ Important Note Selling Rules:**
+
+**Scarcity Mode (Default):**
 - ✅ **Setiap user hanya bisa membeli note 1x** (per user, bukan global)
 - ✅ **Note bisa dijual ke banyak user berbeda** (user A jual ke B, B jual ke C, dst)
 - ✅ Setelah pembelian, **ownership note transfer ke buyer** (buyer bisa jual lagi)
 - ✅ **Original creator selalu dapat komisi** di setiap penjualan (jika di-setting)
-- ✅ Jika ingin digunakan banyak orang sekaligus, **gratiskan saja** (bisa dilihat banyak orang)
+- ✅ Buyer bisa **resell dengan harga custom** setelah membeli
+- ✅ Buyer bisa **repurchase** setelah menjual (dalam grace period dengan harga original, setelah grace period dengan harga premium)
+
+**Standard Mode:**
+- ✅ **Multiple sales allowed** - Seller bisa jual ke banyak buyer sekaligus
+- ✅ **Buyer tidak bisa resell** - Ownership tetap dengan seller
+- ✅ **Tidak ada komisi** - Seller mendapat full amount (minus tax)
+- ✅ **Ownership tetap dengan seller** - Buyer hanya mendapatkan akses, bukan ownership
+
+**General:**
+- ✅ Jika ingin digunakan banyak orang sekaligus, **gunakan Standard Mode atau gratiskan saja** (bisa dilihat banyak orang)
 
 **Commission System:**
+
+**Scarcity Mode:**
 - **Platform Fee**: Deducted dari **setiap transaksi** (default: 20%, configurable di admin settings)
-  - Platform fee tetap ada meskipun note terjual 20x ke user berbeda
 - **Creator Commission**: **Selalu untuk original creator** (pembuat pertama) di **setiap penjualan**
   - Default: 0% (bisa di-setting di admin)
   - Original creator dapat komisi di **setiap transaksi**, bukan hanya pertama kali
   - **Penjual kedua dan seterusnya tidak dapat komisi** (hanya original creator yang dapat komisi)
-- **Free notes**: 0% commission (encourage sharing)
 
-**Example Flow (Platform Fee: 20%, Creator Commission: 10%):**
+**Standard Mode:**
+- **Platform Fee**: 0% (tidak ada platform fee)
+- **Creator Commission**: 0% (tidak ada creator commission)
+- **Seller Amount**: Full amount (minus tax only)
+
+**Free notes**: 0% commission (encourage sharing)
+
+**Example Flow - Scarcity Mode (Platform Fee: 20%, Creator Commission: 10%):**
 - **User A (creator) jual ke User B (Rp 100.000):**
   - A dapat: Rp 90.000 (seller amount Rp 80.000 + creator commission Rp 10.000)
   - Platform dapat: Rp 20.000
@@ -199,6 +226,17 @@ Platform di mana pengguna bisa:
 
 - **Setiap user hanya bisa beli note ini 1x**, tapi **note bisa dijual ke user berbeda terus menerus**
 - **Original creator (User A) selalu dapat komisi di setiap penjualan** (jika di-setting)
+
+**Example Flow - Standard Mode:**
+- **User A (seller) jual ke User B (Rp 100.000):**
+  - A dapat: Rp 100.000 (full amount, minus tax)
+  - Platform dapat: Tax amount only
+  - Ownership tetap dengan A
+  
+- **User A (seller) jual ke User C (Rp 100.000):**
+  - A dapat: Rp 100.000 (full amount, minus tax)
+  - Platform dapat: Tax amount only
+  - Ownership tetap dengan A (B dan C bisa akses, tapi tidak bisa resell)
 
 **Withdraw System:**
 - ⚠️ Withdraw memerlukan **approval admin** minimal **24 jam** setelah request
@@ -314,7 +352,17 @@ See [LOCAL_SETUP.md](LOCAL_SETUP.md) for detailed instructions
 
 ### Testing
 ```bash
+# Run all tests
 ./vendor/bin/pest
+
+# Run Sale Mode tests specifically
+php artisan test --filter=SaleMode
+
+# Run specific test file
+php artisan test tests/Unit/NoteSaleModeTest.php
+php artisan test tests/Feature/SaleModeScarcityPurchaseTest.php
+
+# Code style
 composer pint
 ```
 
@@ -364,6 +412,8 @@ composer pint
 - ✅ Dynamic Tax & Pricing Controls (Tax rules, pricing guidance panel, tax notifications)
 - ✅ Tiered Commission System dengan admin reporting dashboard
 - ✅ Subscription auto-renew flow dengan sufficient/insufficient balance handling & notifications
+- ✅ Sale Mode System (Scarcity & Standard modes dengan repurchase, resale, analytics)
+- ✅ Comprehensive Documentation System (22 documentation entries via DocumentationSeeder)
 
 **In Progress:**
 - ⚠️ FASE 8: Deployment & Launch

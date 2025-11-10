@@ -241,6 +241,20 @@ Menyiapkan aplikasi untuk rilis publik.
 - [x] UI dropdown dengan list purchased notes - ✅ User-friendly interface untuk memilih notes
 - [x] Auto-update setelah add - ✅ Collection langsung ter-update setelah menambah note
 
+### Sale Mode System (Complete)
+- [x] Database migrations - ✅ Added sale_mode, grace_period_days, relist_price_multiplier to notes table
+- [x] Database migrations - ✅ Added resale_price, sold_at, grace_period_ends_at to transactions table
+- [x] Note model helper methods - ✅ isScarcityMode(), isStandardMode(), canRepurchase(), getRepurchasePrice()
+- [x] Scarcity Mode implementation - ✅ One-time purchase, resell capability, creator commission, grace period
+- [x] Standard Mode implementation - ✅ Multiple sales, no resell, no commission, ownership stays with seller
+- [x] Purchase flow logic - ✅ Differentiated logic for scarcity vs standard mode
+- [x] Repurchase flow - ✅ Grace period check, original price vs premium price calculation
+- [x] Resale form & validation - ✅ Dedicated resale form with custom price setting
+- [x] UI/UX improvements - ✅ Sale mode badges, tooltips, countdown timer, better messaging
+- [x] Admin features - ✅ Filter by sale mode, analytics dashboard, repurchase report
+- [x] Testing - ✅ Unit tests (12 tests), Feature tests (scarcity, standard, repurchase, resale, edge cases)
+- [x] Documentation - ✅ Comprehensive documentation in DocumentationSeeder (22 docs)
+
 ### Resell Flow & One-Time Sale System
 - [x] One-time sale rule - ✅ Buyer yang sudah menjual note tidak bisa akses lagi
 - [x] Original creator commission tracking - ✅ Original creator selalu dapat komisi di setiap resell
@@ -319,6 +333,14 @@ Menyiapkan aplikasi untuk rilis publik.
 - [x] Troubleshooting section
 - [x] API documentation
 - [x] Video tutorials
+- [x] DocumentationSeeder - ✅ 22 comprehensive documentation entries covering all features:
+  - Getting Started, Wallet & Withdraw, AI Tools
+  - Sale Mode System, Marketplace, Premium Subscription
+  - Referral Program, Collections, Reviews & Ratings
+  - Support Tickets, Forum, Public Profiles
+  - Featured Notes, Buyer Analytics, Note Conversations
+  - Reading Progress, Workspace, Follow System
+  - Bookmarks, Tax & Pricing, Content Protection, Internationalization
 
 ### Landing Page
 - [x] Custom di admin (CMS dengan 8 section types: hero, features, how_it_works, premium_benefits, trust_indicators, testimonials, promo, custom)
@@ -407,6 +429,14 @@ Menyiapkan aplikasi untuk rilis publik.
 | `buyer_collections`| ✅     | ✅   |
 | `note_downloads`   | ✅     | ✅   |
 | `reading_progress` | ✅     | ✅   |
+
+**Sale Mode System Fields:**
+- `notes.sale_mode` (enum: scarcity, standard)
+- `notes.grace_period_days` (integer, default: 30)
+- `notes.relist_price_multiplier` (decimal, default: 1.5)
+- `transactions.resale_price` (decimal, nullable)
+- `transactions.sold_at` (timestamp, nullable)
+- `transactions.grace_period_ends_at` (timestamp, nullable)
 
 ---
 

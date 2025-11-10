@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreNoteRequest;
 use App\Http\Requests\UpdateNoteRequest;
+use App\Http\Requests\ResaleNoteRequest;
 use App\Models\Note;
 use App\Models\PurchasedNote;
 use App\Models\Tag;
@@ -143,6 +144,9 @@ class NoteController extends Controller
         $validated['is_public'] = $request->has('is_public');
         $validated['status'] = $validated['status'] ?? 'active';
         $validated['is_sold'] = false; // New notes are not sold yet
+        $validated['sale_mode'] = $validated['sale_mode'] ?? 'scarcity';
+        $validated['grace_period_days'] = $validated['grace_period_days'] ?? 30;
+        $validated['relist_price_multiplier'] = $validated['relist_price_multiplier'] ?? 1.5;
 
         $contentHash = $this->generateContentHash($validated['content'] ?? '');
         if ($duplicate = $this->detectUnauthorizedResale($contentHash, $user)) {
@@ -487,6 +491,99 @@ class NoteController extends Controller
         }
 
         return redirect()->route('notes.index')->with('success', 'Note updated successfully.');
+    }
+
+    /**
+     * Show the form for reselling a note (buyer only, scarcity mode only).
+     */
+    public function resaleForm(Note $note): View|RedirectResponse
+    {
+        $user = auth()->user();
+        
+        // Check authorization
+        if (!$user || $user->role !== 'buyer') {
+            return redirect()->route('marketplace.show', $note)
+                ->with('error', 'Hanya buyer yang bisa menjual kembali note.');
+        }
+        
+        if ($note->user_id !== $user->id) {
+            return redirect()->route('marketplace.show', $note)
+                ->with('error', 'Anda bukan pemilik note ini.');
+        }
+        
+        if (!$note->isScarcityMode()) {
+            return redirect()->route('marketplace.show', $note)
+                ->with('error', 'Note dengan Standard Mode tidak bisa di-resell. Hanya Scarcity Mode yang bisa di-resell.');
+        }
+        
+        // Check if user has purchased this note
+        $purchasedNote = PurchasedNote::where('user_id', $user->id)
+            ->where('note_id', $note->id)
+            ->first();
+        
+        if (!$purchasedNote) {
+            return redirect()->route('marketplace.show', $note)
+                ->with('error', 'Anda belum pernah membeli note ini.');
+        }
+        
+        // Get original purchase price
+        $purchaseTransaction = Transaction::where('buyer_id', $user->id)
+            ->where('note_id', $note->id)
+            ->where('status', 'success')
+            ->first();
+        
+        $originalPrice = $purchaseTransaction ? (float) $purchaseTransaction->amount : 0;
+        $currentPrice = $note->price > 0 ? (float) $note->price : $originalPrice;
+        
+        // Get price guidance
+        $defaultMinPrice = Setting::getDefaultMinPrice();
+        $priceGuidance = [
+            'min_default' => $defaultMinPrice,
+            'recommended_multiplier' => Setting::getRecommendedPriceMultiplier(),
+            'recommended_price' => $defaultMinPrice > 0
+                ? round($defaultMinPrice * Setting::getRecommendedPriceMultiplier())
+                : null,
+            'category_rules' => Setting::getCategoryMinPriceList(),
+            'original_price' => $originalPrice,
+        ];
+        
+        return view('notes.resale', compact('note', 'originalPrice', 'currentPrice', 'priceGuidance'));
+    }
+
+    /**
+     * Handle resale submission (update price and make note available for sale).
+     */
+    public function resale(ResaleNoteRequest $request, Note $note): RedirectResponse
+    {
+        $validated = $request->validated();
+        $resalePrice = (float) $validated['resale_price'];
+        
+        // Update note price
+        $note->price = $resalePrice;
+        $note->discount_price = null; // Clear discount when reselling
+        $note->is_public = true; // Make sure note is public for resale
+        $note->status = 'active';
+        $note->save();
+        
+        // Create note history record
+        \App\Models\NoteHistory::create([
+            'note_id' => $note->id,
+            'user_id' => auth()->id(),
+            'action' => 'resale_price_set',
+            'old_data' => ['price' => $note->getOriginal('price')],
+            'new_data' => ['price' => $resalePrice],
+            'changes' => 'Resale price set to ' . currency($resalePrice),
+            'notes' => 'Note listed for resale by ' . auth()->user()->name,
+        ]);
+        
+        // Log activity
+        app(NoteActivityService::class)->logUpdated($note, auth()->user(), 
+            ['price' => $note->getOriginal('price')], 
+            ['price' => $resalePrice]
+        );
+        
+        return redirect()->route('marketplace.show', $note)
+            ->with('success', 'Note berhasil dipasang untuk dijual dengan harga ' . currency($resalePrice) . '. Buyer lain sekarang bisa membeli note ini dari Anda.');
     }
 
     /**

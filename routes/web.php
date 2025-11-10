@@ -75,6 +75,12 @@ Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marke
 Route::get('/marketplace/{note}', [MarketplaceController::class, 'show'])->name('marketplace.show');
 Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purchase'])->middleware(['auth', 'verified', 'username.setup', 'buyer'])->name('marketplace.purchase');
 
+// Resale routes - for buyers who own notes (scarcity mode only)
+Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
+    Route::get('/notes/{note}/resale', [NoteController::class, 'resaleForm'])->name('notes.resale.form');
+    Route::post('/notes/{note}/resale', [NoteController::class, 'resale'])->name('notes.resale');
+});
+
     // Public profile routes
     Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('public.profile.show');
     Route::get('/u/{username}/ai-chat', [PublicProfileController::class, 'aiChat'])->name('public.profile.ai-chat');
@@ -294,6 +300,7 @@ Route::middleware(['auth', 'verified', 'username.setup', 'workspace.user'])->gro
 // Admin routes
 Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.setup'])->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/repurchase-report', [DashboardController::class, 'repurchaseReport'])->name('repurchase-report');
     Route::resource('users', UserController::class);
     Route::post('/users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
     Route::post('/users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');

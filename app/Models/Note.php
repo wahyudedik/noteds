@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use App\Models\NoteConversation;
 use App\Models\NoteReport;
+use App\Models\Transaction;
 
 class Note extends Model
 {
@@ -34,6 +35,9 @@ class Note extends Model
         'is_public',
         'status',
         'is_sold',
+        'sale_mode',
+        'grace_period_days',
+        'relist_price_multiplier',
     ];
 
     protected function casts(): array
@@ -49,6 +53,8 @@ class Note extends Model
             'file_count' => 'integer',
             'preview_percentage' => 'integer',
             'notification_meta' => 'array',
+            'grace_period_days' => 'integer',
+            'relist_price_multiplier' => 'decimal:2',
         ];
     }
 
@@ -370,5 +376,81 @@ class Note extends Model
     public function isPurchasedBy($userId): bool
     {
         return $this->purchasedBy()->where('user_id', $userId)->exists();
+    }
+
+    /**
+     * Check if note is in scarcity mode.
+     */
+    public function isScarcityMode(): bool
+    {
+        return $this->sale_mode === 'scarcity';
+    }
+
+    /**
+     * Check if note is in standard mode.
+     */
+    public function isStandardMode(): bool
+    {
+        return $this->sale_mode === 'standard';
+    }
+
+    /**
+     * Check if user can repurchase this note (within grace period or after).
+     */
+    public function canRepurchase($userId): bool
+    {
+        if (!$this->isScarcityMode()) {
+            return false; // Only scarcity mode supports repurchase
+        }
+
+        $transaction = Transaction::where('buyer_id', $userId)
+            ->where('note_id', $this->id)
+            ->where('status', 'success')
+            ->first();
+
+        if (!$transaction) {
+            return false; // User never purchased
+        }
+
+        // Check if user sold the note
+        if ($this->user_id !== $userId) {
+            // User sold it, check grace period
+            if ($transaction->grace_period_ends_at && $transaction->grace_period_ends_at->isFuture()) {
+                return true; // Within grace period - can repurchase at original price
+            }
+            // After grace period - can repurchase at premium price
+            return true;
+        }
+
+        return false; // User still owns it
+    }
+
+    /**
+     * Get repurchase price for user (original price within grace period, premium after).
+     */
+    public function getRepurchasePrice($userId): ?float
+    {
+        if (!$this->canRepurchase($userId)) {
+            return null;
+        }
+
+        $transaction = Transaction::where('buyer_id', $userId)
+            ->where('note_id', $this->id)
+            ->where('status', 'success')
+            ->first();
+
+        if (!$transaction) {
+            return null;
+        }
+
+        $basePrice = $this->hasDiscount() ? $this->discount_price : $this->price;
+
+        // Check grace period
+        if ($transaction->grace_period_ends_at && $transaction->grace_period_ends_at->isFuture()) {
+            return (float) $basePrice; // Original price within grace period
+        }
+
+        // After grace period - premium price
+        return (float) ($basePrice * $this->relist_price_multiplier);
     }
 }

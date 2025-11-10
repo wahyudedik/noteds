@@ -16,6 +16,9 @@ class Transaction extends Model
         'original_creator_id',
         'note_id',
         'amount',
+        'resale_price',
+        'sold_at',
+        'grace_period_ends_at',
         'commission',
         'currency',
         'platform_fee',
@@ -38,6 +41,7 @@ class Transaction extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'resale_price' => 'decimal:2',
             'commission' => 'decimal:2',
             'currency' => 'string',
             'platform_fee' => 'decimal:2',
@@ -50,6 +54,8 @@ class Transaction extends Model
             'tax_inclusive' => 'boolean',
             'tax_country_code' => 'string',
             'status' => 'string',
+            'sold_at' => 'datetime',
+            'grace_period_ends_at' => 'datetime',
         ];
     }
 
