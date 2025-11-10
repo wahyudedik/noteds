@@ -1,31 +1,34 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('messages.verify_email_message') }}
-    </div>
-
-    @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('messages.verification_link_sent') }}
+    <div class="space-y-6">
+        <div>
+            <h2 class="text-2xl font-semibold text-slate-900">{{ __('messages.verify_email_title') ?? 'Verifikasi email Anda' }}</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+                {{ __('messages.verify_email_message') ?? 'Kami telah mengirimkan tautan verifikasi ke email Anda. Jika belum menerima, kirim ulang menggunakan tombol di bawah.' }}
+            </p>
         </div>
-    @endif
 
-    <div class="mt-4 flex items-center justify-between">
-        <form method="POST" action="{{ route('verification.send') }}">
-            @csrf
+        @if (session('status') == 'verification-link-sent')
+            <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+                {{ __('messages.verification_link_sent') ?? 'Tautan verifikasi baru telah dikirim ke email Anda.' }}
+            </div>
+        @endif
 
-            <div>
-                <x-primary-button>
+        <div class="space-y-4">
+            <form method="POST" action="{{ route('verification.send') }}" class="space-y-4">
+                @csrf
+
+                <x-primary-button class="w-full justify-center">
                     {{ __('messages.resend_verification_email') }}
                 </x-primary-button>
-            </div>
-        </form>
+            </form>
 
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
+            <form method="POST" action="{{ route('logout') }}" class="text-center">
+                @csrf
 
-            <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                {{ __('messages.log_out') }}
-            </button>
-        </form>
+                <button type="submit" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+                    {{ __('messages.log_out') }}
+                </button>
+            </form>
+        </div>
     </div>
 </x-guest-layout>

@@ -1,27 +1,24 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('messages.confirm_password_message') }}
-    </div>
-
-    <form method="POST" action="{{ route('password.confirm') }}">
-        @csrf
-
-        <!-- Password -->
+    <div class="space-y-6">
         <div>
-            <x-input-label for="password" :value="__('messages.password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <h2 class="text-2xl font-semibold text-slate-900">{{ __('messages.confirm_password_title') ?? 'Konfirmasi kata sandi' }}</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+                {{ __('messages.confirm_password_message') ?? 'Silakan masukkan kata sandi Anda untuk melanjutkan. Kami membutuhkan verifikasi tambahan demi keamanan akun Anda.' }}
+            </p>
         </div>
 
-        <div class="flex justify-end mt-4">
-            <x-primary-button>
+        <form method="POST" action="{{ route('password.confirm') }}" class="space-y-6">
+            @csrf
+
+            <div class="space-y-2">
+                <x-input-label for="password" :value="__('messages.password')" />
+                <x-text-input id="password" type="password" name="password" required autocomplete="current-password" placeholder="••••••••" />
+                <x-input-error :messages="$errors->get('password')" />
+            </div>
+
+            <x-primary-button class="w-full justify-center">
                 {{ __('messages.confirm') }}
             </x-primary-button>
-        </div>
-    </form>
+        </form>
+    </div>
 </x-guest-layout>
