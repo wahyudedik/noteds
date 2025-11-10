@@ -22,6 +22,7 @@ return new class extends Migration
                 'trust_indicators',
                 'testimonials',
                 'promo',
+                'cms_pages',
                 'custom'
             ])->default('custom');
             $table->string('title')->nullable(); // Main title/heading

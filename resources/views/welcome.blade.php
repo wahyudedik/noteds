@@ -7,6 +7,16 @@
         $landingHero = __('landing.hero');
         $landingFeatures = collect(__('landing.features'));
         $landingCta = __('landing.cta');
+        $translateOr = fn(string $key, string $fallback) => \Illuminate\Support\Facades\Lang::has($key)
+            ? __($key)
+            : $fallback;
+        $landingStats = collect(
+            $landingHero['stats'] ?? [
+                ['value' => '10K+', 'label' => $translateOr('messages.users', 'Pengguna Aktif')],
+                ['value' => '50K+', 'label' => $translateOr('messages.notes', 'Catatan Dipublikasikan')],
+                ['value' => '4.9/5', 'label' => $translateOr('messages.rating', 'Skor Kepuasan')],
+            ],
+        );
         $featuresIcons = [
             'document-text' =>
                 '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6h4.5m.75 6H6.75A1.75 1.75 0 0 1 5 16.25V7.75A1.75 1.75 0 0 1 6.75 6h5.086a1.75 1.75 0 0 1 1.237.513l3.914 3.914c.328.328.513.775.513 1.237v4.586A1.75 1.75 0 0 1 16.5 18Z"/></svg>',
@@ -17,76 +27,91 @@
         ];
     @endphp
 
-    <div class="min-h-screen bg-white">
+    <div class="overflow-hidden bg-white text-slate-900">
         <!-- Hero -->
-        <section class="relative overflow-hidden border-b border-gray-100">
-            <div class="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-blue-50"></div>
-            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-                <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-                    <div>
+        <section class="relative pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pb-24">
+            <div class="absolute inset-0">
+                <div class="absolute inset-x-0 top-0 h-64 bg-gradient-to-br from-blue-100 via-white to-white"></div>
+                <div class="absolute -top-16 -left-24 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl"></div>
+                <div class="absolute -bottom-24 right-10 h-72 w-72 rounded-full bg-indigo-200/40 blur-[160px]"></div>
+            </div>
+            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid lg:grid-cols-[1.05fr,minmax(0,1fr)] gap-16 items-center">
+                    <div class="max-w-xl">
                         <span
-                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                            <span class="inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
+                            class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">
+                            <span class="inline-flex h-2 w-2 rounded-full bg-blue-400 animate-pulse"></span>
                             {{ $landingHero['badge'] ?? '' }}
                         </span>
                         <h1
-                            class="mt-6 text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-gray-900 leading-tight">
+                            class="mt-6 text-4xl sm:text-5xl lg:text-6xl font-semibold leading-tight tracking-tight text-slate-900">
                             {{ $landingHero['title'] ?? config('app.name', 'Noteds') }}
                         </h1>
-                        <p class="mt-6 text-lg text-gray-600 leading-relaxed max-w-xl">
+                        <p class="mt-6 text-lg leading-8 text-slate-600">
                             {{ $landingHero['subtitle'] ?? '' }}
                         </p>
-                        <div class="mt-8 flex flex-wrap items-center gap-4">
+                        <div class="mt-10 flex flex-wrap items-center gap-4">
                             <a href="{{ route('marketplace.index') }}"
-                                class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-900 text-white font-medium hover:bg-gray-800 transition">
-                                {{ $landingHero['primary_cta'] ?? __('messages.explore_marketplace') }}
+                                class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                                {{ $landingHero['primary_cta'] ?? $translateOr('messages.explore_marketplace', 'Jelajahi Marketplace') }}
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                         d="M13.5 4.5 21 12l-7.5 7.5m6-7.5H3" />
                                 </svg>
                             </a>
                             <a href="{{ auth()->check() ? route('notes.create') : route('register') }}"
-                                class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:border-gray-300 transition">
-                                {{ $landingHero['secondary_cta'] ?? __('messages.collection_add_purchased_button') }}
+                                class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900">
+                                {{ $landingHero['secondary_cta'] ?? $translateOr('messages.collection_add_purchased_button', 'Mulai Membuat Catatan') }}
                             </a>
                         </div>
+                        @if ($landingStats->isNotEmpty())
+                            <dl class="mt-12 grid gap-4 sm:grid-cols-3">
+                                @foreach ($landingStats->take(3) as $stat)
+                                    <div
+                                        class="rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-5 shadow-sm backdrop-blur">
+                                        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                                            {{ $stat['label'] }}</dt>
+                                        <dd class="mt-2 text-2xl font-semibold text-slate-900">{{ $stat['value'] }}</dd>
+                                    </div>
+                                @endforeach
+                            </dl>
+                        @endif
                     </div>
 
                     <div class="relative">
-                        <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-100 rounded-full blur-3xl"></div>
+                        <div class="absolute -top-8 -left-8 h-20 w-20 rounded-full bg-blue-100 blur-2xl"></div>
+                        <div class="absolute -bottom-10 -right-6 h-24 w-24 rounded-full bg-indigo-100 blur-2xl"></div>
                         <div
-                            class="relative rounded-2xl border border-gray-100 shadow-lg shadow-blue-50/40 bg-white/80 backdrop-blur p-6">
+                            class="relative rounded-3xl border border-slate-200 bg-white/80 shadow-xl shadow-blue-100/50 backdrop-blur-xl p-6 sm:p-8">
                             @if (isset($featuredHero) && $featuredHero)
                                 @php($note = $featuredHero->note)
-                                <div class="space-y-4">
+                                <div class="space-y-5">
                                     <div class="flex items-center justify-between">
                                         <span
-                                            class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">
+                                            class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700">
                                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                 <path
                                                     d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                             </svg>
-                                            {{ __('messages.featured_note') }}
+                                            {{ $translateOr('messages.featured_note', 'Catatan Unggulan') }}
                                         </span>
-                                        <span class="text-xs text-gray-400">
-                                            {{ $note->created_at->diffForHumans() }}
-                                        </span>
+                                        <span
+                                            class="text-xs text-slate-400">{{ $note->created_at->diffForHumans() }}</span>
                                     </div>
                                     <a href="{{ route('marketplace.show', $note) }}"
-                                        class="block group featured-click-tracking"
+                                        class="block space-y-3 featured-click-tracking"
                                         data-featured-id="{{ $featuredHero->id }}">
-                                        <h3
-                                            class="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition">
+                                        <h3 class="text-xl font-semibold text-slate-900 hover:text-blue-600 transition">
                                             {{ $note->title }}
                                         </h3>
-                                        <p class="mt-2 text-sm text-gray-600 line-clamp-3">
+                                        <p class="text-sm leading-6 text-slate-600">
                                             {{ Str::limit($note->summary ?? strip_tags($note->content), 140) }}
                                         </p>
                                     </a>
-                                    <div class="flex items-center justify-between text-sm text-gray-500">
+                                    <div class="flex items-center justify-between text-sm text-slate-500">
                                         <div class="flex items-center gap-2">
                                             <span
-                                                class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold">
+                                                class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold">
                                                 {{ substr($note->user->name, 0, 1) }}
                                             </span>
                                             <a href="{{ route('public.profile.show', $note->user->username) }}"
@@ -95,9 +120,11 @@
                                             </a>
                                         </div>
                                         <div class="text-right">
-                                            <p class="text-xs text-gray-400">{{ __('messages.price_label') }}</p>
-                                            <p class="text-sm font-semibold text-gray-900">
-                                                {{ $note->price > 0 ? currency($note->price) : __('messages.free') }}
+                                            <p class="text-xs uppercase tracking-wide text-slate-400">
+                                                {{ $translateOr('messages.price_label', 'Harga') }}
+                                            </p>
+                                            <p class="text-sm font-semibold text-slate-900">
+                                                {{ $note->price > 0 ? currency($note->price) : $translateOr('messages.free', 'Gratis') }}
                                             </p>
                                         </div>
                                     </div>
@@ -105,12 +132,12 @@
                             @else
                                 <div class="space-y-4">
                                     <span
-                                        class="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">
-                                        <span class="inline-block h-2 w-2 rounded-full bg-blue-500"></span>
-                                        {{ __('messages.discover_premium_notes') }}
+                                        class="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-700">
+                                        <span class="inline-block h-2 w-2 rounded-full bg-blue-400"></span>
+                                        {{ $translateOr('messages.discover_premium_notes', 'Temukan Catatan Premium') }}
                                     </span>
-                                    <p class="text-sm text-gray-600 leading-relaxed">
-                                        {{ __('landing.hero.subtitle') }}
+                                    <p class="text-sm text-slate-600 leading-relaxed">
+                                        {{ $landingHero['subtitle'] ?? '' }}
                                     </p>
                                 </div>
                             @endif
@@ -121,19 +148,29 @@
         </section>
 
         <!-- Features -->
-        <section class="py-16 lg:py-20 border-b border-gray-100 bg-white">
-            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid gap-8 md:grid-cols-3">
+        <section class="py-20 lg:py-24 bg-slate-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto">
+                    <span class="text-sm font-semibold tracking-wide text-blue-600 uppercase">
+                        {{ $translateOr('messages.features', 'Fitur Unggulan') }}
+                    </span>
+                    <h2 class="mt-4 text-3xl sm:text-4xl font-semibold text-slate-900">
+                        {{ $translateOr('messages.discover_premium_notes', 'Temukan Catatan Premium') }}
+                    </h2>
+                    <p class="mt-4 text-base text-slate-500 leading-relaxed">
+                        {{ $translateOr('landing.features_intro', 'Gabungkan workflow penulisan, kolaborasi, dan monetisasi dalam satu platform yang modern dan aman.') }}
+                    </p>
+                </div>
+                <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($landingFeatures as $feature)
-                        <div class="p-6 rounded-2xl border border-gray-100 shadow-sm shadow-blue-50/40 bg-slate-50/40">
+                        <div
+                            class="rounded-3xl border border-white/60 bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
                             <div
-                                class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 text-blue-600 mb-5">
+                                class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 mb-6">
                                 {!! $featuresIcons[$feature['icon']] ?? $featuresIcons['sparkles'] !!}
                             </div>
-                            <h3 class="text-lg font-semibold text-gray-900">{{ $feature['title'] }}</h3>
-                            <p class="mt-3 text-sm text-gray-600 leading-relaxed">
-                                {{ $feature['description'] }}
-                            </p>
+                            <h3 class="text-lg font-semibold text-slate-900">{{ $feature['title'] }}</h3>
+                            <p class="mt-4 text-sm text-slate-500 leading-relaxed">{{ $feature['description'] }}</p>
                         </div>
                     @endforeach
                 </div>
@@ -142,53 +179,59 @@
 
         <!-- Featured Carousel -->
         @if (isset($featuredCarousel) && $featuredCarousel->count() > 0)
-            <section class="py-16 lg:py-20 bg-gradient-to-b from-white to-slate-50 border-b border-gray-100">
+            <section class="py-20 lg:py-24 bg-white">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
-                        <div>
-                            <h2 class="text-3xl font-semibold text-gray-900">{{ __('messages.featured_notes') }}</h2>
-                            <p class="mt-2 text-sm text-gray-600">{{ __('messages.discover_premium_notes') }}</p>
+                    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
+                        <div class="max-w-2xl">
+                            <span class="text-sm font-semibold tracking-wide text-blue-600 uppercase">
+                                {{ $translateOr('messages.featured_notes', 'Catatan Unggulan') }}
+                            </span>
+                            <h2 class="mt-4 text-3xl font-semibold text-slate-900">
+                                {{ $translateOr('messages.discover_premium_notes', 'Temukan Catatan Premium') }}
+                            </h2>
+                            <p class="mt-3 text-sm text-slate-500">
+                                {{ $landingHero['subtitle'] ?? '' }}
+                            </p>
                         </div>
                         <a href="{{ route('marketplace.index') }}"
-                            class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700">
-                            {{ __('messages.explore_marketplace') }}
+                            class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700">
+                            {{ $translateOr('messages.explore_marketplace', 'Jelajahi Marketplace') }}
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M13.5 4.5 21 12l-7.5 7.5m6-7.5H3" />
                             </svg>
                         </a>
                     </div>
-
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         @foreach ($featuredCarousel as $featured)
                             @php($note = $featured->note)
                             <a href="{{ route('marketplace.show', $note) }}"
-                                class="group block rounded-2xl border border-gray-100 bg-white p-6 hover:border-blue-200 hover:shadow-lg transition featured-click-tracking"
+                                class="group block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg featured-click-tracking"
                                 data-featured-id="{{ $featured->id }}">
                                 <div class="flex items-center justify-between mb-5">
                                     <span
-                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700">
-                                        {{ __('messages.featured_badge') }}
+                                        class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                                        {{ $translateOr('messages.featured_badge', 'Unggulan') }}
                                     </span>
-                                    <span class="text-xs text-gray-400">{{ $note->created_at->diffForHumans() }}</span>
+                                    <span class="text-xs text-slate-400">{{ $note->created_at->diffForHumans() }}</span>
                                 </div>
                                 <h3
-                                    class="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition">
+                                    class="text-lg font-semibold text-slate-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition">
                                     {{ $note->title }}
                                 </h3>
-                                <p class="text-sm text-gray-600 line-clamp-3">
+                                <p class="text-sm text-slate-500 line-clamp-3">
                                     {{ Str::limit(strip_tags($note->summary ?? $note->content), 120) }}
                                 </p>
-                                <div class="mt-6 flex items-center justify-between text-sm text-gray-500">
+                                <div class="mt-6 flex items-center justify-between text-sm text-slate-500">
                                     <div class="flex items-center gap-2">
                                         <span
-                                            class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 font-semibold">
+                                            class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-semibold">
                                             {{ substr($note->user->name, 0, 1) }}
                                         </span>
                                         <span>{{ $note->user->name }}</span>
                                     </div>
-                                    <span class="font-semibold text-gray-900">
-                                        {{ $note->price > 0 ? currency($note->price) : __('messages.free') }}
+                                    <span class="font-semibold text-slate-900">
+                                        {{ $note->price > 0 ? currency($note->price) : $translateOr('messages.free', 'Gratis') }}
                                     </span>
                                 </div>
                             </a>
@@ -199,45 +242,58 @@
         @endif
 
         <!-- CMS Pages Highlight -->
-        @php($bgClass = '')
-        @php($hasUtilityBg = false)
-        @if(isset($cmsHighlightSection, $highlightedCmsPages) && $cmsHighlightSection && $highlightedCmsPages->count() > 0)
+        @php($utilityBgClass = '')
+        @if (isset($cmsHighlightSection, $highlightedCmsPages) && $cmsHighlightSection && $highlightedCmsPages->count() > 0)
             @php
                 $bgClass = $cmsHighlightSection->background_color ?? '';
                 $textClass = $cmsHighlightSection->text_color ?? '';
                 $alignment = $cmsHighlightSection->alignment ?? 'left';
-                $buttonText = data_get($cmsHighlightSection->content, 'button_text') ?: __('messages.cms_highlight_default_button');
+                $buttonText =
+                    data_get($cmsHighlightSection->content, 'button_text') ?:
+                    $translateOr('messages.cms_highlight_default_button', 'Lihat Semua Halaman');
                 $buttonLink = data_get($cmsHighlightSection->content, 'button_link') ?: route('cms.index');
-                $title = $cmsHighlightSection->title ?: __('messages.cms_pages');
-                $subtitle = $cmsHighlightSection->subtitle ?: __('messages.cms_pages_intro');
-
-                $headingClass = \Illuminate\Support\Str::startsWith((string) $textClass, 'text-') ? $textClass : 'text-gray-900';
-                $paragraphClass = \Illuminate\Support\Str::startsWith((string) $textClass, 'text-') ? $textClass : 'text-gray-600';
-                $inlineTextColor = ($textClass && !\Illuminate\Support\Str::startsWith((string) $textClass, 'text-')) ? $textClass : null;
-
-                $sectionAlignmentClass = match($alignment) {
+                $title = $cmsHighlightSection->title ?: $translateOr('messages.cms_pages', 'Pusat Informasi');
+                $subtitle =
+                    $cmsHighlightSection->subtitle ?:
+                    $translateOr(
+                        'messages.cms_pages_intro',
+                        'Baca kebijakan, panduan, dan pembaruan penting untuk komunitas.',
+                    );
+                $headingClass = \Illuminate\Support\Str::startsWith((string) $textClass, 'text-')
+                    ? $textClass
+                    : 'text-slate-900';
+                $paragraphClass = \Illuminate\Support\Str::startsWith((string) $textClass, 'text-')
+                    ? $textClass
+                    : 'text-slate-500';
+                $inlineTextColor =
+                    $textClass && !\Illuminate\Support\Str::startsWith((string) $textClass, 'text-')
+                        ? $textClass
+                        : null;
+                $sectionAlignmentClass = match ($alignment) {
                     'center' => 'text-center',
                     'right' => 'text-right',
                     default => 'text-left',
                 };
-                $hasUtilityBg = $bgClass && \Illuminate\Support\Str::startsWith((string) $bgClass, 'bg-');
+                $utilityBgClass =
+                    $bgClass && \Illuminate\Support\Str::startsWith((string) $bgClass, 'bg-') ? $bgClass : '';
             @endphp
-            <section class="py-16 lg:py-20 border-b border-gray-100 {{ $hasUtilityBg ? $bgClass : '' }}"
-                @if($bgClass && !$hasUtilityBg) style="background-color: {{ $bgClass }};" @endif>
+            <section class="py-20 lg:py-24 {{ $utilityBgClass ?: 'bg-slate-50 text-slate-900' }}"
+                @if ($bgClass && !$utilityBgClass) style="background-color: {{ $bgClass }}; color: {{ $inlineTextColor ?? '#0f172a' }};" @endif>
                 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 {{ $sectionAlignmentClass }}">
-                        <div class="{{ $sectionAlignmentClass }} w-full md:w-auto">
+                    <div
+                        class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 {{ $sectionAlignmentClass }}">
+                        <div class="{{ $sectionAlignmentClass }} w-full md:w-auto space-y-3">
                             <h2 class="text-3xl font-semibold {{ $headingClass }}"
-                                @if($inlineTextColor) style="color: {{ $inlineTextColor }};" @endif>
+                                @if ($inlineTextColor && !$utilityBgClass) style="color: {{ $inlineTextColor }};" @endif>
                                 {{ $title }}
                             </h2>
-                            <p class="mt-2 text-sm {{ $paragraphClass }}"
-                                @if($inlineTextColor) style="color: {{ $inlineTextColor }};" @endif>
+                            <p class="text-sm {{ $paragraphClass }}"
+                                @if ($inlineTextColor && !$utilityBgClass) style="color: {{ $inlineTextColor }};" @endif>
                                 {{ $subtitle }}
                             </p>
                         </div>
                         <a href="{{ $buttonLink }}"
-                            class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700">
+                            class="inline-flex items-center gap-2 text-sm font-semibold {{ $utilityBgClass ? 'text-blue-50 hover:text-white' : 'text-blue-600 hover:text-blue-700' }}">
                             {{ $buttonText }}
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -245,27 +301,28 @@
                             </svg>
                         </a>
                     </div>
-                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        @foreach($highlightedCmsPages as $page)
-                            <article class="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm hover:shadow-lg hover:border-blue-200 transition">
+                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        @foreach ($highlightedCmsPages as $page)
+                            <article
+                                class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700">
-                                        {{ __('messages.cms_highlight_badge') }}
+                                    <span
+                                        class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                                        {{ $translateOr('messages.cms_highlight_badge', 'Sorotan CMS') }}
                                     </span>
-                                    <span class="text-xs text-gray-400">{{ $page->updated_at?->format('M d, Y') }}</span>
+                                    <span class="text-xs text-slate-400">{{ $page->updated_at?->format('M d, Y') }}</span>
                                 </div>
-                                <a href="{{ route('cms.show', $page) }}" class="block group-hover:text-blue-600 transition">
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                                        {{ $page->title }}
-                                    </h3>
-                                    <p class="text-sm text-gray-600 line-clamp-3">
+                                <a href="{{ route('cms.show', $page) }}"
+                                    class="block space-y-2 hover:text-blue-600 transition">
+                                    <h3 class="text-lg font-semibold text-slate-900 line-clamp-2">{{ $page->title }}</h3>
+                                    <p class="text-sm text-slate-500 line-clamp-3">
                                         {{ \Illuminate\Support\Str::limit(strip_tags($page->content), 160) }}
                                     </p>
                                 </a>
                                 <div class="mt-6">
                                     <a href="{{ route('cms.show', $page) }}"
-                                        class="text-sm font-medium text-blue-600 hover:text-blue-700 inline-flex items-center gap-1">
-                                        {{ __('messages.view') }}
+                                        class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700">
+                                        {{ $translateOr('messages.view', 'Lihat') }}
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                                 d="M9 5l7 7-7 7" />
@@ -289,22 +346,35 @@
         @endif
 
         <!-- Call to Action -->
-        <section class="py-16 lg:py-24 bg-gray-900">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-                <h2 class="text-3xl sm:text-4xl font-semibold leading-tight">
-                    {{ $landingCta['title'] }}
-                </h2>
-                <p class="mt-4 text-base text-gray-300">
-                    {{ $landingCta['subtitle'] }}
-                </p>
-                <a href="{{ route('register') }}"
-                    class="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-gray-900 font-medium hover:bg-gray-100 transition">
-                    {{ $landingCta['button'] }}
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M13.5 4.5 21 12l-7.5 7.5m6-7.5H3" />
-                    </svg>
-                </a>
+        <section class="py-20 lg:py-24">
+            <div
+                class="relative max-w-4xl mx-auto overflow-hidden rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 px-6 sm:px-10 lg:px-14 text-center text-white shadow-xl">
+                <div class="absolute inset-0">
+                    <div class="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/15 to-transparent"></div>
+                    <div class="absolute -top-20 -left-16 h-40 w-40 rounded-full bg-white/25 blur-3xl"></div>
+                    <div class="absolute bottom-0 right-0 h-32 w-32 rounded-full bg-sky-200/40 blur-3xl"></div>
+                </div>
+                <div class="relative py-14 sm:py-16 lg:py-18">
+                    <span
+                        class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold ring-1 ring-white/30">
+                        <span class="h-2 w-2 rounded-full bg-white/80 animate-ping"></span>
+                        {{ $translateOr('messages.ready_to_start', 'Siap mulai berkarya?') }}
+                    </span>
+                    <h2 class="mt-5 text-3xl sm:text-4xl font-semibold leading-tight">
+                        {{ $landingCta['title'] }}
+                    </h2>
+                    <p class="mt-4 text-base text-white/80 leading-relaxed max-w-2xl mx-auto">
+                        {{ $landingCta['subtitle'] }}
+                    </p>
+                    <a href="{{ route('register') }}"
+                        class="mt-10 inline-flex items-center gap-3 rounded-full bg-white/95 px-7 py-3 text-base font-semibold text-blue-700 transition hover:bg-white hover:text-blue-800">
+                        {{ $landingCta['button'] }}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M13.5 4.5 21 12l-7.5 7.5m6-7.5H3" />
+                        </svg>
+                    </a>
+                </div>
             </div>
         </section>
     </div>

@@ -46,7 +46,7 @@
             };
         </script>
     </head>
-    <body class="font-sans antialiased bg-gray-50">
+    <body class="font-sans antialiased bg-gray-50 overflow-x-hidden">
         <div class="min-h-screen flex flex-col">
             @include('layouts.navigation')
 
@@ -60,7 +60,7 @@
             @endisset
 
             <!-- Page Content -->
-            <main class="flex-1">
+            <main class="flex-1 overflow-x-hidden">
                 @hasSection('content')
                     @yield('content')
                 @else
