@@ -213,13 +213,13 @@
                 $paragraphClass = \Illuminate\Support\Str::startsWith((string) $textClass, 'text-') ? $textClass : 'text-gray-600';
                 $inlineTextColor = ($textClass && !\Illuminate\Support\Str::startsWith((string) $textClass, 'text-')) ? $textClass : null;
 
-                $hasUtilityBg = $bgClass && \Illuminate\Support\Str::startsWith((string) $bgClass, 'bg-');
                 $sectionAlignmentClass = match($alignment) {
                     'center' => 'text-center',
                     'right' => 'text-right',
                     default => 'text-left',
                 };
             @endphp
+            @php($hasUtilityBg = $bgClass && \Illuminate\Support\Str::startsWith((string) $bgClass, 'bg-'))
             <section class="py-16 lg:py-20 border-b border-gray-100 {{ $hasUtilityBg ? $bgClass : '' }}"
                 @if($bgClass && !$hasUtilityBg) style="background-color: {{ $bgClass }};" @endif>
                 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
