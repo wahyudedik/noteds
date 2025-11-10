@@ -1372,6 +1372,81 @@
                 });
             });
 
+            // Grace Period Countdown Timer
+            function initGracePeriodCountdown() {
+                const countdownElement = document.getElementById('grace-period-countdown');
+                if (!countdownElement) {
+                    return; // Element doesn't exist, exit gracefully
+                }
+
+                const endTimeAttr = countdownElement.getAttribute('data-end-time');
+                if (!endTimeAttr) {
+                    console.warn('Grace period countdown: data-end-time attribute is missing');
+                    return; // Attribute missing, exit gracefully
+                }
+
+                const endTime = parseInt(endTimeAttr, 10);
+                if (isNaN(endTime) || endTime <= 0) {
+                    console.warn('Grace period countdown: invalid data-end-time value:', endTimeAttr);
+                    countdownElement.textContent = 'Grace period telah berakhir';
+                    countdownElement.classList.remove('text-green-900');
+                    countdownElement.classList.add('text-red-600');
+                    return; // Invalid value, exit gracefully
+                }
+
+                let countdownInterval = null;
+
+                function updateCountdown() {
+                    const now = Math.floor(Date.now() / 1000);
+                    const timeLeft = endTime - now;
+
+                    if (timeLeft <= 0) {
+                        countdownElement.textContent = 'Grace period telah berakhir';
+                        countdownElement.classList.remove('text-green-900');
+                        countdownElement.classList.add('text-red-600');
+                        
+                        // Clear interval to stop unnecessary updates
+                        if (countdownInterval) {
+                            clearInterval(countdownInterval);
+                            countdownInterval = null;
+                        }
+                        return;
+                    }
+
+                    const days = Math.floor(timeLeft / 86400);
+                    const hours = Math.floor((timeLeft % 86400) / 3600);
+                    const minutes = Math.floor((timeLeft % 3600) / 60);
+                    const seconds = timeLeft % 60;
+
+                    let countdownText = '';
+                    if (days > 0) {
+                        countdownText = `${days} hari ${hours} jam ${minutes} menit`;
+                    } else if (hours > 0) {
+                        countdownText = `${hours} jam ${minutes} menit ${seconds} detik`;
+                    } else if (minutes > 0) {
+                        countdownText = `${minutes} menit ${seconds} detik`;
+                    } else {
+                        countdownText = `${seconds} detik`;
+                    }
+
+                    countdownElement.textContent = countdownText;
+                }
+
+                // Initialize countdown immediately
+                updateCountdown();
+
+                // Update countdown every second
+                countdownInterval = setInterval(updateCountdown, 1000);
+            }
+
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initGracePeriodCountdown);
+            } else {
+                // DOM is already ready
+                initGracePeriodCountdown();
+            }
+
             @if (auth()->check() && auth()->user()->hasPremium() && auth()->user()->role === 'buyer')
                 function showCollectionModal(noteId) {
                     const collections = @json(auth()->user()->collections()->get(['id', 'name']));

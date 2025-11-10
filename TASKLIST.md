@@ -15,7 +15,7 @@ Menyiapkan pondasi Laravel & struktur dasar aplikasi Noteds.
 - [x] Buat layout dasar Blade
 - [x] Tambah navbar & dashboard minimal
 - [x] Modifikasi tabel `users`
-- [x] Integrasi Spatie Permission 
+- [x] Integrasi Spatie Permission  
 - [x] Seeder akun admin default
 
 ---
