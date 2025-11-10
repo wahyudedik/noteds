@@ -199,6 +199,8 @@
         @endif
 
         <!-- CMS Pages Highlight -->
+        @php($bgClass = '')
+        @php($hasUtilityBg = false)
         @if(isset($cmsHighlightSection, $highlightedCmsPages) && $cmsHighlightSection && $highlightedCmsPages->count() > 0)
             @php
                 $bgClass = $cmsHighlightSection->background_color ?? '';
@@ -218,8 +220,8 @@
                     'right' => 'text-right',
                     default => 'text-left',
                 };
+                $hasUtilityBg = $bgClass && \Illuminate\Support\Str::startsWith((string) $bgClass, 'bg-');
             @endphp
-            @php($hasUtilityBg = $bgClass && \Illuminate\Support\Str::startsWith((string) $bgClass, 'bg-'))
             <section class="py-16 lg:py-20 border-b border-gray-100 {{ $hasUtilityBg ? $bgClass : '' }}"
                 @if($bgClass && !$hasUtilityBg) style="background-color: {{ $bgClass }};" @endif>
                 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
