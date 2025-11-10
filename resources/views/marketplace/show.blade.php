@@ -565,48 +565,86 @@
                         <!-- Preview Content (for paid notes, before purchase) -->
                         <div class="prose max-w-none mb-6 relative">
                             @php
-                                // Use preview_percentage if set, otherwise use preview_content
+                                $previewMode = 'custom';
+                                $previewContent = null;
+                                $showBlur = false;
+                                $totalLines = null;
+                                $visibleLines = null;
+
                                 if ($note->preview_percentage > 0) {
+                                    $previewMode = 'percentage';
                                     $previewContent = $note->getPreviewContentByPercentage();
                                     $showBlur = $note->preview_percentage < 100;
 
-                                    // Count total lines for info
-                                    $totalLines = count(preg_split('/\r\n|\r|\n/', $note->content));
-                                    $visibleLines = (int) ceil($totalLines * ($note->preview_percentage / 100));
+                                    if ($showBlur) {
+                                        $totalLines = count(preg_split('/\r\n|\r|\n/', $note->content));
+                                        $visibleLines = (int) ceil($totalLines * ($note->preview_percentage / 100));
+                                    }
                                 } else {
-                                    $previewContent =
-                                        $note->preview_content ?:
-                                        \Illuminate\Support\Str::limit(strip_tags($note->content), 300);
-                                    $showBlur = true;
-                                    $totalLines = null;
-                                    $visibleLines = null;
+                                    $previewContent = $note->preview_content ?: $note->summary;
+                                    if (!$previewContent) {
+                                        $previewContent = null;
+                                    }
                                 }
                             @endphp
-                            <div class="prose max-w-none">
-                                <div class="ql-editor text-gray-900 leading-relaxed whitespace-pre-wrap">
-                                    {!! $previewContent !!}
-                                    @if ($note->preview_percentage > 0 && $note->preview_percentage < 100)
-                                        <span class="text-gray-500 italic">...</span>
-                                    @elseif($note->preview_percentage == 0 && strlen(strip_tags($note->content)) > 300)
-                                        <span class="text-gray-500 italic">...</span>
-                                    @endif
+
+                            @if ($previewMode === 'percentage' && !empty($previewContent))
+                                <div class="prose max-w-none">
+                                    <div class="ql-editor text-gray-900 leading-relaxed whitespace-pre-wrap">
+                                        {!! $previewContent !!}
+                                        @if ($note->preview_percentage < 100)
+                                            <span class="text-gray-500 italic">...</span>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                            <!-- Blur overlay for paid content -->
-                            @if ($showBlur)
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white backdrop-blur-sm pointer-events-none flex items-end justify-center pb-8">
-                                    <div class="text-center px-4">
-                                        <p class="text-sm font-semibold text-gray-700 mb-2">
-                                            {{ __('messages.full_content_available_after_purchase') }}</p>
-                                        <p class="text-xs text-gray-600">{{ __('messages.buy_note_to_unlock') }}</p>
-                                        @if ($note->preview_percentage > 0 && isset($visibleLines) && isset($totalLines))
-                                            <p class="text-xs text-gray-500 mt-1">
-                                                {{ __('messages.preview_lines_detail', ['visible' => $visibleLines, 'total' => $totalLines, 'percentage' => $note->preview_percentage]) }}
+
+                                @if ($showBlur)
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white backdrop-blur-sm pointer-events-none flex items-end justify-center pb-8">
+                                        <div class="text-center px-4">
+                                            <p class="text-sm font-semibold text-gray-700 mb-2">
+                                                {{ __('messages.full_content_available_after_purchase') }}</p>
+                                            <p class="text-xs text-gray-600">{{ __('messages.buy_note_to_unlock') }}</p>
+                                            @if (isset($visibleLines, $totalLines))
+                                                <p class="text-xs text-gray-500 mt-1">
+                                                    {{ __('messages.preview_lines_detail', ['visible' => $visibleLines, 'total' => $totalLines, 'percentage' => $note->preview_percentage]) }}
+                                                </p>
+                                            @else
+                                                <p class="text-xs text-gray-500 mt-1">
+                                                    {{ __('messages.preview_percentage_detail', ['percentage' => $note->preview_percentage]) }}
+                                                </p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+                            @else
+                                <div class="relative rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6">
+                                    <div class="flex flex-col items-center text-center space-y-3">
+                                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 text-gray-600">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 11c.5304 0 1.0391-.2107 1.4142-.5858C13.7893 10.0391 14 9.5304 14 9c0-1.1046-.8954-2-2-2s-2 .8954-2 2c0 .5304.2107 1.0391.5858 1.4142C10.9609 10.7893 11.4696 11 12 11Zm0 0v3m-6 4h12a2 2 0 0 0 2-2v-2.382a2 2 0 0 0-.684-1.5L13.316 6.5a2 2 0 0 0-2.632 0L4.684 10.118A2 2 0 0 0 4 11.618V14a2 2 0 0 0 2 2Z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-800">
+                                                {{ __('messages.preview_locked_title') }}
                                             </p>
-                                        @elseif($note->preview_percentage > 0)
-                                            <p class="text-xs text-gray-500 mt-1">
-                                                {{ __('messages.preview_percentage_detail', ['percentage' => $note->preview_percentage]) }}
+                                            <p class="text-xs text-gray-600">
+                                                {{ __('messages.preview_locked_description') }}
+                                            </p>
+                                        </div>
+                                        @if (!empty($previewContent))
+                                            @php
+                                                $previewContainsHtml = is_string($previewContent)
+                                                    && $previewContent !== strip_tags($previewContent);
+                                            @endphp
+                                            <div class="max-w-2xl text-xs text-gray-500 leading-relaxed">
+                                                {!! $previewContainsHtml ? $previewContent : nl2br(e($previewContent)) !!}
+                                            </div>
+                                        @else
+                                            <p class="text-xs text-gray-500">
+                                                {{ __('messages.preview_locked_no_excerpt') }}
                                             </p>
                                         @endif
                                     </div>
