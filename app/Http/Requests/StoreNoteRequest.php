@@ -23,7 +23,7 @@ class StoreNoteRequest extends FormRequest
      */
     public function rules(): array
     {
-        $maxFileSize = auth()->user() && auth()->user()->hasPremium() ? 52428800 : 5242880; // 50MB for premium, 5MB for basic
+        $maxFileSize = auth()->user() && auth()->user()->hasPremium() ? 104857600 : 5242880; // 100MB for premium, 5MB for basic
         
         return [
             'title' => ['required', 'string', 'max:255'],
@@ -59,13 +59,13 @@ class StoreNoteRequest extends FormRequest
         
         if (!$isPremium) {
             return [
-                'attachments.*.max' => 'File size exceeds 5MB limit for Basic users. Upgrade to Premium to upload files up to 50MB.',
+                'attachments.*.max' => 'File size exceeds 5MB limit for Basic users. Upgrade to Premium to upload files up to 100MB.',
                 'attachments.*.mimes' => 'File type not allowed. Allowed: PDF, DOC, DOCX, TXT, ZIP, RAR, JPG, PNG, GIF, XLS, XLSX, PPT, PPTX',
             ];
         }
         
         return [
-            'attachments.*.max' => 'File size exceeds 50MB limit.',
+            'attachments.*.max' => 'File size exceeds 100MB limit.',
             'attachments.*.mimes' => 'File type not allowed. Allowed: PDF, DOC, DOCX, TXT, ZIP, RAR, JPG, PNG, GIF, XLS, XLSX, PPT, PPTX',
         ];
     }
@@ -91,7 +91,7 @@ class StoreNoteRequest extends FormRequest
                         $sizeInMB = round($file->getSize() / 1048576, 2);
                         $validator->errors()->add(
                             "attachments.{$index}",
-                            "File '{$file->getClientOriginalName()}' ({$sizeInMB}MB) exceeds 5MB limit for Basic users. <a href='" . route('subscription.create') . "' class='font-semibold text-blue-600 hover:text-blue-700 underline'>Upgrade to Premium</a> to upload files up to 50MB."
+                            "File '{$file->getClientOriginalName()}' ({$sizeInMB}MB) exceeds 5MB limit for Basic users. <a href='" . route('subscription.create') . "' class='font-semibold text-blue-600 hover:text-blue-700 underline'>Upgrade to Premium</a> to upload files up to 100MB."
                         );
                     }
                 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\WorkspaceActivityLog;
+use App\Models\WorkspaceMember;
 use App\Services\ReferralService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -140,7 +141,9 @@ class RegisteredUserController extends Controller
             ]);
             
             // Add user to workspace
-            $invitation->workspace->members()->attach($user->id, [
+            WorkspaceMember::create([
+                'workspace_id' => $invitation->workspace->id,
+                'user_id' => $user->id,
                 'role' => $invitation->role,
                 'is_active' => true,
                 'joined_at' => now(),

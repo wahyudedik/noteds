@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Workspace;
 use App\Models\WorkspaceActivityLog;
+use App\Models\WorkspaceMember;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -72,7 +73,9 @@ class WorkspaceController extends Controller
         ]);
 
         // Add owner as member with admin role
-        $workspace->members()->attach($user->id, [
+        WorkspaceMember::create([
+            'workspace_id' => $workspace->id,
+            'user_id' => $user->id,
             'role' => 'admin',
             'is_active' => true,
             'joined_at' => now(),

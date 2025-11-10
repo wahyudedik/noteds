@@ -48,6 +48,23 @@
                 </div>
             @endif
 
+            @if (session('success'))
+                <div class="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Subscription Limit Warning -->
             @if (!auth()->user()->hasPremium())
                 @php
@@ -590,8 +607,8 @@
                                         opsional)</span>
                                 </label>
                                 <div
-                                    class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition-colors duration-200">
-                                    <div class="space-y-1 text-center w-full">
+                                    class="mt-1 flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition-colors duration-200">
+                                    <div class="space-y-1 text-center">
                                         <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
                                             viewBox="0 0 48 48">
                                             <path
@@ -608,9 +625,7 @@
                                             </label>
                                             <p class="pl-1">atau drag and drop</p>
                                         </div>
-                                        <p class="text-xs text-gray-500 text-center">PNG, JPG, GIF hingga 5MB per gambar
-                                            (maks 5
-                                            gambar)</p>
+                                        <p class="text-xs text-gray-500">PNG, JPG, GIF hingga 5MB per gambar (maks 5 gambar)</p>
                                     </div>
                                 </div>
                                 <div id="thumbnail-preview" class="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -653,13 +668,59 @@
                                         </div>
                                         <p class="text-xs text-gray-500">
                                             @if (auth()->user()->hasPremium())
-                                                {{ __('messages.max_50mb_per_file') }}
+                                                Maksimal 100MB per file
                                             @else
                                                 {{ __('messages.max_5mb_per_file') }}
                                             @endif
                                         </p>
                                     </div>
                                 </div>
+                                
+                                <!-- Large Files Warning -->
+                                @if(session('large_files_warning'))
+                                    <div class="mt-3 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
+                                        <div class="flex">
+                                            <div class="flex-shrink-0">
+                                                <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div class="ml-3 flex-1">
+                                                <p class="text-sm font-medium text-yellow-800">
+                                                    File Besar Terdeteksi (40MB+)
+                                                </p>
+                                                <div class="mt-2 text-sm text-yellow-700">
+                                                    <p>File berikut berukuran besar dan mungkin memerlukan waktu lebih lama untuk diupload:</p>
+                                                    <ul class="mt-1 list-disc list-inside">
+                                                        @foreach(session('large_files_warning') as $file)
+                                                            <li>{{ $file }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                    <p class="mt-2 font-semibold">⚠️ Harap jangan menutup halaman ini selama proses upload berlangsung.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Upload Progress Bar (for large files) -->
+                                <div id="upload-progress-container" class="mt-3 hidden">
+                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-medium text-blue-800">Uploading large file...</span>
+                                            <span id="upload-progress-percent" class="text-sm font-semibold text-blue-600">0%</span>
+                                        </div>
+                                        <div class="w-full bg-blue-200 rounded-full h-2.5">
+                                            <div id="upload-progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                        </div>
+                                        <div class="mt-2 text-xs text-blue-600">
+                                            <span id="upload-progress-text">Preparing upload...</span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div id="file-list" class="mt-3 space-y-2"></div>
                                 @error('attachments')
                                     <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -682,6 +743,18 @@
                                         <p class="text-sm text-red-800">{!! $message !!}</p>
                                     </div>
                                 @enderror
+                                
+                                @if(session('upload_errors'))
+                                    <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                        <p class="text-sm font-medium text-red-800 mb-2">Upload errors:</p>
+                                        <ul class="list-disc list-inside text-sm text-red-700">
+                                            @foreach(session('upload_errors') as $filename => $error)
+                                                <li><strong>{{ $filename }}:</strong> {{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+                                
                                 @if (!auth()->user()->hasPremium())
                                     <p class="mt-2 text-xs text-yellow-600 flex items-center">
                                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -815,7 +888,7 @@
                                             Mode Penjualan <span class="text-xs text-gray-500 font-normal">(Pilih sistem penjualan)</span>
                                         </label>
                                         <div class="space-y-3">
-                                            <label class="flex items-start p-4 rounded-lg border-2 {{ old('sale_mode', 'scarcity') === 'scarcity' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300' }} cursor-pointer transition-all duration-200">
+                                            <label id="sale-mode-scarcity-label" class="flex items-start p-4 rounded-lg border-2 {{ old('sale_mode', 'scarcity') === 'scarcity' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300' }} cursor-pointer transition-all duration-200">
                                                 <input type="radio" name="sale_mode" value="scarcity" {{ old('sale_mode', 'scarcity') === 'scarcity' ? 'checked' : '' }}
                                                     class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                                 <div class="ml-3 flex-1">
@@ -827,11 +900,11 @@
                                                         • Buyer hanya bisa beli 1x per user<br>
                                                         • Buyer bisa resell dengan harga custom<br>
                                                         • Original creator dapat komisi di setiap penjualan<br>
-                                                        • Grace period {{ old('grace_period_days', 30) }} hari untuk pembelian ulang
+                                                        • Grace period <span id="grace-period-display">{{ old('grace_period_days', 30) }}</span> hari untuk pembelian ulang
                                                     </p>
                                                 </div>
                                             </label>
-                                            <label class="flex items-start p-4 rounded-lg border-2 {{ old('sale_mode') === 'standard' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300' }} cursor-pointer transition-all duration-200">
+                                            <label id="sale-mode-standard-label" class="flex items-start p-4 rounded-lg border-2 {{ old('sale_mode') === 'standard' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300' }} cursor-pointer transition-all duration-200">
                                                 <input type="radio" name="sale_mode" value="standard" {{ old('sale_mode') === 'standard' ? 'checked' : '' }}
                                                     class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                                 <div class="ml-3 flex-1">
@@ -1441,29 +1514,75 @@
                         handleThumbnailUpload(input);
                     };
 
-                    // File upload preview
+                    // File upload preview with large file detection
                     const fileInput = document.getElementById('attachments');
                     const fileList = document.getElementById('file-list');
+                    const uploadProgressContainer = document.getElementById('upload-progress-container');
+                    const uploadProgressBar = document.getElementById('upload-progress-bar');
+                    const uploadProgressPercent = document.getElementById('upload-progress-percent');
+                    const uploadProgressText = document.getElementById('upload-progress-text');
+                    const LARGE_FILE_THRESHOLD = 41943040; // 40MB in bytes
+                    
+                    function formatFileSize(bytes) {
+                        if (bytes >= 1073741824) {
+                            return (bytes / 1073741824).toFixed(2) + ' GB';
+                        } else if (bytes >= 1048576) {
+                            return (bytes / 1048576).toFixed(2) + ' MB';
+                        } else if (bytes >= 1024) {
+                            return (bytes / 1024).toFixed(2) + ' KB';
+                        }
+                        return bytes + ' bytes';
+                    }
+                    
                     if (fileInput && fileList) {
                         fileInput.addEventListener('change', function() {
                             fileList.innerHTML = '';
-                            Array.from(this.files).forEach((file, index) => {
+                            const files = Array.from(this.files);
+                            let hasLargeFile = false;
+                            
+                            files.forEach((file, index) => {
+                                const isLargeFile = file.size >= LARGE_FILE_THRESHOLD;
+                                if (isLargeFile) {
+                                    hasLargeFile = true;
+                                }
+                                
                                 const fileItem = document.createElement('div');
-                                fileItem.className =
-                                    'flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200';
+                                fileItem.className = `flex items-center justify-between p-3 rounded-lg border ${isLargeFile ? 'bg-yellow-50 border-yellow-300' : 'bg-gray-50 border-gray-200'}`;
+                                
+                                let warningIcon = '';
+                                if (isLargeFile) {
+                                    warningIcon = `
+                                        <svg class="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                    `;
+                                }
+                                
                                 fileItem.innerHTML = `
-                    <div class="flex items-center flex-1 min-w-0">
-                        <svg class="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">${file.name}</p>
-                            <p class="text-xs text-gray-500">${(file.size / 1024).toFixed(2)} KB</p>
-                        </div>
-                    </div>
-                `;
+                                    <div class="flex items-center flex-1 min-w-0">
+                                        ${warningIcon}
+                                        <svg class="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium ${isLargeFile ? 'text-yellow-900' : 'text-gray-900'} truncate">${file.name}</p>
+                                            <p class="text-xs ${isLargeFile ? 'text-yellow-700' : 'text-gray-500'}">
+                                                ${formatFileSize(file.size)}
+                                                ${isLargeFile ? '<span class="ml-2 font-semibold">(Large file - upload may take longer)</span>' : ''}
+                                            </p>
+                                        </div>
+                                    </div>
+                                `;
                                 fileList.appendChild(fileItem);
                             });
+                            
+                            // Show warning for large files
+                            if (hasLargeFile && uploadProgressContainer) {
+                                uploadProgressContainer.classList.remove('hidden');
+                                uploadProgressText.textContent = 'File besar terdeteksi. Upload akan dimulai saat form dikirim...';
+                            } else if (uploadProgressContainer) {
+                                uploadProgressContainer.classList.add('hidden');
+                            }
                         });
                     }
 
@@ -2341,26 +2460,54 @@
                         });
                     }
 
-                    // Toggle scarcity settings based on sale_mode
+                    // Toggle scarcity settings and border based on sale_mode
                     const saleModeInputs = document.querySelectorAll('input[name="sale_mode"]');
                     const scarcitySettings = document.getElementById('scarcity-settings');
+                    const scarcityLabel = document.getElementById('sale-mode-scarcity-label');
+                    const standardLabel = document.getElementById('sale-mode-standard-label');
                     
-                    if (saleModeInputs.length > 0 && scarcitySettings) {
-                        function toggleScarcitySettings() {
+                    if (saleModeInputs.length > 0) {
+                        function updateSaleModeUI() {
                             const selectedMode = document.querySelector('input[name="sale_mode"]:checked')?.value;
-                            if (selectedMode === 'scarcity') {
-                                scarcitySettings.style.display = 'block';
-                            } else {
-                                scarcitySettings.style.display = 'none';
+                            
+                            // Update border and background for scarcity label
+                            if (scarcityLabel) {
+                                if (selectedMode === 'scarcity') {
+                                    scarcityLabel.classList.remove('border-gray-200', 'hover:border-gray-300');
+                                    scarcityLabel.classList.add('border-blue-500', 'bg-blue-50');
+                                } else {
+                                    scarcityLabel.classList.remove('border-blue-500', 'bg-blue-50');
+                                    scarcityLabel.classList.add('border-gray-200', 'hover:border-gray-300');
+                                }
+                            }
+                            
+                            // Update border and background for standard label
+                            if (standardLabel) {
+                                if (selectedMode === 'standard') {
+                                    standardLabel.classList.remove('border-gray-200', 'hover:border-gray-300');
+                                    standardLabel.classList.add('border-blue-500', 'bg-blue-50');
+                                } else {
+                                    standardLabel.classList.remove('border-blue-500', 'bg-blue-50');
+                                    standardLabel.classList.add('border-gray-200', 'hover:border-gray-300');
+                                }
+                            }
+                            
+                            // Toggle scarcity settings visibility
+                            if (scarcitySettings) {
+                                if (selectedMode === 'scarcity') {
+                                    scarcitySettings.style.display = 'block';
+                                } else {
+                                    scarcitySettings.style.display = 'none';
+                                }
                             }
                         }
                         
                         saleModeInputs.forEach(input => {
-                            input.addEventListener('change', toggleScarcitySettings);
+                            input.addEventListener('change', updateSaleModeUI);
                         });
                         
                         // Initialize on page load
-                        toggleScarcitySettings();
+                        updateSaleModeUI();
                     }
                 });
             </script>

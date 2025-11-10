@@ -80,47 +80,47 @@ return [
     'username_unique' => 'اسم المستخدم هذا مستخدم بالفعل. يرجى اختيار اسم آخر.',
 
     // Authentication
-'auth_hero_title' => 'سجّل الدخول إلى Noteds وابدأ الإبداع',
-'auth_hero_subtitle' => 'قم بإدارة ملاحظاتك الرقمية، وتعاون مع فريقك، ونم حضورك في سوق Noteds.',
-'log_in_title' => 'تسجيل الدخول إلى حسابك',
-'log_in_subtitle' => 'مرحباً بعودتك! أدخل البريد الإلكتروني وكلمة المرور للمتابعة.',
+    'auth_hero_title' => 'سجّل الدخول إلى Noteds وابدأ الإبداع',
+    'auth_hero_subtitle' => 'قم بإدارة ملاحظاتك الرقمية، وتعاون مع فريقك، ونم حضورك في سوق Noteds.',
+    'log_in_title' => 'تسجيل الدخول إلى حسابك',
+    'log_in_subtitle' => 'مرحباً بعودتك! أدخل البريد الإلكتروني وكلمة المرور للمتابعة.',
     'email' => 'البريد الإلكتروني',
     'password' => 'كلمة المرور',
     'name' => 'الاسم',
     'confirm_password' => 'تأكيد كلمة المرور',
-'name_placeholder' => 'الاسم الكامل',
-'password_placeholder' => 'ثمانية أحرف على الأقل',
-'password_confirm_placeholder' => 'أعد إدخال كلمة المرور',
+    'name_placeholder' => 'الاسم الكامل',
+    'password_placeholder' => 'ثمانية أحرف على الأقل',
+    'password_confirm_placeholder' => 'أعد إدخال كلمة المرور',
     'remember_me' => 'تذكرني',
     'forgot_password' => 'نسيت كلمة المرور؟',
     'log_in' => 'تسجيل الدخول',
     'log_out' => 'تسجيل الخروج',
     'register' => 'التسجيل',
-'create_account' => 'إنشاء حساب جديد',
-'already_registered_prompt' => 'هل لديك حساب بالفعل؟',
+    'create_account' => 'إنشاء حساب جديد',
+    'already_registered_prompt' => 'هل لديك حساب بالفعل؟',
     'already_registered' => 'مسجل بالفعل؟',
-'register_title' => 'أنشئ حساب Noteds الخاص بك',
-'register_subtitle' => 'ابدأ في إدارة وبيع ملاحظاتك أو انضم إلى فريقك للتعاون معاً.',
-'workspace_invite_title' => 'دعوة Workspace',
-'workspace_invite_copy' => 'لقد تمت دعوتك للانضمام إلى مساحة العمل :workspace بصلاحية :role.',
-'invited_email_hint' => 'تم تحديد هذا البريد الإلكتروني من خلال دعوة مساحة العمل.',
-'back_to_login' => 'العودة إلى صفحة تسجيل الدخول',
+    'register_title' => 'أنشئ حساب Noteds الخاص بك',
+    'register_subtitle' => 'ابدأ في إدارة وبيع ملاحظاتك أو انضم إلى فريقك للتعاون معاً.',
+    'workspace_invite_title' => 'دعوة Workspace',
+    'workspace_invite_copy' => 'لقد تمت دعوتك للانضمام إلى مساحة العمل :workspace بصلاحية :role.',
+    'invited_email_hint' => 'تم تحديد هذا البريد الإلكتروني من خلال دعوة مساحة العمل.',
+    'back_to_login' => 'العودة إلى صفحة تسجيل الدخول',
     'i_want_to_be' => 'أريد أن أكون',
     'buyer_option' => '🛒 مشترٍ — أريد شراء والتعلم من الملاحظات',
     'seller_option' => '💰 بائع — أريد بيع معرفتي وكسب المال',
     'referral_code_optional' => 'رمز الإحالة (اختياري)',
     'enter_referral_code' => 'أدخل رمز الإحالة إذا كان لديك واحد',
-'forgot_password_title' => 'نسيت كلمة المرور؟',
+    'forgot_password_title' => 'نسيت كلمة المرور؟',
     'forgot_password_message' => 'نسيت كلمة المرور؟ لا مشكلة. فقط أخبرنا بعنوان بريدك الإلكتروني وسنرسل لك رابط إعادة تعيين كلمة المرور الذي سيتيح لك اختيار واحدة جديدة.',
     'email_password_reset_link' => 'إرسال رابط إعادة تعيين كلمة المرور',
-'reset_password_title' => 'أنشئ كلمة مرور جديدة',
-'reset_password_subtitle' => 'أدخل كلمة مرور جديدة ثم أكدها لاستعادة الوصول إلى حسابك.',
+    'reset_password_title' => 'أنشئ كلمة مرور جديدة',
+    'reset_password_subtitle' => 'أدخل كلمة مرور جديدة ثم أكدها لاستعادة الوصول إلى حسابك.',
     'reset_password' => 'إعادة تعيين كلمة المرور',
-'verify_email_title' => 'تحقق من عنوان بريدك الإلكتروني',
+    'verify_email_title' => 'تحقق من عنوان بريدك الإلكتروني',
     'verify_email_message' => 'شكراً لك على التسجيل! قبل البدء، هل يمكنك التحقق من عنوان بريدك الإلكتروني بالنقر على الرابط الذي أرسلناه لك للتو؟ إذا لم تستلم البريد الإلكتروني، سنرسل لك آخر بكل سرور.',
     'verification_link_sent' => 'تم إرسال رابط تحقق جديد إلى عنوان البريد الإلكتروني الذي قدمته أثناء التسجيل.',
     'resend_verification_email' => 'إعادة إرسال بريد التحقق',
-'confirm_password_title' => 'تأكيد كلمة المرور',
+    'confirm_password_title' => 'تأكيد كلمة المرور',
     'confirm_password_message' => 'هذه منطقة آمنة من التطبيق. يرجى تأكيد كلمة المرور قبل المتابعة.',
 
     // Dashboard
@@ -802,13 +802,13 @@ return [
     'settings' => 'الإعدادات',
     'documentations' => 'التوثيق',
     'cms_pages' => 'صفحات CMS',
-'cms_pages_intro' => 'استكشف صفحات السياسات والأدلة والمعلومات المنسقة لدينا.',
-'cms_highlight_badge' => 'أحدث تحديث',
-'cms_highlight_settings' => 'إعدادات إبراز CMS',
-'cms_highlight_limit_label' => 'عدد الصفحات المعروضة',
-'cms_highlight_button_text_label' => 'نص الزر',
-'cms_highlight_button_link_label' => 'رابط الزر (اختياري)',
-'cms_highlight_default_button' => 'عرض جميع الصفحات',
+    'cms_pages_intro' => 'استكشف صفحات السياسات والأدلة والمعلومات المنسقة لدينا.',
+    'cms_highlight_badge' => 'أحدث تحديث',
+    'cms_highlight_settings' => 'إعدادات إبراز CMS',
+    'cms_highlight_limit_label' => 'عدد الصفحات المعروضة',
+    'cms_highlight_button_text_label' => 'نص الزر',
+    'cms_highlight_button_link_label' => 'رابط الزر (اختياري)',
+    'cms_highlight_default_button' => 'عرض جميع الصفحات',
     'landing_page' => 'الصفحة الرئيسية',
     'social_media' => 'وسائل التواصل الاجتماعي',
     'wallet_analytics' => 'تحليلات المحفظة',
@@ -1462,7 +1462,7 @@ return [
 
     // Docs
     'no_documentation_found' => 'لم يتم العثور على توثيق',
-    
+
     // Notes - Additional Labels
     'file_attachments' => 'مرفقات الملف',
     'preview_content' => 'محتوى المعاينة',
@@ -1473,16 +1473,17 @@ return [
     'brief_summary_note' => 'ملخص موجز لملاحظتك (مُوصى به لرؤية أفضل في السوق)',
     'brief_summary_placeholder' => 'ملخص موجز لملاحظتك...',
     'auto_generated_summary_placeholder' => 'سيظهر الملخص التلقائي هنا...',
-    'max_50mb_per_file' => 'حد أقصى 50 ميجابايت لكل ملف',
-    'max_5mb_per_file' => 'حد أقصى 5 ميجابايت لكل ملف (مميز: 50 ميجابايت)',
+    'max_50mb_per_file' => 'حد أقصى 100 ميجابايت لكل ملف',
+    'max_100mb_per_file' => 'حد أقصى 100 ميجابايت لكل ملف',
+    'max_5mb_per_file' => 'حد أقصى 5 ميجابايت لكل ملف (مميز: 100 ميجابايت)',
     'file_size_limit_basic' => 'حد حجم الملف: 5 ميجابايت للمستخدمين الأساسيين.',
-    'file_size_limit_premium' => 'لـ 50 ميجابايت لكل ملف.',
+    'file_size_limit_premium' => 'لـ 100 ميجابايت لكل ملف.',
     'upgrade_to_premium_arrow' => 'ترقية إلى المميز →',
     'status' => 'الحالة',
     'active' => 'نشط',
     'sold' => 'مباع',
     'inactive' => 'غير نشط',
-    
+
     // Notes - Additional Labels
     'summary' => 'الملخص',
     'summary_optional_ai' => '(اختياري - يمكن للذكاء الاصطناعي إنشاءه)',
@@ -1494,12 +1495,12 @@ return [
     'share_thoughts_about_note' => 'شارك أفكارك حول هذه الملاحظة...',
     'rating_summary' => 'ملخص التقييم',
     'example_how_to_create_first_note' => 'مثال، كيفية إنشاء ملاحظتك الأولى',
-    
+
     // JavaScript Confirm Messages
     'delete_social_media_link_confirm' => 'هل أنت متأكد أنك تريد حذف رابط الوسائط الاجتماعية هذا؟',
     'delete_section_confirm' => 'هل أنت متأكد أنك تريد حذف هذا القسم؟',
     'delete_documentation_confirm' => 'هل أنت متأكد أنك تريد حذف هذا التوثيق؟',
-    
+
     // Controller Messages - General
     'ticket_updated_successfully' => 'تم تحديث التذكرة بنجاح!',
     'ticket_assigned_successfully' => 'تم تعيين التذكرة بنجاح!',
@@ -1520,13 +1521,13 @@ return [
     'fill_required_s3_credentials' => 'يرجى ملء جميع بيانات الاعتماد المطلوبة لـ S3.',
     's3_connection_test_successful' => 'نجح اختبار اتصال S3! يمكنك الآن استخدام S3 للنسخ الاحتياطي.',
     's3_connection_test_failed' => 'فشل اختبار اتصال S3: :error',
-    
+
     // Additional Labels
     'comment_optional' => 'تعليق (اختياري)',
     'none_root' => 'لا شيء (الجذر)',
     'select_existing_tag' => 'اختر علامة موجودة...',
     'delete_ticket_confirm' => 'هل أنت متأكد أنك تريد حذف هذه التذكرة؟ لا يمكن التراجع عن هذا الإجراء.',
-    
+
     // Admin Dashboard - Topup & Midtrans
     'topup_statistics' => 'إحصائيات إعادة الشحن',
     'midtrans_statistics' => 'إحصائيات Midtrans',
@@ -1542,7 +1543,7 @@ return [
     'this_month' => 'هذا الشهر',
     'day_count' => ':count يوم',
     'order_id' => 'معرف الطلب',
-    
+
     // Workspace & Folder UI
     'workspace_root' => 'جذر مساحة العمل',
     'empty_workspace' => 'مساحة عمل فارغة',
@@ -1555,7 +1556,7 @@ return [
     'back_to_workspace' => 'العودة إلى مساحة العمل',
     'creating_folder_in_workspace' => 'إنشاء مجلد في مساحة العمل',
     'creating_folder_in' => 'إنشاء مجلد داخل',
-    
+
     // Workspace Marketplace
     'for_sale' => 'للبيع',
     'sold' => 'تم البيع',
@@ -1678,7 +1679,7 @@ return [
     'review_reply_delete_confirmation' => 'حذف هذا الرد؟',
     'user_placeholder_name' => 'مستخدم',
     'rating_count' => '{1}:count تقييم|[2,*]:count تقييمات',
-    
+
     // Featured Notes
     'featured_note' => 'ملاحظة مميزة',
     'featured_notes' => 'ملاحظات مميزة',
@@ -1692,7 +1693,7 @@ return [
     'featured_badge' => 'مميز',
     'by_label' => 'بواسطة',
     'viewed_time_ago' => 'تمت المشاهدة قبل :time',
-    
+
     // Collections
     'collection_add_purchased_button' => 'إضافة الملاحظات المشتراة',
     'collection_select_notes_title' => 'اختر الملاحظات لإضافتها',
@@ -1704,7 +1705,7 @@ return [
     'collection_empty_with_purchased' => 'لديك :count ملاحظات مشتراة. انقر على ":button" أعلاه لإضافتها إلى هذه المجموعة.',
     'collection_empty_without_purchased' => 'أضف ملاحظات من السوق إلى هذه المجموعة أو قم بشراء ملاحظات أولاً.',
     'collection_browse_marketplace' => 'تصفح السوق',
-    
+
     // Marketplace
     'share_marketplace' => 'شارك المتجر:',
     'share_on_facebook' => 'المشاركة على فيسبوك',
@@ -1728,7 +1729,7 @@ return [
     'plugins' => 'الإضافات',
     'plugins_coming_soon' => 'قريباً',
     'plugins_description' => 'ستسمح الإضافات بإضافة ميزات إضافية إلى مساحة العمل الخاصة بك. هذه الميزة قيد التطوير.',
-    
+
     // Withdraw approval
     'time_elapsed' => 'الوقت المنقضي',
     'hours' => 'ساعات',
@@ -1737,7 +1738,7 @@ return [
     'minimum_24_hours_required' => 'يُطلب الحد الأدنى 24 ساعة قبل الموافقة',
     'withdraw_approval_wait_time' => 'وقت الانتظار للموافقة',
     'hours_remaining' => 'ساعات متبقية',
-    
+
     // Note selling
     'already_sold' => 'تم البيع بالفعل',
 ];

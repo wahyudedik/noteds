@@ -14,11 +14,13 @@ use App\Models\User;
 use App\Models\WorkspaceActivityLog;
 use App\Services\NoteActivityService;
 use App\Services\NotificationService;
+use App\Services\LargeFileUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 
 class NoteController extends Controller
 {
@@ -113,26 +115,36 @@ class NoteController extends Controller
                 ->with('error', "Note creation limit reached! You can only create {$limit} notes on the Basic plan. Upgrade to Premium for unlimited notes.");
         }
 
-        // Check file sizes before validation (for better error handling)
+        // Validate and handle file uploads (including large files)
         $user = auth()->user();
-        if ($request->hasFile('attachments') && !$user->hasPremium()) {
-            $maxSize = 5242880; // 5MB
-            $largeFiles = [];
+        $uploadService = app(LargeFileUploadService::class);
+        
+        if ($request->hasFile('attachments')) {
+            $files = $request->file('attachments');
+            $validationErrors = [];
+            $largeFilesWarning = [];
             
-            foreach ($request->file('attachments') as $file) {
-                if ($file->getSize() > $maxSize) {
+            foreach ($files as $index => $file) {
+                $validation = $uploadService->validateFile($file, $user->hasPremium());
+                
+                if (!$validation['valid']) {
+                    $validationErrors["attachments.{$index}"] = $validation['error'];
+                } elseif (isset($validation['is_large']) && $validation['is_large']) {
                     $sizeInMB = round($file->getSize() / 1048576, 2);
-                    $largeFiles[] = $file->getClientOriginalName() . ' (' . $sizeInMB . 'MB)';
+                    $largeFilesWarning[] = $file->getClientOriginalName() . ' (' . $sizeInMB . 'MB)';
                 }
             }
             
-            if (!empty($largeFiles)) {
+            if (!empty($validationErrors)) {
                 return redirect()->route('notes.create')
                     ->withInput()
-                    ->withErrors([
-                        'attachments' => 'File size exceeds 5MB limit: ' . implode(', ', $largeFiles) . '. Please upgrade to Premium to upload larger files (up to 50MB).'
-                    ])
-                    ->with('upgrade_message', 'Upgrade to Premium to upload files up to 50MB per file.');
+                    ->withErrors($validationErrors)
+                    ->with('upgrade_message', !$user->hasPremium() ? 'Upgrade to Premium to upload files up to 100MB per file.' : null);
+            }
+            
+            // Store large files warning in session for frontend display
+            if (!empty($largeFilesWarning)) {
+                session()->flash('large_files_warning', $largeFilesWarning);
             }
         }
 
@@ -205,8 +217,8 @@ class NoteController extends Controller
             $validated['preview_content'] = Str::limit($content, 300);
         }
 
-        // Handle file uploads
-        $attachments = $this->handleFileUploads($request);
+        // Handle file uploads (with large file support)
+        $attachments = $this->handleFileUploadsWithProgress($request, $user);
         $validated['attachments'] = $attachments;
         $validated['file_count'] = count($attachments);
 
@@ -346,31 +358,133 @@ class NoteController extends Controller
     {
         $this->authorize('update', $note);
 
-        // Check file sizes before validation (for better error handling)
         $user = auth()->user();
-        if ($request->hasFile('attachments') && !$user->hasPremium()) {
-            $maxSize = 5242880; // 5MB
-            $largeFiles = [];
+        
+        // Check if note has been sold - prevent changing certain fields
+        $hasTransactions = $note->transactions()
+            ->where('status', 'success')
+            ->exists();
+        
+        if ($hasTransactions) {
+            // If note has been sold, prevent changing sale_mode and price-related fields
+            // These fields should remain unchanged to maintain transaction integrity
+            $request->merge([
+                'sale_mode' => $note->sale_mode,
+                'grace_period_days' => $note->grace_period_days,
+                'relist_price_multiplier' => $note->relist_price_multiplier,
+            ]);
+        }
+
+        // Validate and handle file uploads (including large files)
+        $uploadService = app(LargeFileUploadService::class);
+        
+        if ($request->hasFile('attachments')) {
+            $files = $request->file('attachments');
+            $validationErrors = [];
+            $largeFilesWarning = [];
             
-            foreach ($request->file('attachments') as $file) {
-                if ($file->getSize() > $maxSize) {
+            foreach ($files as $index => $file) {
+                $validation = $uploadService->validateFile($file, $user->hasPremium());
+                
+                if (!$validation['valid']) {
+                    $validationErrors["attachments.{$index}"] = $validation['error'];
+                } elseif (isset($validation['is_large']) && $validation['is_large']) {
                     $sizeInMB = round($file->getSize() / 1048576, 2);
-                    $largeFiles[] = $file->getClientOriginalName() . ' (' . $sizeInMB . 'MB)';
+                    $largeFilesWarning[] = $file->getClientOriginalName() . ' (' . $sizeInMB . 'MB)';
                 }
             }
             
-            if (!empty($largeFiles)) {
+            if (!empty($validationErrors)) {
                 return redirect()->route('notes.edit', $note)
                     ->withInput()
-                    ->withErrors([
-                        'attachments' => 'File size exceeds 5MB limit: ' . implode(', ', $largeFiles) . '. Please upgrade to Premium to upload larger files (up to 50MB).'
-                    ])
-                    ->with('upgrade_message', 'Upgrade to Premium to upload files up to 50MB per file.');
+                    ->withErrors($validationErrors)
+                    ->with('upgrade_message', !$user->hasPremium() ? 'Upgrade to Premium to upload files up to 100MB per file.' : null);
+            }
+            
+            // Store large files warning in session for frontend display
+            if (!empty($largeFilesWarning)) {
+                session()->flash('large_files_warning', $largeFilesWarning);
             }
         }
 
         $validated = $request->validated();
         $validated['is_public'] = $request->has('is_public');
+
+        // Handle workspace and folder
+        $workspace = null;
+        $folder = null;
+        
+        // Handle folder first (because folder can determine workspace)
+        if ($request->has('folder_id')) {
+            $folderId = $request->input('folder_id');
+            if (!empty($folderId)) {
+                $folder = \App\Models\Folder::where('id', $folderId)
+                    ->where('user_id', $user->id)
+                    ->first();
+                
+                if ($folder) {
+                    $validated['folder_id'] = $folder->id;
+                    // If folder has workspace, use it
+                    if ($folder->workspace_id) {
+                        $workspace = $folder->workspace;
+                        $validated['workspace_id'] = $workspace->id;
+                    }
+                } else {
+                    // Invalid folder, remove it
+                    $validated['folder_id'] = null;
+                }
+            } else {
+                // Empty string means remove folder
+                $validated['folder_id'] = null;
+            }
+        }
+        // If folder_id not in request, keep existing (don't add to validated, will not be updated)
+        
+        // Handle workspace (can be set independently or by folder)
+        if ($request->has('workspace_id')) {
+            $workspaceId = $request->input('workspace_id');
+            if (!empty($workspaceId)) {
+                // Only process if not already set by folder
+                if (!isset($validated['workspace_id'])) {
+                    $workspace = \App\Models\Workspace::where('id', $workspaceId)
+                        ->where(function($q) use ($user) {
+                            $q->where('owner_id', $user->id)
+                              ->orWhereHas('members', function($q) use ($user) {
+                                  $q->where('users.id', $user->id);
+                              });
+                        })
+                        ->first();
+                    
+                    if ($workspace) {
+                        $validated['workspace_id'] = $workspace->id;
+                    } else {
+                        // Invalid workspace, but don't change if folder has workspace
+                        if (!($folder && $folder->workspace_id)) {
+                            $validated['workspace_id'] = null;
+                        }
+                    }
+                }
+            } else {
+                // Empty string means remove workspace (only if folder doesn't require it)
+                if (!($folder && $folder->workspace_id)) {
+                    $validated['workspace_id'] = null;
+                }
+            }
+        }
+        // If workspace_id not in request, keep existing (don't add to validated, will not be updated)
+        
+        // Load workspace and folder for activity log and redirect
+        if (isset($validated['workspace_id'])) {
+            $workspace = $workspace ?? \App\Models\Workspace::find($validated['workspace_id']);
+        } else if ($note->workspace_id) {
+            $workspace = $note->workspace;
+        }
+        
+        if (isset($validated['folder_id'])) {
+            $folder = $folder ?? ($validated['folder_id'] ? \App\Models\Folder::find($validated['folder_id']) : null);
+        } else if ($note->folder_id) {
+            $folder = $note->folder;
+        }
 
         // Handle preview content - auto-generate if not provided
         if (empty($validated['preview_content'])) {
@@ -393,8 +507,8 @@ class NoteController extends Controller
             $validated['content_hash'] = $contentHash;
         }
 
-        // Handle file uploads (merge with existing)
-        $newAttachments = $this->handleFileUploads($request);
+        // Handle file uploads (merge with existing, with large file support)
+        $newAttachments = $this->handleFileUploadsWithProgress($request, $user);
         $existingAttachments = $note->attachments ?? [];
         
         // Keep existing attachments unless explicitly removed
@@ -490,6 +604,28 @@ class NoteController extends Controller
             $note->setNotificationMetaValue('published_notified_at', now()->toIso8601String());
         }
 
+        // Log workspace activity if workspace changed
+        if ($workspace) {
+            WorkspaceActivityLog::record($workspace, 'note_updated', $user, [
+                'note_id' => $note->id,
+                'note_title' => $note->title,
+                'folder_id' => $folder?->id,
+            ]);
+        }
+
+        // Redirect based on context
+        if ($workspace) {
+            $redirectParams = ['workspace' => $workspace->id];
+            if ($folder) {
+                $redirectParams['folder'] = $folder->id;
+            }
+            return redirect()->route('workspaces.show', $redirectParams)
+                ->with('success', 'Note updated successfully.');
+        } elseif ($folder) {
+            return redirect()->route('folders.show', $folder)
+                ->with('success', 'Note updated successfully.');
+        }
+        
         return redirect()->route('notes.index')->with('success', 'Note updated successfully.');
     }
 
@@ -637,9 +773,17 @@ class NoteController extends Controller
     }
 
     /**
-     * Handle file uploads for notes
+     * Handle file uploads for notes (with large file support)
      */
     protected function handleFileUploads($request): array
+    {
+        return $this->handleFileUploadsWithProgress($request, auth()->user());
+    }
+
+    /**
+     * Handle file uploads with progress tracking for large files
+     */
+    protected function handleFileUploadsWithProgress($request, $user): array
     {
         if (!$request->hasFile('attachments')) {
             return [];
@@ -647,45 +791,83 @@ class NoteController extends Controller
 
         $files = $request->file('attachments');
         $attachments = [];
+        $uploadService = app(LargeFileUploadService::class);
 
-        // Ensure private storage directory exists
-        if (!Storage::disk('private')->exists('notes')) {
-            Storage::disk('private')->makeDirectory('notes');
+        // Increase execution time and memory limit for large files
+        $hasLargeFile = false;
+        foreach ($files as $file) {
+            if ($file->getSize() >= LargeFileUploadService::LARGE_FILE_THRESHOLD) {
+                $hasLargeFile = true;
+                break;
+            }
         }
 
-        foreach ($files as $file) {
-            // Validate MIME type
-            $allowedMimes = [
-                'application/pdf',
-                'application/msword',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'text/plain',
-                'application/zip',
-                'application/x-rar-compressed',
-                'image/jpeg',
-                'image/png',
-                'image/gif',
-                'application/vnd.ms-excel',
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'application/vnd.ms-powerpoint',
-                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            ];
+        if ($hasLargeFile) {
+            // Increase time limit for large file uploads
+            set_time_limit(600); // 10 minutes
+            ini_set('max_execution_time', '600');
+            ini_set('memory_limit', '512M');
+        }
 
-            $mimeType = $file->getMimeType();
-            if (!in_array($mimeType, $allowedMimes)) {
-                continue; // Skip invalid files
+        foreach ($files as $index => $file) {
+            try {
+                // Validate MIME type
+                $allowedMimes = [
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'text/plain',
+                    'application/zip',
+                    'application/x-rar-compressed',
+                    'image/jpeg',
+                    'image/png',
+                    'image/gif',
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'application/vnd.ms-powerpoint',
+                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                ];
+
+                $mimeType = $file->getMimeType();
+                if (!in_array($mimeType, $allowedMimes)) {
+                    continue; // Skip invalid files
+                }
+
+                // Check if file is large (40MB+)
+                $isLargeFile = $file->getSize() >= LargeFileUploadService::LARGE_FILE_THRESHOLD;
+
+                if ($isLargeFile) {
+                    // Use large file upload service with progress tracking
+                    $uploadId = Str::uuid();
+                    $progressCallback = function($progress, $uploaded, $total) use ($uploadId, $uploadService) {
+                        $uploadService->setUploadProgress($uploadId, $progress, $uploaded, $total);
+                    };
+
+                    $attachment = $uploadService->handleLargeFileUpload($file, $user->id, $progressCallback);
+                    $attachments[] = $attachment;
+
+                    // Clear progress after upload
+                    session()->forget("upload_progress_{$uploadId}");
+                } else {
+                    // Use regular upload for smaller files
+                    $attachment = $uploadService->handleRegularFile($file, $user->id);
+                    $attachments[] = $attachment;
+                }
+
+            } catch (\Exception $e) {
+                // Log error but continue with other files
+                \Log::error('File upload failed', [
+                    'user_id' => $user->id,
+                    'filename' => $file->getClientOriginalName(),
+                    'error' => $e->getMessage(),
+                ]);
+
+                // Add error to session for display
+                session()->flash('upload_errors', array_merge(
+                    session('upload_errors', []),
+                    [$file->getClientOriginalName() => $e->getMessage()]
+                ));
             }
-
-            // Generate unique filename
-            $filename = Str::uuid() . '_' . Str::slug($file->getClientOriginalName());
-            $path = $file->storeAs('notes/' . auth()->id(), $filename, 'private');
-
-            $attachments[] = [
-                'filename' => $file->getClientOriginalName(),
-                'path' => $path,
-                'size' => $file->getSize(),
-                'mime' => $mimeType,
-            ];
         }
 
         return $attachments;

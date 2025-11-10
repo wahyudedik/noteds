@@ -18,44 +18,60 @@
             <p class="mt-2 text-base text-gray-600">{{ __('messages.update_note_information') }}</p>
         </div>
 
+        <!-- Flash Messages -->
+        @if (session('error'))
+            <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+                        @if (!auth()->user()->hasPremium() || session('upgrade_message'))
+                            <div class="mt-3">
+                                <a href="{{ route('subscription.create') }}"
+                                    class="inline-flex items-center text-sm font-semibold text-red-600 hover:text-red-700 transition-colors duration-200">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                    </svg>
+                                    {{ __('messages.upgrade_to_premium') }} →
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if (session('success'))
+            <div class="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Form Card -->
         <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
             <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
                 <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.note_details') }}</h2>
             </div>
             <div class="p-6">
-            <!-- Flash Messages -->
-            @if(session('error') || session('upgrade_message'))
-                <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <div class="ml-3 flex-1">
-                            @if(session('error'))
-                                <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
-                            @endif
-                            @if(session('upgrade_message'))
-                                <p class="text-sm font-medium text-red-800">{{ session('upgrade_message') }}</p>
-                            @endif
-                            @if(!auth()->user()->hasPremium() || session('upgrade_message'))
-                                <div class="mt-3">
-                                    <a href="{{ route('subscription.create') }}" class="inline-flex items-center text-sm font-semibold text-red-600 hover:text-red-700 transition-colors duration-200">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                        </svg>
-                                        Upgrade to Premium →
-                                    </a>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            <form action="{{ route('notes.update', $note) }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('notes.update', $note) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -97,14 +113,50 @@
                         @enderror
                     </div>
 
-                    <!-- Summary -->
+                    <!-- AI Assistant (for summary and tags) -->
+                    <div
+                        class="flex items-start gap-3 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-sm font-semibold text-gray-900 mb-1">AI Assistant</h4>
+                            <p class="text-xs text-gray-600 mb-3">Let AI help you generate a summary and suggest
+                                tags</p>
+                            <button type="button" id="ai-analyze-btn"
+                                class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                <span id="ai-btn-text">Generate Summary & Tags</span>
+                                <svg id="ai-loading" class="hidden w-4 h-4 ml-2 animate-spin" fill="none"
+                                    viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                        stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Summary (Auto-generated by AI) -->
                     <div>
                         <label for="summary" class="block text-sm font-medium text-gray-700 mb-2">
-                            {{ __('messages.summary') }} <span class="text-xs text-gray-500">{{ __('messages.summary_optional') }}</span>
+                            {{ __('messages.summary') }} <span
+                                class="text-xs text-gray-500">{{ __('messages.summary_optional_ai') }}</span>
                         </label>
                         <textarea name="summary" id="summary" rows="3"
-                            placeholder="{{ __('messages.brief_summary_placeholder') }}"
+                            placeholder="{{ __('messages.auto_generated_summary_placeholder') }}"
                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 resize-y @error('summary') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">{{ old('summary', $note->summary) }}</textarea>
+                        <p class="mt-1 text-xs text-gray-500">{{ __('messages.brief_summary_note') }}</p>
                         @error('summary')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -184,12 +236,12 @@
                             </div>
                         @endif
 
-                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition-colors duration-200">
-                            <div class="space-y-1 text-center w-full">
+                        <div class="mt-1 flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition-colors duration-200">
+                            <div class="space-y-1 text-center">
                                 <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                     <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-4h-12m-6 4h.01M17 8h.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
-                                <div class="flex text-sm text-gray-600">
+                                <div class="flex text-sm text-gray-600 justify-center items-center">
                                     <label for="thumbnails" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                                         <span>Upload gambar</span>
                                         <input type="file" name="thumbnails[]" id="thumbnails" multiple accept="image/*" class="sr-only" onchange="handleThumbnailUpload(this)">
@@ -265,14 +317,61 @@
                                 </div>
                                 <p class="text-xs text-gray-500">
                                     @if(auth()->user()->hasPremium())
-                                        {{ __('messages.max_50mb_per_file') }}
+                                        Maksimal 100MB per file
                                     @else
                                         {{ __('messages.max_5mb_per_file') }}
                                     @endif
                                 </p>
                             </div>
                         </div>
+                        
+                        <!-- Large Files Warning -->
+                        @if(session('large_files_warning'))
+                            <div class="mt-3 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3 flex-1">
+                                        <p class="text-sm font-medium text-yellow-800">
+                                            File Besar Terdeteksi (40MB+)
+                                        </p>
+                                        <div class="mt-2 text-sm text-yellow-700">
+                                            <p>File berikut berukuran besar dan mungkin memerlukan waktu lebih lama untuk diupload:</p>
+                                            <ul class="mt-1 list-disc list-inside">
+                                                @foreach(session('large_files_warning') as $file)
+                                                    <li>{{ $file }}</li>
+                                                @endforeach
+                                            </ul>
+                                            <p class="mt-2 font-semibold">⚠️ Harap jangan menutup halaman ini selama proses upload berlangsung.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Upload Progress Bar (for large files) -->
+                        <div id="upload-progress-container" class="mt-3 hidden">
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-blue-800">Uploading large file...</span>
+                                    <span id="upload-progress-percent" class="text-sm font-semibold text-blue-600">0%</span>
+                                </div>
+                                <div class="w-full bg-blue-200 rounded-full h-2.5">
+                                    <div id="upload-progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                                <div class="mt-2 text-xs text-blue-600">
+                                    <span id="upload-progress-text">Preparing upload...</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div id="file-list" class="mt-3 space-y-2"></div>
+                        
                         @error('attachments')
                             <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
                                 <p class="text-sm text-red-800">{!! $message !!}</p>
@@ -291,6 +390,17 @@
                                 <p class="text-sm text-red-800">{!! $message !!}</p>
                             </div>
                         @enderror
+                        
+                        @if(session('upload_errors'))
+                            <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <p class="text-sm font-medium text-red-800 mb-2">Upload errors:</p>
+                                <ul class="list-disc list-inside text-sm text-red-700">
+                                    @foreach(session('upload_errors') as $filename => $error)
+                                        <li><strong>{{ $filename }}:</strong> {{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Price and Status -->
@@ -858,28 +968,182 @@ function updatePriceGuidanceUI() {
     updateDiscountPreview();
 updatePriceGuidanceUI();
 
-    // File upload preview
+    // File upload preview with large file detection
     const fileInput = document.getElementById('attachments');
     const fileList = document.getElementById('file-list');
+    const uploadProgressContainer = document.getElementById('upload-progress-container');
+    const uploadProgressBar = document.getElementById('upload-progress-bar');
+    const uploadProgressPercent = document.getElementById('upload-progress-percent');
+    const uploadProgressText = document.getElementById('upload-progress-text');
+    const LARGE_FILE_THRESHOLD = 41943040; // 40MB in bytes
+    
+    function formatFileSize(bytes) {
+        if (bytes >= 1073741824) {
+            return (bytes / 1073741824).toFixed(2) + ' GB';
+        } else if (bytes >= 1048576) {
+            return (bytes / 1048576).toFixed(2) + ' MB';
+        } else if (bytes >= 1024) {
+            return (bytes / 1024).toFixed(2) + ' KB';
+        }
+        return bytes + ' bytes';
+    }
+    
     if (fileInput && fileList) {
         fileInput.addEventListener('change', function() {
             fileList.innerHTML = '';
-            Array.from(this.files).forEach((file, index) => {
+            const files = Array.from(this.files);
+            let hasLargeFile = false;
+            
+            files.forEach((file, index) => {
+                const isLargeFile = file.size >= LARGE_FILE_THRESHOLD;
+                if (isLargeFile) {
+                    hasLargeFile = true;
+                }
+                
                 const fileItem = document.createElement('div');
-                fileItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200';
+                fileItem.className = `flex items-center justify-between p-3 rounded-lg border ${isLargeFile ? 'bg-yellow-50 border-yellow-300' : 'bg-gray-50 border-gray-200'}`;
+                
+                let warningIcon = '';
+                if (isLargeFile) {
+                    warningIcon = `
+                        <svg class="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    `;
+                }
+                
                 fileItem.innerHTML = `
                     <div class="flex items-center flex-1 min-w-0">
+                        ${warningIcon}
                         <svg class="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">${file.name}</p>
-                            <p class="text-xs text-gray-500">${(file.size / 1024).toFixed(2)} KB</p>
+                            <p class="text-sm font-medium ${isLargeFile ? 'text-yellow-900' : 'text-gray-900'} truncate">${file.name}</p>
+                            <p class="text-xs ${isLargeFile ? 'text-yellow-700' : 'text-gray-500'}">
+                                ${formatFileSize(file.size)}
+                                ${isLargeFile ? '<span class="ml-2 font-semibold">(Large file - upload may take longer)</span>' : ''}
+                            </p>
                         </div>
                     </div>
                 `;
                 fileList.appendChild(fileItem);
             });
+            
+            // Show warning for large files
+            if (hasLargeFile && uploadProgressContainer) {
+                uploadProgressContainer.classList.remove('hidden');
+                uploadProgressText.textContent = 'File besar terdeteksi. Upload akan dimulai saat form dikirim...';
+            } else if (uploadProgressContainer) {
+                uploadProgressContainer.classList.add('hidden');
+            }
+        });
+    }
+
+    // AI Analyze Button (for summary and tags)
+    const aiAnalyzeBtn = document.getElementById('ai-analyze-btn');
+    const aiBtnText = document.getElementById('ai-btn-text');
+    const aiLoading = document.getElementById('ai-loading');
+    const summaryTextarea = document.getElementById('summary');
+
+    if (aiAnalyzeBtn) {
+        aiAnalyzeBtn.addEventListener('click', async function() {
+            // Get plain text content from Quill for AI analysis
+            const content = quill.getText().trim();
+
+            if (!content) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Content',
+                    text: 'Please enter some content first.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+                return;
+            }
+
+            // Show loading state
+            aiAnalyzeBtn.disabled = true;
+            aiBtnText.textContent = 'Analyzing...';
+            aiLoading.classList.remove('hidden');
+
+            try {
+                const response = await fetch('{{ route('ai.analyze') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        content: content
+                    })
+                });
+
+                const data = await response.json();
+
+                // Check premium requirement
+                if (data.error && data.error === 'premium_required') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Premium Required',
+                        text: 'AI features require a premium subscription.',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    aiAnalyzeBtn.disabled = false;
+                    aiLoading.classList.add('hidden');
+                    aiBtnText.textContent = 'Generate Summary & Tags';
+                    return;
+                }
+
+                if (data.success) {
+                    // Fill summary
+                    if (data.data.summary && summaryTextarea) {
+                        summaryTextarea.value = data.data.summary;
+                    }
+
+                    // Add suggested tags
+                    if (data.data.tags && data.data.tags.length > 0) {
+                        data.data.tags.forEach(tag => {
+                            if (!tagExists(tag)) {
+                                addTag(tag);
+                            }
+                        });
+                    }
+
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Generated!',
+                        text: 'AI has generated summary and suggested tags.',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                } else {
+                    throw new Error(data.message || 'Failed to analyze content');
+                }
+            } catch (error) {
+                console.error('AI analysis error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Failed to analyze content. Please try again.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            } finally {
+                aiAnalyzeBtn.disabled = false;
+                aiLoading.classList.add('hidden');
+                aiBtnText.textContent = 'Generate Summary & Tags';
+            }
         });
     }
 
