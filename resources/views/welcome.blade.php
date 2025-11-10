@@ -201,24 +201,27 @@
         <!-- CMS Pages Highlight -->
         @if(isset($cmsHighlightSection, $highlightedCmsPages) && $cmsHighlightSection && $highlightedCmsPages->count() > 0)
             @php
-                $bgClass = $cmsHighlightSection->background_color;
-                $textClass = $cmsHighlightSection->text_color;
+                $bgClass = $cmsHighlightSection->background_color ?? '';
+                $textClass = $cmsHighlightSection->text_color ?? '';
                 $alignment = $cmsHighlightSection->alignment ?? 'left';
                 $buttonText = data_get($cmsHighlightSection->content, 'button_text') ?: __('messages.cms_highlight_default_button');
                 $buttonLink = data_get($cmsHighlightSection->content, 'button_link') ?: route('cms.index');
                 $title = $cmsHighlightSection->title ?: __('messages.cms_pages');
                 $subtitle = $cmsHighlightSection->subtitle ?: __('messages.cms_pages_intro');
-                $headingClass = \Illuminate\Support\Str::startsWith($textClass, 'text-') ? $textClass : 'text-gray-900';
-                $paragraphClass = \Illuminate\Support\Str::startsWith($textClass, 'text-') ? $textClass : 'text-gray-600';
-                $inlineTextColor = ($textClass && !\Illuminate\Support\Str::startsWith($textClass, 'text-')) ? $textClass : null;
+
+                $headingClass = \Illuminate\Support\Str::startsWith((string) $textClass, 'text-') ? $textClass : 'text-gray-900';
+                $paragraphClass = \Illuminate\Support\Str::startsWith((string) $textClass, 'text-') ? $textClass : 'text-gray-600';
+                $inlineTextColor = ($textClass && !\Illuminate\Support\Str::startsWith((string) $textClass, 'text-')) ? $textClass : null;
+
+                $hasUtilityBg = $bgClass && \Illuminate\Support\Str::startsWith((string) $bgClass, 'bg-');
                 $sectionAlignmentClass = match($alignment) {
                     'center' => 'text-center',
                     'right' => 'text-right',
                     default => 'text-left',
                 };
             @endphp
-            <section class="py-16 lg:py-20 border-b border-gray-100 {{ \Illuminate\Support\Str::startsWith($bgClass, 'bg-') ? $bgClass : '' }}"
-                @if($bgClass && !\Illuminate\Support\Str::startsWith($bgClass, 'bg-')) style="background-color: {{ $bgClass }};" @endif>
+            <section class="py-16 lg:py-20 border-b border-gray-100 {{ $hasUtilityBg ? $bgClass : '' }}"
+                @if($bgClass && !$hasUtilityBg) style="background-color: {{ $bgClass }};" @endif>
                 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 {{ $sectionAlignmentClass }}">
                         <div class="{{ $sectionAlignmentClass }} w-full md:w-auto">
