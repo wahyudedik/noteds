@@ -1919,45 +1919,6 @@
                 // Load bookmarks on page load
                 loadBookmarks();
             @endif
-
-            // Grace Period Countdown Timer
-            const countdownElement = document.getElementById('grace-period-countdown');
-            if (countdownElement) {
-                const endTime = parseInt(countdownElement.getAttribute('data-end-time'));
-                
-                function updateCountdown() {
-                    const now = Math.floor(Date.now() / 1000);
-                    const timeLeft = endTime - now;
-                    
-                    if (timeLeft <= 0) {
-                        countdownElement.textContent = 'Grace period telah berakhir';
-                        countdownElement.classList.remove('text-green-900');
-                        countdownElement.classList.add('text-red-600');
-                        return;
-                    }
-                    
-                    const days = Math.floor(timeLeft / 86400);
-                    const hours = Math.floor((timeLeft % 86400) / 3600);
-                    const minutes = Math.floor((timeLeft % 3600) / 60);
-                    const seconds = timeLeft % 60;
-                    
-                    let countdownText = '';
-                    if (days > 0) {
-                        countdownText = `${days} hari ${hours} jam ${minutes} menit`;
-                    } else if (hours > 0) {
-                        countdownText = `${hours} jam ${minutes} menit ${seconds} detik`;
-                    } else if (minutes > 0) {
-                        countdownText = `${minutes} menit ${seconds} detik`;
-                    } else {
-                        countdownText = `${seconds} detik`;
-                    }
-                    
-                    countdownElement.textContent = countdownText;
-                }
-                
-                updateCountdown();
-                setInterval(updateCountdown, 1000);
-            }
         @endauth
     @endpush
 @endsection
