@@ -711,6 +711,9 @@ const minDefaultPrice = parseFloat(priceGuidanceData?.min_default ?? 0) || 0;
 const recommendedMultiplier = parseFloat(priceGuidanceData?.recommended_multiplier ?? 0) || 0;
 const categoryMinRules = Array.isArray(priceGuidanceData?.category_rules) ? priceGuidanceData.category_rules : [];
 
+// Declare tagsContainer early so it can be used in functions below
+const tagsContainer = document.getElementById('tags-container');
+
 function formatCurrency(amount) {
     if (!currencyFormatter) {
         return 'Rp ' + Number(amount || 0).toLocaleString('id-ID');
@@ -731,6 +734,9 @@ function slugify(text) {
 }
 
 function getSelectedTagValues() {
+    if (!tagsContainer) {
+        return [];
+    }
     return Array.from(tagsContainer.querySelectorAll('input[type="hidden"]'))
         .map(input => input.value || '')
         .filter(Boolean);
@@ -877,48 +883,23 @@ updatePriceGuidanceUI();
         });
     }
 
+    // Tag management (tagsContainer already declared above)
     const tagInput = document.getElementById('tag-input');
     const tagSelect = document.getElementById('tag-select');
-    const tagsContainer = document.getElementById('tags-container');
 
-    // Add tag from input
-    tagInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const tagValue = this.value.trim();
-            if (tagValue && !tagExists(tagValue)) {
-                addTag(tagValue);
-                this.value = '';
-            }
-        }
-    });
-
-    // Add tag from select
-    tagSelect.addEventListener('change', function() {
-        const tagValue = this.value.trim();
-        if (tagValue && !tagExists(tagValue)) {
-            addTag(tagValue);
-            this.value = '';
-        }
-    });
-
-    // Remove tag
-    tagsContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-tag') || e.target.closest('.remove-tag')) {
-            const tagItem = e.target.closest('.tag-item');
-            if (tagItem) {
-                tagItem.remove();
-                updatePriceGuidanceUI();
-            }
-        }
-    });
-
+    // Tag management helper functions
     function tagExists(tagName) {
+        if (!tagsContainer) {
+            return false;
+        }
         return Array.from(tagsContainer.querySelectorAll('input[type="hidden"]'))
             .some(input => input.value.toLowerCase() === tagName.toLowerCase());
     }
 
     function addTag(tagName) {
+        if (!tagsContainer) {
+            return;
+        }
         const tagItem = document.createElement('span');
         tagItem.className = 'tag-item inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200';
         tagItem.innerHTML = `
@@ -931,7 +912,42 @@ updatePriceGuidanceUI();
             </button>
         `;
         tagsContainer.appendChild(tagItem);
-    updatePriceGuidanceUI();
+        updatePriceGuidanceUI();
+    }
+
+    // Setup tag management event listeners (only if elements exist)
+    if (tagInput && tagSelect && tagsContainer) {
+        // Add tag from input
+        tagInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const tagValue = this.value.trim();
+                if (tagValue && !tagExists(tagValue)) {
+                    addTag(tagValue);
+                    this.value = '';
+                }
+            }
+        });
+
+        // Add tag from select
+        tagSelect.addEventListener('change', function() {
+            const tagValue = this.value.trim();
+            if (tagValue && !tagExists(tagValue)) {
+                addTag(tagValue);
+                this.value = '';
+            }
+        });
+
+        // Remove tag
+        tagsContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-tag') || e.target.closest('.remove-tag')) {
+                const tagItem = e.target.closest('.tag-item');
+                if (tagItem) {
+                    tagItem.remove();
+                    updatePriceGuidanceUI();
+                }
+            }
+        });
     }
 });
 </script>
