@@ -145,6 +145,56 @@
                                     {{ $note->total_reviews == 1 ? __('messages.review') : __('messages.reviews_count') }})</span>
                             </div>
                         @endif
+                        
+                        <!-- Sale Mode Badge -->
+                        @if($note->sale_mode)
+                            <div class="mb-3">
+                                @if($note->isScarcityMode())
+                                    <div class="relative inline-block group">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 cursor-help">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                            </svg>
+                                            Scarcity Mode
+                                        </span>
+                                        <!-- Tooltip -->
+                                        <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
+                                            <div class="font-semibold mb-2">Scarcity Mode</div>
+                                            <ul class="space-y-1 text-gray-300">
+                                                <li>• Buyer hanya bisa beli 1x per user</li>
+                                                <li>• Buyer bisa resell dengan harga custom</li>
+                                                <li>• Original creator dapat komisi di setiap penjualan</li>
+                                                <li>• Grace period {{ $note->grace_period_days }} hari untuk pembelian ulang</li>
+                                                <li>• Setelah grace period, harga = original × {{ $note->relist_price_multiplier }}x</li>
+                                            </ul>
+                                            <div class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </div>
+                                @elseif($note->isStandardMode())
+                                    <div class="relative inline-block group">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 cursor-help">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                            </svg>
+                                            Standard Mode - Multiple Sales
+                                        </span>
+                                        <!-- Tooltip -->
+                                        <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
+                                            <div class="font-semibold mb-2">Standard Mode</div>
+                                            <ul class="space-y-1 text-gray-300">
+                                                <li>• Multiple sales (bisa dijual ke banyak buyer)</li>
+                                                <li>• Buyer tidak bisa resell</li>
+                                                <li>• Tidak ada komisi untuk original creator</li>
+                                                <li>• Ownership tetap dengan seller</li>
+                                                <li>• Cocok untuk konten yang perlu diakses ulang</li>
+                                            </ul>
+                                            <div class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+                        
                         @if ($note->price > 0)
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-yellow-100 flex-wrap">
                                 @php
@@ -762,6 +812,24 @@
                             </div>
                         @elseif($canBuy && $note->price > 0)
                             <div class="mt-6 pt-6 border-t border-gray-200">
+                                @if($note->isStandardMode())
+                                    <!-- Standard Mode Info for Buyer -->
+                                    <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <div class="flex items-start">
+                                            <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                            </svg>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-medium text-blue-800 mb-1">Standard Mode - Multiple Sales</p>
+                                                <p class="text-xs text-blue-700">
+                                                    Note ini menggunakan Standard Mode. Anda bisa membeli dan mengakses note ini kapan saja, 
+                                                    tetapi <strong>tidak bisa menjual kembali</strong> ke buyer lain. 
+                                                    Note ini bisa dibeli oleh banyak buyer secara bersamaan.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                                 <form action="{{ route('marketplace.purchase', $note) }}" method="POST">
                                     @csrf
                                     <button type="submit"
@@ -867,10 +935,72 @@
                                     <p class="text-sm text-gray-600 mt-3">
                                         {!! __('messages.buyer_resale_notice') !!}
                                     </p>
+                                    <div class="mt-4">
+                                        <a href="{{ route('notes.resale.form', $note) }}" 
+                                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Set Harga & Jual Kembali
+                                        </a>
+                                    </div>
                                 @endif
                             </div>
                         @elseif($hasPurchasedBefore && !$isNoteOwner)
                             <div class="mt-6 pt-6 border-t border-gray-200">
+                                @if($canRepurchase && $note->isScarcityMode())
+                                    <!-- Can Repurchase (Scarcity Mode) -->
+                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                        <div class="flex items-start">
+                                            <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                            </svg>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-medium text-blue-800 mb-1">Beli Kembali Catatan Ini</p>
+                                                <p class="text-xs text-blue-700 mb-3">
+                                                    Anda sudah pernah membeli dan menjual catatan ini. Anda bisa membeli kembali sekarang.
+                                                </p>
+                                                @if($isWithinGracePeriod && $gracePeriodEndsAt)
+                                                    <div class="bg-green-100 border border-green-300 rounded p-2 mb-3">
+                                                        <p class="text-xs font-semibold text-green-800 mb-1">
+                                                            ⏰ Grace Period Aktif
+                                                        </p>
+                                                        <p class="text-xs text-green-700 mb-2">
+                                                            Beli kembali dengan harga original hingga:
+                                                        </p>
+                                                        <div id="grace-period-countdown" class="text-xs font-bold text-green-900" 
+                                                             data-end-time="{{ $gracePeriodEndsAt->timestamp }}">
+                                                            Menghitung...
+                                                        </div>
+                                                    </div>
+                                                @elseif($gracePeriodEndsAt && !$isWithinGracePeriod)
+                                                    <div class="bg-yellow-100 border border-yellow-300 rounded p-2 mb-3">
+                                                        <p class="text-xs font-semibold text-yellow-800 mb-1">
+                                                            ⚠️ Grace Period Berakhir
+                                                        </p>
+                                                        <p class="text-xs text-yellow-700">
+                                                            Grace period berakhir pada {{ $gracePeriodEndsAt->format('d M Y H:i') }}. Harga pembelian ulang sekarang lebih tinggi.
+                                                        </p>
+                                                    </div>
+                                                @endif
+                                                <div class="flex items-center gap-3">
+                                                    <div>
+                                                        <p class="text-xs text-gray-600">Harga Pembelian Ulang:</p>
+                                                        <p class="text-lg font-bold text-blue-900">{{ currency($repurchasePrice) }}</p>
+                                                    </div>
+                                                    <form action="{{ route('marketplace.purchase', $note) }}" method="POST" class="ml-auto">
+                                                        @csrf
+                                                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                                                            Beli Kembali
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                                
+                                <!-- Access Revoked Message -->
                                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                                     <div class="flex items-start">
                                         <svg class="w-5 h-5 text-yellow-600 mr-3 mt-0.5" fill="currentColor"
@@ -1714,6 +1844,45 @@
                 // Load bookmarks on page load
                 loadBookmarks();
             @endif
+
+            // Grace Period Countdown Timer
+            const countdownElement = document.getElementById('grace-period-countdown');
+            if (countdownElement) {
+                const endTime = parseInt(countdownElement.getAttribute('data-end-time'));
+                
+                function updateCountdown() {
+                    const now = Math.floor(Date.now() / 1000);
+                    const timeLeft = endTime - now;
+                    
+                    if (timeLeft <= 0) {
+                        countdownElement.textContent = 'Grace period telah berakhir';
+                        countdownElement.classList.remove('text-green-900');
+                        countdownElement.classList.add('text-red-600');
+                        return;
+                    }
+                    
+                    const days = Math.floor(timeLeft / 86400);
+                    const hours = Math.floor((timeLeft % 86400) / 3600);
+                    const minutes = Math.floor((timeLeft % 3600) / 60);
+                    const seconds = timeLeft % 60;
+                    
+                    let countdownText = '';
+                    if (days > 0) {
+                        countdownText = `${days} hari ${hours} jam ${minutes} menit`;
+                    } else if (hours > 0) {
+                        countdownText = `${hours} jam ${minutes} menit ${seconds} detik`;
+                    } else if (minutes > 0) {
+                        countdownText = `${minutes} menit ${seconds} detik`;
+                    } else {
+                        countdownText = `${seconds} detik`;
+                    }
+                    
+                    countdownElement.textContent = countdownText;
+                }
+                
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+            }
         @endauth
     @endpush
 @endsection

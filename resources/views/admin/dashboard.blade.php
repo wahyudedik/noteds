@@ -35,14 +35,17 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <div class="text-sm font-medium text-gray-500">{{ __('messages.pending_withdraws') }}</div>
                     <div class="text-2xl font-bold text-yellow-600">{{ $stats['pending_withdraws'] }}</div>
-                    <a href="{{ route('admin.withdraws.index') }}" class="text-xs text-blue-600 hover:underline">{{ __('messages.view_all') }}
+                    <a href="{{ route('admin.withdraws.index') }}"
+                        class="text-xs text-blue-600 hover:underline">{{ __('messages.view_all') }}
                         →</a>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <div class="text-sm font-medium text-gray-500">{{ __('messages.pending_subs') }}</div>
                     <div class="text-2xl font-bold text-orange-600">{{ $stats['pending_subscriptions'] }}</div>
-                    <div class="text-xs text-gray-600 mt-1">{{ $stats['active_subscriptions'] }} {{ __('messages.active') }}</div>
-                    <a href="{{ route('admin.subscriptions.index') }}" class="text-xs text-blue-600 hover:underline">{{ __('messages.manage') }}
+                    <div class="text-xs text-gray-600 mt-1">{{ $stats['active_subscriptions'] }}
+                        {{ __('messages.active') }}</div>
+                    <a href="{{ route('admin.subscriptions.index') }}"
+                        class="text-xs text-blue-600 hover:underline">{{ __('messages.manage') }}
                         →</a>
                 </div>
             </div>
@@ -109,16 +112,19 @@
                     </a>
                     <a href="{{ route('admin.settings.index') }}"
                         class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         <span class="text-sm font-medium text-gray-900">{{ __('messages.settings') }}</span>
                     </a>
                     <a href="{{ route('admin.documentations.index') }}"
                         class="flex items-center p-4 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors">
-                        <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
@@ -127,8 +133,7 @@
                     <a href="{{ route('admin.cms-pages.index') }}"
                         class="flex items-center p-4 bg-sky-50 rounded-lg hover:bg-sky-100 transition-colors">
                         <svg class="w-5 h-5 mr-2 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 20h9" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M16 4H8a2 2 0 00-2 2v14l6-3 6 3V6a2 2 0 00-2-2z" />
                         </svg>
@@ -178,17 +183,20 @@
                             {{ currency($walletStats['avg_wallet_balance']) }}</div>
                     </div>
                     <div class="bg-purple-50 rounded-lg p-4">
-                        <div class="text-xs font-medium text-purple-600 uppercase">{{ __('messages.total_transactions') }}</div>
+                        <div class="text-xs font-medium text-purple-600 uppercase">{{ __('messages.total_transactions') }}
+                        </div>
                         <div class="text-xl font-bold text-purple-900">
                             {{ currency($walletStats['total_successful_transactions']) }}</div>
                     </div>
                     <div class="bg-red-50 rounded-lg p-4">
-                        <div class="text-xs font-medium text-red-600 uppercase">{{ __('messages.total_withdrawals') }}</div>
+                        <div class="text-xs font-medium text-red-600 uppercase">{{ __('messages.total_withdrawals') }}
+                        </div>
                         <div class="text-xl font-bold text-red-900">
                             {{ currency($walletStats['total_withdrawals']) }}</div>
                     </div>
                     <div class="bg-yellow-50 rounded-lg p-4">
-                        <div class="text-xs font-medium text-yellow-600 uppercase">{{ __('messages.total_wallets') }}</div>
+                        <div class="text-xs font-medium text-yellow-600 uppercase">{{ __('messages.total_wallets') }}
+                        </div>
                         <div class="text-xl font-bold text-yellow-900">{{ $walletStats['total_wallets'] }}</div>
                     </div>
                     <div class="bg-indigo-50 rounded-lg p-4">
@@ -204,10 +212,14 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.rank') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.user') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.email') }}</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.balance') }}
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.rank') }}</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.user') }}</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.email') }}</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.balance') }}
                                     </th>
                                 </tr>
                             </thead>
@@ -222,7 +234,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">{{ __('messages.no_wallets_with_balance') }}</td>
+                                        <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">
+                                            {{ __('messages.no_wallets_with_balance') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -242,7 +255,8 @@
                 </h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     <div class="bg-purple-50 rounded-lg p-4">
-                        <div class="text-xs font-medium text-purple-600 uppercase">{{ __('messages.total_referrals') }}</div>
+                        <div class="text-xs font-medium text-purple-600 uppercase">{{ __('messages.total_referrals') }}
+                        </div>
                         <div class="text-xl font-bold text-purple-900">{{ $referralStats['total_referrals'] }}</div>
                     </div>
                     <div class="bg-blue-50 rounded-lg p-4">
@@ -251,7 +265,8 @@
                             {{ currency($referralStats['total_signup_rewards']) }}</div>
                     </div>
                     <div class="bg-green-50 rounded-lg p-4">
-                        <div class="text-xs font-medium text-green-600 uppercase">{{ __('messages.transaction_commissions') }}</div>
+                        <div class="text-xs font-medium text-green-600 uppercase">
+                            {{ __('messages.transaction_commissions') }}</div>
                         <div class="text-xl font-bold text-green-900">
                             {{ currency($referralStats['total_transaction_commission']) }}</div>
                     </div>
@@ -269,15 +284,20 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.rank') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.user') }}</th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.referrals') }}
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.rank') }}</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.user') }}</th>
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.referrals') }}
                                     </th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.signup') }}
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.signup') }}
                                     </th>
                                     <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
                                         {{ __('messages.transaction') }}</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.total_commission') }}
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.total_commission') }}
                                     </th>
                                 </tr>
                             </thead>
@@ -290,13 +310,15 @@
                                         <td class="px-4 py-2 text-sm text-center text-blue-600">
                                             {{ $refData['signup_count'] }} ({{ currency($refData['signup_total']) }})</td>
                                         <td class="px-4 py-2 text-sm text-center text-green-600">
-                                            {{ $refData['transaction_count'] }} ({{ currency($refData['transaction_total']) }})</td>
+                                            {{ $refData['transaction_count'] }}
+                                            ({{ currency($refData['transaction_total']) }})</td>
                                         <td class="px-4 py-2 text-sm font-bold text-right text-purple-600">
                                             {{ currency($refData['total_commission']) }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-4 py-4 text-center text-sm text-gray-500">{{ __('messages.no_referral_data') }}</td>
+                                        <td colspan="6" class="px-4 py-4 text-center text-sm text-gray-500">
+                                            {{ __('messages.no_referral_data') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -311,16 +333,21 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.user') }}</th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.total_signups') }}
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.user') }}</th>
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.total_signups') }}
                                     </th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.signup_rewards_label') }}
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.signup_rewards_label') }}
                                     </th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.referred_buyers') }}
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.referred_buyers') }}
                                     </th>
                                     <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
                                         {{ __('messages.transaction_rewards') }}</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.total_commission') }}
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.total_commission') }}
                                     </th>
                                 </tr>
                             </thead>
@@ -332,17 +359,20 @@
                                                 class="text-xs text-gray-500">{{ $refDetail['user']->email }}</span></td>
                                         <td class="px-4 py-2 text-sm text-center">{{ $refDetail['total_signups'] }}</td>
                                         <td class="px-4 py-2 text-sm text-center text-blue-600">
-                                            {{ $refDetail['signup_count'] }} × {{ currency($refDetail['signup_total']) }}</td>
+                                            {{ $refDetail['signup_count'] }} ×
+                                            {{ currency($refDetail['signup_total']) }}</td>
                                         <td class="px-4 py-2 text-sm text-center text-purple-600">
                                             {{ $refDetail['referred_buyers_count'] }}</td>
                                         <td class="px-4 py-2 text-sm text-center text-green-600">
-                                            {{ $refDetail['transaction_count'] }} × {{ currency($refDetail['transaction_total']) }}</td>
+                                            {{ $refDetail['transaction_count'] }} ×
+                                            {{ currency($refDetail['transaction_total']) }}</td>
                                         <td class="px-4 py-2 text-sm font-bold text-right text-purple-900">
                                             {{ currency($refDetail['total_commission']) }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-4 py-4 text-center text-sm text-gray-500">{{ __('messages.no_detailed_referral_data') }}</td>
+                                        <td colspan="6" class="px-4 py-4 text-center text-sm text-gray-500">
+                                            {{ __('messages.no_detailed_referral_data') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -368,12 +398,16 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.date') }}</th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.notes_created') }}
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.date') }}</th>
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.notes_created') }}
                                     </th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.unique_users') }}
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.unique_users') }}
                                     </th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.avg_per_user') }}
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.avg_per_user') }}
                                     </th>
                                 </tr>
                             </thead>
@@ -391,7 +425,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">{{ __('messages.no_note_creation_data') }}</td>
+                                        <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">
+                                            {{ __('messages.no_note_creation_data') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -406,10 +441,14 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.rank') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.user') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.email') }}</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.total_notes_label') }}
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.rank') }}</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.user') }}</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.email') }}</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.total_notes_label') }}
                                     </th>
                                 </tr>
                             </thead>
@@ -424,7 +463,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">{{ __('messages.no_note_creators') }}</td>
+                                        <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">
+                                            {{ __('messages.no_note_creators') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -439,9 +479,12 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.date') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.user') }}</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.notes_created') }}
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.date') }}</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.user') }}</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.notes_created') }}
                                     </th>
                                 </tr>
                             </thead>
@@ -453,14 +496,16 @@
                                                 {{ \Carbon\Carbon::parse($date)->format('d M Y') }}</td>
                                             <td class="px-4 py-2 text-sm text-gray-900">
                                                 {{ $activity->user->name }}<br><span
-                                                    class="text-xs text-gray-500">{{ $activity->user->email }}</span></td>
+                                                    class="text-xs text-gray-500">{{ $activity->user->email }}</span>
+                                            </td>
                                             <td class="px-4 py-2 text-sm font-bold text-right text-indigo-600">
                                                 {{ $activity->note_count }}</td>
                                         </tr>
                                     @endforeach
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">{{ __('messages.no_note_activity') }}</td>
+                                        <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">
+                                            {{ __('messages.no_note_activity') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -482,12 +527,16 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.date') }}</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.total_amount') }}
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {{ __('messages.date') }}</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                                    {{ __('messages.total_amount') }}
                                 </th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.commission') }}
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                                    {{ __('messages.commission') }}
                                 </th>
-                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.transactions') }}
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                    {{ __('messages.transactions') }}
                                 </th>
                             </tr>
                         </thead>
@@ -505,11 +554,162 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">{{ __('messages.no_revenue_data') }}</td>
+                                    <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">
+                                        {{ __('messages.no_revenue_data') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Sale Mode Analytics -->
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Sale Mode Analytics
+                </h3>
+
+                <!-- Overview Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <!-- Scarcity Mode -->
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-semibold text-blue-800 uppercase">Scarcity Mode</span>
+                            <span
+                                class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs font-medium">{{ $saleModeStats['scarcity_notes'] }}
+                                Notes</span>
+                        </div>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Transactions:</span>
+                                <span
+                                    class="font-semibold text-gray-900">{{ number_format($saleModeStats['scarcity_transactions']) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Revenue:</span>
+                                <span
+                                    class="font-semibold text-blue-900">{{ currency($saleModeStats['scarcity_revenue']) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total Amount:</span>
+                                <span
+                                    class="font-semibold text-gray-900">{{ currency($saleModeStats['scarcity_total_amount']) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Avg Price:</span>
+                                <span
+                                    class="font-semibold text-gray-900">{{ currency($saleModeStats['scarcity_avg_price']) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Standard Mode -->
+                    <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-semibold text-green-800 uppercase">Standard Mode</span>
+                            <span
+                                class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs font-medium">{{ $saleModeStats['standard_notes'] }}
+                                Notes</span>
+                        </div>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Transactions:</span>
+                                <span
+                                    class="font-semibold text-gray-900">{{ number_format($saleModeStats['standard_transactions']) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Revenue:</span>
+                                <span
+                                    class="font-semibold text-green-900">{{ currency($saleModeStats['standard_revenue']) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total Amount:</span>
+                                <span
+                                    class="font-semibold text-gray-900">{{ currency($saleModeStats['standard_total_amount']) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Avg Price:</span>
+                                <span
+                                    class="font-semibold text-gray-900">{{ currency($saleModeStats['standard_avg_price']) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scarcity Features -->
+                    <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                        <div class="text-xs font-semibold text-purple-800 uppercase mb-2">Scarcity Features</div>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Creator Commission:</span>
+                                <span
+                                    class="font-semibold text-purple-900">{{ currency($saleModeStats['scarcity_creator_commission']) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Resales:</span>
+                                <span
+                                    class="font-semibold text-gray-900">{{ number_format($saleModeStats['resale_count']) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Resale Revenue:</span>
+                                <span
+                                    class="font-semibold text-purple-900">{{ currency($saleModeStats['resale_revenue']) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Repurchases:</span>
+                                <span
+                                    class="font-semibold text-gray-900">{{ number_format($saleModeStats['repurchase_count']) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comparison -->
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div class="text-xs font-semibold text-gray-800 uppercase mb-2">Comparison</div>
+                        <div class="space-y-1 text-sm">
+                            @php
+                                $totalRevenue = $saleModeStats['scarcity_revenue'] + $saleModeStats['standard_revenue'];
+                                $scarcityPercent =
+                                    $totalRevenue > 0 ? ($saleModeStats['scarcity_revenue'] / $totalRevenue) * 100 : 0;
+                                $standardPercent =
+                                    $totalRevenue > 0 ? ($saleModeStats['standard_revenue'] / $totalRevenue) * 100 : 0;
+                            @endphp
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total Revenue:</span>
+                                <span class="font-semibold text-gray-900">{{ currency($totalRevenue) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-blue-600">Scarcity:</span>
+                                <span
+                                    class="font-semibold text-blue-900">{{ number_format($scarcityPercent, 1) }}%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-green-600">Standard:</span>
+                                <span
+                                    class="font-semibold text-green-900">{{ number_format($standardPercent, 1) }}%</span>
+                            </div>
+                            <div class="flex justify-between pt-1 border-t border-gray-300">
+                                <span class="text-gray-600">Total Notes:</span>
+                                <span
+                                    class="font-semibold text-gray-900">{{ number_format($saleModeStats['total_with_sale_mode']) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Detailed Report Link -->
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <a href="{{ route('admin.repurchase-report') }}"
+                        class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        View Detailed Repurchase Report
+                    </a>
                 </div>
             </div>
 
@@ -529,11 +729,15 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.rank') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.user') }}</th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.sales') }}
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.rank') }}</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.user') }}</th>
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.sales') }}
                                     </th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.revenue') }}
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.revenue') }}
                                     </th>
                                 </tr>
                             </thead>
@@ -549,7 +753,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">{{ __('messages.no_sellers') }}</td>
+                                        <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">
+                                            {{ __('messages.no_sellers') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -571,11 +776,15 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.rank') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.user') }}</th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.purchases') }}
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.rank') }}</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.user') }}</th>
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.purchases') }}
                                     </th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.total_spent') }}
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.total_spent') }}
                                     </th>
                                 </tr>
                             </thead>
@@ -591,7 +800,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">{{ __('messages.no_buyers') }}</td>
+                                        <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">
+                                            {{ __('messages.no_buyers') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -613,8 +823,10 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.date') }}</th>
-                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.new_users') }}
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {{ __('messages.date') }}</th>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                    {{ __('messages.new_users') }}
                                 </th>
                             </tr>
                         </thead>
@@ -628,7 +840,8 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="2" class="px-4 py-4 text-center text-sm text-gray-500">{{ __('messages.no_user_growth_data') }}</td>
+                                    <td colspan="2" class="px-4 py-4 text-center text-sm text-gray-500">
+                                        {{ __('messages.no_user_growth_data') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -687,13 +900,15 @@
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div class="bg-indigo-50 p-4 rounded-lg">
                             <div class="text-sm font-medium text-gray-600">{{ __('messages.total_transactions') }}</div>
-                            <div class="text-2xl font-bold text-indigo-600">{{ $midtransStats['total_midtrans_transactions'] }}</div>
+                            <div class="text-2xl font-bold text-indigo-600">
+                                {{ $midtransStats['total_midtrans_transactions'] }}</div>
                             <div class="text-xs text-gray-500 mt-1">
                                 {{ $midtransStats['successful_midtrans_transactions'] }} {{ __('messages.successful') }}
                             </div>
                         </div>
                         <div class="bg-green-50 p-4 rounded-lg">
-                            <div class="text-sm font-medium text-gray-600">{{ __('messages.total_midtrans_amount') }}</div>
+                            <div class="text-sm font-medium text-gray-600">{{ __('messages.total_midtrans_amount') }}
+                            </div>
                             <div class="text-2xl font-bold text-green-600">
                                 {{ currency($midtransStats['total_midtrans_amount']) }}
                             </div>
@@ -734,11 +949,16 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.date') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.user') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.order_id') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.amount') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.date') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.user') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.order_id') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.amount') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -759,11 +979,14 @@
                                         </td>
                                         <td class="px-4 py-3 text-sm">
                                             @if ($topup->status === 'success')
-                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">{{ __('messages.success') }}</span>
+                                                <span
+                                                    class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">{{ __('messages.success') }}</span>
                                             @elseif($topup->status === 'pending')
-                                                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">{{ __('messages.pending') }}</span>
+                                                <span
+                                                    class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">{{ __('messages.pending') }}</span>
                                             @else
-                                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">{{ __('messages.failed') }}</span>
+                                                <span
+                                                    class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">{{ __('messages.failed') }}</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -784,13 +1007,19 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.date') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.buyer') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.seller') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.amount') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.commission') }}
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.date') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.buyer') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.seller') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.amount') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.commission') }}
                                     </th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -801,9 +1030,11 @@
                                         <td class="px-4 py-3 text-sm text-gray-900">{{ $transaction->buyer->name }}</td>
                                         <td class="px-4 py-3 text-sm text-gray-900">{{ $transaction->seller->name }}</td>
                                         <td class="px-4 py-3 text-sm font-medium">
-                                            {{ currency($transaction->amount, null, $transaction->currency ?? config('currency.base_currency')) }}</td>
+                                            {{ currency($transaction->amount, null, $transaction->currency ?? config('currency.base_currency')) }}
+                                        </td>
                                         <td class="px-4 py-3 text-sm text-green-600">
-                                            {{ currency($transaction->commission, null, $transaction->currency ?? config('currency.base_currency')) }}</td>
+                                            {{ currency($transaction->commission, null, $transaction->currency ?? config('currency.base_currency')) }}
+                                        </td>
                                         <td class="px-4 py-3 text-sm">
                                             @if ($transaction->status === 'success')
                                                 <span
@@ -823,7 +1054,8 @@
                     </div>
                     <div class="mt-4">
                         <a href="{{ route('admin.transactions.index') }}"
-                            class="text-blue-600 hover:text-blue-800 text-sm">{{ __('messages.view_all_transactions') }} →</a>
+                            class="text-blue-600 hover:text-blue-800 text-sm">{{ __('messages.view_all_transactions') }}
+                            →</a>
                     </div>
                 @else
                     <p class="text-gray-600 text-center py-4">{{ __('messages.no_transactions') }}</p>
@@ -838,12 +1070,18 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.date') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.user') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.amount') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.bank') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.action') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.date') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.user') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.amount') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.bank') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.status') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('messages.action') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -870,18 +1108,19 @@
                                         <td class="px-4 py-3 text-sm">
                                             <a href="{{ route('admin.withdraws.show', $withdraw) }}"
                                                 class="text-blue-600 hover:text-blue-800">{{ __('messages.view') }}</a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-4">
-                    <a href="{{ route('admin.withdraws.index') }}"
-                        class="text-blue-600 hover:text-blue-800 text-sm">{{ __('messages.view_all_withdraws') }} →</a>
-                </div>
-            @else
-                <p class="text-gray-600 text-center py-4">{{ __('messages.no_withdraws') }}</p>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{{ route('admin.withdraws.index') }}"
+                            class="text-blue-600 hover:text-blue-800 text-sm">{{ __('messages.view_all_withdraws') }}
+                            →</a>
+                    </div>
+                @else
+                    <p class="text-gray-600 text-center py-4">{{ __('messages.no_withdraws') }}</p>
                 @endif
             </div>
         </div>

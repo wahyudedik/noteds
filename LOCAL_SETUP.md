@@ -15,7 +15,7 @@
 git clone <repository-url>
 cd noteds
 ```
-
+ 
 ### 2. Install PHP Dependencies
 ```bash
 composer install
@@ -116,7 +116,15 @@ composer pint
 
 #### Pest Testing
 ```bash
+# Run all tests
 ./vendor/bin/pest
+
+# Run Sale Mode tests
+php artisan test --filter=SaleMode
+
+# Run specific test suites
+php artisan test tests/Unit/NoteSaleModeTest.php
+php artisan test tests/Feature/SaleModeScarcityPurchaseTest.php
 php artisan test --filter=subscription_renewal_command  # Verifikasi alur auto-renew premium (saldo cukup & kurang)
 ```
 
@@ -492,6 +500,13 @@ npm install
 - Tombol "Add Purchased Notes" di collection
 - Dropdown untuk memilih purchased notes yang belum ada di collection
 - Hanya purchased notes yang bisa ditambahkan
+
+### Sale Mode System
+- **Scarcity Mode**: One-time purchase, buyer bisa resell dengan harga custom, original creator dapat komisi, grace period untuk repurchase
+- **Standard Mode**: Multiple sales, buyer tidak bisa resell, tidak ada komisi, ownership tetap dengan seller
+- Grace period untuk pembelian ulang (configurable, default: 30 hari)
+- Relist price multiplier untuk pembelian ulang setelah grace period (default: 1.5x)
+- Admin analytics & repurchase report dashboard
 
 ### Resell Flow
 - One-time sale: Buyer yang sudah menjual note tidak bisa akses lagi

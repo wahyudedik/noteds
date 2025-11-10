@@ -808,6 +808,81 @@
                                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>
+
+                                    <!-- Sale Mode -->
+                                    <div class="mt-6">
+                                        <label for="sale_mode" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Mode Penjualan <span class="text-xs text-gray-500 font-normal">(Pilih sistem penjualan)</span>
+                                        </label>
+                                        <div class="space-y-3">
+                                            <label class="flex items-start p-4 rounded-lg border-2 {{ old('sale_mode', 'scarcity') === 'scarcity' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300' }} cursor-pointer transition-all duration-200">
+                                                <input type="radio" name="sale_mode" value="scarcity" {{ old('sale_mode', 'scarcity') === 'scarcity' ? 'checked' : '' }}
+                                                    class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                                <div class="ml-3 flex-1">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-sm font-semibold text-gray-900">Scarcity Mode</span>
+                                                        <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">Default</span>
+                                                    </div>
+                                                    <p class="text-xs text-gray-600 mt-1">
+                                                        • Buyer hanya bisa beli 1x per user<br>
+                                                        • Buyer bisa resell dengan harga custom<br>
+                                                        • Original creator dapat komisi di setiap penjualan<br>
+                                                        • Grace period {{ old('grace_period_days', 30) }} hari untuk pembelian ulang
+                                                    </p>
+                                                </div>
+                                            </label>
+                                            <label class="flex items-start p-4 rounded-lg border-2 {{ old('sale_mode') === 'standard' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300' }} cursor-pointer transition-all duration-200">
+                                                <input type="radio" name="sale_mode" value="standard" {{ old('sale_mode') === 'standard' ? 'checked' : '' }}
+                                                    class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                                <div class="ml-3 flex-1">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-sm font-semibold text-gray-900">Standard Mode</span>
+                                                    </div>
+                                                    <p class="text-xs text-gray-600 mt-1">
+                                                        • Multiple sales (bisa dijual ke banyak buyer)<br>
+                                                        • Buyer tidak bisa resell<br>
+                                                        • Tidak ada komisi untuk original creator<br>
+                                                        • Cocok untuk konten yang perlu diakses ulang
+                                                    </p>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        @error('sale_mode')
+                                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Grace Period & Relist Multiplier (only for scarcity mode) -->
+                                    <div id="scarcity-settings" class="mt-4 space-y-4" style="display: {{ old('sale_mode', 'scarcity') === 'scarcity' ? 'block' : 'none' }};">
+                                        <div>
+                                            <label for="grace_period_days" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Grace Period (Hari) <span class="text-xs text-gray-500 font-normal">(Default: 30)</span>
+                                            </label>
+                                            <input type="number" name="grace_period_days" id="grace_period_days"
+                                                value="{{ old('grace_period_days', 30) }}" min="0" max="365" step="1"
+                                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 @error('grace_period_days') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                                            <p class="mt-1 text-xs text-gray-500">
+                                                Periode dimana buyer yang sudah menjual bisa membeli kembali dengan harga original.
+                                            </p>
+                                            @error('grace_period_days')
+                                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                        <div>
+                                            <label for="relist_price_multiplier" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Relist Price Multiplier <span class="text-xs text-gray-500 font-normal">(Default: 1.5x)</span>
+                                            </label>
+                                            <input type="number" name="relist_price_multiplier" id="relist_price_multiplier"
+                                                value="{{ old('relist_price_multiplier', 1.5) }}" min="1" max="10" step="0.1"
+                                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 @error('relist_price_multiplier') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                                            <p class="mt-1 text-xs text-gray-500">
+                                                Harga pembelian ulang setelah grace period = harga original × multiplier ini.
+                                            </p>
+                                            @error('relist_price_multiplier')
+                                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="flex items-end">
@@ -2264,6 +2339,28 @@
                                 }, 2000);
                             }
                         });
+                    }
+
+                    // Toggle scarcity settings based on sale_mode
+                    const saleModeInputs = document.querySelectorAll('input[name="sale_mode"]');
+                    const scarcitySettings = document.getElementById('scarcity-settings');
+                    
+                    if (saleModeInputs.length > 0 && scarcitySettings) {
+                        function toggleScarcitySettings() {
+                            const selectedMode = document.querySelector('input[name="sale_mode"]:checked')?.value;
+                            if (selectedMode === 'scarcity') {
+                                scarcitySettings.style.display = 'block';
+                            } else {
+                                scarcitySettings.style.display = 'none';
+                            }
+                        }
+                        
+                        saleModeInputs.forEach(input => {
+                            input.addEventListener('change', toggleScarcitySettings);
+                        });
+                        
+                        // Initialize on page load
+                        toggleScarcitySettings();
                     }
                 });
             </script>

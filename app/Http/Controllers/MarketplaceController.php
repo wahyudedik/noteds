@@ -220,6 +220,27 @@ class MarketplaceController extends Controller
             $premiumDiscountPrice = $basePrice - $premiumDiscount;
         }
         
+        // Check repurchase info for scarcity mode
+        $canRepurchase = false;
+        $repurchasePrice = null;
+        $gracePeriodEndsAt = null;
+        $isWithinGracePeriod = false;
+        
+        if (auth()->check() && $note->isScarcityMode() && $hasPurchasedBefore && !$isNoteOwner) {
+            $canRepurchase = $note->canRepurchase(auth()->id());
+            if ($canRepurchase) {
+                $repurchasePrice = $note->getRepurchasePrice(auth()->id());
+                $existingTransaction = Transaction::where('buyer_id', auth()->id())
+                    ->where('note_id', $note->id)
+                    ->where('status', 'success')
+                    ->first();
+                if ($existingTransaction && $existingTransaction->grace_period_ends_at) {
+                    $gracePeriodEndsAt = $existingTransaction->grace_period_ends_at;
+                    $isWithinGracePeriod = $gracePeriodEndsAt->isFuture();
+                }
+            }
+        }
+        
         $conversation = null;
         if (auth()->check()) {
             $conversation = NoteConversation::with(['buyer', 'seller', 'latestMessage.sender'])
@@ -266,7 +287,11 @@ class MarketplaceController extends Controller
             'basePrice',
             'conversation',
             'sellerReviewStats',
-            'taxPreview'
+            'taxPreview',
+            'canRepurchase',
+            'repurchasePrice',
+            'gracePeriodEndsAt',
+            'isWithinGracePeriod'
         ));
     }
 
@@ -289,26 +314,54 @@ class MarketplaceController extends Controller
             return redirect()->route('marketplace.show', $note)->with('error', 'Anda tidak dapat membeli catatan Anda sendiri. Jika Anda adalah pemilik note ini, Anda dapat menjualnya ke buyer lain.');
         }
 
-        // Check if buyer already purchased this note (per user, not global)
-        // IMPORTANT: Each user can only buy a note once - even if they sold it, they can't buy it again
-        // This enforces the one-time sale rule: once you sell, you lose access permanently
-        $existingTransaction = Transaction::where('buyer_id', $buyer->id)
-            ->where('note_id', $note->id)
-            ->where('status', 'success')
-            ->first();
+        // Handle different sale modes
+        if ($note->isStandardMode()) {
+            // Standard mode: Multiple sales allowed, buyer cannot resell, no commission
+            // Check if buyer already purchased (can buy multiple times from different sellers)
+            // But can't buy from same seller twice
+            $existingTransaction = Transaction::where('buyer_id', $buyer->id)
+                ->where('note_id', $note->id)
+                ->where('seller_id', $seller->id)
+                ->where('status', 'success')
+                ->first();
 
-        if ($existingTransaction) {
-            // Check if buyer still owns the note (hasn't sold it yet)
-            if ($buyer->id === $note->user_id) {
-                return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah memiliki catatan ini. Anda dapat menjualnya ke buyer lain, tetapi ingat bahwa setelah dijual, Anda tidak akan bisa mengaksesnya lagi.');
-            } else {
-                // Buyer sold the note - can't buy again (one-time sale rule)
-                return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli dan menjual catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x. Setelah dijual, akses hilang secara permanen.');
+            if ($existingTransaction) {
+                return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli catatan ini dari penjual ini sebelumnya.');
+            }
+        } else {
+            // Scarcity mode: One-time purchase per user, but can repurchase if sold
+            $existingTransaction = Transaction::where('buyer_id', $buyer->id)
+                ->where('note_id', $note->id)
+                ->where('status', 'success')
+                ->first();
+
+            if ($existingTransaction) {
+                // Check if buyer still owns the note (hasn't sold it yet)
+                if ($buyer->id === $note->user_id) {
+                    return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah memiliki catatan ini. Anda dapat menjualnya ke buyer lain, tetapi ingat bahwa setelah dijual, Anda tidak akan bisa mengaksesnya lagi.');
+                } else {
+                    // Buyer sold the note - check if can repurchase
+                    if ($note->canRepurchase($buyer->id)) {
+                        // Can repurchase - will use repurchase price below
+                        $repurchasePrice = $note->getRepurchasePrice($buyer->id);
+                        if ($repurchasePrice) {
+                            // Will use repurchase price instead of base price
+                            $basePrice = $repurchasePrice;
+                        } else {
+                            return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli dan menjual catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x. Setelah dijual, akses hilang secara permanen.');
+                        }
+                    } else {
+                        return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli dan menjual catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x. Setelah dijual, akses hilang secara permanen.');
+                    }
+                }
             }
         }
 
         // Get final price (use discount_price if available, otherwise use regular price)
-        $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
+        // If repurchasing, basePrice already set above in scarcity mode check
+        if (!isset($basePrice)) {
+            $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
+        }
 
         // Apply premium buyer exclusive discount if user has premium
         $finalPrice = $basePrice;
@@ -380,69 +433,80 @@ class MarketplaceController extends Controller
 
             $amount = $buyerPaysAmount;
             
-            // Get commission rates based on seller tier (fallback to settings)
-            $platformCommissionPercent = $commissionTier?->platform_fee_percent ?? Setting::getSetting('platform_commission_percent', 'marketplace', 20);
-            $creatorCommissionPercent = $commissionTier?->creator_commission_percent ?? Setting::getSetting('creator_commission_percent', 'marketplace', 0);
-            
-            // Platform fee (always deducted from every transaction)
-            $platformFee = $priceExcludingTax * ($platformCommissionPercent / 100);
-            
-            // Original creator commission (always for original creator in every transaction)
-            // Original creator gets commission every time the note is sold, regardless of seller
-            // If note doesn't have original_creator_id set, use the first seller (from first transaction)
-            // or fallback to current seller if no transactions exist
+            // Handle commission based on sale mode
+            $platformFee = 0;
+            $creatorCommission = 0;
             $originalCreator = null;
-            if ($note->original_creator_id) {
-                $originalCreator = $note->originalCreator;
+            $sellerAmount = $priceExcludingTax;
+            
+            if ($note->isStandardMode()) {
+                // Standard mode: No commission, seller gets full amount (minus tax)
+                // No original creator commission
             } else {
-                // Find original creator from first transaction
-                $firstTransaction = Transaction::where('note_id', $note->id)
-                    ->where('status', 'success')
-                    ->orderBy('created_at', 'asc')
-                    ->first();
+                // Scarcity mode: Apply commission as usual
+                // Get commission rates based on seller tier (fallback to settings)
+                $platformCommissionPercent = $commissionTier?->platform_fee_percent ?? Setting::getSetting('platform_commission_percent', 'marketplace', 20);
+                $creatorCommissionPercent = $commissionTier?->creator_commission_percent ?? Setting::getSetting('creator_commission_percent', 'marketplace', 0);
                 
-                if ($firstTransaction && $firstTransaction->original_creator_id) {
-                    $originalCreator = User::find($firstTransaction->original_creator_id);
+                // Platform fee (always deducted from every transaction)
+                $platformFee = $priceExcludingTax * ($platformCommissionPercent / 100);
+                
+                // Original creator commission (always for original creator in every transaction)
+                // Original creator gets commission every time the note is sold, regardless of seller
+                // If note doesn't have original_creator_id set, use the first seller (from first transaction)
+                // or fallback to current seller if no transactions exist
+                if ($note->original_creator_id) {
+                    $originalCreator = $note->originalCreator;
                 } else {
-                    // No previous transaction - current seller is original creator
-                    // But check if note was created by a seller (not a buyer reselling)
-                    if ($seller->role === 'seller') {
-                        $originalCreator = $seller;
+                    // Find original creator from first transaction
+                    $firstTransaction = Transaction::where('note_id', $note->id)
+                        ->where('status', 'success')
+                        ->orderBy('created_at', 'asc')
+                        ->first();
+                    
+                    if ($firstTransaction && $firstTransaction->original_creator_id) {
+                        $originalCreator = User::find($firstTransaction->original_creator_id);
                     } else {
-                        // Buyer is selling - find original creator from their purchase transaction
-                        $buyerPurchase = Transaction::where('buyer_id', $seller->id)
-                            ->where('note_id', $note->id)
-                            ->where('status', 'success')
-                            ->first();
-                        
-                        if ($buyerPurchase && $buyerPurchase->original_creator_id) {
-                            $originalCreator = User::find($buyerPurchase->original_creator_id);
+                        // No previous transaction - current seller is original creator
+                        // But check if note was created by a seller (not a buyer reselling)
+                        if ($seller->role === 'seller') {
+                            $originalCreator = $seller;
+                        } else {
+                            // Buyer is selling - find original creator from their purchase transaction
+                            $buyerPurchase = Transaction::where('buyer_id', $seller->id)
+                                ->where('note_id', $note->id)
+                                ->where('status', 'success')
+                                ->first();
+                            
+                            if ($buyerPurchase && $buyerPurchase->original_creator_id) {
+                                $originalCreator = User::find($buyerPurchase->original_creator_id);
+                            }
                         }
                     }
                 }
-            }
-            
-            // If still no original creator found, use current seller (shouldn't happen, but fallback)
-            if (!$originalCreator) {
-                $originalCreator = $seller;
-            }
-            
-            // Set original_creator_id on note if not set (for future resells)
-            if (!$note->original_creator_id) {
-                $note->original_creator_id = $originalCreator->id;
+                
+                // If still no original creator found, use current seller (shouldn't happen, but fallback)
+                if (!$originalCreator) {
+                    $originalCreator = $seller;
+                }
+                
+                // Set original_creator_id on note if not set (for future resells)
+                if (!$note->original_creator_id) {
+                    $note->original_creator_id = $originalCreator->id;
+                }
+                
+                if ($originalCreator && $creatorCommissionPercent > 0) {
+                    // Original creator always gets commission (if setting is > 0)
+                    // Even if seller is the original creator, they still get commission separately
+                    $creatorCommission = $priceExcludingTax * ($creatorCommissionPercent / 100);
+                }
+                
+                // Seller gets: amount - platform_fee - creator_commission
+                // If seller is original creator, they get seller amount + creator commission (total = amount - platform fee)
+                $sellerAmount = $priceExcludingTax - $platformFee - $creatorCommission;
             }
             
             $taxAmount = $taxBreakdown['tax_amount'];
-            $creatorCommission = 0;
-            if ($originalCreator && $creatorCommissionPercent > 0) {
-                // Original creator always gets commission (if setting is > 0)
-                // Even if seller is the original creator, they still get commission separately
-                $creatorCommission = $priceExcludingTax * ($creatorCommissionPercent / 100);
-            }
-            
-            // Seller gets: amount - platform_fee - creator_commission
-            // If seller is original creator, they get seller amount + creator commission (total = amount - platform fee)
-            $sellerAmount = $priceExcludingTax - $platformFee - $creatorCommission;
 
             // Deduct from buyer
             $buyerWallet->balance -= $amount;
@@ -503,15 +567,38 @@ class MarketplaceController extends Controller
                 $admin->save();
             }
 
-            // Transfer note ownership to buyer (so buyer can resell it to other buyers)
-            // Original creator stays in original_creator_id for commission tracking
-            // This allows buyer to resell the note while original creator still gets commission
-            $note->user_id = $buyer->id;
-            // Ensure original_creator_id is set (should already be set above, but double check)
-            if (!$note->original_creator_id && $originalCreator) {
-                $note->original_creator_id = $originalCreator->id;
+            // Handle ownership transfer based on sale mode
+            if ($note->isScarcityMode()) {
+                // Scarcity mode: Transfer ownership to buyer (so buyer can resell it to other buyers)
+                // Original creator stays in original_creator_id for commission tracking
+                // This allows buyer to resell the note while original creator still gets commission
+                $note->user_id = $buyer->id;
+                // Ensure original_creator_id is set (should already be set above, but double check)
+                if (!$note->original_creator_id && $originalCreator) {
+                    $note->original_creator_id = $originalCreator->id;
+                }
+            } else {
+                // Standard mode: Keep ownership with seller, buyer cannot resell
+                // Don't transfer ownership
             }
             $note->save();
+
+            // Calculate grace period end date (only for scarcity mode)
+            $gracePeriodEndsAt = null;
+            if ($note->isScarcityMode() && $note->grace_period_days > 0) {
+                $gracePeriodEndsAt = now()->addDays($note->grace_period_days);
+            }
+
+            // Check if this is a resale (buyer selling to another buyer)
+            // Resale price is the price set by the seller (current owner) when they list it for sale
+            $resalePrice = null;
+            $soldAt = null;
+            if ($note->isScarcityMode() && $seller->role === 'buyer' && $seller->id !== $originalCreator?->id) {
+                // This is a resale - the seller is a buyer who bought it before
+                // The resale price is the current price of the note (set by the seller)
+                $resalePrice = $basePrice;
+                $soldAt = now();
+            }
 
             // Create transaction record
             $transaction = Transaction::create([
@@ -520,6 +607,8 @@ class MarketplaceController extends Controller
                 'original_creator_id' => $originalCreator ? $originalCreator->id : null,
                 'note_id' => $note->id,
                 'amount' => $amount,
+                'resale_price' => $resalePrice,
+                'sold_at' => $soldAt,
                 'commission' => $platformFee, // Keep for backward compatibility
                 'currency' => $baseCurrency,
                 'original_amount' => $amount,
@@ -535,6 +624,7 @@ class MarketplaceController extends Controller
                 'status' => 'success',
                 'payment_method' => 'wallet',
                 'notes' => 'Pembelian catatan: ' . $note->title,
+                'grace_period_ends_at' => $gracePeriodEndsAt,
             ]);
             
             // Create note history record for sale

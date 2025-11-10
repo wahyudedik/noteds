@@ -266,6 +266,45 @@
 
                             <!-- Badges and Meta -->
                             <div class="flex flex-wrap items-center gap-2 mb-4">
+                                @if($note->sale_mode)
+                                    @if($note->isScarcityMode())
+                                        <div class="relative inline-block group">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-800 cursor-help">
+                                                <svg class="w-2.5 h-2.5 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                                </svg>
+                                                Scarcity
+                                            </span>
+                                            <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-56 p-2 bg-gray-900 text-white text-[10px] rounded shadow-lg z-50">
+                                                <div class="font-semibold mb-1">Scarcity Mode</div>
+                                                <div class="text-gray-300 space-y-0.5">
+                                                    <div>• One-time purchase</div>
+                                                    <div>• Buyer bisa resell</div>
+                                                    <div>• Creator dapat komisi</div>
+                                                </div>
+                                                <div class="absolute left-2 top-full w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-gray-900"></div>
+                                            </div>
+                                        </div>
+                                    @elseif($note->isStandardMode())
+                                        <div class="relative inline-block group">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-800 cursor-help">
+                                                <svg class="w-2.5 h-2.5 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                </svg>
+                                                Standard
+                                            </span>
+                                            <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-56 p-2 bg-gray-900 text-white text-[10px] rounded shadow-lg z-50">
+                                                <div class="font-semibold mb-1">Standard Mode</div>
+                                                <div class="text-gray-300 space-y-0.5">
+                                                    <div>• Multiple sales</div>
+                                                    <div>• Buyer tidak bisa resell</div>
+                                                    <div>• Cocok untuk akses ulang</div>
+                                                </div>
+                                                <div class="absolute left-2 top-full w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-gray-900"></div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endif
                                 @if($note->average_rating > 0)
                                     <div class="flex items-center gap-0.5">
                                         @for($i = 1; $i <= 5; $i++)

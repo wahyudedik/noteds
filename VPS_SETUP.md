@@ -18,7 +18,7 @@
 
 ```bash
 # Update system
-sudo apt update && sudo apt upgrade -y
+sudo apt update && sudo apt upgrade -y 
 
 # Install PHP 8.2
 sudo apt install software-properties-common -y
@@ -1095,6 +1095,24 @@ Featured Notes advertising system features:
   - Validasi: Hanya purchased notes yang bisa ditambahkan
   - Auto-filter: Notes yang sudah ada tidak muncul di dropdown
 
+### Sale Mode System
+- **Scarcity Mode:**
+  - One-time purchase per user
+  - Buyer bisa resell dengan harga custom
+  - Original creator dapat komisi di setiap penjualan
+  - Grace period untuk repurchase (configurable, default: 30 hari)
+  - Relist price multiplier untuk repurchase setelah grace period (default: 1.5x)
+  - Ownership transfer ke buyer
+- **Standard Mode:**
+  - Multiple sales allowed
+  - Buyer tidak bisa resell
+  - Tidak ada komisi untuk original creator
+  - Ownership tetap dengan seller
+- **Admin Features:**
+  - Filter notes by sale mode
+  - Analytics dashboard dengan revenue comparison
+  - Detailed repurchase report dengan metrics
+
 ### Resell Flow & One-Time Sale System
 - **Features:**
   - One-time sale: Buyer yang sudah menjual note tidak bisa akses lagi
@@ -1150,6 +1168,17 @@ Featured Notes advertising system features:
 - ✅ Better error logging dan response handling
 - ✅ Max amount validation (100M) untuk topup
 - ✅ Midtrans configuration check sebelum process
+
+### Sale Mode System (2025-11-10):
+- ✅ Complete Sale Mode System implementation
+- ✅ Scarcity Mode: One-time purchase, resell capability, creator commission, grace period
+- ✅ Standard Mode: Multiple sales, no resell, no commission, ownership stays with seller
+- ✅ Repurchase flow dengan grace period & premium pricing
+- ✅ Resale form dengan custom price setting
+- ✅ Admin analytics dashboard dengan sale mode metrics
+- ✅ Detailed repurchase report page
+- ✅ Comprehensive test suite (unit & feature tests)
+- ✅ Documentation seeder dengan 22 comprehensive entries
 
 **Featured Notes System (2025-11-05):**
 - ✅ Complete featured notes advertising system
