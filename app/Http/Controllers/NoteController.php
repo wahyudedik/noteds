@@ -173,9 +173,10 @@ class NoteController extends Controller
         }
         $validated['content_hash'] = $contentHash;
         
-        // Handle workspace and folder
+        // Handle workspace and folder with validation
         $workspace = null;
         $folder = null;
+        $validationErrors = [];
         
         if (!empty($validated['workspace_id'])) {
             $workspace = \App\Models\Workspace::where('id', $validated['workspace_id'])
@@ -190,6 +191,7 @@ class NoteController extends Controller
             if ($workspace) {
                 $validated['workspace_id'] = $workspace->id;
             } else {
+                $validationErrors['workspace_id'] = 'Workspace yang dipilih tidak ditemukan atau Anda tidak memiliki akses ke workspace tersebut.';
                 unset($validated['workspace_id']);
             }
         }
@@ -203,12 +205,32 @@ class NoteController extends Controller
                 $validated['folder_id'] = $folder->id;
                 // If folder has workspace, use it
                 if ($folder->workspace_id && !$workspace) {
-                    $validated['workspace_id'] = $folder->workspace_id;
-                    $workspace = $folder->workspace;
+                    // Validate folder's workspace access
+                    $folderWorkspace = \App\Models\Workspace::where('id', $folder->workspace_id)
+                        ->where(function($q) use ($user) {
+                            $q->where('owner_id', $user->id)
+                              ->orWhereHas('members', function($q) use ($user) {
+                                  $q->where('users.id', $user->id);
+                              });
+                        })
+                        ->first();
+                    
+                    if ($folderWorkspace) {
+                        $validated['workspace_id'] = $folderWorkspace->id;
+                        $workspace = $folderWorkspace;
+                    }
                 }
             } else {
+                $validationErrors['folder_id'] = 'Folder yang dipilih tidak ditemukan atau Anda tidak memiliki akses ke folder tersebut.';
                 unset($validated['folder_id']);
             }
+        }
+        
+        // Return validation errors if any
+        if (!empty($validationErrors)) {
+            return redirect()->route('notes.create')
+                ->withInput()
+                ->withErrors($validationErrors);
         }
 
         // Handle preview content - auto-generate if not provided
@@ -413,6 +435,7 @@ class NoteController extends Controller
         // Handle workspace and folder
         $workspace = null;
         $folder = null;
+        $validationErrors = [];
         
         // Handle folder first (because folder can determine workspace)
         if ($request->has('folder_id')) {
@@ -424,13 +447,29 @@ class NoteController extends Controller
                 
                 if ($folder) {
                     $validated['folder_id'] = $folder->id;
-                    // If folder has workspace, use it
+                    // If folder has workspace, validate access to it
                     if ($folder->workspace_id) {
-                        $workspace = $folder->workspace;
-                        $validated['workspace_id'] = $workspace->id;
+                        $folderWorkspace = \App\Models\Workspace::where('id', $folder->workspace_id)
+                            ->where(function($q) use ($user) {
+                                $q->where('owner_id', $user->id)
+                                  ->orWhereHas('members', function($q) use ($user) {
+                                      $q->where('users.id', $user->id);
+                                  });
+                            })
+                            ->first();
+                        
+                        if ($folderWorkspace) {
+                            $workspace = $folderWorkspace;
+                            $validated['workspace_id'] = $workspace->id;
+                        } else {
+                            // Folder belongs to workspace user doesn't have access to
+                            $validationErrors['folder_id'] = 'Folder yang dipilih berada di workspace yang tidak Anda miliki aksesnya.';
+                            $validated['folder_id'] = null;
+                        }
                     }
                 } else {
                     // Invalid folder, remove it
+                    $validationErrors['folder_id'] = 'Folder yang dipilih tidak ditemukan atau Anda tidak memiliki akses ke folder tersebut.';
                     $validated['folder_id'] = null;
                 }
             } else {

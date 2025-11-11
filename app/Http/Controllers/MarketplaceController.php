@@ -402,62 +402,62 @@ class MarketplaceController extends Controller
             $finalPrice = $basePrice - $premiumDiscount;
         }
 
-        if ($finalPrice <= 0) {
-            return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
-        }
+            if ($finalPrice <= 0) {
+                DB::rollBack();
+                return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
+            }
 
-        $taxContext = $taxService->resolveTaxForPurchase($note, $buyer);
-        $taxBreakdown = $taxService->calculateAmounts((float) $finalPrice, $taxContext);
-        $buyerPaysAmount = $taxBreakdown['total_amount'];
-        $priceExcludingTax = $taxBreakdown['price_excluding_tax'];
+            $taxContext = $taxService->resolveTaxForPurchase($note, $buyer);
+            $taxBreakdown = $taxService->calculateAmounts((float) $finalPrice, $taxContext);
+            $buyerPaysAmount = $taxBreakdown['total_amount'];
+            $priceExcludingTax = $taxBreakdown['price_excluding_tax'];
 
-        if ($buyerPaysAmount <= 0) {
-            return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
-        }
+            if ($buyerPaysAmount <= 0) {
+                DB::rollBack();
+                return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
+            }
 
-        // Ensure wallets exist
-        $baseCurrency = config('currency.base_currency', 'IDR');
+            // Ensure wallets exist
+            $baseCurrency = config('currency.base_currency', 'IDR');
 
-        $buyerWallet = Wallet::firstOrCreate(
-            ['user_id' => $buyer->id],
-            ['balance' => 0, 'currency' => $baseCurrency]
-        );
-        if ($buyerWallet->currency !== $baseCurrency) {
-            $buyerWallet->currency = $baseCurrency;
-            $buyerWallet->save();
-        }
+            $buyerWallet = Wallet::firstOrCreate(
+                ['user_id' => $buyer->id],
+                ['balance' => 0, 'currency' => $baseCurrency]
+            );
+            if ($buyerWallet->currency !== $baseCurrency) {
+                $buyerWallet->currency = $baseCurrency;
+                $buyerWallet->save();
+            }
 
-        $sellerWallet = Wallet::firstOrCreate(
-            ['user_id' => $seller->id],
-            ['balance' => 0, 'currency' => $baseCurrency]
-        );
-        if ($sellerWallet->currency !== $baseCurrency) {
-            $sellerWallet->currency = $baseCurrency;
-            $sellerWallet->save();
-        }
+            $sellerWallet = Wallet::firstOrCreate(
+                ['user_id' => $seller->id],
+                ['balance' => 0, 'currency' => $baseCurrency]
+            );
+            if ($sellerWallet->currency !== $baseCurrency) {
+                $sellerWallet->currency = $baseCurrency;
+                $sellerWallet->save();
+            }
 
-        // Sync wallet balance with user wallet_balance
-        if ($buyerWallet->balance != $buyer->wallet_balance) {
-            $buyerWallet->balance = $buyer->wallet_balance;
-            $buyerWallet->save();
-        }
+            // Sync wallet balance with user wallet_balance
+            if ($buyerWallet->balance != $buyer->wallet_balance) {
+                $buyerWallet->balance = $buyer->wallet_balance;
+                $buyerWallet->save();
+            }
 
-        if ($buyerWallet->balance < $buyerPaysAmount) {
-            return redirect()->route('marketplace.show', $note)->with('error', 'Saldo wallet tidak cukup. Silakan top-up terlebih dahulu.');
-        }
+            if ($buyerWallet->balance < $buyerPaysAmount) {
+                DB::rollBack();
+                return redirect()->route('marketplace.show', $note)->with('error', 'Saldo wallet tidak cukup. Silakan top-up terlebih dahulu.');
+            }
 
-        $notificationData = [
-            'purchase' => null,
-            'sale' => null,
-            'commission' => [],
-            'low_balance' => [],
-            'popularity_check' => false,
-        ];
+            $notificationData = [
+                'purchase' => null,
+                'sale' => null,
+                'commission' => [],
+                'low_balance' => [],
+                'popularity_check' => false,
+            ];
 
-        $commissionTier = $commissionService->resolveTierForSeller($seller);
-
-        try {
-            DB::beginTransaction();
+            $commissionTier = $commissionService->resolveTierForSeller($seller);
 
             $amount = $buyerPaysAmount;
             
