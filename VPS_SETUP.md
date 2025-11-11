@@ -998,25 +998,60 @@ Jika mengalami error "413 Request Entity Too Large" saat upload file:
 1. **Update Nginx Configuration:**
    Edit `/etc/nginx/sites-available/noteds` dan pastikan:
    ```nginx
-   client_max_body_size 200M;  # Increase dari default 1M atau 50M
+   client_max_body_size 200M;  # Increase dari default 1M atau 50M (minimal 200M untuk file besar)
    client_body_buffer_size 128k;
-   client_body_timeout 300s;
+   client_body_timeout 900s;   # 15 menit untuk file sangat besar (51MB+)
+   client_header_timeout 900s;
+   send_timeout 900s;
    ```
 
 2. **Update PHP Configuration:**
-   Edit `/etc/php/8.2/fpm/php.ini`:
+   Edit `/etc/php/8.3/fpm/php.ini`:
    ```ini
-   upload_max_filesize = 100M
-   post_max_size = 200M
-   max_execution_time = 600
+   upload_max_filesize = 1000M
+   post_max_size = 2000M
+   max_execution_time = 1000
+   max_input_time = 900
    memory_limit = 512M
    ```
 
-3. **Restart Services:**
+3. **Update PHP-FPM Configuration:**
+   Edit `/etc/php/8.3/fpm/pool.d/www.conf`:
+   ```ini
+   request_terminate_timeout = 900  # 15 menit untuk file besar
+   ```
+
+4. **Restart Services:**
    ```bash
    sudo systemctl reload nginx
-   sudo systemctl restart php8.2-fpm
+   sudo systemctl restart php8.3-fpm
    ```
+
+#### Jika Menggunakan Cloudflare:
+
+Jika Anda menggunakan Cloudflare sebagai CDN/proxy, pastikan:
+
+1. **Cloudflare Timeout Settings:**
+   - Buka Cloudflare Dashboard → **Speed** → **Optimization**
+   - Pastikan **HTTP/2** dan **HTTP/3** enabled
+   - Buka **Network** → **Protocol Tunneling**
+   - Pastikan timeout cukup besar untuk file upload
+
+2. **Cloudflare Page Rules (Optional):**
+   - Buat page rule untuk route `/notes/upload-background` dengan:
+     - **Cache Level**: Bypass
+     - **Browser Cache TTL**: Respect Existing Headers
+     - **Security Level**: Medium
+
+3. **Cloudflare Worker (Advanced - Optional):**
+   - Jika menggunakan Cloudflare Workers, pastikan timeout worker cukup besar
+   - Default worker timeout adalah 30 detik (Free plan) atau 30 detik (Paid plan)
+   - Untuk file upload besar, pertimbangkan untuk bypass Cloudflare Worker
+
+**Catatan:** Error 524 (Cloudflare Timeout) terjadi ketika Cloudflare menunggu response dari origin server lebih dari 100 detik. Pastikan:
+- Origin server (Nginx/PHP) timeout cukup besar (minimal 900 detik)
+- Koneksi antara Cloudflare dan origin server stabil
+- File tidak terlalu besar (pertimbangkan chunked upload untuk file >100MB)
 
 4. **Verify Configuration:**
    ```bash

@@ -1582,8 +1582,9 @@
                                             error = 'File terlalu besar (413 Request Entity Too Large). Pastikan nginx client_max_body_size sudah dikonfigurasi dengan benar. File akan otomatis diupload saat form disubmit.';
                                         } else if (xhr.status === 500) {
                                             error = 'Server error (500). File akan otomatis diupload saat form disubmit. Silakan hubungi administrator jika masalah berlanjut.';
-                                        } else if (xhr.status === 504) {
-                                            error = 'Upload timeout (504 Gateway Timeout). File terlalu besar atau koneksi lambat. File akan otomatis diupload saat form disubmit.';
+                                        } else if (xhr.status === 504 || xhr.status === 524) {
+                                            // 504 = Gateway Timeout, 524 = Cloudflare Timeout
+                                            error = `Upload timeout (${xhr.status}). File terlalu besar atau koneksi lambat. Pastikan nginx timeout dan Cloudflare timeout sudah dikonfigurasi dengan benar. File akan otomatis diupload saat form disubmit.`;
                                         } else if (xhr.status >= 400) {
                                             error = `Server error (${xhr.status}). File akan otomatis diupload saat form disubmit.`;
                                         } else {
@@ -1658,6 +1659,9 @@
                                             error = 'File terlalu besar (413). Pastikan nginx client_max_body_size sudah dikonfigurasi. File akan otomatis diupload saat form disubmit.';
                                         } else if (xhr.status === 500) {
                                             error = 'Server error (500). File akan otomatis diupload saat form disubmit.';
+                                        } else if (xhr.status === 504 || xhr.status === 524) {
+                                            // 504 = Gateway Timeout, 524 = Cloudflare Timeout
+                                            error = `Upload timeout (${xhr.status}). File terlalu besar atau koneksi lambat. Pastikan nginx timeout dan Cloudflare timeout sudah dikonfigurasi. File akan otomatis diupload saat form disubmit.`;
                                         } else if (xhr.status === 0) {
                                             error = 'Koneksi terputus atau timeout. File akan otomatis diupload saat form disubmit.';
                                         } else {
@@ -2797,19 +2801,27 @@
                             aiLoading.classList.remove('hidden');
 
                             try {
-                                const response = await fetch('{{ route('ai.analyze') }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                        'Accept': 'application/json'
-                                    },
-                                    body: JSON.stringify({
-                                        content: content
-                                    })
-                                });
+                                let response;
+                                let data;
+                                
+                                try {
+                                    response = await fetch('{{ route('ai.analyze') }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Accept': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            content: content
+                                        })
+                                    });
+                                } catch (fetchError) {
+                                    // Network error or fetch failed
+                                    throw new Error('Tidak dapat terhubung ke server. Pastikan koneksi internet stabil dan coba lagi.');
+                                }
 
-                                // Check if response is OK and is JSON
+                                // Check if response is OK
                                 if (!response.ok) {
                                     let errorMessage = 'Terjadi kesalahan. ';
                                     if (response.status === 403) {
@@ -2818,24 +2830,70 @@
                                         errorMessage = 'AI service sedang tidak tersedia. Silakan coba lagi nanti.';
                                     } else if (response.status === 413) {
                                         errorMessage = 'Konten terlalu panjang untuk dianalisis. Silakan kurangi panjang konten atau coba lagi.';
-                                    } else if (response.status >= 500) {
-                                        errorMessage = 'Server error. Silakan coba lagi nanti atau hubungi administrator jika masalah berlanjut.';
                                     } else if (response.status === 422) {
                                         errorMessage = 'Request tidak valid. Pastikan konten tidak kosong dan tidak melebihi batas maksimum.';
+                                    } else if (response.status === 524) {
+                                        errorMessage = 'Request timeout (524). Server membutuhkan waktu lebih lama untuk memproses. Silakan coba lagi atau kurangi panjang konten.';
+                                    } else if (response.status >= 500) {
+                                        errorMessage = 'Server error. Silakan coba lagi nanti atau hubungi administrator jika masalah berlanjut.';
                                     } else {
                                         errorMessage += 'Silakan coba lagi.';
+                                    }
+                                    
+                                    // Try to get JSON error message from response (only if not already consumed)
+                                    try {
+                                        const contentType = response.headers.get('content-type') || '';
+                                        if (contentType.includes('application/json')) {
+                                            // Clone response to read JSON without consuming body
+                                            const responseClone = response.clone();
+                                            try {
+                                                const errorData = await responseClone.json();
+                                                if (errorData && errorData.message) {
+                                                    errorMessage = errorData.message;
+                                                }
+                                            } catch (jsonError) {
+                                                // If JSON parsing fails, use default message
+                                                console.error('Failed to parse error JSON:', jsonError);
+                                            }
+                                        }
+                                    } catch (e) {
+                                        // Ignore error, use default message
+                                        console.error('Error reading error response:', e);
                                     }
                                     
                                     throw new Error(errorMessage);
                                 }
 
                                 // Check content type before parsing JSON
-                                const contentType = response.headers.get('content-type');
-                                if (!contentType || !contentType.includes('application/json')) {
-                                    throw new Error('Server mengembalikan response yang tidak valid. Silakan coba lagi.');
+                                const contentType = response.headers.get('content-type') || '';
+                                if (!contentType.includes('application/json')) {
+                                    // Clone response to read text without consuming body
+                                    const responseClone = response.clone();
+                                    try {
+                                        const textResponse = await responseClone.text();
+                                        console.error('Non-JSON response from AI service:', {
+                                            status: response.status,
+                                            contentType: contentType,
+                                            preview: textResponse.substring(0, 500)
+                                        });
+                                    } catch (e) {
+                                        // Ignore error reading text
+                                    }
+                                    throw new Error('Server mengembalikan response yang tidak valid. Pastikan AI service berjalan dengan benar.');
                                 }
 
-                                const data = await response.json();
+                                // Parse JSON response
+                                try {
+                                    data = await response.json();
+                                } catch (parseError) {
+                                    console.error('Failed to parse JSON response:', parseError);
+                                    throw new Error('Gagal memparse response dari server. Pastikan AI service berjalan dengan benar.');
+                                }
+                                
+                                // Ensure data is defined
+                                if (!data) {
+                                    throw new Error('Server mengembalikan response kosong. Silakan coba lagi.');
+                                }
 
                                 // Check premium requirement
                                 if (checkPremiumRequirement(data)) {

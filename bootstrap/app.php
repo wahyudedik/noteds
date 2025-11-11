@@ -30,16 +30,20 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Helper function to check if request is for AI route
+        // Helper function to check if request is for AI route or expects JSON
         $isAiRoute = function ($request) {
             $path = $request->path();
+            $acceptHeader = $request->header('Accept', '');
+            
             return $request->expectsJson() 
                 || $request->wantsJson() 
                 || $request->is('api/*') 
                 || $request->is('ai/*') 
                 || str_contains($path, '/ai/')
                 || $request->routeIs('ai.*')
-                || $request->routeIs('buyer-ai.*');
+                || $request->routeIs('buyer-ai.*')
+                || str_contains($acceptHeader, 'application/json')
+                || $request->ajax();
         };
 
         // Ensure JSON responses for AI routes (routes that expect JSON)
