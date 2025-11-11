@@ -42,37 +42,46 @@ return [
         'merchant_id' => env('MIDTRANS_MERCHANT_ID'),
     ],
 
-    'ollama' => [
-        'url' => env('OLLAMA_URL', 'http://localhost:11434'),
-        'model' => env('OLLAMA_MODEL', 'llama3.2'),
-        'image_model' => env('OLLAMA_IMAGE_MODEL', 'flux'), // Model untuk image generation (flux, stable-diffusion-xl, dll)
-        'vision_model' => env('OLLAMA_VISION_MODEL', 'llava'), // Model untuk vision/OCR (llava, bakllava, dll)
-        
-        // CPU Optimization Settings (untuk VPS tanpa GPU)
-        'num_threads' => env('OLLAMA_NUM_THREADS', null), // Auto-detect jika null, atau set manual (e.g., 8 untuk 8 cores)
-        'num_ctx' => env('OLLAMA_NUM_CTX', 4096), // Context window size (4096 = 4K tokens, 8192 = 8K tokens)
-        'batch_size' => env('OLLAMA_BATCH_SIZE', 512), // Batch size untuk CPU inference
-        'use_mlock' => env('OLLAMA_USE_MLOCK', false), // Lock memory (perlu root, untuk performa lebih baik)
-        'numa' => env('OLLAMA_NUMA', false), // NUMA optimization (untuk multi-socket CPU)
-        'thread_priority' => env('OLLAMA_THREAD_PRIORITY', null), // Thread priority (null = default)
-        'timeout' => env('OLLAMA_TIMEOUT', 120), // Request timeout dalam detik (120 = 2 menit untuk CPU)
-    ],
+    /*
+    |--------------------------------------------------------------------------
+    | AI Services Configuration (DEPRECATED - Not Used)
+    |--------------------------------------------------------------------------
+    |
+    | These configurations are kept for reference but are no longer used
+    | as all AI features have been removed from the application.
+    | You can safely remove these if you don't plan to re-enable AI features.
+    |
+    */
 
-    'tesseract' => [
-        'path' => env('TESSERACT_PATH', 'tesseract'), // Path to tesseract executable
-    ],
+    // 'ollama' => [
+    //     'url' => env('OLLAMA_URL', 'http://localhost:11434'),
+    //     'model' => env('OLLAMA_MODEL', 'llama3.2'),
+    //     'image_model' => env('OLLAMA_IMAGE_MODEL', 'flux'),
+    //     'vision_model' => env('OLLAMA_VISION_MODEL', 'llava'),
+    //     'num_threads' => env('OLLAMA_NUM_THREADS', null),
+    //     'num_ctx' => env('OLLAMA_NUM_CTX', 4096),
+    //     'batch_size' => env('OLLAMA_BATCH_SIZE', 512),
+    //     'use_mlock' => env('OLLAMA_USE_MLOCK', false),
+    //     'numa' => env('OLLAMA_NUMA', false),
+    //     'thread_priority' => env('OLLAMA_THREAD_PRIORITY', null),
+    //     'timeout' => env('OLLAMA_TIMEOUT', 120),
+    // ],
 
-    'unsplash' => [
-        'access_key' => env('UNSPLASH_ACCESS_KEY'),
-        'secret_key' => env('UNSPLASH_SECRET_KEY'),
-    ],
+    // 'tesseract' => [
+    //     'path' => env('TESSERACT_PATH', 'tesseract'),
+    // ],
 
-    'stability' => [
-        'api_key' => env('STABILITY_API_KEY'),
-    ],
+    // 'unsplash' => [
+    //     'access_key' => env('UNSPLASH_ACCESS_KEY'),
+    //     'secret_key' => env('UNSPLASH_SECRET_KEY'),
+    // ],
 
-    'runway' => [
-        'api_key' => env('RUNWAY_API_KEY'),
-    ],
+    // 'stability' => [
+    //     'api_key' => env('STABILITY_API_KEY'),
+    // ],
+
+    // 'runway' => [
+    //     'api_key' => env('RUNWAY_API_KEY'),
+    // ],
 
 ];

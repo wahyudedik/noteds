@@ -256,6 +256,24 @@ class NoteController extends Controller
         $tags = $validated['tags'] ?? [];
         unset($validated['tags']);
 
+        // Handle draft and scheduled publishing
+        $isDraft = $request->has('save_as_draft') || $request->input('is_draft', false);
+        $scheduledAt = $request->input('scheduled_at');
+        
+        $validated['is_draft'] = $isDraft;
+        
+        if ($scheduledAt && !$isDraft) {
+            $validated['scheduled_at'] = \Carbon\Carbon::parse($scheduledAt);
+            $validated['status'] = 'active'; // Will be published later
+        } else {
+            $validated['scheduled_at'] = null;
+        }
+        
+        // If not draft and not scheduled, publish immediately
+        if (!$isDraft && !$scheduledAt) {
+            $validated['published_at'] = now();
+        }
+
         $note = Note::create($validated);
         $this->syncTags($note, $tags);
 
@@ -271,17 +289,20 @@ class NoteController extends Controller
         \App\Models\NoteHistory::create([
             'note_id' => $note->id,
             'user_id' => auth()->id(),
-            'action' => 'created',
+            'action' => $isDraft ? 'draft_created' : ($scheduledAt ? 'scheduled' : 'created'),
             'old_data' => null,
-            'new_data' => $note->only(['title', 'content', 'summary', 'price', 'discount_price', 'is_public', 'status']),
-            'changes' => 'Note created',
-            'notes' => 'Note created by ' . auth()->user()->name,
+            'new_data' => $note->only(['title', 'content', 'summary', 'price', 'discount_price', 'is_public', 'status', 'is_draft', 'scheduled_at']),
+            'changes' => $isDraft ? 'Note saved as draft' : ($scheduledAt ? 'Note scheduled for publishing' : 'Note created'),
+            'notes' => 'Note ' . ($isDraft ? 'saved as draft' : ($scheduledAt ? 'scheduled' : 'created')) . ' by ' . auth()->user()->name,
         ]);
 
         // Log activity
-        app(NoteActivityService::class)->logCreated($note, auth()->user());
+        if (!$isDraft) {
+            app(NoteActivityService::class)->logCreated($note, auth()->user());
+        }
 
-        if ($note->is_public && $note->status === 'active' && !$note->notificationMeta('published_notified_at')) {
+        // Only notify if published immediately (not draft, not scheduled)
+        if (!$isDraft && !$scheduledAt && $note->is_public && $note->status === 'active' && !$note->notificationMeta('published_notified_at')) {
             app(NotificationService::class)->notifyNewNotePublished($note);
             $note->setNotificationMetaValue('published_notified_at', now()->toIso8601String());
         }
@@ -587,8 +608,37 @@ class NoteController extends Controller
         $tags = $validated['tags'] ?? [];
         unset($validated['tags']);
 
+        // Handle draft and scheduled publishing
+        $isDraft = $request->has('save_as_draft') || $request->input('is_draft', false);
+        $scheduledAt = $request->input('scheduled_at');
+        $publishNow = $request->has('publish_now');
+        
+        if ($publishNow && $note->is_draft) {
+            // Publishing draft now
+            $validated['is_draft'] = false;
+            $validated['scheduled_at'] = null;
+            if (!$note->published_at) {
+                $validated['published_at'] = now();
+            }
+        } elseif ($scheduledAt && !$isDraft) {
+            // Scheduling for later
+            $validated['scheduled_at'] = \Carbon\Carbon::parse($scheduledAt);
+            $validated['is_draft'] = false;
+        } elseif ($isDraft) {
+            // Saving as draft
+            $validated['is_draft'] = true;
+            $validated['scheduled_at'] = null;
+        } else {
+            // Publishing immediately (if not already published)
+            if (!$note->published_at && !$note->is_draft) {
+                $validated['published_at'] = now();
+            }
+            $validated['is_draft'] = false;
+            $validated['scheduled_at'] = null;
+        }
+
         // Track changes for activity log and history
-        $oldData = $note->only(['title', 'content', 'summary', 'price', 'discount_price', 'is_public', 'status', 'preview_content', 'preview_percentage']);
+        $oldData = $note->only(['title', 'content', 'summary', 'price', 'discount_price', 'is_public', 'status', 'preview_content', 'preview_percentage', 'is_draft', 'scheduled_at', 'published_at']);
         $oldTags = $note->tags->pluck('name')->toArray();
 
         $note->update($validated);

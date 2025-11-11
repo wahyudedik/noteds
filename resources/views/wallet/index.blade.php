@@ -62,93 +62,114 @@
         @endif
 
         <!-- Wallet Balance Card -->
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
+        <div class="bg-gradient-to-br from-green-50 via-blue-50 to-indigo-50 overflow-hidden shadow-lg rounded-xl border border-green-200 mb-8">
             <div class="px-6 py-8">
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                    <!-- Balance Display -->
                     <div class="flex-1">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex-shrink-0 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg p-3">
-                                <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="flex items-center gap-4">
+                            <div class="flex-shrink-0 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-4 shadow-md">
+                                <svg class="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-sm font-medium text-gray-500 mb-1">{{ __('messages.wallet_balance_title') }}</h3>
-                                <p class="text-4xl font-bold text-green-600">
+                                <p class="text-sm font-medium text-gray-600 mb-1">{{ __('messages.wallet_balance_title') }}</p>
+                                <p class="text-5xl font-bold text-gray-900 tracking-tight">
                                     {{ currency($wallet->balance, $userCurrency, $walletCurrency) }}
                                 </p>
+                                <p class="text-xs text-gray-500 mt-1">{{ __('messages.available_balance') }}</p>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Action Buttons -->
                     <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                        <form action="{{ route('wallet.topup') }}" method="POST" class="flex gap-2 w-full sm:w-auto">
+                        <form action="{{ route('wallet.topup') }}" method="POST" class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto flex-1">
                             @csrf
-                            <div class="relative flex-1">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 text-sm">{{ $currencySymbol }}</span>
+                            <div class="relative flex-1 min-w-[200px]">
+                                <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ __('messages.enter_amount') }}</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 text-sm font-medium">{{ $currencySymbol }}</span>
+                                    </div>
+                                    <input
+                                        type="number"
+                                        name="amount"
+                                        min="{{ $minAttribute }}"
+                                        max="{{ $maxAttribute }}"
+                                        step="{{ $stepAttribute }}"
+                                        value="{{ old('amount') }}"
+                                        placeholder="0"
+                                        required
+                                        class="block w-full pl-10 pr-4 py-2.5 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 text-sm h-[42px]">
+                                </div>
+                                {{-- <p class="mt-1.5 text-xs text-gray-500">
+                                    {{ __('messages.minimum_topup_amount', ['amount' => currency($topupMinBase, $userCurrency, $baseCurrency)]) }}
+                                </p> --}}
                             </div>
-                            <input
-                                type="number"
-                                name="amount"
-                                min="{{ $minAttribute }}"
-                                max="{{ $maxAttribute }}"
-                                step="{{ $stepAttribute }}"
-                                value="{{ old('amount') }}"
-                                placeholder="{{ __('messages.enter_amount') }}"
-                                required
-                                class="block w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
-                            <p class="mt-1 text-xs text-gray-500">
-                                {{ __('messages.minimum_topup_amount', ['amount' => currency($topupMinBase, $userCurrency, $baseCurrency)]) }}
-                            </p>
+                            <div class="flex items-end">
+                                <button type="submit" class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap w-full sm:w-auto h-[42px]">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    {{ __('messages.top_up') }}
+                                </button>
                             </div>
-                            <button type="submit" class="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                {{ __('messages.top_up') }}
-                            </button>
                         </form>
-                        @if($wallet->balance >= 50000)
-                            <a href="{{ route('wallet.withdraw.create') }}" class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm hover:shadow-md transition-all duration-200">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                {{ __('messages.withdraw') }}
-                            </a>
-                        @else
-                            <button type="button" disabled title="{{ __('messages.minimum_withdraw', ['amount' => currency($withdrawMinBase, $userCurrency, $baseCurrency)]) }}" class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gray-400 cursor-not-allowed shadow-sm transition-all duration-200 opacity-60">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                {{ __('messages.withdraw') }}
-                            </button>
-                        @endif
+                        <div class="flex items-end">
+                            @if($wallet->balance >= 50000)
+                                <a href="{{ route('wallet.withdraw.create') }}" class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-md hover:shadow-lg transition-all duration-200 w-full sm:w-auto h-[42px]">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    {{ __('messages.withdraw') }}
+                                </a>
+                            @else
+                                <button type="button" disabled title="{{ __('messages.minimum_withdraw', ['amount' => currency($withdrawMinBase, $userCurrency, $baseCurrency)]) }}" class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-semibold rounded-lg text-white bg-gray-400 cursor-not-allowed shadow-sm transition-all duration-200 opacity-60 w-full sm:w-auto h-[42px]">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    {{ __('messages.withdraw') }}
+                                </button>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Transaction History -->
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.transaction_history') }}</h2>
+        <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200">
+            <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-blue-100 rounded-lg p-2">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.transaction_history') }}</h2>
+                    </div>
+                    <span class="text-sm text-gray-500">{{ $transactions->total() }} {{ __('messages.transactions') }}</span>
+                </div>
             </div>
             <div class="p-6">
                 @if($transactions->count() > 0)
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto -mx-6 px-6">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.date') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.type') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.description') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.amount') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.status') }}</th>
+                                    <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">{{ __('messages.date') }}</th>
+                                    <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">{{ __('messages.type') }}</th>
+                                    <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">{{ __('messages.description') }}</th>
+                                    <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">{{ __('messages.amount') }}</th>
+                                    <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">{{ __('messages.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($transactions as $transaction)
-                                    <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                    <tr class="hover:bg-blue-50/50 transition-colors duration-150">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <div class="flex items-center">
                                                 <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

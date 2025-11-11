@@ -33,6 +33,12 @@ Schedule::command('forum:publish-scheduled-posts')
     ->timezone('Asia/Jakarta')
     ->description('Publish forum posts that have reached their scheduled time');
 
+// Schedule publish scheduled notes (run every minute)
+Schedule::command('notes:publish-scheduled')
+    ->everyMinute()
+    ->timezone('Asia/Jakarta')
+    ->description('Publish notes that have reached their scheduled publishing time');
+
 Schedule::command('workspace:digest')
     ->daily()
     ->at('07:00')
@@ -50,3 +56,9 @@ Schedule::command('featured:expiry-reminders')
     ->at('09:00')
     ->timezone('Asia/Jakarta')
     ->description('Send reminders for featured notes that are about to expire.');
+
+// Schedule view revenue validation (run every hour)
+Schedule::command('views:validate --limit=200')
+    ->hourly()
+    ->timezone('Asia/Jakarta')
+    ->description('Validate pending view revenues and mark as approved or rejected.');

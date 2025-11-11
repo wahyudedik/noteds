@@ -391,81 +391,6 @@
                 </div>
             </div>
 
-            <!-- AI Summary Generator Demo -->
-            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div class="bg-gradient-to-r from-teal-500 to-teal-600 p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.ai_summary_generator') }}</h3>
-                            <p class="text-teal-100 text-sm">{{ __('messages.auto_generate_summaries') }}</p>
-                        </div>
-                        <svg class="w-12 h-12 text-teal-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.note_content') }}</label>
-                        <textarea id="ai-content" rows="4" 
-                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500"
-                            placeholder="{{ __('messages.paste_note_content') }}">{{ __('messages.simulator_sample_summary') }}</textarea>
-                    </div>
-                    <button type="button" id="ai-generate" 
-                        class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
-                        {{ __('messages.generate_summary') }}
-                    </button>
-                    <div id="ai-result" class="mt-6 hidden">
-                        <div class="bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg">
-                            <h4 class="text-lg font-bold text-teal-800 mb-2">{{ __('messages.ai_summary') }}</h4>
-                            <p class="text-sm text-gray-700" id="ai-summary-text"></p>
-                            <p class="text-xs text-gray-500 mt-2">{{ __('messages.powered_by_ollama') }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tag Suggestion Simulator -->
-            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div class="bg-gradient-to-r from-cyan-500 to-cyan-600 p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.tag_suggestion') }}</h3>
-                            <p class="text-cyan-100 text-sm">{{ __('messages.ai_powered_tag_suggestions') }}</p>
-                        </div>
-                        <svg class="w-12 h-12 text-cyan-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                        </svg>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.note_title') }}</label>
-                        <input type="text" id="tag-title" 
-                            value="Laravel Framework Tutorial"
-                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.note_content') }}</label>
-                        <textarea id="tag-content" rows="3" 
-                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500"
-                            placeholder="{{ __('messages.enter_note_content') }}">{{ __('messages.simulator_sample_content') }}</textarea>
-                    </div>
-                    <button type="button" id="tag-suggest" 
-                        class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
-                        {{ __('messages.get_tag_suggestions') }}
-                    </button>
-                    <div id="tag-result" class="mt-6 hidden">
-                        <div class="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
-                            <h4 class="text-sm font-bold text-cyan-800 mb-3">{{ __('messages.suggested_tags') }}</h4>
-                            <div class="flex flex-wrap gap-2" id="tag-suggestions">
-                                <!-- Tags will be inserted here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Price Benchmark Tool -->
             <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 <div class="bg-gradient-to-r from-violet-500 to-violet-600 p-6">
@@ -554,11 +479,6 @@ document.addEventListener('DOMContentLoaded', function() {
         transactionComplete: @json(__('messages.transaction_complete')),
         processing: @json(__('messages.processing')),
         generating: @json(__('messages.generating')),
-        generateSummary: @json(__('messages.generate_summary')),
-        analyzing: @json(__('messages.analyzing')),
-        getTagSuggestions: @json(__('messages.get_tag_suggestions')),
-        pleaseEnterContent: @json(__('messages.please_enter_content')),
-        pleaseEnterTitleOrContent: @json(__('messages.please_enter_title_or_content')),
         insufficientBalance: @json(__('messages.insufficient_balance')),
         topup: @json(__('messages.topup')),
         withdraw: @json(__('messages.withdraw')),
@@ -743,57 +663,6 @@ document.addEventListener('DOMContentLoaded', function() {
         this.disabled = true;
         activateStep(0);
         setTimeout(nextStep.bind(this), 1000);
-    });
-
-    // AI Summary Generator Demo
-    document.getElementById('ai-generate').addEventListener('click', function() {
-        const content = document.getElementById('ai-content').value;
-        if (!content.trim()) {
-            alert(translations.pleaseEnterContent);
-            return;
-        }
-        
-        this.disabled = true;
-        this.textContent = translations.generating;
-        
-        // Simulate AI processing (in real app, this would call API)
-        setTimeout(() => {
-            const summary = `Laravel is a PHP framework that simplifies web development. It offers elegant syntax, powerful features, and a rich ecosystem. Developers can build applications efficiently while ensuring code quality and best practices.`;
-            
-            document.getElementById('ai-summary-text').textContent = summary;
-            document.getElementById('ai-result').classList.remove('hidden');
-            this.disabled = false;
-            this.textContent = translations.generateSummary;
-        }, 2000);
-    });
-
-    // Tag Suggestion Simulator
-    document.getElementById('tag-suggest').addEventListener('click', function() {
-        const title = document.getElementById('tag-title').value;
-        const content = document.getElementById('tag-content').value;
-        
-        if (!title.trim() && !content.trim()) {
-            alert(translations.pleaseEnterTitleOrContent);
-            return;
-        }
-        
-        this.disabled = true;
-        this.textContent = translations.analyzing;
-        
-        // Simulate AI tag suggestions (in real app, this would call API)
-        setTimeout(() => {
-            const tags = ['laravel', 'php', 'framework', 'tutorial', 'web-development', 'backend'];
-            const suggestionsDiv = document.getElementById('tag-suggestions');
-            suggestionsDiv.innerHTML = tags.map(tag => `
-                <span class="px-3 py-1 bg-cyan-100 text-cyan-800 rounded-full text-xs font-medium">
-                    #${tag}
-                </span>
-            `).join('');
-            
-            document.getElementById('tag-result').classList.remove('hidden');
-            this.disabled = false;
-            this.textContent = translations.getTagSuggestions;
-        }, 1500);
     });
 
     // Price Benchmark Tool

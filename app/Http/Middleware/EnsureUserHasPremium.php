@@ -43,14 +43,14 @@ class EnsureUserHasPremium
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'This feature requires a Premium subscription. Please upgrade to access advanced AI Memory Platform features.',
+                    'message' => 'This feature requires a Premium subscription. Please upgrade to access premium features.',
                     'upgrade_url' => route('subscription.create'),
                 ], 403);
             }
 
             return redirect()
                 ->route('subscription.create')
-                ->with('error', 'This feature requires a Premium subscription. Please upgrade to access advanced AI Memory Platform features.');
+                ->with('error', 'This feature requires a Premium subscription. Please upgrade to access premium features.');
         }
 
         return $next($request);

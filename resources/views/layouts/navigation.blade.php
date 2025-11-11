@@ -62,22 +62,31 @@
                     'active' => request()->routeIs('marketplace.*'),
                 ];
 
+                // Forum submenu
+                $forumIsActive = request()->routeIs('forum.*');
+                $forumSubmenu = [
+                    [
+                        'label' => 'Forum',
+                        'href' => route('forum.index'),
+                        'active' => request()->routeIs('forum.index') || (request()->routeIs('forum.*') && !request()->routeIs('forum.analytics') && !request()->routeIs('forum.preferences.*')),
+                    ],
+                    [
+                        'label' => 'Analytics',
+                        'href' => route('forum.analytics'),
+                        'active' => request()->routeIs('forum.analytics'),
+                    ],
+                    [
+                        'label' => 'Preferences',
+                        'href' => route('forum.preferences.edit'),
+                        'active' => request()->routeIs('forum.preferences.*'),
+                    ],
+                ];
+
                 $primaryLinks[] = [
                     'label' => 'Forum',
                     'href' => route('forum.index'),
-                    'active' => request()->routeIs('forum.*') && !request()->routeIs('forum.analytics'),
-                ];
-
-                $primaryLinks[] = [
-                    'label' => 'Forum Analytics',
-                    'href' => route('forum.analytics'),
-                    'active' => request()->routeIs('forum.analytics'),
-                ];
-
-                $primaryLinks[] = [
-                    'label' => 'Forum Preferences',
-                    'href' => route('forum.preferences.edit'),
-                    'active' => request()->routeIs('forum.preferences.*'),
+                    'active' => $forumIsActive,
+                    'submenu' => $forumSubmenu,
                 ];
 
                 $primaryLinks[] = [
@@ -86,62 +95,88 @@
                     'active' => request()->routeIs('note-conversations.*'),
                 ];
 
+                // Seller Tools submenu
                 if ($isSellerOrAdmin) {
+                    $sellerToolsSubmenu = [
+                        [
+                            'label' => 'Featured Notes',
+                            'href' => route('featured-notes.index'),
+                            'active' => request()->routeIs('featured-notes.*'),
+                        ],
+                    ];
+                    $sellerToolsIsActive = request()->routeIs('featured-notes.*');
+                    
                     $moreLinks[] = [
-                        'label' => 'Featured',
+                        'label' => 'Seller Tools',
                         'href' => route('featured-notes.index'),
-                        'active' => request()->routeIs('featured-notes.*'),
+                        'active' => $sellerToolsIsActive,
+                        'submenu' => $sellerToolsSubmenu,
                     ];
                 }
 
-                if (!$isAdmin) {
+                // Buyer Library submenu (Premium features)
+                if ($isBuyerOrAdmin && $hasPremium) {
+                    $buyerLibrarySubmenu = [
+                        [
+                            'label' => 'Collections',
+                            'href' => route('collections.index'),
+                            'active' => request()->routeIs('collections.*'),
+                        ],
+                        [
+                            'label' => 'Analytics',
+                            'href' => route('buyer-analytics.index'),
+                            'active' => request()->routeIs('buyer-analytics.*'),
+                        ],
+                        [
+                            'label' => 'Reading History',
+                            'href' => route('reading-history.index'),
+                            'active' => request()->routeIs('reading-history.*'),
+                        ],
+                        [
+                            'label' => 'Batch Download',
+                            'href' => route('batch-download.index'),
+                            'active' => request()->routeIs('batch-download.*'),
+                        ],
+                    ];
+                    $buyerLibraryIsActive = request()->routeIs('collections.*') || 
+                                            request()->routeIs('buyer-analytics.*') || 
+                                            request()->routeIs('reading-history.*') || 
+                                            request()->routeIs('batch-download.*');
+                    
                     $moreLinks[] = [
+                        'label' => 'My Library',
+                        'href' => route('collections.index'),
+                        'active' => $buyerLibraryIsActive,
+                        'submenu' => $buyerLibrarySubmenu,
+                    ];
+                }
+
+                // Settings submenu
+                $settingsSubmenu = [];
+                if (!$isAdmin) {
+                    $settingsSubmenu[] = [
                         'label' => __('messages.subscription'),
                         'href' => route('subscription.index'),
                         'active' => request()->routeIs('subscription.*'),
                     ];
                 }
-
-                $moreLinks[] = [
+                $settingsSubmenu[] = [
                     'label' => __('messages.referral'),
                     'href' => route('referral.index'),
                     'active' => request()->routeIs('referral.*'),
                 ];
-
-                if ($hasPremium) {
+                $settingsIsActive = request()->routeIs('subscription.*') || request()->routeIs('referral.*');
+                
+                if (!empty($settingsSubmenu)) {
                     $moreLinks[] = [
-                        'label' => __('messages.mynoteds'),
-                        'href' => route('mynoteds.index'),
-                        'active' => request()->routeIs('mynoteds.*'),
+                        'label' => 'Settings',
+                        'href' => !$isAdmin ? route('subscription.index') : route('referral.index'),
+                        'active' => $settingsIsActive,
+                        'submenu' => $settingsSubmenu,
                     ];
-
-                    if ($isBuyerOrAdmin) {
-                        $moreLinks[] = [
-                            'label' => 'Collections',
-                            'href' => route('collections.index'),
-                            'active' => request()->routeIs('collections.*'),
-                        ];
-
-                        $moreLinks[] = [
-                            'label' => 'Analytics',
-                            'href' => route('buyer-analytics.index'),
-                            'active' => request()->routeIs('buyer-analytics.*'),
-                        ];
-
-                        $moreLinks[] = [
-                            'label' => 'Reading History',
-                            'href' => route('reading-history.index'),
-                            'active' => request()->routeIs('reading-history.*'),
-                        ];
-
-                        $moreLinks[] = [
-                            'label' => 'Batch Download',
-                            'href' => route('batch-download.index'),
-                            'active' => request()->routeIs('batch-download.*'),
-                        ];
-                    }
                 }
 
+                // Tools submenu
                 $moreLinks[] = [
                     'label' => __('messages.simulators'),
                     'href' => route('simulators.index'),
@@ -197,39 +232,83 @@
                     <!-- Desktop Navigation -->
                     <nav class="hidden lg:flex items-center gap-1">
                         @foreach ($primaryLinks as $link)
-                            <a href="{{ $link['href'] }}"
-                                class="{{ $desktopLinkClasses }} {{ $link['active'] ? $desktopActiveClasses : '' }}">
-                                {{ $link['label'] }}
-                                </a>
-                        @endforeach
-
-                        @if ($user && $user->role !== 'user_workspaces' && (!empty($moreLinks) || !empty($adminMoreLinks)))
-                                <!-- More Menu Dropdown -->
+                            @if (isset($link['submenu']) && !empty($link['submenu']))
+                                <!-- Submenu Dropdown -->
                                 <div class="relative" x-data="{ open: false }">
-                                    <button @click="open = !open"
-                                    class="{{ $desktopLinkClasses }} flex items-center gap-1 {{ $moreIsActive ? $desktopActiveClasses : '' }}">
-                                        More
+                                    <a href="{{ $link['href'] }}"
+                                        @mouseenter="open = true"
+                                        @mouseleave="open = false"
+                                        class="{{ $desktopLinkClasses }} flex items-center gap-1 {{ $link['active'] ? $desktopActiveClasses : '' }}">
+                                        {{ $link['label'] }}
                                         <svg class="w-4 h-4" :class="{ 'rotate-180': open }" fill="none"
                                             stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 9l-7 7-7-7" />
                                         </svg>
-                                    </button>
-                                <div x-show="open" x-cloak @click.away="open = false" x-transition
+                                    </a>
+                                    <div x-show="open" x-cloak 
+                                        @mouseenter="open = true"
+                                        @mouseleave="open = false"
+                                        x-transition
                                         class="absolute left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+                                        @foreach ($link['submenu'] as $subLink)
+                                            <a href="{{ $subLink['href'] }}"
+                                                class="{{ $dropdownLinkClasses }} {{ $subLink['active'] ? $dropdownActiveClasses : '' }}">
+                                                {{ $subLink['label'] }}
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <a href="{{ $link['href'] }}"
+                                    class="{{ $desktopLinkClasses }} {{ $link['active'] ? $desktopActiveClasses : '' }}">
+                                    {{ $link['label'] }}
+                                </a>
+                            @endif
+                        @endforeach
+
+                        @if ($user && $user->role !== 'user_workspaces' && (!empty($moreLinks) || !empty($adminMoreLinks)))
+                            <!-- More Menu Dropdown -->
+                            <div class="relative" x-data="{ open: false }">
+                                <button @click="open = !open"
+                                    class="{{ $desktopLinkClasses }} flex items-center gap-1 {{ $moreIsActive ? $desktopActiveClasses : '' }}">
+                                    More
+                                    <svg class="w-4 h-4" :class="{ 'rotate-180': open }" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                                <div x-show="open" x-cloak @click.away="open = false" x-transition
+                                    class="absolute left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
                                     @foreach ($moreLinks as $link)
-                                        <a href="{{ $link['href'] }}"
-                                            class="{{ $dropdownLinkClasses }} {{ $link['active'] ? $dropdownActiveClasses : '' }}">
-                                            {{ $link['label'] }}
+                                        @if (isset($link['submenu']) && !empty($link['submenu']))
+                                            <!-- Submenu in More dropdown -->
+                                            <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100 mb-1">
+                                                {{ $link['label'] }}
+                                            </div>
+                                            @foreach ($link['submenu'] as $subLink)
+                                                <a href="{{ $subLink['href'] }}"
+                                                    class="{{ $dropdownLinkClasses }} pl-6 {{ $subLink['active'] ? $dropdownActiveClasses : '' }}">
+                                                    {{ $subLink['label'] }}
                                                 </a>
+                                            @endforeach
+                                            @if (!$loop->last)
+                                                <div class="border-t border-gray-100 my-1"></div>
+                                            @endif
+                                        @else
+                                            <a href="{{ $link['href'] }}"
+                                                class="{{ $dropdownLinkClasses }} {{ $link['active'] ? $dropdownActiveClasses : '' }}">
+                                                {{ $link['label'] }}
+                                            </a>
+                                        @endif
                                     @endforeach
 
                                     @if (!empty($adminMoreLinks))
                                         @if (!empty($moreLinks))
                                             <div class="border-t border-gray-200 my-1"></div>
                                         @endif
-                                        <div
-                                            class="px-4 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                        <div class="px-4 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                                             Admin
                                         </div>
                                         @foreach ($adminMoreLinks as $link)
@@ -238,10 +317,10 @@
                                                 {{ $link['label'] }}
                                             </a>
                                         @endforeach
-                                        @endif
-                                    </div>
+                                    @endif
                                 </div>
-                            @endif
+                            </div>
+                        @endif
                     </nav>
 
                     <!-- Mobile Menu Button -->
@@ -545,27 +624,77 @@
         class="lg:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50 max-h-[calc(100vh-4rem)] overflow-y-auto">
         <div class="px-4 py-4 space-y-1">
             @foreach ($primaryLinks as $link)
-                <a href="{{ $link['href'] }}"
-                    class="{{ $mobileLinkClasses }} {{ $link['active'] ? $mobileActiveClasses : '' }}"
-                @click="mobileMenuOpen = false">
-                    {{ $link['label'] }}
-                    </a>
-            @endforeach
-
-            @if ($user && $user->role !== 'user_workspaces' && (!empty($moreLinks) || !empty($adminMoreLinks)))
-                    <div class="border-t border-gray-200 my-2"></div>
-                    <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">More</div>
-
-                @foreach ($moreLinks as $link)
+                @if (isset($link['submenu']) && !empty($link['submenu']))
+                    <!-- Mobile Submenu -->
+                    <div x-data="{ open: false }" class="space-y-1">
+                        <button @click="open = !open"
+                            class="{{ $mobileLinkClasses }} flex items-center justify-between w-full {{ $link['active'] ? $mobileActiveClasses : '' }}">
+                            <span>{{ $link['label'] }}</span>
+                            <svg class="w-5 h-5" :class="{ 'rotate-180': open }" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-cloak x-transition
+                            class="pl-4 space-y-1 border-l-2 border-gray-200 ml-2">
+                            @foreach ($link['submenu'] as $subLink)
+                                <a href="{{ $subLink['href'] }}"
+                                    class="{{ $mobileLinkClasses }} {{ $subLink['active'] ? $mobileActiveClasses : '' }}"
+                                    @click="mobileMenuOpen = false">
+                                    {{ $subLink['label'] }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @else
                     <a href="{{ $link['href'] }}"
                         class="{{ $mobileLinkClasses }} {{ $link['active'] ? $mobileActiveClasses : '' }}"
                         @click="mobileMenuOpen = false">
                         {{ $link['label'] }}
+                    </a>
+                @endif
+            @endforeach
+
+            @if ($user && $user->role !== 'user_workspaces' && (!empty($moreLinks) || !empty($adminMoreLinks)))
+                <div class="border-t border-gray-200 my-2"></div>
+                <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">More</div>
+
+                @foreach ($moreLinks as $link)
+                    @if (isset($link['submenu']) && !empty($link['submenu']))
+                        <!-- Mobile Submenu in More -->
+                        <div x-data="{ open: false }" class="space-y-1">
+                            <button @click="open = !open"
+                                class="{{ $mobileLinkClasses }} flex items-center justify-between w-full {{ $link['active'] ? $mobileActiveClasses : '' }}">
+                                <span>{{ $link['label'] }}</span>
+                                <svg class="w-5 h-5" :class="{ 'rotate-180': open }" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition
+                                class="pl-4 space-y-1 border-l-2 border-gray-200 ml-2">
+                                @foreach ($link['submenu'] as $subLink)
+                                    <a href="{{ $subLink['href'] }}"
+                                        class="{{ $mobileLinkClasses }} {{ $subLink['active'] ? $mobileActiveClasses : '' }}"
+                                        @click="mobileMenuOpen = false">
+                                        {{ $subLink['label'] }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ $link['href'] }}"
+                            class="{{ $mobileLinkClasses }} {{ $link['active'] ? $mobileActiveClasses : '' }}"
+                            @click="mobileMenuOpen = false">
+                            {{ $link['label'] }}
                         </a>
+                    @endif
                 @endforeach
 
                 @if (!empty($adminMoreLinks))
-                        <div class="border-t border-gray-200 my-2"></div>
+                    <div class="border-t border-gray-200 my-2"></div>
                     <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</div>
 
                     @foreach ($adminMoreLinks as $link)

@@ -111,7 +111,7 @@ class MarketplaceController extends Controller
             ]);
         }
 
-        $note->load('tags', 'user', 'originalCreator', 'reviews.user', 'transactions');
+        $note->load('tags', 'user', 'originalCreator', 'reviews.user', 'transactions', 'comments.user', 'reactions.user', 'questions.user');
 
         // Track impression for featured notes (track for all users, not just authenticated)
         $featuredNote = \App\Models\FeaturedNote::where('note_id', $note->id)
@@ -144,6 +144,22 @@ class MarketplaceController extends Controller
             }
         }
 
+        // Process view monetization for free notes (0.01 rupiah per view)
+        if ($note->price == 0) {
+            $monetizationService = app(\App\Services\NoteViewMonetizationService::class);
+            // Get fingerprint from session or generate from request data
+            $fingerprint = session('browser_fingerprint') ?? request()->header('X-Fingerprint') ?? null;
+            
+            // Process view revenue (with bot protection)
+            $monetizationService->processView(
+                $note,
+                request()->ip(),
+                request()->userAgent(),
+                $fingerprint,
+                auth()->id()
+            );
+        }
+
         // Load reviews with replies
         $reviews = $note->reviews()
             ->with([
@@ -152,6 +168,34 @@ class MarketplaceController extends Controller
             ])
             ->latest()
             ->paginate(10);
+
+        // Load comments with replies
+        $comments = $note->comments()
+            ->with(['user', 'replies.user'])
+            ->latest()
+            ->paginate(10, ['*'], 'comments');
+
+        // Load reactions summary
+        $reactionsSummary = $note->reactions()
+            ->selectRaw('reaction_type, COUNT(*) as count')
+            ->groupBy('reaction_type')
+            ->get()
+            ->pluck('count', 'reaction_type')
+            ->toArray();
+
+        // Get user's reaction if authenticated
+        $userReaction = null;
+        if (auth()->check()) {
+            $userReaction = $note->reactions()
+                ->where('user_id', auth()->id())
+                ->first();
+        }
+
+        // Load questions with answers
+        $questions = $note->questions()
+            ->with(['user', 'answeredBy'])
+            ->latest()
+            ->paginate(10, ['*'], 'questions');
 
         $canBuy = false;
         $alreadyPurchased = false;
@@ -291,7 +335,11 @@ class MarketplaceController extends Controller
             'canRepurchase',
             'repurchasePrice',
             'gracePeriodEndsAt',
-            'isWithinGracePeriod'
+            'isWithinGracePeriod',
+            'comments',
+            'reactionsSummary',
+            'userReaction',
+            'questions'
         ));
     }
 
@@ -812,19 +860,9 @@ class MarketplaceController extends Controller
             }
 
             if ($notificationData['popularity_check']) {
-                $previousMilestones = $note->notificationMeta('popularity_milestones', []);
-                $updatedMilestones = $previousMilestones;
-
-                foreach ($this->notificationService->getPopularityThresholds() as $threshold) {
-                    if ($note->purchase_count >= $threshold && !in_array($threshold, $updatedMilestones, true)) {
-                        $this->notificationService->notifyNotePopular($note, $threshold);
-                        $updatedMilestones[] = $threshold;
-                    }
-                }
-
-                if ($updatedMilestones !== $previousMilestones) {
-                    $note->setNotificationMetaValue('popularity_milestones', array_values(array_unique($updatedMilestones)));
-                }
+                // Dispatch popularity check to queue for async processing
+                \App\Jobs\CheckNotePopularityJob::dispatch($note->id)
+                    ->onQueue('notifications');
             }
 
             // Track click for featured notes

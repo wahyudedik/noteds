@@ -14,7 +14,6 @@ use App\Http\Controllers\Admin\CommissionTierController as AdminCommissionTierCo
 use App\Http\Controllers\Admin\PostModerationController;
 use App\Http\Controllers\Admin\NoteModerationController;
 use App\Http\Controllers\Admin\AccountModerationController;
-use App\Http\Controllers\AiController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicCmsPageController;
 use App\Http\Controllers\MarketplaceController;
@@ -83,8 +82,6 @@ Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
 
     // Public profile routes
     Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('public.profile.show');
-    Route::get('/u/{username}/ai-chat', [PublicProfileController::class, 'aiChat'])->name('public.profile.ai-chat');
-    Route::post('/u/{username}/ai-chat/ask', [PublicProfileController::class, 'askSeller'])->name('public.profile.ai-chat.ask');
 
     // Forum routes - Available for all authenticated users
     Route::middleware(['auth', 'verified', 'username.setup'])->prefix('forum')->name('forum.')->group(function () {
@@ -183,26 +180,6 @@ Route::middleware(['auth', 'verified', 'username.setup', 'workspace.user'])->gro
         Route::post('/workspaces/{workspace}/purchase', [\App\Http\Controllers\WorkspaceController::class, 'purchase'])->name('workspaces.purchase');
     });
 
-    // AI routes - Premium features only (require subscription)
-    Route::post('/ai/analyze', [AiController::class, 'analyze'])->name('ai.analyze');
-    Route::post('/ai/generate-content', [AiController::class, 'generateContent'])->name('ai.generate-content');
-    Route::post('/ai/search-images', [AiController::class, 'searchImages'])->name('ai.search-images');
-    Route::post('/ai/generate-image', [AiController::class, 'generateImage'])->name('ai.generate-image');
-    Route::post('/ai/generate-video', [AiController::class, 'generateVideo'])->name('ai.generate-video');
-    Route::post('/ai/edit-video', [AiController::class, 'editVideo'])->name('ai.edit-video');
-    Route::post('/ai/generate-ideas', [AiController::class, 'generateIdeas'])->name('ai.generate-ideas');
-    Route::get('/ai/status', [AiController::class, 'status'])->name('ai.status');
-
-    // Buyer AI routes - Premium features only (for purchased notes)
-    // Rate limiting: 10 requests per minute per user
-    Route::middleware(['premium', 'throttle.ai:10,1'])->prefix('buyer-ai')->name('buyer-ai.')->group(function () {
-        Route::post('/analyze/{note}', [\App\Http\Controllers\BuyerAiController::class, 'analyzePurchasedNote'])->name('analyze');
-        Route::post('/ask', [\App\Http\Controllers\BuyerAiController::class, 'askPurchasedNote'])->name('ask');
-        Route::post('/study-materials/{note}', [\App\Http\Controllers\BuyerAiController::class, 'generateStudyMaterials'])->name('study-materials');
-        Route::post('/compare', [\App\Http\Controllers\BuyerAiController::class, 'compareNotes'])->name('compare');
-        Route::get('/recommendations', [\App\Http\Controllers\BuyerAiController::class, 'getRecommendations'])->name('recommendations');
-        Route::post('/extract-content/{note}', [\App\Http\Controllers\BuyerAiController::class, 'extractContent'])->name('extract-content');
-    });
 
     // Collections (Wishlist) routes - Premium features only
     Route::middleware('premium')->resource('collections', \App\Http\Controllers\CollectionController::class);
@@ -241,21 +218,6 @@ Route::middleware(['auth', 'verified', 'username.setup', 'workspace.user'])->gro
         Route::get('/', [\App\Http\Controllers\ReadingHistoryController::class, 'index'])->name('index');
     });
 
-    // MyNoteds (AI Memory Platform) routes - Premium features only
-    Route::middleware('premium')->prefix('mynoteds')->name('mynoteds.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\MyNotedsController::class, 'index'])->name('index');
-        Route::get('/ask', [\App\Http\Controllers\MyNotedsController::class, 'ask'])->name('ask'); // Q&A interface
-        Route::get('/search', [\App\Http\Controllers\MyNotedsController::class, 'search'])->name('search'); // Semantic search interface
-        Route::get('/insights', [\App\Http\Controllers\MyNotedsController::class, 'insights'])->name('insights'); // AI insights
-    });
-
-    // AI Memory Platform API routes - Premium features only
-    Route::middleware('premium')->prefix('ai-memory')->name('ai-memory.')->group(function () {
-        Route::post('/ask', [AiController::class, 'ask'])->name('ask'); // Q&A API
-        Route::post('/search', [AiController::class, 'semanticSearch'])->name('search'); // Semantic search API
-        Route::post('/context-links', [AiController::class, 'contextLinks'])->name('context-links'); // Context linking API
-        // More premium AI features will be added here
-    });
 
     // Subscription routes
     Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
@@ -287,6 +249,90 @@ Route::middleware(['auth', 'verified', 'username.setup', 'workspace.user'])->gro
     // Support Ticket routes
     Route::resource('support-tickets', SupportTicketController::class);
     Route::post('/support-tickets/{supportTicket}/reply', [SupportTicketController::class, 'reply'])->name('support-tickets.reply');
+
+    // Refund routes
+    Route::get('/refunds', [\App\Http\Controllers\RefundController::class, 'index'])->name('refunds.index');
+    Route::get('/transactions/{transaction}/refund/create', [\App\Http\Controllers\RefundController::class, 'create'])->name('refunds.create');
+    Route::post('/transactions/{transaction}/refund', [\App\Http\Controllers\RefundController::class, 'store'])->name('refunds.store');
+    Route::get('/refunds/{refund}', [\App\Http\Controllers\RefundController::class, 'show'])->name('refunds.show');
+
+    // Bundle routes
+    Route::get('/bundles', [\App\Http\Controllers\NoteBundleController::class, 'index'])->name('bundles.index');
+    Route::get('/bundles/create', [\App\Http\Controllers\NoteBundleController::class, 'create'])->name('bundles.create');
+    Route::post('/bundles', [\App\Http\Controllers\NoteBundleController::class, 'store'])->name('bundles.store');
+    Route::get('/bundles/{bundle}', [\App\Http\Controllers\NoteBundleController::class, 'show'])->name('bundles.show');
+    Route::post('/bundles/{bundle}/purchase', [\App\Http\Controllers\NoteBundleController::class, 'purchase'])->name('bundles.purchase');
+
+    // Gift Note routes
+    Route::get('/gifts', [\App\Http\Controllers\GiftNoteController::class, 'index'])->name('gifts.index');
+    Route::get('/notes/{note}/gift/create', [\App\Http\Controllers\GiftNoteController::class, 'create'])->name('gifts.create');
+    Route::post('/notes/{note}/gift', [\App\Http\Controllers\GiftNoteController::class, 'store'])->name('gifts.store');
+    Route::get('/gifts/{giftNote}', [\App\Http\Controllers\GiftNoteController::class, 'show'])->name('gifts.show');
+    Route::post('/gifts/{giftNote}/claim', [\App\Http\Controllers\GiftNoteController::class, 'claim'])->name('gifts.claim');
+
+    // Note Comments routes
+    Route::post('/notes/{note}/comments', [\App\Http\Controllers\NoteCommentController::class, 'store'])->name('notes.comments.store');
+    Route::post('/comments/{comment}/reply', [\App\Http\Controllers\NoteCommentController::class, 'reply'])->name('comments.reply');
+    Route::put('/comments/{comment}', [\App\Http\Controllers\NoteCommentController::class, 'update'])->name('comments.update');
+    Route::delete('/comments/{comment}', [\App\Http\Controllers\NoteCommentController::class, 'destroy'])->name('comments.destroy');
+    Route::post('/comments/{comment}/like', [\App\Http\Controllers\NoteCommentController::class, 'like'])->name('comments.like');
+
+    // Note Reactions routes
+    Route::post('/notes/{note}/reactions', [\App\Http\Controllers\NoteReactionController::class, 'store'])->name('notes.reactions.store');
+    Route::delete('/notes/{note}/reactions/{reaction}', [\App\Http\Controllers\NoteReactionController::class, 'destroy'])->name('notes.reactions.destroy');
+    Route::post('/notes/{note}/reactions/toggle', [\App\Http\Controllers\NoteReactionController::class, 'toggle'])->name('notes.reactions.toggle');
+
+    // Note Q&A routes
+    Route::post('/notes/{note}/questions', [\App\Http\Controllers\NoteQuestionController::class, 'store'])->name('notes.questions.store');
+    // Handle GET requests (e.g., browser refresh after POST) by redirecting to marketplace
+    Route::get('/notes/{note}/questions', function (App\Models\Note $note) {
+        return redirect()->route('marketplace.show', $note)->withFragment('questions');
+    })->name('notes.questions.index');
+    Route::post('/questions/{question}/answer', [\App\Http\Controllers\NoteQuestionController::class, 'answer'])->name('questions.answer');
+    Route::post('/questions/{question}/helpful', [\App\Http\Controllers\NoteQuestionController::class, 'markHelpful'])->name('questions.helpful');
+
+    // Note Templates routes
+    Route::get('/templates', [\App\Http\Controllers\NoteTemplateController::class, 'index'])->name('templates.index');
+    Route::get('/templates/create', [\App\Http\Controllers\NoteTemplateController::class, 'create'])->name('templates.create');
+    Route::post('/templates', [\App\Http\Controllers\NoteTemplateController::class, 'store'])->name('templates.store');
+    Route::get('/templates/{template}', [\App\Http\Controllers\NoteTemplateController::class, 'show'])->name('templates.show');
+    Route::post('/templates/{template}/use', [\App\Http\Controllers\NoteTemplateController::class, 'use'])->name('templates.use');
+
+    // Note Series routes
+    Route::get('/series', [\App\Http\Controllers\NoteSeriesController::class, 'index'])->name('series.index');
+    Route::get('/series/create', [\App\Http\Controllers\NoteSeriesController::class, 'create'])->name('series.create');
+    Route::post('/series', [\App\Http\Controllers\NoteSeriesController::class, 'store'])->name('series.store');
+    Route::get('/series/{series}', [\App\Http\Controllers\NoteSeriesController::class, 'show'])->name('series.show');
+    Route::put('/series/{series}', [\App\Http\Controllers\NoteSeriesController::class, 'update'])->name('series.update');
+    Route::delete('/series/{series}', [\App\Http\Controllers\NoteSeriesController::class, 'destroy'])->name('series.destroy');
+
+    // Categories routes
+    Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'index'])->name('categories.index');
+    Route::get('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'show'])->name('categories.show');
+
+    // Activity Feed routes
+    Route::get('/activity', [\App\Http\Controllers\ActivityController::class, 'index'])->name('activity.index');
+    Route::get('/activity/following', [\App\Http\Controllers\ActivityController::class, 'following'])->name('activity.following');
+
+    // Messaging routes
+    Route::get('/messages', [\App\Http\Controllers\MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{user}', [\App\Http\Controllers\MessageController::class, 'conversation'])->name('messages.conversation');
+    Route::post('/messages/{user}', [\App\Http\Controllers\MessageController::class, 'store'])->name('messages.store');
+    Route::post('/messages/{message}/read', [\App\Http\Controllers\MessageController::class, 'markAsRead'])->name('messages.read');
+
+    // Recently Viewed Notes routes
+    Route::get('/viewed-notes', [\App\Http\Controllers\NoteViewHistoryController::class, 'index'])->name('viewed-notes.index');
+
+    // Webhook routes (for users to manage their webhooks)
+    Route::middleware('premium')->prefix('webhooks')->name('webhooks.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\WebhookController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\WebhookController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\WebhookController::class, 'store'])->name('store');
+        Route::get('/{webhook}', [\App\Http\Controllers\WebhookController::class, 'show'])->name('show');
+        Route::put('/{webhook}', [\App\Http\Controllers\WebhookController::class, 'update'])->name('update');
+        Route::delete('/{webhook}', [\App\Http\Controllers\WebhookController::class, 'destroy'])->name('destroy');
+        Route::post('/{webhook}/test', [\App\Http\Controllers\WebhookController::class, 'test'])->name('test');
+    });
 
     // Notification routes
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -321,6 +367,11 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::post('/subscriptions/{subscription}/approve', [AdminSubscriptionController::class, 'approve'])->name('subscriptions.approve');
     Route::post('/subscriptions/{subscription}/reject', [AdminSubscriptionController::class, 'reject'])->name('subscriptions.reject');
     Route::get('/notes', [AdminNoteController::class, 'index'])->name('notes.index');
+    Route::get('/workspaces', [\App\Http\Controllers\Admin\WorkspaceController::class, 'index'])->name('workspaces.index');
+    Route::get('/workspaces/{workspace}', [\App\Http\Controllers\Admin\WorkspaceController::class, 'show'])->name('workspaces.show');
+    Route::get('/view-history', [\App\Http\Controllers\Admin\ViewHistoryController::class, 'index'])->name('view-history.index');
+    Route::get('/view-history/export', [\App\Http\Controllers\Admin\ViewHistoryController::class, 'export'])->name('view-history.export');
+    Route::get('/view-history/{viewRevenue}', [\App\Http\Controllers\Admin\ViewHistoryController::class, 'show'])->name('view-history.show');
     Route::resource('tickets', AdminTicketController::class)->only(['index', 'show', 'update']);
     Route::post('/tickets/{ticket}/assign', [AdminTicketController::class, 'assign'])->name('tickets.assign');
     Route::post('/tickets/{ticket}/reply', [AdminTicketController::class, 'reply'])->name('tickets.reply');
@@ -350,6 +401,16 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::post('/notes/moderation/{note}/suspend', [NoteModerationController::class, 'suspend'])->name('notes.moderation.suspend');
     Route::post('/notes/moderation/{note}/activate', [NoteModerationController::class, 'activate'])->name('notes.moderation.activate');
     Route::post('/notes/moderation/report/{report}/status', [NoteModerationController::class, 'updateReportStatus'])->name('notes.moderation.report.status');
+
+    // Admin Refund routes
+    Route::get('/refunds', [\App\Http\Controllers\Admin\RefundController::class, 'index'])->name('refunds.index');
+    Route::get('/refunds/{refund}', [\App\Http\Controllers\Admin\RefundController::class, 'show'])->name('refunds.show');
+    Route::post('/refunds/{refund}/approve', [\App\Http\Controllers\Admin\RefundController::class, 'approve'])->name('refunds.approve');
+    Route::post('/refunds/{refund}/reject', [\App\Http\Controllers\Admin\RefundController::class, 'reject'])->name('refunds.reject');
+
+    // Admin User Verification routes
+    Route::post('/users/{user}/verify', [UserController::class, 'verify'])->name('users.verify');
+    Route::post('/users/{user}/unverify', [UserController::class, 'unverify'])->name('users.unverify');
 
     Route::get('/accounts/moderation', [AccountModerationController::class, 'index'])->name('accounts.moderation.index');
     Route::get('/accounts/moderation/{user}', [AccountModerationController::class, 'show'])->name('accounts.moderation.show');

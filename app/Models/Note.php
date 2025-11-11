@@ -12,6 +12,16 @@ use Illuminate\Support\Str;
 use App\Models\NoteConversation;
 use App\Models\NoteReport;
 use App\Models\Transaction;
+use App\Models\Refund;
+use App\Models\GiftNote;
+use App\Models\NoteComment;
+use App\Models\NoteReaction;
+use App\Models\NoteQuestion;
+use App\Models\NoteViewHistory;
+use App\Models\NoteViewRevenue;
+use App\Models\NoteBundle;
+use App\Models\Category;
+use App\Models\NoteSeries;
 
 class Note extends Model
 {
@@ -21,6 +31,8 @@ class Note extends Model
         'original_creator_id',
         'folder_id',
         'workspace_id',
+        'series_id',
+        'series_order',
         'title',
         'content',
         'content_hash',
@@ -38,6 +50,9 @@ class Note extends Model
         'sale_mode',
         'grace_period_days',
         'relist_price_multiplier',
+        'is_draft',
+        'scheduled_at',
+        'published_at',
     ];
 
     protected function casts(): array
@@ -55,6 +70,10 @@ class Note extends Model
             'notification_meta' => 'array',
             'grace_period_days' => 'integer',
             'relist_price_multiplier' => 'decimal:2',
+            'is_draft' => 'boolean',
+            'scheduled_at' => 'datetime',
+            'published_at' => 'datetime',
+            'series_order' => 'integer',
         ];
     }
 
@@ -89,6 +108,11 @@ class Note extends Model
         return $this->hasMany(NoteReview::class);
     }
 
+    public function viewRevenues()
+    {
+        return $this->hasMany(NoteViewRevenue::class);
+    }
+
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
@@ -118,6 +142,86 @@ class Note extends Model
     public function workspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class);
+    }
+
+    /**
+     * Get the series that contains this note.
+     */
+    public function series(): BelongsTo
+    {
+        return $this->belongsTo(NoteSeries::class, 'series_id');
+    }
+
+    /**
+     * Get comments for this note.
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(NoteComment::class)->whereNull('parent_id')->latest();
+    }
+
+    /**
+     * Get all comments including replies.
+     */
+    public function allComments(): HasMany
+    {
+        return $this->hasMany(NoteComment::class)->latest();
+    }
+
+    /**
+     * Get reactions for this note.
+     */
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(NoteReaction::class);
+    }
+
+    /**
+     * Get questions for this note.
+     */
+    public function questions(): HasMany
+    {
+        return $this->hasMany(NoteQuestion::class)->latest();
+    }
+
+    /**
+     * Get refunds for this note.
+     */
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class);
+    }
+
+    /**
+     * Get gift notes for this note.
+     */
+    public function giftNotes(): HasMany
+    {
+        return $this->hasMany(GiftNote::class);
+    }
+
+    /**
+     * Get view history for this note.
+     */
+    public function viewHistory(): HasMany
+    {
+        return $this->hasMany(NoteViewHistory::class);
+    }
+
+    /**
+     * Get bundles that include this note.
+     */
+    public function bundles()
+    {
+        return $this->belongsToMany(NoteBundle::class, 'note_bundle_items', 'note_id', 'bundle_id');
+    }
+
+    /**
+     * Get categories for this note.
+     */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'note_category', 'note_id', 'category_id');
     }
 
     /**
@@ -343,6 +447,7 @@ class Note extends Model
 
     /**
      * Get AI analyses.
+     * @deprecated AI features have been removed. This relationship is kept for backward compatibility.
      */
     public function aiAnalyses()
     {

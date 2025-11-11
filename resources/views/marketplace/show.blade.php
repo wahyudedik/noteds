@@ -360,20 +360,6 @@
                                         </div>
                                     </div>
                                 </a>
-                                @if (
-                                    $note->user->role === 'seller' &&
-                                        $note->user->notes()->where('is_public', true)->where('status', 'active')->count() > 0)
-                                    <a href="{{ route('public.profile.ai-chat', $note->user->username) }}"
-                                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-sm hover:shadow-md"
-                                        title="{{ __('messages.ask_ai_about_notes', ['name' => $note->user->name]) }}">
-                                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                                        </svg>
-                                        {{ __('messages.ask_ai_button') }}
-                                    </a>
-                                @endif
                                 <div class="text-xs text-gray-500">
                                     <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
@@ -1214,6 +1200,268 @@
                     </div>
                 </div>
             @endif
+
+            <!-- Reactions Section -->
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Reactions') }}</h2>
+                </div>
+                <div class="p-6">
+                    @auth
+                        <div class="mb-4">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <button onclick="toggleReaction('like')" 
+                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'like' ? 'bg-blue-50 border-blue-300' : '' }}"
+                                    data-reaction="like">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.834a1 1 0 001.364.97l5-.833a1 1 0 00.636-.97v-5.834a1 1 0 00-.636-.97l-5-.833a1 1 0 00-1.364.97zM15.5 2a1.5 1.5 0 011.5 1.5v7a1.5 1.5 0 01-1.5 1.5h-4a1.5 1.5 0 01-1.5-1.5v-7A1.5 1.5 0 0111.5 2h4z" />
+                                    </svg>
+                                    <span>{{ __('Like') }}</span>
+                                    <span class="ml-2 text-sm text-gray-600" id="reaction-count-like">{{ $reactionsSummary['like'] ?? 0 }}</span>
+                                </button>
+                                <button onclick="toggleReaction('love')" 
+                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'love' ? 'bg-red-50 border-red-300' : '' }}"
+                                    data-reaction="love">
+                                    <svg class="w-5 h-5 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>{{ __('Love') }}</span>
+                                    <span class="ml-2 text-sm text-gray-600" id="reaction-count-love">{{ $reactionsSummary['love'] ?? 0 }}</span>
+                                </button>
+                                <button onclick="toggleReaction('helpful')" 
+                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'helpful' ? 'bg-green-50 border-green-300' : '' }}"
+                                    data-reaction="helpful">
+                                    <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>{{ __('Helpful') }}</span>
+                                    <span class="ml-2 text-sm text-gray-600" id="reaction-count-helpful">{{ $reactionsSummary['helpful'] ?? 0 }}</span>
+                                </button>
+                                <button onclick="toggleReaction('insightful')" 
+                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'insightful' ? 'bg-purple-50 border-purple-300' : '' }}"
+                                    data-reaction="insightful">
+                                    <svg class="w-5 h-5 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    <span>{{ __('Insightful') }}</span>
+                                    <span class="ml-2 text-sm text-gray-600" id="reaction-count-insightful">{{ $reactionsSummary['insightful'] ?? 0 }}</span>
+                                </button>
+                                <button onclick="toggleReaction('thanks')" 
+                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'thanks' ? 'bg-yellow-50 border-yellow-300' : '' }}"
+                                    data-reaction="thanks">
+                                    <svg class="w-5 h-5 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.986 1.164l-1 7A1 1 0 0115 17H4a1 1 0 01-.986-1.164l1-7A1 1 0 015 8h4V2a1 1 0 011.3-.954z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>{{ __('Thanks') }}</span>
+                                    <span class="ml-2 text-sm text-gray-600" id="reaction-count-thanks">{{ $reactionsSummary['thanks'] ?? 0 }}</span>
+                                </button>
+                            </div>
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-500">{{ __('Log in to react to this note') }}</p>
+                    @endauth
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Comments') }} ({{ $comments->total() }})</h2>
+                </div>
+                <div class="p-6">
+                    @auth
+                        <!-- Comment Form -->
+                        <form action="{{ route('notes.comments.store', $note) }}" method="POST" class="mb-6 pb-6 border-b border-gray-200">
+                            @csrf
+                            <div class="mb-4">
+                                <textarea name="content" rows="3" required
+                                    placeholder="{{ __('Write a comment...') }}"
+                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                            </div>
+                            <button type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+                                {{ __('Post Comment') }}
+                            </button>
+                        </form>
+                    @else
+                        <p class="text-sm text-gray-500 mb-4">{{ __('Log in to comment') }}</p>
+                    @endauth
+
+                    <!-- Comments List -->
+                    @if($comments->count() > 0)
+                        <div class="space-y-6">
+                            @foreach($comments as $comment)
+                                <div id="comment-{{ $comment->id }}" class="pb-6 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
+                                    <div class="flex gap-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                                @if($comment->user->avatar)
+                                                    <img src="{{ Storage::url($comment->user->avatar) }}" alt="{{ $comment->user->name }}" class="w-10 h-10 rounded-full object-cover">
+                                                @else
+                                                    <span class="text-sm font-semibold text-gray-600">{{ substr($comment->user->name, 0, 1) }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-start justify-between mb-2">
+                                                <div>
+                                                    <p class="text-sm font-semibold text-gray-900">{{ $comment->user->name }}</p>
+                                                    <p class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</p>
+                                                </div>
+                                                @auth
+                                                    @if($comment->user_id === auth()->id() || auth()->user()->hasRole('admin'))
+                                                        <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" onclick="return confirm('{{ __('Delete this comment?') }}')"
+                                                                class="text-xs text-red-600 hover:text-red-800">{{ __('Delete') }}</button>
+                                                        </form>
+                                                    @endif
+                                                @endauth
+                                            </div>
+                                            <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $comment->content }}</p>
+                                            
+                                            @auth
+                                                <button onclick="showReplyForm({{ $comment->id }})" 
+                                                    class="mt-2 text-xs text-blue-600 hover:text-blue-800">
+                                                    {{ __('Reply') }}
+                                                </button>
+                                                
+                                                <!-- Reply Form -->
+                                                <form id="reply-form-{{ $comment->id }}" action="{{ route('comments.reply', $comment) }}" method="POST" class="mt-2 hidden">
+                                                    @csrf
+                                                    <textarea name="content" rows="2" required
+                                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"></textarea>
+                                                    <div class="mt-2 flex gap-2">
+                                                        <button type="submit" class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                                                            {{ __('Reply') }}
+                                                        </button>
+                                                        <button type="button" onclick="hideReplyForm({{ $comment->id }})" class="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                                                            {{ __('Cancel') }}
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            @endauth
+
+                                            <!-- Replies -->
+                                            @if($comment->replies->count() > 0)
+                                                <div class="mt-4 ml-6 space-y-4 border-l-2 border-gray-200 pl-4">
+                                                    @foreach($comment->replies as $reply)
+                                                        <div class="flex gap-3">
+                                                            <div class="flex-shrink-0">
+                                                                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                                                    @if($reply->user->avatar)
+                                                                        <img src="{{ Storage::url($reply->user->avatar) }}" alt="{{ $reply->user->name }}" class="w-8 h-8 rounded-full object-cover">
+                                                                    @else
+                                                                        <span class="text-xs font-semibold text-gray-600">{{ substr($reply->user->name, 0, 1) }}</span>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                            <div class="flex-1">
+                                                                <p class="text-xs font-semibold text-gray-900">{{ $reply->user->name }}</p>
+                                                                <p class="text-xs text-gray-700 mt-1">{{ $reply->content }}</p>
+                                                                <p class="text-xs text-gray-500 mt-1">{{ $reply->created_at->diffForHumans() }}</p>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="mt-6">
+                            {{ $comments->links() }}
+                        </div>
+                    @else
+                        <p class="text-center text-gray-500 py-8">{{ __('No comments yet. Be the first to comment!') }}</p>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Q&A Section -->
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Questions & Answers') }} ({{ $questions->total() }})</h2>
+                </div>
+                <div class="p-6">
+                    @auth
+                        <!-- Ask Question Form -->
+                        <form action="{{ route('notes.questions.store', $note) }}" method="POST" class="mb-6 pb-6 border-b border-gray-200">
+                            @csrf
+                            <div class="mb-4">
+                                <textarea name="question" rows="3" required
+                                    placeholder="{{ __('Ask a question about this note...') }}"
+                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                            </div>
+                            <button type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+                                {{ __('Ask Question') }}
+                            </button>
+                        </form>
+                    @else
+                        <p class="text-sm text-gray-500 mb-4">{{ __('Log in to ask questions') }}</p>
+                    @endauth
+
+                    <!-- Questions List -->
+                    @if($questions->count() > 0)
+                        <div class="space-y-6">
+                            @foreach($questions as $question)
+                                <div id="question-{{ $question->id }}" class="pb-6 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
+                                    <div class="mb-3">
+                                        <div class="flex items-start justify-between mb-2">
+                                            <div class="flex-1">
+                                                <p class="text-sm font-semibold text-gray-900 mb-1">{{ $question->user->name }}</p>
+                                                <p class="text-sm text-gray-700">{{ $question->question }}</p>
+                                                <p class="text-xs text-gray-500 mt-1">{{ $question->created_at->diffForHumans() }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @if($question->isAnswered())
+                                        <div class="ml-6 pl-4 border-l-2 border-green-200 bg-green-50 rounded p-4">
+                                            <div class="flex items-start justify-between mb-2">
+                                                <div class="flex-1">
+                                                    <p class="text-xs font-semibold text-green-800 mb-1">
+                                                        {{ __('Answered by') }} {{ $question->answeredBy->name }}
+                                                    </p>
+                                                    <p class="text-sm text-gray-700">{{ $question->answer }}</p>
+                                                    <p class="text-xs text-gray-500 mt-1">{{ $question->answered_at->diffForHumans() }}</p>
+                                                </div>
+                                            </div>
+                                        @auth
+                                            <button onclick="markHelpful({{ $question->id }}, this)" 
+                                                class="mt-2 text-xs text-green-600 hover:text-green-800">
+                                                {{ __('Helpful') }} ({{ $question->helpful_count }})
+                                            </button>
+                                        @endauth
+                                        </div>
+                                    @elseif(auth()->check() && auth()->id() === $note->user_id)
+                                        <!-- Answer Form (for seller) -->
+                                        <form action="{{ route('questions.answer', $question) }}" method="POST" class="ml-6 mt-3">
+                                            @csrf
+                                            <textarea name="answer" rows="3" required
+                                                placeholder="{{ __('Write your answer...') }}"
+                                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"></textarea>
+                                            <button type="submit" class="mt-2 px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">
+                                                {{ __('Answer') }}
+                                            </button>
+                                        </form>
+                                    @else
+                                        <p class="text-xs text-gray-500 ml-6">{{ __('Waiting for seller to answer...') }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="mt-6">
+                            {{ $questions->links() }}
+                        </div>
+                    @else
+                        <p class="text-center text-gray-500 py-8">{{ __('No questions yet. Be the first to ask!') }}</p>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1226,6 +1474,48 @@
     @endpush
 
     @push('scripts')
+        <script>
+            // Generate browser fingerprint for bot detection
+            function generateFingerprint() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillText('Fingerprint', 2, 2);
+                
+                const fingerprint = [
+                    navigator.userAgent,
+                    navigator.language,
+                    screen.width + 'x' + screen.height,
+                    new Date().getTimezoneOffset(),
+                    canvas.toDataURL(),
+                    navigator.hardwareConcurrency || 0,
+                    navigator.deviceMemory || 0,
+                    navigator.platform,
+                ].join('|');
+                
+                // Simple hash function
+                let hash = 0;
+                for (let i = 0; i < fingerprint.length; i++) {
+                    const char = fingerprint.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; // Convert to 32bit integer
+                }
+                
+                return Math.abs(hash).toString(16);
+            }
+            
+            // Set fingerprint in header for free notes
+            @if($note->price == 0)
+                document.addEventListener('DOMContentLoaded', function() {
+                    const fingerprint = generateFingerprint();
+                    // Store in sessionStorage to reuse
+                    if (!sessionStorage.getItem('browser_fingerprint')) {
+                        sessionStorage.setItem('browser_fingerprint', fingerprint);
+                    }
+                });
+            @endif
+        </script>
         <script>
             const copyTranslations = @js([
                 'success_title' => __('messages.copy_link_success_title'),
@@ -1630,6 +1920,7 @@
         </script>
         @auth
             @if (auth()->user()->hasPremium() && auth()->user()->role === 'buyer' && ($alreadyPurchased ?? false))
+            <script>
                 // Reading Progress Tracking
                 const noteId = '{{ $note->id }}';
                 let progressUpdateTimeout;
@@ -1918,7 +2209,174 @@
 
                 // Load bookmarks on page load
                 loadBookmarks();
+            </script>
             @endif
         @endauth
+    <script>
+        // Reactions functionality
+        function toggleReaction(type) {
+            const btn = document.querySelector(`[data-reaction="${type}"]`);
+            if (!btn) return;
+            
+            // Disable button during request
+            const originalDisabled = btn.disabled;
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            
+            fetch(`/notes/{{ $note->id }}/reactions/toggle`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ reaction_type: type })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Update reaction counts
+                    if (data.reactions) {
+                        Object.keys(data.reactions).forEach(reactionType => {
+                            const countEl = document.getElementById(`reaction-count-${reactionType}`);
+                            if (countEl) {
+                                countEl.textContent = data.reactions[reactionType] || 0;
+                            }
+                        });
+                    }
+                    
+                    // Update button states - reset all
+                    document.querySelectorAll('.reaction-btn').forEach(button => {
+                        button.classList.remove('bg-blue-50', 'border-blue-300', 'bg-red-50', 'border-red-300', 'bg-green-50', 'border-green-300', 'bg-purple-50', 'border-purple-300', 'bg-yellow-50', 'border-yellow-300');
+                        button.classList.add('border-gray-300');
+                    });
+                    
+                    // Highlight active reaction
+                    if (data.user_reaction) {
+                        const activeBtn = document.querySelector(`[data-reaction="${data.user_reaction}"]`);
+                        if (activeBtn) {
+                            activeBtn.classList.remove('border-gray-300');
+                            const colorMap = {
+                                'like': ['bg-blue-50', 'border-blue-300'],
+                                'love': ['bg-red-50', 'border-red-300'],
+                                'helpful': ['bg-green-50', 'border-green-300'],
+                                'insightful': ['bg-purple-50', 'border-purple-300'],
+                                'thanks': ['bg-yellow-50', 'border-yellow-300']
+                            };
+                            const colors = colorMap[data.user_reaction];
+                            if (colors) {
+                                activeBtn.classList.add(...colors);
+                            }
+                        }
+                    }
+                } else {
+                    throw new Error(data.message || 'Failed to update reaction');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'Failed to update reaction. Please try again.',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    alert('Failed to update reaction. Please try again.');
+                }
+            })
+            .finally(() => {
+                // Re-enable button
+                if (btn) {
+                    btn.disabled = originalDisabled;
+                    btn.style.opacity = '1';
+                }
+            });
+        }
+
+        // Comments reply functionality
+        function showReplyForm(commentId) {
+            const form = document.getElementById(`reply-form-${commentId}`);
+            if (form) {
+                form.classList.remove('hidden');
+                const textarea = form.querySelector('textarea');
+                if (textarea) {
+                    textarea.focus();
+                }
+            }
+        }
+
+        function hideReplyForm(commentId) {
+            const form = document.getElementById(`reply-form-${commentId}`);
+            if (form) {
+                form.classList.add('hidden');
+                const textarea = form.querySelector('textarea');
+                if (textarea) {
+                    textarea.value = '';
+                }
+            }
+        }
+
+        // Q&A helpful functionality
+        function markHelpful(questionId, element) {
+            const btn = element || (window.event ? window.event.target : null);
+            if (!btn) return;
+            
+            // Disable button during request
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            
+            fetch(`/questions/${questionId}/helpful`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    btn.textContent = `{{ __('Helpful') }} (${data.helpful_count || 0})`;
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50');
+                    btn.style.opacity = '0.5';
+                } else {
+                    throw new Error(data.message || 'Failed to mark as helpful');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Re-enable button on error
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.textContent = originalText;
+                
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'Failed to mark as helpful. Please try again.',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    alert('Failed to mark as helpful. Please try again.');
+                }
+            });
+        }
+    </script>
     @endpush
 @endsection

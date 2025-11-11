@@ -21,6 +21,43 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>[x-cloak]{display:none !important;}</style>
+        
+        <!-- Content Protection Styles -->
+        <style>
+            /* Disable text selection */
+            body {
+                -webkit-user-select: none !important;
+                -moz-user-select: none !important;
+                -ms-user-select: none !important;
+                user-select: none !important;
+                -webkit-touch-callout: none !important;
+            }
+            
+            /* Allow text selection in input fields and textareas */
+            input, textarea, [contenteditable="true"] {
+                -webkit-user-select: text !important;
+                -moz-user-select: text !important;
+                -ms-user-select: text !important;
+                user-select: text !important;
+            }
+            
+            /* Disable drag and drop */
+            img, a {
+                -webkit-user-drag: none !important;
+                -khtml-user-drag: none !important;
+                -moz-user-drag: none !important;
+                -o-user-drag: none !important;
+                user-drag: none !important;
+                pointer-events: none !important;
+            }
+            
+            /* Re-enable pointer events for interactive elements */
+            button, a[href], input, textarea, select, [onclick], [role="button"] {
+                pointer-events: auto !important;
+            }
+            
+        </style>
+        
         @stack('styles')
         
         <!-- Iconify Icons -->
@@ -315,6 +352,636 @@
         @endif
 
         @stack('scripts')
+        
+        <!-- Content Protection Scripts -->
+        <script>
+            (function() {
+                'use strict';
+                
+                // Disable right-click context menu
+                document.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }, true);
+                
+                // Blur overlay untuk mencegah screenshot
+                const blurOverlay = document.createElement('div');
+                blurOverlay.id = 'screenshot-protection-overlay';
+                blurOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999999;display:none;backdrop-filter:blur(10px);';
+                document.body.appendChild(blurOverlay);
+                
+                // Deteksi Print Screen dan keyboard shortcuts
+                let printScreenPressed = false;
+                
+                document.addEventListener('keydown', function(e) {
+                    // Disable Print Screen
+                    if (e.key === 'PrintScreen' || e.keyCode === 44) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        printScreenPressed = true;
+                        
+                        // Show blur overlay
+                        blurOverlay.style.display = 'block';
+                        
+                        // Clear clipboard immediately
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            navigator.clipboard.writeText('').catch(function() {});
+                        }
+                        
+                        // Try to clear clipboard using fallback method
+                        try {
+                            const textArea = document.createElement('textarea');
+                            textArea.value = '';
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(textArea);
+                        } catch(err) {}
+                        
+                        // Hide overlay after delay
+                        setTimeout(function() {
+                            blurOverlay.style.display = 'none';
+                            printScreenPressed = false;
+                        }, 2000);
+                        
+                        return false;
+                    }
+                    
+                    // Deteksi kombinasi Windows + Print Screen
+                    if (e.key === 'PrintScreen' && (e.metaKey || e.ctrlKey)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        blurOverlay.style.display = 'block';
+                        setTimeout(function() {
+                            blurOverlay.style.display = 'none';
+                        }, 2000);
+                        return false;
+                    }
+                    
+                    // Disable F12 (DevTools)
+                    if (e.key === 'F12' || (e.keyCode === 123)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                    
+                    // Disable Ctrl+Shift+I (DevTools)
+                    if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                    
+                    // Disable Ctrl+Shift+J (Console)
+                    if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                    
+                    // Disable Ctrl+Shift+C (Inspect Element)
+                    if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                    
+                    // Disable Ctrl+S (Save)
+                    if (e.ctrlKey && e.key === 's') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                    
+                    // Disable Ctrl+P (Print)
+                    if (e.ctrlKey && e.key === 'p') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                    
+                    // Disable Ctrl+A (Select All) - except in input fields
+                    if (e.ctrlKey && e.key === 'a' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                    
+                    // Disable Ctrl+C (Copy) - except in input fields
+                    if (e.ctrlKey && e.key === 'c' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                    
+                    // Disable Ctrl+V (Paste) - except in input fields
+                    if (e.ctrlKey && e.key === 'v' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                    
+                    // Disable Ctrl+X (Cut)
+                    if (e.ctrlKey && e.key === 'x') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                    
+                    // Disable Ctrl+U (View Source)
+                    if (e.ctrlKey && e.key === 'u') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                    
+                    // Disable Ctrl+Shift+P (Command Palette)
+                    if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                }, true);
+                
+                // Disable copy
+                document.addEventListener('copy', function(e) {
+                    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                        e.preventDefault();
+                        e.clipboardData.setData('text/plain', '');
+                        return false;
+                    }
+                }, true);
+                
+                // Disable cut
+                document.addEventListener('cut', function(e) {
+                    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }, true);
+                
+                // Disable paste
+                document.addEventListener('paste', function(e) {
+                    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }, true);
+                
+                // Disable drag start
+                document.addEventListener('dragstart', function(e) {
+                    e.preventDefault();
+                    return false;
+                }, true);
+                
+                // Disable select start
+                document.addEventListener('selectstart', function(e) {
+                    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }, true);
+                
+                // Detect screen recording attempts
+                let canvasFingerprint = '';
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    ctx.textBaseline = 'top';
+                    ctx.font = '14px Arial';
+                    ctx.textBaseline = 'alphabetic';
+                    ctx.fillStyle = '#f60';
+                    ctx.fillRect(125, 1, 62, 20);
+                    ctx.fillStyle = '#069';
+                    ctx.fillText('Screen recording detection', 2, 15);
+                    canvasFingerprint = canvas.toDataURL();
+                } catch(e) {}
+                
+                // Monitor for DevTools
+                let devtools = {open: false, orientation: null};
+                const threshold = 160;
+                
+                // Monitor for DevTools (less aggressive - just warn)
+                setInterval(function() {
+                    if (window.outerHeight - window.innerHeight > threshold || 
+                        window.outerWidth - window.innerWidth > threshold) {
+                        if (!devtools.open) {
+                            devtools.open = true;
+                            // Show warning but don't break the page
+                            console.warn('Developer Tools Detected. Content protection is active.');
+                        }
+                    } else {
+                        devtools.open = false;
+                    }
+                }, 1000);
+                
+                // Disable print
+                window.addEventListener('beforeprint', function(e) {
+                    e.preventDefault();
+                    return false;
+                });
+                
+                // Disable screenshot on mobile (iOS/Android)
+                if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
+                    document.addEventListener('touchstart', function(e) {
+                        if (e.touches.length > 1) {
+                            e.preventDefault();
+                            return false;
+                        }
+                    }, {passive: false});
+                }
+                
+                // Console warning
+                const originalLog = console.log;
+                console.log = function() {
+                    // Silently block console logs
+                };
+                
+                // Disable image saving
+                document.addEventListener('DOMContentLoaded', function() {
+                    const images = document.querySelectorAll('img');
+                    images.forEach(function(img) {
+                        img.addEventListener('dragstart', function(e) {
+                            e.preventDefault();
+                            return false;
+                        });
+                        img.setAttribute('draggable', 'false');
+                    });
+                });
+                
+                // Monitor clipboard changes (detect screenshot)
+                let lastClipboardCheck = '';
+                setInterval(function() {
+                    if (navigator.clipboard && navigator.clipboard.readText) {
+                        navigator.clipboard.readText().then(function(text) {
+                            // Jika clipboard berubah dan bukan dari input field, clear
+                            if (text && text !== lastClipboardCheck && !printScreenPressed) {
+                                navigator.clipboard.writeText('').catch(function() {});
+                                blurOverlay.style.display = 'block';
+                                setTimeout(function() {
+                                    blurOverlay.style.display = 'none';
+                                }, 1500);
+                            }
+                            lastClipboardCheck = text;
+                        }).catch(function() {});
+                    }
+                }, 500);
+                
+                // Clear clipboard periodically
+                setInterval(function() {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText('').catch(function() {});
+                    }
+                }, 800);
+                
+                // Deteksi window blur (mungkin screenshot)
+                let windowBlurred = false;
+                window.addEventListener('blur', function() {
+                    windowBlurred = true;
+                    blurOverlay.style.display = 'block';
+                });
+                
+                window.addEventListener('focus', function() {
+                    if (windowBlurred) {
+                        setTimeout(function() {
+                            blurOverlay.style.display = 'none';
+                            windowBlurred = false;
+                            // Clear clipboard saat window focus kembali
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                                navigator.clipboard.writeText('').catch(function() {});
+                            }
+                        }, 1000);
+                    }
+                });
+                
+                // Deteksi Print Screen dengan keyup (additional method)
+                document.addEventListener('keyup', function(e) {
+                    if (e.key === 'PrintScreen' || e.keyCode === 44) {
+                        printScreenPressed = true;
+                        blurOverlay.style.display = 'block';
+                        
+                        // Clear clipboard multiple times
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            navigator.clipboard.writeText('').catch(function() {});
+                            setTimeout(function() {
+                                navigator.clipboard.writeText('').catch(function() {});
+                            }, 100);
+                            setTimeout(function() {
+                                navigator.clipboard.writeText('').catch(function() {});
+                            }, 300);
+                        }
+                        
+                        // Try fallback method
+                        try {
+                            const textArea = document.createElement('textarea');
+                            textArea.value = '';
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(textArea);
+                        } catch(err) {}
+                        
+                        setTimeout(function() {
+                            blurOverlay.style.display = 'none';
+                            printScreenPressed = false;
+                        }, 2000);
+                    }
+                });
+                
+                // Deteksi Snipping Tool (Windows + Shift + S)
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 's' && e.shiftKey && (e.metaKey || e.ctrlKey)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        blurOverlay.style.display = 'block';
+                        setTimeout(function() {
+                            blurOverlay.style.display = 'none';
+                        }, 3000);
+                        return false;
+                    }
+                }, true);
+                
+                // Deteksi perubahan visibility (tab switch untuk screenshot)
+                document.addEventListener('visibilitychange', function() {
+                    if (document.hidden) {
+                        blurOverlay.style.display = 'block';
+                        // Clear clipboard saat tab hidden
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            navigator.clipboard.writeText('').catch(function() {});
+                        }
+                    } else {
+                        setTimeout(function() {
+                            blurOverlay.style.display = 'none';
+                            // Clear clipboard saat tab visible kembali
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                                navigator.clipboard.writeText('').catch(function() {});
+                            }
+                        }, 500);
+                    }
+                });
+                
+                // ========== AI DETECTION & PROTECTION ==========
+                
+                // Deteksi AI Bots dari User-Agent
+                const userAgent = navigator.userAgent.toLowerCase();
+                const aiBotPatterns = [
+                    'chatgpt', 'openai', 'gpt-', 'claude', 'anthropic', 'bard', 'gemini',
+                    'perplexity', 'copilot', 'bingbot', 'googlebot', 'crawler', 'spider',
+                    'scraper', 'bot', 'automated', 'ai-agent', 'llm', 'language-model',
+                    'crawler', 'scraper', 'headless', 'phantom', 'selenium', 'puppeteer',
+                    'playwright', 'webdriver', 'automation', 'testcafe', 'cypress'
+                ];
+                
+                let aiDetected = false;
+                aiBotPatterns.forEach(function(pattern) {
+                    if (userAgent.includes(pattern)) {
+                        aiDetected = true;
+                        console.warn('AI Bot detected:', pattern);
+                    }
+                });
+                
+                // Deteksi headless browser
+                const headlessIndicators = {
+                    webdriver: navigator.webdriver === true,
+                    chrome: !window.chrome,
+                    permissions: navigator.permissions === undefined,
+                    plugins: navigator.plugins.length === 0,
+                    languages: navigator.languages.length === 0,
+                    platform: navigator.platform === '',
+                    vendor: navigator.vendor === ''
+                };
+                
+                let headlessScore = 0;
+                Object.keys(headlessIndicators).forEach(function(key) {
+                    if (headlessIndicators[key]) headlessScore++;
+                });
+                
+                if (headlessScore >= 3) {
+                    aiDetected = true;
+                    console.warn('Headless browser detected');
+                }
+                
+                // Deteksi automated mouse movement (AI biasanya tidak punya human-like movement)
+                let mouseMovements = [];
+                let lastMouseTime = Date.now();
+                let suspiciousMovement = false;
+                
+                document.addEventListener('mousemove', function(e) {
+                    const now = Date.now();
+                    const timeDiff = now - lastMouseTime;
+                    const distance = Math.sqrt(
+                        Math.pow(e.movementX || 0, 2) + Math.pow(e.movementY || 0, 2)
+                    );
+                    
+                    mouseMovements.push({
+                        time: timeDiff,
+                        distance: distance,
+                        speed: distance / (timeDiff || 1)
+                    });
+                    
+                    // Keep only last 50 movements
+                    if (mouseMovements.length > 50) {
+                        mouseMovements.shift();
+                    }
+                    
+                    // Deteksi movement yang terlalu konsisten (AI pattern)
+                    if (mouseMovements.length >= 20) {
+                        const speeds = mouseMovements.map(m => m.speed);
+                        const avgSpeed = speeds.reduce((a, b) => a + b, 0) / speeds.length;
+                        const variance = speeds.reduce((sum, speed) => sum + Math.pow(speed - avgSpeed, 2), 0) / speeds.length;
+                        
+                        // AI biasanya punya variance sangat rendah (terlalu konsisten)
+                        if (variance < 0.001 && avgSpeed > 0) {
+                            suspiciousMovement = true;
+                        }
+                        
+                        // Deteksi movement terlalu cepat atau terlalu lambat
+                        if (avgSpeed > 50 || (avgSpeed < 0.1 && avgSpeed > 0)) {
+                            suspiciousMovement = true;
+                        }
+                    }
+                    
+                    lastMouseTime = now;
+                });
+                
+                // Deteksi click pattern (AI biasanya terlalu cepat atau terlalu konsisten)
+                let clickTimes = [];
+                let lastClickTime = 0;
+                
+                document.addEventListener('click', function(e) {
+                    const now = Date.now();
+                    if (lastClickTime > 0) {
+                        const timeDiff = now - lastClickTime;
+                        clickTimes.push(timeDiff);
+                        
+                        if (clickTimes.length > 20) {
+                            clickTimes.shift();
+                        }
+                        
+                        // Deteksi click yang terlalu konsisten (AI pattern)
+                        if (clickTimes.length >= 10) {
+                            const avgTime = clickTimes.reduce((a, b) => a + b, 0) / clickTimes.length;
+                            const variance = clickTimes.reduce((sum, time) => sum + Math.pow(time - avgTime, 2), 0) / clickTimes.length;
+                            
+                            // AI biasanya punya variance sangat rendah
+                            if (variance < 100 && avgTime < 500) {
+                                suspiciousMovement = true;
+                            }
+                        }
+                    }
+                    lastClickTime = now;
+                });
+                
+                // Deteksi scroll pattern (AI biasanya scroll terlalu smooth atau terlalu cepat)
+                let scrollEvents = [];
+                let lastScrollTime = Date.now();
+                
+                window.addEventListener('scroll', function() {
+                    const now = Date.now();
+                    const timeDiff = now - lastScrollTime;
+                    
+                    scrollEvents.push({
+                        time: timeDiff,
+                        position: window.pageYOffset
+                    });
+                    
+                    if (scrollEvents.length > 30) {
+                        scrollEvents.shift();
+                    }
+                    
+                    // Deteksi scroll yang terlalu konsisten
+                    if (scrollEvents.length >= 15) {
+                        const times = scrollEvents.map(s => s.time);
+                        const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
+                        const variance = times.reduce((sum, time) => sum + Math.pow(time - avgTime, 2), 0) / times.length;
+                        
+                        if (variance < 50 && avgTime < 100) {
+                            suspiciousMovement = true;
+                        }
+                    }
+                    
+                    lastScrollTime = now;
+                });
+                
+                // Deteksi kecepatan membaca (AI biasanya terlalu cepat)
+                let pageLoadTime = Date.now();
+                let readingTime = 0;
+                
+                setInterval(function() {
+                    readingTime = Date.now() - pageLoadTime;
+                    const scrollPercentage = (window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+                    
+                    // Jika scroll > 80% dalam waktu < 5 detik, kemungkinan AI
+                    if (readingTime < 5000 && scrollPercentage > 80) {
+                        suspiciousMovement = true;
+                    }
+                }, 1000);
+                
+                // Deteksi missing human behavior
+                let humanActivity = {
+                    mouseMove: false,
+                    click: false,
+                    scroll: false,
+                    keypress: false,
+                    touch: false
+                };
+                
+                document.addEventListener('mousemove', function() {
+                    humanActivity.mouseMove = true;
+                });
+                
+                document.addEventListener('click', function() {
+                    humanActivity.click = true;
+                });
+                
+                window.addEventListener('scroll', function() {
+                    humanActivity.scroll = true;
+                });
+                
+                document.addEventListener('keypress', function() {
+                    humanActivity.keypress = true;
+                });
+                
+                document.addEventListener('touchstart', function() {
+                    humanActivity.touch = true;
+                });
+                
+                // Check setelah 10 detik apakah ada human activity
+                setTimeout(function() {
+                    const hasActivity = Object.values(humanActivity).some(function(active) {
+                        return active === true;
+                    });
+                    
+                    if (!hasActivity && !document.hidden) {
+                        suspiciousMovement = true;
+                    }
+                }, 10000);
+                
+                // Deteksi automation tools
+                if (window.navigator.webdriver || 
+                    window.document.documentElement.getAttribute('webdriver') ||
+                    window.navigator.plugins.length === 0 ||
+                    !window.chrome ||
+                    window.outerHeight === window.innerHeight) {
+                    aiDetected = true;
+                }
+                
+                // Deteksi jika browser tidak punya proper window properties
+                try {
+                    if (window.outerWidth === 0 || window.outerHeight === 0) {
+                        aiDetected = true;
+                    }
+                } catch(e) {
+                    aiDetected = true;
+                }
+                
+                // Action jika AI terdeteksi
+                if (aiDetected || suspiciousMovement) {
+                    // Blur seluruh konten
+                    blurOverlay.style.display = 'block';
+                    blurOverlay.style.background = 'rgba(255, 0, 0, 0.8)';
+                    blurOverlay.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:24px;font-weight:bold;text-align:center;">AI Tool Detected<br><span style="font-size:16px;">Automated access is not allowed</span></div>';
+                    
+                    // Clear semua konten setelah delay
+                    setTimeout(function() {
+                        document.body.style.display = 'none';
+                        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-size:24px;color:red;">AI Tool Detected. Automated access is not allowed on this website.</div>';
+                    }, 3000);
+                    
+                    // Log ke server (optional)
+                    try {
+                        fetch('/api/ai-detection', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                            },
+                            body: JSON.stringify({
+                                userAgent: navigator.userAgent,
+                                detected: true,
+                                reason: aiDetected ? 'AI Bot User-Agent' : 'Suspicious Behavior',
+                                timestamp: new Date().toISOString()
+                            })
+                        }).catch(function() {});
+                    } catch(e) {}
+                }
+                
+                // Periodic check untuk suspicious behavior
+                setInterval(function() {
+                    if (suspiciousMovement && !aiDetected) {
+                        // Show warning overlay
+                        blurOverlay.style.display = 'block';
+                        blurOverlay.style.background = 'rgba(255, 165, 0, 0.7)';
+                        setTimeout(function() {
+                            blurOverlay.style.display = 'none';
+                            blurOverlay.style.background = 'rgba(0,0,0,0.9)';
+                        }, 2000);
+                    }
+                }, 5000);
+                
+            })();
+        </script>
         
         <!-- Featured Notes Popups -->
         @include('components.featured-popups')

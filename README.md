@@ -23,10 +23,11 @@ Platform di mana pengguna bisa:
 - ✅ **Komisi 20%** dari setiap transaksi berbayar
 - ✅ **Free notes:** 0% commission (mendorong knowledge sharing)
 - ✅ **Paid notes:** Platform fee (default: 20%, configurable) + Creator commission (optional, untuk original creator)
-- ⚠️ **Setiap user hanya bisa beli note 1x**, tapi **note bisa dijual ke user berbeda** (ownership transfer)
-- ⚠️ **Original creator selalu dapat komisi** di setiap penjualan (jika di-setting)
+- ⚠️ **Scarcity Mode (Default):** Setiap user hanya bisa beli note 1x, tapi note bisa dijual ke user berbeda (ownership transfer)
+- ⚠️ **Standard Mode:** Multiple sales allowed, buyer tidak bisa resell (lihat detail di bagian Note Selling Rules)
+- ⚠️ **Original creator selalu dapat komisi** di setiap penjualan (default: 0%, bisa di-setting di admin)
 - ⚠️ **Withdraw:** Approval admin minimal 24 jam (tidak otomatis)
-- ⚠️ Paket Premium: Rp25.000/bln (FASE 7)
+- ⚠️ **Paket Premium:** Rp25.000/bln (default, configurable di admin settings)
 - ✅ Iklan catatan unggulan (Featured Notes) — Platform untuk mempromosikan note dengan bayar per iklan
   - Lokasi iklan: Landing Hero, Landing Carousel, Marketplace Banner, Marketplace Grid, Popup Welcome, Popup Exit Intent, Popup Interstitial
   - Durasi: 7, 14, atau 30 hari
@@ -52,7 +53,6 @@ Platform di mana pengguna bisa:
 
 **Tools:**
 - Midtrans (Payment Gateway)
-- Ollama (AI Local LLM)
 - Laravel Telescope (Debugging)
 - Pest (Testing)
 
@@ -79,13 +79,10 @@ Platform di mana pengguna bisa:
 - ✅ Withdraw management
 - ✅ Rating & reviews
 - ✅ Public profiles with avatar upload & share functionality
-- ✅ Premium subscriptions
-- ✅ AI-powered summaries & tags (Ollama - Basic) dengan enhanced error handling
-- ✅ AI Chat untuk Seller Profile (Public feature - semua user bisa akses)
-- ✅ External AI APIs: Stability AI (image generation), Unsplash (image search), RunwayML (video generation)
-- ✅ Request queuing untuk high traffic (`ProcessAiRequest` job)
-- ✅ Performance tracking & monitoring untuk AI requests
-- ✅ Enhanced error handling dengan retry mechanism untuk semua AI APIs
+- ✅ Premium subscriptions dengan benefit khusus untuk Seller dan Buyer
+  - **Seller Benefits**: Unlimited notes, advanced analytics, upload file hingga 20MB, featured notes auto-approve, workspace management, cloud backup
+  - **Buyer Benefits**: Collections & wishlist, buyer analytics, reading progress tracking, bookmarks, export notes (PDF/DOCX/Markdown), reading history
+- ✅ File upload limits: Premium users (20MB), Basic users (5MB)
 - ✅ Referral system
 - ✅ Notification system (SweetAlert2)
 - ✅ Support ticket system
@@ -128,30 +125,43 @@ Platform di mana pengguna bisa:
   - Completion rate tracking
   - Recent purchases & categories
 
-**AI Memory Platform Plugin (Premium Subscription Feature - Planned):**
-- 🚧 Multi-workspace system (personal, team, organization)
-- 🚧 Semantic search dengan embeddings
-- 🚧 Natural Language Q&A ("Apa yang kubicarakan dengan Rina minggu lalu?")
-- 🚧 Context linking antar catatan
-- 🚧 Activity timeline & history tracking
-- 🚧 Auto insights & weekly summaries
-- 🚧 Enhanced folder & tag system
-- 🚧 Separate authentication/role untuk AI Platform (optional)
+**New Features (2025):**
+- ✅ **Refund System** — Buyers can request refunds, admins can approve/reject with full workflow
+- ✅ **Note Bundles** — Create and sell bundles of multiple notes with discounts
+- ✅ **Gift Notes** — Send notes as gifts to other users with email notifications
+- ✅ **Comments System** — Threaded comments with nested replies and likes
+- ✅ **Reactions System** — 5 reaction types (Like, Love, Helpful, Insightful, Thanks) with real-time updates
+- ✅ **Q&A System** — Ask questions about notes, sellers can answer, mark helpful feature
+- ✅ **Note Templates** — Create reusable templates for quick note creation
+- ✅ **Note Series** — Organize notes into series with ordering
+- ✅ **Categories** — Hierarchical category system for better organization
+- ✅ **Activity Feed** — Track and view user activities with polymorphic relationships
+- ✅ **In-App Messaging** — Direct messaging between users with conversation threads
+- ✅ **Webhooks** (Premium) — Create webhooks for events (note.purchased, etc.)
+- ✅ **Recently Viewed Notes** (Premium) — Track and view recently viewed notes
+- ✅ **Draft & Scheduled Publishing** — Save drafts and schedule notes for future publishing with auto-publish command
+- ✅ **User Verification** — Admin can verify users with verified badges
+
+**Note:** Semua fitur AI telah dihapus dari aplikasi. Platform sekarang fokus pada marketplace dan fitur premium untuk seller dan buyer.
 
 ---
 
-## 🎮 Marketing Tools (Coming Soon)
+## 🎮 Marketing Tools
+
+**✅ All Marketing Tools Implemented:**
 
 **Top 3 Priorities:**
-1. **Earnings Calculator** — Simulate seller earnings potential
-2. **Referral ROI Calculator** — Track referral program ROI
-3. **Premium vs Basic Comparison** — Interactive plan comparison
+1. ✅ **Earnings Calculator** — Simulate seller earnings potential
+2. ✅ **Referral ROI Calculator** — Track referral program ROI
+3. ✅ **Premium vs Basic Comparison** — Interactive plan comparison
 
 **Additional Simulators:**
-- Wallet Simulator
-- AI Summary Demo
-- Transaction Flow Visualizer
-- Price Benchmark Tool
+- ✅ Wallet Simulator — Track balance and transactions
+- ✅ Transaction Flow Visualizer — Visualize payment process
+- ✅ Price Benchmark Tool — Compare note prices with market average
+- ✅ Marketplace Preview — Explore marketplace features
+
+**Note:** AI-related simulators (AI Summary Demo, Tag Suggestion) have been removed as all AI features have been removed from the application.
 
 ---
 
@@ -268,65 +278,26 @@ Platform di mana pengguna bisa:
 
 ---
 
-## 🧠 Noteds Business AI Vision
-
-> **AI Memory Platform** pertama dari Indonesia yang mampu memahami konteks dari setiap catatan — baik teks, dokumen, maupun aktivitas — untuk membantu pengguna mengambil keputusan lebih cepat dan cerdas.
+## 🚀 Current Development Phase
 
 **Current Phase:** ✅ Marketplace v1.0 (Active Development)
-**Next Phase:** 🚧 AI Memory Platform Plugin (Premium Subscription Feature - 2026 Q1)
-
-### 🎯 Visi
-
-Menjadi **AI Memory Platform** pertama dari Indonesia yang mampu memahami konteks dari setiap catatan — baik teks, dokumen, maupun aktivitas — untuk membantu pengguna mengambil keputusan lebih cepat dan cerdas.
-
-### 💡 Konsep Singkat
-
-Noteds adalah aplikasi pencatat cerdas (AI-based note system) yang:
-
-- Mengelola catatan teks, gambar, dan dokumen
-- Menghubungkan konteks antar catatan (meeting, transaksi, ide, pelanggan, dll)
-- Menghadirkan **AI assistant** untuk menjawab pertanyaan berbasis data milik pengguna
-- Menjadi fondasi "memori digital" pribadi maupun organisasi
-
-### ⚙️ AI Layer (Context Engine)
-
-- **Natural Language Understanding:** Model LLM lokal via Ollama (tanpa ketergantungan API eksternal)
-- **Embedding & Semantic Search:** 
-  - `sentence-transformers` atau `OpenAI embeddings` (opsional, bisa pakai model lokal `all-MiniLM-L6-v2`)
-- **Insight Engine:** Modul Laravel khusus untuk:
-  - Summarization (ringkasan otomatis) ✅
-  - Q&A berbasis catatan
-  - Context linking antar catatan
-  - Keyword tagging otomatis ✅
-
-### 🚀 Fitur Utama AI Memory Platform (MVP)
-
-1. 📝 Catatan teks, gambar, & dokumen (upload + auto-tagging) ✅ (Basic sudah ada di marketplace)
-2. 🔍 Pencarian pintar (AI-based semantic search)
-3. 💬 Tanya catatanmu: "Apa yang kubicarakan dengan Rina minggu lalu?"
-4. 🧠 Insight otomatis (ringkasan mingguan, deteksi topik)
-5. 📂 Folder & tag system (enhanced)
-6. 👥 Multi workspace (personal, tim, lembaga)
-7. 🔒 Autentikasi dan role khusus untuk AI Memory Platform (bisa terpisah dari marketplace)
-8. 🕓 Aktivitas & histori (timeline perubahan catatan)
 
 ### 📅 Roadmap
 
 | Phase | Focus | Timeline | Status |
 |-------|-------|----------|--------|
 | **Phase 0: Marketplace v1.0** | Catatan + Marketplace + Wallet | 2025 Q4 | ✅ In Progress |
-| **Phase 1: AI Memory MVP** | Catatan + AI Q&A sederhana (Premium Plugin) | 2026 Q1 | 🚧 Planned |
-| **Phase 2: Team Workspace** | Multi user + kolaborasi real-time | 2026 Q2 | 🚧 Planned |
-| **Phase 3: Integrasi & API** | Integrasi dengan tools eksternal | 2026 Q3 | 🚧 Planned |
-| **Phase 4: AI Insight Center** | Laporan & rekomendasi berbasis AI | 2026 Q4 | 🚧 Planned |
-| **Phase 5: Marketplace Plugin** | Pengembang eksternal bisa menambah modul | 2027 | 🚧 Planned |
+| **Phase 1: Team Workspace** | Multi user + kolaborasi real-time | 2026 Q1 | 🚧 Planned |
+| **Phase 2: Integrasi & API** | Integrasi dengan tools eksternal | 2026 Q2 | 🚧 Planned |
+| **Phase 3: Marketplace Plugin** | Pengembang eksternal bisa menambah modul | 2026 Q3 | 🚧 Planned |
+| **Phase 4: AI Memory Platform** | AI Q&A, Semantic Search, Insights (Premium Plugin) | 🚧 Coming Soon |
 
 ### Tech Stack Business (Future)
 
 - **Database:** PostgreSQL
 - **Search:** Meilisearch
 - **Frontend:** Vue 3 + Pinia
-- **AI:** Ollama + Embeddings
+- **AI:** Coming Soon (AI Memory Platform Plugin)
 - **Infrastructure:** Docker Compose
 
 See [TASKLIST.md](TASKLIST.md) for full roadmap
@@ -394,7 +365,6 @@ composer pint
 - ✅ FASE 5: Withdraw & Admin Panel
 - ✅ FASE 6: Rating & Reviews
 - ✅ FASE 7: Premium Plans
-- ✅ AI Integration (Ollama)
 - ✅ Referral System
 - ✅ Notification System (SweetAlert2)
 - ✅ Admin Manual Subscription Creation
@@ -408,7 +378,6 @@ composer pint
 - ✅ Seller Analytics Dashboard (Impressions, Clicks, CTR, ROI)
 - ✅ Auto-approve Featured Notes untuk Premium Users
 - ✅ Note History & Versioning System (Buyer history, Update history, Prevent delete)
-- ✅ AI Chat untuk Seller Profile (Public feature - semua user bisa akses)
 - ✅ Collections Enhancement (Add Purchased Notes)
 - ✅ Resell Flow & One-Time Sale System (Original creator commission, Access control)
 - ✅ Profile Features (Avatar upload, Share functionality, Open Graph tags)
@@ -418,6 +387,23 @@ composer pint
 - ✅ Subscription auto-renew flow dengan sufficient/insufficient balance handling & notifications
 - ✅ Sale Mode System (Scarcity & Standard modes dengan repurchase, resale, analytics)
 - ✅ Comprehensive Documentation System (22 documentation entries via DocumentationSeeder)
+- ✅ Refund System (Full workflow dengan admin approval)
+- ✅ Note Bundles (Create, view, purchase bundles)
+- ✅ Gift Notes (Send gifts dengan email notifications)
+- ✅ Comments System (Threaded dengan nested replies)
+- ✅ Reactions System (5 types dengan real-time updates)
+- ✅ Q&A System (Questions & answers dengan helpful marking)
+- ✅ Note Templates (Reusable templates)
+- ✅ Note Series (Organize notes into series)
+- ✅ Categories (Hierarchical category system)
+- ✅ Activity Feed (User activity tracking)
+- ✅ In-App Messaging (Direct messaging dengan conversations)
+- ✅ Webhooks (Premium feature untuk event tracking)
+- ✅ Recently Viewed Notes (Premium feature)
+- ✅ Draft & Scheduled Publishing (Draft status & auto-publish command)
+- ✅ User Verification (Admin verification dengan badges)
+- ✅ JavaScript Fixes (Marketplace show page JavaScript properly wrapped in script tags)
+- ✅ Controller Fixes (Base Controller extends BaseController for middleware support)
 
 **In Progress:**
 - ⚠️ FASE 8: Deployment & Launch
@@ -436,14 +422,16 @@ composer pint
 - ✅ Auto-expire command (daily at 01:00 WIB)
 - ✅ Seller dashboard analytics dengan detailed metrics
 
-**Planned (Premium Subscription Plugin):**
-- 🚧 AI Memory Platform Plugin
-  - Multi-workspace system
+**Coming Soon (Premium Subscription Plugin):**
+- 🚧 **AI Memory Platform Plugin** — Coming Soon
+  - Multi-workspace system dengan AI-powered features
   - Semantic search dengan embeddings
   - Natural Language Q&A
   - Context linking antar catatan
   - Activity timeline & history
   - Auto insights & weekly summaries
+  
+  **Note:** Fitur AI telah dihapus dari aplikasi saat ini. AI Memory Platform akan dikembangkan di masa depan sebagai premium plugin terpisah.
 
 **Planned:**
 - ⚠️ Mobile App
@@ -467,7 +455,6 @@ See [TASKLIST.md](TASKLIST.md) for full task list
 - [Tailwind CSS](https://tailwindcss.com/docs)
 - [Alpine.js](https://alpinejs.dev/)
 - [Midtrans API](https://docs.midtrans.com/)
-- [Ollama](https://ollama.ai/)
 
 ---
 
@@ -476,6 +463,27 @@ See [TASKLIST.md](TASKLIST.md) for full task list
 1. Review [LOCAL_SETUP.md](LOCAL_SETUP.md) untuk development environment
 2. Check [TASKLIST.md](TASKLIST.md) untuk roadmap & priorities
 3. Deploy ke VPS dengan [VPS_SETUP.md](VPS_SETUP.md)
+
+---
+
+## 🔧 Recent Updates (2025)
+
+### Bug Fixes
+- ✅ Fixed JavaScript code rendering issue in marketplace show page (all JS properly wrapped in script tags)
+- ✅ Fixed NoteQuestionController middleware error (Base Controller now extends BaseController)
+- ✅ Added GET route handler for questions endpoint to prevent Method Not Allowed errors
+
+### Technical Improvements
+- ✅ All JavaScript functions properly scoped and wrapped in script tags
+- ✅ Improved error handling in frontend JavaScript (reactions, comments, Q&A)
+- ✅ Better user feedback with SweetAlert2 for all interactive features
+- ✅ Route optimization for better error handling
+
+### Documentation
+- ✅ Updated README.md with all new features
+- ✅ Updated TASKLIST.md with complete implementation status
+- ✅ All database tables documented
+- ✅ All features properly categorized and documented
 
 ---
 

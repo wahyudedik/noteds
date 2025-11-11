@@ -468,6 +468,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get AI analyses.
+     * @deprecated AI features have been removed. This relationship is kept for backward compatibility.
      */
     public function aiAnalyses()
     {

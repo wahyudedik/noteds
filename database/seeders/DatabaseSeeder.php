@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             FolderSeeder::class,
             NoteSeeder::class,
             StudyMaterialSeeder::class,
-            AiAnalysisSeeder::class,
+            // AiAnalysisSeeder::class, // DEPRECATED: AI features have been removed
             DocumentationSeeder::class,
             LandingPageSectionSeeder::class,
             CmsPageSeeder::class,
@@ -47,6 +47,19 @@ class DatabaseSeeder extends Seeder
             AppNotificationSeeder::class,
             SocialFeatureSeeder::class,
             WithdrawSeeder::class,
+            // New feature seeders
+            CategorySeeder::class,
+            NoteTemplateSeeder::class,
+            NoteSeriesSeeder::class,
+            NoteCommentSeeder::class,
+            NoteReactionSeeder::class,
+            NoteQuestionSeeder::class,
+            NoteBundleSeeder::class,
+            RefundSeeder::class,
+            GiftNoteSeeder::class,
+            ActivitySeeder::class,
+            MessageSeeder::class,
+            WebhookSeeder::class,
         ]);
     }
 }
