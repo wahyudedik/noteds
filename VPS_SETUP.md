@@ -389,8 +389,19 @@ server {
         deny all;
     }
 
-    # Increase upload size for file attachments
-    client_max_body_size 50M;
+    # Increase upload size for file attachments (support up to 200MB for large files)
+    # For premium users: up to 100MB per file, multiple files can exceed 200MB total
+    client_max_body_size 200M;
+    
+    # Increase buffer sizes for large file uploads
+    client_body_buffer_size 128k;
+    client_header_buffer_size 1k;
+    large_client_header_buffers 4 16k;
+    
+    # Increase timeouts for large file uploads
+    client_body_timeout 300s;
+    client_header_timeout 300s;
+    send_timeout 300s;
 
     # Gzip compression
     gzip on;
@@ -903,10 +914,83 @@ REDIS_PORT=6379
 
 ## 🚨 Troubleshooting
 
+### 413 Request Entity Too Large (Nginx)
+Jika mengalami error "413 Request Entity Too Large" saat upload file:
+
+#### Untuk aaPanel Users (Recommended):
+
+1. **Update PHP Configuration via aaPanel:**
+   - Buka aaPanel → **App Store** → Cari **PHP-8.3** (atau versi PHP yang digunakan)
+   - Klik **Setting** → Pilih **Limit of upload**
+   - Set **upload_max_filesize** ke **1000M** (atau sesuai kebutuhan)
+   - Klik **Save**
+   - Pilih **Configuration** tab
+   - Pastikan:
+     - `post_max_size`: **2000M**
+     - `memory_limit`: **512M**
+     - `max_execution_time`: **1000** (atau lebih besar)
+   - Klik **Save**
+
+2. **Update Nginx Configuration via aaPanel:**
+   - Buka aaPanel → **App Store** → Cari **Nginx**
+   - Klik **Setting** → Pilih **Configuration file**
+   - Atau bisa juga via **Files** → Edit file konfigurasi site
+   - Cari file konfigurasi untuk domain Anda (biasanya di `/www/server/panel/vhost/nginx/your-domain.conf`)
+   - Tambahkan atau update di dalam block `server { ... }`:
+   ```nginx
+   client_max_body_size 200M;  # Increase dari default 1M atau 50M
+   client_body_buffer_size 128k;
+   client_body_timeout 300s;
+   ```
+   - **Save** dan **Reload** Nginx
+
+3. **Restart Services via aaPanel:**
+   - Buka aaPanel → **App Store** → **Nginx** → **Setting** → **Service** → **Reload**
+   - Buka aaPanel → **App Store** → **PHP-8.3** → **Setting** → **Service** → **Restart**
+
+4. **Clear Laravel Cache:**
+   ```bash
+   cd /www/wwwroot/noteds.com  # atau path aplikasi Anda
+   php artisan config:clear
+   php artisan cache:clear
+   ```
+
+#### Untuk Manual Configuration (Jika tidak menggunakan aaPanel):
+
+1. **Update Nginx Configuration:**
+   Edit `/etc/nginx/sites-available/noteds` dan pastikan:
+   ```nginx
+   client_max_body_size 200M;  # Increase dari default 1M atau 50M
+   client_body_buffer_size 128k;
+   client_body_timeout 300s;
+   ```
+
+2. **Update PHP Configuration:**
+   Edit `/etc/php/8.2/fpm/php.ini`:
+   ```ini
+   upload_max_filesize = 100M
+   post_max_size = 200M
+   max_execution_time = 600
+   memory_limit = 512M
+   ```
+
+3. **Restart Services:**
+   ```bash
+   sudo systemctl reload nginx
+   sudo systemctl restart php8.2-fpm
+   ```
+
+4. **Verify Configuration:**
+   ```bash
+   sudo nginx -t  # Test nginx config
+   php -i | grep upload_max_filesize  # Check PHP settings
+   ```
+
 ### 500 Internal Server Error
 - Check `storage/logs/laravel.log`
 - Verify file permissions
 - Run `php artisan config:clear`
+- Check PHP-FPM error logs: `sudo tail -f /var/log/php8.2-fpm.log`
 
 ### Queue Not Processing
 ```bash

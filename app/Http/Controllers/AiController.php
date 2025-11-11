@@ -39,29 +39,60 @@ class AiController extends Controller
             }
 
             // Validate request - Laravel will automatically return JSON if request expects JSON
-            $validated = $request->validate([
-                'content' => 'required|string|max:10000',
-            ]);
+            try {
+                $validated = $request->validate([
+                    'content' => 'required|string|max:50000', // Increased to 50K chars for longer content
+                ]);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Konten terlalu panjang. Maksimal 50.000 karakter untuk analisis AI.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
 
             $content = $request->input('content');
 
             // Check if Ollama is available
             if (! $this->aiService->isAvailable()) {
+                logger()->warning('AI analyze: Ollama service not available', [
+                    'user_id' => auth()->id(),
+                    'base_url' => config('services.ollama.url'),
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'AI service is currently unavailable. Please try again later.',
+                    'message' => 'AI service sedang tidak tersedia. Silakan coba lagi nanti atau hubungi administrator.',
                 ], 503);
+            }
+
+            // Truncate content if too long (prevent timeout)
+            $contentLength = strlen($content);
+            if ($contentLength > 30000) {
+                logger()->info('AI analyze: Content truncated', [
+                    'user_id' => auth()->id(),
+                    'original_length' => $contentLength,
+                    'truncated_length' => 30000,
+                ]);
+                $content = substr($content, 0, 30000) . '...';
             }
 
             // Generate summary
             $summary = $this->aiService->generateSummary($content, 200);
             if ($summary === null || empty(trim($summary))) {
-                $summary = 'Tidak dapat menghasilkan ringkasan.';
+                logger()->warning('AI analyze: Summary generation returned null or empty', [
+                    'user_id' => auth()->id(),
+                    'content_length' => strlen($content),
+                ]);
+                $summary = 'Tidak dapat menghasilkan ringkasan. Silakan coba lagi atau tulis ringkasan manual.';
             }
 
             // Suggest tags
             $suggestedTags = $this->aiService->suggestTags($content, 5);
             if (empty($suggestedTags)) {
+                logger()->info('AI analyze: No tags suggested', [
+                    'user_id' => auth()->id(),
+                ]);
                 $suggestedTags = [];
             }
 
@@ -73,10 +104,10 @@ class AiController extends Controller
                 ],
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Handle validation exception (should not reach here, but just in case)
+            // This should not reach here, but handle just in case
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid request: ' . $e->getMessage(),
+                'message' => 'Konten tidak valid. Pastikan konten tidak kosong dan tidak melebihi batas maksimum.',
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
@@ -86,11 +117,23 @@ class AiController extends Controller
                 'user_id' => auth()->id(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
+                'content_length' => $request->input('content') ? strlen($request->input('content')) : 0,
             ]);
+
+            // Provide more specific error message based on error type
+            $errorMessage = 'Terjadi kesalahan saat memproses analisis AI. ';
+            
+            if (str_contains($e->getMessage(), 'timeout') || str_contains($e->getMessage(), 'Connection timed out')) {
+                $errorMessage = 'Request timeout. Konten mungkin terlalu panjang atau server sedang sibuk. Silakan coba lagi atau kurangi panjang konten.';
+            } elseif (str_contains($e->getMessage(), 'Connection') || str_contains($e->getMessage(), 'refused')) {
+                $errorMessage = 'Tidak dapat terhubung ke AI service. Pastikan Ollama service berjalan dengan benar.';
+            } else {
+                $errorMessage .= 'Silakan coba lagi nanti atau hubungi administrator jika masalah berlanjut.';
+            }
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while processing your request. Please try again later.',
+                'message' => $errorMessage,
             ], 500);
         }
     }

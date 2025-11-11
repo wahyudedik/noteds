@@ -2744,8 +2744,12 @@
                                         errorMessage = 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.';
                                     } else if (response.status === 503) {
                                         errorMessage = 'AI service sedang tidak tersedia. Silakan coba lagi nanti.';
+                                    } else if (response.status === 413) {
+                                        errorMessage = 'Konten terlalu panjang untuk dianalisis. Silakan kurangi panjang konten atau coba lagi.';
                                     } else if (response.status >= 500) {
-                                        errorMessage = 'Server error. Silakan coba lagi nanti.';
+                                        errorMessage = 'Server error. Silakan coba lagi nanti atau hubungi administrator jika masalah berlanjut.';
+                                    } else if (response.status === 422) {
+                                        errorMessage = 'Request tidak valid. Pastikan konten tidak kosong dan tidak melebihi batas maksimum.';
                                     } else {
                                         errorMessage += 'Silakan coba lagi.';
                                     }
