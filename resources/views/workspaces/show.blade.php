@@ -389,7 +389,7 @@
                                         $thumbnailPath = is_array($thumbnail) ? ($thumbnail['path'] ?? $thumbnail) : $thumbnail;
                                     @endphp
                                     <div class="relative group">
-                                        <img src="{{ Storage::url($thumbnailPath) }}" alt="Thumbnail {{ $index + 1 }}" class="w-full h-20 object-cover rounded border border-gray-200">
+                                        <img src="{{ \Illuminate\Support\Facades\Storage::url($thumbnailPath) }}" alt="Thumbnail {{ $index + 1 }}" class="w-full h-20 object-cover rounded border border-gray-200">
                                         <label class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded flex items-center justify-center cursor-pointer transition-all">
                                             <input type="checkbox" name="removed_thumbnails[]" value="{{ basename($thumbnailPath) }}" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
                                             <span class="ml-2 text-xs text-white hidden group-hover:block">Remove</span>

@@ -246,82 +246,121 @@ class WorkspaceController extends Controller
             $validated['is_public'] = true; // Make workspace public when listing for sale
         }
 
-        // Handle file uploads for bundle workspace
-        $attachments = [];
-        $thumbnails = [];
-        
-        if ($request->hasFile('attachments')) {
-            $uploadService = app(\App\Services\LargeFileUploadService::class);
-            foreach ($request->file('attachments') as $file) {
-                try {
-                    $isLargeFile = $file->getSize() >= \App\Services\LargeFileUploadService::LARGE_FILE_THRESHOLD;
-                    if ($isLargeFile) {
-                        $attachment = $uploadService->handleLargeFileUpload($file, $user->id);
-                    } else {
-                        $attachment = $uploadService->handleRegularFile($file, $user->id);
+        // Use DB transaction to ensure atomicity
+        try {
+            DB::beginTransaction();
+
+            // Handle file uploads for bundle workspace
+            $attachments = [];
+            $thumbnails = [];
+            
+            if ($request->hasFile('attachments')) {
+                $uploadService = app(\App\Services\LargeFileUploadService::class);
+                foreach ($request->file('attachments') as $file) {
+                    try {
+                        $isLargeFile = $file->getSize() >= \App\Services\LargeFileUploadService::LARGE_FILE_THRESHOLD;
+                        if ($isLargeFile) {
+                            $attachment = $uploadService->handleLargeFileUpload($file, $user->id);
+                        } else {
+                            $attachment = $uploadService->handleRegularFile($file, $user->id);
+                        }
+                        $attachments[] = $attachment;
+                    } catch (\Exception $e) {
+                        \Log::error('Workspace attachment upload failed', [
+                            'user_id' => $user->id,
+                            'workspace_id' => $workspace->id,
+                            'filename' => $file->getClientOriginalName(),
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                        ]);
+                        // Continue with other files, but log error
                     }
-                    $attachments[] = $attachment;
-                } catch (\Exception $e) {
-                    \Log::error('Workspace attachment upload failed', [
-                        'user_id' => $user->id,
-                        'workspace_id' => $workspace->id,
-                        'filename' => $file->getClientOriginalName(),
-                        'error' => $e->getMessage(),
-                    ]);
                 }
             }
-        }
-        
-        // Handle thumbnail uploads
-        if ($request->hasFile('thumbnails')) {
-            foreach ($request->file('thumbnails') as $file) {
-                if ($file->isValid() && str_starts_with($file->getMimeType(), 'image/')) {
-                    $filename = \Illuminate\Support\Str::uuid() . '_' . time() . '.' . $file->getClientOriginalExtension();
-                    $path = $file->storeAs('thumbnails/' . $user->id, $filename, 'public');
-                    $thumbnails[] = $path;
+            
+            // Handle thumbnail uploads with error handling
+            if ($request->hasFile('thumbnails')) {
+                foreach ($request->file('thumbnails') as $file) {
+                    try {
+                        if ($file->isValid() && str_starts_with($file->getMimeType(), 'image/')) {
+                            $filename = \Illuminate\Support\Str::uuid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+                            
+                            // Ensure directory exists
+                            if (!Storage::disk('public')->exists('thumbnails/' . $user->id)) {
+                                Storage::disk('public')->makeDirectory('thumbnails/' . $user->id);
+                            }
+                            
+                            $path = $file->storeAs('thumbnails/' . $user->id, $filename, 'public');
+                            $thumbnails[] = $path;
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Workspace thumbnail upload failed', [
+                            'user_id' => $user->id,
+                            'workspace_id' => $workspace->id,
+                            'filename' => $file->getClientOriginalName(),
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                        ]);
+                        // Continue with other thumbnails, but log error
+                    }
                 }
             }
+            
+            // Merge with existing attachments/thumbnails if updating
+            $existingAttachments = $workspace->attachments ?? [];
+            $existingThumbnails = $workspace->thumbnails ?? [];
+            
+            // Keep existing unless explicitly removed
+            $removedAttachments = $request->input('removed_attachments', []);
+            $removedThumbnails = $request->input('removed_thumbnails', []);
+            
+            $existingAttachments = array_filter($existingAttachments, function($attachment) use ($removedAttachments) {
+                $filename = is_array($attachment) ? ($attachment['filename'] ?? '') : basename($attachment);
+                return !in_array($filename, $removedAttachments);
+            });
+            
+            $existingThumbnails = array_filter($existingThumbnails, function($thumbnail) use ($removedThumbnails) {
+                $filename = is_array($thumbnail) ? ($thumbnail['filename'] ?? '') : basename($thumbnail);
+                return !in_array($filename, $removedThumbnails);
+            });
+            
+            $finalAttachments = array_merge(array_values($existingAttachments), $attachments);
+            $finalThumbnails = array_merge(array_values($existingThumbnails), $thumbnails);
+
+            $workspace->update([
+                'price' => $validated['price'],
+                'discount_price' => $validated['discount_price'] ?? null,
+                'sale_mode' => $validated['sale_mode'],
+                'grace_period_days' => $validated['grace_period_days'],
+                'relist_price_multiplier' => $validated['relist_price_multiplier'],
+                'is_for_sale' => true,
+                'is_public' => $validated['is_public'],
+                'status' => 'active',
+                'marketplace_description' => $validated['marketplace_description'] ?? null,
+                'original_creator_id' => $validated['original_creator_id'] ?? $workspace->original_creator_id,
+                'attachments' => !empty($finalAttachments) ? $finalAttachments : null,
+                'thumbnails' => !empty($finalThumbnails) ? $finalThumbnails : null,
+                'file_count' => count($finalAttachments),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('workspaces.show', $workspace)
+                ->with('success', __('messages.workspace_listed_for_sale'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            \Log::error('Workspace sell failed', [
+                'user_id' => $user->id,
+                'workspace_id' => $workspace->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->route('workspaces.show', $workspace)
+                ->with('error', 'Gagal menyimpan workspace untuk dijual. Silakan coba lagi.')
+                ->withInput();
         }
-        
-        // Merge with existing attachments/thumbnails if updating
-        $existingAttachments = $workspace->attachments ?? [];
-        $existingThumbnails = $workspace->thumbnails ?? [];
-        
-        // Keep existing unless explicitly removed
-        $removedAttachments = $request->input('removed_attachments', []);
-        $removedThumbnails = $request->input('removed_thumbnails', []);
-        
-        $existingAttachments = array_filter($existingAttachments, function($attachment) use ($removedAttachments) {
-            $filename = is_array($attachment) ? ($attachment['filename'] ?? '') : basename($attachment);
-            return !in_array($filename, $removedAttachments);
-        });
-        
-        $existingThumbnails = array_filter($existingThumbnails, function($thumbnail) use ($removedThumbnails) {
-            $filename = is_array($thumbnail) ? ($thumbnail['filename'] ?? '') : basename($thumbnail);
-            return !in_array($filename, $removedThumbnails);
-        });
-        
-        $finalAttachments = array_merge(array_values($existingAttachments), $attachments);
-        $finalThumbnails = array_merge(array_values($existingThumbnails), $thumbnails);
-
-        $workspace->update([
-            'price' => $validated['price'],
-            'discount_price' => $validated['discount_price'] ?? null,
-            'sale_mode' => $validated['sale_mode'],
-            'grace_period_days' => $validated['grace_period_days'],
-            'relist_price_multiplier' => $validated['relist_price_multiplier'],
-            'is_for_sale' => true,
-            'is_public' => $validated['is_public'],
-            'status' => 'active',
-            'marketplace_description' => $validated['marketplace_description'] ?? null,
-            'original_creator_id' => $validated['original_creator_id'] ?? $workspace->original_creator_id,
-            'attachments' => !empty($finalAttachments) ? $finalAttachments : null,
-            'thumbnails' => !empty($finalThumbnails) ? $finalThumbnails : null,
-            'file_count' => count($finalAttachments),
-        ]);
-
-        return redirect()->route('workspaces.show', $workspace)
-            ->with('success', __('messages.workspace_listed_for_sale'));
     }
 
     /**
@@ -333,150 +372,178 @@ class WorkspaceController extends Controller
         CommissionService $commissionService,
         TaxService $taxService
     ): RedirectResponse {
-        if (!$workspace->is_public || $workspace->status !== 'active') {
-            return redirect()->route('workspaces.show', $workspace)
-                ->with('error', 'Workspace tidak tersedia untuk dibeli.');
-        }
-
         $buyer = $request->user();
-        $seller = $workspace->owner;
-
-        // Buyer cannot buy their own workspace (but they can resell it if they own it)
-        if ($buyer->id === $seller->id) {
-            return redirect()->route('workspaces.show', $workspace)
-                ->with('error', 'Anda tidak dapat membeli workspace Anda sendiri. Jika Anda adalah pemilik workspace ini, Anda dapat menjualnya ke buyer lain.');
-        }
-
-        // Handle different sale modes
-        if ($workspace->isStandardMode()) {
-            // Standard mode: Multiple sales allowed, buyer cannot resell, no commission
-            // Check if buyer already purchased (can buy multiple times from different sellers)
-            // But can't buy from same seller twice
-            $existingTransaction = Transaction::where('buyer_id', $buyer->id)
-                ->where('workspace_id', $workspace->id)
-                ->where('seller_id', $seller->id)
-                ->where('status', 'success')
-                ->first();
-
-            if ($existingTransaction) {
+        
+        // Use DB transaction with lock to prevent race conditions
+        try {
+            DB::beginTransaction();
+            
+            // Lock the workspace row to prevent concurrent purchases
+            $workspace = Workspace::lockForUpdate()->find($workspace->id);
+            
+            if (!$workspace) {
+                DB::rollBack();
                 return redirect()->route('workspaces.show', $workspace)
-                    ->with('error', 'Anda sudah membeli workspace ini dari penjual ini sebelumnya.');
+                    ->with('error', 'Workspace tidak ditemukan.');
             }
-        } else {
-            // Scarcity mode: One-time purchase per user, but can repurchase if sold
-            $existingTransaction = Transaction::where('buyer_id', $buyer->id)
-                ->where('workspace_id', $workspace->id)
-                ->where('status', 'success')
-                ->first();
+            
+            // Re-check status after lock (might have been sold during request)
+            if (!$workspace->is_public || $workspace->status !== 'active' || !$workspace->is_for_sale) {
+                DB::rollBack();
+                return redirect()->route('workspaces.show', $workspace)
+                    ->with('error', 'Workspace tidak tersedia untuk dibeli.');
+            }
 
-            if ($existingTransaction) {
-                // Check if buyer still owns the workspace (hasn't sold it yet)
-                if ($buyer->id === $workspace->owner_id) {
+            $seller = $workspace->owner;
+
+            // Buyer cannot buy their own workspace (but they can resell it if they own it)
+            if ($buyer->id === $seller->id) {
+                DB::rollBack();
+                return redirect()->route('workspaces.show', $workspace)
+                    ->with('error', 'Anda tidak dapat membeli workspace Anda sendiri. Jika Anda adalah pemilik workspace ini, Anda dapat menjualnya ke buyer lain.');
+            }
+
+            // Handle different sale modes
+            if ($workspace->isStandardMode()) {
+                // Standard mode: Multiple sales allowed, buyer cannot resell, no commission
+                // Check if buyer already purchased (can buy multiple times from different sellers)
+                // But can't buy from same seller twice
+                $existingTransaction = Transaction::where('buyer_id', $buyer->id)
+                    ->where('workspace_id', $workspace->id)
+                    ->where('seller_id', $seller->id)
+                    ->where('status', 'success')
+                    ->first();
+
+                if ($existingTransaction) {
+                    DB::rollBack();
                     return redirect()->route('workspaces.show', $workspace)
-                        ->with('error', 'Anda sudah memiliki workspace ini. Anda dapat menjualnya ke buyer lain, tetapi ingat bahwa setelah dijual, Anda tidak akan bisa mengaksesnya lagi.');
-                } else {
-                    // Buyer sold the workspace - check if can repurchase
-                    if ($workspace->canRepurchase($buyer->id)) {
-                        // Can repurchase - will use repurchase price below
-                        $repurchasePrice = $workspace->getRepurchasePrice($buyer->id);
-                        if ($repurchasePrice) {
-                            // Will use repurchase price instead of base price
-                            $basePrice = $repurchasePrice;
+                        ->with('error', 'Anda sudah membeli workspace ini dari penjual ini sebelumnya.');
+                }
+            } else {
+                // Scarcity mode: One-time purchase per user, but can repurchase if sold
+                // Check if workspace is already sold (lock ensures we see latest state)
+                if ($workspace->is_sold && $workspace->owner_id !== $buyer->id) {
+                    DB::rollBack();
+                    return redirect()->route('workspaces.show', $workspace)
+                        ->with('error', 'Workspace ini sudah terjual. Setiap workspace scarcity hanya bisa dibeli 1x.');
+                }
+                
+                $existingTransaction = Transaction::where('buyer_id', $buyer->id)
+                    ->where('workspace_id', $workspace->id)
+                    ->where('status', 'success')
+                    ->first();
+
+                if ($existingTransaction) {
+                    // Check if buyer still owns the workspace (hasn't sold it yet)
+                    if ($buyer->id === $workspace->owner_id) {
+                        DB::rollBack();
+                        return redirect()->route('workspaces.show', $workspace)
+                            ->with('error', 'Anda sudah memiliki workspace ini. Anda dapat menjualnya ke buyer lain, tetapi ingat bahwa setelah dijual, Anda tidak akan bisa mengaksesnya lagi.');
+                    } else {
+                        // Buyer sold the workspace - check if can repurchase
+                        if ($workspace->canRepurchase($buyer->id)) {
+                            // Can repurchase - will use repurchase price below
+                            $repurchasePrice = $workspace->getRepurchasePrice($buyer->id);
+                            if ($repurchasePrice) {
+                                // Will use repurchase price instead of base price
+                                $basePrice = $repurchasePrice;
+                            } else {
+                                DB::rollBack();
+                                return redirect()->route('workspaces.show', $workspace)
+                                    ->with('error', 'Anda sudah membeli dan menjual workspace ini sebelumnya. Setiap user hanya bisa membeli workspace ini 1x. Setelah dijual, akses hilang secara permanen.');
+                            }
                         } else {
+                            DB::rollBack();
                             return redirect()->route('workspaces.show', $workspace)
                                 ->with('error', 'Anda sudah membeli dan menjual workspace ini sebelumnya. Setiap user hanya bisa membeli workspace ini 1x. Setelah dijual, akses hilang secara permanen.');
                         }
-                    } else {
-                        return redirect()->route('workspaces.show', $workspace)
-                            ->with('error', 'Anda sudah membeli dan menjual workspace ini sebelumnya. Setiap user hanya bisa membeli workspace ini 1x. Setelah dijual, akses hilang secara permanen.');
                     }
                 }
             }
-        }
 
-        // Get final price (use discount_price if available, otherwise use regular price)
-        // If repurchasing, basePrice already set above in scarcity mode check
-        if (!isset($basePrice)) {
-            $basePrice = $workspace->hasDiscount() ? $workspace->discount_price : $workspace->price;
-        }
+            // Get final price (use discount_price if available, otherwise use regular price)
+            // If repurchasing, basePrice already set above in scarcity mode check
+            if (!isset($basePrice)) {
+                $basePrice = $workspace->hasDiscount() ? $workspace->discount_price : $workspace->price;
+            }
 
-        // Apply premium buyer exclusive discount if user has premium
-        $finalPrice = $basePrice;
-        $premiumDiscount = 0;
-        $premiumDiscountPercent = 0;
-        
-        if ($buyer->hasPremium() && $basePrice > 0) {
-            $premiumDiscountPercent = Setting::getPremiumBuyerDiscountPercent();
-            $premiumDiscount = $basePrice * ($premiumDiscountPercent / 100);
-            $finalPrice = $basePrice - $premiumDiscount;
-        }
+            // Apply premium buyer exclusive discount if user has premium
+            $finalPrice = $basePrice;
+            $premiumDiscount = 0;
+            $premiumDiscountPercent = 0;
+            
+            if ($buyer->hasPremium() && $basePrice > 0) {
+                $premiumDiscountPercent = Setting::getPremiumBuyerDiscountPercent();
+                $premiumDiscount = $basePrice * ($premiumDiscountPercent / 100);
+                $finalPrice = $basePrice - $premiumDiscount;
+            }
 
-        if ($finalPrice <= 0) {
-            return redirect()->route('workspaces.show', $workspace)
-                ->with('error', 'Workspace ini gratis, tidak perlu dibeli.');
-        }
+            if ($finalPrice <= 0) {
+                DB::rollBack();
+                return redirect()->route('workspaces.show', $workspace)
+                    ->with('error', 'Workspace ini gratis, tidak perlu dibeli.');
+            }
 
-        // For workspace, tax is calculated similarly but TaxService expects Note
-        // We'll use a simplified tax calculation for workspace
-        $taxContext = [
-            'tax_percent' => 0.0,
-            'is_inclusive' => true,
-            'country_code' => null,
-        ];
-        
-        // Try to get tax from buyer's country if available
-        if ($buyer->currency) {
-            // Simplified: use default tax percent from settings
-            $taxContext['tax_percent'] = Setting::getDefaultTaxPercent();
-            $taxContext['is_inclusive'] = Setting::isTaxInclusiveDefault();
-        }
+            // For workspace, tax is calculated similarly but TaxService expects Note
+            // We'll use a simplified tax calculation for workspace
+            $taxContext = [
+                'tax_percent' => 0.0,
+                'is_inclusive' => true,
+                'country_code' => null,
+            ];
+            
+            // Try to get tax from buyer's country if available
+            if ($buyer->currency) {
+                // Simplified: use default tax percent from settings
+                $taxContext['tax_percent'] = Setting::getDefaultTaxPercent();
+                $taxContext['is_inclusive'] = Setting::isTaxInclusiveDefault();
+            }
 
-        $taxBreakdown = $taxService->calculateAmounts((float) $finalPrice, $taxContext);
-        $buyerPaysAmount = $taxBreakdown['total_amount'];
-        $priceExcludingTax = $taxBreakdown['price_excluding_tax'];
+            $taxBreakdown = $taxService->calculateAmounts((float) $finalPrice, $taxContext);
+            $buyerPaysAmount = $taxBreakdown['total_amount'];
+            $priceExcludingTax = $taxBreakdown['price_excluding_tax'];
 
-        if ($buyerPaysAmount <= 0) {
-            return redirect()->route('workspaces.show', $workspace)
-                ->with('error', 'Workspace ini gratis, tidak perlu dibeli.');
-        }
+            if ($buyerPaysAmount <= 0) {
+                DB::rollBack();
+                return redirect()->route('workspaces.show', $workspace)
+                    ->with('error', 'Workspace ini gratis, tidak perlu dibeli.');
+            }
 
-        // Ensure wallets exist
-        $baseCurrency = config('currency.base_currency', 'IDR');
+            // Ensure wallets exist
+            $baseCurrency = config('currency.base_currency', 'IDR');
 
-        $buyerWallet = Wallet::firstOrCreate(
-            ['user_id' => $buyer->id],
-            ['balance' => 0, 'currency' => $baseCurrency]
-        );
-        if ($buyerWallet->currency !== $baseCurrency) {
-            $buyerWallet->currency = $baseCurrency;
-            $buyerWallet->save();
-        }
+            $buyerWallet = Wallet::firstOrCreate(
+                ['user_id' => $buyer->id],
+                ['balance' => 0, 'currency' => $baseCurrency]
+            );
+            if ($buyerWallet->currency !== $baseCurrency) {
+                $buyerWallet->currency = $baseCurrency;
+                $buyerWallet->save();
+            }
 
-        $sellerWallet = Wallet::firstOrCreate(
-            ['user_id' => $seller->id],
-            ['balance' => 0, 'currency' => $baseCurrency]
-        );
-        if ($sellerWallet->currency !== $baseCurrency) {
-            $sellerWallet->currency = $baseCurrency;
-            $sellerWallet->save();
-        }
+            $sellerWallet = Wallet::firstOrCreate(
+                ['user_id' => $seller->id],
+                ['balance' => 0, 'currency' => $baseCurrency]
+            );
+            if ($sellerWallet->currency !== $baseCurrency) {
+                $sellerWallet->currency = $baseCurrency;
+                $sellerWallet->save();
+            }
 
-        // Sync wallet balance with user wallet_balance
-        if ($buyerWallet->balance != $buyer->wallet_balance) {
-            $buyerWallet->balance = $buyer->wallet_balance;
-            $buyerWallet->save();
-        }
+            // Sync wallet balance with user wallet_balance
+            if ($buyerWallet->balance != $buyer->wallet_balance) {
+                $buyerWallet->balance = $buyer->wallet_balance;
+                $buyerWallet->save();
+            }
 
-        if ($buyerWallet->balance < $buyerPaysAmount) {
-            return redirect()->route('workspaces.show', $workspace)
-                ->with('error', 'Saldo wallet tidak cukup. Silakan top-up terlebih dahulu.')
-                ->with('redirect_to_wallet', true);
-        }
+            if ($buyerWallet->balance < $buyerPaysAmount) {
+                DB::rollBack();
+                return redirect()->route('workspaces.show', $workspace)
+                    ->with('error', 'Saldo wallet tidak cukup. Silakan top-up terlebih dahulu.')
+                    ->with('redirect_to_wallet', true);
+            }
 
-        $commissionTier = $commissionService->resolveTierForSeller($seller);
-
-        try {
-            DB::beginTransaction();
+            $commissionTier = $commissionService->resolveTierForSeller($seller);
 
             $amount = $buyerPaysAmount;
             

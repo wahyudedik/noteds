@@ -314,48 +314,76 @@ class MarketplaceController extends Controller
             return redirect()->route('marketplace.show', $note)->with('error', 'Anda tidak dapat membeli catatan Anda sendiri. Jika Anda adalah pemilik note ini, Anda dapat menjualnya ke buyer lain.');
         }
 
-        // Handle different sale modes
-        if ($note->isStandardMode()) {
-            // Standard mode: Multiple sales allowed, buyer cannot resell, no commission
-            // Check if buyer already purchased (can buy multiple times from different sellers)
-            // But can't buy from same seller twice
-            $existingTransaction = Transaction::where('buyer_id', $buyer->id)
-                ->where('note_id', $note->id)
-                ->where('seller_id', $seller->id)
-                ->where('status', 'success')
-                ->first();
-
-            if ($existingTransaction) {
-                return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli catatan ini dari penjual ini sebelumnya.');
+        // Use DB transaction with lock to prevent race conditions
+        try {
+            DB::beginTransaction();
+            
+            // Lock the note row to prevent concurrent purchases (especially for scarcity mode)
+            $note = Note::lockForUpdate()->find($note->id);
+            
+            if (!$note) {
+                DB::rollBack();
+                return redirect()->route('marketplace.index')->with('error', 'Catatan tidak ditemukan.');
             }
-        } else {
-            // Scarcity mode: One-time purchase per user, but can repurchase if sold
-            $existingTransaction = Transaction::where('buyer_id', $buyer->id)
-                ->where('note_id', $note->id)
-                ->where('status', 'success')
-                ->first();
+            
+            // Re-check status after lock (might have been sold during request)
+            if (!$note->is_public || $note->status !== 'active' || !$note->is_for_sale) {
+                DB::rollBack();
+                return redirect()->route('marketplace.show', $note)->with('error', 'Catatan tidak tersedia untuk dibeli.');
+            }
 
-            if ($existingTransaction) {
-                // Check if buyer still owns the note (hasn't sold it yet)
-                if ($buyer->id === $note->user_id) {
-                    return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah memiliki catatan ini. Anda dapat menjualnya ke buyer lain, tetapi ingat bahwa setelah dijual, Anda tidak akan bisa mengaksesnya lagi.');
-                } else {
-                    // Buyer sold the note - check if can repurchase
-                    if ($note->canRepurchase($buyer->id)) {
-                        // Can repurchase - will use repurchase price below
-                        $repurchasePrice = $note->getRepurchasePrice($buyer->id);
-                        if ($repurchasePrice) {
-                            // Will use repurchase price instead of base price
-                            $basePrice = $repurchasePrice;
+            // Handle different sale modes
+            if ($note->isStandardMode()) {
+                // Standard mode: Multiple sales allowed, buyer cannot resell, no commission
+                // Check if buyer already purchased (can buy multiple times from different sellers)
+                // But can't buy from same seller twice
+                $existingTransaction = Transaction::where('buyer_id', $buyer->id)
+                    ->where('note_id', $note->id)
+                    ->where('seller_id', $seller->id)
+                    ->where('status', 'success')
+                    ->first();
+
+                if ($existingTransaction) {
+                    DB::rollBack();
+                    return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli catatan ini dari penjual ini sebelumnya.');
+                }
+            } else {
+                // Scarcity mode: One-time purchase per user, but can repurchase if sold
+                // Check if note is already sold (lock ensures we see latest state)
+                if ($note->is_sold && $note->user_id !== $buyer->id) {
+                    DB::rollBack();
+                    return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini sudah terjual. Setiap note scarcity hanya bisa dibeli 1x.');
+                }
+                
+                $existingTransaction = Transaction::where('buyer_id', $buyer->id)
+                    ->where('note_id', $note->id)
+                    ->where('status', 'success')
+                    ->first();
+
+                if ($existingTransaction) {
+                    // Check if buyer still owns the note (hasn't sold it yet)
+                    if ($buyer->id === $note->user_id) {
+                        DB::rollBack();
+                        return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah memiliki catatan ini. Anda dapat menjualnya ke buyer lain, tetapi ingat bahwa setelah dijual, Anda tidak akan bisa mengaksesnya lagi.');
+                    } else {
+                        // Buyer sold the note - check if can repurchase
+                        if ($note->canRepurchase($buyer->id)) {
+                            // Can repurchase - will use repurchase price below
+                            $repurchasePrice = $note->getRepurchasePrice($buyer->id);
+                            if ($repurchasePrice) {
+                                // Will use repurchase price instead of base price
+                                $basePrice = $repurchasePrice;
+                            } else {
+                                DB::rollBack();
+                                return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli dan menjual catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x. Setelah dijual, akses hilang secara permanen.');
+                            }
                         } else {
+                            DB::rollBack();
                             return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli dan menjual catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x. Setelah dijual, akses hilang secara permanen.');
                         }
-                    } else {
-                        return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli dan menjual catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x. Setelah dijual, akses hilang secara permanen.');
                     }
                 }
             }
-        }
 
         // Get final price (use discount_price if available, otherwise use regular price)
         // If repurchasing, basePrice already set above in scarcity mode check
@@ -814,6 +842,14 @@ class MarketplaceController extends Controller
                 ->with('success', 'Catatan berhasil dibeli! Anda dapat melihat detail lengkapnya.');
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            \Log::error('Note purchase failed', [
+                'note_id' => $note->id ?? null,
+                'buyer_id' => $buyer->id ?? null,
+                'seller_id' => $seller->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             
             return redirect()->route('marketplace.show', $note)
                 ->with('error', 'Terjadi kesalahan saat memproses pembelian. Silakan coba lagi.');
