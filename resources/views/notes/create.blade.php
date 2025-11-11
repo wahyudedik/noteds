@@ -1560,45 +1560,111 @@
                             
                                 return new Promise((resolve, reject) => {
                                 xhr.onload = function() {
+                                    // Check response status and content type before parsing
+                                    const contentType = xhr.getResponseHeader('content-type') || '';
+                                    const isJson = contentType.includes('application/json');
+                                    
+                                    // Check if response is empty
+                                    if (!xhr.responseText || xhr.responseText.trim() === '') {
+                                        const error = 'Server tidak mengembalikan response. File akan otomatis diupload saat form disubmit.';
+                                        fileUploadStatus.set(fileIndex, { status: 'error', error: error, canRetry: true });
+                                        updateFileItemStatus(fileIndex, 'error', 0, error);
+                                        reject(new Error(error));
+                                        return;
+                                    }
+                                    
+                                    // Handle non-JSON responses (HTML error pages, etc.)
+                                    if (!isJson) {
+                                        let error = 'Server mengembalikan response yang tidak valid. ';
+                                        
+                                        // Check for common error status codes
+                                        if (xhr.status === 413) {
+                                            error = 'File terlalu besar (413 Request Entity Too Large). Pastikan nginx client_max_body_size sudah dikonfigurasi dengan benar. File akan otomatis diupload saat form disubmit.';
+                                        } else if (xhr.status === 500) {
+                                            error = 'Server error (500). File akan otomatis diupload saat form disubmit. Silakan hubungi administrator jika masalah berlanjut.';
+                                        } else if (xhr.status === 504) {
+                                            error = 'Upload timeout (504 Gateway Timeout). File terlalu besar atau koneksi lambat. File akan otomatis diupload saat form disubmit.';
+                                        } else if (xhr.status >= 400) {
+                                            error = `Server error (${xhr.status}). File akan otomatis diupload saat form disubmit.`;
+                                        } else {
+                                            error += 'File akan otomatis diupload saat form disubmit.';
+                                        }
+                                        
+                                        console.error('Non-JSON response from server:', {
+                                            status: xhr.status,
+                                            contentType: contentType,
+                                            responsePreview: xhr.responseText.substring(0, 200)
+                                        });
+                                        
+                                        fileUploadStatus.set(fileIndex, { status: 'error', error: error, canRetry: true });
+                                        updateFileItemStatus(fileIndex, 'error', 0, error);
+                                        reject(new Error(error));
+                                        return;
+                                    }
+                                    
                                     try {
                                         const response = JSON.parse(xhr.responseText);
+                                        
+                                        // Handle successful response
                                         if (xhr.status === 200 && response.success) {
                                             backgroundUploadIds.push(response.upload_id);
                                             fileUploadStatus.set(fileIndex, { status: 'completed', uploadId: response.upload_id });
                                             updateFileItemStatus(fileIndex, 'completed');
                                             resolve(response);
-                                        } else {
-                                            // Handle error response
-                                            let errorMessage = response.error || 'Upload failed';
-                                            
-                                            // Check if premium is required
-                                            if (response.requires_premium) {
-                                                errorMessage += ' <a href="{{ route("subscription.create") }}" class="underline font-semibold">Upgrade ke Premium</a>';
-                                            }
-                                            
-                                            // Show server limits if provided
-                                            if (response.server_limits) {
-                                                errorMessage += ` (Limit server: ${response.server_limits.upload_max_filesize})`;
-                                            }
-                                            
-                                            fileUploadStatus.set(fileIndex, { status: 'error', error: errorMessage, canRetry: response.can_retry !== false });
-                                            updateFileItemStatus(fileIndex, 'error', 0, errorMessage);
-                                            
-                                            // Show SweetAlert for important errors (but don't block - file will upload on form submit)
-                                            if (response.requires_premium) {
-                                                Swal.fire({
-                                                    icon: 'warning',
-                                                    title: 'Premium Diperlukan',
-                                                    html: errorMessage,
-                                                    confirmButtonText: 'OK'
-                                                });
-                                            }
-                                            
-                                            reject(new Error(errorMessage));
+                                            return;
                                         }
+                                        
+                                        // Handle error response (JSON but not success)
+                                        let errorMessage = response.error || response.message || 'Upload failed';
+                                        
+                                        // Check if premium is required
+                                        if (response.requires_premium) {
+                                            errorMessage += ' <a href="{{ route("subscription.create") }}" class="underline font-semibold">Upgrade ke Premium</a>';
+                                        }
+                                        
+                                        // Show server limits if provided
+                                        if (response.server_limits) {
+                                            errorMessage += ` (Limit server: ${response.server_limits.upload_max_filesize})`;
+                                        }
+                                        
+                                        fileUploadStatus.set(fileIndex, { status: 'error', error: errorMessage, canRetry: response.can_retry !== false });
+                                        updateFileItemStatus(fileIndex, 'error', 0, errorMessage);
+                                        
+                                        // Show SweetAlert for important errors (but don't block - file will upload on form submit)
+                                        if (response.requires_premium) {
+                                            Swal.fire({
+                                                icon: 'warning',
+                                                title: 'Premium Diperlukan',
+                                                html: errorMessage,
+                                                confirmButtonText: 'OK'
+                                            });
+                                        }
+                                        
+                                        reject(new Error(errorMessage));
+                                        
                                     } catch (e) {
-                                        const error = 'Failed to parse server response';
-                                        fileUploadStatus.set(fileIndex, { status: 'error', error: error });
+                                        // JSON parse error
+                                        console.error('Failed to parse JSON response:', {
+                                            error: e.message,
+                                            status: xhr.status,
+                                            responsePreview: xhr.responseText.substring(0, 500),
+                                            contentType: contentType
+                                        });
+                                        
+                                        let error = 'Gagal memparse response server. ';
+                                        
+                                        // Provide more specific error based on status code
+                                        if (xhr.status === 413) {
+                                            error = 'File terlalu besar (413). Pastikan nginx client_max_body_size sudah dikonfigurasi. File akan otomatis diupload saat form disubmit.';
+                                        } else if (xhr.status === 500) {
+                                            error = 'Server error (500). File akan otomatis diupload saat form disubmit.';
+                                        } else if (xhr.status === 0) {
+                                            error = 'Koneksi terputus atau timeout. File akan otomatis diupload saat form disubmit.';
+                                        } else {
+                                            error += 'File akan otomatis diupload saat form disubmit.';
+                                        }
+                                        
+                                        fileUploadStatus.set(fileIndex, { status: 'error', error: error, canRetry: true });
                                         updateFileItemStatus(fileIndex, 'error', 0, error);
                                         reject(new Error(error));
                                     }
@@ -1618,8 +1684,14 @@
                                     reject(new Error(error));
                                 };
                                 
+                                // Set timeout - 15 minutes for very large files (51MB+)
+                                xhr.timeout = 900000; // 15 minutes (900 seconds)
+                                
+                                // Set request headers to ensure JSON response
+                                xhr.setRequestHeader('Accept', 'application/json');
+                                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                                
                                 xhr.open('POST', '{{ route("notes.upload-background") }}');
-                                xhr.timeout = 600000; // 10 minutes timeout for large files
                                 xhr.send(formData);
                             });
                         } catch (error) {

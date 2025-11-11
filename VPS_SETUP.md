@@ -932,27 +932,65 @@ Jika mengalami error "413 Request Entity Too Large" saat upload file:
    - Klik **Save**
 
 2. **Update Nginx Configuration via aaPanel:**
-   - Buka aaPanel → **App Store** → Cari **Nginx**
-   - Klik **Setting** → Pilih **Configuration file**
-   - Atau bisa juga via **Files** → Edit file konfigurasi site
-   - Cari file konfigurasi untuk domain Anda (biasanya di `/www/server/panel/vhost/nginx/your-domain.conf`)
+   
+   **Cara 1: Via Files Manager (Recommended)**
+   - Buka aaPanel → **Files**
+   - Navigate ke `/www/server/panel/vhost/nginx/`
+   - Cari file konfigurasi domain Anda (misal: `noteds.com.conf`)
+   - Edit file tersebut
    - Tambahkan atau update di dalam block `server { ... }`:
    ```nginx
-   client_max_body_size 200M;  # Increase dari default 1M atau 50M
+   client_max_body_size 200M;  # Increase dari default 1M atau 50M (minimal 200M untuk file besar)
    client_body_buffer_size 128k;
-   client_body_timeout 300s;
+   client_body_timeout 900s;   # 15 menit untuk file sangat besar (51MB+)
+   client_header_timeout 900s;
+   send_timeout 900s;
    ```
+   - **Save** file
+   
+   **Cara 2: Via Nginx Settings**
+   - Buka aaPanel → **App Store** → **Nginx** → **Setting**
+   - Pilih **Configuration file**
+   - Edit file konfigurasi untuk domain Anda
+   - Tambahkan konfigurasi di atas
    - **Save** dan **Reload** Nginx
+   
+   **Reload Nginx:**
+   - Buka aaPanel → **App Store** → **Nginx** → **Setting** → **Service** → **Reload**
 
-3. **Restart Services via aaPanel:**
+3. **Update PHP-FPM Timeout (PENTING untuk file besar 51MB+):**
+   - Buka aaPanel → **App Store** → **PHP-8.3** → **Setting**
+   - Pilih **Limit of timeout** tab
+   - Set ke **1000** (atau lebih besar, seperti 1500 untuk file sangat besar)
+   - Klik **Save**
+   - Pilih **FPM profile** tab
+   - Cari `request_terminate_timeout` dan set ke **900** atau lebih besar (dalam detik)
+   - Jika tidak ada, tambahkan: `request_terminate_timeout = 900`
+   - Klik **Save**
+   
+   **Catatan:** File 51MB membutuhkan waktu lebih lama untuk upload, terutama dengan koneksi lambat. Timeout harus cukup besar untuk menghindari error di akhir upload.
+   
+4. **Restart Services via aaPanel:**
    - Buka aaPanel → **App Store** → **Nginx** → **Setting** → **Service** → **Reload**
    - Buka aaPanel → **App Store** → **PHP-8.3** → **Setting** → **Service** → **Restart**
 
-4. **Clear Laravel Cache:**
+5. **Clear Laravel Cache:**
    ```bash
    cd /www/wwwroot/noteds.com  # atau path aplikasi Anda
    php artisan config:clear
    php artisan cache:clear
+   ```
+
+6. **Verifikasi Konfigurasi:**
+   ```bash
+   # Check PHP settings
+   php -i | grep -E "upload_max_filesize|post_max_size|max_execution_time|memory_limit"
+   
+   # Check Nginx config
+   nginx -t
+   
+   # Check PHP-FPM timeout
+   grep request_terminate_timeout /etc/php/8.3/fpm/pool.d/www.conf
    ```
 
 #### Untuk Manual Configuration (Jika tidak menggunakan aaPanel):

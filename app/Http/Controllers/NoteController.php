@@ -828,8 +828,9 @@ class NoteController extends Controller
         // Increase memory limit and execution time IMMEDIATELY for file uploads
         // This prevents memory exhaustion errors during file processing
         ini_set('memory_limit', '512M');
-        set_time_limit(600); // 10 minutes
-        ini_set('max_execution_time', '600');
+        set_time_limit(900); // 15 minutes for very large files (51MB+)
+        ini_set('max_execution_time', '900');
+        ini_set('max_input_time', '900'); // Also increase input time
         
         $user = auth()->user();
         
@@ -924,6 +925,15 @@ class NoteController extends Controller
         }
 
         try {
+            // Log upload start for debugging
+            \Log::info('Background upload started', [
+                'user_id' => $user->id,
+                'filename' => $file->getClientOriginalName(),
+                'file_size_mb' => round($file->getSize() / 1048576, 2),
+                'memory_limit' => ini_get('memory_limit'),
+                'max_execution_time' => ini_get('max_execution_time'),
+            ]);
+            
             // Memory limit and execution time already increased at the start of method
             // Upload file (memory limit already set to 512M)
             $attachment = $uploadService->handleLargeFileUpload($file, $user->id);
@@ -946,10 +956,13 @@ class NoteController extends Controller
             // Save session with minimal data
             session([$sessionKey => $backgroundUploads]);
             
-            // Clear session cache to free memory
-            if (function_exists('session_write_close')) {
-                // Don't close session here as we might need it for response
-            }
+            // Log successful upload
+            \Log::info('Background upload completed', [
+                'user_id' => $user->id,
+                'upload_id' => $uploadId,
+                'filename' => $attachment['filename'],
+                'file_size_mb' => round($attachment['size'] / 1048576, 2),
+            ]);
             
             return response()->json([
                 'success' => true,
@@ -997,13 +1010,15 @@ class NoteController extends Controller
                 'file_size' => $fileSize,
                 'file_size_mb' => $fileSizeMB,
                 'error' => $e->getMessage(),
-                'error_trace' => $e->getTraceAsString(),
-                'upload_max_filesize' => $uploadMaxFilesize,
-                'post_max_size' => $postMaxSize,
-                'max_execution_time' => $maxExecutionTime,
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'memory_limit' => $memoryLimit,
                 'memory_usage' => $currentMemoryUsageMB . 'MB',
                 'memory_peak' => round(memory_get_peak_usage(true) / 1048576, 2) . 'MB',
+                'upload_max_filesize' => $uploadMaxFilesize,
+                'post_max_size' => $postMaxSize,
+                'max_execution_time' => $maxExecutionTime,
             ]);
             
             return response()->json([

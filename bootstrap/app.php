@@ -80,4 +80,24 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 500);
             }
         });
+        
+        // Ensure JSON responses for background upload routes
+        $exceptions->render(function (\Exception $e, $request) {
+            if ($request->is('notes/upload-background') || $request->routeIs('notes.upload-background')) {
+                \Log::error('Unhandled exception in upload background route', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'path' => $request->path(),
+                    'user_id' => auth()->id(),
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Upload gagal. File akan otomatis diupload saat form disubmit.',
+                    'can_retry' => true,
+                ], 500);
+            }
+        });
     })->create();
