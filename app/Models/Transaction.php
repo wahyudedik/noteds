@@ -15,6 +15,7 @@ class Transaction extends Model
         'seller_id',
         'original_creator_id',
         'note_id',
+        'workspace_id',
         'amount',
         'resale_price',
         'sold_at',
@@ -80,7 +81,15 @@ class Transaction extends Model
     }
 
     /**
-     * Get the original creator of the note.
+     * Get the workspace in this transaction.
+     */
+    public function workspace(): BelongsTo
+    {
+        return $this->belongsTo(Workspace::class);
+    }
+
+    /**
+     * Get the original creator of the note or workspace.
      */
     public function originalCreator(): BelongsTo
     {

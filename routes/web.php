@@ -156,6 +156,7 @@ Route::middleware(['auth', 'verified', 'username.setup', 'workspace.user'])->gro
     // Notes routes - for sellers and workspace users
     // Check is done in NoteController and middleware
     Route::resource('notes', NoteController::class);
+    Route::post('/notes/upload-background', [NoteController::class, 'uploadBackground'])->name('notes.upload-background');
     Route::get('/notes/{note}/attachments/{filename}', [NoteAttachmentController::class, 'download'])->name('notes.attachments.download');
     
     // Batch Download routes - Premium features only

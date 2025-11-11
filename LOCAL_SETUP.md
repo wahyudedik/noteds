@@ -247,7 +247,7 @@ MIDTRANS_MERCHANT_ID=Gxxxxx  # Sandbox Merchant ID (optional)
    - Buka `http://noteds.test/wallet` atau `http://localhost:8000/wallet`
    - Klik "Top Up"
    - Masukkan amount (min Rp 10.000)
-   - Pilih payment method yang tersedia di sandbox:
+   - Pilih payment method yang tersedia di sandbox: 
      - ✅ **Credit Card** (Visa: 4811 1111 1111 1114)
      - ✅ **Virtual Account** (BCA, Mandiri, BNI, BRI)
      - ✅ **Bank Transfer**
@@ -484,6 +484,15 @@ npm install
 ## 🆕 Recent Features Added
 
 - SweetAlert2 toasts & confirmation modals have been propagated to profile, admin user management, and support ticket flows. Remember to rerun `npm run dev` (or `npm run build`) after pulling to ensure the updated bundle is served.
+
+### AI Features Improvements (2025-01-11)
+- ✅ Enhanced error handling untuk semua AI APIs (Ollama, Stability AI, Unsplash, RunwayML)
+- ✅ Request queuing untuk high traffic (`ProcessAiRequest` job) - dapat diproses secara asinkron
+- ✅ Performance tracking & monitoring untuk AI requests (duration logging, error tracking)
+- ✅ Null checks dan validation improvements di semua AI controllers
+- ✅ Retry mechanism untuk external APIs (Stability AI: 2x dengan delay 2s, Unsplash: 2x dengan delay 100ms, RunwayML: 2x dengan delay 2s)
+- ✅ Detailed error logging dengan status codes, error bodies, traces, user IDs
+- ✅ Fallback values untuk AI responses yang gagal (default messages, empty arrays)
 
 ### Note History & Versioning
 - Seller bisa lihat buyer history (semua buyer yang pernah membeli note)

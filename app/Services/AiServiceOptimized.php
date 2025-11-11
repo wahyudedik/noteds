@@ -59,7 +59,8 @@ class AiServiceOptimized extends AiService
     }
 
     /**
-     * Optimized callOllama with connection pooling and retry logic
+     * Optimized callOllama with caching, connection pooling, and CPU optimization
+     * Inherits CPU optimization from parent class (AiService)
      */
     public function callOllama(string $prompt, array $options = []): ?array
     {
@@ -67,14 +68,18 @@ class AiServiceOptimized extends AiService
         $isReadOperation = !isset($options['stream']) || $options['stream'] === false;
         
         if ($isReadOperation) {
+            // Create cache key (CPU optimization is handled by parent class)
+            // Note: Cache key doesn't include CPU settings as they're consistent per server
             $cacheKey = 'ollama_response_' . md5($prompt . '_' . json_encode($options));
             
             return Cache::remember($cacheKey, $this->cacheDuration, function () use ($prompt, $options) {
+                // Parent class (AiService) already handles CPU optimization automatically
                 return parent::callOllama($prompt, $options);
             });
         }
 
-        // For streaming operations, don't cache
+        // For streaming operations, don't cache but still use CPU optimization
+        // Parent class (AiService) already handles CPU optimization automatically
         return parent::callOllama($prompt, $options);
     }
 

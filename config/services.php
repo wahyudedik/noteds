@@ -47,6 +47,15 @@ return [
         'model' => env('OLLAMA_MODEL', 'llama3.2'),
         'image_model' => env('OLLAMA_IMAGE_MODEL', 'flux'), // Model untuk image generation (flux, stable-diffusion-xl, dll)
         'vision_model' => env('OLLAMA_VISION_MODEL', 'llava'), // Model untuk vision/OCR (llava, bakllava, dll)
+        
+        // CPU Optimization Settings (untuk VPS tanpa GPU)
+        'num_threads' => env('OLLAMA_NUM_THREADS', null), // Auto-detect jika null, atau set manual (e.g., 8 untuk 8 cores)
+        'num_ctx' => env('OLLAMA_NUM_CTX', 4096), // Context window size (4096 = 4K tokens, 8192 = 8K tokens)
+        'batch_size' => env('OLLAMA_BATCH_SIZE', 512), // Batch size untuk CPU inference
+        'use_mlock' => env('OLLAMA_USE_MLOCK', false), // Lock memory (perlu root, untuk performa lebih baik)
+        'numa' => env('OLLAMA_NUMA', false), // NUMA optimization (untuk multi-socket CPU)
+        'thread_priority' => env('OLLAMA_THREAD_PRIORITY', null), // Thread priority (null = default)
+        'timeout' => env('OLLAMA_TIMEOUT', 120), // Request timeout dalam detik (120 = 2 menit untuk CPU)
     ],
 
     'tesseract' => [

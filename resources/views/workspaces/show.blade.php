@@ -229,7 +229,7 @@
 
 <!-- Sell Workspace Modal -->
 <div id="sell-workspace-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white my-10">
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">{{ __('messages.sell_workspace') }}</h3>
@@ -240,15 +240,70 @@
                     </svg>
                 </button>
             </div>
-            <form action="{{ route('workspaces.sell', $workspace) }}" method="POST">
+            <form action="{{ route('workspaces.sell', $workspace) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="space-y-4">
                     <div>
+                        <label for="sale_mode" class="block text-sm font-medium text-gray-700 mb-2">
+                            Mode Penjualan
+                        </label>
+                        <select name="sale_mode" id="sale_mode" required
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                            <option value="scarcity" {{ old('sale_mode', $workspace->sale_mode ?: 'scarcity') === 'scarcity' ? 'selected' : '' }}>
+                                Scarcity Mode (1x pembelian per user, bisa resell)
+                            </option>
+                            <option value="standard" {{ old('sale_mode', $workspace->sale_mode) === 'standard' ? 'selected' : '' }}>
+                                Standard Mode (Multiple sales, tidak bisa resell)
+                            </option>
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Scarcity: Setiap user hanya bisa beli 1x, buyer bisa resell. Standard: Bisa dijual ke banyak buyer, tidak bisa resell.
+                        </p>
+                    </div>
+                    <div>
                         <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
-                            {{ __('messages.price') }} (Rp)
+                            {{ __('messages.price') }} (Rp) *
                         </label>
                         <input type="number" name="price" id="price" min="0" step="0.01" required
+                               value="{{ old('price', $workspace->price) }}"
                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label for="discount_price" class="block text-sm font-medium text-gray-700 mb-2">
+                            Harga Diskon (Rp) <span class="text-gray-500 text-xs">(opsional)</span>
+                        </label>
+                        <input type="number" name="discount_price" id="discount_price" min="0" step="0.01"
+                               value="{{ old('discount_price', $workspace->discount_price) }}"
+                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                        <p class="mt-1 text-xs text-gray-500">
+                            Jika diisi, harga diskon akan ditampilkan sebagai harga utama.
+                        </p>
+                    </div>
+                    <div id="scarcity-options" style="display: {{ old('sale_mode', $workspace->sale_mode ?: 'scarcity') === 'scarcity' ? 'block' : 'none' }};">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="grace_period_days" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Grace Period (hari)
+                                </label>
+                                <input type="number" name="grace_period_days" id="grace_period_days" min="0" max="365" 
+                                       value="{{ old('grace_period_days', $workspace->grace_period_days ?? 30) }}"
+                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Periode untuk repurchase dengan harga original (default: 30 hari)
+                                </p>
+                            </div>
+                            <div>
+                                <label for="relist_price_multiplier" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Repurchase Multiplier
+                                </label>
+                                <input type="number" name="relist_price_multiplier" id="relist_price_multiplier" min="1" max="10" step="0.1"
+                                       value="{{ old('relist_price_multiplier', $workspace->relist_price_multiplier ?? 1.5) }}"
+                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Harga repurchase setelah grace period (default: 1.5x)
+                                </p>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label for="marketplace_description" class="block text-sm font-medium text-gray-700 mb-2">
@@ -256,7 +311,7 @@
                         </label>
                         <textarea name="marketplace_description" id="marketplace_description" rows="4"
                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500"
-                                  placeholder="{{ __('messages.describe_workspace_for_sale') }}"></textarea>
+                                  placeholder="{{ __('messages.describe_workspace_for_sale') }}">{{ old('marketplace_description', $workspace->marketplace_description) }}</textarea>
                     </div>
                     <div class="flex items-center justify-end gap-3 pt-4">
                         <button type="button" onclick="document.getElementById('sell-workspace-modal').classList.add('hidden')" 
@@ -269,6 +324,16 @@
                     </div>
                 </div>
             </form>
+            <script>
+                document.getElementById('sale_mode').addEventListener('change', function() {
+                    const scarcityOptions = document.getElementById('scarcity-options');
+                    if (this.value === 'scarcity') {
+                        scarcityOptions.style.display = 'block';
+                    } else {
+                        scarcityOptions.style.display = 'none';
+                    }
+                });
+            </script>
         </div>
     </div>
 </div>

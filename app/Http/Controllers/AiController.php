@@ -46,9 +46,15 @@ class AiController extends Controller
 
             // Generate summary
             $summary = $this->aiService->generateSummary($content, 200);
+            if ($summary === null || empty(trim($summary))) {
+                $summary = 'Tidak dapat menghasilkan ringkasan.';
+            }
 
             // Suggest tags
             $suggestedTags = $this->aiService->suggestTags($content, 5);
+            if (empty($suggestedTags)) {
+                $suggestedTags = [];
+            }
 
             return response()->json([
                 'success' => true,
@@ -58,9 +64,15 @@ class AiController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
+            logger()->error('AI analyze error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while processing your request.',
+                'message' => 'An error occurred while processing your request. Please try again later.',
             ], 500);
         }
     }
@@ -403,7 +415,7 @@ class AiController extends Controller
             // Generate content
             $content = $this->aiService->generateContent($prompt, $maxLength);
 
-            if ($content) {
+            if ($content && !empty(trim($content))) {
                 return response()->json([
                     'success' => true,
                     'content' => $content,
@@ -412,7 +424,7 @@ class AiController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to generate content. Please try again.',
+                'message' => 'Gagal menghasilkan konten. Silakan coba lagi dengan prompt yang berbeda.',
             ], 500);
         } catch (\Exception $e) {
             logger()->error('AI Content generation error', [

@@ -781,93 +781,332 @@ class NoteController extends Controller
     }
 
     /**
-     * Handle file uploads with progress tracking for large files
+     * Handle background file upload for files > 5MB
+     * This allows files to be uploaded in the background without blocking form submission
      */
+    public function uploadBackground(Request $request)
+    {
+        // Increase memory limit and execution time IMMEDIATELY for file uploads
+        // This prevents memory exhaustion errors during file processing
+        ini_set('memory_limit', '512M');
+        set_time_limit(600); // 10 minutes
+        ini_set('max_execution_time', '600');
+        
+        $user = auth()->user();
+        
+        // Check if file was actually uploaded
+        if (!$request->hasFile('file')) {
+            // Check if it's a PHP upload error
+            if ($request->has('file')) {
+                $uploadError = $request->input('file');
+                $errorMessages = [
+                    UPLOAD_ERR_INI_SIZE => 'File terlalu besar. Melebihi batas upload_max_filesize di server.',
+                    UPLOAD_ERR_FORM_SIZE => 'File terlalu besar. Melebihi batas MAX_FILE_SIZE di form.',
+                    UPLOAD_ERR_PARTIAL => 'File hanya terupload sebagian. Silakan coba lagi.',
+                    UPLOAD_ERR_NO_FILE => 'Tidak ada file yang dipilih.',
+                    UPLOAD_ERR_NO_TMP_DIR => 'Folder temporary tidak ditemukan di server.',
+                    UPLOAD_ERR_CANT_WRITE => 'Gagal menulis file ke disk.',
+                    UPLOAD_ERR_EXTENSION => 'Upload dihentikan oleh extension PHP.',
+                ];
+                
+                $errorCode = is_numeric($uploadError) ? (int)$uploadError : UPLOAD_ERR_NO_FILE;
+                $errorMessage = $errorMessages[$errorCode] ?? 'Unknown upload error';
+                
+                return response()->json([
+                    'success' => false,
+                    'error' => $errorMessage,
+                    'error_code' => $errorCode
+                ], 400);
+            }
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Tidak ada file yang dipilih atau file terlalu besar (melebihi post_max_size atau upload_max_filesize di PHP).'
+            ], 400);
+        }
+
+        $file = $request->file('file');
+        
+        // Check if file upload was successful
+        if (!$file->isValid()) {
+            $errorCode = $file->getError();
+            $errorMessages = [
+                UPLOAD_ERR_INI_SIZE => 'File terlalu besar. Melebihi batas upload_max_filesize (' . ini_get('upload_max_filesize') . ') di server.',
+                UPLOAD_ERR_FORM_SIZE => 'File terlalu besar. Melebihi batas MAX_FILE_SIZE di form.',
+                UPLOAD_ERR_PARTIAL => 'File hanya terupload sebagian. Silakan coba lagi.',
+                UPLOAD_ERR_NO_FILE => 'Tidak ada file yang dipilih.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Folder temporary tidak ditemukan di server.',
+                UPLOAD_ERR_CANT_WRITE => 'Gagal menulis file ke disk.',
+                UPLOAD_ERR_EXTENSION => 'Upload dihentikan oleh extension PHP.',
+            ];
+            
+            $errorMessage = $errorMessages[$errorCode] ?? 'File upload error: ' . $errorCode;
+            
+            // Check PHP configuration limits
+            $uploadMaxFilesize = ini_get('upload_max_filesize');
+            $postMaxSize = ini_get('post_max_size');
+            $fileSizeMB = round($file->getSize() / 1048576, 2);
+            
+            if ($errorCode == UPLOAD_ERR_INI_SIZE || $errorCode == UPLOAD_ERR_FORM_SIZE) {
+                $errorMessage .= " File Anda: {$fileSizeMB}MB. Limit server: upload_max_filesize={$uploadMaxFilesize}, post_max_size={$postMaxSize}";
+            }
+            
+            return response()->json([
+                'success' => false,
+                'error' => $errorMessage,
+                'error_code' => $errorCode,
+                'file_size_mb' => $fileSizeMB,
+                'server_limits' => [
+                    'upload_max_filesize' => $uploadMaxFilesize,
+                    'post_max_size' => $postMaxSize,
+                ]
+            ], 400);
+        }
+
+        $uploadService = app(LargeFileUploadService::class);
+        
+        // Validate file
+        $isPremium = $user->hasPremium();
+        $validation = $uploadService->validateFile($file, $isPremium);
+        
+        if (!$validation['valid']) {
+            $errorMessage = $validation['error'] ?? 'File validation failed';
+            
+            // Add premium upgrade suggestion if file too large for basic user
+            if (!$isPremium && $file->getSize() > 5242880) {
+                $errorMessage .= ' Upgrade ke Premium untuk upload file hingga 100MB.';
+            }
+            
+            return response()->json([
+                'success' => false,
+                'error' => $errorMessage,
+                'requires_premium' => !$isPremium && $file->getSize() > 5242880
+            ], 400);
+        }
+
+        try {
+            // Memory limit and execution time already increased at the start of method
+            // Upload file (memory limit already set to 512M)
+            $attachment = $uploadService->handleLargeFileUpload($file, $user->id);
+            
+            // Store in session for later use in form submission
+            // Only store minimal data to avoid session size issues
+            $sessionKey = 'background_uploads_' . $user->id;
+            $backgroundUploads = session($sessionKey, []);
+            $uploadId = Str::uuid();
+            
+            // Store only essential data (not the full file content)
+            $backgroundUploads[$uploadId] = [
+                'filename' => $attachment['filename'],
+                'path' => $attachment['path'],
+                'size' => $attachment['size'],
+                'mime' => $attachment['mime'],
+                'is_large' => $attachment['is_large'] ?? false,
+            ];
+            
+            // Save session with minimal data
+            session([$sessionKey => $backgroundUploads]);
+            
+            // Clear session cache to free memory
+            if (function_exists('session_write_close')) {
+                // Don't close session here as we might need it for response
+            }
+            
+            return response()->json([
+                'success' => true,
+                'upload_id' => $uploadId,
+                'attachment' => $attachment,
+                'message' => 'File uploaded successfully'
+            ]);
+            
+        } catch (\Exception $e) {
+            $errorMessage = $e->getMessage();
+            $fileSize = $file->getSize() ?? 0;
+            $fileSizeMB = round($fileSize / 1048576, 2);
+            $uploadMaxFilesize = ini_get('upload_max_filesize');
+            $postMaxSize = ini_get('post_max_size');
+            $maxExecutionTime = ini_get('max_execution_time');
+            $memoryLimit = ini_get('memory_limit');
+            $currentMemoryUsage = memory_get_usage(true);
+            $currentMemoryUsageMB = round($currentMemoryUsage / 1048576, 2);
+            $memoryLimitBytes = $this->convertMemoryToBytes($memoryLimit);
+            $memoryLimitMB = round($memoryLimitBytes / 1048576, 2);
+            
+            // Check if it's a memory exhaustion error
+            $isMemoryError = str_contains($errorMessage, 'memory') 
+                || str_contains($errorMessage, 'Memory') 
+                || str_contains($errorMessage, 'Allowed memory') 
+                || str_contains($errorMessage, 'exhausted');
+            
+            // Provide more helpful error messages with reassurance
+            if ($isMemoryError) {
+                $errorMessage = "Out of memory. File terlalu besar ({$fileSizeMB}MB). Memory limit: {$memoryLimitMB}MB, Usage: {$currentMemoryUsageMB}MB. File akan otomatis diupload saat form disubmit dengan memory limit yang lebih besar.";
+            } elseif (str_contains($errorMessage, 'timeout') || str_contains($errorMessage, 'execution time') || str_contains($errorMessage, 'Maximum execution time')) {
+                $errorMessage = "Upload timeout. File terlalu besar ({$fileSizeMB}MB) atau koneksi lambat. File akan otomatis diupload saat form disubmit.";
+            } elseif (str_contains($errorMessage, 'size') || str_contains($errorMessage, 'exceed') || str_contains($errorMessage, 'larger than')) {
+                $errorMessage = "File terlalu besar ({$fileSizeMB}MB). Limit server: upload_max_filesize={$uploadMaxFilesize}, post_max_size={$postMaxSize}. File akan otomatis diupload saat form disubmit.";
+            } elseif (str_contains($errorMessage, 'disk') || str_contains($errorMessage, 'Disk') || str_contains($errorMessage, 'space')) {
+                $errorMessage = "Disk penuh atau tidak ada space tersedia. Silakan hubungi administrator.";
+            } else {
+                // Generic error with reassuring message
+                $errorMessage = "Upload gagal: {$errorMessage}. File: {$fileSizeMB}MB. File akan otomatis diupload saat form disubmit.";
+            }
+            
+            \Log::error('Background file upload failed', [
+                'user_id' => $user->id,
+                'filename' => $file->getClientOriginalName(),
+                'file_size' => $fileSize,
+                'file_size_mb' => $fileSizeMB,
+                'error' => $e->getMessage(),
+                'error_trace' => $e->getTraceAsString(),
+                'upload_max_filesize' => $uploadMaxFilesize,
+                'post_max_size' => $postMaxSize,
+                'max_execution_time' => $maxExecutionTime,
+                'memory_limit' => $memoryLimit,
+                'memory_usage' => $currentMemoryUsageMB . 'MB',
+                'memory_peak' => round(memory_get_peak_usage(true) / 1048576, 2) . 'MB',
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'error' => $errorMessage,
+                'can_retry' => true, // File can be uploaded on form submit
+                'file_size_mb' => $fileSizeMB,
+                'server_limits' => [
+                    'upload_max_filesize' => $uploadMaxFilesize,
+                    'post_max_size' => $postMaxSize,
+                    'max_execution_time' => $maxExecutionTime,
+                    'memory_limit' => $memoryLimit,
+                    'memory_usage' => $currentMemoryUsageMB . 'MB',
+                ],
+                'error_detail' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
     protected function handleFileUploadsWithProgress($request, $user): array
     {
-        if (!$request->hasFile('attachments')) {
-            return [];
-        }
-
-        $files = $request->file('attachments');
+        // Increase memory limit for file uploads during form submission
+        // This handles files that failed background upload or files uploaded directly
+        ini_set('memory_limit', '512M');
+        set_time_limit(600);
+        ini_set('max_execution_time', '600');
+        
         $attachments = [];
         $uploadService = app(LargeFileUploadService::class);
-
-        // Increase execution time and memory limit for large files
-        $hasLargeFile = false;
-        foreach ($files as $file) {
-            if ($file->getSize() >= LargeFileUploadService::LARGE_FILE_THRESHOLD) {
-                $hasLargeFile = true;
-                break;
+        
+        // Get background uploaded files from session
+        $sessionKey = 'background_uploads_' . $user->id;
+        $backgroundUploads = session($sessionKey, []);
+        $uploadIds = $request->input('background_upload_ids', []);
+        
+        // Add background uploaded files
+        foreach ($uploadIds as $uploadId) {
+            if (isset($backgroundUploads[$uploadId])) {
+                $attachments[] = $backgroundUploads[$uploadId];
             }
         }
-
-        if ($hasLargeFile) {
-            // Increase time limit for large file uploads
-            set_time_limit(600); // 10 minutes
-            ini_set('max_execution_time', '600');
-            ini_set('memory_limit', '512M');
-        }
-
-        foreach ($files as $index => $file) {
-            try {
-                // Validate MIME type
-                $allowedMimes = [
-                    'application/pdf',
-                    'application/msword',
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                    'text/plain',
-                    'application/zip',
-                    'application/x-rar-compressed',
-                    'image/jpeg',
-                    'image/png',
-                    'image/gif',
-                    'application/vnd.ms-excel',
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    'application/vnd.ms-powerpoint',
-                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                ];
-
-                $mimeType = $file->getMimeType();
-                if (!in_array($mimeType, $allowedMimes)) {
-                    continue; // Skip invalid files
+        
+        // Handle regular file uploads (< 5MB or files not uploaded in background)
+        if ($request->hasFile('attachments')) {
+            $files = $request->file('attachments');
+            $backgroundUploadIds = $request->input('background_upload_ids', []);
+            $backgroundFileNames = [];
+            
+            // Get filenames of background uploaded files
+            foreach ($backgroundUploadIds as $uploadId) {
+                if (isset($backgroundUploads[$uploadId])) {
+                    $backgroundFileNames[] = $backgroundUploads[$uploadId]['filename'];
                 }
-
-                // Check if file is large (40MB+)
-                $isLargeFile = $file->getSize() >= LargeFileUploadService::LARGE_FILE_THRESHOLD;
-
-                if ($isLargeFile) {
-                    // Use large file upload service with progress tracking
-                    $uploadId = Str::uuid();
-                    $progressCallback = function($progress, $uploaded, $total) use ($uploadId, $uploadService) {
-                        $uploadService->setUploadProgress($uploadId, $progress, $uploaded, $total);
-                    };
-
-                    $attachment = $uploadService->handleLargeFileUpload($file, $user->id, $progressCallback);
-                    $attachments[] = $attachment;
-
-                    // Clear progress after upload
-                    session()->forget("upload_progress_{$uploadId}");
-                } else {
-                    // Use regular upload for smaller files
-                    $attachment = $uploadService->handleRegularFile($file, $user->id);
-                    $attachments[] = $attachment;
-                }
-
-            } catch (\Exception $e) {
-                // Log error but continue with other files
-                \Log::error('File upload failed', [
-                    'user_id' => $user->id,
-                    'filename' => $file->getClientOriginalName(),
-                    'error' => $e->getMessage(),
-                ]);
-
-                // Add error to session for display
-                session()->flash('upload_errors', array_merge(
-                    session('upload_errors', []),
-                    [$file->getClientOriginalName() => $e->getMessage()]
-                ));
             }
+
+            // Increase execution time and memory limit for large files
+            $hasLargeFile = false;
+            foreach ($files as $file) {
+                if ($file->getSize() >= LargeFileUploadService::LARGE_FILE_THRESHOLD) {
+                    $hasLargeFile = true;
+                    break;
+                }
+            }
+
+            if ($hasLargeFile) {
+                // Increase time limit for large file uploads
+                set_time_limit(600); // 10 minutes
+                ini_set('max_execution_time', '600');
+                ini_set('memory_limit', '512M');
+            }
+
+            foreach ($files as $index => $file) {
+                // Skip files that were already uploaded in background
+                if (in_array($file->getClientOriginalName(), $backgroundFileNames)) {
+                    continue;
+                }
+                
+                try {
+                    // Validate MIME type
+                    $allowedMimes = [
+                        'application/pdf',
+                        'application/msword',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'text/plain',
+                        'application/zip',
+                        'application/x-rar-compressed',
+                        'image/jpeg',
+                        'image/png',
+                        'image/gif',
+                        'application/vnd.ms-excel',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/vnd.ms-powerpoint',
+                        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    ];
+
+                    $mimeType = $file->getMimeType();
+                    if (!in_array($mimeType, $allowedMimes)) {
+                        continue; // Skip invalid files
+                    }
+
+                    // Check if file is large (40MB+)
+                    $isLargeFile = $file->getSize() >= LargeFileUploadService::LARGE_FILE_THRESHOLD;
+
+                    if ($isLargeFile) {
+                        // Use large file upload service with progress tracking
+                        $uploadId = Str::uuid();
+                        $progressCallback = function($progress, $uploaded, $total) use ($uploadId, $uploadService) {
+                            $uploadService->setUploadProgress($uploadId, $progress, $uploaded, $total);
+                        };
+
+                        $attachment = $uploadService->handleLargeFileUpload($file, $user->id, $progressCallback);
+                        $attachments[] = $attachment;
+
+                        // Clear progress after upload
+                        session()->forget("upload_progress_{$uploadId}");
+                    } else {
+                        // Use regular upload for smaller files
+                        $attachment = $uploadService->handleRegularFile($file, $user->id);
+                        $attachments[] = $attachment;
+                    }
+
+                } catch (\Exception $e) {
+                    // Log error but continue with other files
+                    \Log::error('File upload failed', [
+                        'user_id' => $user->id,
+                        'filename' => $file->getClientOriginalName(),
+                        'error' => $e->getMessage(),
+                    ]);
+
+                    // Add error to session for display
+                    session()->flash('upload_errors', array_merge(
+                        session('upload_errors', []),
+                        [$file->getClientOriginalName() => $e->getMessage()]
+                    ));
+                }
+            }
+        }
+        
+        // Clear background uploads from session after use
+        if (!empty($uploadIds)) {
+            $remainingUploads = array_diff_key($backgroundUploads, array_flip($uploadIds));
+            session([$sessionKey => $remainingUploads]);
         }
 
         return $attachments;
@@ -953,5 +1192,33 @@ class NoteController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * Convert memory limit string to bytes
+     * 
+     * @param string $memoryLimit
+     * @return int
+     */
+    protected function convertMemoryToBytes(string $memoryLimit): int
+    {
+        $memoryLimit = trim($memoryLimit);
+        if (empty($memoryLimit) || $memoryLimit === '-1') {
+            return PHP_INT_MAX;
+        }
+        
+        $last = strtolower($memoryLimit[strlen($memoryLimit) - 1]);
+        $value = (int) $memoryLimit;
+
+        switch ($last) {
+            case 'g':
+                $value *= 1024;
+            case 'm':
+                $value *= 1024;
+            case 'k':
+                $value *= 1024;
+        }
+
+        return $value;
     }
 }

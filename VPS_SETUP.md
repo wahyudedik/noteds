@@ -433,7 +433,14 @@ sudo supervisorctl update
 sudo supervisorctl start noteds-worker:*
 ```
 
-> Queue workers memproses email notifikasi forum, job AI, serta tugas-tugas background lain. Pastikan service ini selalu aktif.
+> Queue workers memproses email notifikasi forum, job AI (`ProcessAiRequest`), serta tugas-tugas background lain. Pastikan service ini selalu aktif.
+
+**AI Request Queuing:**
+- AI requests dapat diproses secara asinkron menggunakan `ProcessAiRequest` job untuk menghindari blocking pada high traffic
+- Job ini menangani: analyze, ask, generate_image, generate_video, search_images, semantic_search, context_links, generate_content, generate_ideas
+- Retry mechanism: 3 attempts dengan backoff 5 detik
+- Performance tracking: Duration logging untuk monitoring
+- Caching: Hasil dapat di-cache untuk mempercepat response
 
 ### 12. Scheduled Tasks (Cron)
 
@@ -534,11 +541,12 @@ sudo -u www-data php artisan forum:publish-scheduled-posts
 - Requires queue/cron to run reliably (see steps 11 & 12)
 - Owners see scheduled indicators until publish time is reached
 
-### 13. Ollama Setup (AI Features)
+### 13. Ollama Setup (AI Features) - CPU Optimized
 
-Ollama can be installed on the same server or a separate server:
+Ollama can be installed on the same server or a separate server. **This setup is optimized for CPU-only inference (no GPU required).**
 
-#### Option 1: Install Ollama on Same Server
+#### Option 1: Install Ollama on Same Server (Recommended for VPS)
+
 ```bash
 # Install Ollama
 curl -fsSL https://ollama.com/install.sh | sh
@@ -548,9 +556,15 @@ sudo systemctl enable ollama
 sudo systemctl start ollama
 
 # Pull required model (adjust based on your needs)
-ollama pull llama3.2
+# For CPU-only: Use smaller models for better performance
+ollama pull llama3.2        # ~2GB, good for CPU
 # or
-ollama pull mistral
+ollama pull mistral:7b      # ~4GB, better quality
+# or
+ollama pull qwen2.5:7b      # ~4.5GB, good balance
+
+# For better CPU performance, use quantized models:
+ollama pull llama3.2:3b     # ~2GB, faster on CPU
 ```
 
 #### Option 2: Install Ollama on Separate Server
@@ -559,9 +573,110 @@ If using a separate server, ensure:
 - Update `.env` with correct `OLLAMA_URL`
 - Configure firewall to allow connection (if needed)
 
+#### CPU Optimization Configuration
+
+Add to your `.env` file for optimal CPU performance:
+
+```env
+# Ollama Configuration
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+
+# CPU Optimization Settings (auto-detect jika tidak di-set)
+# OLLAMA_NUM_THREADS=8              # Manual: set jumlah CPU cores (auto-detect jika null)
+OLLAMA_NUM_CTX=4096                  # Context window (4096 = 4K tokens, 8192 = 8K tokens)
+OLLAMA_BATCH_SIZE=512                # Batch size untuk CPU inference
+OLLAMA_USE_MLOCK=false               # Lock memory (perlu root, untuk performa lebih baik)
+OLLAMA_NUMA=false                    # NUMA optimization (untuk multi-socket CPU)
+OLLAMA_TIMEOUT=120                   # Request timeout (120 = 2 menit untuk CPU)
+```
+
+#### CPU Optimization Features
+
+The AI service automatically:
+- **Auto-detects CPU cores** and uses all available cores (minus 1 for system)
+- **Disables GPU** (sets `num_gpu=0`) for CPU-only inference
+- **Optimizes memory usage** with memory mapping (`use_mmap=true`)
+- **Uses optimal batch size** for CPU inference
+- **Configures thread count** based on available CPU cores
+
 #### Verify Ollama Connection
 ```bash
 curl http://localhost:11434/api/tags
+```
+
+#### Performance Tuning for CPU
+
+1. **For VPS with 4-8 CPU cores:**
+   ```env
+   OLLAMA_NUM_THREADS=6        # Leave 1-2 cores for system
+   OLLAMA_NUM_CTX=4096         # 4K context window
+   OLLAMA_BATCH_SIZE=512       # Smaller batch for CPU
+   ```
+
+2. **For VPS with 8+ CPU cores:**
+   ```env
+   OLLAMA_NUM_THREADS=12       # Use more threads
+   OLLAMA_NUM_CTX=8192         # 8K context window (if RAM allows)
+   OLLAMA_BATCH_SIZE=1024      # Larger batch
+   ```
+
+3. **For better performance (requires root):**
+   ```env
+   OLLAMA_USE_MLOCK=true       # Lock memory (prevents swapping)
+   ```
+
+#### Monitor CPU Usage
+```bash
+# Check CPU usage during AI inference
+htop
+# or
+top
+
+# Check Ollama process
+ps aux | grep ollama
+
+# Monitor Ollama logs
+sudo journalctl -u ollama -f
+```
+
+#### AI Error Handling & Monitoring
+
+**Error Handling Improvements:**
+- ✅ **Stability AI API:** Enhanced error handling dengan retry mechanism (2x dengan delay 2s), validation untuk size/dimensions, file verification, detailed error logging untuk HTTP status codes (401, 402, 403, 429, 500+)
+- ✅ **Unsplash API:** Retry mechanism (2x dengan delay 100ms), validation untuk photo data, specific error handling untuk HTTP status codes, connection exception handling
+- ✅ **RunwayML API:** Retry mechanism (2x dengan delay 2s), validation untuk duration/ratio, response structure validation, detailed error logging
+- ✅ **Ollama API:** Enhanced error handling dengan null checks, fallback values, detailed logging dengan trace
+
+**Monitoring:**
+- All AI requests are logged with duration tracking
+- Error logs include: status codes, error bodies, traces, user IDs, prompts (truncated)
+- Performance metrics: Request duration, success/failure rates, retry counts
+- Log location: `storage/logs/laravel.log`
+
+**Check AI Service Status:**
+```bash
+# View AI-related logs
+tail -f /var/www/noteds/storage/logs/laravel.log | grep -i "ai\|ollama\|stability\|unsplash\|runway"
+
+# Check AI service availability
+curl http://localhost:11434/api/tags
+
+# Monitor queue jobs for AI requests
+php artisan queue:work --queue=default
+```
+
+**API Configuration:**
+Add to `.env` for external AI APIs (optional):
+```env
+# Stability AI (for image generation)
+STABILITY_API_KEY=your_stability_api_key
+
+# Unsplash (for image search)
+UNSPLASH_ACCESS_KEY=your_unsplash_access_key
+
+# RunwayML (for video generation)
+RUNWAY_API_KEY=your_runway_api_key
 ```
 
 ### 14. Monitoring Setup
@@ -802,7 +917,7 @@ sudo supervisorctl restart noteds-worker:*
   ```
 - Check Nginx config for proper root and asset serving
 - Verify file permissions (storage and public/build should be writable)
-- Clear browser cache (hard refresh: Ctrl+Shift+R or Cmd+Shift+R)
+- Clear browser cache (hard refresh: Ctrl+Shift+R or Cmd+Shift+R) 
 - Check browser console for 404 errors on JavaScript files
 - Verify `.env` has correct `APP_URL` (must match your domain)
 - **If Swal is still undefined after build:**
@@ -818,6 +933,28 @@ sudo supervisorctl restart noteds-worker:*
 - Check `.env` `OLLAMA_URL` is correct
 - Check firewall rules if using remote Ollama server
 - View Ollama logs: `sudo journalctl -u ollama -f`
+
+### AI Service Issues
+
+#### AI Request Fails
+- Check Ollama service: `sudo systemctl status ollama`
+- Check AI service availability: `curl http://localhost:11434/api/tags`
+- View AI error logs: `tail -f storage/logs/laravel.log | grep -i "ai\|ollama"`
+- Verify queue worker is running: `sudo supervisorctl status noteds-worker:*`
+- Check API keys for external services (Stability AI, Unsplash, RunwayML) in `.env`
+
+#### AI Request Timeout
+- Increase timeout in `.env`: `OLLAMA_TIMEOUT=120` (default: 120 seconds)
+- Check server resources (CPU, RAM) during AI inference
+- Consider using smaller models for CPU-only inference
+- Monitor queue jobs: `php artisan queue:work --queue=default`
+
+#### External AI API Errors
+- **Stability AI:** Check API key, verify credits, check rate limits
+- **Unsplash:** Check API key, verify rate limits, check connection
+- **RunwayML:** Check API key, verify credits, check API endpoint
+- All errors are logged with detailed information in `storage/logs/laravel.log`
+- Check error logs for specific HTTP status codes (401, 403, 429, 500+)
 
 ### Midtrans Payment Issues / Top-up Tidak Bisa
 
@@ -1168,6 +1305,18 @@ Featured Notes advertising system features:
 - ✅ Better error logging dan response handling
 - ✅ Max amount validation (100M) untuk topup
 - ✅ Midtrans configuration check sebelum process
+
+**AI Features Improvements (2025-01-11):**
+- ✅ Enhanced error handling untuk semua AI APIs (Ollama, Stability AI, Unsplash, RunwayML)
+- ✅ Request queuing untuk high traffic (`ProcessAiRequest` job) - dapat diproses secara asinkron
+- ✅ Performance tracking & monitoring untuk AI requests (duration logging, error tracking)
+- ✅ Null checks dan validation improvements di semua AI controllers
+- ✅ Retry mechanism untuk external APIs (Stability AI: 2x dengan delay 2s, Unsplash: 2x dengan delay 100ms, RunwayML: 2x dengan delay 2s)
+- ✅ Detailed error logging dengan status codes, error bodies, traces, user IDs
+- ✅ Fallback values untuk AI responses yang gagal (default messages, empty arrays)
+- ✅ Connection exception handling untuk network issues
+- ✅ File validation untuk Stability AI image generation
+- ✅ Response structure validation untuk RunwayML video generation
 
 ### Sale Mode System (2025-11-10):
 - ✅ Complete Sale Mode System implementation

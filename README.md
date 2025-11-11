@@ -80,8 +80,12 @@ Platform di mana pengguna bisa:
 - ✅ Rating & reviews
 - ✅ Public profiles with avatar upload & share functionality
 - ✅ Premium subscriptions
-- ✅ AI-powered summaries & tags (Ollama - Basic)
+- ✅ AI-powered summaries & tags (Ollama - Basic) dengan enhanced error handling
 - ✅ AI Chat untuk Seller Profile (Public feature - semua user bisa akses)
+- ✅ External AI APIs: Stability AI (image generation), Unsplash (image search), RunwayML (video generation)
+- ✅ Request queuing untuk high traffic (`ProcessAiRequest` job)
+- ✅ Performance tracking & monitoring untuk AI requests
+- ✅ Enhanced error handling dengan retry mechanism untuk semua AI APIs
 - ✅ Referral system
 - ✅ Notification system (SweetAlert2)
 - ✅ Support ticket system

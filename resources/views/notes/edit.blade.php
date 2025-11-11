@@ -968,14 +968,17 @@ function updatePriceGuidanceUI() {
     updateDiscountPreview();
 updatePriceGuidanceUI();
 
-    // File upload preview with large file detection
+    // File upload preview with background upload for files > 5MB
     const fileInput = document.getElementById('attachments');
     const fileList = document.getElementById('file-list');
     const uploadProgressContainer = document.getElementById('upload-progress-container');
     const uploadProgressBar = document.getElementById('upload-progress-bar');
     const uploadProgressPercent = document.getElementById('upload-progress-percent');
     const uploadProgressText = document.getElementById('upload-progress-text');
-    const LARGE_FILE_THRESHOLD = 41943040; // 40MB in bytes
+    const BACKGROUND_UPLOAD_THRESHOLD = 5242880; // 5MB in bytes
+    const backgroundUploadIds = []; // Store upload IDs for form submission
+    const fileUploadStatus = new Map(); // Track upload status per file
+    const selectedFiles = new Map(); // Store selected files by index
     
     function formatFileSize(bytes) {
         if (bytes >= 1073741824) {
@@ -988,19 +991,155 @@ updatePriceGuidanceUI();
         return bytes + ' bytes';
     }
     
+    async function uploadFileInBackground(file, fileIndex) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('_token', '{{ csrf_token() }}');
+        
+        // Update UI to show uploading
+        fileUploadStatus.set(fileIndex, { status: 'uploading', progress: 0 });
+        updateFileItemStatus(fileIndex, 'uploading', 0);
+        
+        try {
+            const xhr = new XMLHttpRequest();
+            
+            // Track upload progress
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    fileUploadStatus.set(fileIndex, { status: 'uploading', progress: percentComplete });
+                    updateFileItemStatus(fileIndex, 'uploading', percentComplete);
+                }
+            });
+            
+                            return new Promise((resolve, reject) => {
+                                xhr.onload = function() {
+                                    try {
+                                        const response = JSON.parse(xhr.responseText);
+                                        if (xhr.status === 200 && response.success) {
+                                            backgroundUploadIds.push(response.upload_id);
+                                            fileUploadStatus.set(fileIndex, { status: 'completed', uploadId: response.upload_id });
+                                            updateFileItemStatus(fileIndex, 'completed');
+                                            resolve(response);
+                                        } else {
+                                            // Handle error response
+                                            let errorMessage = response.error || 'Upload failed';
+                                            
+                                            // Check if premium is required
+                                            if (response.requires_premium) {
+                                                errorMessage += ' <a href="{{ route("subscription.create") }}" class="underline font-semibold">Upgrade ke Premium</a>';
+                                            }
+                                            
+                                            // Show server limits if provided
+                                            if (response.server_limits) {
+                                                errorMessage += ` (Limit server: ${response.server_limits.upload_max_filesize})`;
+                                            }
+                                            
+                                            fileUploadStatus.set(fileIndex, { status: 'error', error: errorMessage, canRetry: response.can_retry !== false });
+                                            updateFileItemStatus(fileIndex, 'error', 0, errorMessage);
+                                            
+                                            // Show SweetAlert for important errors (but don't block - file will upload on form submit)
+                                            if (response.requires_premium) {
+                                                Swal.fire({
+                                                    icon: 'warning',
+                                                    title: 'Premium Diperlukan',
+                                                    html: errorMessage,
+                                                    confirmButtonText: 'OK'
+                                                });
+                                            }
+                                            
+                                            reject(new Error(errorMessage));
+                                        }
+                                    } catch (e) {
+                                        const error = 'Failed to parse server response';
+                                        fileUploadStatus.set(fileIndex, { status: 'error', error: error });
+                                        updateFileItemStatus(fileIndex, 'error', 0, error);
+                                        reject(new Error(error));
+                                    }
+                                };
+                                
+                                xhr.onerror = function() {
+                                    const error = 'Network error. Pastikan koneksi internet stabil. File akan otomatis diupload saat form disubmit.';
+                                    fileUploadStatus.set(fileIndex, { status: 'error', error: error, canRetry: true });
+                                    updateFileItemStatus(fileIndex, 'error', 0, error);
+                                    reject(new Error(error));
+                                };
+                                
+                                xhr.ontimeout = function() {
+                                    const error = 'Upload timeout. File akan otomatis diupload saat form disubmit.';
+                                    fileUploadStatus.set(fileIndex, { status: 'error', error: error, canRetry: true });
+                                    updateFileItemStatus(fileIndex, 'error', 0, error);
+                                    reject(new Error(error));
+                                };
+                                
+                                xhr.open('POST', '{{ route("notes.upload-background") }}');
+                                xhr.timeout = 600000; // 10 minutes timeout for large files
+                                xhr.send(formData);
+                            });
+        } catch (error) {
+            fileUploadStatus.set(fileIndex, { status: 'error', error: error.message });
+            updateFileItemStatus(fileIndex, 'error', 0, error.message);
+            throw error;
+        }
+    }
+    
+    function updateFileItemStatus(fileIndex, status, progress = 0, error = null) {
+        const fileItem = document.querySelector(`[data-file-index="${fileIndex}"]`);
+        if (!fileItem) return;
+        
+        const statusElement = fileItem.querySelector('.file-upload-status');
+        const progressBar = fileItem.querySelector('.file-progress-bar');
+        
+        if (status === 'uploading') {
+            statusElement.innerHTML = `
+                <span class="text-xs text-blue-600">Uploading... ${Math.round(progress)}%</span>
+            `;
+            if (progressBar) {
+                progressBar.style.width = progress + '%';
+            }
+        } else if (status === 'completed') {
+            statusElement.innerHTML = `
+                <span class="text-xs text-green-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    Uploaded
+                </span>
+            `;
+            fileItem.classList.remove('bg-yellow-50', 'border-yellow-300');
+            fileItem.classList.add('bg-green-50', 'border-green-300');
+        } else if (status === 'error') {
+            const errorMsg = error || 'Upload failed';
+            statusElement.innerHTML = `
+                <div class="text-xs text-red-600 space-y-1">
+                    <p class="font-semibold">⚠️ ${errorMsg}</p>
+                    <p class="text-red-500 text-xs italic">💡 Jangan khawatir, file akan otomatis diupload saat form disubmit.</p>
+                </div>
+            `;
+            fileItem.classList.remove('bg-yellow-50', 'border-yellow-300');
+            fileItem.classList.add('bg-red-50', 'border-red-300');
+        }
+    }
+    
     if (fileInput && fileList) {
-        fileInput.addEventListener('change', function() {
+        fileInput.addEventListener('change', async function() {
             fileList.innerHTML = '';
+            selectedFiles.clear(); // Clear previous files
+            fileUploadStatus.clear(); // Clear previous status
+            backgroundUploadIds.length = 0; // Clear previous upload IDs
             const files = Array.from(this.files);
             let hasLargeFile = false;
+            const uploadPromises = [];
             
             files.forEach((file, index) => {
-                const isLargeFile = file.size >= LARGE_FILE_THRESHOLD;
+                selectedFiles.set(index, file); // Store file reference
+                const isLargeFile = file.size >= BACKGROUND_UPLOAD_THRESHOLD;
                 if (isLargeFile) {
                     hasLargeFile = true;
                 }
                 
                 const fileItem = document.createElement('div');
+                fileItem.setAttribute('data-file-index', index);
                 fileItem.className = `flex items-center justify-between p-3 rounded-lg border ${isLargeFile ? 'bg-yellow-50 border-yellow-300' : 'bg-gray-50 border-gray-200'}`;
                 
                 let warningIcon = '';
@@ -1022,20 +1161,120 @@ updatePriceGuidanceUI();
                             <p class="text-sm font-medium ${isLargeFile ? 'text-yellow-900' : 'text-gray-900'} truncate">${file.name}</p>
                             <p class="text-xs ${isLargeFile ? 'text-yellow-700' : 'text-gray-500'}">
                                 ${formatFileSize(file.size)}
-                                ${isLargeFile ? '<span class="ml-2 font-semibold">(Large file - upload may take longer)</span>' : ''}
+                                ${isLargeFile ? '<span class="ml-2 font-semibold">(Large file - uploading in background...)</span>' : ''}
                             </p>
+                            ${isLargeFile ? `
+                                <div class="mt-1 w-full bg-gray-200 rounded-full h-1.5">
+                                    <div class="file-progress-bar bg-blue-600 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            ` : ''}
+                            <div class="file-upload-status mt-1"></div>
                         </div>
                     </div>
                 `;
                 fileList.appendChild(fileItem);
+                
+                // Start background upload for large files
+                if (isLargeFile) {
+                    uploadPromises.push(uploadFileInBackground(file, index));
+                }
             });
             
-            // Show warning for large files
+            // Show progress container if there are large files
             if (hasLargeFile && uploadProgressContainer) {
                 uploadProgressContainer.classList.remove('hidden');
-                uploadProgressText.textContent = 'File besar terdeteksi. Upload akan dimulai saat form dikirim...';
+                uploadProgressText.textContent = 'File besar terdeteksi. Upload sedang berjalan di background...';
             } else if (uploadProgressContainer) {
                 uploadProgressContainer.classList.add('hidden');
+            }
+            
+            // Wait for all background uploads to complete (but don't block)
+            if (uploadPromises.length > 0) {
+                Promise.allSettled(uploadPromises).then(results => {
+                    const failed = results.filter(r => r.status === 'rejected').length;
+                    if (failed === 0) {
+                        uploadProgressText.textContent = 'Semua file berhasil diupload!';
+                        uploadProgressContainer.classList.add('hidden');
+                    } else {
+                        uploadProgressText.textContent = `${failed} file gagal diupload. Silakan coba lagi.`;
+                    }
+                });
+            }
+        });
+    }
+    
+    // Add hidden input for background upload IDs before form submission
+    const form = document.querySelector('form[action*="notes"]');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Check if there are any files still uploading
+            const uploadingFiles = [];
+            fileUploadStatus.forEach((status, index) => {
+                if (status.status === 'uploading') {
+                    const file = selectedFiles.get(index);
+                    if (file) {
+                        uploadingFiles.push(file.name);
+                    }
+                }
+            });
+            
+            if (uploadingFiles.length > 0) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Upload Sedang Berlangsung',
+                    html: `File berikut masih dalam proses upload:<br><strong>${uploadingFiles.join(', ')}</strong><br><br>Harap tunggu hingga upload selesai sebelum submit form.`,
+                    confirmButtonText: 'OK'
+                });
+                return false;
+            }
+            
+            // Check for failed uploads
+            const failedFiles = [];
+            fileUploadStatus.forEach((status, index) => {
+                if (status.status === 'error') {
+                    const file = selectedFiles.get(index);
+                    if (file) {
+                        failedFiles.push(file.name);
+                    }
+                }
+            });
+            
+            // Add background upload IDs to form
+            backgroundUploadIds.forEach(uploadId => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'background_upload_ids[]';
+                input.value = uploadId;
+                form.appendChild(input);
+            });
+            
+            // Remove large files from file input to avoid duplicate upload (only if they're successfully uploaded)
+            if (fileInput && fileInput.files.length > 0) {
+                const files = Array.from(fileInput.files);
+                const filesToKeep = [];
+                files.forEach((file, index) => {
+                    const status = fileUploadStatus.get(index);
+                    // Keep small files (< 5MB) or files that failed to upload in background
+                    // Remove large files that were successfully uploaded in background
+                    if (file.size < BACKGROUND_UPLOAD_THRESHOLD) {
+                        filesToKeep.push(file); // Keep all small files
+                    } else if (status && status.status === 'error') {
+                        filesToKeep.push(file); // Keep files that failed to upload - they will be uploaded on form submit
+                    } else if (status && status.status !== 'completed') {
+                        filesToKeep.push(file); // Keep files that didn't complete (shouldn't happen, but safety check)
+                    }
+                    // Files with status === 'completed' are removed (they're already uploaded)
+                });
+                const dt = new DataTransfer();
+                filesToKeep.forEach(file => dt.items.add(file));
+                fileInput.files = dt.files;
+            }
+            
+            // Show info message if there are failed files (but don't block submission)
+            if (failedFiles.length > 0) {
+                // Just log to console, don't block - files will be uploaded on form submit
+                console.log('Some files failed to upload in background, will be uploaded on form submit:', failedFiles);
             }
         });
     }
