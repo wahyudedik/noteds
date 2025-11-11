@@ -467,9 +467,15 @@ class AiController extends Controller
 
             // Check if Ollama is available
             if (!$this->aiService->isAvailable()) {
+                logger()->warning('AI generateContent: Ollama service not available', [
+                    'user_id' => auth()->id(),
+                    'base_url' => config('services.ollama.url'),
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'AI service is currently unavailable. Please try again later.',
+                    'message' => 'AI service is currently unavailable. Please ensure Ollama is running and configured correctly.',
+                    'error_code' => 'SERVICE_UNAVAILABLE',
                 ], 503);
             }
 
@@ -483,19 +489,27 @@ class AiController extends Controller
                 ]);
             }
 
+            logger()->warning('AI generateContent: Content generation returned null or empty', [
+                'user_id' => auth()->id(),
+                'prompt_length' => strlen($prompt),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menghasilkan konten. Silakan coba lagi dengan prompt yang berbeda.',
+                'error_code' => 'GENERATION_FAILED',
             ], 500);
         } catch (\Exception $e) {
             logger()->error('AI Content generation error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while generating content.',
+                'message' => 'An error occurred while generating content. Please try again later.',
+                'error_code' => 'INTERNAL_ERROR',
             ], 500);
         }
     }
@@ -649,20 +663,29 @@ class AiController extends Controller
                 ]);
             }
 
+            logger()->warning('AI generateImage: Image generation failed - API not configured', [
+                'user_id' => auth()->id(),
+                'stability_configured' => !empty(config('services.stability.api_key')),
+                'ollama_available' => $this->aiService->isAvailable(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to generate image. Please ensure image generation API is configured.',
+                'message' => 'Failed to generate image. Please ensure Stability AI API key is configured in your .env file (STABILITY_API_KEY).',
+                'error_code' => 'API_NOT_CONFIGURED',
                 'usage_summary' => $decision['usage_summary'],
             ], 500);
         } catch (\Exception $e) {
             logger()->error('Image generation error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while generating image.',
+                'message' => 'An error occurred while generating image. Please try again later.',
+                'error_code' => 'INTERNAL_ERROR',
                 'usage_summary' => $decision['usage_summary'],
             ], 500);
         }
@@ -739,20 +762,29 @@ class AiController extends Controller
                 ]);
             }
 
+            logger()->warning('AI generateVideo: Video generation failed - API not configured', [
+                'user_id' => auth()->id(),
+                'runway_configured' => !empty(config('services.runway.api_key')),
+                'ollama_available' => $this->aiService->isAvailable(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to generate video. Please ensure video generation API is configured.',
+                'message' => 'Failed to generate video. Please ensure RunwayML API key is configured in your .env file (RUNWAY_API_KEY).',
+                'error_code' => 'API_NOT_CONFIGURED',
                 'usage_summary' => $decision['usage_summary'],
             ], 500);
         } catch (\Exception $e) {
             logger()->error('Video generation error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while generating video.',
+                'message' => 'An error occurred while generating video. Please try again later.',
+                'error_code' => 'INTERNAL_ERROR',
                 'usage_summary' => $decision['usage_summary'],
             ], 500);
         }
@@ -837,9 +869,15 @@ class AiController extends Controller
 
             // Check if Ollama is available
             if (!$this->aiService->isAvailable()) {
+                logger()->warning('AI generateIdeas: Ollama service not available', [
+                    'user_id' => auth()->id(),
+                    'base_url' => config('services.ollama.url'),
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'AI service is currently unavailable. Please try again later.',
+                    'message' => 'AI service is currently unavailable. Please ensure Ollama is running and configured correctly.',
+                    'error_code' => 'SERVICE_UNAVAILABLE',
                 ], 503);
             }
 
@@ -854,19 +892,27 @@ class AiController extends Controller
                 ]);
             }
 
+            logger()->warning('AI generateIdeas: Idea generation returned empty', [
+                'user_id' => auth()->id(),
+                'topic' => $topic,
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to generate ideas. Please try again.',
+                'message' => 'Failed to generate ideas. Please try again with a different topic.',
+                'error_code' => 'GENERATION_FAILED',
             ], 500);
         } catch (\Exception $e) {
             logger()->error('Idea generation error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while generating ideas.',
+                'message' => 'An error occurred while generating ideas. Please try again later.',
+                'error_code' => 'INTERNAL_ERROR',
             ], 500);
         }
     }
