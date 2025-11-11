@@ -2109,7 +2109,8 @@
                             <img src="${image.thumbnail || image.url}" 
                                  alt="${image.description || query}" 
                                  class="w-full h-24 object-cover rounded-lg border border-gray-200 hover:border-blue-400 transition-all duration-200"
-                                 loading="lazy">
+                                 loading="lazy"
+                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'%3E%3Crect fill=\\'%23ddd\\' width=\\'100\\' height=\\'100\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' text-anchor=\\'middle\\' dy=\\'0.3em\\' fill=\\'%23999\\' font-size=\\'12\\'%3EImage%3C/text%3E%3C/svg%3E'">
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-all duration-200 flex items-center justify-center">
                                 <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -2157,27 +2158,69 @@
 
                                     imageResults.classList.remove('hidden');
                                 } else {
+                                    // No images found or error
+                                    let message = 'Tidak ada gambar ditemukan. ';
+                                    if (data.message) {
+                                        message = data.message;
+                                    } else if (data.images && data.images.length === 0) {
+                                        message += 'Coba kata kunci lain atau pastikan API key Unsplash sudah dikonfigurasi.';
+                                    } else {
+                                        message += 'Pastikan API key Unsplash sudah dikonfigurasi dengan benar.';
+                                    }
+                                    
                                     Swal.fire({
                                         icon: 'info',
                                         title: 'Tidak Ada Hasil',
-                                        text: data.message ||
-                                            'Tidak ada gambar ditemukan. Coba kata kunci lain.',
+                                        text: message,
                                         toast: true,
                                         position: 'top-end',
                                         showConfirmButton: false,
-                                        timer: 3000
+                                        timer: 4000
                                     });
                                 }
                             } catch (error) {
                                 console.error('Image search error:', error);
+                                
+                                // Determine error message
+                                let errorMessage = 'Gagal mencari gambar. ';
+                                
+                                if (error.message) {
+                                    errorMessage += error.message;
+                                } else if (error.response && error.response.status) {
+                                    const status = error.response.status;
+                                    if (status === 401) {
+                                        errorMessage += 'API key tidak valid atau expired.';
+                                    } else if (status === 403) {
+                                        errorMessage += 'Akses ditolak. Periksa permission API key.';
+                                    } else if (status === 429) {
+                                        errorMessage += 'Rate limit tercapai. Silakan coba lagi nanti.';
+                                    } else if (status >= 500) {
+                                        errorMessage += 'Server error. Silakan coba lagi nanti.';
+                                    } else {
+                                        errorMessage += 'Terjadi kesalahan. Silakan coba lagi.';
+                                    }
+                                } else {
+                                    errorMessage += 'Pastikan API key Unsplash sudah dikonfigurasi dengan benar.';
+                                }
+                                
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Error',
-                                    text: error.message || 'Gagal mencari gambar. Silakan coba lagi.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
+                                    title: 'Error Pencarian Gambar',
+                                    html: `
+                                        <p class="text-sm mb-3">${errorMessage}</p>
+                                        <p class="text-xs text-gray-600">Silakan coba lagi atau hubungi support jika masalah berlanjut.</p>
+                                    `,
+                                    showConfirmButton: true,
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Coba Lagi',
+                                    cancelButtonText: 'Tutup',
+                                    confirmButtonColor: '#3b82f6',
+                                    cancelButtonColor: '#6b7280'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        // Retry search
+                                        imageSearchBtn.click();
+                                    }
                                 });
                             } finally {
                                 imageSearchBtn.disabled = false;
@@ -2293,15 +2336,49 @@
                                 }
                             } catch (error) {
                                 console.error('Image generation error:', error);
+                                
+                                // Determine error message based on error type
+                                let errorMessage = 'Gagal generate gambar. ';
+                                
+                                if (error.message) {
+                                    errorMessage += error.message;
+                                } else if (error.response && error.response.status) {
+                                    const status = error.response.status;
+                                    if (status === 401) {
+                                        errorMessage += 'API key tidak valid atau expired.';
+                                    } else if (status === 402) {
+                                        errorMessage += 'Saldo credits tidak mencukupi.';
+                                    } else if (status === 403) {
+                                        errorMessage += 'Akses ditolak. Periksa permission API key.';
+                                    } else if (status === 429) {
+                                        errorMessage += 'Rate limit tercapai. Silakan coba lagi nanti.';
+                                    } else if (status >= 500) {
+                                        errorMessage += 'Server error. Silakan coba lagi nanti.';
+                                    } else {
+                                        errorMessage += 'Terjadi kesalahan. Silakan coba lagi.';
+                                    }
+                                } else {
+                                    errorMessage += 'Pastikan API key Stability AI sudah dikonfigurasi dengan benar.';
+                                }
+                                
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Error',
-                                    text: error.message ||
-                                        'Gagal generate gambar. Pastikan API key sudah dikonfigurasi.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
+                                    title: 'Error Generate Gambar',
+                                    html: `
+                                        <p class="text-sm mb-3">${errorMessage}</p>
+                                        <p class="text-xs text-gray-600">Silakan coba lagi atau hubungi support jika masalah berlanjut.</p>
+                                    `,
+                                    showConfirmButton: true,
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Coba Lagi',
+                                    cancelButtonText: 'Tutup',
+                                    confirmButtonColor: '#3b82f6',
+                                    cancelButtonColor: '#6b7280'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        // Retry generation
+                                        imageGenerateBtn.click();
+                                    }
                                 });
                             } finally {
                                 imageGenerateBtn.disabled = false;
@@ -2414,16 +2491,51 @@
                                 }
                             } catch (error) {
                                 console.error('Video generation error:', error);
-                                videoStatus.textContent = 'Error: ' + (error.message || 'Gagal generate video');
+                                
+                                // Determine error message based on error type
+                                let errorMessage = 'Gagal generate video. ';
+                                
+                                if (error.message) {
+                                    errorMessage += error.message;
+                                } else if (error.response && error.response.status) {
+                                    const status = error.response.status;
+                                    if (status === 401) {
+                                        errorMessage += 'API key tidak valid atau expired.';
+                                    } else if (status === 402) {
+                                        errorMessage += 'Saldo credits tidak mencukupi.';
+                                    } else if (status === 403) {
+                                        errorMessage += 'Akses ditolak. Periksa permission API key.';
+                                    } else if (status === 429) {
+                                        errorMessage += 'Rate limit tercapai. Silakan coba lagi nanti.';
+                                    } else if (status >= 500) {
+                                        errorMessage += 'Server error. Silakan coba lagi nanti.';
+                                    } else {
+                                        errorMessage += 'Terjadi kesalahan. Silakan coba lagi.';
+                                    }
+                                } else {
+                                    errorMessage += 'Pastikan API key RunwayML sudah dikonfigurasi dengan benar.';
+                                }
+                                
+                                videoStatus.textContent = 'Error: ' + errorMessage;
+                                
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Error',
-                                    text: error.message ||
-                                        'Gagal generate video. Pastikan API key sudah dikonfigurasi.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
+                                    title: 'Error Generate Video',
+                                    html: `
+                                        <p class="text-sm mb-3">${errorMessage}</p>
+                                        <p class="text-xs text-gray-600">Silakan coba lagi atau hubungi support jika masalah berlanjut.</p>
+                                    `,
+                                    showConfirmButton: true,
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Coba Lagi',
+                                    cancelButtonText: 'Tutup',
+                                    confirmButtonColor: '#3b82f6',
+                                    cancelButtonColor: '#6b7280'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        // Retry generation
+                                        videoGenerateBtn.click();
+                                    }
                                 });
                             } finally {
                                 videoGenerateBtn.disabled = false;
@@ -2635,18 +2747,32 @@
                                 }
 
                                 if (data.success) {
-                                    // Fill summary
-                                    if (data.data.summary) {
+                                    // Fill summary (with fallback if empty)
+                                    if (data.data && data.data.summary) {
                                         summaryTextarea.value = data.data.summary;
+                                    } else {
+                                        // Show warning if summary is empty
+                                        Swal.fire({
+                                            icon: 'warning',
+                                            title: 'Ringkasan Kosong',
+                                            text: 'AI tidak dapat menghasilkan ringkasan. Silakan coba lagi atau tulis ringkasan manual.',
+                                            toast: true,
+                                            position: 'top-end',
+                                            showConfirmButton: false,
+                                            timer: 3000
+                                        });
                                     }
 
-                                    // Add suggested tags
-                                    if (data.data.tags && data.data.tags.length > 0) {
+                                    // Add suggested tags (with fallback if empty)
+                                    if (data.data && data.data.tags && data.data.tags.length > 0) {
                                         data.data.tags.forEach(tag => {
                                             if (!tagExists(tag)) {
                                                 addTag(tag);
                                             }
                                         });
+                                    } else {
+                                        // Show info if no tags suggested
+                                        console.log('No tags suggested by AI');
                                     }
 
                                     // Show success message
@@ -2665,36 +2791,91 @@
                                         aiBtnText.textContent = 'Generate with AI';
                                     }, 2000);
                                 } else {
+                                    // Determine error message
+                                    let errorMessage = data.message || 'AI service sedang tidak tersedia. ';
+                                    
+                                    if (data.message) {
+                                        errorMessage = data.message;
+                                    } else if (!response.ok) {
+                                        if (response.status === 503) {
+                                            errorMessage = 'AI service sedang tidak tersedia. Silakan coba lagi nanti.';
+                                        } else if (response.status >= 500) {
+                                            errorMessage = 'Server error. Silakan coba lagi nanti.';
+                                        } else {
+                                            errorMessage += 'Silakan coba lagi.';
+                                        }
+                                    }
+                                    
                                     Swal.fire({
                                         icon: 'error',
-                                        title: 'AI Unavailable',
-                                        text: 'AI service is currently unavailable. Please try again later.',
-                                        toast: true,
-                                        position: 'top-end',
-                                        showConfirmButton: false,
-                                        timer: 3000
+                                        title: 'Error AI Analysis',
+                                        html: `
+                                            <p class="text-sm mb-3">${errorMessage}</p>
+                                            <p class="text-xs text-gray-600">Pastikan Ollama service berjalan atau coba lagi nanti.</p>
+                                        `,
+                                        showConfirmButton: true,
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Coba Lagi',
+                                        cancelButtonText: 'Tutup',
+                                        confirmButtonColor: '#3b82f6',
+                                        cancelButtonColor: '#6b7280'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            // Retry analysis
+                                            aiAnalyzeBtn.click();
+                                        } else {
+                                            aiBtnText.textContent = 'Generate with AI';
+                                        }
                                     });
-                                    aiBtnText.textContent = 'Try Again';
                                 }
                             } catch (error) {
                                 console.error('AI analysis error:', error);
+                                
+                                // Determine error message
+                                let errorMessage = 'Terjadi kesalahan saat menganalisis konten. ';
+                                
+                                if (!data || !data.success) {
+                                    if (data && data.message) {
+                                        errorMessage = data.message;
+                                    } else {
+                                        errorMessage += 'AI service mungkin sedang tidak tersedia. Silakan coba lagi nanti.';
+                                    }
+                                } else if (error.message) {
+                                    errorMessage += error.message;
+                                } else {
+                                    errorMessage += 'Silakan coba lagi.';
+                                }
+                                
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Error',
-                                    text: 'An error occurred while analyzing your content. Please try again.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
+                                    title: 'Error AI Analysis',
+                                    html: `
+                                        <p class="text-sm mb-3">${errorMessage}</p>
+                                        <p class="text-xs text-gray-600">Pastikan Ollama service berjalan atau coba lagi nanti.</p>
+                                    `,
+                                    showConfirmButton: true,
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Coba Lagi',
+                                    cancelButtonText: 'Tutup',
+                                    confirmButtonColor: '#3b82f6',
+                                    cancelButtonColor: '#6b7280'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        // Retry analysis
+                                        aiAnalyzeBtn.click();
+                                    } else {
+                                        aiBtnText.textContent = 'Generate with AI';
+                                    }
                                 });
-                                aiBtnText.textContent = 'Try Again';
                             } finally {
                                 // Reset loading state
                                 aiAnalyzeBtn.disabled = false;
                                 aiLoading.classList.add('hidden');
-                                setTimeout(() => {
-                                    aiBtnText.textContent = 'Generate with AI';
-                                }, 2000);
+                                if (aiBtnText.textContent !== 'Try Again') {
+                                    setTimeout(() => {
+                                        aiBtnText.textContent = 'Generate with AI';
+                                    }, 2000);
+                                }
                             }
                         });
                     }

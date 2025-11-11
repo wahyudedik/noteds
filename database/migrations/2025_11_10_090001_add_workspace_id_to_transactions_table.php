@@ -12,11 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->foreignUuid('workspace_id')->nullable()->after('note_id')->constrained('workspaces')->onDelete('cascade');
+            // Add workspace_id column first (without foreign key)
+            $table->uuid('workspace_id')->nullable()->after('note_id');
             
-            // Update index to include workspace_id
-            $table->dropIndex(['buyer_id', 'note_id']);
-            $table->index(['buyer_id', 'note_id']);
+            // Add foreign key constraint
+            $table->foreign('workspace_id')->references('id')->on('workspaces')->onDelete('cascade');
+            
+            // Update indexes - drop old index first (if it exists and not used by foreign key)
+            // Note: We can't drop the index if it's used by foreign key, so we'll keep it and add new ones
+            // The original index ['buyer_id', 'note_id'] is still useful for note transactions
             $table->index(['buyer_id', 'workspace_id']);
         });
     }

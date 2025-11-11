@@ -313,6 +313,93 @@
                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500"
                                   placeholder="{{ __('messages.describe_workspace_for_sale') }}">{{ old('marketplace_description', $workspace->marketplace_description) }}</textarea>
                     </div>
+
+                    <!-- File Attachments (Bundle Workspace) -->
+                    <div>
+                        <label for="attachments" class="block text-sm font-medium text-gray-700 mb-2">
+                            File Attachments (Bundle Workspace)
+                            <span class="text-xs text-gray-500 font-normal">(Optional - untuk bundle workspace)</span>
+                        </label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-purple-400 transition-colors duration-200">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600">
+                                    <label for="attachments" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
+                                        <span>Upload files</span>
+                                        <input id="attachments" name="attachments[]" type="file" multiple
+                                               accept=".pdf,.doc,.docx,.txt,.zip,.rar,.jpg,.jpeg,.png,.gif,.xls,.xlsx,.ppt,.pptx"
+                                               class="sr-only">
+                                    </label>
+                                    <p class="pl-1">atau drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500">PDF, DOC, DOCX, TXT, ZIP, RAR, JPG, PNG, GIF, XLS, XLSX, PPT, PPTX (Max 50MB per file)</p>
+                            </div>
+                        </div>
+                        @if($workspace->hasAttachments())
+                            <div class="mt-3 space-y-2">
+                                <p class="text-xs font-medium text-gray-700 mb-2">Current Attachments ({{ $workspace->file_count }}):</p>
+                                @foreach($workspace->attachments as $index => $attachment)
+                                    @php
+                                        $filename = is_array($attachment) ? ($attachment['filename'] ?? 'Unknown') : basename($attachment);
+                                    @endphp
+                                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
+                                        <div class="flex items-center flex-1 min-w-0">
+                                            <svg class="w-4 h-4 text-purple-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                            </svg>
+                                            <p class="text-xs font-medium text-gray-900 truncate">{{ $filename }}</p>
+                                        </div>
+                                        <label class="ml-2 flex items-center cursor-pointer">
+                                            <input type="checkbox" name="removed_attachments[]" value="{{ $filename }}" class="h-3 w-3 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                            <span class="ml-1 text-xs text-red-600">Remove</span>
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Thumbnails -->
+                    <div>
+                        <label for="thumbnails" class="block text-sm font-medium text-gray-700 mb-2">
+                            Thumbnails (Gambar Preview)
+                            <span class="text-xs text-gray-500 font-normal">(Optional - maks 5 gambar)</span>
+                        </label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-purple-400 transition-colors duration-200">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600">
+                                    <label for="thumbnails" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500">
+                                        <span>Upload gambar</span>
+                                        <input type="file" name="thumbnails[]" id="thumbnails" multiple accept="image/*" class="sr-only">
+                                    </label>
+                                    <p class="pl-1">atau drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500">PNG, JPG, GIF hingga 5MB per gambar (maks 5 gambar)</p>
+                            </div>
+                        </div>
+                        @if($workspace->hasThumbnails())
+                            <div class="mt-3 grid grid-cols-5 gap-2">
+                                @foreach($workspace->thumbnails as $index => $thumbnail)
+                                    @php
+                                        $thumbnailPath = is_array($thumbnail) ? ($thumbnail['path'] ?? $thumbnail) : $thumbnail;
+                                    @endphp
+                                    <div class="relative group">
+                                        <img src="{{ Storage::url($thumbnailPath) }}" alt="Thumbnail {{ $index + 1 }}" class="w-full h-20 object-cover rounded border border-gray-200">
+                                        <label class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded flex items-center justify-center cursor-pointer transition-all">
+                                            <input type="checkbox" name="removed_thumbnails[]" value="{{ basename($thumbnailPath) }}" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                            <span class="ml-2 text-xs text-white hidden group-hover:block">Remove</span>
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+
                     <div class="flex items-center justify-end gap-3 pt-4">
                         <button type="button" onclick="document.getElementById('sell-workspace-modal').classList.add('hidden')" 
                                 class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">

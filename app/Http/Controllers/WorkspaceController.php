@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class WorkspaceController extends Controller
 {
@@ -223,6 +224,10 @@ class WorkspaceController extends Controller
             'relist_price_multiplier' => 'nullable|numeric|min:1|max:10',
             'marketplace_description' => 'nullable|string|max:1000',
             'is_public' => 'boolean',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'file|max:51200|mimes:pdf,doc,docx,txt,zip,rar,jpg,jpeg,png,gif,xls,xlsx,ppt,pptx',
+            'thumbnails' => 'nullable|array',
+            'thumbnails.*' => 'image|max:5120|mimes:jpg,jpeg,png,gif',
         ]);
 
         // Set original_creator_id if not set (first time selling)
@@ -241,6 +246,64 @@ class WorkspaceController extends Controller
             $validated['is_public'] = true; // Make workspace public when listing for sale
         }
 
+        // Handle file uploads for bundle workspace
+        $attachments = [];
+        $thumbnails = [];
+        
+        if ($request->hasFile('attachments')) {
+            $uploadService = app(\App\Services\LargeFileUploadService::class);
+            foreach ($request->file('attachments') as $file) {
+                try {
+                    $isLargeFile = $file->getSize() >= \App\Services\LargeFileUploadService::LARGE_FILE_THRESHOLD;
+                    if ($isLargeFile) {
+                        $attachment = $uploadService->handleLargeFileUpload($file, $user->id);
+                    } else {
+                        $attachment = $uploadService->handleRegularFile($file, $user->id);
+                    }
+                    $attachments[] = $attachment;
+                } catch (\Exception $e) {
+                    \Log::error('Workspace attachment upload failed', [
+                        'user_id' => $user->id,
+                        'workspace_id' => $workspace->id,
+                        'filename' => $file->getClientOriginalName(),
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+        
+        // Handle thumbnail uploads
+        if ($request->hasFile('thumbnails')) {
+            foreach ($request->file('thumbnails') as $file) {
+                if ($file->isValid() && str_starts_with($file->getMimeType(), 'image/')) {
+                    $filename = \Illuminate\Support\Str::uuid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+                    $path = $file->storeAs('thumbnails/' . $user->id, $filename, 'public');
+                    $thumbnails[] = $path;
+                }
+            }
+        }
+        
+        // Merge with existing attachments/thumbnails if updating
+        $existingAttachments = $workspace->attachments ?? [];
+        $existingThumbnails = $workspace->thumbnails ?? [];
+        
+        // Keep existing unless explicitly removed
+        $removedAttachments = $request->input('removed_attachments', []);
+        $removedThumbnails = $request->input('removed_thumbnails', []);
+        
+        $existingAttachments = array_filter($existingAttachments, function($attachment) use ($removedAttachments) {
+            $filename = is_array($attachment) ? ($attachment['filename'] ?? '') : basename($attachment);
+            return !in_array($filename, $removedAttachments);
+        });
+        
+        $existingThumbnails = array_filter($existingThumbnails, function($thumbnail) use ($removedThumbnails) {
+            $filename = is_array($thumbnail) ? ($thumbnail['filename'] ?? '') : basename($thumbnail);
+            return !in_array($filename, $removedThumbnails);
+        });
+        
+        $finalAttachments = array_merge(array_values($existingAttachments), $attachments);
+        $finalThumbnails = array_merge(array_values($existingThumbnails), $thumbnails);
+
         $workspace->update([
             'price' => $validated['price'],
             'discount_price' => $validated['discount_price'] ?? null,
@@ -252,6 +315,9 @@ class WorkspaceController extends Controller
             'status' => 'active',
             'marketplace_description' => $validated['marketplace_description'] ?? null,
             'original_creator_id' => $validated['original_creator_id'] ?? $workspace->original_creator_id,
+            'attachments' => !empty($finalAttachments) ? $finalAttachments : null,
+            'thumbnails' => !empty($finalThumbnails) ? $finalThumbnails : null,
+            'file_count' => count($finalAttachments),
         ]);
 
         return redirect()->route('workspaces.show', $workspace)

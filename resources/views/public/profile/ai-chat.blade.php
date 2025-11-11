@@ -155,20 +155,114 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({ question: question })
             });
 
+            // Check HTTP status before parsing JSON
+            if (!response.ok) {
+                let errorMessage = 'Terjadi kesalahan. ';
+                if (response.status === 503) {
+                    errorMessage = 'AI service sedang tidak tersedia. Silakan coba lagi nanti.';
+                } else if (response.status === 404) {
+                    errorMessage = 'Tidak ada notes ditemukan. Pastikan seller memiliki notes public.';
+                } else if (response.status >= 500) {
+                    errorMessage = 'Server error. Silakan coba lagi nanti.';
+                } else {
+                    errorMessage += 'Silakan coba lagi.';
+                }
+                
+                removeMessage(loadingId);
+                addMessage('ai', errorMessage, false);
+                
+                // Show retry option for server errors
+                if (response.status >= 500 || response.status === 503) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage,
+                        showConfirmButton: true,
+                        showCancelButton: true,
+                        confirmButtonText: 'Coba Lagi',
+                        cancelButtonText: 'Tutup',
+                        confirmButtonColor: '#3b82f6',
+                        cancelButtonColor: '#6b7280'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            questionInput.value = question;
+                            chatForm.dispatchEvent(new Event('submit'));
+                        }
+                    });
+                }
+                return;
+            }
+
             const data = await response.json();
 
             // Remove loading message
             removeMessage(loadingId);
 
             if (data.success) {
-                addMessage('ai', data.answer, false, data.referenced_notes);
+                // Validate answer is not empty
+                if (data.answer && data.answer.trim()) {
+                    addMessage('ai', data.answer, false, data.referenced_notes);
+                } else {
+                    addMessage('ai', 'Maaf, saya tidak dapat memproses pertanyaan Anda. Silakan coba dengan pertanyaan yang berbeda.', false);
+                }
             } else {
-                addMessage('ai', data.message || 'Sorry, I could not process your question. Please try again.', false);
+                // Determine error message
+                let errorMessage = data.message || 'Maaf, saya tidak dapat memproses pertanyaan Anda. Silakan coba lagi.';
+                
+                addMessage('ai', errorMessage, false);
+                
+                // Show retry option if it's a service error
+                if (errorMessage.includes('tidak tersedia') || errorMessage.includes('error') || errorMessage.includes('unavailable')) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage,
+                        showConfirmButton: true,
+                        showCancelButton: true,
+                        confirmButtonText: 'Coba Lagi',
+                        cancelButtonText: 'Tutup',
+                        confirmButtonColor: '#3b82f6',
+                        cancelButtonColor: '#6b7280'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            questionInput.value = question;
+                            chatForm.dispatchEvent(new Event('submit'));
+                        }
+                    });
+                }
             }
         } catch (error) {
             removeMessage(loadingId);
-            addMessage('ai', 'An error occurred. Please try again later.', false);
+            
+            // Determine error message
+            let errorMessage = 'Terjadi kesalahan. ';
+            
+            if (error.message) {
+                errorMessage += error.message;
+            } else {
+                errorMessage += 'Pastikan koneksi internet Anda stabil dan coba lagi.';
+            }
+            
+            addMessage('ai', errorMessage, false);
             console.error('Error:', error);
+            
+            // Show retry option
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorMessage,
+                showConfirmButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Coba Lagi',
+                cancelButtonText: 'Tutup',
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#6b7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    questionInput.value = question;
+                    chatForm.dispatchEvent(new Event('submit'));
+                }
+            });
         } finally {
             // Re-enable input
             questionInput.disabled = false;
