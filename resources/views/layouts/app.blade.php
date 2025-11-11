@@ -792,12 +792,14 @@
                         const variance = speeds.reduce((sum, speed) => sum + Math.pow(speed - avgSpeed, 2), 0) / speeds.length;
                         
                         // AI biasanya punya variance sangat rendah (terlalu konsisten)
-                        if (variance < 0.001 && avgSpeed > 0) {
+                        // Threshold dinaikkan untuk mengurangi false positive
+                        if (variance < 0.0001 && avgSpeed > 0) {
                             suspiciousMovement = true;
                         }
                         
                         // Deteksi movement terlalu cepat atau terlalu lambat
-                        if (avgSpeed > 50 || (avgSpeed < 0.1 && avgSpeed > 0)) {
+                        // Threshold dinaikkan untuk mengurangi false positive
+                        if (avgSpeed > 100 || (avgSpeed < 0.01 && avgSpeed > 0)) {
                             suspiciousMovement = true;
                         }
                     }
@@ -825,7 +827,8 @@
                             const variance = clickTimes.reduce((sum, time) => sum + Math.pow(time - avgTime, 2), 0) / clickTimes.length;
                             
                             // AI biasanya punya variance sangat rendah
-                            if (variance < 100 && avgTime < 500) {
+                            // Threshold dinaikkan untuk mengurangi false positive
+                            if (variance < 10 && avgTime < 200) {
                                 suspiciousMovement = true;
                             }
                         }
@@ -856,7 +859,8 @@
                         const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
                         const variance = times.reduce((sum, time) => sum + Math.pow(time - avgTime, 2), 0) / times.length;
                         
-                        if (variance < 50 && avgTime < 100) {
+                        // Threshold dinaikkan untuk mengurangi false positive
+                        if (variance < 5 && avgTime < 50) {
                             suspiciousMovement = true;
                         }
                     }
@@ -872,8 +876,8 @@
                     readingTime = Date.now() - pageLoadTime;
                     const scrollPercentage = (window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
                     
-                    // Jika scroll > 80% dalam waktu < 5 detik, kemungkinan AI
-                    if (readingTime < 5000 && scrollPercentage > 80) {
+                    // Jika scroll > 80% dalam waktu < 2 detik, kemungkinan AI (threshold lebih ketat)
+                    if (readingTime < 2000 && scrollPercentage > 90) {
                         suspiciousMovement = true;
                     }
                 }, 1000);
@@ -907,7 +911,7 @@
                     humanActivity.touch = true;
                 });
                 
-                // Check setelah 10 detik apakah ada human activity
+                // Check setelah 30 detik apakah ada human activity (threshold lebih longgar)
                 setTimeout(function() {
                     const hasActivity = Object.values(humanActivity).some(function(active) {
                         return active === true;
@@ -916,7 +920,7 @@
                     if (!hasActivity && !document.hidden) {
                         suspiciousMovement = true;
                     }
-                }, 10000);
+                }, 30000);
                 
                 // Deteksi automation tools
                 if (window.navigator.webdriver || 
@@ -967,7 +971,10 @@
                     } catch(e) {}
                 }
                 
-                // Periodic check untuk suspicious behavior
+                // Periodic check untuk suspicious behavior - DISABLED untuk menghindari false positive
+                // Overlay orange terlalu mengganggu user experience normal
+                // Hanya aktifkan jika benar-benar terdeteksi AI bot, bukan hanya suspicious movement
+                /*
                 setInterval(function() {
                     if (suspiciousMovement && !aiDetected) {
                         // Show warning overlay
@@ -979,6 +986,7 @@
                         }, 2000);
                     }
                 }, 5000);
+                */
                 
             })();
         </script>

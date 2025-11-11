@@ -44,6 +44,10 @@ class Note extends Model
         'file_count',
         'price',
         'discount_price',
+        'monetization_approved',
+        'monetization_auto_approved',
+        'monetization_approved_by',
+        'monetization_approved_at',
         'is_public',
         'status',
         'is_sold',
@@ -60,6 +64,9 @@ class Note extends Model
         return [
             'price' => 'decimal:2',
             'discount_price' => 'decimal:2',
+            'monetization_approved' => 'boolean',
+            'monetization_auto_approved' => 'boolean',
+            'monetization_approved_at' => 'datetime',
             'is_public' => 'boolean',
             'status' => 'string',
             'is_sold' => 'boolean',
@@ -113,6 +120,70 @@ class Note extends Model
         return $this->hasMany(NoteViewRevenue::class);
     }
 
+    /**
+     * Get the admin who approved monetization.
+     */
+    public function monetizationApprover(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'monetization_approved_by');
+    }
+
+    /**
+     * Check if note can be monetized (free note with approval).
+     */
+    public function canMonetize(): bool
+    {
+        // Must be free note
+        if ($this->price > 0) {
+            return false;
+        }
+
+        // Must be approved (either by admin or auto-approved)
+        return $this->monetization_approved || $this->monetization_auto_approved;
+    }
+
+    /**
+     * Check if note has at least one successful sale.
+     */
+    public function hasSuccessfulSale(): bool
+    {
+        return $this->transactions()
+            ->where('status', 'success')
+            ->exists();
+    }
+
+    /**
+     * Auto-approve monetization if seller has at least 1 successful sale.
+     */
+    public function checkAndAutoApproveMonetization(): bool
+    {
+        // Only for free notes
+        if ($this->price > 0) {
+            return false;
+        }
+
+        // Already approved
+        if ($this->monetization_approved || $this->monetization_auto_approved) {
+            return false;
+        }
+
+        // Check if seller has at least 1 successful sale (any note)
+        $sellerHasSale = \App\Models\Transaction::where('seller_id', $this->user_id)
+            ->where('status', 'success')
+            ->exists();
+
+        if ($sellerHasSale) {
+            $this->update([
+                'monetization_auto_approved' => true,
+                'monetization_approved' => true,
+                'monetization_approved_at' => now(),
+            ]);
+            return true;
+        }
+
+        return false;
+    }
+
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
@@ -121,6 +192,14 @@ class Note extends Model
     public function activities()
     {
         return $this->hasMany(NoteActivity::class)->latest();
+    }
+
+    /**
+     * Get the embedding for this note.
+     */
+    public function embedding()
+    {
+        return $this->hasOne(NoteEmbedding::class);
     }
 
     public function histories()

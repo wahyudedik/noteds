@@ -27,6 +27,16 @@ class NoteViewMonetizationService
             return null;
         }
 
+        // Check if monetization is approved
+        if (!$note->canMonetize()) {
+            Log::debug('View monetization skipped: Not approved', [
+                'note_id' => $note->id,
+                'monetization_approved' => $note->monetization_approved,
+                'monetization_auto_approved' => $note->monetization_auto_approved,
+            ]);
+            return null;
+        }
+
         $ipAddress = $ipAddress ?? request()->ip();
         $userAgent = $userAgent ?? request()->userAgent();
         

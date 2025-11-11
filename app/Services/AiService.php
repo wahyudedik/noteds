@@ -307,6 +307,55 @@ class AiService
     }
 
     /**
+     * Generate embedding vector for content.
+     * Uses AI to generate semantic embeddings for semantic search.
+     *
+     * @param string $content The content to embed
+     * @return array|null Array of embedding values or null on failure
+     */
+    public function generateEmbedding(string $content): ?array
+    {
+        try {
+            // For now, use a simple approach with AI
+            // In production, use dedicated embedding API (OpenAI, Cohere, etc.)
+            $content = $this->truncateContent($content, 2000);
+            
+            $prompt = "Convert the following text into a semantic representation. Extract key concepts and themes:\n\n{$content}\n\nKey concepts (comma-separated):";
+            
+            $response = $this->callOllama($prompt, [
+                'temperature' => 0.3,
+                'num_predict' => 300,
+            ]);
+
+            if ($response && isset($response['response'])) {
+                // Extract keywords and create a simple embedding-like representation
+                $keywords = $this->extractTags($response['response']);
+                
+                // Create a simple vector representation (in production, use proper embedding model)
+                // This is a placeholder - actual embeddings should be 768+ dimensions
+                $embedding = array_fill(0, 768, 0.0);
+                
+                // Simple hash-based embedding (placeholder)
+                foreach ($keywords as $index => $keyword) {
+                    $hash = crc32($keyword);
+                    $position = abs($hash) % 768;
+                    $embedding[$position] = 0.1 + (abs($hash) % 10) / 100;
+                }
+                
+                return $embedding;
+            }
+
+            return null;
+        } catch (Exception $e) {
+            Log::error('Embedding generation failed', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
      * Find relevant notes based on semantic understanding of query.
      * This is a basic implementation - full semantic search will require embeddings.
      *

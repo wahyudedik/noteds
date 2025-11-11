@@ -208,6 +208,12 @@ TEXT,
                     ->replaceMatches('/\s+/u', ' ')
                     ->trim();
 
+                $price = $template['price'] + rand(-20000, 20000);
+                $isFreeNote = rand(1, 10) <= 2; // 20% chance untuk free note
+                if ($isFreeNote) {
+                    $price = 0;
+                }
+
                 $note = Note::create([
                     'user_id' => $seller->id,
                     'original_creator_id' => $seller->id, // Set original creator
@@ -216,11 +222,19 @@ TEXT,
                     'title' => $template['title'] . ($i > 0 ? ' ' . ($i + 1) : ''),
                     'content' => $content,
                     'content_hash' => hash('sha256', (string) $normalized),
-                    'price' => $template['price'] + rand(-20000, 20000),
+                    'price' => $price,
                     'is_public' => rand(0, 100) > 20, // 80% public
                     'status' => ['active', 'active', 'active', 'active', 'inactive'][rand(0, 4)],
                     'is_sold' => false, // New notes are not sold yet
+                    // Monetization approval: only approve if seller already has sales
+                    'monetization_approved' => false,
+                    'monetization_auto_approved' => false,
                 ]);
+
+                // Auto-approve monetization if seller has at least 1 sale (will be checked after TransactionSeeder runs)
+                if ($price == 0) {
+                    $note->checkAndAutoApproveMonetization();
+                }
 
                 // Attach random tags (2-4 tags per note)
                 $randomTags = $allTags->random(rand(2, 4));

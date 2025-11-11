@@ -15,6 +15,7 @@ use App\Models\WorkspaceActivityLog;
 use App\Services\NoteActivityService;
 use App\Services\NotificationService;
 use App\Services\LargeFileUploadService;
+use App\Services\AutoTaggingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -276,6 +277,20 @@ class NoteController extends Controller
 
         $note = Note::create($validated);
         $this->syncTags($note, $tags);
+
+        // Auto-tagging for premium users (if no tags provided)
+        if ($user->hasPremium() && empty($tags)) {
+            try {
+                $autoTaggingService = app(AutoTaggingService::class);
+                $autoTaggingService->autoTag($note, true); // Use AI for premium users
+            } catch (\Exception $e) {
+                // Log but don't fail note creation
+                logger()->warning('Auto-tagging failed', [
+                    'note_id' => $note->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         if ($workspace) {
             WorkspaceActivityLog::record($workspace, 'note_added', $user, [
@@ -643,6 +658,19 @@ class NoteController extends Controller
 
         $note->update($validated);
         $newTags = $this->syncTags($note, $tags);
+
+        // Auto-tagging update for premium users (if tags were removed)
+        if ($user->hasPremium() && $note->tags()->count() === 0) {
+            try {
+                $autoTaggingService = app(AutoTaggingService::class);
+                $autoTaggingService->autoTag($note, true);
+            } catch (\Exception $e) {
+                logger()->warning('Auto-tagging update failed', [
+                    'note_id' => $note->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
         
         $newData = $note->fresh()->only(['title', 'content', 'summary', 'price', 'discount_price', 'is_public', 'status', 'preview_content', 'preview_percentage']);
 

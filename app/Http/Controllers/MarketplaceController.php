@@ -220,8 +220,9 @@ class MarketplaceController extends Controller
             // IMPORTANT: Only current owner can access full content
             // Buyer who sold the note loses access - it's a one-time sale
             $canBuy = false;
-            if ($user->role === 'buyer' && !$isNoteOwner) {
-                // Buyer can buy if they haven't purchased it before
+            // Admin can buy (admin has all access)
+            if (($user->role === 'buyer' || $user->hasRole('admin')) && !$isNoteOwner) {
+                // Buyer/Admin can buy if they haven't purchased it before
                 $canBuy = !$alreadyPurchased && $note->price > 0;
                 // Only show full content if they are current owner (not if they purchased before but sold it)
                 $showFullContent = false; // Buyer who doesn't own can't see full content
@@ -232,17 +233,21 @@ class MarketplaceController extends Controller
                     $canReview = $userReview === null;
                 }
             } elseif ($isNoteOwner) {
-                // Current owner (seller or buyer who owns it) can see full content
+                // Current owner (seller, buyer, or admin who owns it) can see full content
                 $showFullContent = true;
                 
-                // Check if can review (if buyer owns it)
-                if ($user->role === 'buyer') {
+                // Check if can review (if buyer/admin owns it)
+                if ($user->role === 'buyer' || $user->hasRole('admin')) {
                     $userReview = $note->reviews()->where('user_id', auth()->id())->first();
                     $canReview = $userReview === null;
                 }
             } else {
-                // Seller viewing other seller's note - can't buy, can see preview
-                $showFullContent = $note->price == 0;
+                // Seller viewing other seller's note - can't buy, can see preview (except admin)
+                $showFullContent = $note->price == 0 || $user->hasRole('admin');
+                // Admin can buy even if they are seller
+                if ($user->hasRole('admin') && !$isNoteOwner) {
+                    $canBuy = !$alreadyPurchased && $note->price > 0;
+                }
             }
         } else {
             // Guest users can only see preview (for paid notes)
@@ -807,6 +812,11 @@ class MarketplaceController extends Controller
             }
 
             $note = $note->fresh(['user']);
+
+            // Auto-approve monetization for free notes if seller has at least 1 sale
+            if ($note->price == 0) {
+                $note->checkAndAutoApproveMonetization();
+            }
 
             if ($notificationData['purchase']) {
                 $buyerForNotification = User::find($notificationData['purchase']['buyer_id']);

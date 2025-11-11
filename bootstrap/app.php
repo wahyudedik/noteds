@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'workspace.user' => \App\Http\Middleware\EnsureWorkspaceUser::class,
             'throttle.ai' => \App\Http\Middleware\ThrottleAiRequests::class,
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
+            'ai.access' => \App\Http\Middleware\EnsureAiAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

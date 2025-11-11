@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             FolderSeeder::class,
             NoteSeeder::class,
             StudyMaterialSeeder::class,
-            // AiAnalysisSeeder::class, // DEPRECATED: AI features have been removed
+            // AiAnalysisSeeder::class, // AI features are now workspace-based
             DocumentationSeeder::class,
             LandingPageSectionSeeder::class,
             CmsPageSeeder::class,
@@ -38,6 +38,7 @@ class DatabaseSeeder extends Seeder
             SocialMediaLinkSeeder::class,
             FeaturedNoteSeeder::class,
             TransactionSeeder::class,
+            MonetizationApprovalSeeder::class, // Auto-approve monetization after transactions are seeded
             PurchasedNoteSeeder::class,
             NoteEngagementSeeder::class,
             NoteReviewSeeder::class,
