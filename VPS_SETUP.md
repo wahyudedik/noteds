@@ -98,9 +98,15 @@ DB_PASSWORD=your_strong_password
 # MIDTRANS_CLIENT_KEY=your_production_key
 # MIDTRANS_IS_PRODUCTION=true
 
-# Ollama Configuration (for AI features)
+# Ollama Configuration (for AI features - CPU Optimized)
 OLLAMA_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2
+OLLAMA_NUM_THREADS=8      # Sesuaikan dengan jumlah CPU cores (auto-detect jika null)
+OLLAMA_NUM_CTX=4096       # Context window (4096 = 4K tokens, 8192 = 8K tokens)
+OLLAMA_BATCH_SIZE=512     # Batch size untuk CPU inference
+OLLAMA_TIMEOUT=120        # Timeout dalam detik (120 = 2 menit untuk CPU)
+OLLAMA_USE_MLOCK=false    # Lock memory (perlu root, untuk performa lebih baik)
+OLLAMA_NUMA=false         # NUMA optimization (untuk multi-socket CPU)
 # Or if Ollama is on different server:
 # OLLAMA_URL=http://your-ollama-server:11434
 
@@ -575,21 +581,23 @@ If using a separate server, ensure:
 
 #### CPU Optimization Configuration
 
-Add to your `.env` file for optimal CPU performance:
+**PENTING:** Konfigurasi Ollama sudah termasuk di bagian **Environment Configuration** (step 4) di atas. Pastikan semua variabel berikut ada di file `.env`:
 
 ```env
-# Ollama Configuration
+# Ollama Configuration (for AI features - CPU Optimized)
 OLLAMA_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2
-
-# CPU Optimization Settings (auto-detect jika tidak di-set)
-# OLLAMA_NUM_THREADS=8              # Manual: set jumlah CPU cores (auto-detect jika null)
-OLLAMA_NUM_CTX=4096                  # Context window (4096 = 4K tokens, 8192 = 8K tokens)
-OLLAMA_BATCH_SIZE=512                # Batch size untuk CPU inference
-OLLAMA_USE_MLOCK=false               # Lock memory (perlu root, untuk performa lebih baik)
-OLLAMA_NUMA=false                    # NUMA optimization (untuk multi-socket CPU)
-OLLAMA_TIMEOUT=120                   # Request timeout (120 = 2 menit untuk CPU)
+OLLAMA_NUM_THREADS=8      # Sesuaikan dengan jumlah CPU cores (auto-detect jika null)
+OLLAMA_NUM_CTX=4096       # Context window (4096 = 4K tokens, 8192 = 8K tokens)
+OLLAMA_BATCH_SIZE=512     # Batch size untuk CPU inference
+OLLAMA_TIMEOUT=120        # Timeout dalam detik (120 = 2 menit untuk CPU)
+OLLAMA_USE_MLOCK=false    # Lock memory (perlu root, untuk performa lebih baik)
+OLLAMA_NUMA=false         # NUMA optimization (untuk multi-socket CPU)
 ```
+
+**Catatan:**
+- Jika `OLLAMA_NUM_THREADS` tidak di-set atau di-set `null`, sistem akan auto-detect jumlah CPU cores
+- Setelah update `.env`, jalankan: `php artisan config:clear && php artisan cache:clear`
 
 #### CPU Optimization Features
 
@@ -609,21 +617,31 @@ curl http://localhost:11434/api/tags
 
 1. **For VPS with 4-8 CPU cores:**
    ```env
-   OLLAMA_NUM_THREADS=6        # Leave 1-2 cores for system
+   OLLAMA_NUM_THREADS=6        # Leave 1-2 cores for system (atau biarkan null untuk auto-detect)
    OLLAMA_NUM_CTX=4096         # 4K context window
    OLLAMA_BATCH_SIZE=512       # Smaller batch for CPU
+   OLLAMA_TIMEOUT=120          # 2 menit timeout
    ```
 
 2. **For VPS with 8+ CPU cores:**
    ```env
-   OLLAMA_NUM_THREADS=12       # Use more threads
+   OLLAMA_NUM_THREADS=12       # Use more threads (atau biarkan null untuk auto-detect)
    OLLAMA_NUM_CTX=8192         # 8K context window (if RAM allows)
    OLLAMA_BATCH_SIZE=1024      # Larger batch
+   OLLAMA_TIMEOUT=180          # 3 menit timeout untuk request yang lebih kompleks
    ```
 
 3. **For better performance (requires root):**
    ```env
    OLLAMA_USE_MLOCK=true       # Lock memory (prevents swapping)
+   OLLAMA_NUMA=true            # NUMA optimization (untuk multi-socket CPU)
+   ```
+
+4. **For VPS with limited memory (< 4GB):**
+   ```env
+   OLLAMA_NUM_CTX=2048         # Reduce context window untuk menghemat memory
+   OLLAMA_BATCH_SIZE=256       # Smaller batch size
+   OLLAMA_TIMEOUT=180          # Increase timeout karena mungkin lebih lambat
    ```
 
 #### Monitor CPU Usage
@@ -935,6 +953,98 @@ sudo supervisorctl restart noteds-worker:*
 - View Ollama logs: `sudo journalctl -u ollama -f`
 
 ### AI Service Issues
+
+#### Ollama Status & Error Handling
+
+**Status Ollama dari Log:**
+- ✅ Ollama service berjalan dengan baik
+- ✅ Model berhasil dimuat (`model r>` menunjukkan model sedang dimuat/ready)
+- ✅ Server aktif dan merespons request
+- ✅ CPU backend loaded dengan baik
+
+**Error 500 di Ollama:**
+- Error 500 adalah **normal dan transient** (sementara)
+- Dapat terjadi karena:
+  - Model sedang loading/memuat
+  - Request timeout (jika prompt terlalu panjang atau CPU lambat)
+  - Memory sementara tidak cukup (jarang)
+  - Model error sementara (jarang)
+
+**Perbaikan yang Sudah Diterapkan:**
+- ✅ **Auto-retry mechanism:** Error 500/503 akan di-retry otomatis sampai 2 kali dengan delay 2 detik
+- ✅ **Model availability check:** Sistem memeriksa apakah model tersedia sebelum membuat request
+- ✅ **Enhanced error logging:** Log detail untuk debugging (status code, error message, attempt count)
+- ✅ **Connection exception handling:** Menangani network errors dengan baik
+- ✅ **Response validation:** Memvalidasi struktur response sebelum digunakan
+
+**Cara Memeriksa Status Ollama:**
+```bash
+# Cek status service
+systemctl status ollama
+
+# Cek log Ollama
+journalctl -u ollama -f
+
+# Cek model yang tersedia
+curl http://localhost:11434/api/tags
+
+# Test API (format JSON yang benar)
+curl -X POST http://localhost:11434/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama3.2",
+    "prompt": "Hello, how are you?",
+    "stream": false
+  }'
+
+# Atau gunakan script test otomatis (jika tersedia)
+bash test-ollama.sh
+```
+
+**Script Test Otomatis:**
+File `test-ollama.sh` sudah disediakan di root project untuk test komprehensif:
+- ✅ Check service status
+- ✅ Check available models
+- ✅ Verify model availability (llama3.2)
+- ✅ Test API generate endpoint
+- ✅ Check configuration
+- ✅ Check process and memory usage
+
+**Troubleshooting Ollama Error 500:**
+1. **Model sedang loading:** Tunggu beberapa detik, retry mechanism akan menangani ini
+2. **Memory tidak cukup:** Cek memory usage dengan `free -h`, pertimbangkan mengurangi `num_ctx` di config
+3. **Request timeout:** Increase timeout di `.env` (`OLLAMA_TIMEOUT=180`)
+4. **Model tidak tersedia:** Pastikan model sudah di-download dengan `ollama pull llama3.2`
+5. **CPU overload:** Monitor CPU usage, pertimbangkan mengurangi `OLLAMA_NUM_THREADS`
+
+**Konfigurasi Optimal untuk CPU-only VPS:**
+Konfigurasi ini sudah termasuk di bagian **Environment Configuration** (step 4) di atas. Pastikan semua variabel berikut ada di file `.env`:
+
+```env
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+OLLAMA_NUM_THREADS=8      # Sesuaikan dengan jumlah CPU cores (auto-detect jika null)
+OLLAMA_NUM_CTX=4096       # Context window (4096 = 4K tokens, 8192 = 8K tokens)
+OLLAMA_BATCH_SIZE=512     # Batch size untuk CPU inference
+OLLAMA_TIMEOUT=120        # Timeout dalam detik (120 = 2 menit untuk CPU)
+OLLAMA_USE_MLOCK=false    # Lock memory (perlu root, untuk performa lebih baik)
+OLLAMA_NUMA=false         # NUMA optimization (untuk multi-socket CPU)
+```
+
+**Catatan Penting:**
+- `OLLAMA_NUM_THREADS`: Jika di-set `null` atau tidak di-set, sistem akan auto-detect jumlah CPU cores
+- `OLLAMA_NUM_CTX`: Jika memory VPS terbatas (< 4GB), kurangi ke `2048` atau `1024`
+- `OLLAMA_TIMEOUT`: Increase ke `180` atau `240` jika request sering timeout
+- `OLLAMA_USE_MLOCK`: Set ke `true` hanya jika memiliki akses root dan ingin performa lebih baik
+- `OLLAMA_NUMA`: Set ke `true` hanya untuk server dengan multi-socket CPU
+
+**Setelah update `.env`, jalankan:**
+```bash
+php artisan config:clear
+php artisan cache:clear
+```
+
+#### AI Service Issues
 
 #### AI Request Fails
 - Check Ollama service: `sudo systemctl status ollama`
@@ -1312,6 +1422,8 @@ Featured Notes advertising system features:
 - ✅ Performance tracking & monitoring untuk AI requests (duration logging, error tracking)
 - ✅ Null checks dan validation improvements di semua AI controllers
 - ✅ Retry mechanism untuk external APIs (Stability AI: 2x dengan delay 2s, Unsplash: 2x dengan delay 100ms, RunwayML: 2x dengan delay 2s)
+- ✅ **Ollama retry mechanism:** Auto-retry untuk error 500/503 dengan 2 retries dan 2s delay (menangani transient errors seperti model loading, timeout)
+- ✅ **Ollama model availability check:** Enhanced `isAvailable()` method yang memeriksa apakah model tersedia sebelum request
 - ✅ Detailed error logging dengan status codes, error bodies, traces, user IDs
 - ✅ Fallback values untuk AI responses yang gagal (default messages, empty arrays)
 - ✅ Connection exception handling untuk network issues

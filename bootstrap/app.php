@@ -30,5 +30,54 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Helper function to check if request is for AI route
+        $isAiRoute = function ($request) {
+            $path = $request->path();
+            return $request->expectsJson() 
+                || $request->wantsJson() 
+                || $request->is('api/*') 
+                || $request->is('ai/*') 
+                || str_contains($path, '/ai/')
+                || $request->routeIs('ai.*')
+                || $request->routeIs('buyer-ai.*');
+        };
+
+        // Ensure JSON responses for AI routes (routes that expect JSON)
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $e, $request) use ($isAiRoute) {
+            if ($isAiRoute($request)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+        });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, $request) use ($isAiRoute) {
+            if ($isAiRoute($request)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage() ?: 'An error occurred',
+                ], $e->getStatusCode());
+            }
+        });
+
+        $exceptions->render(function (\Exception $e, $request) use ($isAiRoute) {
+            // Only handle for AI routes to avoid breaking other routes
+            if ($isAiRoute($request)) {
+                \Log::error('Unhandled exception in AI route', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'path' => $request->path(),
+                    'route' => $request->route()?->getName(),
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred while processing your request. Please try again later.',
+                ], 500);
+            }
+        });
     })->create();

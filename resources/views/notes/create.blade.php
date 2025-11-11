@@ -2729,12 +2729,35 @@
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Accept': 'application/json'
                                     },
                                     body: JSON.stringify({
                                         content: content
                                     })
                                 });
+
+                                // Check if response is OK and is JSON
+                                if (!response.ok) {
+                                    let errorMessage = 'Terjadi kesalahan. ';
+                                    if (response.status === 403) {
+                                        errorMessage = 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.';
+                                    } else if (response.status === 503) {
+                                        errorMessage = 'AI service sedang tidak tersedia. Silakan coba lagi nanti.';
+                                    } else if (response.status >= 500) {
+                                        errorMessage = 'Server error. Silakan coba lagi nanti.';
+                                    } else {
+                                        errorMessage += 'Silakan coba lagi.';
+                                    }
+                                    
+                                    throw new Error(errorMessage);
+                                }
+
+                                // Check content type before parsing JSON
+                                const contentType = response.headers.get('content-type');
+                                if (!contentType || !contentType.includes('application/json')) {
+                                    throw new Error('Server mengembalikan response yang tidak valid. Silakan coba lagi.');
+                                }
 
                                 const data = await response.json();
 
@@ -2834,16 +2857,12 @@
                                 // Determine error message
                                 let errorMessage = 'Terjadi kesalahan saat menganalisis konten. ';
                                 
-                                if (!data || !data.success) {
-                                    if (data && data.message) {
-                                        errorMessage = data.message;
-                                    } else {
-                                        errorMessage += 'AI service mungkin sedang tidak tersedia. Silakan coba lagi nanti.';
-                                    }
-                                } else if (error.message) {
-                                    errorMessage += error.message;
+                                if (error.message) {
+                                    errorMessage = error.message;
+                                } else if (error.name === 'SyntaxError' || (error.message && error.message.includes('JSON'))) {
+                                    errorMessage = 'Server mengembalikan response yang tidak valid. Pastikan AI service berjalan dengan benar.';
                                 } else {
-                                    errorMessage += 'Silakan coba lagi.';
+                                    errorMessage += 'AI service mungkin sedang tidak tersedia. Silakan coba lagi nanti.';
                                 }
                                 
                                 Swal.fire({

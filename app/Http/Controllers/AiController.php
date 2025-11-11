@@ -20,20 +20,29 @@ class AiController extends Controller
      */
     public function analyze(Request $request): JsonResponse
     {
-        // Check premium subscription
-        if (!auth()->user()->hasPremium()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.',
-                'requires_premium' => true,
-            ], 403);
-        }
-
-        $request->validate([
-            'content' => 'required|string|max:10000',
-        ]);
-
         try {
+            // Ensure user is authenticated
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Authentication required.',
+                ], 401);
+            }
+
+            // Check premium subscription
+            if (!auth()->user()->hasPremium()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.',
+                    'requires_premium' => true,
+                ], 403);
+            }
+
+            // Validate request - Laravel will automatically return JSON if request expects JSON
+            $validated = $request->validate([
+                'content' => 'required|string|max:10000',
+            ]);
+
             $content = $request->input('content');
 
             // Check if Ollama is available
@@ -63,11 +72,20 @@ class AiController extends Controller
                     'tags' => $suggestedTags,
                 ],
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Handle validation exception (should not reach here, but just in case)
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid request: ' . $e->getMessage(),
+                'errors' => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
             logger()->error('AI analyze error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => auth()->id(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
 
             return response()->json([

@@ -26,7 +26,7 @@ Platform di mana pengguna bisa:
 - ⚠️ **Setiap user hanya bisa beli note 1x**, tapi **note bisa dijual ke user berbeda** (ownership transfer)
 - ⚠️ **Original creator selalu dapat komisi** di setiap penjualan (jika di-setting)
 - ⚠️ **Withdraw:** Approval admin minimal 24 jam (tidak otomatis)
-- ⚠️ Paket Premium: Rp25.000/bln (FASE 7 - opsional)
+- ⚠️ Paket Premium: Rp25.000/bln (FASE 7)
 - ✅ Iklan catatan unggulan (Featured Notes) — Platform untuk mempromosikan note dengan bayar per iklan
   - Lokasi iklan: Landing Hero, Landing Carousel, Marketplace Banner, Marketplace Grid, Popup Welcome, Popup Exit Intent, Popup Interstitial
   - Durasi: 7, 14, atau 30 hari

@@ -175,16 +175,62 @@ class AiService
 
     /**
      * Check if Ollama is available and accessible.
+     * Also checks if the configured model is available.
      *
-     * @return bool True if Ollama is available
+     * @return bool True if Ollama is available and model exists
      */
     public function isAvailable(): bool
     {
         try {
+            // Check if Ollama service is running
             $response = Http::timeout(5)->get("{$this->baseUrl}/api/tags");
 
-            return $response->successful();
+            if (!$response->successful()) {
+                Log::warning('Ollama service is not responding', [
+                    'status' => $response->status(),
+                    'base_url' => $this->baseUrl,
+                ]);
+                return false;
+            }
+
+            // Check if the configured model is available
+            $tags = $response->json();
+            if (!isset($tags['models']) || !is_array($tags['models'])) {
+                Log::warning('Ollama API returned invalid response structure', [
+                    'response' => $tags,
+                ]);
+                return false;
+            }
+
+            // Check if our model is in the list
+            $modelExists = false;
+            foreach ($tags['models'] as $model) {
+                if (isset($model['name']) && $model['name'] === $this->model) {
+                    $modelExists = true;
+                    break;
+                }
+            }
+
+            if (!$modelExists) {
+                Log::warning('Ollama model not found', [
+                    'model' => $this->model,
+                    'available_models' => array_column($tags['models'], 'name'),
+                ]);
+                return false;
+            }
+
+            return true;
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::warning('Ollama connection failed', [
+                'error' => $e->getMessage(),
+                'base_url' => $this->baseUrl,
+            ]);
+            return false;
         } catch (Exception $e) {
+            Log::error('Ollama availability check failed', [
+                'error' => $e->getMessage(),
+                'base_url' => $this->baseUrl,
+            ]);
             return false;
         }
     }
@@ -510,31 +556,115 @@ class AiService
             // Increase timeout for CPU inference (may be slower than GPU)
             $timeout = config('services.ollama.timeout', 120); // 2 minutes default for CPU
             
-            $response = Http::timeout($timeout)->post("{$this->baseUrl}/api/generate", $payload);
+            // Retry mechanism for transient errors (500, 503, timeout)
+            $maxRetries = 2;
+            $retryDelay = 2000; // 2 seconds
+            
+            $lastException = null;
+            $lastResponse = null;
+            
+            for ($attempt = 0; $attempt <= $maxRetries; $attempt++) {
+                try {
+                    if ($attempt > 0) {
+                        // Wait before retry
+                        usleep($retryDelay * 1000);
+                        Log::info('Retrying Ollama API request', [
+                            'attempt' => $attempt + 1,
+                            'max_retries' => $maxRetries + 1,
+                            'model' => $this->model,
+                        ]);
+                    }
+                    
+                    $response = Http::timeout($timeout)
+                        ->post("{$this->baseUrl}/api/generate", $payload);
 
-            if ($response->successful()) {
-                $result = $response->json();
-                
-                // Log performance metrics if available
-                if (isset($result['eval_count']) && config('app.debug')) {
-                    $evalTime = $result['eval_count'] > 0 
-                        ? ($result['total_duration'] ?? 0) / $result['eval_count'] * 1000 
-                        : 0;
-                    Log::debug('Ollama inference performance', [
-                        'eval_count' => $result['eval_count'],
-                        'total_duration' => $result['total_duration'] ?? 0,
-                        'avg_time_per_token_ms' => round($evalTime, 2),
-                    ]);
+                    if ($response->successful()) {
+                        $result = $response->json();
+                        
+                        // Validate response structure
+                        if (!isset($result['response'])) {
+                            Log::warning('Ollama API returned invalid response structure', [
+                                'response_keys' => array_keys($result),
+                                'model' => $this->model,
+                            ]);
+                            return null;
+                        }
+                        
+                        // Log performance metrics if available
+                        if (isset($result['eval_count']) && config('app.debug')) {
+                            $evalTime = $result['eval_count'] > 0 
+                                ? ($result['total_duration'] ?? 0) / $result['eval_count'] * 1000 
+                                : 0;
+                            Log::debug('Ollama inference performance', [
+                                'eval_count' => $result['eval_count'],
+                                'total_duration' => $result['total_duration'] ?? 0,
+                                'avg_time_per_token_ms' => round($evalTime, 2),
+                                'attempt' => $attempt + 1,
+                            ]);
+                        }
+                        
+                        return $result;
+                    }
+                    
+                    $lastResponse = $response;
+                    $statusCode = $response->status();
+                    
+                    // Don't retry for client errors (4xx) - these are permanent
+                    if ($statusCode >= 400 && $statusCode < 500) {
+                        break;
+                    }
+                    
+                    // Retry for server errors (5xx) and network errors
+                    if ($statusCode >= 500 || $statusCode === 0) {
+                        if ($attempt < $maxRetries) {
+                            continue; // Retry
+                        }
+                    } else {
+                        break; // Don't retry for other status codes
+                    }
+                } catch (\Illuminate\Http\Client\ConnectionException $e) {
+                    $lastException = $e;
+                    if ($attempt < $maxRetries) {
+                        continue; // Retry on connection errors
+                    }
+                } catch (\Illuminate\Http\Client\RequestException $e) {
+                    $lastException = $e;
+                    if ($attempt < $maxRetries) {
+                        continue; // Retry on request errors
+                    }
+                } catch (Exception $e) {
+                    $lastException = $e;
+                    // Don't retry for other exceptions
+                    break;
                 }
-                
-                return $result;
             }
 
-            Log::warning('Ollama API request failed', [
-                'status' => $response->status(),
-                'body' => $response->body(),
+            // Log final error after all retries
+            $errorDetails = [
+                'status' => $lastResponse ? $lastResponse->status() : 'unknown',
                 'model' => $this->model,
-            ]);
+                'attempts' => $attempt + 1,
+            ];
+            
+            if ($lastResponse) {
+                $errorBody = $lastResponse->body();
+                // Try to parse error message from response
+                try {
+                    $errorJson = $lastResponse->json();
+                    if (isset($errorJson['error'])) {
+                        $errorDetails['error_message'] = $errorJson['error'];
+                    }
+                } catch (Exception $e) {
+                    // If not JSON, include raw body (truncated)
+                    $errorDetails['error_body'] = substr($errorBody, 0, 500);
+                }
+            }
+            
+            if ($lastException) {
+                $errorDetails['exception'] = $lastException->getMessage();
+            }
+            
+            Log::warning('Ollama API request failed after retries', $errorDetails);
 
             return null;
         } catch (Exception $e) {

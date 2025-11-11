@@ -45,8 +45,16 @@ MIDTRANS_SERVER_KEY=your_sandbox_key_here
 MIDTRANS_CLIENT_KEY=your_sandbox_key_here
 MIDTRANS_IS_PRODUCTION=false
 
+# Ollama Configuration (for AI features)
 OLLAMA_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2
+# Optional: CPU optimization settings (for local development)
+# OLLAMA_NUM_THREADS=4      # Sesuaikan dengan jumlah CPU cores
+# OLLAMA_NUM_CTX=4096       # Context window
+# OLLAMA_BATCH_SIZE=512     # Batch size untuk CPU
+# OLLAMA_TIMEOUT=120        # Timeout dalam detik
+# OLLAMA_USE_MLOCK=false    # Lock memory
+# OLLAMA_NUMA=false         # NUMA optimization
 ```
 
 ### 4. Database Setup

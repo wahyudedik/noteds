@@ -1313,12 +1313,35 @@ updatePriceGuidanceUI();
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({
                         content: content
                     })
                 });
+
+                // Check if response is OK and is JSON
+                if (!response.ok) {
+                    let errorMessage = 'Terjadi kesalahan. ';
+                    if (response.status === 403) {
+                        errorMessage = 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.';
+                    } else if (response.status === 503) {
+                        errorMessage = 'AI service sedang tidak tersedia. Silakan coba lagi nanti.';
+                    } else if (response.status >= 500) {
+                        errorMessage = 'Server error. Silakan coba lagi nanti.';
+                    } else {
+                        errorMessage += 'Silakan coba lagi.';
+                    }
+                    
+                    throw new Error(errorMessage);
+                }
+
+                // Check content type before parsing JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server mengembalikan response yang tidak valid. Silakan coba lagi.');
+                }
 
                 const data = await response.json();
 
@@ -1369,14 +1392,36 @@ updatePriceGuidanceUI();
                 }
             } catch (error) {
                 console.error('AI analysis error:', error);
+                
+                // Determine error message
+                let errorMessage = 'Terjadi kesalahan saat menganalisis konten. ';
+                
+                if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.name === 'SyntaxError' || (error.message && error.message.includes('JSON'))) {
+                    errorMessage = 'Server mengembalikan response yang tidak valid. Pastikan AI service berjalan dengan benar.';
+                } else {
+                    errorMessage += 'AI service mungkin sedang tidak tersedia. Silakan coba lagi nanti.';
+                }
+                
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
-                    text: error.message || 'Failed to analyze content. Please try again.',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000
+                    title: 'Error AI Analysis',
+                    html: `
+                        <p class="text-sm mb-3">${errorMessage}</p>
+                        <p class="text-xs text-gray-600">Pastikan Ollama service berjalan atau coba lagi nanti.</p>
+                    `,
+                    showConfirmButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Coba Lagi',
+                    cancelButtonText: 'Tutup',
+                    confirmButtonColor: '#3b82f6',
+                    cancelButtonColor: '#6b7280'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Retry analysis
+                        aiAnalyzeBtn.click();
+                    }
                 });
             } finally {
                 aiAnalyzeBtn.disabled = false;
