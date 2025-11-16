@@ -56,6 +56,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sale Mode</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.visibility') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Monetization</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.created') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.action') }}</th>
                             </tr>
@@ -96,6 +97,33 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{{ $note->status }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        @if($note->price == 0)
+                                            @if($note->monetization_approved || $note->monetization_auto_approved)
+                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                                                    Approved
+                                                    @if($note->monetization_auto_approved)
+                                                        (Auto)
+                                                    @endif
+                                                </span>
+                                            @else
+                                                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Pending</span>
+                                                <div class="mt-1 flex gap-1">
+                                                    <form method="POST" action="{{ route('admin.notes.approve-monetization', $note) }}" class="inline">
+                                                        @csrf
+                                                        <button type="submit" class="text-xs bg-green-500 hover:bg-green-700 text-white px-2 py-1 rounded">Approve</button>
+                                                    </form>
+                                                    <form method="POST" action="{{ route('admin.notes.reject-monetization', $note) }}" class="inline" onsubmit="return confirm('Yakin reject monetization?')">
+                                                        @csrf
+                                                        <input type="hidden" name="admin_notes" value="Rejected by admin">
+                                                        <button type="submit" class="text-xs bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded">Reject</button>
+                                                    </form>
+                                                </div>
+                                            @endif
+                                        @else
+                                            <span class="text-gray-400 text-xs">-</span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $note->created_at->format('d M Y') }}

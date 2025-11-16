@@ -42,28 +42,45 @@ return [
         'merchant_id' => env('MIDTRANS_MERCHANT_ID'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | AI Services Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for AI services (Ollama - Free & Open Source)
+    | Ollama allows running LLMs locally or via API
+    |
+    */
+
     'ollama' => [
         'url' => env('OLLAMA_URL', 'http://localhost:11434'),
         'model' => env('OLLAMA_MODEL', 'llama3.2'),
-        'image_model' => env('OLLAMA_IMAGE_MODEL', 'flux'), // Model untuk image generation (flux, stable-diffusion-xl, dll)
-        'vision_model' => env('OLLAMA_VISION_MODEL', 'llava'), // Model untuk vision/OCR (llava, bakllava, dll)
+        'image_model' => env('OLLAMA_IMAGE_MODEL', 'flux'),
+        'vision_model' => env('OLLAMA_VISION_MODEL', 'llava'),
+        'num_threads' => env('OLLAMA_NUM_THREADS', null),
+        'num_ctx' => env('OLLAMA_NUM_CTX', 4096),
+        'batch_size' => env('OLLAMA_BATCH_SIZE', 512),
+        'use_mlock' => env('OLLAMA_USE_MLOCK', false),
+        'numa' => env('OLLAMA_NUMA', false),
+        'thread_priority' => env('OLLAMA_THREAD_PRIORITY', null),
+        'timeout' => env('OLLAMA_TIMEOUT', 120),
     ],
 
-    'tesseract' => [
-        'path' => env('TESSERACT_PATH', 'tesseract'), // Path to tesseract executable
-    ],
+    // 'tesseract' => [
+    //     'path' => env('TESSERACT_PATH', 'tesseract'),
+    // ],
 
-    'unsplash' => [
-        'access_key' => env('UNSPLASH_ACCESS_KEY'),
-        'secret_key' => env('UNSPLASH_SECRET_KEY'),
-    ],
+    // 'unsplash' => [
+    //     'access_key' => env('UNSPLASH_ACCESS_KEY'),
+    //     'secret_key' => env('UNSPLASH_SECRET_KEY'),
+    // ],
 
-    'stability' => [
-        'api_key' => env('STABILITY_API_KEY'),
-    ],
+    // 'stability' => [
+    //     'api_key' => env('STABILITY_API_KEY'),
+    // ],
 
-    'runway' => [
-        'api_key' => env('RUNWAY_API_KEY'),
-    ],
+    // 'runway' => [
+    //     'api_key' => env('RUNWAY_API_KEY'),
+    // ],
 
 ];

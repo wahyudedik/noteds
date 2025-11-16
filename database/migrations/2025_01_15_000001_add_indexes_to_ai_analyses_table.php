@@ -4,6 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * DEPRECATED: This migration adds indexes to the ai_analyses table.
+ * AI features have been removed from the application (January 2025).
+ * This migration is kept for backward compatibility with existing databases.
+ */
 return new class extends Migration
 {
     /**

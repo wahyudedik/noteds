@@ -132,58 +132,209 @@
         @endif
 
         <!-- Premium Features -->
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.premium_features') }}</h2>
-            </div>
-            <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="flex items-start gap-4">
-                        <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
-                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Seller Benefits -->
+            @if(auth()->user()->role === 'seller' || auth()->user()->role === 'user_workspaces')
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        {{ __('messages.seller_benefits') }}
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.unlimited_notes') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.create_many_notes_no_limits') }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.unlimited_notes') }}</h3>
-                            <p class="text-sm text-gray-600">{{ __('messages.create_many_notes_no_limits') }}</p>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.advanced_analytics') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.track_sales_performance') }}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex items-start gap-4">
-                        <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
-                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.larger_file_uploads') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.upload_files_up_to_20mb') }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.advanced_analytics') }}</h3>
-                            <p class="text-sm text-gray-600">{{ __('messages.track_sales_performance') }}</p>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.featured_notes_auto_approve') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.promote_notes_instantly') }}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex items-start gap-4">
-                        <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
-                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.cloud_backup') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.automatic_backup_notes') }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.priority_support') }}</h3>
-                            <p class="text-sm text-gray-600">{{ __('messages.get_faster_response_times') }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-4">
-                        <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
-                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.cloud_backup') }}</h3>
-                            <p class="text-sm text-gray-600">{{ __('messages.automatic_backup_notes') }}</p>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.workspace_management') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.organize_notes_with_workspaces') }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            @endif
+
+            <!-- Buyer Benefits -->
+            @if(auth()->user()->role === 'buyer')
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {{ __('messages.buyer_benefits') }}
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.collections_wishlist') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.organize_purchased_notes') }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.buyer_analytics') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.track_purchases_and_progress') }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.reading_progress') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.track_reading_progress_notes') }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.bookmarks') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.save_important_sections') }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.export_notes') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.export_pdf_docx_markdown') }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.reading_history') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.view_all_read_notes') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <!-- General Benefits (if not seller or buyer specific) -->
+            @if(auth()->user()->role !== 'seller' && auth()->user()->role !== 'buyer' && auth()->user()->role !== 'user_workspaces')
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.premium_features') }}</h2>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.unlimited_notes') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.create_many_notes_no_limits') }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">{{ __('messages.priority_support') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('messages.get_faster_response_times') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 </div>

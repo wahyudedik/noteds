@@ -82,86 +82,79 @@ class LargeFileUploadService
     protected function handleLargeFile(UploadedFile $file, string $userId, ?callable $progressCallback = null): array
     {
         try {
+            // Ensure memory limit is set before processing
+            // This should already be set by the controller, but set it here as well for safety
+            $currentMemoryLimit = ini_get('memory_limit');
+            $currentMemoryLimitBytes = $this->convertToBytes($currentMemoryLimit);
+            if ($currentMemoryLimitBytes < 512 * 1024 * 1024) { // Less than 512MB
+                ini_set('memory_limit', '512M');
+            }
+            
             // Ensure private storage directory exists
             if (!Storage::disk('private')->exists('notes/' . $userId)) {
                 Storage::disk('private')->makeDirectory('notes/' . $userId);
             }
 
-            // Generate unique filename
-            $filename = Str::uuid() . '_' . Str::slug($file->getClientOriginalName());
-            $destinationPath = 'notes/' . $userId . '/' . $filename;
-
-            // Use streaming for large files to avoid memory issues
+            // Get file info BEFORE opening stream to minimize memory usage
+            $originalFilename = $file->getClientOriginalName();
             $fileSize = $file->getSize();
-            $uploadedBytes = 0;
+            $mimeType = $file->getMimeType();
+            
+            // Generate unique filename
+            $filename = Str::uuid() . '_' . Str::slug($originalFilename);
 
             // Increase PHP limits for large file upload
-            $oldMaxExecutionTime = ini_get('max_execution_time');
-            $oldMemoryLimit = ini_get('memory_limit');
+            set_time_limit(900); // 15 minutes for very large files
+            ini_set('max_execution_time', '900');
+            ini_set('max_input_time', '900');
             
+            // Use Laravel Storage's putFileAs which handles large files efficiently
+            // putFileAs uses move_uploaded_file internally which is more memory efficient
+            // than reading the entire file into memory
             try {
-                set_time_limit(600); // 10 minutes
-                ini_set('memory_limit', '512M');
+                // Use putFileAs which is optimized for uploaded files
+                // It uses move_uploaded_file internally, which is memory efficient
+                $path = Storage::disk('private')->putFileAs('notes/' . $userId, $file, $filename);
                 
-                // Use Laravel Storage's putStream with streaming for large files
-                // This handles memory efficiently by streaming the file
-                $stream = fopen($file->getRealPath(), 'rb');
-                if (!$stream) {
-                    throw new Exception('Failed to open source file for reading.');
-                }
-
-                // Use putStream which handles large files efficiently
-                $success = Storage::disk('private')->putStream($destinationPath, $stream);
-                
-                if ($stream) {
-                    fclose($stream);
-                }
-                
-                if (!$success) {
+                if (!$path) {
                     throw new Exception('Failed to upload file to storage.');
                 }
+                
+                // Verify the file was uploaded correctly
+                if (!Storage::disk('private')->exists($path)) {
+                    throw new Exception('File upload verification failed: file does not exist.');
+                }
+                
+                $uploadedSize = Storage::disk('private')->size($path);
+                if ($uploadedSize !== $fileSize) {
+                    Storage::disk('private')->delete($path);
+                    throw new Exception("File size mismatch after upload. Expected: {$fileSize}, Got: {$uploadedSize}");
+                }
 
-                // Simulate progress for callback (since putStream doesn't provide progress)
+                // Simulate progress for callback
                 if ($progressCallback) {
-                    // Call progress at 25%, 50%, 75%, and 100%
-                    $progressCallback(25, $fileSize * 0.25, $fileSize);
-                    $progressCallback(50, $fileSize * 0.5, $fileSize);
-                    $progressCallback(75, $fileSize * 0.75, $fileSize);
                     $progressCallback(100, $fileSize, $fileSize);
                 }
-            } finally {
-                // Restore original PHP limits
-                if ($oldMaxExecutionTime) {
-                    set_time_limit($oldMaxExecutionTime);
+            } catch (\Exception $e) {
+                // Clean up partial upload if exists
+                if (isset($path) && Storage::disk('private')->exists($path)) {
+                    Storage::disk('private')->delete($path);
                 }
-                if ($oldMemoryLimit) {
-                    ini_set('memory_limit', $oldMemoryLimit);
-                }
-            }
-
-            // Verify file was uploaded correctly
-            if (!Storage::disk('private')->exists($destinationPath)) {
-                throw new Exception('File upload verification failed.');
-            }
-
-            $uploadedSize = Storage::disk('private')->size($destinationPath);
-            if ($uploadedSize !== $fileSize) {
-                Storage::disk('private')->delete($destinationPath);
-                throw new Exception('File size mismatch after upload.');
+                throw $e;
             }
 
             Log::info('Large file uploaded successfully', [
                 'user_id' => $userId,
-                'filename' => $file->getClientOriginalName(),
+                'filename' => $originalFilename,
                 'size' => $fileSize,
-                'path' => $destinationPath,
+                'path' => $path,
             ]);
 
             return [
-                'filename' => $file->getClientOriginalName(),
-                'path' => $destinationPath,
+                'filename' => $originalFilename,
+                'path' => $path,
                 'size' => $fileSize,
-                'mime' => $file->getMimeType(),
+                'mime' => $mimeType,
                 'is_large' => true,
             ];
 
@@ -169,16 +162,42 @@ class LargeFileUploadService
             Log::error('Large file upload failed', [
                 'user_id' => $userId,
                 'filename' => $file->getClientOriginalName(),
+                'file_size' => $file->getSize(),
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // Clean up partial upload if exists
-            if (isset($destinationPath) && Storage::disk('private')->exists($destinationPath)) {
-                Storage::disk('private')->delete($destinationPath);
+            if (isset($path) && Storage::disk('private')->exists($path)) {
+                Storage::disk('private')->delete($path);
             }
 
             throw $e;
         }
+    }
+
+    /**
+     * Convert memory limit string to bytes
+     * 
+     * @param string $memoryLimit
+     * @return int
+     */
+    protected function convertToBytes(string $memoryLimit): int
+    {
+        $memoryLimit = trim($memoryLimit);
+        $last = strtolower($memoryLimit[strlen($memoryLimit) - 1]);
+        $value = (int) $memoryLimit;
+
+        switch ($last) {
+            case 'g':
+                $value *= 1024;
+            case 'm':
+                $value *= 1024;
+            case 'k':
+                $value *= 1024;
+        }
+
+        return $value;
     }
 
     /**

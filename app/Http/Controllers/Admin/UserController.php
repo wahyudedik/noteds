@@ -104,6 +104,82 @@ class UserController extends Controller
             ->with('success', 'User berhasil dihapus.');
     }
 
+    /**
+     * Verify a user account.
+     */
+    public function verify(User $user): RedirectResponse
+    {
+        if ($user->is_verified) {
+            return redirect()->route('admin.users.show', $user)
+                ->with('info', 'User is already verified.');
+        }
+
+        $user->update([
+            'is_verified' => true,
+            'verified_at' => now(),
+            'verified_by' => Auth::id(),
+        ]);
+
+        // Log admin action
+        AdminActionLog::create([
+            'admin_id' => Auth::id(),
+            'target_user_id' => $user->id,
+            'action' => 'verify',
+            'details' => 'User account verified',
+        ]);
+
+        // Notify user
+        $this->notificationService->create(
+            $user,
+            'account_verified',
+            '✅ Account Verified',
+            'Your account has been verified by an administrator. You now have a verified badge on your profile.',
+            route('public.profile.show', $user->username),
+            ['verified_at' => now()]
+        );
+
+        return redirect()->route('admin.users.show', $user)
+            ->with('success', 'User verified successfully.');
+    }
+
+    /**
+     * Unverify a user account.
+     */
+    public function unverify(User $user): RedirectResponse
+    {
+        if (!$user->is_verified) {
+            return redirect()->route('admin.users.show', $user)
+                ->with('info', 'User is not verified.');
+        }
+
+        $user->update([
+            'is_verified' => false,
+            'verified_at' => null,
+            'verified_by' => null,
+        ]);
+
+        // Log admin action
+        AdminActionLog::create([
+            'admin_id' => Auth::id(),
+            'target_user_id' => $user->id,
+            'action' => 'unverify',
+            'details' => 'User account verification removed',
+        ]);
+
+        // Notify user
+        $this->notificationService->create(
+            $user,
+            'account_unverified',
+            '⚠️ Verification Removed',
+            'Your account verification has been removed by an administrator.',
+            route('public.profile.show', $user->username),
+            []
+        );
+
+        return redirect()->route('admin.users.show', $user)
+            ->with('success', 'User verification removed successfully.');
+    }
+
     public function deactivate(Request $request, User $user): RedirectResponse
     {
         if ($message = $this->guardAgainstSelfOrLastAdmin($user)) {

@@ -14,11 +14,13 @@ class ContentExtractorService
     protected string $ollamaBaseUrl;
     protected string $ollamaModel;
     protected int $cacheDuration = 86400; // 24 hours
+    protected AiService $aiService;
 
-    public function __construct()
+    public function __construct(AiService $aiService)
     {
         $this->ollamaBaseUrl = config('services.ollama.url', 'http://localhost:11434');
         $this->ollamaModel = config('services.ollama.model', 'llama3.2');
+        $this->aiService = $aiService; // Use AiService for CPU-optimized Ollama calls
     }
 
     /**
@@ -167,6 +169,7 @@ class ContentExtractorService
 
     /**
      * Extract image text using Ollama vision model
+     * Uses AiService for CPU-optimized inference
      */
     protected function extractImageTextWithOllama(string $imagePath, string $model): ?array
     {
@@ -176,12 +179,22 @@ class ContentExtractorService
             $base64Image = base64_encode($imageData);
             $mimeType = mime_content_type($imagePath);
 
-            $response = Http::timeout(120)
+            // Use AiService's callOllama method which includes CPU optimization
+            // For vision models, we need to send images, so we use HTTP directly but with CPU-optimized options
+            $response = Http::timeout(config('services.ollama.timeout', 120))
                 ->post("{$this->ollamaBaseUrl}/api/generate", [
                     'model' => $model,
                     'prompt' => 'Extract all text from this image. Return only the extracted text, no explanations.',
                     'images' => ["data:{$mimeType};base64,{$base64Image}"],
                     'stream' => false,
+                    // Add CPU optimization options
+                    'options' => [
+                        'num_thread' => config('services.ollama.num_threads') ?: $this->getOptimalThreadCount(),
+                        'num_ctx' => config('services.ollama.num_ctx', 4096),
+                        'num_gpu' => 0, // CPU only
+                        'use_mmap' => true,
+                        'batch_size' => config('services.ollama.batch_size', 512),
+                    ],
                 ]);
 
             if ($response->successful()) {
@@ -202,6 +215,28 @@ class ContentExtractorService
             ]);
             return null;
         }
+    }
+    
+    /**
+     * Get optimal CPU thread count (same logic as AiService)
+     */
+    protected function getOptimalThreadCount(): int
+    {
+        $configThreads = config('services.ollama.num_threads');
+        if ($configThreads !== null && is_numeric($configThreads) && $configThreads > 0) {
+            return (int)$configThreads;
+        }
+        
+        // Auto-detect CPU cores
+        if (PHP_OS_FAMILY !== 'Windows') {
+            $output = @shell_exec('nproc 2>/dev/null');
+            if ($output !== null && is_numeric(trim($output))) {
+                $cpuCount = (int)trim($output);
+                return max(2, min($cpuCount - 1, 64));
+            }
+        }
+        
+        return 4; // Fallback
     }
 
     /**
@@ -234,23 +269,22 @@ class ContentExtractorService
 
     /**
      * Extract tables from text using AI
+     * Uses AiService for CPU-optimized inference
      */
     protected function extractTablesWithAI(string $text): ?array
     {
         try {
             $prompt = "Extract all tables from the following text. Return each table as a JSON array with headers and rows. Format: [{\"headers\": [...], \"rows\": [[...], [...]]}]\n\nText:\n" . substr($text, 0, 5000);
 
-            $response = Http::timeout(60)
-                ->post("{$this->ollamaBaseUrl}/api/generate", [
-                    'model' => $this->ollamaModel,
-                    'prompt' => $prompt,
-                    'stream' => false,
-                    'format' => 'json',
-                ]);
+            // Use AiService's callOllama method which includes CPU optimization
+            $response = $this->aiService->callOllama($prompt, [
+                'format' => 'json',
+                'temperature' => 0.3, // Lower temperature for more structured output
+                'num_predict' => 2000,
+            ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                $responseText = $data['response'] ?? '';
+            if ($response && isset($response['response'])) {
+                $responseText = $response['response'];
                 
                 // Try to parse JSON from response
                 $jsonStart = strpos($responseText, '[');

@@ -81,7 +81,7 @@ class UserSeeder extends Seeder
                     'role' => 'seller',
                     'wallet_balance' => rand(100000, 500000),
                     'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode("Premium User $i") . '&background=8b5cf6&color=fff',
-                    'bio' => 'Premium subscriber with access to advanced features.',
+                    'bio' => 'Premium subscriber with access to advanced features including AI in workspace.',
                     'location' => 'Jakarta, Indonesia',
                 ]
             );
@@ -104,6 +104,33 @@ class UserSeeder extends Seeder
                     'expired_at' => now()->addMonths(rand(1, 12)),
                 ]);
             }
+
+            // Create a test workspace for premium user to test AI features
+            $workspace = \App\Models\Workspace::firstOrCreate(
+                [
+                    'owner_id' => $premiumUser->id,
+                    'name' => "Premium User {$i} Workspace",
+                ],
+                [
+                    'slug' => Str::slug("Premium User {$i} Workspace") . '-' . Str::random(5),
+                    'type' => 'personal',
+                    'description' => 'Test workspace for premium user to test AI features',
+                    'is_active' => true,
+                ]
+            );
+
+            // Add premium user as member with admin role
+            \App\Models\WorkspaceMember::firstOrCreate(
+                [
+                    'workspace_id' => $workspace->id,
+                    'user_id' => $premiumUser->id,
+                ],
+                [
+                    'role' => 'admin',
+                    'is_active' => true,
+                    'joined_at' => now(),
+                ]
+            );
         }
     }
 }

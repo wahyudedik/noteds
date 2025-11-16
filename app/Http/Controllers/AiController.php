@@ -20,35 +20,81 @@ class AiController extends Controller
      */
     public function analyze(Request $request): JsonResponse
     {
-        // Check premium subscription
-        if (!auth()->user()->hasPremium()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.',
-                'requires_premium' => true,
-            ], 403);
-        }
-
-        $request->validate([
-            'content' => 'required|string|max:10000',
-        ]);
-
         try {
+            // Ensure user is authenticated
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Authentication required.',
+                ], 401);
+            }
+
+            // Check premium subscription
+            if (!auth()->user()->hasPremium()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Fitur AI ini memerlukan subscription premium. Silakan upgrade untuk menggunakan fitur ini.',
+                    'requires_premium' => true,
+                ], 403);
+            }
+
+            // Validate request - Laravel will automatically return JSON if request expects JSON
+            try {
+                $validated = $request->validate([
+                    'content' => 'required|string|max:50000', // Increased to 50K chars for longer content
+                ]);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Konten terlalu panjang. Maksimal 50.000 karakter untuk analisis AI.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
             $content = $request->input('content');
 
             // Check if Ollama is available
             if (! $this->aiService->isAvailable()) {
+                logger()->warning('AI analyze: Ollama service not available', [
+                    'user_id' => auth()->id(),
+                    'base_url' => config('services.ollama.url'),
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'AI service is currently unavailable. Please try again later.',
+                    'message' => 'AI service sedang tidak tersedia. Silakan coba lagi nanti atau hubungi administrator.',
                 ], 503);
+            }
+
+            // Truncate content if too long (prevent timeout)
+            $contentLength = strlen($content);
+            if ($contentLength > 30000) {
+                logger()->info('AI analyze: Content truncated', [
+                    'user_id' => auth()->id(),
+                    'original_length' => $contentLength,
+                    'truncated_length' => 30000,
+                ]);
+                $content = substr($content, 0, 30000) . '...';
             }
 
             // Generate summary
             $summary = $this->aiService->generateSummary($content, 200);
+            if ($summary === null || empty(trim($summary))) {
+                logger()->warning('AI analyze: Summary generation returned null or empty', [
+                    'user_id' => auth()->id(),
+                    'content_length' => strlen($content),
+                ]);
+                $summary = 'Tidak dapat menghasilkan ringkasan. Silakan coba lagi atau tulis ringkasan manual.';
+            }
 
             // Suggest tags
             $suggestedTags = $this->aiService->suggestTags($content, 5);
+            if (empty($suggestedTags)) {
+                logger()->info('AI analyze: No tags suggested', [
+                    'user_id' => auth()->id(),
+                ]);
+                $suggestedTags = [];
+            }
 
             return response()->json([
                 'success' => true,
@@ -57,10 +103,37 @@ class AiController extends Controller
                     'tags' => $suggestedTags,
                 ],
             ]);
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // This should not reach here, but handle just in case
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while processing your request.',
+                'message' => 'Konten tidak valid. Pastikan konten tidak kosong dan tidak melebihi batas maksimum.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            logger()->error('AI analyze error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'content_length' => $request->input('content') ? strlen($request->input('content')) : 0,
+            ]);
+
+            // Provide more specific error message based on error type
+            $errorMessage = 'Terjadi kesalahan saat memproses analisis AI. ';
+            
+            if (str_contains($e->getMessage(), 'timeout') || str_contains($e->getMessage(), 'Connection timed out')) {
+                $errorMessage = 'Request timeout. Konten mungkin terlalu panjang atau server sedang sibuk. Silakan coba lagi atau kurangi panjang konten.';
+            } elseif (str_contains($e->getMessage(), 'Connection') || str_contains($e->getMessage(), 'refused')) {
+                $errorMessage = 'Tidak dapat terhubung ke AI service. Pastikan Ollama service berjalan dengan benar.';
+            } else {
+                $errorMessage .= 'Silakan coba lagi nanti atau hubungi administrator jika masalah berlanjut.';
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $errorMessage,
             ], 500);
         }
     }
@@ -394,35 +467,49 @@ class AiController extends Controller
 
             // Check if Ollama is available
             if (!$this->aiService->isAvailable()) {
+                logger()->warning('AI generateContent: Ollama service not available', [
+                    'user_id' => auth()->id(),
+                    'base_url' => config('services.ollama.url'),
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'AI service is currently unavailable. Please try again later.',
+                    'message' => 'AI service is currently unavailable. Please ensure Ollama is running and configured correctly.',
+                    'error_code' => 'SERVICE_UNAVAILABLE',
                 ], 503);
             }
 
             // Generate content
             $content = $this->aiService->generateContent($prompt, $maxLength);
 
-            if ($content) {
+            if ($content && !empty(trim($content))) {
                 return response()->json([
                     'success' => true,
                     'content' => $content,
                 ]);
             }
 
+            logger()->warning('AI generateContent: Content generation returned null or empty', [
+                'user_id' => auth()->id(),
+                'prompt_length' => strlen($prompt),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to generate content. Please try again.',
+                'message' => 'Gagal menghasilkan konten. Silakan coba lagi dengan prompt yang berbeda.',
+                'error_code' => 'GENERATION_FAILED',
             ], 500);
         } catch (\Exception $e) {
             logger()->error('AI Content generation error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while generating content.',
+                'message' => 'An error occurred while generating content. Please try again later.',
+                'error_code' => 'INTERNAL_ERROR',
             ], 500);
         }
     }
@@ -576,20 +663,29 @@ class AiController extends Controller
                 ]);
             }
 
+            logger()->warning('AI generateImage: Image generation failed - API not configured', [
+                'user_id' => auth()->id(),
+                'stability_configured' => !empty(config('services.stability.api_key')),
+                'ollama_available' => $this->aiService->isAvailable(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to generate image. Please ensure image generation API is configured.',
+                'message' => 'Failed to generate image. Please ensure Stability AI API key is configured in your .env file (STABILITY_API_KEY).',
+                'error_code' => 'API_NOT_CONFIGURED',
                 'usage_summary' => $decision['usage_summary'],
             ], 500);
         } catch (\Exception $e) {
             logger()->error('Image generation error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while generating image.',
+                'message' => 'An error occurred while generating image. Please try again later.',
+                'error_code' => 'INTERNAL_ERROR',
                 'usage_summary' => $decision['usage_summary'],
             ], 500);
         }
@@ -666,20 +762,29 @@ class AiController extends Controller
                 ]);
             }
 
+            logger()->warning('AI generateVideo: Video generation failed - API not configured', [
+                'user_id' => auth()->id(),
+                'runway_configured' => !empty(config('services.runway.api_key')),
+                'ollama_available' => $this->aiService->isAvailable(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to generate video. Please ensure video generation API is configured.',
+                'message' => 'Failed to generate video. Please ensure RunwayML API key is configured in your .env file (RUNWAY_API_KEY).',
+                'error_code' => 'API_NOT_CONFIGURED',
                 'usage_summary' => $decision['usage_summary'],
             ], 500);
         } catch (\Exception $e) {
             logger()->error('Video generation error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while generating video.',
+                'message' => 'An error occurred while generating video. Please try again later.',
+                'error_code' => 'INTERNAL_ERROR',
                 'usage_summary' => $decision['usage_summary'],
             ], 500);
         }
@@ -764,9 +869,15 @@ class AiController extends Controller
 
             // Check if Ollama is available
             if (!$this->aiService->isAvailable()) {
+                logger()->warning('AI generateIdeas: Ollama service not available', [
+                    'user_id' => auth()->id(),
+                    'base_url' => config('services.ollama.url'),
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'AI service is currently unavailable. Please try again later.',
+                    'message' => 'AI service is currently unavailable. Please ensure Ollama is running and configured correctly.',
+                    'error_code' => 'SERVICE_UNAVAILABLE',
                 ], 503);
             }
 
@@ -781,19 +892,27 @@ class AiController extends Controller
                 ]);
             }
 
+            logger()->warning('AI generateIdeas: Idea generation returned empty', [
+                'user_id' => auth()->id(),
+                'topic' => $topic,
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to generate ideas. Please try again.',
+                'message' => 'Failed to generate ideas. Please try again with a different topic.',
+                'error_code' => 'GENERATION_FAILED',
             ], 500);
         } catch (\Exception $e) {
             logger()->error('Idea generation error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while generating ideas.',
+                'message' => 'An error occurred while generating ideas. Please try again later.',
+                'error_code' => 'INTERNAL_ERROR',
             ], 500);
         }
     }

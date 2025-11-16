@@ -117,7 +117,7 @@ class MarketplaceController extends Controller
             ]);
         }
 
-        $note->load('tags', 'user', 'originalCreator', 'reviews.user', 'transactions');
+        $note->load('tags', 'user', 'originalCreator', 'reviews.user', 'transactions', 'comments.user', 'reactions.user', 'questions.user');
 
         // Track impression for featured notes (track for all users, not just authenticated)
         $featuredNote = \App\Models\FeaturedNote::where('note_id', $note->id)
@@ -150,6 +150,22 @@ class MarketplaceController extends Controller
             }
         }
 
+        // Process view monetization for free notes (0.01 rupiah per view)
+        if ($note->price == 0) {
+            $monetizationService = app(\App\Services\NoteViewMonetizationService::class);
+            // Get fingerprint from session or generate from request data
+            $fingerprint = session('browser_fingerprint') ?? request()->header('X-Fingerprint') ?? null;
+            
+            // Process view revenue (with bot protection)
+            $monetizationService->processView(
+                $note,
+                request()->ip(),
+                request()->userAgent(),
+                $fingerprint,
+                auth()->id()
+            );
+        }
+
         // Load reviews with replies
         $reviews = $note->reviews()
             ->with([
@@ -158,6 +174,34 @@ class MarketplaceController extends Controller
             ])
             ->latest()
             ->paginate(10);
+
+        // Load comments with replies
+        $comments = $note->comments()
+            ->with(['user', 'replies.user'])
+            ->latest()
+            ->paginate(10, ['*'], 'comments');
+
+        // Load reactions summary
+        $reactionsSummary = $note->reactions()
+            ->selectRaw('reaction_type, COUNT(*) as count')
+            ->groupBy('reaction_type')
+            ->get()
+            ->pluck('count', 'reaction_type')
+            ->toArray();
+
+        // Get user's reaction if authenticated
+        $userReaction = null;
+        if (auth()->check()) {
+            $userReaction = $note->reactions()
+                ->where('user_id', auth()->id())
+                ->first();
+        }
+
+        // Load questions with answers
+        $questions = $note->questions()
+            ->with(['user', 'answeredBy'])
+            ->latest()
+            ->paginate(10, ['*'], 'questions');
 
         $canBuy = false;
         $alreadyPurchased = false;
@@ -182,8 +226,9 @@ class MarketplaceController extends Controller
             // IMPORTANT: Only current owner can access full content
             // Buyer who sold the note loses access - it's a one-time sale
             $canBuy = false;
-            if ($user->role === 'buyer' && !$isNoteOwner) {
-                // Buyer can buy if they haven't purchased it before
+            // Admin can buy (admin has all access)
+            if (($user->role === 'buyer' || $user->hasRole('admin')) && !$isNoteOwner) {
+                // Buyer/Admin can buy if they haven't purchased it before
                 $canBuy = !$alreadyPurchased && $note->price > 0;
                 // Only show full content if they are current owner (not if they purchased before but sold it)
                 $showFullContent = false; // Buyer who doesn't own can't see full content
@@ -194,17 +239,21 @@ class MarketplaceController extends Controller
                     $canReview = $userReview === null;
                 }
             } elseif ($isNoteOwner) {
-                // Current owner (seller or buyer who owns it) can see full content
+                // Current owner (seller, buyer, or admin who owns it) can see full content
                 $showFullContent = true;
                 
-                // Check if can review (if buyer owns it)
-                if ($user->role === 'buyer') {
+                // Check if can review (if buyer/admin owns it)
+                if ($user->role === 'buyer' || $user->hasRole('admin')) {
                     $userReview = $note->reviews()->where('user_id', auth()->id())->first();
                     $canReview = $userReview === null;
                 }
             } else {
-                // Seller viewing other seller's note - can't buy, can see preview
-                $showFullContent = $note->price == 0;
+                // Seller viewing other seller's note - can't buy, can see preview (except admin)
+                $showFullContent = $note->price == 0 || $user->hasRole('admin');
+                // Admin can buy even if they are seller
+                if ($user->hasRole('admin') && !$isNoteOwner) {
+                    $canBuy = !$alreadyPurchased && $note->price > 0;
+                }
             }
         } else {
             // Guest users can only see preview (for paid notes)
@@ -297,7 +346,11 @@ class MarketplaceController extends Controller
             'canRepurchase',
             'repurchasePrice',
             'gracePeriodEndsAt',
-            'isWithinGracePeriod'
+            'isWithinGracePeriod',
+            'comments',
+            'reactionsSummary',
+            'userReaction',
+            'questions'
         ));
     }
 
@@ -320,48 +373,76 @@ class MarketplaceController extends Controller
             return redirect()->route('marketplace.show', $note)->with('error', 'Anda tidak dapat membeli catatan Anda sendiri. Jika Anda adalah pemilik note ini, Anda dapat menjualnya ke buyer lain.');
         }
 
-        // Handle different sale modes
-        if ($note->isStandardMode()) {
-            // Standard mode: Multiple sales allowed, buyer cannot resell, no commission
-            // Check if buyer already purchased (can buy multiple times from different sellers)
-            // But can't buy from same seller twice
-            $existingTransaction = Transaction::where('buyer_id', $buyer->id)
-                ->where('note_id', $note->id)
-                ->where('seller_id', $seller->id)
-                ->where('status', 'success')
-                ->first();
-
-            if ($existingTransaction) {
-                return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli catatan ini dari penjual ini sebelumnya.');
+        // Use DB transaction with lock to prevent race conditions
+        try {
+            DB::beginTransaction();
+            
+            // Lock the note row to prevent concurrent purchases (especially for scarcity mode)
+            $note = Note::lockForUpdate()->find($note->id);
+            
+            if (!$note) {
+                DB::rollBack();
+                return redirect()->route('marketplace.index')->with('error', 'Catatan tidak ditemukan.');
             }
-        } else {
-            // Scarcity mode: One-time purchase per user, but can repurchase if sold
-            $existingTransaction = Transaction::where('buyer_id', $buyer->id)
-                ->where('note_id', $note->id)
-                ->where('status', 'success')
-                ->first();
+            
+            // Re-check status after lock (might have been sold during request)
+            if (!$note->is_public || $note->status !== 'active' || !$note->is_for_sale) {
+                DB::rollBack();
+                return redirect()->route('marketplace.show', $note)->with('error', 'Catatan tidak tersedia untuk dibeli.');
+            }
 
-            if ($existingTransaction) {
-                // Check if buyer still owns the note (hasn't sold it yet)
-                if ($buyer->id === $note->user_id) {
-                    return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah memiliki catatan ini. Anda dapat menjualnya ke buyer lain, tetapi ingat bahwa setelah dijual, Anda tidak akan bisa mengaksesnya lagi.');
-                } else {
-                    // Buyer sold the note - check if can repurchase
-                    if ($note->canRepurchase($buyer->id)) {
-                        // Can repurchase - will use repurchase price below
-                        $repurchasePrice = $note->getRepurchasePrice($buyer->id);
-                        if ($repurchasePrice) {
-                            // Will use repurchase price instead of base price
-                            $basePrice = $repurchasePrice;
+            // Handle different sale modes
+            if ($note->isStandardMode()) {
+                // Standard mode: Multiple sales allowed, buyer cannot resell, no commission
+                // Check if buyer already purchased (can buy multiple times from different sellers)
+                // But can't buy from same seller twice
+                $existingTransaction = Transaction::where('buyer_id', $buyer->id)
+                    ->where('note_id', $note->id)
+                    ->where('seller_id', $seller->id)
+                    ->where('status', 'success')
+                    ->first();
+
+                if ($existingTransaction) {
+                    DB::rollBack();
+                    return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli catatan ini dari penjual ini sebelumnya.');
+                }
+            } else {
+                // Scarcity mode: One-time purchase per user, but can repurchase if sold
+                // Check if note is already sold (lock ensures we see latest state)
+                if ($note->is_sold && $note->user_id !== $buyer->id) {
+                    DB::rollBack();
+                    return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini sudah terjual. Setiap note scarcity hanya bisa dibeli 1x.');
+                }
+                
+                $existingTransaction = Transaction::where('buyer_id', $buyer->id)
+                    ->where('note_id', $note->id)
+                    ->where('status', 'success')
+                    ->first();
+
+                if ($existingTransaction) {
+                    // Check if buyer still owns the note (hasn't sold it yet)
+                    if ($buyer->id === $note->user_id) {
+                        DB::rollBack();
+                        return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah memiliki catatan ini. Anda dapat menjualnya ke buyer lain, tetapi ingat bahwa setelah dijual, Anda tidak akan bisa mengaksesnya lagi.');
+                    } else {
+                        // Buyer sold the note - check if can repurchase
+                        if ($note->canRepurchase($buyer->id)) {
+                            // Can repurchase - will use repurchase price below
+                            $repurchasePrice = $note->getRepurchasePrice($buyer->id);
+                            if ($repurchasePrice) {
+                                // Will use repurchase price instead of base price
+                                $basePrice = $repurchasePrice;
+                            } else {
+                                DB::rollBack();
+                                return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli dan menjual catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x. Setelah dijual, akses hilang secara permanen.');
+                            }
                         } else {
+                            DB::rollBack();
                             return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli dan menjual catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x. Setelah dijual, akses hilang secara permanen.');
                         }
-                    } else {
-                        return redirect()->route('marketplace.show', $note)->with('error', 'Anda sudah membeli dan menjual catatan ini sebelumnya. Setiap user hanya bisa membeli note ini 1x. Setelah dijual, akses hilang secara permanen.');
                     }
                 }
             }
-        }
 
         // Get final price (use discount_price if available, otherwise use regular price)
         // If repurchasing, basePrice already set above in scarcity mode check
@@ -380,62 +461,62 @@ class MarketplaceController extends Controller
             $finalPrice = $basePrice - $premiumDiscount;
         }
 
-        if ($finalPrice <= 0) {
-            return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
-        }
+            if ($finalPrice <= 0) {
+                DB::rollBack();
+                return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
+            }
 
-        $taxContext = $taxService->resolveTaxForPurchase($note, $buyer);
-        $taxBreakdown = $taxService->calculateAmounts((float) $finalPrice, $taxContext);
-        $buyerPaysAmount = $taxBreakdown['total_amount'];
-        $priceExcludingTax = $taxBreakdown['price_excluding_tax'];
+            $taxContext = $taxService->resolveTaxForPurchase($note, $buyer);
+            $taxBreakdown = $taxService->calculateAmounts((float) $finalPrice, $taxContext);
+            $buyerPaysAmount = $taxBreakdown['total_amount'];
+            $priceExcludingTax = $taxBreakdown['price_excluding_tax'];
 
-        if ($buyerPaysAmount <= 0) {
-            return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
-        }
+            if ($buyerPaysAmount <= 0) {
+                DB::rollBack();
+                return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
+            }
 
-        // Ensure wallets exist
-        $baseCurrency = config('currency.base_currency', 'IDR');
+            // Ensure wallets exist
+            $baseCurrency = config('currency.base_currency', 'IDR');
 
-        $buyerWallet = Wallet::firstOrCreate(
-            ['user_id' => $buyer->id],
-            ['balance' => 0, 'currency' => $baseCurrency]
-        );
-        if ($buyerWallet->currency !== $baseCurrency) {
-            $buyerWallet->currency = $baseCurrency;
-            $buyerWallet->save();
-        }
+            $buyerWallet = Wallet::firstOrCreate(
+                ['user_id' => $buyer->id],
+                ['balance' => 0, 'currency' => $baseCurrency]
+            );
+            if ($buyerWallet->currency !== $baseCurrency) {
+                $buyerWallet->currency = $baseCurrency;
+                $buyerWallet->save();
+            }
 
-        $sellerWallet = Wallet::firstOrCreate(
-            ['user_id' => $seller->id],
-            ['balance' => 0, 'currency' => $baseCurrency]
-        );
-        if ($sellerWallet->currency !== $baseCurrency) {
-            $sellerWallet->currency = $baseCurrency;
-            $sellerWallet->save();
-        }
+            $sellerWallet = Wallet::firstOrCreate(
+                ['user_id' => $seller->id],
+                ['balance' => 0, 'currency' => $baseCurrency]
+            );
+            if ($sellerWallet->currency !== $baseCurrency) {
+                $sellerWallet->currency = $baseCurrency;
+                $sellerWallet->save();
+            }
 
-        // Sync wallet balance with user wallet_balance
-        if ($buyerWallet->balance != $buyer->wallet_balance) {
-            $buyerWallet->balance = $buyer->wallet_balance;
-            $buyerWallet->save();
-        }
+            // Sync wallet balance with user wallet_balance
+            if ($buyerWallet->balance != $buyer->wallet_balance) {
+                $buyerWallet->balance = $buyer->wallet_balance;
+                $buyerWallet->save();
+            }
 
-        if ($buyerWallet->balance < $buyerPaysAmount) {
-            return redirect()->route('marketplace.show', $note)->with('error', 'Saldo wallet tidak cukup. Silakan top-up terlebih dahulu.');
-        }
+            if ($buyerWallet->balance < $buyerPaysAmount) {
+                DB::rollBack();
+                return redirect()->route('marketplace.show', $note)->with('error', 'Saldo wallet tidak cukup. Silakan top-up terlebih dahulu.');
+            }
 
-        $notificationData = [
-            'purchase' => null,
-            'sale' => null,
-            'commission' => [],
-            'low_balance' => [],
-            'popularity_check' => false,
-        ];
+            $notificationData = [
+                'purchase' => null,
+                'sale' => null,
+                'commission' => [],
+                'low_balance' => [],
+                'popularity_check' => false,
+            ];
 
-        $commissionTier = $commissionService->resolveTierForSeller($seller);
-
-        try {
-            DB::beginTransaction();
+            $commissionTier = $commissionService->resolveTierForSeller($seller);
 
             $amount = $buyerPaysAmount;
             
@@ -738,6 +819,11 @@ class MarketplaceController extends Controller
 
             $note = $note->fresh(['user']);
 
+            // Auto-approve monetization for free notes if seller has at least 1 sale
+            if ($note->price == 0) {
+                $note->checkAndAutoApproveMonetization();
+            }
+
             if ($notificationData['purchase']) {
                 $buyerForNotification = User::find($notificationData['purchase']['buyer_id']);
                 if ($buyerForNotification) {
@@ -790,19 +876,9 @@ class MarketplaceController extends Controller
             }
 
             if ($notificationData['popularity_check']) {
-                $previousMilestones = $note->notificationMeta('popularity_milestones', []);
-                $updatedMilestones = $previousMilestones;
-
-                foreach ($this->notificationService->getPopularityThresholds() as $threshold) {
-                    if ($note->purchase_count >= $threshold && !in_array($threshold, $updatedMilestones, true)) {
-                        $this->notificationService->notifyNotePopular($note, $threshold);
-                        $updatedMilestones[] = $threshold;
-                    }
-                }
-
-                if ($updatedMilestones !== $previousMilestones) {
-                    $note->setNotificationMetaValue('popularity_milestones', array_values(array_unique($updatedMilestones)));
-                }
+                // Dispatch popularity check to queue for async processing
+                \App\Jobs\CheckNotePopularityJob::dispatch($note->id)
+                    ->onQueue('notifications');
             }
 
             // Track click for featured notes
@@ -820,6 +896,14 @@ class MarketplaceController extends Controller
                 ->with('success', 'Catatan berhasil dibeli! Anda dapat melihat detail lengkapnya.');
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            \Log::error('Note purchase failed', [
+                'note_id' => $note->id ?? null,
+                'buyer_id' => $buyer->id ?? null,
+                'seller_id' => $seller->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             
             return redirect()->route('marketplace.show', $note)
                 ->with('error', 'Terjadi kesalahan saat memproses pembelian. Silakan coba lagi.');

@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @deprecated AI features have been removed from the application (January 2025).
+ * This model is kept for backward compatibility with existing database records.
+ * The table can be dropped in the future if needed.
+ */
 class AiAnalysis extends Model
 {
     use HasFactory, HasUuids;

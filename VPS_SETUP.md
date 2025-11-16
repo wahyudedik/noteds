@@ -98,9 +98,15 @@ DB_PASSWORD=your_strong_password
 # MIDTRANS_CLIENT_KEY=your_production_key
 # MIDTRANS_IS_PRODUCTION=true
 
-# Ollama Configuration (for AI features)
+# Ollama Configuration (for AI features - CPU Optimized)
 OLLAMA_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2
+OLLAMA_NUM_THREADS=8      # Sesuaikan dengan jumlah CPU cores (auto-detect jika null)
+OLLAMA_NUM_CTX=4096       # Context window (4096 = 4K tokens, 8192 = 8K tokens)
+OLLAMA_BATCH_SIZE=512     # Batch size untuk CPU inference
+OLLAMA_TIMEOUT=120        # Timeout dalam detik (120 = 2 menit untuk CPU)
+OLLAMA_USE_MLOCK=false    # Lock memory (perlu root, untuk performa lebih baik)
+OLLAMA_NUMA=false         # NUMA optimization (untuk multi-socket CPU)
 # Or if Ollama is on different server:
 # OLLAMA_URL=http://your-ollama-server:11434
 
@@ -385,8 +391,19 @@ server {
         deny all;
     }
 
-    # Increase upload size for file attachments
-    client_max_body_size 50M;
+    # Increase upload size for file attachments (support up to 200MB for large files)
+    # For premium users: up to 100MB per file, multiple files can exceed 200MB total
+    client_max_body_size 200M;
+    
+    # Increase buffer sizes for large file uploads
+    client_body_buffer_size 128k;
+    client_header_buffer_size 1k;
+    large_client_header_buffers 4 16k;
+    
+    # Increase timeouts for large file uploads
+    client_body_timeout 300s;
+    client_header_timeout 300s;
+    send_timeout 300s;
 
     # Gzip compression
     gzip on;
@@ -435,7 +452,14 @@ sudo supervisorctl update
 sudo supervisorctl start noteds-worker:*
 ```
 
-> Queue workers memproses email notifikasi forum, job AI, serta tugas-tugas background lain. Pastikan service ini selalu aktif.
+> Queue workers memproses email notifikasi forum, job AI (`ProcessAiRequest`), serta tugas-tugas background lain. Pastikan service ini selalu aktif.
+
+**AI Request Queuing:**
+- AI requests dapat diproses secara asinkron menggunakan `ProcessAiRequest` job untuk menghindari blocking pada high traffic
+- Job ini menangani: analyze, ask, generate_image, generate_video, search_images, semantic_search, context_links, generate_content, generate_ideas
+- Retry mechanism: 3 attempts dengan backoff 5 detik
+- Performance tracking: Duration logging untuk monitoring
+- Caching: Hasil dapat di-cache untuk mempercepat response
 
 ### 12. Scheduled Tasks (Cron)
 
@@ -536,11 +560,12 @@ sudo -u www-data php artisan forum:publish-scheduled-posts
 - Requires queue/cron to run reliably (see steps 11 & 12)
 - Owners see scheduled indicators until publish time is reached
 
-### 13. Ollama Setup (AI Features)
+### 13. Ollama Setup (AI Features) - CPU Optimized
 
-Ollama can be installed on the same server or a separate server:
+Ollama can be installed on the same server or a separate server. **This setup is optimized for CPU-only inference (no GPU required).**
 
-#### Option 1: Install Ollama on Same Server
+#### Option 1: Install Ollama on Same Server (Recommended for VPS)
+
 ```bash
 # Install Ollama
 curl -fsSL https://ollama.com/install.sh | sh
@@ -550,9 +575,15 @@ sudo systemctl enable ollama
 sudo systemctl start ollama
 
 # Pull required model (adjust based on your needs)
-ollama pull llama3.2
+# For CPU-only: Use smaller models for better performance
+ollama pull llama3.2        # ~2GB, good for CPU
 # or
-ollama pull mistral
+ollama pull mistral:7b      # ~4GB, better quality
+# or
+ollama pull qwen2.5:7b      # ~4.5GB, good balance
+
+# For better CPU performance, use quantized models:
+ollama pull llama3.2:3b     # ~2GB, faster on CPU
 ```
 
 #### Option 2: Install Ollama on Separate Server
@@ -561,9 +592,122 @@ If using a separate server, ensure:
 - Update `.env` with correct `OLLAMA_URL`
 - Configure firewall to allow connection (if needed)
 
+#### CPU Optimization Configuration
+
+**PENTING:** Konfigurasi Ollama sudah termasuk di bagian **Environment Configuration** (step 4) di atas. Pastikan semua variabel berikut ada di file `.env`:
+
+```env
+# Ollama Configuration (for AI features - CPU Optimized)
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+OLLAMA_NUM_THREADS=8      # Sesuaikan dengan jumlah CPU cores (auto-detect jika null)
+OLLAMA_NUM_CTX=4096       # Context window (4096 = 4K tokens, 8192 = 8K tokens)
+OLLAMA_BATCH_SIZE=512     # Batch size untuk CPU inference
+OLLAMA_TIMEOUT=120        # Timeout dalam detik (120 = 2 menit untuk CPU)
+OLLAMA_USE_MLOCK=false    # Lock memory (perlu root, untuk performa lebih baik)
+OLLAMA_NUMA=false         # NUMA optimization (untuk multi-socket CPU)
+```
+
+**Catatan:**
+- Jika `OLLAMA_NUM_THREADS` tidak di-set atau di-set `null`, sistem akan auto-detect jumlah CPU cores
+- Setelah update `.env`, jalankan: `php artisan config:clear && php artisan cache:clear`
+
+#### CPU Optimization Features
+
+The AI service automatically:
+- **Auto-detects CPU cores** and uses all available cores (minus 1 for system)
+- **Disables GPU** (sets `num_gpu=0`) for CPU-only inference
+- **Optimizes memory usage** with memory mapping (`use_mmap=true`)
+- **Uses optimal batch size** for CPU inference
+- **Configures thread count** based on available CPU cores
+
 #### Verify Ollama Connection
 ```bash
 curl http://localhost:11434/api/tags
+```
+
+#### Performance Tuning for CPU
+
+1. **For VPS with 4-8 CPU cores:**
+   ```env
+   OLLAMA_NUM_THREADS=6        # Leave 1-2 cores for system (atau biarkan null untuk auto-detect)
+   OLLAMA_NUM_CTX=4096         # 4K context window
+   OLLAMA_BATCH_SIZE=512       # Smaller batch for CPU
+   OLLAMA_TIMEOUT=120          # 2 menit timeout
+   ```
+
+2. **For VPS with 8+ CPU cores:**
+   ```env
+   OLLAMA_NUM_THREADS=12       # Use more threads (atau biarkan null untuk auto-detect)
+   OLLAMA_NUM_CTX=8192         # 8K context window (if RAM allows)
+   OLLAMA_BATCH_SIZE=1024      # Larger batch
+   OLLAMA_TIMEOUT=180          # 3 menit timeout untuk request yang lebih kompleks
+   ```
+
+3. **For better performance (requires root):**
+   ```env
+   OLLAMA_USE_MLOCK=true       # Lock memory (prevents swapping)
+   OLLAMA_NUMA=true            # NUMA optimization (untuk multi-socket CPU)
+   ```
+
+4. **For VPS with limited memory (< 4GB):**
+   ```env
+   OLLAMA_NUM_CTX=2048         # Reduce context window untuk menghemat memory
+   OLLAMA_BATCH_SIZE=256       # Smaller batch size
+   OLLAMA_TIMEOUT=180          # Increase timeout karena mungkin lebih lambat
+   ```
+
+#### Monitor CPU Usage
+```bash
+# Check CPU usage during AI inference
+htop
+# or
+top
+
+# Check Ollama process
+ps aux | grep ollama
+
+# Monitor Ollama logs
+sudo journalctl -u ollama -f
+```
+
+#### AI Error Handling & Monitoring
+
+**Error Handling Improvements:**
+- ✅ **Stability AI API:** Enhanced error handling dengan retry mechanism (2x dengan delay 2s), validation untuk size/dimensions, file verification, detailed error logging untuk HTTP status codes (401, 402, 403, 429, 500+)
+- ✅ **Unsplash API:** Retry mechanism (2x dengan delay 100ms), validation untuk photo data, specific error handling untuk HTTP status codes, connection exception handling
+- ✅ **RunwayML API:** Retry mechanism (2x dengan delay 2s), validation untuk duration/ratio, response structure validation, detailed error logging
+- ✅ **Ollama API:** Enhanced error handling dengan null checks, fallback values, detailed logging dengan trace
+
+**Monitoring:**
+- All AI requests are logged with duration tracking
+- Error logs include: status codes, error bodies, traces, user IDs, prompts (truncated)
+- Performance metrics: Request duration, success/failure rates, retry counts
+- Log location: `storage/logs/laravel.log`
+
+**Check AI Service Status:**
+```bash
+# View AI-related logs
+tail -f /var/www/noteds/storage/logs/laravel.log | grep -i "ai\|ollama\|stability\|unsplash\|runway"
+
+# Check AI service availability
+curl http://localhost:11434/api/tags
+
+# Monitor queue jobs for AI requests
+php artisan queue:work --queue=default
+```
+
+**API Configuration:**
+Add to `.env` for external AI APIs (optional):
+```env
+# Stability AI (for image generation)
+STABILITY_API_KEY=your_stability_api_key
+
+# Unsplash (for image search)
+UNSPLASH_ACCESS_KEY=your_unsplash_access_key
+
+# RunwayML (for video generation)
+RUNWAY_API_KEY=your_runway_api_key
 ```
 
 ### 14. Monitoring Setup
@@ -772,10 +916,156 @@ REDIS_PORT=6379
 
 ## 🚨 Troubleshooting
 
+### 413 Request Entity Too Large (Nginx)
+Jika mengalami error "413 Request Entity Too Large" saat upload file:
+
+#### Untuk aaPanel Users (Recommended):
+
+1. **Update PHP Configuration via aaPanel:**
+   - Buka aaPanel → **App Store** → Cari **PHP-8.3** (atau versi PHP yang digunakan)
+   - Klik **Setting** → Pilih **Limit of upload**
+   - Set **upload_max_filesize** ke **1000M** (atau sesuai kebutuhan)
+   - Klik **Save**
+   - Pilih **Configuration** tab
+   - Pastikan:
+     - `post_max_size`: **2000M**
+     - `memory_limit`: **512M**
+     - `max_execution_time`: **1000** (atau lebih besar)
+   - Klik **Save**
+
+2. **Update Nginx Configuration via aaPanel:**
+   
+   **Cara 1: Via Files Manager (Recommended)**
+   - Buka aaPanel → **Files**
+   - Navigate ke `/www/server/panel/vhost/nginx/`
+   - Cari file konfigurasi domain Anda (misal: `noteds.com.conf`)
+   - Edit file tersebut
+   - Tambahkan atau update di dalam block `server { ... }`:
+   ```nginx
+   client_max_body_size 200M;  # Increase dari default 1M atau 50M (minimal 200M untuk file besar)
+   client_body_buffer_size 128k;
+   client_body_timeout 900s;   # 15 menit untuk file sangat besar (51MB+)
+   client_header_timeout 900s;
+   send_timeout 900s;
+   ```
+   - **Save** file
+   
+   **Cara 2: Via Nginx Settings**
+   - Buka aaPanel → **App Store** → **Nginx** → **Setting**
+   - Pilih **Configuration file**
+   - Edit file konfigurasi untuk domain Anda
+   - Tambahkan konfigurasi di atas
+   - **Save** dan **Reload** Nginx
+   
+   **Reload Nginx:**
+   - Buka aaPanel → **App Store** → **Nginx** → **Setting** → **Service** → **Reload**
+
+3. **Update PHP-FPM Timeout (PENTING untuk file besar 51MB+):**
+   - Buka aaPanel → **App Store** → **PHP-8.3** → **Setting**
+   - Pilih **Limit of timeout** tab
+   - Set ke **1000** (atau lebih besar, seperti 1500 untuk file sangat besar)
+   - Klik **Save**
+   - Pilih **FPM profile** tab
+   - Cari `request_terminate_timeout` dan set ke **900** atau lebih besar (dalam detik)
+   - Jika tidak ada, tambahkan: `request_terminate_timeout = 900`
+   - Klik **Save**
+   
+   **Catatan:** File 51MB membutuhkan waktu lebih lama untuk upload, terutama dengan koneksi lambat. Timeout harus cukup besar untuk menghindari error di akhir upload.
+   
+4. **Restart Services via aaPanel:**
+   - Buka aaPanel → **App Store** → **Nginx** → **Setting** → **Service** → **Reload**
+   - Buka aaPanel → **App Store** → **PHP-8.3** → **Setting** → **Service** → **Restart**
+
+5. **Clear Laravel Cache:**
+   ```bash
+   cd /www/wwwroot/noteds.com  # atau path aplikasi Anda
+   php artisan config:clear
+   php artisan cache:clear
+   ```
+
+6. **Verifikasi Konfigurasi:**
+   ```bash
+   # Check PHP settings
+   php -i | grep -E "upload_max_filesize|post_max_size|max_execution_time|memory_limit"
+   
+   # Check Nginx config
+   nginx -t
+   
+   # Check PHP-FPM timeout
+   grep request_terminate_timeout /etc/php/8.3/fpm/pool.d/www.conf
+   ```
+
+#### Untuk Manual Configuration (Jika tidak menggunakan aaPanel):
+
+1. **Update Nginx Configuration:**
+   Edit `/etc/nginx/sites-available/noteds` dan pastikan:
+   ```nginx
+   client_max_body_size 200M;  # Increase dari default 1M atau 50M (minimal 200M untuk file besar)
+   client_body_buffer_size 128k;
+   client_body_timeout 900s;   # 15 menit untuk file sangat besar (51MB+)
+   client_header_timeout 900s;
+   send_timeout 900s;
+   ```
+
+2. **Update PHP Configuration:**
+   Edit `/etc/php/8.3/fpm/php.ini`:
+   ```ini
+   upload_max_filesize = 1000M
+   post_max_size = 2000M
+   max_execution_time = 1000
+   max_input_time = 900
+   memory_limit = 512M
+   ```
+
+3. **Update PHP-FPM Configuration:**
+   Edit `/etc/php/8.3/fpm/pool.d/www.conf`:
+   ```ini
+   request_terminate_timeout = 900  # 15 menit untuk file besar
+   ```
+
+4. **Restart Services:**
+   ```bash
+   sudo systemctl reload nginx
+   sudo systemctl restart php8.3-fpm
+   ```
+
+#### Jika Menggunakan Cloudflare:
+
+Jika Anda menggunakan Cloudflare sebagai CDN/proxy, pastikan:
+
+1. **Cloudflare Timeout Settings:**
+   - Buka Cloudflare Dashboard → **Speed** → **Optimization**
+   - Pastikan **HTTP/2** dan **HTTP/3** enabled
+   - Buka **Network** → **Protocol Tunneling**
+   - Pastikan timeout cukup besar untuk file upload
+
+2. **Cloudflare Page Rules (Optional):**
+   - Buat page rule untuk route `/notes/upload-background` dengan:
+     - **Cache Level**: Bypass
+     - **Browser Cache TTL**: Respect Existing Headers
+     - **Security Level**: Medium
+
+3. **Cloudflare Worker (Advanced - Optional):**
+   - Jika menggunakan Cloudflare Workers, pastikan timeout worker cukup besar
+   - Default worker timeout adalah 30 detik (Free plan) atau 30 detik (Paid plan)
+   - Untuk file upload besar, pertimbangkan untuk bypass Cloudflare Worker
+
+**Catatan:** Error 524 (Cloudflare Timeout) terjadi ketika Cloudflare menunggu response dari origin server lebih dari 100 detik. Pastikan:
+- Origin server (Nginx/PHP) timeout cukup besar (minimal 900 detik)
+- Koneksi antara Cloudflare dan origin server stabil
+- File tidak terlalu besar (pertimbangkan chunked upload untuk file >100MB)
+
+4. **Verify Configuration:**
+   ```bash
+   sudo nginx -t  # Test nginx config
+   php -i | grep upload_max_filesize  # Check PHP settings
+   ```
+
 ### 500 Internal Server Error
 - Check `storage/logs/laravel.log`
 - Verify file permissions
 - Run `php artisan config:clear`
+- Check PHP-FPM error logs: `sudo tail -f /var/log/php8.2-fpm.log`
 
 ### Queue Not Processing
 ```bash
@@ -804,7 +1094,7 @@ sudo supervisorctl restart noteds-worker:*
   ```
 - Check Nginx config for proper root and asset serving
 - Verify file permissions (storage and public/build should be writable)
-- Clear browser cache (hard refresh: Ctrl+Shift+R or Cmd+Shift+R)
+- Clear browser cache (hard refresh: Ctrl+Shift+R or Cmd+Shift+R) 
 - Check browser console for 404 errors on JavaScript files
 - Verify `.env` has correct `APP_URL` (must match your domain)
 - **If Swal is still undefined after build:**
@@ -820,6 +1110,120 @@ sudo supervisorctl restart noteds-worker:*
 - Check `.env` `OLLAMA_URL` is correct
 - Check firewall rules if using remote Ollama server
 - View Ollama logs: `sudo journalctl -u ollama -f`
+
+### AI Service Issues
+
+#### Ollama Status & Error Handling
+
+**Status Ollama dari Log:**
+- ✅ Ollama service berjalan dengan baik
+- ✅ Model berhasil dimuat (`model r>` menunjukkan model sedang dimuat/ready)
+- ✅ Server aktif dan merespons request
+- ✅ CPU backend loaded dengan baik
+
+**Error 500 di Ollama:**
+- Error 500 adalah **normal dan transient** (sementara)
+- Dapat terjadi karena:
+  - Model sedang loading/memuat
+  - Request timeout (jika prompt terlalu panjang atau CPU lambat)
+  - Memory sementara tidak cukup (jarang)
+  - Model error sementara (jarang)
+
+**Perbaikan yang Sudah Diterapkan:**
+- ✅ **Auto-retry mechanism:** Error 500/503 akan di-retry otomatis sampai 2 kali dengan delay 2 detik
+- ✅ **Model availability check:** Sistem memeriksa apakah model tersedia sebelum membuat request
+- ✅ **Enhanced error logging:** Log detail untuk debugging (status code, error message, attempt count)
+- ✅ **Connection exception handling:** Menangani network errors dengan baik
+- ✅ **Response validation:** Memvalidasi struktur response sebelum digunakan
+
+**Cara Memeriksa Status Ollama:**
+```bash
+# Cek status service
+systemctl status ollama
+
+# Cek log Ollama
+journalctl -u ollama -f
+
+# Cek model yang tersedia
+curl http://localhost:11434/api/tags
+
+# Test API (format JSON yang benar)
+curl -X POST http://localhost:11434/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama3.2",
+    "prompt": "Hello, how are you?",
+    "stream": false
+  }'
+
+# Atau gunakan script test otomatis (jika tersedia)
+bash test-ollama.sh
+```
+
+**Script Test Otomatis:**
+File `test-ollama.sh` sudah disediakan di root project untuk test komprehensif:
+- ✅ Check service status
+- ✅ Check available models
+- ✅ Verify model availability (llama3.2)
+- ✅ Test API generate endpoint
+- ✅ Check configuration
+- ✅ Check process and memory usage
+
+**Troubleshooting Ollama Error 500:**
+1. **Model sedang loading:** Tunggu beberapa detik, retry mechanism akan menangani ini
+2. **Memory tidak cukup:** Cek memory usage dengan `free -h`, pertimbangkan mengurangi `num_ctx` di config
+3. **Request timeout:** Increase timeout di `.env` (`OLLAMA_TIMEOUT=180`)
+4. **Model tidak tersedia:** Pastikan model sudah di-download dengan `ollama pull llama3.2`
+5. **CPU overload:** Monitor CPU usage, pertimbangkan mengurangi `OLLAMA_NUM_THREADS`
+
+**Konfigurasi Optimal untuk CPU-only VPS:**
+Konfigurasi ini sudah termasuk di bagian **Environment Configuration** (step 4) di atas. Pastikan semua variabel berikut ada di file `.env`:
+
+```env
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+OLLAMA_NUM_THREADS=8      # Sesuaikan dengan jumlah CPU cores (auto-detect jika null)
+OLLAMA_NUM_CTX=4096       # Context window (4096 = 4K tokens, 8192 = 8K tokens)
+OLLAMA_BATCH_SIZE=512     # Batch size untuk CPU inference
+OLLAMA_TIMEOUT=120        # Timeout dalam detik (120 = 2 menit untuk CPU)
+OLLAMA_USE_MLOCK=false    # Lock memory (perlu root, untuk performa lebih baik)
+OLLAMA_NUMA=false         # NUMA optimization (untuk multi-socket CPU)
+```
+
+**Catatan Penting:**
+- `OLLAMA_NUM_THREADS`: Jika di-set `null` atau tidak di-set, sistem akan auto-detect jumlah CPU cores
+- `OLLAMA_NUM_CTX`: Jika memory VPS terbatas (< 4GB), kurangi ke `2048` atau `1024`
+- `OLLAMA_TIMEOUT`: Increase ke `180` atau `240` jika request sering timeout
+- `OLLAMA_USE_MLOCK`: Set ke `true` hanya jika memiliki akses root dan ingin performa lebih baik
+- `OLLAMA_NUMA`: Set ke `true` hanya untuk server dengan multi-socket CPU
+
+**Setelah update `.env`, jalankan:**
+```bash
+php artisan config:clear
+php artisan cache:clear
+```
+
+#### AI Service Issues
+
+#### AI Request Fails
+- Check Ollama service: `sudo systemctl status ollama`
+- Check AI service availability: `curl http://localhost:11434/api/tags`
+- View AI error logs: `tail -f storage/logs/laravel.log | grep -i "ai\|ollama"`
+- Verify queue worker is running: `sudo supervisorctl status noteds-worker:*`
+- Check API keys for external services (Stability AI, Unsplash, RunwayML) in `.env`
+
+#### AI Request Timeout
+- Increase timeout in `.env`: `OLLAMA_TIMEOUT=120` (default: 120 seconds)
+- Check server resources (CPU, RAM) during AI inference
+- Consider using smaller models for CPU-only inference
+- Monitor queue jobs: `php artisan queue:work --queue=default`
+
+#### External AI API Errors
+- **Stability AI:** Check API key, verify credits, check rate limits
+- **Unsplash:** Check API key, verify rate limits, check connection
+- **RunwayML:** Check API key, verify credits, check API endpoint
+- All errors are logged with detailed information in `storage/logs/laravel.log`
+- Check error logs for specific HTTP status codes (401, 403, 429, 500+)
 
 ### Midtrans Payment Issues / Top-up Tidak Bisa
 
@@ -1170,6 +1574,20 @@ Featured Notes advertising system features:
 - ✅ Better error logging dan response handling
 - ✅ Max amount validation (100M) untuk topup
 - ✅ Midtrans configuration check sebelum process
+
+**AI Features Improvements (2025-01-11):**
+- ✅ Enhanced error handling untuk semua AI APIs (Ollama, Stability AI, Unsplash, RunwayML)
+- ✅ Request queuing untuk high traffic (`ProcessAiRequest` job) - dapat diproses secara asinkron
+- ✅ Performance tracking & monitoring untuk AI requests (duration logging, error tracking)
+- ✅ Null checks dan validation improvements di semua AI controllers
+- ✅ Retry mechanism untuk external APIs (Stability AI: 2x dengan delay 2s, Unsplash: 2x dengan delay 100ms, RunwayML: 2x dengan delay 2s)
+- ✅ **Ollama retry mechanism:** Auto-retry untuk error 500/503 dengan 2 retries dan 2s delay (menangani transient errors seperti model loading, timeout)
+- ✅ **Ollama model availability check:** Enhanced `isAvailable()` method yang memeriksa apakah model tersedia sebelum request
+- ✅ Detailed error logging dengan status codes, error bodies, traces, user IDs
+- ✅ Fallback values untuk AI responses yang gagal (default messages, empty arrays)
+- ✅ Connection exception handling untuk network issues
+- ✅ File validation untuk Stability AI image generation
+- ✅ Response structure validation untuk RunwayML video generation
 
 ### Sale Mode System (2025-11-10):
 - ✅ Complete Sale Mode System implementation

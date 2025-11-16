@@ -175,16 +175,62 @@ class AiService
 
     /**
      * Check if Ollama is available and accessible.
+     * Also checks if the configured model is available.
      *
-     * @return bool True if Ollama is available
+     * @return bool True if Ollama is available and model exists
      */
     public function isAvailable(): bool
     {
         try {
+            // Check if Ollama service is running
             $response = Http::timeout(5)->get("{$this->baseUrl}/api/tags");
 
-            return $response->successful();
+            if (!$response->successful()) {
+                Log::warning('Ollama service is not responding', [
+                    'status' => $response->status(),
+                    'base_url' => $this->baseUrl,
+                ]);
+                return false;
+            }
+
+            // Check if the configured model is available
+            $tags = $response->json();
+            if (!isset($tags['models']) || !is_array($tags['models'])) {
+                Log::warning('Ollama API returned invalid response structure', [
+                    'response' => $tags,
+                ]);
+                return false;
+            }
+
+            // Check if our model is in the list
+            $modelExists = false;
+            foreach ($tags['models'] as $model) {
+                if (isset($model['name']) && $model['name'] === $this->model) {
+                    $modelExists = true;
+                    break;
+                }
+            }
+
+            if (!$modelExists) {
+                Log::warning('Ollama model not found', [
+                    'model' => $this->model,
+                    'available_models' => array_column($tags['models'], 'name'),
+                ]);
+                return false;
+            }
+
+            return true;
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::warning('Ollama connection failed', [
+                'error' => $e->getMessage(),
+                'base_url' => $this->baseUrl,
+            ]);
+            return false;
         } catch (Exception $e) {
+            Log::error('Ollama availability check failed', [
+                'error' => $e->getMessage(),
+                'base_url' => $this->baseUrl,
+            ]);
             return false;
         }
     }
@@ -261,6 +307,55 @@ class AiService
     }
 
     /**
+     * Generate embedding vector for content.
+     * Uses AI to generate semantic embeddings for semantic search.
+     *
+     * @param string $content The content to embed
+     * @return array|null Array of embedding values or null on failure
+     */
+    public function generateEmbedding(string $content): ?array
+    {
+        try {
+            // For now, use a simple approach with AI
+            // In production, use dedicated embedding API (OpenAI, Cohere, etc.)
+            $content = $this->truncateContent($content, 2000);
+            
+            $prompt = "Convert the following text into a semantic representation. Extract key concepts and themes:\n\n{$content}\n\nKey concepts (comma-separated):";
+            
+            $response = $this->callOllama($prompt, [
+                'temperature' => 0.3,
+                'num_predict' => 300,
+            ]);
+
+            if ($response && isset($response['response'])) {
+                // Extract keywords and create a simple embedding-like representation
+                $keywords = $this->extractTags($response['response']);
+                
+                // Create a simple vector representation (in production, use proper embedding model)
+                // This is a placeholder - actual embeddings should be 768+ dimensions
+                $embedding = array_fill(0, 768, 0.0);
+                
+                // Simple hash-based embedding (placeholder)
+                foreach ($keywords as $index => $keyword) {
+                    $hash = crc32($keyword);
+                    $position = abs($hash) % 768;
+                    $embedding[$position] = 0.1 + (abs($hash) % 10) / 100;
+                }
+                
+                return $embedding;
+            }
+
+            return null;
+        } catch (Exception $e) {
+            Log::error('Embedding generation failed', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
      * Find relevant notes based on semantic understanding of query.
      * This is a basic implementation - full semantic search will require embeddings.
      *
@@ -326,8 +421,157 @@ class AiService
     }
 
     /**
-     * Enhanced callOllama with custom options.
+     * Get optimal CPU thread count for Ollama
+     * Uses all available CPU cores for maximum performance
+     * 
+     * @return int Number of CPU threads to use
+     */
+    protected function getOptimalThreadCount(): int
+    {
+        // First, check if manually configured in config
+        $configThreads = config('services.ollama.num_threads');
+        if ($configThreads !== null && is_numeric($configThreads) && $configThreads > 0) {
+            return (int)$configThreads;
+        }
+        
+        // Auto-detect CPU cores
+        $cpuCount = null;
+        
+        // Method 1: Use nproc command (Linux - most reliable)
+        if (PHP_OS_FAMILY !== 'Windows') {
+            $output = @shell_exec('nproc 2>/dev/null');
+            if ($output !== null && is_numeric(trim($output))) {
+                $cpuCount = (int)trim($output);
+            }
+        }
+        
+        // Method 2: Use getconf (Linux)
+        if ($cpuCount === null && PHP_OS_FAMILY !== 'Windows') {
+            $output = @shell_exec('getconf _NPROCESSORS_ONLN 2>/dev/null');
+            if ($output !== null && is_numeric(trim($output))) {
+                $cpuCount = (int)trim($output);
+            }
+        }
+        
+        // Method 3: Check /proc/cpuinfo on Linux
+        if ($cpuCount === null && is_readable('/proc/cpuinfo')) {
+            $cpuinfo = file_get_contents('/proc/cpuinfo');
+            preg_match_all('/^processor/m', $cpuinfo, $matches);
+            if (count($matches[0]) > 0) {
+                $cpuCount = count($matches[0]);
+            }
+        }
+        
+        // Method 4: Use sysctl on macOS/BSD
+        if ($cpuCount === null && PHP_OS_FAMILY !== 'Windows') {
+            $output = @shell_exec('sysctl -n hw.ncpu 2>/dev/null');
+            if ($output !== null && is_numeric(trim($output))) {
+                $cpuCount = (int)trim($output);
+            }
+        }
+        
+        // Method 5: Use environment variable (Windows)
+        if ($cpuCount === null && isset($_ENV['NUMBER_OF_PROCESSORS'])) {
+            $cpuCount = (int)$_ENV['NUMBER_OF_PROCESSORS'];
+        }
+        
+        // Fallback: Use 4 cores as minimum
+        $cpuCount = $cpuCount ?: 4;
+        
+        // Ensure at least 2 threads and max 64 threads (modern CPUs can handle more)
+        // Leave 1-2 cores for system processes
+        $optimalThreads = max(2, min($cpuCount - 1, 64));
+        
+        // Log detected CPU count (only in debug mode)
+        if (config('app.debug')) {
+            Log::debug('CPU detection for Ollama', [
+                'detected_cores' => $cpuCount,
+                'optimal_threads' => $optimalThreads,
+                'os' => PHP_OS_FAMILY,
+            ]);
+        }
+        
+        return $optimalThreads;
+    }
+
+    /**
+     * Get CPU-optimized options for Ollama
+     * Optimizes for CPU-only inference (no GPU)
+     * 
+     * @param array $userOptions User-provided options
+     * @return array Optimized options for CPU
+     */
+    protected function getCpuOptimizedOptions(array $userOptions = []): array
+    {
+        // Get optimal thread count (use all CPU cores)
+        $numThreads = $this->getOptimalThreadCount();
+        
+        // Base CPU-optimized options
+        $cpuOptions = [
+            // CPU Threading - use all available CPU cores
+            'num_thread' => $numThreads,
+            
+            // Context window - optimize for CPU memory
+            // Larger context = more memory, but better results
+            // Adjust based on available RAM
+            'num_ctx' => config('services.ollama.num_ctx', 4096),
+            
+            // GPU settings - disable GPU, use CPU only
+            'num_gpu' => 0, // 0 = CPU only
+            'num_gqa' => 1, // Grouped-query attention (1 for CPU)
+            
+            // Memory optimizations for CPU
+            'use_mmap' => true, // Memory mapping for efficient file access
+            'use_mlock' => config('services.ollama.use_mlock', false), // Lock memory (may require root)
+            
+            // NUMA optimization (if available)
+            'numa' => config('services.ollama.numa', false),
+            
+            // Batch size - smaller batches for CPU
+            'batch_size' => config('services.ollama.batch_size', 512),
+            
+            // CPU-specific performance settings
+            'repeat_penalty' => 1.1, // Penalty for repetition
+            'repeat_last_n' => 64, // Context window for repetition penalty
+            
+            // Temperature and prediction defaults
+            'temperature' => 0.7,
+            'num_predict' => 500,
+            
+            // Top-p (nucleus sampling) for better CPU performance
+            'top_p' => 0.9,
+            'top_k' => 40,
+            
+            // Thread priority (lower = higher priority, but may require root)
+            'thread_priority' => config('services.ollama.thread_priority', null),
+        ];
+        
+        // Merge with user options (user options take precedence)
+        // User can override any CPU optimization setting
+        $mergedOptions = array_merge($cpuOptions, $userOptions);
+        
+        // Ensure num_thread is set (unless user explicitly overrides)
+        // Ollama uses 'num_thread' (singular) not 'num_threads'
+        if (!isset($userOptions['num_thread']) && !isset($userOptions['num_threads'])) {
+            $mergedOptions['num_thread'] = $numThreads;
+        } elseif (isset($userOptions['num_threads'])) {
+            // Support both 'num_thread' and 'num_threads' for compatibility
+            $mergedOptions['num_thread'] = $userOptions['num_threads'];
+            unset($mergedOptions['num_threads']);
+        }
+        
+        // Remove null values to avoid sending them to Ollama
+        $mergedOptions = array_filter($mergedOptions, function($value) {
+            return $value !== null;
+        });
+        
+        return $mergedOptions;
+    }
+
+    /**
+     * Enhanced callOllama with CPU optimization.
      * Made public for use in other services like AiInsightService.
+     * Optimized for CPU-only inference (no GPU required).
      *
      * @param string $prompt The prompt to send
      * @param array $options Optional parameters (temperature, num_predict, etc.)
@@ -336,33 +580,147 @@ class AiService
     public function callOllama(string $prompt, array $options = []): ?array
     {
         try {
-            $defaultOptions = [
-                'temperature' => 0.7,
-                'num_predict' => 500,
-            ];
-
-            $mergedOptions = array_merge($defaultOptions, $options);
-
-            $response = Http::timeout(60)->post("{$this->baseUrl}/api/generate", [
+            // Get CPU-optimized options (merges user options with CPU optimizations)
+            $optimizedOptions = $this->getCpuOptimizedOptions($options);
+            
+            // Prepare request payload
+            $payload = [
                 'model' => $this->model,
                 'prompt' => $prompt,
                 'stream' => false,
-                'options' => $mergedOptions,
-            ]);
+                'options' => $optimizedOptions,
+            ];
+            
+            // Log CPU optimization settings (only in debug mode)
+            if (config('app.debug')) {
+                Log::debug('Ollama CPU-optimized request', [
+                    'model' => $this->model,
+                    'num_thread' => $optimizedOptions['num_thread'] ?? 'default',
+                    'num_ctx' => $optimizedOptions['num_ctx'] ?? 'default',
+                    'num_gpu' => $optimizedOptions['num_gpu'] ?? 0,
+                    'prompt_length' => strlen($prompt),
+                ]);
+            }
+            
+            // Increase timeout for CPU inference (may be slower than GPU)
+            $timeout = config('services.ollama.timeout', 120); // 2 minutes default for CPU
+            
+            // Retry mechanism for transient errors (500, 503, timeout)
+            $maxRetries = 2;
+            $retryDelay = 2000; // 2 seconds
+            
+            $lastException = null;
+            $lastResponse = null;
+            
+            for ($attempt = 0; $attempt <= $maxRetries; $attempt++) {
+                try {
+                    if ($attempt > 0) {
+                        // Wait before retry
+                        usleep($retryDelay * 1000);
+                        Log::info('Retrying Ollama API request', [
+                            'attempt' => $attempt + 1,
+                            'max_retries' => $maxRetries + 1,
+                            'model' => $this->model,
+                        ]);
+                    }
+                    
+                    $response = Http::timeout($timeout)
+                        ->post("{$this->baseUrl}/api/generate", $payload);
 
-            if ($response->successful()) {
-                return $response->json();
+                    if ($response->successful()) {
+                        $result = $response->json();
+                        
+                        // Validate response structure
+                        if (!isset($result['response'])) {
+                            Log::warning('Ollama API returned invalid response structure', [
+                                'response_keys' => array_keys($result),
+                                'model' => $this->model,
+                            ]);
+                            return null;
+                        }
+                        
+                        // Log performance metrics if available
+                        if (isset($result['eval_count']) && config('app.debug')) {
+                            $evalTime = $result['eval_count'] > 0 
+                                ? ($result['total_duration'] ?? 0) / $result['eval_count'] * 1000 
+                                : 0;
+                            Log::debug('Ollama inference performance', [
+                                'eval_count' => $result['eval_count'],
+                                'total_duration' => $result['total_duration'] ?? 0,
+                                'avg_time_per_token_ms' => round($evalTime, 2),
+                                'attempt' => $attempt + 1,
+                            ]);
+                        }
+                        
+                        return $result;
+                    }
+                    
+                    $lastResponse = $response;
+                    $statusCode = $response->status();
+                    
+                    // Don't retry for client errors (4xx) - these are permanent
+                    if ($statusCode >= 400 && $statusCode < 500) {
+                        break;
+                    }
+                    
+                    // Retry for server errors (5xx) and network errors
+                    if ($statusCode >= 500 || $statusCode === 0) {
+                        if ($attempt < $maxRetries) {
+                            continue; // Retry
+                        }
+                    } else {
+                        break; // Don't retry for other status codes
+                    }
+                } catch (\Illuminate\Http\Client\ConnectionException $e) {
+                    $lastException = $e;
+                    if ($attempt < $maxRetries) {
+                        continue; // Retry on connection errors
+                    }
+                } catch (\Illuminate\Http\Client\RequestException $e) {
+                    $lastException = $e;
+                    if ($attempt < $maxRetries) {
+                        continue; // Retry on request errors
+                    }
+                } catch (Exception $e) {
+                    $lastException = $e;
+                    // Don't retry for other exceptions
+                    break;
+                }
             }
 
-            Log::warning('Ollama API request failed', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
+            // Log final error after all retries
+            $errorDetails = [
+                'status' => $lastResponse ? $lastResponse->status() : 'unknown',
+                'model' => $this->model,
+                'attempts' => $attempt + 1,
+            ];
+            
+            if ($lastResponse) {
+                $errorBody = $lastResponse->body();
+                // Try to parse error message from response
+                try {
+                    $errorJson = $lastResponse->json();
+                    if (isset($errorJson['error'])) {
+                        $errorDetails['error_message'] = $errorJson['error'];
+                    }
+                } catch (Exception $e) {
+                    // If not JSON, include raw body (truncated)
+                    $errorDetails['error_body'] = substr($errorBody, 0, 500);
+                }
+            }
+            
+            if ($lastException) {
+                $errorDetails['exception'] = $lastException->getMessage();
+            }
+            
+            Log::warning('Ollama API request failed after retries', $errorDetails);
 
             return null;
         } catch (Exception $e) {
             Log::error('Ollama API request exception', [
                 'error' => $e->getMessage(),
+                'model' => $this->model,
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return null;
@@ -596,6 +954,7 @@ class AiService
     {
         try {
             $response = Http::timeout(10)
+                ->retry(2, 100) // Retry 2 times with 100ms delay
                 ->withHeaders([
                     'Authorization' => "Client-ID {$apiKey}",
                 ])
@@ -611,6 +970,11 @@ class AiService
 
                 if (isset($data['results']) && is_array($data['results'])) {
                     foreach ($data['results'] as $photo) {
+                        // Validate required fields before adding
+                        if (!isset($photo['urls']) || !isset($photo['urls']['regular']) && !isset($photo['urls']['small'])) {
+                            continue; // Skip invalid photo data
+                        }
+                        
                         $images[] = [
                             'id' => $photo['id'] ?? null,
                             'url' => $photo['urls']['regular'] ?? $photo['urls']['small'] ?? null,
@@ -627,10 +991,38 @@ class AiService
                 return $images;
             }
 
+            // Handle specific HTTP error codes
+            $statusCode = $response->status();
+            $errorMessage = 'Unsplash API request failed';
+            
+            if ($statusCode === 401) {
+                $errorMessage = 'Unsplash API key is invalid or expired';
+            } elseif ($statusCode === 403) {
+                $errorMessage = 'Unsplash API access forbidden. Check API key permissions';
+            } elseif ($statusCode === 429) {
+                $errorMessage = 'Unsplash API rate limit exceeded. Please try again later';
+            } elseif ($statusCode >= 500) {
+                $errorMessage = 'Unsplash API server error. Please try again later';
+            }
+            
+            Log::warning('Unsplash API request failed', [
+                'status_code' => $statusCode,
+                'error' => $response->body(),
+                'query' => $query,
+            ]);
+
+            return [];
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('Unsplash API connection failed', [
+                'error' => $e->getMessage(),
+                'query' => $query,
+            ]);
             return [];
         } catch (Exception $e) {
             Log::error('Unsplash API request failed', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'query' => $query,
             ]);
 
             return [];
@@ -794,7 +1186,30 @@ class AiService
             $size = $options['size'] ?? '1024x1024';
             $style = $options['style'] ?? 'vivid';
             
-            $response = Http::timeout(60)
+            // Validate size format
+            if (!preg_match('/^\d+x\d+$/', $size)) {
+                Log::error('Invalid size format for Stability AI', [
+                    'size' => $size,
+                    'prompt' => substr($prompt, 0, 100),
+                ]);
+                return null;
+            }
+            
+            [$width, $height] = explode('x', $size);
+            $width = (int)$width;
+            $height = (int)$height;
+            
+            // Validate dimensions (Stability AI limits)
+            if ($width < 64 || $width > 2048 || $height < 64 || $height > 2048) {
+                Log::error('Invalid dimensions for Stability AI', [
+                    'width' => $width,
+                    'height' => $height,
+                ]);
+                return null;
+            }
+            
+            $response = Http::timeout(120) // Increased timeout for image generation
+                ->retry(2, 2000) // Retry 2 times with 2s delay
                 ->withHeaders([
                     'Authorization' => "Bearer {$apiKey}",
                     'Accept' => 'application/json',
@@ -804,15 +1219,23 @@ class AiService
                         ['text' => $prompt]
                     ],
                     'cfg_scale' => $options['cfg_scale'] ?? 7,
-                    'height' => (int)explode('x', $size)[1],
-                    'width' => (int)explode('x', $size)[0],
+                    'height' => $height,
+                    'width' => $width,
                     'samples' => 1,
-                    'steps' => $options['steps'] ?? 30,
+                    'steps' => min($options['steps'] ?? 30, 50), // Max 50 steps
                     'style_preset' => $style,
                 ]);
 
             if ($response->successful()) {
                 $imageData = $response->body();
+                
+                // Validate image data
+                if (empty($imageData) || strlen($imageData) < 100) {
+                    Log::error('Stability AI returned invalid image data', [
+                        'data_length' => strlen($imageData),
+                    ]);
+                    return null;
+                }
                 
                 // Save to public storage
                 $tempDir = storage_path('app/public/temp');
@@ -820,19 +1243,80 @@ class AiService
                 
                 $filename = uniqid('img_') . '.png';
                 $tempPath = $tempDir . '/' . $filename;
-                file_put_contents($tempPath, $imageData);
+                
+                // Write file with error handling
+                if (file_put_contents($tempPath, $imageData) === false) {
+                    Log::error('Failed to save Stability AI image to disk', [
+                        'path' => $tempPath,
+                    ]);
+                    return null;
+                }
+                
+                // Verify file was written
+                if (!file_exists($tempPath) || filesize($tempPath) === 0) {
+                    Log::error('Stability AI image file verification failed', [
+                        'path' => $tempPath,
+                    ]);
+                    return null;
+                }
                 
                 return [
                     'url' => asset('storage/temp/' . $filename),
                     'path' => $tempPath,
                     'base64' => base64_encode($imageData),
+                    'size' => filesize($tempPath),
                 ];
             }
 
+            // Handle specific HTTP error codes
+            $statusCode = $response->status();
+            $errorBody = $response->json() ?? $response->body();
+            
+            if ($statusCode === 401) {
+                Log::error('Stability AI API key is invalid or expired', [
+                    'status_code' => $statusCode,
+                    'error' => $errorBody,
+                ]);
+            } elseif ($statusCode === 402) {
+                Log::error('Stability AI insufficient credits', [
+                    'status_code' => $statusCode,
+                    'error' => $errorBody,
+                ]);
+            } elseif ($statusCode === 403) {
+                Log::error('Stability AI access forbidden. Check API key permissions', [
+                    'status_code' => $statusCode,
+                    'error' => $errorBody,
+                ]);
+            } elseif ($statusCode === 429) {
+                Log::warning('Stability AI rate limit exceeded', [
+                    'status_code' => $statusCode,
+                    'error' => $errorBody,
+                ]);
+            } elseif ($statusCode >= 500) {
+                Log::error('Stability AI server error', [
+                    'status_code' => $statusCode,
+                    'error' => $errorBody,
+                ]);
+            } else {
+                Log::error('Stability AI request failed', [
+                    'status_code' => $statusCode,
+                    'error' => $errorBody,
+                    'prompt' => substr($prompt, 0, 100),
+                ]);
+            }
+
+            return null;
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('Stability AI connection failed', [
+                'error' => $e->getMessage(),
+                'prompt' => substr($prompt, 0, 100),
+            ]);
             return null;
         } catch (Exception $e) {
             Log::error('Stability AI image generation failed', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'prompt' => substr($prompt, 0, 100),
             ]);
 
             return null;
@@ -937,7 +1421,19 @@ class AiService
         try {
             // This is a placeholder - actual RunwayML API integration
             // RunwayML typically returns a job ID that you poll for completion
-            $response = Http::timeout(30)
+            // NOTE: RunwayML API endpoint and structure may vary - adjust as needed
+            
+            $duration = min(max((int)($options['duration'] ?? 5), 1), 10); // Min 1, Max 10 seconds
+            $ratio = $options['ratio'] ?? '16:9';
+            
+            // Validate ratio
+            $validRatios = ['16:9', '9:16', '1:1', '4:3', '3:4'];
+            if (!in_array($ratio, $validRatios)) {
+                $ratio = '16:9'; // Default
+            }
+            
+            $response = Http::timeout(60) // Increased timeout for video generation
+                ->retry(2, 2000) // Retry 2 times with 2s delay
                 ->withHeaders([
                     'Authorization' => "Bearer {$apiKey}",
                     'Content-Type' => 'application/json',
@@ -945,23 +1441,78 @@ class AiService
                 ->post('https://api.runwayml.com/v1/image-to-video', [
                     'image_url' => $options['image_url'] ?? null,
                     'prompt' => $prompt,
-                    'duration' => $options['duration'] ?? 5,
-                    'ratio' => $options['ratio'] ?? '16:9',
+                    'duration' => $duration,
+                    'ratio' => $ratio,
                 ]);
 
             if ($response->successful()) {
                 $data = $response->json();
+                
+                // Validate response structure
+                if (!isset($data['id']) && !isset($data['job_id'])) {
+                    Log::error('RunwayML API returned invalid response structure', [
+                        'response' => $data,
+                    ]);
+                    return null;
+                }
+                
                 return [
-                    'job_id' => $data['id'] ?? null,
-                    'status' => 'processing',
-                    'estimated_time' => $data['estimated_time'] ?? 60,
+                    'job_id' => $data['id'] ?? $data['job_id'] ?? null,
+                    'status' => $data['status'] ?? 'processing',
+                    'estimated_time' => $data['estimated_time'] ?? $data['estimated_duration'] ?? 60,
+                    'poll_url' => $data['poll_url'] ?? null,
                 ];
             }
 
+            // Handle specific HTTP error codes
+            $statusCode = $response->status();
+            $errorBody = $response->json() ?? $response->body();
+            
+            if ($statusCode === 401) {
+                Log::error('RunwayML API key is invalid or expired', [
+                    'status_code' => $statusCode,
+                    'error' => $errorBody,
+                ]);
+            } elseif ($statusCode === 402) {
+                Log::error('RunwayML insufficient credits', [
+                    'status_code' => $statusCode,
+                    'error' => $errorBody,
+                ]);
+            } elseif ($statusCode === 403) {
+                Log::error('RunwayML access forbidden. Check API key permissions', [
+                    'status_code' => $statusCode,
+                    'error' => $errorBody,
+                ]);
+            } elseif ($statusCode === 429) {
+                Log::warning('RunwayML rate limit exceeded', [
+                    'status_code' => $statusCode,
+                    'error' => $errorBody,
+                ]);
+            } elseif ($statusCode >= 500) {
+                Log::error('RunwayML server error', [
+                    'status_code' => $statusCode,
+                    'error' => $errorBody,
+                ]);
+            } else {
+                Log::error('RunwayML video generation failed', [
+                    'status_code' => $statusCode,
+                    'error' => $errorBody,
+                    'prompt' => substr($prompt, 0, 100),
+                ]);
+            }
+
+            return null;
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('RunwayML connection failed', [
+                'error' => $e->getMessage(),
+                'prompt' => substr($prompt, 0, 100),
+            ]);
             return null;
         } catch (Exception $e) {
             Log::error('RunwayML video generation failed', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'prompt' => substr($prompt, 0, 100),
             ]);
 
             return null;

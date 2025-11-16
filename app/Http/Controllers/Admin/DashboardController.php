@@ -12,24 +12,41 @@ use App\Models\Wallet;
 use App\Models\Withdraw;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use App\Jobs\CalculateStatisticsJob;
 
 class DashboardController extends Controller
 {
     public function index(): View
     {
-        $stats = [
-            'total_users' => User::count(),
-            'total_notes' => Note::count(),
-            'public_notes' => Note::where('is_public', true)->count(),
-            'total_transactions' => Transaction::count(),
-            'total_revenue' => Transaction::where('status', 'success')->sum('commission'),
-            'pending_withdraws' => Withdraw::where('status', 'pending')->count(),
-            'total_withdraws' => Withdraw::count(),
-            'pending_subscriptions' => Subscription::where('status', 'pending')->count(),
-            'active_subscriptions' => Subscription::where('status', 'active')->count(),
-        ];
+        // Try to get cached stats first, otherwise calculate
+        $cacheKey = 'dashboard_stats';
+        $cachedStats = Cache::get($cacheKey);
+        
+        // Dispatch job to refresh stats in background if cache is old or missing
+        if (!$cachedStats || Cache::get("{$cacheKey}_last_updated", 0) < now()->subMinutes(5)->timestamp) {
+            CalculateStatisticsJob::dispatch('dashboard')
+                ->onQueue('statistics');
+        }
+        
+        // Use cached stats if available, otherwise calculate synchronously
+        if ($cachedStats) {
+            $stats = $cachedStats;
+        } else {
+            $stats = [
+                'total_users' => User::count(),
+                'total_notes' => Note::count(),
+                'public_notes' => Note::where('is_public', true)->count(),
+                'total_transactions' => Transaction::count(),
+                'total_revenue' => Transaction::where('status', 'success')->sum('commission'),
+                'pending_withdraws' => Withdraw::where('status', 'pending')->count(),
+                'total_withdraws' => Withdraw::count(),
+                'pending_subscriptions' => Subscription::where('status', 'pending')->count(),
+                'active_subscriptions' => Subscription::where('status', 'active')->count(),
+            ];
+        }
 
         // Get platform wallet balance (admin wallet)
         $admin = User::where('role', 'admin')->first();

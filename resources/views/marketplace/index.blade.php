@@ -405,16 +405,6 @@
                                         @endif
                                     </div>
                                 </a>
-                                @if($note->user->role === 'seller' && $note->user->notes()->where('is_public', true)->where('status', 'active')->count() > 0)
-                                    <a href="{{ route('public.profile.ai-chat', $note->user->username) }}"
-                                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded hover:from-purple-700 hover:to-blue-700 transition-all duration-200"
-                                        title="{{ __('messages.ask_ai_about_notes', ['name' => $note->user->name]) }}">
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                                        </svg>
-                                        AI
-                                    </a>
-                                @endif
                                 <span class="text-xs text-gray-500">{{ $note->created_at->diffForHumans() }}</span>
                             </div>
                         </div>

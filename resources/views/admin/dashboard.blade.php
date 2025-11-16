@@ -139,6 +139,26 @@
                         </svg>
                         <span class="text-sm font-medium text-sky-900">{{ __('messages.cms_pages') }}</span>
                     </a>
+                    <a href="{{ route('admin.workspaces.index') }}"
+                        class="flex items-center p-4 bg-cyan-50 rounded-lg hover:bg-cyan-100 transition-colors">
+                        <svg class="w-5 h-5 mr-2 text-cyan-600" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <span class="text-sm font-medium text-cyan-900">Workspaces</span>
+                    </a>
+                    <a href="{{ route('admin.view-history.index') }}"
+                        class="flex items-center p-4 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors">
+                        <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span class="text-sm font-medium text-emerald-900">View History</span>
+                    </a>
                     <a href="{{ route('admin.landing-page.index') }}"
                         class="flex items-center p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors">
                         <svg class="w-5 h-5 mr-2 text-pink-600" fill="none" stroke="currentColor"
@@ -311,7 +331,8 @@
                                             {{ $refData['signup_count'] }} ({{ currency($refData['signup_total']) }})</td>
                                         <td class="px-4 py-2 text-sm text-center text-green-600">
                                             {{ $refData['transaction_count'] }}
-                                            ({{ currency($refData['transaction_total']) }})</td>
+                                            ({{ currency($refData['transaction_total']) }})
+                                        </td>
                                         <td class="px-4 py-2 text-sm font-bold text-right text-purple-600">
                                             {{ currency($refData['total_commission']) }}</td>
                                     </tr>

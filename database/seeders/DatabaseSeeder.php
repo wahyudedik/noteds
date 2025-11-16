@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             FolderSeeder::class,
             NoteSeeder::class,
             StudyMaterialSeeder::class,
-            AiAnalysisSeeder::class,
+            // AiAnalysisSeeder::class, // AI features are now workspace-based
             DocumentationSeeder::class,
             LandingPageSectionSeeder::class,
             CmsPageSeeder::class,
@@ -38,6 +38,7 @@ class DatabaseSeeder extends Seeder
             SocialMediaLinkSeeder::class,
             FeaturedNoteSeeder::class,
             TransactionSeeder::class,
+            MonetizationApprovalSeeder::class, // Auto-approve monetization after transactions are seeded
             PurchasedNoteSeeder::class,
             NoteEngagementSeeder::class,
             NoteReviewSeeder::class,
@@ -48,6 +49,19 @@ class DatabaseSeeder extends Seeder
             SocialFeatureSeeder::class,
             WithdrawSeeder::class,
             StudioSeeder::class,
+            // New feature seeders
+            CategorySeeder::class,
+            NoteTemplateSeeder::class,
+            NoteSeriesSeeder::class,
+            NoteCommentSeeder::class,
+            NoteReactionSeeder::class,
+            NoteQuestionSeeder::class,
+            NoteBundleSeeder::class,
+            RefundSeeder::class,
+            GiftNoteSeeder::class,
+            ActivitySeeder::class,
+            MessageSeeder::class,
+            WebhookSeeder::class,
         ]);
     }
 }

@@ -94,24 +94,66 @@
     </div>
 
     <div class="flex max-w-full">
-        <!-- Sidebar - Folder Tree -->
+        <!-- Sidebar - Folder Tree & AI Features -->
         <div class="w-64 bg-white border-r border-gray-200 min-h-screen">
-            <div class="p-4">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase mb-3">{{ __('messages.folders') }}</h3>
-                <div class="space-y-1">
-                    <!-- Root/Workspace Level -->
-                    <a href="{{ route('workspaces.show', $workspace) }}" 
-                       class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors {{ request()->routeIs('workspaces.show') && !request()->has('folder') ? 'bg-blue-50 text-blue-700' : 'text-gray-700' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                        <span class="text-sm font-medium">{{ __('messages.workspace_root') }}</span>
-                    </a>
-                    
-                    @foreach($workspace->folders as $folder)
-                        @include('workspaces.partials.folder-tree-item', ['folder' => $folder, 'workspace' => $workspace, 'level' => 0])
-                    @endforeach
+            <div class="p-4 space-y-6">
+                <!-- Folders Section -->
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase mb-3">{{ __('messages.folders') }}</h3>
+                    <div class="space-y-1">
+                        <!-- Root/Workspace Level -->
+                        <a href="{{ route('workspaces.show', $workspace) }}" 
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors {{ request()->routeIs('workspaces.show') && !request()->has('folder') ? 'bg-blue-50 text-blue-700' : 'text-gray-700' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            <span class="text-sm font-medium">{{ __('messages.workspace_root') }}</span>
+                        </a>
+                        
+                        @foreach($workspace->folders as $folder)
+                            @include('workspaces.partials.folder-tree-item', ['folder' => $folder, 'workspace' => $workspace, 'level' => 0])
+                        @endforeach
+                    </div>
                 </div>
+
+                <!-- AI Features Section -->
+                @php
+                    $user = auth()->user();
+                    $canAccessAI = $user && ($user->hasRole('admin') || $user->hasPremium());
+                @endphp
+                @if($canAccessAI)
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase mb-3">AI Features</h3>
+                    <div class="space-y-1">
+                        <!-- AI Chat -->
+                        <a href="{{ route('workspaces.ai.chat', $workspace) }}" 
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors {{ request()->routeIs('workspaces.ai.chat') ? 'bg-purple-50 text-purple-700' : 'text-gray-700' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                            <span class="text-sm font-medium">AI Chat</span>
+                        </a>
+
+                        <!-- AI Memory Platform -->
+                        <a href="{{ route('workspaces.ai-memory.index', $workspace) }}" 
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors {{ request()->routeIs('workspaces.ai-memory.*') ? 'bg-purple-50 text-purple-700' : 'text-gray-700' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            <span class="text-sm font-medium">AI Memory</span>
+                        </a>
+
+                        <!-- MyNoteds -->
+                        <a href="{{ route('workspaces.mynoteds.index', $workspace) }}" 
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors {{ request()->routeIs('workspaces.mynoteds.*') ? 'bg-purple-50 text-purple-700' : 'text-gray-700' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span class="text-sm font-medium">MyNoteds</span>
+                        </a>
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
 
@@ -229,7 +271,7 @@
 
 <!-- Sell Workspace Modal -->
 <div id="sell-workspace-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white my-10">
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">{{ __('messages.sell_workspace') }}</h3>
@@ -240,15 +282,70 @@
                     </svg>
                 </button>
             </div>
-            <form action="{{ route('workspaces.sell', $workspace) }}" method="POST">
+            <form action="{{ route('workspaces.sell', $workspace) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="space-y-4">
                     <div>
+                        <label for="sale_mode" class="block text-sm font-medium text-gray-700 mb-2">
+                            Mode Penjualan
+                        </label>
+                        <select name="sale_mode" id="sale_mode" required
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                            <option value="scarcity" {{ old('sale_mode', $workspace->sale_mode ?: 'scarcity') === 'scarcity' ? 'selected' : '' }}>
+                                Scarcity Mode (1x pembelian per user, bisa resell)
+                            </option>
+                            <option value="standard" {{ old('sale_mode', $workspace->sale_mode) === 'standard' ? 'selected' : '' }}>
+                                Standard Mode (Multiple sales, tidak bisa resell)
+                            </option>
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Scarcity: Setiap user hanya bisa beli 1x, buyer bisa resell. Standard: Bisa dijual ke banyak buyer, tidak bisa resell.
+                        </p>
+                    </div>
+                    <div>
                         <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
-                            {{ __('messages.price') }} (Rp)
+                            {{ __('messages.price') }} (Rp) *
                         </label>
                         <input type="number" name="price" id="price" min="0" step="0.01" required
+                               value="{{ old('price', $workspace->price) }}"
                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label for="discount_price" class="block text-sm font-medium text-gray-700 mb-2">
+                            Harga Diskon (Rp) <span class="text-gray-500 text-xs">(opsional)</span>
+                        </label>
+                        <input type="number" name="discount_price" id="discount_price" min="0" step="0.01"
+                               value="{{ old('discount_price', $workspace->discount_price) }}"
+                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                        <p class="mt-1 text-xs text-gray-500">
+                            Jika diisi, harga diskon akan ditampilkan sebagai harga utama.
+                        </p>
+                    </div>
+                    <div id="scarcity-options" style="display: {{ old('sale_mode', $workspace->sale_mode ?: 'scarcity') === 'scarcity' ? 'block' : 'none' }};">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="grace_period_days" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Grace Period (hari)
+                                </label>
+                                <input type="number" name="grace_period_days" id="grace_period_days" min="0" max="365" 
+                                       value="{{ old('grace_period_days', $workspace->grace_period_days ?? 30) }}"
+                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Periode untuk repurchase dengan harga original (default: 30 hari)
+                                </p>
+                            </div>
+                            <div>
+                                <label for="relist_price_multiplier" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Repurchase Multiplier
+                                </label>
+                                <input type="number" name="relist_price_multiplier" id="relist_price_multiplier" min="1" max="10" step="0.1"
+                                       value="{{ old('relist_price_multiplier', $workspace->relist_price_multiplier ?? 1.5) }}"
+                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Harga repurchase setelah grace period (default: 1.5x)
+                                </p>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label for="marketplace_description" class="block text-sm font-medium text-gray-700 mb-2">
@@ -256,8 +353,95 @@
                         </label>
                         <textarea name="marketplace_description" id="marketplace_description" rows="4"
                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500"
-                                  placeholder="{{ __('messages.describe_workspace_for_sale') }}"></textarea>
+                                  placeholder="{{ __('messages.describe_workspace_for_sale') }}">{{ old('marketplace_description', $workspace->marketplace_description) }}</textarea>
                     </div>
+
+                    <!-- File Attachments (Bundle Workspace) -->
+                    <div>
+                        <label for="attachments" class="block text-sm font-medium text-gray-700 mb-2">
+                            File Attachments (Bundle Workspace)
+                            <span class="text-xs text-gray-500 font-normal">(Optional - untuk bundle workspace)</span>
+                        </label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-purple-400 transition-colors duration-200">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600">
+                                    <label for="attachments" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
+                                        <span>Upload files</span>
+                                        <input id="attachments" name="attachments[]" type="file" multiple
+                                               accept=".pdf,.doc,.docx,.txt,.zip,.rar,.jpg,.jpeg,.png,.gif,.xls,.xlsx,.ppt,.pptx"
+                                               class="sr-only">
+                                    </label>
+                                    <p class="pl-1">atau drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500">PDF, DOC, DOCX, TXT, ZIP, RAR, JPG, PNG, GIF, XLS, XLSX, PPT, PPTX (Max 50MB per file)</p>
+                            </div>
+                        </div>
+                        @if($workspace->hasAttachments())
+                            <div class="mt-3 space-y-2">
+                                <p class="text-xs font-medium text-gray-700 mb-2">Current Attachments ({{ $workspace->file_count }}):</p>
+                                @foreach($workspace->attachments as $index => $attachment)
+                                    @php
+                                        $filename = is_array($attachment) ? ($attachment['filename'] ?? 'Unknown') : basename($attachment);
+                                    @endphp
+                                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
+                                        <div class="flex items-center flex-1 min-w-0">
+                                            <svg class="w-4 h-4 text-purple-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                            </svg>
+                                            <p class="text-xs font-medium text-gray-900 truncate">{{ $filename }}</p>
+                                        </div>
+                                        <label class="ml-2 flex items-center cursor-pointer">
+                                            <input type="checkbox" name="removed_attachments[]" value="{{ $filename }}" class="h-3 w-3 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                            <span class="ml-1 text-xs text-red-600">Remove</span>
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Thumbnails -->
+                    <div>
+                        <label for="thumbnails" class="block text-sm font-medium text-gray-700 mb-2">
+                            Thumbnails (Gambar Preview)
+                            <span class="text-xs text-gray-500 font-normal">(Optional - maks 5 gambar)</span>
+                        </label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-purple-400 transition-colors duration-200">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600">
+                                    <label for="thumbnails" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500">
+                                        <span>Upload gambar</span>
+                                        <input type="file" name="thumbnails[]" id="thumbnails" multiple accept="image/*" class="sr-only">
+                                    </label>
+                                    <p class="pl-1">atau drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500">PNG, JPG, GIF hingga 5MB per gambar (maks 5 gambar)</p>
+                            </div>
+                        </div>
+                        @if($workspace->hasThumbnails())
+                            <div class="mt-3 grid grid-cols-5 gap-2">
+                                @foreach($workspace->thumbnails as $index => $thumbnail)
+                                    @php
+                                        $thumbnailPath = is_array($thumbnail) ? ($thumbnail['path'] ?? $thumbnail) : $thumbnail;
+                                    @endphp
+                                    <div class="relative group">
+                                        <img src="{{ \Illuminate\Support\Facades\Storage::url($thumbnailPath) }}" alt="Thumbnail {{ $index + 1 }}" class="w-full h-20 object-cover rounded border border-gray-200">
+                                        <label class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded flex items-center justify-center cursor-pointer transition-all">
+                                            <input type="checkbox" name="removed_thumbnails[]" value="{{ basename($thumbnailPath) }}" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                            <span class="ml-2 text-xs text-white hidden group-hover:block">Remove</span>
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+
                     <div class="flex items-center justify-end gap-3 pt-4">
                         <button type="button" onclick="document.getElementById('sell-workspace-modal').classList.add('hidden')" 
                                 class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
@@ -269,6 +453,16 @@
                     </div>
                 </div>
             </form>
+            <script>
+                document.getElementById('sale_mode').addEventListener('change', function() {
+                    const scarcityOptions = document.getElementById('scarcity-options');
+                    if (this.value === 'scarcity') {
+                        scarcityOptions.style.display = 'block';
+                    } else {
+                        scarcityOptions.style.display = 'none';
+                    }
+                });
+            </script>
         </div>
     </div>
 </div>

@@ -14,7 +14,11 @@ use App\Models\NoteReviewReply;
 use App\Models\Setting;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Bus;
 use App\Mail\ForumNotificationMail;
+use App\Jobs\SendNotificationJob;
+use App\Jobs\SendBatchNotificationsJob;
+use App\Jobs\SendEmailJob;
 
 class NotificationService
 {
@@ -228,21 +232,62 @@ class NotificationService
 
     /**
      * Create a notification for a user.
+     * Uses queue for better performance.
      */
-    public function create(User $user, string $type, string $title, string $message, ?string $link = null, ?array $data = null): AppNotification
+    public function create(User $user, string $type, string $title, string $message, ?string $link = null, ?array $data = null, bool $useQueue = true): AppNotification
     {
-        $notification = AppNotification::create([
-            'user_id' => $user->id,
-            'type' => $type,
-            'title' => $title,
-            'message' => $message,
-            'link' => $link,
-            'data' => $data,
-        ]);
+        if ($useQueue && config('queue.default') !== 'sync') {
+            // Dispatch to queue for async processing
+            SendNotificationJob::dispatch($user->id, $type, $title, $message, $link, $data)
+                ->onQueue('notifications');
+            
+            // Still create notification immediately for instant display
+            // The queue job will handle email sending
+            $notification = AppNotification::create([
+                'user_id' => $user->id,
+                'type' => $type,
+                'title' => $title,
+                'message' => $message,
+                'link' => $link,
+                'data' => $data,
+            ]);
+        } else {
+            // Synchronous processing (for testing or sync queue)
+            $notification = AppNotification::create([
+                'user_id' => $user->id,
+                'type' => $type,
+                'title' => $title,
+                'message' => $message,
+                'link' => $link,
+                'data' => $data,
+            ]);
 
-        $this->sendForumEmailIfEnabled($user, $type, $title, $message, $link);
+            $this->sendForumEmailIfEnabled($user, $type, $title, $message, $link);
+        }
 
         return $notification;
+    }
+
+    /**
+     * Create notifications for multiple users in batch.
+     */
+    public function createBatch(array $userIds, string $type, string $title, string $message, ?string $link = null, ?array $data = null): void
+    {
+        if (config('queue.default') !== 'sync') {
+            // Split into chunks for better performance
+            $chunks = array_chunk($userIds, 100);
+            
+            foreach ($chunks as $chunk) {
+                SendBatchNotificationsJob::dispatch($chunk, $type, $title, $message, $link, $data)
+                    ->onQueue('notifications');
+            }
+        } else {
+            // Synchronous processing
+            $users = User::whereIn('id', $userIds)->get();
+            foreach ($users as $user) {
+                $this->create($user, $type, $title, $message, $link, $data, false);
+            }
+        }
     }
 
     /**
@@ -778,7 +823,13 @@ class NotificationService
             return;
         }
 
-        Mail::to($user->email)->queue(new ForumNotificationMail($title, $message, $link));
+        // Use queue for email sending
+        if (config('queue.default') !== 'sync') {
+            SendEmailJob::dispatch($user->email, new ForumNotificationMail($title, $message, $link))
+                ->onQueue('emails');
+        } else {
+            Mail::to($user->email)->send(new ForumNotificationMail($title, $message, $link));
+        }
     }
 
     public function notifyNoteChatMessage(User $recipient, NoteConversation $conversation, string $messagePreview, ?User $sender = null): AppNotification

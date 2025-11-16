@@ -131,7 +131,7 @@
                             <!-- Ecosystem Category -->
                             <div>
                                 <label for="ecosystem_category" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Ekosistem Kreatif
+                                    {{ __('messages.ecosystem_category') ?? 'Ekosistem Kreatif' }}
                                 </label>
                                 <select name="ecosystem_category" id="ecosystem_category"
                                     class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
@@ -143,7 +143,7 @@
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                                 <p class="mt-2 text-xs text-gray-600">
-                                    Pilih kategori ekosistem (Elements/AudioJungle/CodeCanyon/GraphicRiver/PhotoDune/Themeforest/VideoHive/3DOcean) untuk meningkatkan penemuan dan rekomendasi.
+                                    {{ __('messages.ecosystem_category_help') ?? 'Pilih kategori ekosistem (Elements/AudioJungle/CodeCanyon/GraphicRiver/PhotoDune/Themeforest/VideoHive/3DOcean) untuk meningkatkan penemuan dan rekomendasi.' }}
                                 </p>
                             </div>
 
@@ -151,7 +151,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label for="language" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Bahasa Konten
+                                        {{ __('messages.note_language') ?? 'Bahasa Konten' }}
                                     </label>
                                     <select name="language" id="language"
                                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
@@ -165,11 +165,11 @@
                                 </div>
                                 <div>
                                     <label for="scheduled_publish_at" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Jadwalkan Publikasi (opsional)
+                                        {{ __('messages.scheduled_publish_at') ?? 'Jadwalkan Publikasi' }} ({{ __('messages.optional') }})
                                     </label>
                                     <input type="datetime-local" name="scheduled_publish_at" id="scheduled_publish_at" value="{{ old('scheduled_publish_at') }}"
                                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
-                                    <p class="mt-2 text-xs text-gray-600">Jika diisi, catatan akan otomatis dipublikasikan pada waktu tersebut.</p>
+                                    <p class="mt-2 text-xs text-gray-600">{{ __('messages.scheduled_publish_help') ?? 'Jika diisi, catatan akan otomatis dipublikasikan pada waktu tersebut.' }}</p>
                                     @error('scheduled_publish_at')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
@@ -538,48 +538,13 @@
                                 @enderror
                             </div>
 
-                            <!-- AI Assistant (for summary and tags) -->
-                            <div
-                                class="flex items-start gap-3 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="text-sm font-semibold text-gray-900 mb-1">AI Assistant</h4>
-                                    <p class="text-xs text-gray-600 mb-3">Let AI help you generate a summary and suggest
-                                        tags</p>
-                                    <button type="button" id="ai-analyze-btn"
-                                        class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                        </svg>
-                                        <span id="ai-btn-text">Generate Summary & Tags</span>
-                                        <svg id="ai-loading" class="hidden w-4 h-4 ml-2 animate-spin" fill="none"
-                                            viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                            </path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Summary (Auto-generated by AI) -->
+                            <!-- Summary -->
                             <div>
                                 <label for="summary" class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('messages.summary') }} <span
-                                        class="text-xs text-gray-500">{{ __('messages.summary_optional_ai') }}</span>
+                                    {{ __('messages.summary') }} <span class="text-xs text-gray-500">(Optional)</span>
                                 </label>
                                 <textarea name="summary" id="summary" rows="3"
-                                    placeholder="{{ __('messages.auto_generated_summary_placeholder') }}"
+                                    placeholder="Enter a brief summary of your note..."
                                     class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 resize-y @error('summary') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">{{ old('summary') }}</textarea>
                                 <p class="mt-1 text-xs text-gray-500">{{ __('messages.brief_summary_note') }}</p>
                                 @error('summary')
@@ -1137,19 +1102,45 @@
                                 @enderror
                             </div>
 
+                            <!-- Draft & Schedule Options -->
+                            <div class="mt-6 pt-6 border-t border-gray-200 bg-gray-50 rounded-lg p-4">
+                                <div class="space-y-4">
+                                    <!-- Save as Draft -->
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="save_as_draft" id="save_as_draft" value="1"
+                                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                        <label for="save_as_draft" class="ml-2 text-sm font-medium text-gray-700">
+                                            {{ __('Save as Draft') }}
+                                        </label>
+                                    </div>
+                                    
+                                    <!-- Schedule Publishing -->
+                                    <div id="schedule-section" class="hidden">
+                                        <label for="scheduled_at" class="block text-sm font-medium text-gray-700 mb-2">
+                                            {{ __('Schedule Publishing') }}
+                                        </label>
+                                        <input type="datetime-local" name="scheduled_at" id="scheduled_at"
+                                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            {{ __('The note will be published automatically at the scheduled time.') }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Actions -->
                             <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
                                 <a href="{{ route('notes.index') }}"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200">
                                     Cancel
                                 </a>
-                                <button type="submit"
+                                <button type="submit" id="submit-btn"
                                     class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
                                     <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M5 13l4 4L19 7" />
                                     </svg>
-                                    Create Note
+                                    <span id="submit-text">{{ __('Create Note') }}</span>
                                 </button>
                             </div>
                         </div>
@@ -1561,14 +1552,17 @@
                         handleThumbnailUpload(input);
                     };
 
-                    // File upload preview with large file detection
+                    // File upload preview with background upload for files > 5MB
                     const fileInput = document.getElementById('attachments');
                     const fileList = document.getElementById('file-list');
                     const uploadProgressContainer = document.getElementById('upload-progress-container');
                     const uploadProgressBar = document.getElementById('upload-progress-bar');
                     const uploadProgressPercent = document.getElementById('upload-progress-percent');
                     const uploadProgressText = document.getElementById('upload-progress-text');
-                    const LARGE_FILE_THRESHOLD = 41943040; // 40MB in bytes
+                    const BACKGROUND_UPLOAD_THRESHOLD = 5242880; // 5MB in bytes
+                    const backgroundUploadIds = []; // Store upload IDs for form submission
+                    const fileUploadStatus = new Map(); // Track upload status per file
+                    const selectedFiles = new Map(); // Store selected files by index
                     
                     function formatFileSize(bytes) {
                         if (bytes >= 1073741824) {
@@ -1581,19 +1575,231 @@
                         return bytes + ' bytes';
                     }
                     
+                    async function uploadFileInBackground(file, fileIndex) {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('_token', '{{ csrf_token() }}');
+                        
+                        // Update UI to show uploading
+                        fileUploadStatus.set(fileIndex, { status: 'uploading', progress: 0 });
+                        updateFileItemStatus(fileIndex, 'uploading', 0);
+                        
+                        try {
+                            const xhr = new XMLHttpRequest();
+                            
+                            // Track upload progress
+                            xhr.upload.addEventListener('progress', function(e) {
+                                if (e.lengthComputable) {
+                                    const percentComplete = (e.loaded / e.total) * 100;
+                                    fileUploadStatus.set(fileIndex, { status: 'uploading', progress: percentComplete });
+                                    updateFileItemStatus(fileIndex, 'uploading', percentComplete);
+                                }
+                            });
+                            
+                                return new Promise((resolve, reject) => {
+                                xhr.onload = function() {
+                                    // Check response status and content type before parsing
+                                    const contentType = xhr.getResponseHeader('content-type') || '';
+                                    const isJson = contentType.includes('application/json');
+                                    
+                                    // Check if response is empty
+                                    if (!xhr.responseText || xhr.responseText.trim() === '') {
+                                        const error = 'Server tidak mengembalikan response. File akan otomatis diupload saat form disubmit.';
+                                        fileUploadStatus.set(fileIndex, { status: 'error', error: error, canRetry: true });
+                                        updateFileItemStatus(fileIndex, 'error', 0, error);
+                                        reject(new Error(error));
+                                        return;
+                                    }
+                                    
+                                    // Handle non-JSON responses (HTML error pages, etc.)
+                                    if (!isJson) {
+                                        let error = 'Server mengembalikan response yang tidak valid. ';
+                                        
+                                        // Check for common error status codes
+                                        if (xhr.status === 413) {
+                                            error = 'File terlalu besar (413 Request Entity Too Large). Pastikan nginx client_max_body_size sudah dikonfigurasi dengan benar. File akan otomatis diupload saat form disubmit.';
+                                        } else if (xhr.status === 500) {
+                                            error = 'Server error (500). File akan otomatis diupload saat form disubmit. Silakan hubungi administrator jika masalah berlanjut.';
+                                        } else if (xhr.status === 504 || xhr.status === 524) {
+                                            // 504 = Gateway Timeout, 524 = Cloudflare Timeout
+                                            error = `Upload timeout (${xhr.status}). File terlalu besar atau koneksi lambat. Pastikan nginx timeout dan Cloudflare timeout sudah dikonfigurasi dengan benar. File akan otomatis diupload saat form disubmit.`;
+                                        } else if (xhr.status >= 400) {
+                                            error = `Server error (${xhr.status}). File akan otomatis diupload saat form disubmit.`;
+                                        } else {
+                                            error += 'File akan otomatis diupload saat form disubmit.';
+                                        }
+                                        
+                                        console.error('Non-JSON response from server:', {
+                                            status: xhr.status,
+                                            contentType: contentType,
+                                            responsePreview: xhr.responseText.substring(0, 200)
+                                        });
+                                        
+                                        fileUploadStatus.set(fileIndex, { status: 'error', error: error, canRetry: true });
+                                        updateFileItemStatus(fileIndex, 'error', 0, error);
+                                        reject(new Error(error));
+                                        return;
+                                    }
+                                    
+                                    try {
+                                        const response = JSON.parse(xhr.responseText);
+                                        
+                                        // Handle successful response
+                                        if (xhr.status === 200 && response.success) {
+                                            backgroundUploadIds.push(response.upload_id);
+                                            fileUploadStatus.set(fileIndex, { status: 'completed', uploadId: response.upload_id });
+                                            updateFileItemStatus(fileIndex, 'completed');
+                                            resolve(response);
+                                            return;
+                                        }
+                                        
+                                        // Handle error response (JSON but not success)
+                                        let errorMessage = response.error || response.message || 'Upload failed';
+                                        
+                                        // Check if premium is required
+                                        if (response.requires_premium) {
+                                            errorMessage += ' <a href="{{ route("subscription.create") }}" class="underline font-semibold">Upgrade ke Premium</a>';
+                                        }
+                                        
+                                        // Show server limits if provided
+                                        if (response.server_limits) {
+                                            errorMessage += ` (Limit server: ${response.server_limits.upload_max_filesize})`;
+                                        }
+                                        
+                                        fileUploadStatus.set(fileIndex, { status: 'error', error: errorMessage, canRetry: response.can_retry !== false });
+                                        updateFileItemStatus(fileIndex, 'error', 0, errorMessage);
+                                        
+                                        // Show SweetAlert for important errors (but don't block - file will upload on form submit)
+                                        if (response.requires_premium) {
+                                            Swal.fire({
+                                                icon: 'warning',
+                                                title: 'Premium Diperlukan',
+                                                html: errorMessage,
+                                                confirmButtonText: 'OK'
+                                            });
+                                        }
+                                        
+                                        reject(new Error(errorMessage));
+                                        
+                                    } catch (e) {
+                                        // JSON parse error
+                                        console.error('Failed to parse JSON response:', {
+                                            error: e.message,
+                                            status: xhr.status,
+                                            responsePreview: xhr.responseText.substring(0, 500),
+                                            contentType: contentType
+                                        });
+                                        
+                                        let error = 'Gagal memparse response server. ';
+                                        
+                                        // Provide more specific error based on status code
+                                        if (xhr.status === 413) {
+                                            error = 'File terlalu besar (413). Pastikan nginx client_max_body_size sudah dikonfigurasi. File akan otomatis diupload saat form disubmit.';
+                                        } else if (xhr.status === 500) {
+                                            error = 'Server error (500). File akan otomatis diupload saat form disubmit.';
+                                        } else if (xhr.status === 504 || xhr.status === 524) {
+                                            // 504 = Gateway Timeout, 524 = Cloudflare Timeout
+                                            error = `Upload timeout (${xhr.status}). File terlalu besar atau koneksi lambat. Pastikan nginx timeout dan Cloudflare timeout sudah dikonfigurasi. File akan otomatis diupload saat form disubmit.`;
+                                        } else if (xhr.status === 0) {
+                                            error = 'Koneksi terputus atau timeout. File akan otomatis diupload saat form disubmit.';
+                                        } else {
+                                            error += 'File akan otomatis diupload saat form disubmit.';
+                                        }
+                                        
+                                        fileUploadStatus.set(fileIndex, { status: 'error', error: error, canRetry: true });
+                                        updateFileItemStatus(fileIndex, 'error', 0, error);
+                                        reject(new Error(error));
+                                    }
+                                };
+                                
+                                xhr.onerror = function() {
+                                    const error = 'Network error. Pastikan koneksi internet stabil. File akan otomatis diupload saat form disubmit.';
+                                    fileUploadStatus.set(fileIndex, { status: 'error', error: error, canRetry: true });
+                                    updateFileItemStatus(fileIndex, 'error', 0, error);
+                                    reject(new Error(error));
+                                };
+                                
+                                xhr.ontimeout = function() {
+                                    const error = 'Upload timeout. File akan otomatis diupload saat form disubmit.';
+                                    fileUploadStatus.set(fileIndex, { status: 'error', error: error, canRetry: true });
+                                    updateFileItemStatus(fileIndex, 'error', 0, error);
+                                    reject(new Error(error));
+                                };
+                                
+                                // Set timeout - 15 minutes for very large files (51MB+)
+                                xhr.timeout = 900000; // 15 minutes (900 seconds)
+                                
+                                // Set request headers to ensure JSON response
+                                xhr.setRequestHeader('Accept', 'application/json');
+                                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                                
+                                xhr.open('POST', '{{ route("notes.upload-background") }}');
+                                xhr.send(formData);
+                            });
+                        } catch (error) {
+                            fileUploadStatus.set(fileIndex, { status: 'error', error: error.message });
+                            updateFileItemStatus(fileIndex, 'error', 0, error.message);
+                            throw error;
+                        }
+                    }
+                    
+                    function updateFileItemStatus(fileIndex, status, progress = 0, error = null) {
+                        const fileItem = document.querySelector(`[data-file-index="${fileIndex}"]`);
+                        if (!fileItem) return;
+                        
+                        const statusElement = fileItem.querySelector('.file-upload-status');
+                        const progressBar = fileItem.querySelector('.file-progress-bar');
+                        
+                        if (status === 'uploading') {
+                            statusElement.innerHTML = `
+                                <span class="text-xs text-blue-600">Uploading... ${Math.round(progress)}%</span>
+                            `;
+                            if (progressBar) {
+                                progressBar.style.width = progress + '%';
+                            }
+                        } else if (status === 'completed') {
+                            statusElement.innerHTML = `
+                                <span class="text-xs text-green-600 flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    Uploaded
+                                </span>
+                            `;
+                            fileItem.classList.remove('bg-yellow-50', 'border-yellow-300');
+                            fileItem.classList.add('bg-green-50', 'border-green-300');
+                        } else if (status === 'error') {
+                            const errorMsg = error || 'Upload failed';
+                            statusElement.innerHTML = `
+                                <div class="text-xs text-red-600 space-y-1">
+                                    <p class="font-semibold">⚠️ ${errorMsg}</p>
+                                    <p class="text-red-500 text-xs italic">💡 Jangan khawatir, file akan otomatis diupload saat form disubmit.</p>
+                                </div>
+                            `;
+                            fileItem.classList.remove('bg-yellow-50', 'border-yellow-300');
+                            fileItem.classList.add('bg-red-50', 'border-red-300');
+                        }
+                    }
+                    
                     if (fileInput && fileList) {
-                        fileInput.addEventListener('change', function() {
+                        fileInput.addEventListener('change', async function() {
                             fileList.innerHTML = '';
+                            selectedFiles.clear(); // Clear previous files
+                            fileUploadStatus.clear(); // Clear previous status
+                            backgroundUploadIds.length = 0; // Clear previous upload IDs
                             const files = Array.from(this.files);
                             let hasLargeFile = false;
+                            const uploadPromises = [];
                             
                             files.forEach((file, index) => {
-                                const isLargeFile = file.size >= LARGE_FILE_THRESHOLD;
+                                selectedFiles.set(index, file); // Store file reference
+                                const isLargeFile = file.size >= BACKGROUND_UPLOAD_THRESHOLD;
                                 if (isLargeFile) {
                                     hasLargeFile = true;
                                 }
                                 
                                 const fileItem = document.createElement('div');
+                                fileItem.setAttribute('data-file-index', index);
                                 fileItem.className = `flex items-center justify-between p-3 rounded-lg border ${isLargeFile ? 'bg-yellow-50 border-yellow-300' : 'bg-gray-50 border-gray-200'}`;
                                 
                                 let warningIcon = '';
@@ -1615,20 +1821,120 @@
                                             <p class="text-sm font-medium ${isLargeFile ? 'text-yellow-900' : 'text-gray-900'} truncate">${file.name}</p>
                                             <p class="text-xs ${isLargeFile ? 'text-yellow-700' : 'text-gray-500'}">
                                                 ${formatFileSize(file.size)}
-                                                ${isLargeFile ? '<span class="ml-2 font-semibold">(Large file - upload may take longer)</span>' : ''}
+                                                ${isLargeFile ? '<span class="ml-2 font-semibold">(Large file - uploading in background...)</span>' : ''}
                                             </p>
+                                            ${isLargeFile ? `
+                                                <div class="mt-1 w-full bg-gray-200 rounded-full h-1.5">
+                                                    <div class="file-progress-bar bg-blue-600 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                                </div>
+                                            ` : ''}
+                                            <div class="file-upload-status mt-1"></div>
                                         </div>
                                     </div>
                                 `;
                                 fileList.appendChild(fileItem);
+                                
+                                // Start background upload for large files
+                                if (isLargeFile) {
+                                    uploadPromises.push(uploadFileInBackground(file, index));
+                                }
                             });
                             
-                            // Show warning for large files
+                            // Show progress container if there are large files
                             if (hasLargeFile && uploadProgressContainer) {
                                 uploadProgressContainer.classList.remove('hidden');
-                                uploadProgressText.textContent = 'File besar terdeteksi. Upload akan dimulai saat form dikirim...';
+                                uploadProgressText.textContent = 'File besar terdeteksi. Upload sedang berjalan di background...';
                             } else if (uploadProgressContainer) {
                                 uploadProgressContainer.classList.add('hidden');
+                            }
+                            
+                            // Wait for all background uploads to complete (but don't block)
+                            if (uploadPromises.length > 0) {
+                                Promise.allSettled(uploadPromises).then(results => {
+                                    const failed = results.filter(r => r.status === 'rejected').length;
+                                    if (failed === 0) {
+                                        uploadProgressText.textContent = 'Semua file berhasil diupload!';
+                                        uploadProgressContainer.classList.add('hidden');
+                                    } else {
+                                        uploadProgressText.textContent = `${failed} file gagal diupload. Silakan coba lagi.`;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Add hidden input for background upload IDs before form submission
+                    const form = document.querySelector('form[action*="notes"]');
+                    if (form) {
+                        form.addEventListener('submit', function(e) {
+                            // Check if there are any files still uploading
+                            const uploadingFiles = [];
+                            fileUploadStatus.forEach((status, index) => {
+                                if (status.status === 'uploading') {
+                                    const file = selectedFiles.get(index);
+                                    if (file) {
+                                        uploadingFiles.push(file.name);
+                                    }
+                                }
+                            });
+                            
+                            if (uploadingFiles.length > 0) {
+                                e.preventDefault();
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Upload Sedang Berlangsung',
+                                    html: `File berikut masih dalam proses upload:<br><strong>${uploadingFiles.join(', ')}</strong><br><br>Harap tunggu hingga upload selesai sebelum submit form.`,
+                                    confirmButtonText: 'OK'
+                                });
+                                return false;
+                            }
+                            
+                            // Check for failed uploads
+                            const failedFiles = [];
+                            fileUploadStatus.forEach((status, index) => {
+                                if (status.status === 'error') {
+                                    const file = selectedFiles.get(index);
+                                    if (file) {
+                                        failedFiles.push(file.name);
+                                    }
+                                }
+                            });
+                            
+                            // Add background upload IDs to form
+                            backgroundUploadIds.forEach(uploadId => {
+                                const input = document.createElement('input');
+                                input.type = 'hidden';
+                                input.name = 'background_upload_ids[]';
+                                input.value = uploadId;
+                                form.appendChild(input);
+                            });
+                            
+                            // Remove large files from file input to avoid duplicate upload (only if they're successfully uploaded)
+                            if (fileInput && fileInput.files.length > 0) {
+                                const files = Array.from(fileInput.files);
+                                const filesToKeep = [];
+                                files.forEach((file, index) => {
+                                    const status = fileUploadStatus.get(index);
+                                    // Keep small files (< 5MB) or files that failed to upload in background
+                                    // Remove large files that were successfully uploaded in background
+                                    if (file.size < BACKGROUND_UPLOAD_THRESHOLD) {
+                                        filesToKeep.push(file); // Keep all small files
+                                    } else if (status && status.status === 'error') {
+                                        filesToKeep.push(file); // Keep files that failed to upload - they will be uploaded on form submit
+                                    } else if (status && status.status !== 'completed') {
+                                        filesToKeep.push(file); // Keep files that didn't complete (shouldn't happen, but safety check)
+                                    }
+                                    // Files with status === 'completed' are removed (they're already uploaded)
+                                });
+                                const dt = new DataTransfer();
+                                filesToKeep.forEach(file => dt.items.add(file));
+                                fileInput.files = dt.files;
+                            }
+                            
+                            // Show info message if there are failed files (but don't block submission)
+                            if (failedFiles.length > 0) {
+                                // Just log to console, don't block - files will be uploaded on form submit
+                                console.log('Some files failed to upload in background, will be uploaded on form submit:', failedFiles);
                             }
                         });
                     }
@@ -1727,785 +2033,7 @@
                         return false;
                     }
 
-                    // AI Assistant functionality
-                    // AI Content Generator
-                    const aiGenerateBtn = document.getElementById('ai-generate-btn');
-                    const aiPromptInput = document.getElementById('ai-prompt-input');
-                    const aiGenerateLoading = document.getElementById('ai-generate-loading');
-
-                    if (aiGenerateBtn && aiPromptInput) {
-                        // Allow Enter key to trigger generation
-                        aiPromptInput.addEventListener('keypress', function(e) {
-                            if (e.key === 'Enter') {
-                                aiGenerateBtn.click();
-                            }
-                        });
-
-                        aiGenerateBtn.addEventListener('click', async function() {
-                            const prompt = aiPromptInput.value.trim();
-
-                            if (!prompt) {
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Prompt Kosong',
-                                    text: 'Silakan masukkan prompt atau pertanyaan untuk generate konten.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                                return;
-                            }
-
-                            // Show loading state
-                            aiGenerateBtn.disabled = true;
-                            aiGenerateLoading.classList.remove('hidden');
-
-                            try {
-                                const response = await fetch('{{ route('ai.generate-content') }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                    body: JSON.stringify({
-                                        prompt: prompt,
-                                        max_length: 2000
-                                    })
-                                });
-
-                                const data = await response.json();
-
-                                // Check premium requirement
-                                if (checkPremiumRequirement(data)) {
-                                    aiGenerateBtn.disabled = false;
-                                    aiGenerateLoading.classList.add('hidden');
-                                    return;
-                                }
-
-                                if (data.success && data.content) {
-                                    // Insert generated content into Quill editor at current cursor position
-                                    // Get current selection or end of content
-                                    let range = quill.getSelection();
-                                    if (!range) {
-                                        range = {
-                                            index: quill.getLength(),
-                                            length: 0
-                                        };
-                                    }
-
-                                    // Convert HTML to Quill Delta
-                                    const delta = quill.clipboard.convert({
-                                        html: data.content
-                                    });
-
-                                    // Insert at current position (append if no selection)
-                                    quill.updateContents(
-                                        new Delta()
-                                        .retain(range.index)
-                                        .delete(range.length)
-                                        .concat(delta),
-                                        'api'
-                                    );
-
-                                    // Move cursor to end of inserted content
-                                    const newIndex = range.index + delta.length();
-                                    quill.setSelection(newIndex);
-
-                                    // Update hidden textarea
-                                    contentTextarea.value = quill.root.innerHTML;
-
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Konten Berhasil Dibuat!',
-                                        text: 'Konten telah dimasukkan ke editor. Anda dapat mengeditnya lebih lanjut.',
-                                        toast: true,
-                                        position: 'top-end',
-                                        showConfirmButton: false,
-                                        timer: 3000
-                                    });
-                                } else {
-                                    throw new Error(data.message || 'Failed to generate content');
-                                }
-                            } catch (error) {
-                                console.error('AI generation error:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: error.message || 'Gagal generate konten. Silakan coba lagi.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                            } finally {
-                                aiGenerateBtn.disabled = false;
-                                aiGenerateLoading.classList.add('hidden');
-                            }
-                        });
-                    }
-
-                    // Image Search
-                    const imageSearchBtn = document.getElementById('image-search-btn');
-                    const imageSearchInput = document.getElementById('image-search-input');
-                    const imageSearchLoading = document.getElementById('image-search-loading');
-                    const imageResults = document.getElementById('image-results');
-
-                    if (imageSearchBtn && imageSearchInput) {
-                        // Allow Enter key to trigger search
-                        imageSearchInput.addEventListener('keypress', function(e) {
-                            if (e.key === 'Enter') {
-                                imageSearchBtn.click();
-                            }
-                        });
-
-                        imageSearchBtn.addEventListener('click', async function() {
-                            const query = imageSearchInput.value.trim();
-
-                            if (!query) {
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Query Kosong',
-                                    text: 'Silakan masukkan kata kunci untuk mencari gambar.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                                return;
-                            }
-
-                            // Show loading state
-                            imageSearchBtn.disabled = true;
-                            imageSearchLoading.classList.remove('hidden');
-                            imageResults.classList.add('hidden');
-                            imageResults.innerHTML = '';
-
-                            try {
-                                const response = await fetch('{{ route('ai.search-images') }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                    body: JSON.stringify({
-                                        query: query,
-                                        limit: 12
-                                    })
-                                });
-
-                                const data = await response.json();
-
-                                // Check premium requirement
-                                if (checkPremiumRequirement(data)) {
-                                    imageSearchBtn.disabled = false;
-                                    imageSearchLoading.classList.add('hidden');
-                                    return;
-                                }
-
-                                if (data.success) {
-                                    notifyAiUsageResult(data, 'Cari Gambar Referensi');
-                                }
-
-                                if (data.success && data.images && data.images.length > 0) {
-                                    // Display images
-                                    imageResults.innerHTML = '';
-                                    data.images.forEach(image => {
-                                        const imgDiv = document.createElement('div');
-                                        imgDiv.className = 'relative group cursor-pointer';
-                                        imgDiv.innerHTML = `
-                            <img src="${image.thumbnail || image.url}" 
-                                 alt="${image.description || query}" 
-                                 class="w-full h-24 object-cover rounded-lg border border-gray-200 hover:border-blue-400 transition-all duration-200"
-                                 loading="lazy">
-                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-all duration-200 flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                </svg>
-                            </div>
-                        `;
-
-                                        // Insert image to editor on click
-                                        imgDiv.addEventListener('click', function() {
-                                            const imageUrl = image.url || image.full;
-                                            if (imageUrl) {
-                                                // Get current selection or end of content
-                                                let range = quill.getSelection();
-                                                if (!range) {
-                                                    range = {
-                                                        index: quill.getLength(),
-                                                        length: 0
-                                                    };
-                                                }
-
-                                                // Insert image into Quill editor
-                                                quill.insertEmbed(range.index, 'image',
-                                                    imageUrl, 'user');
-
-                                                // Move cursor after image
-                                                quill.setSelection(range.index + 1);
-
-                                                // Update hidden textarea
-                                                contentTextarea.value = quill.root.innerHTML;
-
-                                                Swal.fire({
-                                                    icon: 'success',
-                                                    title: 'Gambar Ditambahkan!',
-                                                    text: 'Gambar telah dimasukkan ke editor.',
-                                                    toast: true,
-                                                    position: 'top-end',
-                                                    showConfirmButton: false,
-                                                    timer: 2000
-                                                });
-                                            }
-                                        });
-
-                                        imageResults.appendChild(imgDiv);
-                                    });
-
-                                    imageResults.classList.remove('hidden');
-                                } else {
-                                    Swal.fire({
-                                        icon: 'info',
-                                        title: 'Tidak Ada Hasil',
-                                        text: data.message ||
-                                            'Tidak ada gambar ditemukan. Coba kata kunci lain.',
-                                        toast: true,
-                                        position: 'top-end',
-                                        showConfirmButton: false,
-                                        timer: 3000
-                                    });
-                                }
-                            } catch (error) {
-                                console.error('Image search error:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: error.message || 'Gagal mencari gambar. Silakan coba lagi.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                            } finally {
-                                imageSearchBtn.disabled = false;
-                                imageSearchLoading.classList.add('hidden');
-                            }
-                        });
-                    }
-
-                    // Image Generation
-                    const imageGenerateBtn = document.getElementById('image-generate-btn');
-                    const imageGenerateInput = document.getElementById('image-generate-input');
-                    const imageGenerateLoading = document.getElementById('image-generate-loading');
-                    const imageSizeSelect = document.getElementById('image-size-select');
-                    const imageStyleSelect = document.getElementById('image-style-select');
-                    const generatedImageResult = document.getElementById('generated-image-result');
-                    const generatedImage = document.getElementById('generated-image');
-
-                    if (imageGenerateBtn && imageGenerateInput) {
-                        imageGenerateInput.addEventListener('keypress', function(e) {
-                            if (e.key === 'Enter') {
-                                imageGenerateBtn.click();
-                            }
-                        });
-
-                        imageGenerateBtn.addEventListener('click', async function() {
-                            const prompt = imageGenerateInput.value.trim();
-
-                            if (!prompt) {
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Prompt Kosong',
-                                    text: 'Silakan masukkan deskripsi gambar yang ingin dibuat.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                                return;
-                            }
-
-                            imageGenerateBtn.disabled = true;
-                            imageGenerateLoading.classList.remove('hidden');
-                            generatedImageResult.classList.add('hidden');
-
-                            try {
-                                const response = await fetch('{{ route('ai.generate-image') }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                    body: JSON.stringify({
-                                        prompt: prompt,
-                                        size: imageSizeSelect.value,
-                                        style: imageStyleSelect.value
-                                    })
-                                });
-
-                                const data = await response.json();
-
-                                // Check premium requirement
-                                if (checkPremiumRequirement(data)) {
-                                    imageGenerateBtn.disabled = false;
-                                    imageGenerateLoading.classList.add('hidden');
-                                    return;
-                                }
-
-                                if (data.success && data.image) {
-                                    notifyAiUsageResult(data, 'Generate Gambar AI');
-                                    if (data.image.url) {
-                                        generatedImage.src = data.image.url;
-                                        generatedImageResult.classList.remove('hidden');
-
-                                        // Add click to insert image
-                                        generatedImage.onclick = function() {
-                                            let range = quill.getSelection();
-                                            if (!range) {
-                                                range = {
-                                                    index: quill.getLength(),
-                                                    length: 0
-                                                };
-                                            }
-                                            quill.insertEmbed(range.index, 'image', data.image.url, 'user');
-                                            quill.setSelection(range.index + 1);
-                                            contentTextarea.value = quill.root.innerHTML;
-
-                                            Swal.fire({
-                                                icon: 'success',
-                                                title: 'Gambar Ditambahkan!',
-                                                text: 'Gambar telah dimasukkan ke editor.',
-                                                toast: true,
-                                                position: 'top-end',
-                                                showConfirmButton: false,
-                                                timer: 2000
-                                            });
-                                        };
-
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Gambar Berhasil Dibuat!',
-                                            text: 'Klik gambar untuk memasukkannya ke editor.',
-                                            toast: true,
-                                            position: 'top-end',
-                                            showConfirmButton: false,
-                                            timer: 3000
-                                        });
-                                    } else if (data.image.base64) {
-                                        generatedImage.src = 'data:image/png;base64,' + data.image.base64;
-                                        generatedImageResult.classList.remove('hidden');
-                                    }
-                                } else {
-                                    throw new Error(data.message || 'Failed to generate image');
-                                }
-                            } catch (error) {
-                                console.error('Image generation error:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: error.message ||
-                                        'Gagal generate gambar. Pastikan API key sudah dikonfigurasi.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                            } finally {
-                                imageGenerateBtn.disabled = false;
-                                imageGenerateLoading.classList.add('hidden');
-                            }
-                        });
-                    }
-
-                    // Video Generation
-                    const videoGenerateBtn = document.getElementById('video-generate-btn');
-                    const videoGenerateInput = document.getElementById('video-generate-input');
-                    const videoGenerateLoading = document.getElementById('video-generate-loading');
-                    const videoDurationSelect = document.getElementById('video-duration-select');
-                    const videoRatioSelect = document.getElementById('video-ratio-select');
-                    const generatedVideoResult = document.getElementById('generated-video-result');
-                    const videoStatus = document.getElementById('video-status');
-
-                    if (videoGenerateBtn && videoGenerateInput) {
-                        videoGenerateInput.addEventListener('keypress', function(e) {
-                            if (e.key === 'Enter') {
-                                videoGenerateBtn.click();
-                            }
-                        });
-
-                        videoGenerateBtn.addEventListener('click', async function() {
-                            const prompt = videoGenerateInput.value.trim();
-
-                            if (!prompt) {
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Prompt Kosong',
-                                    text: 'Silakan masukkan deskripsi video yang ingin dibuat.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                                return;
-                            }
-
-                            videoGenerateBtn.disabled = true;
-                            videoGenerateLoading.classList.remove('hidden');
-                            generatedVideoResult.classList.remove('hidden');
-                            videoStatus.textContent = 'Generating video... This may take a while.';
-
-                            try {
-                                const response = await fetch('{{ route('ai.generate-video') }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                    body: JSON.stringify({
-                                        prompt: prompt,
-                                        duration: parseInt(videoDurationSelect.value),
-                                        ratio: videoRatioSelect.value
-                                    })
-                                });
-
-                                const data = await response.json();
-
-                                // Check premium requirement
-                                if (checkPremiumRequirement(data)) {
-                                    videoGenerateBtn.disabled = false;
-                                    videoGenerateLoading.classList.add('hidden');
-                                    return;
-                                }
-
-                                if (data.success && data.video) {
-                                    notifyAiUsageResult(data, 'Generate Video AI');
-                                    if (data.video.type === 'script') {
-                                        // Jika yang dihasilkan adalah script (dari Ollama)
-                                        videoStatus.innerHTML = `
-                                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                                <h5 class="font-semibold text-blue-900 mb-2">Video Script Generated</h5>
-                                                <p class="text-sm text-blue-700 mb-2">${data.video.message || ''}</p>
-                                                <div class="bg-white rounded p-3 max-h-64 overflow-y-auto">
-                                                    <pre class="text-xs whitespace-pre-wrap">${data.video.script || ''}</pre>
-                                                </div>
-                                                <p class="text-xs text-blue-600 mt-2">Note: Untuk generate video actual, konfigurasi RunwayML API.</p>
-                                            </div>
-                                        `;
-                                        Swal.fire({
-                                            icon: 'info',
-                                            title: 'Script Video Dibuat',
-                                            text: 'Script video telah dibuat. Untuk video actual, gunakan RunwayML API.',
-                                            toast: true,
-                                            position: 'top-end',
-                                            showConfirmButton: false,
-                                            timer: 4000
-                                        });
-                                    } else if (data.video.job_id) {
-                                        videoStatus.textContent =
-                                            `Video sedang diproses (Job ID: ${data.video.job_id}). Estimasi waktu: ${data.video.estimated_time || 60} detik.`;
-                                        Swal.fire({
-                                            icon: 'info',
-                                            title: 'Video Sedang Diproses',
-                                            text: 'Video generation sedang berjalan. Anda akan diberitahu ketika selesai.',
-                                            toast: true,
-                                            position: 'top-end',
-                                            showConfirmButton: false,
-                                            timer: 5000
-                                        });
-                                    } else if (data.video.url) {
-                                        videoStatus.innerHTML =
-                                            `<video src="${data.video.url}" controls class="w-full max-w-md rounded-lg"></video>`;
-                                    }
-                                } else {
-                                    throw new Error(data.message || 'Failed to generate video');
-                                }
-                            } catch (error) {
-                                console.error('Video generation error:', error);
-                                videoStatus.textContent = 'Error: ' + (error.message || 'Gagal generate video');
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: error.message ||
-                                        'Gagal generate video. Pastikan API key sudah dikonfigurasi.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                            } finally {
-                                videoGenerateBtn.disabled = false;
-                                videoGenerateLoading.classList.add('hidden');
-                            }
-                        });
-                    }
-
-                    // Idea Generator
-                    const ideaGenerateBtn = document.getElementById('idea-generate-btn');
-                    const ideaTopicInput = document.getElementById('idea-topic-input');
-                    const ideaGenerateLoading = document.getElementById('idea-generate-loading');
-                    const generatedIdeasResult = document.getElementById('generated-ideas-result');
-
-                    if (ideaGenerateBtn && ideaTopicInput) {
-                        ideaTopicInput.addEventListener('keypress', function(e) {
-                            if (e.key === 'Enter') {
-                                ideaGenerateBtn.click();
-                            }
-                        });
-
-                        ideaGenerateBtn.addEventListener('click', async function() {
-                            const topic = ideaTopicInput.value.trim();
-
-                            if (!topic) {
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Topik Kosong',
-                                    text: 'Silakan masukkan topik untuk generate ide.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                                return;
-                            }
-
-                            ideaGenerateBtn.disabled = true;
-                            ideaGenerateLoading.classList.remove('hidden');
-                            generatedIdeasResult.classList.add('hidden');
-                            generatedIdeasResult.innerHTML = '';
-
-                            try {
-                                const response = await fetch('{{ route('ai.generate-ideas') }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                    body: JSON.stringify({
-                                        topic: topic,
-                                        count: 5
-                                    })
-                                });
-
-                                const data = await response.json();
-
-                                // Check premium requirement
-                                if (checkPremiumRequirement(data)) {
-                                    ideaGenerateBtn.disabled = false;
-                                    ideaGenerateLoading.classList.add('hidden');
-                                    return;
-                                }
-
-                                if (data.success && data.ideas && data.ideas.length > 0) {
-                                    generatedIdeasResult.innerHTML = '';
-                                    data.ideas.forEach((idea, index) => {
-                                        const ideaDiv = document.createElement('div');
-                                        ideaDiv.className =
-                                            'bg-white p-4 rounded-lg border border-gray-200 hover:border-amber-300 transition-all';
-                                        ideaDiv.innerHTML = `
-                            <h5 class="font-semibold text-gray-900 mb-2">${index + 1}. ${idea.title || 'Untitled Idea'}</h5>
-                            ${idea.description ? `<p class="text-sm text-gray-600 mb-2">${idea.description}</p>` : ''}
-                            ${idea.key_points && idea.key_points.length > 0 ? `
-                                                                                                                                                                                                        <ul class="text-xs text-gray-500 list-disc list-inside">
-                                                                                                                                                                                                            ${idea.key_points.map(point => `<li>${point}</li>`).join('')}
-                                                                                                                                                                                                        </ul>
-                                                                                                                                                                                                    ` : ''}
-                            <button type="button" class="mt-2 text-xs text-amber-600 hover:text-amber-700 font-medium" onclick="useIdea('${idea.title || ''}', '${(idea.description || '').replace(/'/g, "\\'")}')">
-                                Gunakan Ide Ini →
-                            </button>
-                        `;
-                                        generatedIdeasResult.appendChild(ideaDiv);
-                                    });
-
-                                    generatedIdeasResult.classList.remove('hidden');
-
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Ide Berhasil Dibuat!',
-                                        text: `Ditemukan ${data.ideas.length} ide kreatif.`,
-                                        toast: true,
-                                        position: 'top-end',
-                                        showConfirmButton: false,
-                                        timer: 3000
-                                    });
-                                } else {
-                                    throw new Error(data.message || 'Failed to generate ideas');
-                                }
-                            } catch (error) {
-                                console.error('Idea generation error:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: error.message || 'Gagal generate ide. Silakan coba lagi.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                            } finally {
-                                ideaGenerateBtn.disabled = false;
-                                ideaGenerateLoading.classList.add('hidden');
-                            }
-                        });
-                    }
-
-                    // Function to use idea in editor
-                    window.useIdea = function(title, description) {
-                        let range = quill.getSelection();
-                        if (!range) {
-                            range = {
-                                index: quill.getLength(),
-                                length: 0
-                            };
-                        }
-
-                        const content = `<h2>${title}</h2><p>${description}</p>`;
-                        const delta = quill.clipboard.convert({
-                            html: content
-                        });
-                        quill.updateContents(
-                            new Delta()
-                            .retain(range.index)
-                            .delete(range.length)
-                            .concat(delta),
-                            'api'
-                        );
-
-                        quill.setSelection(range.index + delta.length());
-                        contentTextarea.value = quill.root.innerHTML;
-
-                        // Update title field if exists
-                        const titleInput = document.getElementById('title');
-                        if (titleInput && !titleInput.value) {
-                            titleInput.value = title;
-                        }
-
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Ide Ditambahkan!',
-                            text: 'Ide telah dimasukkan ke editor.',
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 2000
-                        });
-                    };
-
-                    // AI Analyze Button (for summary and tags)
-                    const aiAnalyzeBtn = document.getElementById('ai-analyze-btn');
-                    const aiBtnText = document.getElementById('ai-btn-text');
-                    const aiLoading = document.getElementById('ai-loading');
-                    const summaryTextarea = document.getElementById('summary');
-
-                    if (aiAnalyzeBtn) {
-                        aiAnalyzeBtn.addEventListener('click', async function() {
-                            // Get plain text content from Quill for AI analysis
-                            const content = quill.getText().trim();
-
-                            if (!content) {
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'No Content',
-                                    text: 'Please enter some content first.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                                return;
-                            }
-
-                            // Show loading state
-                            aiAnalyzeBtn.disabled = true;
-                            aiBtnText.textContent = 'Analyzing...';
-                            aiLoading.classList.remove('hidden');
-
-                            try {
-                                const response = await fetch('{{ route('ai.analyze') }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                    body: JSON.stringify({
-                                        content: content
-                                    })
-                                });
-
-                                const data = await response.json();
-
-                                // Check premium requirement
-                                if (checkPremiumRequirement(data)) {
-                                    aiAnalyzeBtn.disabled = false;
-                                    aiLoading.classList.add('hidden');
-                                    aiBtnText.textContent = 'Generate Summary & Tags';
-                                    return;
-                                }
-
-                                if (data.success) {
-                                    // Fill summary
-                                    if (data.data.summary) {
-                                        summaryTextarea.value = data.data.summary;
-                                    }
-
-                                    // Add suggested tags
-                                    if (data.data.tags && data.data.tags.length > 0) {
-                                        data.data.tags.forEach(tag => {
-                                            if (!tagExists(tag)) {
-                                                addTag(tag);
-                                            }
-                                        });
-                                    }
-
-                                    // Show success message
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Generated!',
-                                        text: 'AI has generated summary and suggested tags.',
-                                        toast: true,
-                                        position: 'top-end',
-                                        showConfirmButton: false,
-                                        timer: 3000
-                                    });
-
-                                    aiBtnText.textContent = 'Success! ✓';
-                                    setTimeout(() => {
-                                        aiBtnText.textContent = 'Generate with AI';
-                                    }, 2000);
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'AI Unavailable',
-                                        text: 'AI service is currently unavailable. Please try again later.',
-                                        toast: true,
-                                        position: 'top-end',
-                                        showConfirmButton: false,
-                                        timer: 3000
-                                    });
-                                    aiBtnText.textContent = 'Try Again';
-                                }
-                            } catch (error) {
-                                console.error('AI analysis error:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: 'An error occurred while analyzing your content. Please try again.',
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                                aiBtnText.textContent = 'Try Again';
-                            } finally {
-                                // Reset loading state
-                                aiAnalyzeBtn.disabled = false;
-                                aiLoading.classList.add('hidden');
-                                setTimeout(() => {
-                                    aiBtnText.textContent = 'Generate with AI';
-                                }, 2000);
-                            }
-                        });
-                    }
+                    // AI features removed - all AI functionality has been removed
 
                     // Toggle scarcity settings and border based on sale_mode
                     const saleModeInputs = document.querySelectorAll('input[name="sale_mode"]');
@@ -2555,6 +2083,42 @@
                         
                         // Initialize on page load
                         updateSaleModeUI();
+                    }
+
+                    // Draft & Schedule functionality
+                    const draftCheckbox = document.getElementById('save_as_draft');
+                    const scheduleSection = document.getElementById('schedule-section');
+                    const scheduledAtInput = document.getElementById('scheduled_at');
+                    const submitBtn = document.getElementById('submit-btn');
+                    const submitText = document.getElementById('submit-text');
+
+                    if (draftCheckbox) {
+                        draftCheckbox.addEventListener('change', function() {
+                            if (this.checked) {
+                                scheduleSection.classList.remove('hidden');
+                                submitText.textContent = '{{ __('Save as Draft') }}';
+                            } else {
+                                scheduleSection.classList.add('hidden');
+                                scheduledAtInput.value = '';
+                                submitText.textContent = '{{ __('Create Note') }}';
+                            }
+                        });
+
+                        // Check if scheduled_at is set, show schedule section
+                        if (scheduledAtInput && scheduledAtInput.value) {
+                            scheduleSection.classList.remove('hidden');
+                            draftCheckbox.checked = false;
+                        }
+
+                        // Update submit text based on schedule
+                        scheduledAtInput.addEventListener('change', function() {
+                            if (this.value) {
+                                submitText.textContent = '{{ __('Schedule Note') }}';
+                                draftCheckbox.checked = false;
+                            } else if (!draftCheckbox.checked) {
+                                submitText.textContent = '{{ __('Create Note') }}';
+                            }
+                        });
                     }
                 });
             </script>

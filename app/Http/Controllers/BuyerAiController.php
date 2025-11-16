@@ -101,16 +101,25 @@ class BuyerAiController extends Controller
 
             // Generate summary
             $summary = $this->aiService->generateSummary($content, 500);
+            if ($summary === null || empty(trim($summary))) {
+                $summary = 'Tidak dapat menghasilkan ringkasan untuk note ini.';
+            }
 
             // Extract key points using AI
             $keyPointsPrompt = "Dari konten berikut, ekstrak 5-10 poin penting:\n\n" . substr($content, 0, 3000);
             $keyPointsResponse = $this->aiService->callOllama($keyPointsPrompt, ['num_predict' => 200]);
             $keyPoints = $this->parseKeyPoints($keyPointsResponse['response'] ?? '');
+            if (empty($keyPoints)) {
+                $keyPoints = ['Tidak dapat mengekstrak poin penting.'];
+            }
 
             // Generate insights
             $insightsPrompt = "Dari konten berikut, berikan 3-5 insight utama:\n\n" . substr($content, 0, 3000);
             $insightsResponse = $this->aiService->callOllama($insightsPrompt, ['num_predict' => 200]);
             $insights = $this->parseInsights($insightsResponse['response'] ?? '');
+            if (empty($insights)) {
+                $insights = ['Tidak dapat menghasilkan insight.'];
+            }
 
             // Extract topics
             $topics = $this->aiService->suggestTags($content, 5);
@@ -162,11 +171,13 @@ class BuyerAiController extends Controller
             logger()->error('AI Note Analyzer error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'note_id' => $note->id ?? null,
+                'user_id' => $user->id ?? null,
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while analyzing the note.',
+                'message' => 'Terjadi kesalahan saat menganalisis note. Silakan coba lagi nanti.',
             ], 500);
         }
     }
