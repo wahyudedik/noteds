@@ -33,6 +33,10 @@ Schedule::command('forum:publish-scheduled-posts')
     ->timezone('Asia/Jakarta')
     ->description('Publish forum posts that have reached their scheduled time');
 
+Schedule::command('notes:publish-scheduled')
+    ->everyMinute()
+    ->timezone('Asia/Jakarta')
+    ->description('Publish notes that have reached their scheduled publish time');
 Schedule::command('workspace:digest')
     ->daily()
     ->at('07:00')
@@ -50,3 +54,9 @@ Schedule::command('featured:expiry-reminders')
     ->at('09:00')
     ->timezone('Asia/Jakarta')
     ->description('Send reminders for featured notes that are about to expire.');
+
+// Studio SLA reminders (milestones due and funding reminders)
+Schedule::command('studio:sla-reminders')
+    ->hourly()
+    ->timezone('Asia/Jakarta')
+    ->description('Send SLA reminders for Studio milestones and funding.');

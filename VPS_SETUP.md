@@ -335,6 +335,8 @@ sudo chmod -R 775 /var/www/noteds/storage
 sudo chmod -R 775 /var/www/noteds/bootstrap/cache
 ```
 
+> Identity verification documents (KTP & selfie) are stored on the `private` disk (`storage/app/private`), downloaded via secured admin routes. No public exposure required.
+
 ### 8. Optimize Laravel
 
 ```bash

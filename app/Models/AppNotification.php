@@ -52,4 +52,15 @@ class AppNotification extends Model
     {
         $this->update(['is_read' => true]);
     }
+
+    protected static function booted(): void
+    {
+        static::created(function (AppNotification $notification) {
+            try {
+                event(new \App\Events\NotificationCreated($notification));
+            } catch (\Throwable $e) {
+                // ignore broadcasting failures
+            }
+        });
+    }
 }

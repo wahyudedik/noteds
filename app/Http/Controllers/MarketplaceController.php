@@ -50,6 +50,12 @@ class MarketplaceController extends Controller
                       ->orWhere('content', 'like', '%' . $request->search . '%');
                 });
             })
+            ->when($request->ecosystem, function ($query) use ($request) {
+                return $query->where('ecosystem_category', $request->ecosystem);
+            })
+            ->when($request->language, function ($query) use ($request) {
+                return $query->where('language', $request->language);
+            })
             ->when($request->min_price, function ($query) use ($request) {
                 return $query->where('price', '>=', $request->min_price);
             })

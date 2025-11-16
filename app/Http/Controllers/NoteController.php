@@ -93,7 +93,19 @@ class NoteController extends Controller
             'category_rules' => Setting::getCategoryMinPriceList(),
         ];
 
-        return view('notes.create', compact('tags', 'folders', 'workspaces', 'selectedWorkspace', 'selectedFolder', 'priceGuidance'));
+        $ecosystems = [
+            '' => '— Tidak ditentukan —',
+            'elements' => 'Elements (Unlimited)',
+            'audiojungle' => 'AudioJungle',
+            'codecanyon' => 'CodeCanyon',
+            'graphicriver' => 'GraphicRiver',
+            'photodune' => 'PhotoDune',
+            'themeforest' => 'Themeforest',
+            'videohive' => 'VideoHive',
+            '3docean' => '3DOcean',
+        ];
+
+        return view('notes.create', compact('tags', 'folders', 'workspaces', 'selectedWorkspace', 'selectedFolder', 'priceGuidance', 'ecosystems'));
     }
 
     /**
@@ -149,6 +161,9 @@ class NoteController extends Controller
         }
 
         $validated = $request->validated();
+        $validated['ecosystem_category'] = $request->input('ecosystem_category') ?: null;
+        $validated['language'] = $request->input('language') ?: null;
+        $validated['scheduled_publish_at'] = $request->input('scheduled_publish_at') ?: null;
         $user = auth()->user();
         $validated['user_id'] = $user->id;
         $validated['original_creator_id'] = $user->id; // Set original creator on creation
@@ -348,7 +363,26 @@ class NoteController extends Controller
             'category_rules' => Setting::getCategoryMinPriceList(),
         ];
 
-        return view('notes.edit', compact('note', 'tags', 'folders', 'workspaces', 'priceGuidance'));
+        $ecosystems = [
+            '' => '— Tidak ditentukan —',
+            'elements' => 'Elements (Unlimited)',
+            'audiojungle' => 'AudioJungle',
+            'codecanyon' => 'CodeCanyon',
+            'graphicriver' => 'GraphicRiver',
+            'photodune' => 'PhotoDune',
+            'themeforest' => 'Themeforest',
+            'videohive' => 'VideoHive',
+            '3docean' => '3DOcean',
+        ];
+
+        $languages = [
+            '' => '— Language —',
+            'en' => 'English',
+            'id' => 'Bahasa Indonesia',
+            'ar' => 'العربية',
+        ];
+
+        return view('notes.edit', compact('note', 'tags', 'folders', 'workspaces', 'priceGuidance', 'ecosystems', 'languages'));
     }
 
     /**
@@ -408,6 +442,9 @@ class NoteController extends Controller
         }
 
         $validated = $request->validated();
+        if ($request->has('ecosystem_category')) {
+            $validated['ecosystem_category'] = $request->input('ecosystem_category') ?: null;
+        }
         $validated['is_public'] = $request->has('is_public');
 
         // Handle workspace and folder

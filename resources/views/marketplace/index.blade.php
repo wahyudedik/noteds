@@ -63,7 +63,7 @@
         <!-- Search and Filter Form -->
         <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-8">
             <form method="GET" action="{{ route('marketplace.index') }}" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
                     <div>
                         <label for="search" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.search_title') }}</label>
                         <input type="text" name="search" id="search" value="{{ request('search') }}" 
@@ -79,6 +79,36 @@
                                     {{ $tag->name }} ({{ $tag->notes_count }})
                                 </option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label for="ecosystem" class="block text-sm font-medium text-gray-700 mb-2">Ecosystem</label>
+                        @php
+                            $ecosystems = [
+                                '' => 'Semua ecosystem',
+                                'elements' => 'Elements (Unlimited)',
+                                'audiojungle' => 'AudioJungle',
+                                'codecanyon' => 'CodeCanyon',
+                                'graphicriver' => 'GraphicRiver',
+                                'photodune' => 'PhotoDune',
+                                'themeforest' => 'Themeforest',
+                                'videohive' => 'VideoHive',
+                                '3docean' => '3DOcean',
+                            ];
+                        @endphp
+                        <select name="ecosystem" id="ecosystem" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                            @foreach($ecosystems as $value => $label)
+                                <option value="{{ $value }}" {{ request('ecosystem') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label for="language" class="block text-sm font-medium text-gray-700 mb-2">Bahasa</label>
+                        <select name="language" id="language" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                            <option value="">{{ __('messages.all') }}</option>
+                            <option value="en" {{ request('language')==='en' ? 'selected' : '' }}>English</option>
+                            <option value="id" {{ request('language')==='id' ? 'selected' : '' }}>Bahasa Indonesia</option>
+                            <option value="ar" {{ request('language')==='ar' ? 'selected' : '' }}>العربية</option>
                         </select>
                     </div>
                     <div>
@@ -111,7 +141,7 @@
                         </svg>
                         {{ __('messages.filter') }}
                     </button>
-                    @if(request()->hasAny(['search', 'tag', 'min_price', 'max_price', 'sort']))
+                    @if(request()->hasAny(['search', 'tag', 'min_price', 'max_price', 'sort', 'ecosystem', 'language']))
                         <a href="{{ route('marketplace.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200">
                             {{ __('messages.clear') }}
                         </a>

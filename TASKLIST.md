@@ -310,6 +310,51 @@ Menyiapkan aplikasi untuk rilis publik.
 - [x] Views: notes/show, notes/edit, notes/create, notes/index, marketplace/show
 - [ ] Security: Virus scanning integration (ClamAV)
 
+### Identity Verification (KYC)
+- [x] Add fields to `users`: agreement_accepted_at, agreement_version, ktp_path, selfie_path, verification_status, verification_reviewed_at, verification_reviewed_by, verification_notes
+- [x] Registration: require agreement checkbox, KTP & selfie uploads (5MB limit)
+- [x] Store documents on private disk and record paths
+- [x] Admin: approve/reject verification with notes, download KTP/selfie
+- [x] Gate seller features until verification approved
+
+### Manajemen Waktu & Bahasa untuk Notes
+- [x] Add fields to `notes`: ecosystem_category, language, scheduled_publish_at
+- [x] Marketplace filter: Dropdown Ecosystem & Language
+- [x] Create/Edit Notes: Form fields untuk ecosystem category, language, scheduled publish
+- [x] Scheduled Publish Command: `notes:publish-scheduled` (runs every minute)
+- [x] Verification check: Unverified users cannot create notes
+
+### Studio Order Flow (Envato Studio-like)
+- [x] Migration `service_orders` table (brief, budget, status, escrow_amount, milestones JSON)
+- [x] Migration `service_quotes` table (vendor, milestones, total_amount, status)
+- [x] Migration `escrow_ledgers` table (fund/release/refund history)
+- [x] Migration `order_activities` table (timeline log)
+- [x] Models: ServiceOrder, ServiceQuote, EscrowLedger, OrderActivity
+- [x] Controllers: ServiceOrderController, ServiceQuoteController, VendorController
+- [x] Routes: Studio hub, orders CRUD, quotes, escrow actions
+- [x] UI: Brief creation, order listing, order detail dengan escrow/milestones
+- [x] Escrow System: Fund, release (with platform fee), refund
+- [x] Quote System: Admin/vendor create quote, buyer accept/reject
+- [x] Vendor Role: Dedicated role & dashboard (assigned orders, quotes)
+- [x] Platform Fee: Configurable percentage (default: 10%) deducted on release
+- [x] Milestone Validation: Prevent release exceeding milestone cap
+- [x] Order Timeline: Activity log untuk semua actions
+- [x] Email Notifications: Toggleable per event (quote, escrow, vendor assigned)
+- [x] Realtime Notifications: Broadcast + Echo integration untuk bell
+- [x] SLA Reminders: Scheduler untuk milestone due & funding reminders
+- [x] Admin Features: Manual vendor assignment, bulk assign, unassigned orders list
+- [x] Rate Limiting: Throttle pada escrow/quote actions
+
+### System Health & Monitoring
+- [x] Admin System Health Dashboard (`/admin/system-health`)
+- [x] Health Checks: Database, Queue, Cache, Scheduler, Broadcaster
+- [x] Queue Monitoring: Pending/failed jobs count dengan alerts
+- [x] Scheduler Detection: Automatic marker via event listener
+- [x] Critical Alerts: Auto-notify admins when components fail (rate-limited)
+- [x] Broadcaster Test: Test connection untuk Pusher/Ably
+- [x] Setup Instructions: Guide untuk Echo configuration
+- [x] Visual Indicators: Color-coded badges (Healthy/Warning/Error)
+
 ### Support Ticket System
 - [x] Migration `support_tickets` table (UUID, status, priority, screenshots, links, admin_response)
 - [x] Migration `support_ticket_replies` table (UUID, conversation thread support)
@@ -402,9 +447,20 @@ Menyiapkan aplikasi untuk rilis publik.
 - Settings hanya bisa diubah oleh admin role
 - Test connection tidak upload file, hanya verify credentials
 
-### REST API & Mobile (pending dulu/optional)
-- [ ] REST API publik
-- [ ] Versi mobile: Flutter app
+### Ekosistem Kreatif (Roadmap/Marketing)
+- [x] Elements: Langganan kreatif unlimited (akses jutaan aset)
+- [x] AudioJungle: Musik & SFX katalog besar (royalty-safe)
+- [x] CodeCanyon: Plugin, kode, skrip (Bootstrap/JS/PHP/WordPress/HTML5)
+- [x] GraphicRiver: Aset grafis (logo, font, Photoshop actions, materi cetak)
+- [x] PhotoDune: Fotografi stok bebas royalti
+- [x] Themeforest: Template premium (WordPress, Shopify, dsb)
+- [x] VideoHive: Video, template, motion graphics
+- [x] 3DOcean: Model 3D, tekstur, render setups
+- [x] Routes: `/ecosystem`, `/ecosystem/{category}`, `/tuts`, `/studio`
+- [x] Controllers: EcosystemController, TutsController, StudioController
+- [x] UI: Ecosystem hub pages dengan links ke marketplace filtered
+- [x] Navigation: Global menu links di "More" dropdown
+- [x] Marketplace Integration: Filter by ecosystem_category
 
 ---
 
@@ -429,6 +485,10 @@ Menyiapkan aplikasi untuk rilis publik.
 | `buyer_collections`| ✅     | ✅   |
 | `note_downloads`   | ✅     | ✅   |
 | `reading_progress` | ✅     | ✅   |
+| `service_orders`   | ✅     | ✅   |
+| `service_quotes`   | ✅     | ✅   |
+| `escrow_ledgers`  | ✅     | ✅   |
+| `order_activities` | ✅     | ✅   |
 
 **Sale Mode System Fields:**
 - `notes.sale_mode` (enum: scarcity, standard)
@@ -460,4 +520,3 @@ Menyiapkan aplikasi untuk rilis publik.
 - [README.md](README.md) - Platform Overview
 - [LOCAL_SETUP.md](LOCAL_SETUP.md) - Local Development Guide
 - [VPS_SETUP.md](VPS_SETUP.md) - VPS Deployment Guide
-

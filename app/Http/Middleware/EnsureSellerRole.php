@@ -32,6 +32,11 @@ class EnsureSellerRole
             return redirect()->back()->with('error', 'Fitur ini hanya tersedia untuk Seller. Buyer tidak dapat menjual note. Jika ingin menjual, silakan buat akun Seller dengan email berbeda.');
         }
 
+        // Require identity verification for sellers (unless admin)
+        if (($user->verification_status ?? 'pending') !== 'approved') {
+            return redirect()->back()->with('error', 'Akun Anda belum terverifikasi. Silakan tunggu verifikasi admin setelah mengunggah KTP dan foto wajah saat pendaftaran.');
+        }
+
         return $next($request);
     }
 }

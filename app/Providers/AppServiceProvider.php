@@ -19,6 +19,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register schedule event listener to track scheduler runs
+        if (class_exists(\Illuminate\Console\Events\ScheduledTaskStarting::class)) {
+            \Illuminate\Support\Facades\Event::listen(
+                \Illuminate\Console\Events\ScheduledTaskStarting::class,
+                \App\Listeners\ScheduleEventListener::class
+            );
+        }
     }
 }

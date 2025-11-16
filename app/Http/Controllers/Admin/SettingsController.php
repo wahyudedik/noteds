@@ -50,6 +50,19 @@ class SettingsController extends Controller
         $featuredLocationLabels = Setting::getFeaturedLocationLabels();
         $featuredDurations = Setting::getFeaturedDurations();
 
+        // Studio settings
+        $studioPlatformFeePercent = Setting::getSetting('studio_platform_fee_percent', 'studio', 10);
+        $studioEmailToggles = [
+            'quote_created' => (bool) Setting::getSetting('studio_email_quote_created', 'studio', true),
+            'quote_accepted' => (bool) Setting::getSetting('studio_email_quote_accepted', 'studio', true),
+            'quote_rejected' => (bool) Setting::getSetting('studio_email_quote_rejected', 'studio', true),
+            'escrow_funded' => (bool) Setting::getSetting('studio_email_escrow_funded', 'studio', true),
+            'escrow_released' => (bool) Setting::getSetting('studio_email_escrow_released', 'studio', true),
+            'escrow_refunded' => (bool) Setting::getSetting('studio_email_escrow_refunded', 'studio', true),
+            'vendor_assigned' => (bool) Setting::getSetting('studio_email_vendor_assigned', 'studio', true),
+        ];
+        $studioSlaFundingReminderDays = (int) Setting::getSetting('studio_sla_funding_reminder_days', 'studio', 3);
+
         // AI usage configuration
         $aiFreeUsageLimit = Setting::getAiFreeUsageLimit();
         $aiFeaturePrices = Setting::getAiFeaturePrices();
@@ -66,6 +79,9 @@ class SettingsController extends Controller
             'referralCommissionPercent',
             'platformCommissionPercent',
             'creatorCommissionPercent',
+            'studioPlatformFeePercent',
+            'studioEmailToggles',
+            'studioSlaFundingReminderDays',
             'premiumBuyerDiscountPercent',
             'defaultTaxPercent',
             'taxInclusiveDefault',
@@ -103,6 +119,15 @@ class SettingsController extends Controller
             'referral_reward_commission_percent' => 'nullable|numeric|min:0|max:100',
             'platform_commission_percent' => 'nullable|numeric|min:0|max:100',
             'creator_commission_percent' => 'nullable|numeric|min:0|max:100',
+            'studio_platform_fee_percent' => 'nullable|numeric|min:0|max:100',
+            'studio_email_quote_created' => 'nullable|boolean',
+            'studio_email_quote_accepted' => 'nullable|boolean',
+            'studio_email_quote_rejected' => 'nullable|boolean',
+            'studio_email_escrow_funded' => 'nullable|boolean',
+            'studio_email_escrow_released' => 'nullable|boolean',
+            'studio_email_escrow_refunded' => 'nullable|boolean',
+            'studio_email_vendor_assigned' => 'nullable|boolean',
+            'studio_sla_funding_reminder_days' => 'nullable|integer|min:1|max:30',
             'premium_buyer_discount_percent' => 'nullable|numeric|min:0|max:50',
             'tax_default_percent' => 'nullable|numeric|min:0|max:100',
             'tax_inclusive_default' => 'nullable|boolean',
@@ -187,6 +212,49 @@ class SettingsController extends Controller
                 'number',
                 'marketplace',
                 'Creator commission percentage (only for original creator on resale)'
+            );
+        }
+
+        // Update studio platform fee percent
+        if ($request->has('studio_platform_fee_percent')) {
+            Setting::setSetting(
+                'studio_platform_fee_percent',
+                $request->input('studio_platform_fee_percent', 10),
+                'number',
+                'studio',
+                'Studio platform fee percentage deducted on escrow releases'
+            );
+        }
+
+        // Update studio email toggles
+        $studioEmailKeys = [
+            'studio_email_quote_created',
+            'studio_email_quote_accepted',
+            'studio_email_quote_rejected',
+            'studio_email_escrow_funded',
+            'studio_email_escrow_released',
+            'studio_email_escrow_refunded',
+            'studio_email_vendor_assigned',
+        ];
+        foreach ($studioEmailKeys as $key) {
+            if ($request->has($key)) {
+                Setting::setSetting(
+                    $key,
+                    $request->boolean($key),
+                    'boolean',
+                    'studio',
+                    'Studio email toggle for ' . $key
+                );
+            }
+        }
+
+        if ($request->has('studio_sla_funding_reminder_days')) {
+            Setting::setSetting(
+                'studio_sla_funding_reminder_days',
+                (int) $request->input('studio_sla_funding_reminder_days', 3),
+                'number',
+                'studio',
+                'Days before sending funding reminder for quoted orders'
             );
         }
 
@@ -290,6 +358,19 @@ class SettingsController extends Controller
 
         if ($request->has('creator_commission_percent')) {
             $updates[] = 'Creator commission updated to ' . $request->input('creator_commission_percent') . '%';
+        }
+
+        if ($request->has('studio_platform_fee_percent')) {
+            $updates[] = 'Studio platform fee updated to ' . $request->input('studio_platform_fee_percent') . '%';
+        }
+        foreach ($studioEmailKeys as $key) {
+            if ($request->has($key)) {
+                $label = str_replace(['studio_email_', '_'], ['', ' '], $key);
+                $updates[] = 'Studio email "' . $label . '" set to ' . ($request->boolean($key) ? 'ON' : 'OFF');
+            }
+        }
+        if ($request->has('studio_sla_funding_reminder_days')) {
+            $updates[] = 'Studio SLA funding reminder set to every ' . (int) $request->input('studio_sla_funding_reminder_days') . ' days';
         }
 
         if ($request->has('tax_default_percent')) {

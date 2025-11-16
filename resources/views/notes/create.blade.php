@@ -128,6 +128,53 @@
                                 @enderror
                             </div>
 
+                            <!-- Ecosystem Category -->
+                            <div>
+                                <label for="ecosystem_category" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Ekosistem Kreatif
+                                </label>
+                                <select name="ecosystem_category" id="ecosystem_category"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                                    @foreach($ecosystems as $key => $label)
+                                        <option value="{{ $key }}" {{ old('ecosystem_category')===$key ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                @error('ecosystem_category')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                                <p class="mt-2 text-xs text-gray-600">
+                                    Pilih kategori ekosistem (Elements/AudioJungle/CodeCanyon/GraphicRiver/PhotoDune/Themeforest/VideoHive/3DOcean) untuk meningkatkan penemuan dan rekomendasi.
+                                </p>
+                            </div>
+
+                            <!-- Language & Scheduling -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="language" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Bahasa Konten
+                                    </label>
+                                    <select name="language" id="language"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                                        @foreach($languages as $code => $label)
+                                            <option value="{{ $code }}" {{ old('language')===$code ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('language')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label for="scheduled_publish_at" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Jadwalkan Publikasi (opsional)
+                                    </label>
+                                    <input type="datetime-local" name="scheduled_publish_at" id="scheduled_publish_at" value="{{ old('scheduled_publish_at') }}"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                                    <p class="mt-2 text-xs text-gray-600">Jika diisi, catatan akan otomatis dipublikasikan pada waktu tersebut.</p>
+                                    @error('scheduled_publish_at')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
                             <!-- AI Content Generator -->
                             <div
                                 class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200 p-4 mb-6 {{ !auth()->user()->hasPremium() ? 'opacity-75' : '' }}">

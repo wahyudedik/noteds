@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -192,6 +193,56 @@ class UserController extends Controller
         $this->notificationService->notifyAccountReactivated($user, Auth::user());
 
         return back()->with('success', 'Suspend akun dicabut.');
+    }
+
+    public function approveVerification(Request $request, User $user): RedirectResponse
+    {
+        $old = [
+            'verification_status' => $user->verification_status,
+        ];
+
+        $user->update([
+            'verification_status' => 'approved',
+            'verification_reviewed_at' => now(),
+            'verification_reviewed_by' => Auth::id(),
+            'verification_notes' => $request->input('notes'),
+        ]);
+
+        $this->logAdminAction($user, 'identity_verification_approved', $request->input('notes'), $old);
+
+        return back()->with('success', 'Verifikasi identitas disetujui.');
+    }
+
+    public function rejectVerification(Request $request, User $user): RedirectResponse
+    {
+        $request->validate([
+            'reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        $old = [
+            'verification_status' => $user->verification_status,
+        ];
+
+        $user->update([
+            'verification_status' => 'rejected',
+            'verification_reviewed_at' => now(),
+            'verification_reviewed_by' => Auth::id(),
+            'verification_notes' => $request->input('reason'),
+        ]);
+
+        $this->logAdminAction($user, 'identity_verification_rejected', $request->input('reason'), $old);
+
+        return back()->with('success', 'Verifikasi identitas ditolak.');
+    }
+
+    public function downloadDocument(User $user, string $type)
+    {
+        abort_unless(in_array($type, ['ktp', 'selfie']), 404);
+
+        $path = $type === 'ktp' ? $user->ktp_path : $user->selfie_path;
+        abort_unless($path && Storage::disk('private')->exists($path), 404);
+
+        return Storage::disk('private')->download($path);
     }
 
     private function guardAgainstSelfOrLastAdmin(User $user): ?string

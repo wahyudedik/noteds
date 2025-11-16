@@ -30,6 +30,9 @@ class StoreNoteRequest extends FormRequest
             'content' => ['required', 'string'],
             'summary' => ['nullable', 'string', 'max:500'],
             'preview_content' => ['nullable', 'string', 'max:300'],
+            'ecosystem_category' => ['nullable', 'in:elements,audiojungle,codecanyon,graphicriver,photodune,themeforest,videohive,3docean'],
+            'language' => ['nullable', 'in:en,id,ar'],
+            'scheduled_publish_at' => ['nullable', 'date'],
             'preview_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
             'thumbnails' => ['nullable', 'array', 'max:5'],
             'thumbnails.*' => ['image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'], // 5MB per image

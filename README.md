@@ -49,12 +49,16 @@ Platform di mana pengguna bisa:
 - Vite 6.4.1
 - Quill (Rich Text Editor)
 - SweetAlert2 (Notifications)
+- Laravel Echo (Realtime Notifications)
+- Pusher/Ably (Broadcasting)
 
 **Tools:**
 - Midtrans (Payment Gateway)
 - Ollama (AI Local LLM)
 - Laravel Telescope (Debugging)
 - Pest (Testing)
+- Laravel Queue (Background Jobs)
+- Laravel Scheduler (Cron Jobs)
 
 **Database:** All tables use **UUID** primary keys for security
 
@@ -123,6 +127,43 @@ Platform di mana pengguna bisa:
   - Download statistics
   - Completion rate tracking
   - Recent purchases & categories
+- ✅ Identity Verification (KYC)
+  - Agreement consent during registration
+  - KTP & selfie upload with secure private storage
+  - Admin approval workflow (required for sellers)
+  - Document download for admin review
+  - Verification status tracking
+- ✅ Ecosystem Creative (Envato-like)
+  - Elements: Unlimited creative subscription
+  - AudioJungle: Music tracks & sound effects
+  - CodeCanyon: Plugins, code, scripts
+  - GraphicRiver: Graphic assets & designs
+  - PhotoDune: Royalty-free stock photography
+  - Themeforest: Premium website templates
+  - VideoHive: Videos, templates, motion graphics
+  - 3DOcean: 3D models, textures, render setups
+  - Marketplace filtering by ecosystem category
+- ✅ Studio Order Flow (Service Marketplace)
+  - Brief creation by buyers
+  - Quote system with milestones (admin/vendor)
+  - Escrow funding, release, and refund
+  - Vendor role & dedicated dashboard
+  - Platform fee on escrow release (configurable)
+  - Order activity timeline
+  - SLA reminders (milestone due, funding reminders)
+  - Bulk vendor assignment (admin)
+  - Email notifications (toggleable per event)
+  - Realtime notifications via Echo/Broadcasting
+- ✅ Note Time & Language Management
+  - Scheduled publish (auto-publish at specified time)
+  - Language specification per note
+  - Marketplace filtering by language
+- ✅ System Health Monitoring (Admin)
+  - Database, Queue, Cache, Scheduler health checks
+  - Broadcaster configuration verification
+  - Queue jobs monitoring (pending/failed)
+  - Scheduler run detection
+  - Critical component alerts with notifications
 
 **AI Memory Platform Plugin (Premium Subscription Feature - Planned):**
 - 🚧 Multi-workspace system (personal, team, organization)
@@ -148,6 +189,83 @@ Platform di mana pengguna bisa:
 - AI Summary Demo
 - Transaction Flow Visualizer
 - Price Benchmark Tool
+
+### 🌟 Fitur Utama Ekosistem Kreatif
+
+- **Elements (Langganan Creative Unlimited):**
+  - Langganan kreatif tak terbatas (unlimited)
+  - Akses ke jutaan aset kreatif dengan satu biaya rendah
+  - Cocok untuk kreator yang butuh banyak aset cepat dengan lisensi aman
+
+- **AudioJungle (Audio & SFX):**
+  - Ratusan ribu trek musik dan efek suara
+  - Dibuat oleh komunitas profesional musik global
+  - Cocok untuk video, podcast, game, dan iklan
+
+- **CodeCanyon (Kode & Plugin):**
+  - Ribuan plugin, kode, dan skrip
+  - Dukungan framework populer: Bootstrap, JavaScript, PHP, WordPress, HTML5, dsb.
+  - Cocok untuk mempercepat pengembangan produk digital
+
+- **GraphicRiver (Grafis & Desain):**
+  - Aset grafis dan desain siap pakai
+  - Contoh: template logo, font, Photoshop actions, materi cetak
+
+- **PhotoDune (Fotografi Stok):**
+  - Koleksi besar fotografi stok bebas royalti (royalty-free)
+  - Siap digunakan untuk berbagai jenis proyek
+
+- **Themeforest (Template Premium):**
+  - Marketplace template situs web premium terkemuka
+  - Menawarkan tema untuk WordPress, Shopify, dan lainnya
+
+- **VideoHive (Video & Motion Graphics):**
+  - Marketplace untuk semua kebutuhan video
+  - Koleksi besar video, template, dan motion graphics bebas royalti
+
+- **3DOcean (3D Assets):**
+  - Komunitas global untuk semua hal 3D
+  - Menawarkan model 3D, tekstur, dan render setups
+
+### 🎨 Studio — Service Marketplace
+
+**Studio** adalah marketplace jasa kreatif (mirip Envato Studio) yang memungkinkan buyer memesan layanan custom dari vendor terverifikasi.
+
+**Fitur Utama:**
+- ✅ **Brief Creation:** Buyer membuat brief dengan title, description, dan budget
+- ✅ **Quote System:** Admin/Vendor mengirim quote dengan milestones breakdown
+- ✅ **Escrow System:** 
+  - Buyer fund escrow dari wallet
+  - Release per milestone dengan validasi
+  - Refund jika cancel
+  - Platform fee deduction (configurable, default: 10%)
+- ✅ **Vendor Dashboard:** 
+  - Daftar orders assigned
+  - Quotes yang dikirim
+  - Milestone tracking
+- ✅ **Admin Features:**
+  - Manual vendor assignment
+  - Bulk assign orders
+  - Unassigned orders list
+  - Platform fee configuration
+- ✅ **Notifications:**
+  - Email notifications (toggleable per event)
+  - Realtime in-app notifications via Echo
+  - Automated alerts untuk quote, escrow, milestone events
+- ✅ **SLA Reminders:**
+  - Milestone due reminders
+  - Funding reminders untuk quoted orders
+  - Automated hourly scheduler
+- ✅ **Order Timeline:** Activity log untuk semua order actions
+
+**Workflow:**
+1. Buyer creates brief → Status: `submitted`
+2. Admin/Vendor creates quote with milestones → Status: `quoted`
+3. Buyer accepts quote → Vendor assigned, milestones locked
+4. Buyer funds escrow → Status: `in_progress`
+5. Vendor completes milestone → Buyer releases escrow
+6. Platform fee deducted, vendor receives net amount
+7. Order completed when all milestones done
 
 ---
 
@@ -346,7 +464,14 @@ npm run build
 ```bash
 php artisan serve
 npm run build  # with Herd
+php artisan queue:work  # For background jobs (emails, notifications)
+php artisan schedule:run  # For scheduled tasks (or setup cron)
 ```
+
+**Important:** 
+- Run `php artisan queue:work` for email notifications and broadcasting
+- Setup cron for scheduler: `* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1`
+- Configure broadcaster (Pusher/Ably) in `.env` for realtime notifications
 
 See [LOCAL_SETUP.md](LOCAL_SETUP.md) for detailed instructions
 
@@ -373,10 +498,42 @@ composer pint
 - ✅ **UUID** untuk semua primary keys (prevent enumeration)
 - ✅ **Spatie Permission** untuk role-based access
 - ✅ **HTTPS** mandatory di production
-- ✅ **Rate limiting** on sensitive endpoints
+- ✅ **Rate limiting** on sensitive endpoints (escrow, quotes)
 - ✅ **CSRF** protection on all forms
 - ✅ **SQL injection** prevention via Eloquent
 - ✅ **XSS** protection via Blade escaping
+- ✅ **Identity Verification (KYC)** dengan secure private storage untuk dokumen sensitif
+- ✅ **File upload validation** dengan MIME type checking dan safe extensions only
+- ✅ **Private disk storage** untuk KTP dan selfie (tidak accessible via public URL)
+
+---
+
+## 🏥 System Health & Monitoring
+
+**Admin System Health Dashboard** (`/admin/system-health`) menyediakan monitoring real-time untuk komponen kritis sistem:
+
+**Health Checks:**
+- ✅ **Database:** Connection status, driver info
+- ✅ **Queue:** Driver status, pending/failed jobs count, worker detection
+- ✅ **Cache:** Driver test, read/write verification
+- ✅ **Scheduler:** Last run detection, scheduled commands count
+- ✅ **Broadcaster:** Configuration verification (Pusher/Ably), test connection
+
+**Monitoring Features:**
+- ✅ **Queue Jobs:** Real-time count of pending and failed jobs
+- ✅ **Scheduler Detection:** Automatic marker when `schedule:run` executes
+- ✅ **Critical Alerts:** Automatic notifications to admins when components fail
+- ✅ **Rate Limiting:** Alerts sent max once per hour to prevent spam
+
+**Alert System:**
+- ✅ **Critical Alerts:** Database/Queue down → In-app notification to all admins
+- ✅ **Warning Alerts:** Scheduler not running, failed jobs detected
+- ✅ **Visual Indicators:** Color-coded badges (Healthy/Warning/Error)
+
+**Setup Instructions:**
+- Broadcaster configuration guide included in dashboard
+- Cron setup instructions for scheduler
+- Queue worker commands and troubleshooting
 
 ---
 
@@ -414,6 +571,12 @@ composer pint
 - ✅ Subscription auto-renew flow dengan sufficient/insufficient balance handling & notifications
 - ✅ Sale Mode System (Scarcity & Standard modes dengan repurchase, resale, analytics)
 - ✅ Comprehensive Documentation System (22 documentation entries via DocumentationSeeder)
+- ✅ Identity Verification (KYC) dengan admin approval workflow
+- ✅ Ecosystem Creative (8 categories: Elements, AudioJungle, CodeCanyon, GraphicRiver, PhotoDune, Themeforest, VideoHive, 3DOcean)
+- ✅ Studio Order Flow (Brief, Quote, Escrow, Milestones, Vendor dashboard)
+- ✅ Note Time & Language Management (Scheduled publish, language filtering)
+- ✅ System Health Monitoring dengan realtime alerts
+- ✅ Realtime Notifications (Broadcast + Echo integration)
 
 **In Progress:**
 - ⚠️ FASE 8: Deployment & Launch

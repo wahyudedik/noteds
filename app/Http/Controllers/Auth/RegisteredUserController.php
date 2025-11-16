@@ -77,6 +77,9 @@ class RegisteredUserController extends Controller
             'role' => ['required', 'in:buyer,seller,user_workspaces'],
             'referral_code' => ['nullable', 'string', 'exists:users,referral_code'],
             'invite_token' => ['nullable', 'string'],
+            'agree_terms' => ['accepted'],
+            'ktp_file' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'selfie_file' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
         ]);
 
         // If invitation exists, role must be user_workspaces
@@ -107,6 +110,16 @@ class RegisteredUserController extends Controller
             $counter++;
         }
 
+        // Handle uploads (store in private disk)
+        $ktpPath = null;
+        $selfiePath = null;
+        if ($request->hasFile('ktp_file')) {
+            $ktpPath = $request->file('ktp_file')->store('kyc/ktp', 'private');
+        }
+        if ($request->hasFile('selfie_file')) {
+            $selfiePath = $request->file('selfie_file')->store('kyc/selfie', 'private');
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -116,6 +129,11 @@ class RegisteredUserController extends Controller
             'referred_by' => $referrer?->id,
             'is_active' => true,
             'suspended_at' => null,
+            'agreement_accepted_at' => now(),
+            'agreement_version' => 'v1',
+            'ktp_path' => $ktpPath,
+            'selfie_path' => $selfiePath,
+            'verification_status' => 'pending',
         ]);
         
         // Assign Spatie role

@@ -55,6 +55,33 @@ Route::post('/locale/timezone', [LocaleController::class, 'setTimezone'])->middl
 
 // Simulators (public for marketing)
 Route::get('/simulators', [SimulatorController::class, 'index'])->name('simulators.index');
+Route::get('/ecosystem', [\App\Http\Controllers\EcosystemController::class, 'index'])->name('ecosystem.index');
+Route::prefix('ecosystem')->name('ecosystem.')->group(function () {
+    Route::get('/audio', [\App\Http\Controllers\EcosystemController::class, 'audio'])->name('audio');
+    Route::get('/code', [\App\Http\Controllers\EcosystemController::class, 'code'])->name('code');
+    Route::get('/graphics', [\App\Http\Controllers\EcosystemController::class, 'graphics'])->name('graphics');
+    Route::get('/photos', [\App\Http\Controllers\EcosystemController::class, 'photos'])->name('photos');
+    Route::get('/themes', [\App\Http\Controllers\EcosystemController::class, 'themes'])->name('themes');
+    Route::get('/videos', [\App\Http\Controllers\EcosystemController::class, 'videos'])->name('videos');
+    Route::get('/3d', [\App\Http\Controllers\EcosystemController::class, 'threeD'])->name('3d');
+});
+Route::get('/tuts', [\App\Http\Controllers\TutsController::class, 'index'])->name('tuts.index');
+Route::get('/studio', [\App\Http\Controllers\StudioController::class, 'index'])->name('studio.index');
+Route::middleware(['auth', 'verified', 'role:vendor|admin'])->get('/vendor', [\App\Http\Controllers\VendorController::class, 'index'])->name('vendor.index');
+Route::middleware(['auth', 'verified', 'username.setup'])->prefix('studio')->name('studio.')->group(function () {
+    Route::get('/orders', [\App\Http\Controllers\ServiceOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/create', [\App\Http\Controllers\ServiceOrderController::class, 'create'])->name('orders.create');
+    Route::post('/orders', [\App\Http\Controllers\ServiceOrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders/{order}', [\App\Http\Controllers\ServiceOrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/fund-escrow', [\App\Http\Controllers\ServiceOrderController::class, 'fundEscrow'])->middleware('throttle:5,1')->name('orders.fund-escrow');
+    Route::post('/orders/{order}/release-escrow', [\App\Http\Controllers\ServiceOrderController::class, 'releaseEscrow'])->middleware('throttle:5,1')->name('orders.release-escrow');
+    Route::post('/orders/{order}/refund-escrow', [\App\Http\Controllers\ServiceOrderController::class, 'refundEscrow'])->middleware('throttle:5,1')->name('orders.refund-escrow');
+    Route::post('/orders/{order}/assign-vendor', [\App\Http\Controllers\ServiceOrderController::class, 'assignVendor'])->middleware('role:admin')->name('orders.assign-vendor');
+    Route::get('/orders/{order}/quotes/create', [\App\Http\Controllers\ServiceQuoteController::class, 'create'])->name('orders.quotes.create');
+    Route::post('/orders/{order}/quotes', [\App\Http\Controllers\ServiceQuoteController::class, 'store'])->middleware('throttle:5,1')->name('orders.quotes.store');
+    Route::post('/quotes/{quote}/accept', [\App\Http\Controllers\ServiceQuoteController::class, 'accept'])->middleware('throttle:8,1')->name('quotes.accept');
+    Route::post('/quotes/{quote}/reject', [\App\Http\Controllers\ServiceQuoteController::class, 'reject'])->middleware('throttle:8,1')->name('quotes.reject');
+});
 
 // Contact (public)
 Route::get('/contact', [App\Http\Controllers\ContactController::class, 'index'])->name('contact.index');
@@ -306,6 +333,9 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::post('/users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');
     Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
     Route::post('/users/{user}/release', [UserController::class, 'release'])->name('users.release');
+    Route::post('/users/{user}/verify-approve', [UserController::class, 'approveVerification'])->name('users.verify.approve');
+    Route::post('/users/{user}/verify-reject', [UserController::class, 'rejectVerification'])->name('users.verify.reject');
+    Route::get('/users/{user}/download-doc/{type}', [UserController::class, 'downloadDocument'])->name('users.download-doc');
     Route::resource('commission-tiers', AdminCommissionTierController::class)->except(['show']);
     Route::resource('faqs', AdminFaqController::class);
     Route::resource('cms-pages', AdminCmsPageController::class);
@@ -330,12 +360,19 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
     Route::post('/settings/test-s3', [AdminSettingsController::class, 'testS3'])->name('settings.test-s3');
+    Route::get('/system-health', [\App\Http\Controllers\Admin\SystemHealthController::class, 'index'])->name('system-health.index');
+    Route::post('/system-health/test-broadcaster', [\App\Http\Controllers\Admin\SystemHealthController::class, 'testBroadcaster'])->name('system-health.test-broadcaster');
     Route::post('/tax-rules', [AdminTaxRuleController::class, 'store'])->name('tax-rules.store');
     Route::put('/tax-rules/{taxRule}', [AdminTaxRuleController::class, 'update'])->name('tax-rules.update');
     Route::delete('/tax-rules/{taxRule}', [AdminTaxRuleController::class, 'destroy'])->name('tax-rules.destroy');
     Route::post('/price-rules', [AdminPriceRuleController::class, 'store'])->name('price-rules.store');
     Route::put('/price-rules/{tagSlug}', [AdminPriceRuleController::class, 'update'])->name('price-rules.update');
     Route::delete('/price-rules/{tagSlug}', [AdminPriceRuleController::class, 'destroy'])->name('price-rules.destroy');
+
+    // Vendors admin
+    Route::get('/vendors', [\App\Http\Controllers\Admin\VendorController::class, 'index'])->name('vendors.index');
+    Route::post('/vendors/assign', [\App\Http\Controllers\Admin\VendorController::class, 'assign'])->name('vendors.assign');
+    Route::post('/vendors/bulk-assign', [\App\Http\Controllers\Admin\VendorController::class, 'bulkAssign'])->name('vendors.bulk-assign');
 
     Route::get('/forum/moderation', [PostModerationController::class, 'index'])->name('forum.moderation.index');
     Route::get('/forum/moderation/{post}', [PostModerationController::class, 'show'])->name('forum.moderation.show');

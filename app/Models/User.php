@@ -51,6 +51,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'forum_email_preferences',
         'is_active',
         'suspended_at',
+        'agreement_accepted_at',
+        'agreement_version',
+        'ktp_path',
+        'selfie_path',
+        'verification_status',
+        'verification_reviewed_at',
+        'verification_reviewed_by',
+        'verification_notes',
     ];
 
     /**
@@ -77,6 +85,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'forum_email_preferences' => 'array',
             'is_active' => 'boolean',
             'suspended_at' => 'datetime',
+            'agreement_accepted_at' => 'datetime',
+            'verification_reviewed_at' => 'datetime',
         ];
     }
 

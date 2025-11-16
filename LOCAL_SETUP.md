@@ -32,7 +32,7 @@ Edit `.env`:
 APP_NAME="Noteds"
 APP_ENV=local
 APP_DEBUG=true
-APP_URL=http://noteds.test  # Use HTTP for development to avoid mixed content errors
+APP_URL=http://noteds.test  # Use HTTP for development (Vite dev server HTTP)
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -78,9 +78,10 @@ npm run build  # For production build (no hot reload)
 ```
 
 **⚠️ Important:** 
-- **Akses via HTTP:** `http://noteds.test` (bukan https) untuk menghindari Mixed Content errors
-- Jika Herd menggunakan HTTPS, disable HTTPS di Herd settings atau akses langsung via HTTP
-- `npm run dev` menggunakan Vite dev server (HTTP) yang tidak kompatibel dengan HTTPS pages
+- **Akses via HTTP:** `http://noteds.test` (bukan https://) untuk development
+- Vite dev server menggunakan HTTP (port 5173)
+- Browser akan block mixed content jika akses via HTTPS, jadi gunakan HTTP untuk development
+- `npm run dev` menggunakan Vite dev server (HTTP) yang lebih stabil untuk development
 
 #### Using `php artisan serve` (HTTP)
 ```bash
@@ -165,6 +166,16 @@ php artisan forum:publish-scheduled-posts
 ```
 
 **Note:** This command is automatically scheduled to run daily at 00:00 WIB in production (see `routes/console.php`). In development, you can run it manually to test subscription renewal logic.
+
+## 🪪 Identity Verification (Local Testing)
+
+- Pendaftaran kini mewajibkan:
+  - Centang persetujuan Surat Perjanjian Pengguna
+  - Upload KTP: JPG/PNG/PDF (maks 5MB)
+  - Upload Selfie/Fot o Wajah: JPG/PNG (maks 5MB)
+- Dokumen disimpan di disk `private` (tidak publik). Admin dapat mengunduh via halaman detail user.
+- Approve/Reject dilakukan di halaman: `/admin/users/{id}` (panel “Verifikasi Identitas”).
+- Seller hanya bisa mengakses fitur jual jika status verifikasi: `approved`.
 
 **What it does:**
 - Checks active premium subscriptions expiring today or tomorrow
@@ -374,11 +385,28 @@ MIDTRANS_MERCHANT_ID=Gxxxxx  # Sandbox Merchant ID (optional)
 - Vite dev server berjalan di `http://noteds.test:5173` (HTTP)
 - Browser block mixed content (HTTPS page loading HTTP resources)
 
-**Solutions (Pilih salah satu):**
+**✅ SOLUTION - Use HTTP for Development (Recommended):**
 
-1. **✅ RECOMMENDED - Akses via HTTP:**
+Untuk development, gunakan HTTP untuk menghindari mixed content errors:
+
+1. **Akses via HTTP:**
+   - Buka: `http://noteds.test` (bukan https://)
+   - Vite dev server berjalan di HTTP port 5173
+   - Tidak ada mixed content error
+
+2. **Update APP_URL di .env:**
+   ```env
+   APP_URL=http://noteds.test
+   ```
+
+3. **Clear Browser Cache:**
+   - Jika browser masih redirect ke HTTPS, clear cache
+   - Atau gunakan incognito mode
+
+**Alternative Solutions (Jika masih error):**
+
+1. **Akses via HTTP:**
    - Akses langsung: `http://noteds.test` (bukan https://)
-   - Browser akan otomatis menggunakan HTTP dan tidak ada mixed content error
    - Clear browser cache jika masih redirect ke HTTPS
 
 2. **Disable HTTPS di Herd:**

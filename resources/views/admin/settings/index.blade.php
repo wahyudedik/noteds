@@ -17,6 +17,120 @@
                 <p class="text-gray-600 mt-1">{{ __('messages.configure_system_wide_settings') }}</p>
             </div>
 
+            <!-- Studio Platform Fee Configuration -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-6">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l2-2 4 4m6 2V7a2 2 0 00-2-2h-3.28a2 2 0 01-1.788-1.106l-.894-1.788A2 2 0 0011.45 2H8a2 2 0 00-2 2v3M7 10h10M7 14h6M7 18h3" />
+                                </svg>
+                                {{ __('messages.studio_platform_fee') }}
+                            </h3>
+                            <p class="text-sm text-gray-600 mt-1">
+                                {{ __('messages.studio_platform_fee_description') ?? 'Atur persentase fee platform untuk rilis escrow pada Studio (order jasa).' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
+                        @csrf
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="studio_platform_fee_percent" class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ __('messages.studio_platform_fee') }} (%) <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="number" name="studio_platform_fee_percent" id="studio_platform_fee_percent"
+                                        value="{{ old('studio_platform_fee_percent', $studioPlatformFeePercent ?? 10) }}"
+                                        min="0" max="100" step="0.1" required placeholder="10"
+                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500 @error('studio_platform_fee_percent') border-red-500 @enderror">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 text-sm">%</span>
+                                    </div>
+                                </div>
+                                @error('studio_platform_fee_percent')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                                <p class="mt-2 text-xs text-gray-500">
+                                    {{ __('messages.studio_platform_fee_note') ?? 'Dipotong dari jumlah rilis saat escrow dilepas ke vendor.' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end pt-4 border-t border-gray-200">
+                            <button type="submit"
+                                class="px-6 py-2 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-lg transition-colors">
+                                {{ __('messages.save_studio_settings') ?? 'Save Studio Settings' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Studio Email Notification Toggles -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-6">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                {{ __('messages.studio_email_notifications') }}
+                            </h3>
+                            <p class="text-sm text-gray-600 mt-1">{{ __('messages.studio_email_notifications_description') ?? 'Aktifkan/nonaktifkan email untuk event Studio.' }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-4">
+                        @csrf
+                        @php
+                            $toggles = [
+                                'studio_email_quote_created' => __('messages.studio_email_quote_created'),
+                                'studio_email_quote_accepted' => __('messages.studio_email_quote_accepted'),
+                                'studio_email_quote_rejected' => __('messages.studio_email_quote_rejected'),
+                                'studio_email_escrow_funded' => __('messages.studio_email_escrow_funded'),
+                                'studio_email_escrow_released' => __('messages.studio_email_escrow_released'),
+                                'studio_email_escrow_refunded' => __('messages.studio_email_escrow_refunded'),
+                                'studio_email_vendor_assigned' => __('messages.studio_email_vendor_assigned'),
+                            ];
+                        @endphp
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach($toggles as $key => $label)
+                                <div class="flex items-center justify-between border rounded-lg p-3">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-800">{{ $label }}</div>
+                                        <div class="text-xs text-gray-500">{{ __('messages.send_email_on_event') ?? 'Kirim email saat event ini terjadi' }}</div>
+                                    </div>
+                                    <div>
+                                        <input type="hidden" name="{{ $key }}" value="0">
+                                        <label class="inline-flex relative items-center cursor-pointer">
+                                            <input type="checkbox" class="sr-only peer" name="{{ $key }}" value="1"
+                                                {{ old($key, $studioEmailToggles[$key] ?? true) ? 'checked' : '' }}>
+                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+                                        </label>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="mt-6 border-t pt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.sla_funding_reminder_days') ?? 'SLA Funding Reminder (days)' }}</label>
+                            <input type="number" min="1" max="30" name="studio_sla_funding_reminder_days" value="{{ old('studio_sla_funding_reminder_days', $studioSlaFundingReminderDays ?? 3) }}" class="w-32 rounded-lg border-gray-300">
+                            <p class="text-xs text-gray-500 mt-1">{{ __('messages.sla_funding_reminder_description') ?? 'Kirim pengingat pendanaan untuk order quoted yang belum didanai setelah N hari.' }}</p>
+                        </div>
+                        <div class="flex items-center justify-end pt-4 border-t border-gray-200">
+                            <button type="submit"
+                                class="px-6 py-2 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors">
+                                {{ __('messages.save_studio_email_settings') ?? 'Save Studio Email Settings' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Pricing Guidance Configuration -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-6">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">

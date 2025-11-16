@@ -25,6 +25,7 @@ class Note extends Model
         'content',
         'content_hash',
         'summary',
+        'language',
         'preview_content',
         'preview_percentage',
         'thumbnails',
@@ -34,10 +35,12 @@ class Note extends Model
         'discount_price',
         'is_public',
         'status',
+        'scheduled_publish_at',
         'is_sold',
         'sale_mode',
         'grace_period_days',
         'relist_price_multiplier',
+        'ecosystem_category',
     ];
 
     protected function casts(): array
@@ -47,6 +50,8 @@ class Note extends Model
             'discount_price' => 'decimal:2',
             'is_public' => 'boolean',
             'status' => 'string',
+            'language' => 'string',
+            'scheduled_publish_at' => 'datetime',
             'is_sold' => 'boolean',
             'attachments' => 'array',
             'thumbnails' => 'array',
@@ -55,6 +60,7 @@ class Note extends Model
             'notification_meta' => 'array',
             'grace_period_days' => 'integer',
             'relist_price_multiplier' => 'decimal:2',
+            'ecosystem_category' => 'string',
         ];
     }
 

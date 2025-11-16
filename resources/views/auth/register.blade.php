@@ -7,7 +7,7 @@
             </p>
         </div>
 
-        <form method="POST" action="{{ route('register') }}" class="space-y-6">
+        <form method="POST" action="{{ route('register') }}" class="space-y-6" enctype="multipart/form-data">
             @csrf
 
             <div class="space-y-2">
@@ -27,6 +27,33 @@
                     <input type="hidden" name="invite_token" value="{{ $inviteToken }}">
                 </div>
             @endif
+
+            <div class="space-y-2">
+                <x-input-label for="ktp_file" :value="__('messages.ktp_upload') ?? 'Upload KTP (JPG/PNG/PDF)'" />
+                <input id="ktp_file" type="file" name="ktp_file" accept=".jpg,.jpeg,.png,.pdf" required class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-blue-500 focus:ring focus:ring-blue-500/20">
+                <p class="text-xs text-slate-500">{{ __('messages.ktp_upload_help') ?? 'Format: JPG, PNG, atau PDF. Maksimal 5MB.' }}</p>
+                <x-input-error :messages="$errors->get('ktp_file')" />
+            </div>
+
+            <div class="space-y-2">
+                <x-input-label for="selfie_file" :value="__('messages.selfie_upload') ?? 'Upload Foto Wajah / Selfie (JPG/PNG)'" />
+                <input id="selfie_file" type="file" name="selfie_file" accept=".jpg,.jpeg,.png" required class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-blue-500 focus:ring focus:ring-blue-500/20">
+                <p class="text-xs text-slate-500">{{ __('messages.selfie_upload_help') ?? 'Gunakan foto terang dengan wajah terlihat jelas. Maksimal 5MB.' }}</p>
+                <x-input-error :messages="$errors->get('selfie_file')" />
+            </div>
+
+            <div class="space-y-2">
+                <label class="flex items-start gap-3">
+                    <input type="checkbox" name="agree_terms" value="1" required class="mt-1 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                    <span class="text-sm text-slate-700">
+                        {!! __('messages.agreement_consent_copy', [
+                            'agreement_url' => route('cms.show', ['cmsPage' => 'user-agreement']),
+                            'terms_url' => route('cms.show', ['cmsPage' => 'terms-and-conditions']),
+                        ]) !!}
+                    </span>
+                </label>
+                <x-input-error :messages="$errors->get('agree_terms')" />
+            </div>
 
             <div class="space-y-2">
                 <x-input-label for="email" :value="__('messages.email')" />

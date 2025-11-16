@@ -47,6 +47,7 @@ class DatabaseSeeder extends Seeder
             AppNotificationSeeder::class,
             SocialFeatureSeeder::class,
             WithdrawSeeder::class,
+            StudioSeeder::class,
         ]);
     }
 }

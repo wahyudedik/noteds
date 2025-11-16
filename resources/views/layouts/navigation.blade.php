@@ -25,7 +25,23 @@
             ],
         ];
 
-        $moreLinks = [];
+        $moreLinks = [
+            [
+                'label' => __('messages.ecosystem'),
+                'href' => route('ecosystem.index'),
+                'active' => request()->routeIs('ecosystem.*'),
+            ],
+            [
+                'label' => __('messages.tuts'),
+                'href' => route('tuts.index'),
+                'active' => request()->routeIs('tuts.*'),
+            ],
+            [
+                'label' => __('messages.studio'),
+                'href' => route('studio.index'),
+                'active' => request()->routeIs('studio.*'),
+            ],
+        ];
         $adminMoreLinks = [];
 
         if ($user) {
@@ -148,6 +164,14 @@
                     'active' => request()->routeIs('simulators.*'),
                 ];
 
+                if ($user->hasRole('vendor') || $isAdmin) {
+                    $moreLinks[] = [
+                        'label' => __('messages.vendor'),
+                        'href' => route('vendor.index'),
+                        'active' => request()->routeIs('vendor.*'),
+                    ];
+                }
+
                 if ($isAdmin) {
                     $adminMoreLinks[] = [
                         'label' => __('messages.admin'),
@@ -171,6 +195,12 @@
                         'label' => 'Account Moderation',
                         'href' => route('admin.accounts.moderation.index'),
                         'active' => request()->routeIs('admin.accounts.moderation.*'),
+                    ];
+
+                    $adminMoreLinks[] = [
+                        'label' => __('messages.system_health'),
+                        'href' => route('admin.system-health.index'),
+                        'active' => request()->routeIs('admin.system-health.*'),
                     ];
                 }
             }
@@ -290,7 +320,26 @@
                     @auth
                         <div class="flex items-center gap-3">
                             <!-- Notifications Bell -->
-                            <div class="relative" x-data="{ open: false }">
+                            <div class="relative" x-data="{ 
+                                open: false,
+                                init() {
+                                    try {
+                                        if (window.Echo && {{ auth()->check() ? 'true' : 'false' }}) {
+                                            window.Echo.private('user.{{ auth()->id() }}')
+                                                .listen('.NotificationCreated', (e) => {
+                                                    // Optimistically bump badge and show subtle pulse
+                                                    const badge = this.$root.querySelector('[data-notif-badge]');
+                                                    if (badge) {
+                                                        const val = parseInt(badge.innerText || '0', 10) || 0;
+                                                        badge.innerText = val + 1;
+                                                        badge.classList.add('animate-pulse');
+                                                        setTimeout(() => badge.classList.remove('animate-pulse'), 1000);
+                                                    }
+                                                });
+                                        }
+                                    } catch (err) {}
+                                }
+                            }">
                                 @php
                                     $unreadCount = auth()->user()->notifications()->unread()->count();
                                 @endphp
@@ -302,7 +351,7 @@
                                     </svg>
                                     @if ($unreadCount > 0)
                                         <span
-                                            class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">{{ $unreadCount }}</span>
+                                            class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full" data-notif-badge>{{ $unreadCount }}</span>
                                     @endif
                                 </button>
 
@@ -320,98 +369,55 @@
                                     @php
                                         $notifications = auth()->user()->notifications()->latest()->take(5)->get();
                                     @endphp
-                                    @forelse($notifications as $notification)
-                                        <a href="{{ $notification->link ?? '#' }}"
-                                            class="block px-4 py-3 hover:bg-gray-50 transition-colors duration-150 {{ !$notification->is_read ? 'bg-blue-50' : '' }}">
-                                            <div class="flex items-start">
-                                                <div class="flex-shrink-0">
-                                                    @if ($notification->type === 'purchase')
-                                                        <div
-                                                            class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                                                            <svg class="w-5 h-5 text-green-600" fill="none"
-                                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M5 13l4 4L19 7" />
-                                                            </svg>
-                                                        </div>
-                                                    @elseif($notification->type === 'sale')
-                                                        <div
-                                                            class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                                            <svg class="w-5 h-5 text-blue-600" fill="none"
-                                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                            </svg>
-                                                        </div>
-                                                    @elseif($notification->type === 'review')
-                                                        <div
-                                                            class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
-                                                            <svg class="w-5 h-5 text-yellow-600" fill="none"
-                                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                                                            </svg>
-                                                        </div>
-                                                    @elseif($notification->type === 'ticket_response')
-                                                        <div
-                                                            class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                                                            <svg class="w-5 h-5 text-purple-600" fill="none"
-                                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                            </svg>
-                                                        </div>
-                                                    @elseif($notification->type === 'subscription')
-                                                        <div
-                                                            class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                                                            <svg class="w-5 h-5 text-indigo-600" fill="none"
-                                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                            </svg>
-                                                        </div>
-                                                    @else
-                                                        <div
-                                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                                                            <svg class="w-5 h-5 text-gray-600" fill="none"
-                                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                            </svg>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                                <div class="ml-3 flex-1 min-w-0">
-                                                    <p class="text-sm font-medium text-gray-900 truncate">
-                                                        {{ $notification->title }}</p>
-                                                    <p class="text-xs text-gray-500 truncate">{{ $notification->message }}
-                                                    </p>
-                                                    <p class="text-xs text-gray-400 mt-1">
-                                                        {{ $notification->created_at->diffForHumans() }}</p>
-                                                </div>
-                                                @if (!$notification->is_read)
-                                                    <div class="flex-shrink-0">
-                                                        <span class="w-2 h-2 bg-blue-600 rounded-full block"></span>
-                                                    </div>
-                                                @endif
+                                    <div id="notif-list">
+                                        @forelse($notifications as $notification)
+                                            @include('partials.notification-item', ['notification' => $notification])
+                                        @empty
+                                            <div class="px-4 py-8 text-center" data-notif-empty>
+                                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                                </svg>
+                                                <p class="mt-2 text-sm text-gray-600">
+                                                    {{ __('messages.no_notifications_yet') }}</p>
                                             </div>
-                                        </a>
-                                    @empty
-                                        <div class="px-4 py-8 text-center">
-                                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none"
-                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                            </svg>
-                                            <p class="mt-2 text-sm text-gray-600">
-                                                {{ __('messages.no_notifications_yet') }}</p>
-                                        </div>
-                                    @endforelse
+                                        @endforelse
+                                    </div>
+                                    <script>
+                                        function prependNotificationItem(n) {
+                                            try {
+                                                const list = document.getElementById('notif-list');
+                                                if (!list) return;
+                                                const empty = list.querySelector('[data-notif-empty]');
+                                                if (empty) empty.remove();
+                                                const a = document.createElement('a');
+                                                a.href = n.link || '#';
+                                                a.className = 'block px-4 py-3 hover:bg-gray-50 transition-colors duration-150 bg-blue-50';
+                                                a.innerHTML = `
+                                                    <div class="flex items-start">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                                                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                        <div class="ml-3 flex-1 min-w-0">
+                                                            <p class="text-sm font-medium text-gray-900 truncate">${n.title || 'Notification'}</p>
+                                                            <p class="text-xs text-gray-500 truncate">${n.message || ''}</p>
+                                                            <p class="text-xs text-gray-400 mt-1">baru saja</p>
+                                                        </div>
+                                                        <div class="flex-shrink-0"><span class="w-2 h-2 bg-blue-600 rounded-full block"></span></div>
+                                                    </div>`;
+                                                list.prepend(a);
+                                            } catch(e) {}
+                                        }
+                                        if (window.Echo && {{ auth()->check() ? 'true' : 'false' }}) {
+                                            window.Echo.private('user.{{ auth()->id() }}')
+                                                .listen('.NotificationCreated', (e) => prependNotificationItem(e));
+                                        }
+                                    </script>
                                 </div>
                             </div>
 
