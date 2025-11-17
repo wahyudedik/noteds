@@ -165,8 +165,8 @@ Route::get('/dashboard', function () {
     $user = auth()->user();
     
     // Check if user needs to complete profile (KTP and selfie) - redirect once after register
-    // Check session to see if this is first time after register
-    if (!$user->ktp_path || !$user->selfie_path) {
+    // Check session to see if this is first time after register (admin tidak perlu verifikasi)
+    if (!$user->hasRole('admin') && (!$user->ktp_path || !$user->selfie_path)) {
         // Only redirect if coming from registration (check session or recent registration)
         $justRegistered = session('just_registered', false);
         if ($justRegistered || ($user->created_at->gt(now()->subMinutes(5)) && !$user->ktp_path && !$user->selfie_path)) {

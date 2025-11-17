@@ -43,8 +43,8 @@ class EnsureKycComplete
             return $next($request);
         }
         
-        // Check if user has uploaded document identity and selfie
-        if (!$user->ktp_path || !$user->selfie_path) {
+        // Check if user has uploaded document identity and selfie (admin tidak perlu verifikasi)
+        if (!$user->hasRole('admin') && (!$user->ktp_path || !$user->selfie_path)) {
             return redirect()->route('profile.edit')
                 ->with('error', 'Silakan lengkapi profil Anda dengan mengupload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk mengakses fitur ini.');
         }

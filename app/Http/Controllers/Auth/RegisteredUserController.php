@@ -191,8 +191,8 @@ class RegisteredUserController extends Controller
         }
 
         // Redirect to profile untuk melengkapi KTP dan selfie (sekali saja setelah register)
-        // Jika belum lengkap, redirect ke profile
-        if (!$user->ktp_path || !$user->selfie_path) {
+        // Jika belum lengkap, redirect ke profile (admin tidak perlu verifikasi)
+        if (!$user->hasRole('admin') && (!$user->ktp_path || !$user->selfie_path)) {
             return redirect()->route('profile.edit')
                 ->with('info', 'Silakan lengkapi profil Anda dengan mengupload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk verifikasi identitas.');
         }
