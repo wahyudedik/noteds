@@ -217,8 +217,9 @@ class MarketplaceController extends Controller
             })
             ->with(['tags', 'user', 'reviews'])
             ->withCount('transactions')
+            ->withAvg('reviews', 'rating')
             ->orderByDesc('transactions_count')
-            ->orderByDesc('average_rating')
+            ->orderByDesc('reviews_avg_rating')
             ->limit(6)
             ->get();
 
