@@ -29,7 +29,7 @@
                 <div class="text-sm font-medium text-yellow-800">{{ __('messages.quick_assign_order') }}</div>
                 <form method="POST" action="{{ route('admin.vendors.assign') }}" class="mt-3 flex flex-col sm:flex-row gap-2 items-start sm:items-center">
                     @csrf
-                    <input type="text" name="order_id" placeholder="{{ __('messages.order_id') ?? 'Order ID (UUID)' }}" class="w-full sm:w-72 rounded-lg border-gray-300" required>
+                    <input type="text" name="order_id" placeholder="{{ __('messages.order_id') }}" class="w-full sm:w-72 rounded-lg border-gray-300" required>
                     <select name="vendor_id" class="w-full sm:w-72 rounded-lg border-gray-300" required>
                         <option value="">{{ __('messages.select_vendor') }}</option>
                         @foreach($vendors as $vendor)
@@ -83,7 +83,7 @@
                                 <option value="{{ $vendor->id }}">{{ $vendor->name }} ({{ $vendor->email }})</option>
                             @endforeach
                         </select>
-                        <button type="submit" class="px-4 py-2 rounded-md bg-blue-600 text-white text-sm">{{ __('messages.bulk_assign') ?? 'Bulk Assign' }}</button>
+                        <button type="submit" class="px-4 py-2 rounded-md bg-blue-600 text-white text-sm">{{ __('messages.bulk_assign') }}</button>
                         <div class="ml-auto">{{ $unassignedOrders->links() }}</div>
                     </div>
                 </form>
@@ -107,7 +107,7 @@
                                     @php
                                         $count = \App\Models\ServiceOrder::where('assigned_user_id', $vendor->id)->count();
                                     @endphp
-                                    {{ $count }} {{ __('messages.order') ?? 'order' }}
+                                    {{ $count }} {{ $count === 1 ? __('messages.order_singular') : __('messages.orders') }}
                                 </td>
                             </tr>
                         @endforeach

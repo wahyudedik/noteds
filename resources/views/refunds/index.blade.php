@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', __('Refund Requests'))
+@section('title', __('messages.refund_requests'))
 
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('Refund Requests') }}</h1>
-            <p class="mt-2 text-sm text-gray-600">{{ __('View and manage your refund requests') }}</p>
+            <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.refund_requests') }}</h1>
+            <p class="mt-2 text-sm text-gray-600">{{ __('messages.view_and_manage_refunds') }}</p>
         </div>
 
         <!-- Flash Messages -->
@@ -31,22 +31,22 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                {{ __('Note') }}
+                                {{ __('messages.note') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                {{ __('Amount') }}
+                                {{ __('messages.amount') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                {{ __('Reason') }}
+                                {{ __('messages.reason') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                {{ __('Status') }}
+                                {{ __('messages.status') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                {{ __('Date') }}
+                                {{ __('messages.date') }}
                             </th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                {{ __('Actions') }}
+                                {{ __('messages.action') }}
                             </th>
                         </tr>
                     </thead>
@@ -58,7 +58,7 @@
                                         {{ $refund->note->title }}
                                     </div>
                                     <div class="text-sm text-gray-500">
-                                        {{ __('Transaction') }}: #{{ substr($refund->transaction_id, 0, 8) }}
+                                        {{ __('messages.transaction') }}: #{{ substr($refund->transaction_id, 0, 8) }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -79,19 +79,19 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($refund->status === 'pending')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                            {{ __('Pending') }}
+                                            {{ __('messages.pending') }}
                                         </span>
                                     @elseif($refund->status === 'approved')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            {{ __('Approved') }}
+                                            {{ __('messages.approved') }}
                                         </span>
                                     @elseif($refund->status === 'rejected')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                            {{ __('Rejected') }}
+                                            {{ __('messages.rejected') }}
                                         </span>
                                     @elseif($refund->status === 'processed')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            {{ __('Processed') }}
+                                            {{ __('messages.processed') }}
                                         </span>
                                     @endif
                                 </td>
@@ -101,7 +101,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{{ route('refunds.show', $refund) }}"
                                         class="text-blue-600 hover:text-blue-900">
-                                        {{ __('View Details') }}
+                                        {{ __('messages.view_details') }}
                                     </a>
                                 </td>
                             </tr>
@@ -120,9 +120,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <h3 class="mt-4 text-lg font-medium text-gray-900">{{ __('No refund requests') }}</h3>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">{{ __('messages.no_refund_requests') }}</h3>
                 <p class="mt-2 text-sm text-gray-500">
-                    {{ __('You haven\'t submitted any refund requests yet.') }}
+                    {{ __('messages.no_refund_requests_description') }}
                 </p>
             </div>
         @endif

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @php use Illuminate\Support\Str; @endphp
 
-@section('title', 'Forum Moderation')
+@section('title', __('messages.forum_moderation'))
 
 @section('content')
 <div class="py-12 bg-gray-50 min-h-screen">

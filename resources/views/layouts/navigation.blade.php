@@ -47,7 +47,7 @@
         if ($user) {
             if ($user->role === 'user_workspaces') {
                 $primaryLinks[] = [
-                    'label' => 'Workspaces',
+                    'label' => __('messages.workspaces'),
                     'href' => route('workspaces.index'),
                     'active' => request()->routeIs('workspaces.*'),
                 ];
@@ -68,7 +68,7 @@
 
                 // Workspaces link - available for all authenticated users with KYC
                 $primaryLinks[] = [
-                    'label' => 'Workspaces',
+                    'label' => __('messages.workspaces'),
                     'href' => route('workspaces.index'),
                     'active' => request()->routeIs('workspaces.*'),
                 ];
@@ -89,31 +89,31 @@
                 $forumIsActive = request()->routeIs('forum.*');
                 $forumSubmenu = [
                     [
-                        'label' => 'Forum',
+                        'label' => __('messages.forum'),
                         'href' => route('forum.index'),
                         'active' => request()->routeIs('forum.index') || (request()->routeIs('forum.*') && !request()->routeIs('forum.analytics') && !request()->routeIs('forum.preferences.*')),
                     ],
                     [
-                        'label' => 'Analytics',
+                        'label' => __('messages.analytics'),
                         'href' => route('forum.analytics'),
                         'active' => request()->routeIs('forum.analytics'),
                     ],
                     [
-                        'label' => 'Preferences',
+                        'label' => __('messages.preferences'),
                         'href' => route('forum.preferences.edit'),
                         'active' => request()->routeIs('forum.preferences.*'),
                     ],
                 ];
 
                 $primaryLinks[] = [
-                    'label' => 'Forum',
+                    'label' => __('messages.forum'),
                     'href' => route('forum.index'),
                     'active' => $forumIsActive,
                     'submenu' => $forumSubmenu,
                 ];
 
                 $primaryLinks[] = [
-                    'label' => 'Produk Chats',
+                    'label' => __('messages.produk_chats'),
                     'href' => route('note-conversations.index'),
                     'active' => request()->routeIs('note-conversations.*'),
                 ];
@@ -122,7 +122,7 @@
                 if ($isSellerOrAdmin) {
                     $sellerToolsSubmenu = [
                         [
-                            'label' => 'Featured Notes',
+                            'label' => __('messages.featured_notes'),
                             'href' => route('featured-notes.index'),
                             'active' => request()->routeIs('featured-notes.*'),
                         ],
@@ -130,7 +130,7 @@
                     $sellerToolsIsActive = request()->routeIs('featured-notes.*');
                     
                     $moreLinks[] = [
-                        'label' => 'Seller Tools',
+                        'label' => __('messages.seller_tools'),
                         'href' => route('featured-notes.index'),
                         'active' => $sellerToolsIsActive,
                         'submenu' => $sellerToolsSubmenu,
@@ -142,22 +142,22 @@
                 if ($isBuyerOrAdmin || $isAdmin) {
                     $buyerLibrarySubmenu = [
                         [
-                            'label' => 'Collections',
+                            'label' => __('messages.collections'),
                             'href' => route('collections.index'),
                             'active' => request()->routeIs('collections.*'),
                         ],
                         [
-                            'label' => 'Analytics',
+                            'label' => __('messages.analytics'),
                             'href' => route('buyer-analytics.index'),
                             'active' => request()->routeIs('buyer-analytics.*'),
                         ],
                         [
-                            'label' => 'Reading History',
+                            'label' => __('messages.reading_history'),
                             'href' => route('reading-history.index'),
                             'active' => request()->routeIs('reading-history.*'),
                         ],
                         [
-                            'label' => 'Batch Download',
+                            'label' => __('messages.batch_download'),
                             'href' => route('batch-download.index'),
                             'active' => request()->routeIs('batch-download.*'),
                         ],
@@ -168,7 +168,7 @@
                                             request()->routeIs('batch-download.*');
                     
                     $moreLinks[] = [
-                        'label' => 'My Library',
+                        'label' => __('messages.my_library'),
                         'href' => route('collections.index'),
                         'active' => $buyerLibraryIsActive,
                         'submenu' => $buyerLibrarySubmenu,

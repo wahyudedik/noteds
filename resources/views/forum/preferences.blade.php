@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Forum Email Preferences')
+@section('title', __('messages.forum_email_preferences'))
 
 @section('content')
 <div class="py-8 sm:py-12 bg-gray-50 min-h-screen">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
             <div class="px-6 py-5 border-b border-gray-200">
-                <h1 class="text-2xl font-semibold text-gray-900">Forum Email Notifications</h1>
+                <h1 class="text-2xl font-semibold text-gray-900">{{ __('messages.forum_email_notifications') }}</h1>
                 <p class="mt-2 text-sm text-gray-600">
                     Pilih email notifikasi yang ingin kamu terima untuk aktivitas forum. Kamu masih akan menerima notifikasi in-app meskipun email dimatikan.
                 </p>

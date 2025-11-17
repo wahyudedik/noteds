@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Jual Kembali Catatan')
+@section('title', __('messages.resale_note'))
 
 @section('content')
 <div class="py-8 sm:py-12">

@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'AI Memory Platform')
+@section('title', __('messages.ai_memory_platform'))
 
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">AI Memory Platform</h1>
-            <p class="text-gray-600">Tanya apapun tentang catatan Anda menggunakan AI yang memahami semua data Anda</p>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('messages.ai_memory_platform') }}</h1>
+            <p class="text-gray-600">{{ __('messages.ai_memory_description') }}</p>
         </div>
 
         <!-- Stats Cards -->
@@ -21,7 +21,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Catatan</p>
+                        <p class="text-sm font-medium text-gray-500">{{ __('messages.total_notes') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ $total_notes ?? 0 }}</p>
                     </div>
                 </div>
@@ -49,7 +49,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">AI Status</p>
+                        <p class="text-sm font-medium text-gray-500">{{ __('messages.ai_status') }}</p>
                         <p class="text-2xl font-bold text-green-600">Aktif</p>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
             <!-- Q&A Section -->
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Tanya AI tentang Catatan Anda</h2>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">{{ __('messages.ask_ai_about_notes') }}</h2>
                     
                     <form id="aiMemoryForm" class="mb-6">
                         @csrf
@@ -93,7 +93,7 @@
                                     </svg>
                                 </div>
                                 <div class="ml-4 flex-1">
-                                    <h3 class="text-sm font-medium text-gray-900 mb-2">Jawaban AI</h3>
+                                    <h3 class="text-sm font-medium text-gray-900 mb-2">{{ __('messages.ai_answer') }}</h3>
                                     <div id="answerText" class="text-gray-700 whitespace-pre-wrap"></div>
                                 </div>
                             </div>
@@ -109,7 +109,7 @@
                     <!-- Loading State -->
                     <div id="loadingState" class="hidden text-center py-8">
                         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                        <p class="mt-2 text-sm text-gray-600">AI sedang memproses pertanyaan Anda...</p>
+                        <p class="mt-2 text-sm text-gray-600">{{ __('messages.ai_processing') }}</p>
                     </div>
                 </div>
             </div>
@@ -118,7 +118,7 @@
             <div class="space-y-6">
                 <!-- Quick Actions -->
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.quick_actions') }}</h3>
                     <div class="space-y-2">
                         <button 
                             onclick="askQuestion('Apa saja topik utama dari catatan saya?')"
@@ -150,7 +150,7 @@
                 <!-- Topics -->
                 @if(!empty($topics))
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Topik Populer</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.popular_topics') }}</h3>
                     <div class="flex flex-wrap gap-2">
                         @foreach(array_slice($topics, 0, 15) as $topic)
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

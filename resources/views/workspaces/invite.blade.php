@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Invite Team - ' . $workspace->name)
+@section('title', __('messages.invite_team') . ' - ' . $workspace->name)
 
 @section('content')
 <div class="py-8 sm:py-12">

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', '#' . $hashtag->name . ' - Forum')
+@section('title', '#' . $hashtag->name . ' - ' . __('messages.hashtag_forum'))
 
 @section('content')
 <div class="py-8 sm:py-12 bg-gray-50 min-h-screen">

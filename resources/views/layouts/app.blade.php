@@ -23,7 +23,13 @@
         <style>[x-cloak]{display:none !important;}</style>
         
         <!-- Content Protection Styles -->
+        @php
+            $disableTextSelection = \App\Models\Setting::getSetting('protection_disable_text_selection', 'content_protection', false);
+            $disableDragDrop = \App\Models\Setting::getSetting('protection_disable_drag_drop', 'content_protection', false);
+        @endphp
+        @if($disableTextSelection || $disableDragDrop)
         <style>
+            @if($disableTextSelection)
             /* Disable text selection */
             body {
                 -webkit-user-select: none !important;
@@ -40,7 +46,9 @@
                 -ms-user-select: text !important;
                 user-select: text !important;
             }
+            @endif
             
+            @if($disableDragDrop)
             /* Disable drag and drop */
             img, a {
                 -webkit-user-drag: none !important;
@@ -55,8 +63,10 @@
             button, a[href], input, textarea, select, [onclick], [role="button"] {
                 pointer-events: auto !important;
             }
+            @endif
             
         </style>
+        @endif
         
         @stack('styles')
         
@@ -354,27 +364,78 @@
         @stack('scripts')
         
         <!-- Content Protection Scripts -->
+        @php
+            $protectionSettings = [
+                'disable_right_click' => \App\Models\Setting::getSetting('protection_disable_right_click', 'content_protection', false),
+                'disable_keyboard_shortcuts' => \App\Models\Setting::getSetting('protection_disable_keyboard_shortcuts', 'content_protection', false),
+                'disable_copy_paste' => \App\Models\Setting::getSetting('protection_disable_copy_paste', 'content_protection', false),
+                'disable_drag_drop' => \App\Models\Setting::getSetting('protection_disable_drag_drop', 'content_protection', false),
+                'disable_print' => \App\Models\Setting::getSetting('protection_disable_print', 'content_protection', false),
+                'disable_view_source' => \App\Models\Setting::getSetting('protection_disable_view_source', 'content_protection', false),
+                'detect_devtools' => \App\Models\Setting::getSetting('protection_detect_devtools', 'content_protection', false),
+                'disable_screenshot' => \App\Models\Setting::getSetting('protection_disable_screenshot', 'content_protection', false),
+                'disable_image_saving' => \App\Models\Setting::getSetting('protection_disable_image_saving', 'content_protection', false),
+                'disable_console' => \App\Models\Setting::getSetting('protection_disable_console', 'content_protection', false),
+                'monitor_clipboard' => \App\Models\Setting::getSetting('protection_monitor_clipboard', 'content_protection', false),
+                'disable_print_screen' => \App\Models\Setting::getSetting('protection_disable_print_screen', 'content_protection', false),
+                'disable_snipping_tool' => \App\Models\Setting::getSetting('protection_disable_snipping_tool', 'content_protection', false),
+                'detect_window_blur' => \App\Models\Setting::getSetting('protection_detect_window_blur', 'content_protection', false),
+                'detect_visibility_change' => \App\Models\Setting::getSetting('protection_detect_visibility_change', 'content_protection', false),
+                'clear_clipboard_periodic' => \App\Models\Setting::getSetting('protection_clear_clipboard_periodic', 'content_protection', false),
+                'blur_overlay' => \App\Models\Setting::getSetting('protection_blur_overlay', 'content_protection', false),
+                'disable_f12' => \App\Models\Setting::getSetting('protection_disable_f12', 'content_protection', false),
+                'disable_devtools_shortcuts' => \App\Models\Setting::getSetting('protection_disable_devtools_shortcuts', 'content_protection', false),
+                'detect_ai_bots' => \App\Models\Setting::getSetting('protection_detect_ai_bots', 'content_protection', false),
+                'detect_headless' => \App\Models\Setting::getSetting('protection_detect_headless', 'content_protection', false),
+                'detect_mouse_movement' => \App\Models\Setting::getSetting('protection_detect_mouse_movement', 'content_protection', false),
+                'detect_click_pattern' => \App\Models\Setting::getSetting('protection_detect_click_pattern', 'content_protection', false),
+                'detect_screen_recording' => \App\Models\Setting::getSetting('protection_detect_screen_recording', 'content_protection', false),
+            ];
+        @endphp
         <script>
             (function() {
                 'use strict';
                 
+                // Protection settings from server
+                const protectionSettings = @json($protectionSettings);
+                
+                @if($protectionSettings['blur_overlay'])
+                // Blur overlay untuk mencegah screenshot
+                const blurOverlay = document.createElement('div');
+                blurOverlay.id = 'screenshot-protection-overlay';
+                blurOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999999;display:none;backdrop-filter:blur(10px);';
+                document.body.appendChild(blurOverlay);
+                @endif
+                
+                @if($protectionSettings['disable_right_click'])
                 // Disable right-click context menu
                 document.addEventListener('contextmenu', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     return false;
                 }, true);
+                @endif
                 
-                // Blur overlay untuk mencegah screenshot
-                const blurOverlay = document.createElement('div');
-                blurOverlay.id = 'screenshot-protection-overlay';
-                blurOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999999;display:none;backdrop-filter:blur(10px);';
-                document.body.appendChild(blurOverlay);
+                // Helper function untuk show blur overlay
+                function showBlurOverlay() {
+                    if (protectionSettings.blur_overlay && typeof blurOverlay !== 'undefined') {
+                        blurOverlay.style.display = 'block';
+                    }
+                }
+                
+                function hideBlurOverlay(delay = 0) {
+                    if (protectionSettings.blur_overlay && typeof blurOverlay !== 'undefined') {
+                        setTimeout(function() {
+                            blurOverlay.style.display = 'none';
+                        }, delay);
+                    }
+                }
                 
                 // Deteksi Print Screen dan keyboard shortcuts
                 let printScreenPressed = false;
                 
                 document.addEventListener('keydown', function(e) {
+                    @if($protectionSettings['disable_print_screen'])
                     // Disable Print Screen
                     if (e.key === 'PrintScreen' || e.keyCode === 44) {
                         e.preventDefault();

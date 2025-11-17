@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Account Moderation')
+@section('title', __('messages.account_moderation'))
 
 @section('content')
 <div class="py-12 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Account Moderation</h1>
+                <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.account_moderation') }}</h1>
                 <p class="mt-1 text-sm text-gray-600">Monitor reports and keep user accounts compliant.</p>
             </div>
             <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800">

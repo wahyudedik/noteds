@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Support Ticket Details')
+@section('title', __('messages.support_ticket_details'))
 
 @section('content')
 <div class="py-12">

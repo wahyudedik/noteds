@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Tutorial')
+@section('title', __('messages.edit_tutorial'))
 
 @section('content')
 <div class="py-12">
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Edit Tutorial</h2>
-            <a href="{{ route('admin.tutorials.index') }}" class="text-blue-600 hover:text-blue-800">← Back to Tutorials</a>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('messages.edit_tutorial') }}</h2>
+            <a href="{{ route('admin.tutorials.index') }}" class="text-blue-600 hover:text-blue-800">{{ __('messages.back_to_tutorials') }}</a>
         </div>
 
         <div class="bg-white shadow-sm rounded-lg p-6">

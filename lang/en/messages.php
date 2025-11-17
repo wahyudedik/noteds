@@ -877,6 +877,9 @@ return [
     'top_10_wallets' => 'Top 10 Wallets (by Balance)',
     'rank' => 'Rank',
     'user' => 'User',
+    'you' => 'You',
+    'and' => 'and',
+    'profile' => 'Profile',
     'email' => 'Email',
     'no_wallets_with_balance' => 'No wallets with balance yet.',
     'referral_analytics' => 'Referral Analytics',
@@ -2438,4 +2441,145 @@ return [
     // Notes Show
     'cannot_delete_sold' => 'Cannot Delete (Sold)',
     'cannot_delete_sold_tooltip' => 'Cannot delete note that has been sold',
+    
+    // Admin Pending Verification
+    'user_verification_pending_title' => 'User Verification Pending',
+    'verification_pending_title' => 'User Verification Pending',
+    'verification_pending_description' => 'List of users who have uploaded identity documents (ID card or Student card) and selfie photo and require identity verification',
+    'pending_count' => 'pending',
+    'search_name_email' => 'Search name or email',
+    'all_roles' => 'All Roles',
+    'verification_status_label' => 'Verification Status',
+    'identity_document_selfie' => 'Identity Document & Selfie',
+    'upload_date' => 'Upload Date',
+    'document_type_label_short' => 'Type',
+    'document_not_available' => 'Identity document not available',
+    'selfie_not_available' => 'Selfie not available',
+    'detail' => 'Detail',
+    'approve_verification_confirm' => 'Approve verification for this user?',
+    'reject_reason_placeholder' => 'Rejection reason',
+    'no_users_need_verification' => 'No users need verification at this time.',
+    'please_fill_reject_reason' => 'Please fill in the rejection reason.',
+    'confirm_reject_verification' => 'Are you sure you want to reject verification for this user?',
+    'verified_by_admin' => 'Verified by admin',
+    'selfie' => 'Selfie',
+    
+    // Studio Orders
+    'order_singular' => 'order',
+    'orders' => 'orders',
+    
+    // Navigation
+    'workspaces' => 'Workspaces',
+    'forum' => 'Forum',
+    'analytics' => 'Analytics',
+    'preferences' => 'Preferences',
+    'produk_chats' => 'Product Chats',
+    'featured_notes' => 'Featured Notes',
+    'seller_tools' => 'Seller Tools',
+    'collections' => 'Collections',
+    'reading_history' => 'Reading History',
+    'batch_download' => 'Batch Download',
+    'my_library' => 'My Library',
+    
+    // Forum
+    'post_details' => 'Post Details',
+    'back_to_forum' => 'Back to Forum',
+    
+    // Refunds
+    'refund_requests' => 'Refund Requests',
+    'view_and_manage_refunds' => 'View and manage your refund requests',
+    'no_refund_requests' => 'No refund requests',
+    'no_refund_requests_description' => 'You haven\'t submitted any refund requests yet.',
+    'view_details' => 'View Details',
+    'processed' => 'Processed',
+    
+    // Series
+    'back_to_series' => 'Back to Series',
+    'notes_in_series' => 'Notes in this Series',
+    'no_notes_in_series' => 'No notes in this series yet.',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    
+    // Admin Tutorials
+    'admin_tutorials' => 'Admin Tutorials',
+    'tutorial_management' => 'Tutorial Management',
+    'create_tutorial' => 'Create Tutorial',
+    'edit_tutorial' => 'Edit Tutorial',
+    'back_to_tutorials' => '← Back to Tutorials',
+    
+    // Notes Resale
+    'resale_note' => 'Resale Note',
+    
+    // AI Memory
+    'ai_memory_platform' => 'AI Memory Platform',
+    
+    // AI Chat
+    'ai_chat' => 'AI Chat',
+    
+    // Forum Moderation
+    'post_moderation' => 'Post Moderation',
+    'forum_moderation' => 'Forum Moderation',
+    
+    // Note Moderation
+    'note_moderation' => 'Note Moderation',
+    'moderate_note' => 'Moderate Note',
+    
+    // Account Moderation
+    'account_moderation' => 'Account Moderation',
+    'moderate_account' => 'Moderate Account',
+    
+    // Forum Pages
+    'forum_index' => 'Forum',
+    'forum_analytics' => 'Forum Analytics',
+    'forum_email_preferences' => 'Forum Email Preferences',
+    'forum_email_notifications' => 'Forum Email Notifications',
+    'bookmarked_posts_forum' => 'Bookmarked Posts - Forum',
+    
+    // Reading History
+    'reading_history' => 'Reading History',
+    
+    // Collections
+    'my_collections' => 'My Collections',
+    'create_collection' => 'Create Collection',
+    
+    // Workspaces
+    'invite_team' => 'Invite Team',
+    
+    // Forum Hashtag
+    'hashtag_forum' => 'Forum',
+    
+    // MyNoteds
+    'mynoteds_ai_memory_platform' => 'MyNoteds - AI Memory Platform',
+    
+    // AI Memory
+    'ai_memory_description' => 'Ask anything about your notes using AI that understands all your data',
+    'total_notes' => 'Total Notes',
+    'ai_status' => 'AI Status',
+    'ask_ai_about_notes' => 'Ask AI about Your Notes',
+    'ai_answer' => 'AI Answer',
+    'ai_processing' => 'AI is processing your question...',
+    'quick_actions' => 'Quick Actions',
+    'popular_topics' => 'Popular Topics',
+    
+    // Note Conversations
+    'product_conversations' => 'Product Conversations',
+    'product_conversations_description' => 'Private chat between buyer and seller after purchase. Each product has its own conversation forum.',
+    'no_conversations_yet' => 'No conversations yet',
+    'conversations_auto_created' => 'Conversations will be automatically created after a successful transaction. You can return here to continue chatting with your transaction partner.',
+    'you_as_buyer' => 'You as Buyer',
+    'you_as_seller' => 'You as Seller',
+    'product_not_available' => 'Product not available',
+    'no_messages_yet' => 'No messages yet. Start the conversation by sending the first message.',
+    'continue_chat' => 'Continue Chat →',
+    'back_to_conversations' => 'Back to conversations list',
+    'conversation_between' => 'Conversation between',
+    'buyer' => 'buyer',
+    'seller' => 'seller',
+    'view_product' => 'View Product',
+    'read' => 'Read',
+    'sent' => 'Sent',
+    'start_conversation' => 'No messages yet. Start a conversation with your transaction partner.',
+    'message_label' => 'Message',
+    'write_message_placeholder' => 'Write a message (max 2000 characters)',
+    'send_message' => 'Send Message',
 ];

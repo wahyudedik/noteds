@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Batch Download')
+@section('title', __('messages.batch_download'))
 
 @section('content')
 <div class="py-8 sm:py-12 bg-gray-50 min-h-screen">

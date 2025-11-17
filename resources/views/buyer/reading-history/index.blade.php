@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Reading History')
+@section('title', __('messages.reading_history'))
 
 @section('content')
 <div class="py-8 sm:py-12 bg-gray-50 min-h-screen">

@@ -30,32 +30,32 @@
                     <div class="space-y-8">
                         <div class="space-y-4">
                             <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white/80 ring-1 ring-white/20">
-                                {{ __('messages.welcome') ?? 'Selamat Datang' }}
+                                {{ __('messages.welcome') }}
                             </span>
                             <h1 class="text-4xl xl:text-5xl font-semibold leading-tight text-white">
-                                {{ __('messages.auth_hero_title') ?? 'Masuk ke Noteds dan mulai berkarya' }}
+                                {{ __('messages.auth_hero_title') }}
                             </h1>
                             <p class="text-white/70 leading-relaxed max-w-lg">
-                                {{ __('messages.auth_hero_subtitle') ?? 'Kelola catatan digital, kolaborasi dengan tim, dan kembangkan potensi Anda melalui marketplace Noteds.' }}
+                                {{ __('messages.auth_hero_subtitle') }}
                             </p>
                         </div>
                         <dl class="grid grid-cols-3 gap-4 max-w-xl text-white/80">
                             <div>
-                                <dt class="text-sm font-semibold uppercase tracking-wide text-white/60">{{ __('messages.users') ?? 'Pengguna' }}</dt>
+                                <dt class="text-sm font-semibold uppercase tracking-wide text-white/60">{{ __('messages.users') }}</dt>
                                 <dd class="mt-1 text-2xl font-semibold">10K+</dd>
                             </div>
                             <div>
-                                <dt class="text-sm font-semibold uppercase tracking-wide text-white/60">{{ __('messages.notes') ?? 'Catatan' }}</dt>
+                                <dt class="text-sm font-semibold uppercase tracking-wide text-white/60">{{ __('messages.notes') }}</dt>
                                 <dd class="mt-1 text-2xl font-semibold">50K+</dd>
                             </div>
                             <div>
-                                <dt class="text-sm font-semibold uppercase tracking-wide text-white/60">{{ __('messages.rating') ?? 'Rating' }}</dt>
+                                <dt class="text-sm font-semibold uppercase tracking-wide text-white/60">{{ __('messages.rating') }}</dt>
                                 <dd class="mt-1 text-2xl font-semibold">4.9/5</dd>
                             </div>
                         </dl>
                     </div>
                     <div class="text-white/60 text-sm">
-                        © {{ date('Y') }} {{ config('app.name', 'Noteds') }}. {{ __('messages.all_rights_reserved') ?? 'All rights reserved.' }}
+                        © {{ date('Y') }} {{ config('app.name', 'Noteds') }}. {{ __('messages.all_rights_reserved') }}
                     </div>
                 </div>
             </div>
@@ -71,7 +71,7 @@
                         {{ $slot }}
                     </div>
                     <div class="mt-10 text-center text-sm text-slate-400 lg:hidden">
-                        © {{ date('Y') }} {{ config('app.name', 'Noteds') }}. {{ __('messages.all_rights_reserved') ?? 'All rights reserved.' }}
+                        © {{ date('Y') }} {{ config('app.name', 'Noteds') }}. {{ __('messages.all_rights_reserved') }}
                     </div>
                 </div>
             </div>

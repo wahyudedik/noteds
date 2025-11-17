@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Percakapan Produk')
+@section('title', __('messages.product_conversations'))
 
 @section('content')
 <div class="py-10 bg-gray-50 min-h-screen">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">Percakapan Produk</h1>
+            <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.product_conversations') }}</h1>
             <p class="mt-2 text-sm text-gray-600">
-                Chat pribadi antara buyer dan seller setelah pembelian. Setiap produk memiliki forum percakapan sendiri.
+                {{ __('messages.product_conversations_description') }}
             </p>
         </div>
 
@@ -18,13 +18,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                <h2 class="text-lg font-semibold text-gray-900 mb-1">Belum ada percakapan</h2>
+                <h2 class="text-lg font-semibold text-gray-900 mb-1">{{ __('messages.no_conversations_yet') }}</h2>
                 <p class="text-sm text-gray-500">
-                    Percakapan akan otomatis dibuat setelah transaksi berhasil. Anda bisa kembali ke sini untuk melanjutkan chat dengan lawan transaksi.
+                    {{ __('messages.conversations_auto_created') }}
                 </p>
                 <a href="{{ route('marketplace.index') }}"
                     class="inline-flex items-center mt-6 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
-                    Jelajahi Marketplace
+                    {{ __('messages.explore_marketplace') }}
                 </a>
             </div>
         @else
@@ -40,21 +40,21 @@
                         <div class="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div>
                                 <div class="flex items-center gap-2 text-xs uppercase text-gray-400">
-                                    <span>{{ $conversation->note->title ?? 'Produk tidak tersedia' }}</span>
+                                    <span>{{ $conversation->note->title ?? __('messages.product_not_available') }}</span>
                                     <span>•</span>
-                                    <span>{{ $conversation->buyer_id === $user->id ? 'Anda sebagai Buyer' : 'Anda sebagai Seller' }}</span>
+                                    <span>{{ $conversation->buyer_id === $user->id ? __('messages.you_as_buyer') : __('messages.you_as_seller') }}</span>
                                 </div>
                                 <h3 class="mt-1 text-lg font-semibold text-gray-900">
-                                    {{ $otherUser->name }} ({{ $otherUser->role ?? 'User' }})
+                                    {{ $otherUser->name }} ({{ $otherUser->role ?? __('messages.user') }})
                                 </h3>
                                 <p class="mt-2 text-sm text-gray-600">
                                     @if ($lastMessage)
                                         <span class="font-medium">
-                                            {{ $lastMessage->sender_id === $user->id ? 'Anda:' : ($lastMessage->sender->name ?? 'Pengguna') . ':' }}
+                                            {{ $lastMessage->sender_id === $user->id ? __('messages.you') . ':' : ($lastMessage->sender->name ?? __('messages.user')) . ':' }}
                                         </span>
                                         {{ \Illuminate\Support\Str::limit($lastMessage->message, 120) }}
                                     @else
-                                        Belum ada pesan. Mulai percakapan dengan mengirim pesan pertama.
+                                        {{ __('messages.no_messages_yet') }}
                                     @endif
                                 </p>
                             </div>
@@ -64,7 +64,7 @@
                                 </span>
                                 <span
                                     class="mt-2 inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-600">
-                                    Lanjutkan Chat →
+                                    {{ __('messages.continue_chat') }}
                                 </span>
                             </div>
                         </div>

@@ -53,7 +53,7 @@
                                 </div>
                                 <div class="ml-3 flex-1">
                                     <p class="text-sm font-semibold text-red-800">
-                                        Critical Alert: {{ $alert['component'] }}
+                                        {{ __('messages.critical_alert') }}: {{ $alert['component'] }}
                                     </p>
                                     <p class="text-sm text-red-700 mt-1">
                                         {{ $alert['message'] }}
@@ -71,7 +71,7 @@
                                 </div>
                                 <div class="ml-3 flex-1">
                                     <p class="text-sm font-semibold text-yellow-800">
-                                        Warning: {{ $alert['component'] }}
+                                        {{ __('messages.warning') }}: {{ $alert['component'] }}
                                     </p>
                                     <p class="text-sm text-yellow-700 mt-1">
                                         {{ $alert['message'] }}

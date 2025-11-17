@@ -80,7 +80,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span class="text-sm font-medium text-yellow-900">Verifikasi User</span>
+                        <span class="text-sm font-medium text-yellow-900">{{ __('messages.verification_pending_title') }}</span>
                         @if($pendingVerificationCount > 0)
                             <span class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full absolute top-0 right-0">
                                 {{ $pendingVerificationCount }}

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Forum Analytics')
+@section('title', __('messages.forum_analytics'))
 
 @push('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.min.css">

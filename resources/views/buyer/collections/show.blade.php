@@ -60,7 +60,7 @@
                     {{ __('messages.collection_browse_marketplace') }}
                 </a>
                 <a href="{{ route('collections.edit', $collection) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    Edit
+                    {{ __('messages.edit') }}
                 </a>
             </div>
         </div>

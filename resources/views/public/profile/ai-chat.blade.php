@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'AI Chat - ' . $seller->name . ' Profile')
+@section('title', __('messages.ai_chat') . ' - ' . $seller->name . ' ' . __('messages.profile'))
 
 @section('content')
 <div class="py-8 sm:py-12 bg-gray-50 min-h-screen">

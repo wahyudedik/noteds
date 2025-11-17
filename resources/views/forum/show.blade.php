@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Post Details')
+@section('title', __('messages.post_details'))
 
 @section('content')
     @include('forum.partials.quill-assets')
@@ -13,7 +13,7 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
-                    Back to Forum
+                    {{ __('messages.back_to_forum') }}
                 </a>
             </div>
 

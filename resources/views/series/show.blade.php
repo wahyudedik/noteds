@@ -12,7 +12,7 @@
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
-                {{ __('Back to Series') }}
+                {{ __('messages.back_to_series') }}
             </a>
         </div>
 
@@ -27,16 +27,16 @@
                 </div>
                 @if($series->is_active)
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                        {{ __('Active') }}
+                        {{ __('messages.active') }}
                     </span>
                 @else
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                        {{ __('Inactive') }}
+                        {{ __('messages.inactive') }}
                     </span>
                 @endif
             </div>
             <div class="text-sm text-gray-600">
-                {{ __('Created by') }} <a href="{{ route('public.profile.show', $series->user->username) }}" class="text-blue-600 hover:text-blue-800">
+                {{ __('messages.created_by') }} <a href="{{ route('public.profile.show', $series->user->username) }}" class="text-blue-600 hover:text-blue-800">
                     {{ $series->user->name }}
                 </a>
             </div>
@@ -45,7 +45,7 @@
         <!-- Notes in Series -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">
-                {{ __('Notes in this Series') }} ({{ $series->notes->count() }})
+                {{ __('messages.notes_in_series') }} ({{ $series->notes->count() }})
             </h2>
             @if($series->notes->count() > 0)
                 <div class="space-y-4">
@@ -67,13 +67,13 @@
                             </div>
                             <a href="{{ route('marketplace.show', $note) }}"
                                 class="ml-4 text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                {{ __('View') }}
+                                {{ __('messages.view') }}
                             </a>
                         </div>
                     @endforeach
                 </div>
             @else
-                <p class="text-center text-gray-500 py-8">{{ __('No notes in this series yet.') }}</p>
+                <p class="text-center text-gray-500 py-8">{{ __('messages.no_notes_in_series') }}</p>
             @endif
         </div>
     </div>

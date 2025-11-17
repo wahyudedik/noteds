@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'AI Insights - MyNoteds')
+@section('title', __('messages.ai_insights_title'))
 
 @section('content')
 <div class="py-8 sm:py-12">

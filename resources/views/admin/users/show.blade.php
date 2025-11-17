@@ -244,7 +244,7 @@
                                 </span>
                             </div>
                             <p class="text-xs text-gray-600 mt-1">
-                                {{ __('messages.performed_by') }}: {{ $log->admin?->name ?? 'Admin' }}
+                                {{ __('messages.performed_by') }}: {{ $log->admin?->name ?? __('messages.admin') }}
                             </p>
                             @if($log->reason)
                                 <p class="text-xs text-red-600 mt-1">

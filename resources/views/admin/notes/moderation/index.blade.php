@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Note Moderation')
+@section('title', __('messages.note_moderation'))
 
 @section('content')
 <div class="py-12 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Note Moderation</h1>
+                <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.note_moderation') }}</h1>
                 <p class="mt-1 text-sm text-gray-600">Review reported notes, update statuses, and keep the marketplace safe.</p>
             </div>
             <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800">

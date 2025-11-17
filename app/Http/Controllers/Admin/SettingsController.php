@@ -138,6 +138,32 @@ class SettingsController extends Controller
             'min_price_default' => 'nullable|numeric|min:0|max:100000000',
             'recommended_price_multiplier' => 'nullable|numeric|min:0|max:10',
             'featured_price.*.*' => 'nullable|numeric|min:0|max:100000000',
+            // Content Protection Settings
+            'protection_disable_text_selection' => 'nullable|boolean',
+            'protection_disable_right_click' => 'nullable|boolean',
+            'protection_disable_keyboard_shortcuts' => 'nullable|boolean',
+            'protection_disable_copy_paste' => 'nullable|boolean',
+            'protection_disable_drag_drop' => 'nullable|boolean',
+            'protection_disable_print' => 'nullable|boolean',
+            'protection_disable_view_source' => 'nullable|boolean',
+            'protection_detect_devtools' => 'nullable|boolean',
+            'protection_disable_screenshot' => 'nullable|boolean',
+            'protection_disable_image_saving' => 'nullable|boolean',
+            'protection_disable_console' => 'nullable|boolean',
+            'protection_monitor_clipboard' => 'nullable|boolean',
+            'protection_disable_print_screen' => 'nullable|boolean',
+            'protection_disable_snipping_tool' => 'nullable|boolean',
+            'protection_detect_window_blur' => 'nullable|boolean',
+            'protection_detect_visibility_change' => 'nullable|boolean',
+            'protection_clear_clipboard_periodic' => 'nullable|boolean',
+            'protection_blur_overlay' => 'nullable|boolean',
+            'protection_disable_f12' => 'nullable|boolean',
+            'protection_disable_devtools_shortcuts' => 'nullable|boolean',
+            'protection_detect_ai_bots' => 'nullable|boolean',
+            'protection_detect_headless' => 'nullable|boolean',
+            'protection_detect_mouse_movement' => 'nullable|boolean',
+            'protection_detect_click_pattern' => 'nullable|boolean',
+            'protection_detect_screen_recording' => 'nullable|boolean',
         ]);
 
         // Update or create S3 settings
@@ -432,6 +458,51 @@ class SettingsController extends Controller
                 }
             }
             $updates[] = 'Featured notes pricing updated';
+        }
+
+        // Update Content Protection Settings
+        $protectionSettings = [
+            'protection_disable_text_selection',
+            'protection_disable_right_click',
+            'protection_disable_keyboard_shortcuts',
+            'protection_disable_copy_paste',
+            'protection_disable_drag_drop',
+            'protection_disable_print',
+            'protection_disable_view_source',
+            'protection_detect_devtools',
+            'protection_disable_screenshot',
+            'protection_disable_image_saving',
+            'protection_disable_console',
+            'protection_monitor_clipboard',
+            'protection_disable_print_screen',
+            'protection_disable_snipping_tool',
+            'protection_detect_window_blur',
+            'protection_detect_visibility_change',
+            'protection_clear_clipboard_periodic',
+            'protection_blur_overlay',
+            'protection_disable_f12',
+            'protection_disable_devtools_shortcuts',
+            'protection_detect_ai_bots',
+            'protection_detect_headless',
+            'protection_detect_mouse_movement',
+            'protection_detect_click_pattern',
+            'protection_detect_screen_recording',
+        ];
+
+        foreach ($protectionSettings as $key) {
+            if ($request->has($key)) {
+                Setting::setSetting(
+                    $key,
+                    $request->boolean($key),
+                    'boolean',
+                    'content_protection',
+                    ucfirst(str_replace('protection_', '', str_replace('_', ' ', $key)))
+                );
+            }
+        }
+
+        if ($request->hasAny($protectionSettings)) {
+            $updates[] = 'Content protection settings updated';
         }
 
         if (!empty($updates)) {

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'My Collections')
+@section('title', __('messages.my_collections'))
 
 @section('content')
 <div class="py-8">

@@ -877,6 +877,9 @@ return [
     'top_10_wallets' => '10 Dompet Teratas (berdasarkan Saldo)',
     'rank' => 'Peringkat',
     'user' => 'Pengguna',
+    'you' => 'Anda',
+    'and' => 'dan',
+    'profile' => 'Profile',
     'email' => 'Email',
     'no_wallets_with_balance' => 'Belum ada dompet dengan saldo.',
     'referral_analytics' => 'Analitik Referral',
@@ -2114,6 +2117,123 @@ return [
     'order_id' => 'Order ID (UUID)',
     'bulk_assign' => 'Bulk Assign',
     'order' => 'order',
+    'order_singular' => 'order',
+    'orders' => 'orders',
+    
+    // Navigation
+    'workspaces' => 'Workspaces',
+    'forum' => 'Forum',
+    'analytics' => 'Analytics',
+    'preferences' => 'Preferences',
+    'produk_chats' => 'Produk Chats',
+    'featured_notes' => 'Featured Notes',
+    'seller_tools' => 'Seller Tools',
+    'collections' => 'Collections',
+    'reading_history' => 'Reading History',
+    'batch_download' => 'Batch Download',
+    'my_library' => 'My Library',
+    
+    // Forum
+    'post_details' => 'Post Details',
+    'back_to_forum' => 'Back to Forum',
+    
+    // Refunds
+    'refund_requests' => 'Refund Requests',
+    'view_and_manage_refunds' => 'View and manage your refund requests',
+    'no_refund_requests' => 'No refund requests',
+    'no_refund_requests_description' => 'You haven\'t submitted any refund requests yet.',
+    'view_details' => 'View Details',
+    'processed' => 'Processed',
+    
+    // Series
+    'back_to_series' => 'Back to Series',
+    'notes_in_series' => 'Notes in this Series',
+    'no_notes_in_series' => 'No notes in this series yet.',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    
+    // Admin Tutorials
+    'admin_tutorials' => 'Admin Tutorials',
+    'tutorial_management' => 'Tutorial Management',
+    'create_tutorial' => 'Create Tutorial',
+    'edit_tutorial' => 'Edit Tutorial',
+    'back_to_tutorials' => '← Back to Tutorials',
+    
+    // Notes Resale
+    'resale_note' => 'Jual Kembali Catatan',
+    
+    // AI Memory
+    'ai_memory_platform' => 'AI Memory Platform',
+    
+    // AI Chat
+    'ai_chat' => 'AI Chat',
+    
+    // Forum Moderation
+    'post_moderation' => 'Post Moderation',
+    'forum_moderation' => 'Forum Moderation',
+    
+    // Note Moderation
+    'note_moderation' => 'Note Moderation',
+    'moderate_note' => 'Moderate Note',
+    
+    // Account Moderation
+    'account_moderation' => 'Account Moderation',
+    'moderate_account' => 'Moderate Account',
+    
+    // Forum Pages
+    'forum_index' => 'Forum',
+    'forum_analytics' => 'Forum Analytics',
+    'forum_email_preferences' => 'Forum Email Preferences',
+    'forum_email_notifications' => 'Forum Email Notifications',
+    'bookmarked_posts_forum' => 'Bookmarked Posts - Forum',
+    
+    // Reading History
+    'reading_history' => 'Reading History',
+    
+    // Collections
+    'my_collections' => 'My Collections',
+    'create_collection' => 'Create Collection',
+    
+    // Workspaces
+    'invite_team' => 'Invite Team',
+    
+    // Forum Hashtag
+    'hashtag_forum' => 'Forum',
+    
+    // MyNoteds
+    'mynoteds_ai_memory_platform' => 'MyNoteds - AI Memory Platform',
+    
+    // AI Memory
+    'ai_memory_description' => 'Tanya apapun tentang catatan Anda menggunakan AI yang memahami semua data Anda',
+    'total_notes' => 'Total Catatan',
+    'ai_status' => 'AI Status',
+    'ask_ai_about_notes' => 'Tanya AI tentang Catatan Anda',
+    'ai_answer' => 'Jawaban AI',
+    'ai_processing' => 'AI sedang memproses pertanyaan Anda...',
+    'quick_actions' => 'Quick Actions',
+    'popular_topics' => 'Topik Populer',
+    
+    // Note Conversations
+    'product_conversations' => 'Percakapan Produk',
+    'product_conversations_description' => 'Chat pribadi antara buyer dan seller setelah pembelian. Setiap produk memiliki forum percakapan sendiri.',
+    'no_conversations_yet' => 'Belum ada percakapan',
+    'conversations_auto_created' => 'Percakapan akan otomatis dibuat setelah transaksi berhasil. Anda bisa kembali ke sini untuk melanjutkan chat dengan lawan transaksi.',
+    'you_as_buyer' => 'Anda sebagai Buyer',
+    'you_as_seller' => 'Anda sebagai Seller',
+    'product_not_available' => 'Produk tidak tersedia',
+    'no_messages_yet' => 'Belum ada pesan. Mulai percakapan dengan mengirim pesan pertama.',
+    'continue_chat' => 'Lanjutkan Chat →',
+    'back_to_conversations' => 'Kembali ke daftar percakapan',
+    'conversation_between' => 'Percakapan antara',
+    'buyer' => 'buyer',
+    'seller' => 'seller',
+    'view_product' => 'Lihat Produk',
+    'read' => 'Dibaca',
+    'sent' => 'Terkirim',
+    'start_conversation' => 'Belum ada pesan. Mulailah percakapan dengan lawan transaksi Anda.',
+    'message_label' => 'Pesan',
+    'write_message_placeholder' => 'Tulis pesan (maks 2000 karakter)',
+    'send_message' => 'Kirim Pesan',
     
     // Tuts+ & Education
     'education_creative_coding' => 'Edukasi Kreatif & Coding',
@@ -2435,4 +2555,26 @@ return [
     // Notes Show
     'cannot_delete_sold' => 'Tidak Dapat Dihapus (Terjual)',
     'cannot_delete_sold_tooltip' => 'Tidak dapat menghapus catatan yang sudah terjual',
+    
+    // Admin Pending Verification
+    'user_verification_pending_title' => 'User Verification Pending',
+    'verification_pending_title' => 'Verifikasi User Pending',
+    'verification_pending_description' => 'Daftar user yang sudah upload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie serta memerlukan verifikasi identitas',
+    'pending_count' => 'pending',
+    'search_name_email' => 'Cari nama atau email',
+    'all_roles' => 'Semua Role',
+    'verification_status_label' => 'Status Verifikasi',
+    'identity_document_selfie' => 'Dokumen Identitas & Selfie',
+    'upload_date' => 'Tanggal Upload',
+    'document_type_label_short' => 'Jenis',
+    'document_not_available' => 'Dokumen identitas tidak ada',
+    'selfie_not_available' => 'Selfie tidak ada',
+    'detail' => 'Detail',
+    'approve_verification_confirm' => 'Approve verifikasi untuk user ini?',
+    'reject_reason_placeholder' => 'Alasan reject',
+    'no_users_need_verification' => 'Tidak ada user yang perlu verifikasi saat ini.',
+    'please_fill_reject_reason' => 'Silakan isi alasan reject.',
+    'confirm_reject_verification' => 'Apakah Anda yakin ingin reject verifikasi user ini?',
+    'verified_by_admin' => 'Verified by admin',
+    'selfie' => 'Selfie',
 ];

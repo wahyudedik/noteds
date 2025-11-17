@@ -838,6 +838,9 @@ return [
     'top_10_wallets' => 'أفضل 10 محافظ (حسب الرصيد)',
     'rank' => 'الترتيب',
     'user' => 'المستخدم',
+    'you' => 'أنت',
+    'and' => 'و',
+    'profile' => 'الملف الشخصي',
     'email' => 'البريد الإلكتروني',
     'no_wallets_with_balance' => 'لا توجد محافظ برصيد بعد.',
     'referral_analytics' => 'تحليلات الإحالة',
@@ -2303,4 +2306,145 @@ return [
     // Notes Show
     'cannot_delete_sold' => 'لا يمكن الحذف (تم البيع)',
     'cannot_delete_sold_tooltip' => 'لا يمكن حذف الملاحظة التي تم بيعها',
+    
+    // Admin Pending Verification
+    'user_verification_pending_title' => 'التحقق من المستخدم معلق',
+    'verification_pending_title' => 'التحقق من المستخدم معلق',
+    'verification_pending_description' => 'قائمة المستخدمين الذين قاموا بتحميل وثائق الهوية (بطاقة الهوية أو بطاقة الطالب) وصورة السيلفي ويتطلبون التحقق من الهوية',
+    'pending_count' => 'معلق',
+    'search_name_email' => 'البحث عن الاسم أو البريد الإلكتروني',
+    'all_roles' => 'جميع الأدوار',
+    'verification_status_label' => 'حالة التحقق',
+    'identity_document_selfie' => 'وثيقة الهوية والسيلفي',
+    'upload_date' => 'تاريخ التحميل',
+    'document_type_label_short' => 'النوع',
+    'document_not_available' => 'وثيقة الهوية غير متاحة',
+    'selfie_not_available' => 'السيلفي غير متاح',
+    'detail' => 'التفاصيل',
+    'approve_verification_confirm' => 'الموافقة على التحقق لهذا المستخدم؟',
+    'reject_reason_placeholder' => 'سبب الرفض',
+    'no_users_need_verification' => 'لا يوجد مستخدمون يحتاجون إلى التحقق في هذا الوقت.',
+    'please_fill_reject_reason' => 'يرجى ملء سبب الرفض.',
+    'confirm_reject_verification' => 'هل أنت متأكد أنك تريد رفض التحقق لهذا المستخدم؟',
+    'verified_by_admin' => 'تم التحقق بواسطة المشرف',
+    'selfie' => 'السيلفي',
+    
+    // Studio Orders
+    'order_singular' => 'طلب',
+    'orders' => 'طلبات',
+    
+    // Navigation
+    'workspaces' => 'مساحات العمل',
+    'forum' => 'المنتدى',
+    'analytics' => 'التحليلات',
+    'preferences' => 'التفضيلات',
+    'produk_chats' => 'محادثات المنتج',
+    'featured_notes' => 'الملاحظات المميزة',
+    'seller_tools' => 'أدوات البائع',
+    'collections' => 'المجموعات',
+    'reading_history' => 'تاريخ القراءة',
+    'batch_download' => 'التنزيل المجمع',
+    'my_library' => 'مكتبتي',
+    
+    // Forum
+    'post_details' => 'تفاصيل المنشور',
+    'back_to_forum' => 'العودة إلى المنتدى',
+    
+    // Refunds
+    'refund_requests' => 'طلبات الاسترداد',
+    'view_and_manage_refunds' => 'عرض وإدارة طلبات الاسترداد الخاصة بك',
+    'no_refund_requests' => 'لا توجد طلبات استرداد',
+    'no_refund_requests_description' => 'لم تقم بتقديم أي طلبات استرداد بعد.',
+    'view_details' => 'عرض التفاصيل',
+    'processed' => 'تمت المعالجة',
+    
+    // Series
+    'back_to_series' => 'العودة إلى السلسلة',
+    'notes_in_series' => 'الملاحظات في هذه السلسلة',
+    'no_notes_in_series' => 'لا توجد ملاحظات في هذه السلسلة بعد.',
+    'active' => 'نشط',
+    'inactive' => 'غير نشط',
+    
+    // Admin Tutorials
+    'admin_tutorials' => 'دروس المشرف',
+    'tutorial_management' => 'إدارة الدروس',
+    'create_tutorial' => 'إنشاء درس',
+    'edit_tutorial' => 'تعديل الدرس',
+    'back_to_tutorials' => '← العودة إلى الدروس',
+    
+    // Notes Resale
+    'resale_note' => 'إعادة بيع الملاحظة',
+    
+    // AI Memory
+    'ai_memory_platform' => 'منصة ذاكرة AI',
+    
+    // AI Chat
+    'ai_chat' => 'محادثة AI',
+    
+    // Forum Moderation
+    'post_moderation' => 'تعديل المنشور',
+    'forum_moderation' => 'تعديل المنتدى',
+    
+    // Note Moderation
+    'note_moderation' => 'تعديل الملاحظة',
+    'moderate_note' => 'تعديل الملاحظة',
+    
+    // Account Moderation
+    'account_moderation' => 'تعديل الحساب',
+    'moderate_account' => 'تعديل الحساب',
+    
+    // Forum Pages
+    'forum_index' => 'المنتدى',
+    'forum_analytics' => 'تحليلات المنتدى',
+    'forum_email_preferences' => 'تفضيلات بريد المنتدى',
+    'forum_email_notifications' => 'إشعارات بريد المنتدى',
+    'bookmarked_posts_forum' => 'المنشورات المرجعية - المنتدى',
+    
+    // Reading History
+    'reading_history' => 'تاريخ القراءة',
+    
+    // Collections
+    'my_collections' => 'مجموعاتي',
+    'create_collection' => 'إنشاء مجموعة',
+    
+    // Workspaces
+    'invite_team' => 'دعوة الفريق',
+    
+    // Forum Hashtag
+    'hashtag_forum' => 'المنتدى',
+    
+    // MyNoteds
+    'mynoteds_ai_memory_platform' => 'MyNoteds - منصة ذاكرة AI',
+    
+    // AI Memory
+    'ai_memory_description' => 'اسأل أي شيء عن ملاحظاتك باستخدام AI الذي يفهم جميع بياناتك',
+    'total_notes' => 'إجمالي الملاحظات',
+    'ai_status' => 'حالة AI',
+    'ask_ai_about_notes' => 'اسأل AI عن ملاحظاتك',
+    'ai_answer' => 'إجابة AI',
+    'ai_processing' => 'AI يعالج سؤالك...',
+    'quick_actions' => 'إجراءات سريعة',
+    'popular_topics' => 'مواضيع شائعة',
+    
+    // Note Conversations
+    'product_conversations' => 'محادثات المنتج',
+    'product_conversations_description' => 'محادثة خاصة بين المشتري والبائع بعد الشراء. كل منتج له منتدى محادثة خاص به.',
+    'no_conversations_yet' => 'لا توجد محادثات بعد',
+    'conversations_auto_created' => 'سيتم إنشاء المحادثات تلقائيًا بعد معاملة ناجحة. يمكنك العودة هنا لمتابعة الدردشة مع شريك المعاملة.',
+    'you_as_buyer' => 'أنت كمشتري',
+    'you_as_seller' => 'أنت كبائع',
+    'product_not_available' => 'المنتج غير متاح',
+    'no_messages_yet' => 'لا توجد رسائل بعد. ابدأ المحادثة بإرسال الرسالة الأولى.',
+    'continue_chat' => 'متابعة الدردشة →',
+    'back_to_conversations' => 'العودة إلى قائمة المحادثات',
+    'conversation_between' => 'محادثة بين',
+    'buyer' => 'مشتري',
+    'seller' => 'بائع',
+    'view_product' => 'عرض المنتج',
+    'read' => 'مقروء',
+    'sent' => 'مرسل',
+    'start_conversation' => 'لا توجد رسائل بعد. ابدأ محادثة مع شريك المعاملة.',
+    'message_label' => 'الرسالة',
+    'write_message_placeholder' => 'اكتب رسالة (حد أقصى 2000 حرف)',
+    'send_message' => 'إرسال الرسالة',
 ];

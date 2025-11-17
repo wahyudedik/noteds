@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Forum')
+@section('title', __('messages.forum_index'))
 
 @section('content')
 @include('forum.partials.quill-assets')

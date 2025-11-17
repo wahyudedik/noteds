@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create Collection')
+@section('title', __('messages.create_collection'))
 
 @section('content')
 <div class="py-8">

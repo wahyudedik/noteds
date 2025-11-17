@@ -898,7 +898,7 @@
                                                 <div class="text-xs text-gray-500 uppercase">{{ $rule->country_code }}</div>
                                             </td>
                                             <td class="px-4 py-2 text-gray-700">
-                                                {{ $rule->note_category ?? 'Semua Kategori' }}
+                                                {{ $rule->note_category ?? __('messages.all_categories') }}
                                             </td>
                                             <td class="px-4 py-2">
                                                 <form action="{{ route('admin.tax-rules.update', $rule) }}" method="POST" class="inline-flex items-center gap-2">
@@ -1138,6 +1138,540 @@
                             <button type="submit"
                                 class="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors">
                                 Save Featured Notes Pricing
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Content Protection Settings -->
+            <div id="content-protection" class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-6">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                Content Protection Settings
+                            </h3>
+                            <p class="text-sm text-gray-600 mt-1">
+                                Aktifkan atau nonaktifkan fitur anti-copy, anti-AI, dan perlindungan konten lainnya
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
+                        @csrf
+                        <input type="hidden" name="redirect_to" value="{{ route('admin.settings.index') }}#content-protection">
+                        
+                        <div class="space-y-6">
+                            <!-- Text Selection Protection -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_text_selection" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable Text Selection</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah user memilih dan menyalin teks dari halaman</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_text_selection" id="protection_disable_text_selection" 
+                                            value="1" {{ Setting::getSetting('protection_disable_text_selection', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable Right Click -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_right_click" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable Right Click</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah klik kanan untuk membuka context menu</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_right_click" id="protection_disable_right_click" 
+                                            value="1" {{ Setting::getSetting('protection_disable_right_click', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable Keyboard Shortcuts -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_keyboard_shortcuts" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable Keyboard Shortcuts</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah Ctrl+C, Ctrl+V, Ctrl+S, Ctrl+P, Ctrl+A, Ctrl+X, Ctrl+U, dll</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_keyboard_shortcuts" id="protection_disable_keyboard_shortcuts" 
+                                            value="1" {{ Setting::getSetting('protection_disable_keyboard_shortcuts', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable Copy/Cut/Paste -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_copy_paste" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable Copy/Cut/Paste</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah event copy, cut, dan paste</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_copy_paste" id="protection_disable_copy_paste" 
+                                            value="1" {{ Setting::getSetting('protection_disable_copy_paste', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable Drag & Drop -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_drag_drop" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable Drag & Drop</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah drag and drop untuk gambar dan elemen lainnya</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_drag_drop" id="protection_disable_drag_drop" 
+                                            value="1" {{ Setting::getSetting('protection_disable_drag_drop', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable Print -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_print" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable Print</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah print halaman (Ctrl+P dan beforeprint event)</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_print" id="protection_disable_print" 
+                                            value="1" {{ Setting::getSetting('protection_disable_print', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable View Source -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_view_source" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable View Source</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah Ctrl+U untuk melihat source code halaman</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_view_source" id="protection_disable_view_source" 
+                                            value="1" {{ Setting::getSetting('protection_disable_view_source', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Detect DevTools -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_detect_devtools" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Detect Developer Tools</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mendeteksi dan memperingatkan ketika DevTools dibuka</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_detect_devtools" id="protection_detect_devtools" 
+                                            value="1" {{ Setting::getSetting('protection_detect_devtools', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable Screenshot (Mobile) -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_screenshot" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable Screenshot (Mobile)</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah screenshot pada perangkat mobile (iOS/Android)</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_screenshot" id="protection_disable_screenshot" 
+                                            value="1" {{ Setting::getSetting('protection_disable_screenshot', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable Image Saving -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_image_saving" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable Image Saving</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah drag dan save gambar dari halaman</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_image_saving" id="protection_disable_image_saving" 
+                                            value="1" {{ Setting::getSetting('protection_disable_image_saving', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable Console -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_console" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable Console</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Memblokir console.log dan akses ke browser console</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_console" id="protection_disable_console" 
+                                            value="1" {{ Setting::getSetting('protection_disable_console', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Monitor Clipboard -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_monitor_clipboard" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Monitor Clipboard</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Memantau dan membersihkan clipboard secara berkala</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_monitor_clipboard" id="protection_monitor_clipboard" 
+                                            value="1" {{ Setting::getSetting('protection_monitor_clipboard', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable Print Screen -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_print_screen" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable Print Screen</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah tombol Print Screen dan kombinasi Windows+Print Screen</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_print_screen" id="protection_disable_print_screen" 
+                                            value="1" {{ Setting::getSetting('protection_disable_print_screen', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable Snipping Tool -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_snipping_tool" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable Snipping Tool</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah Windows+Shift+S (Snipping Tool) dan tools screenshot lainnya</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_snipping_tool" id="protection_disable_snipping_tool" 
+                                            value="1" {{ Setting::getSetting('protection_disable_snipping_tool', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Detect Window Blur -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_detect_window_blur" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Detect Window Blur</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mendeteksi ketika window kehilangan focus (mungkin screenshot)</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_detect_window_blur" id="protection_detect_window_blur" 
+                                            value="1" {{ Setting::getSetting('protection_detect_window_blur', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Detect Visibility Change -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_detect_visibility_change" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Detect Visibility Change</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mendeteksi perubahan tab visibility (tab switch untuk screenshot)</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_detect_visibility_change" id="protection_detect_visibility_change" 
+                                            value="1" {{ Setting::getSetting('protection_detect_visibility_change', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Clear Clipboard Periodically -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_clear_clipboard_periodic" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Clear Clipboard Periodically</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Membersihkan clipboard secara berkala setiap 800ms</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_clear_clipboard_periodic" id="protection_clear_clipboard_periodic" 
+                                            value="1" {{ Setting::getSetting('protection_clear_clipboard_periodic', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Blur Overlay Protection -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_blur_overlay" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Blur Overlay Protection</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Menampilkan blur overlay saat terdeteksi screenshot atau aktivitas mencurigakan</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_blur_overlay" id="protection_blur_overlay" 
+                                            value="1" {{ Setting::getSetting('protection_blur_overlay', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable F12 -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_f12" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable F12 (DevTools)</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah tombol F12 untuk membuka Developer Tools</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_f12" id="protection_disable_f12" 
+                                            value="1" {{ Setting::getSetting('protection_disable_f12', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Disable Ctrl+Shift+I/J/C -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_disable_devtools_shortcuts" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Disable DevTools Shortcuts</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mencegah Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (DevTools shortcuts)</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_disable_devtools_shortcuts" id="protection_disable_devtools_shortcuts" 
+                                            value="1" {{ Setting::getSetting('protection_disable_devtools_shortcuts', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- AI Bot Detection -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_detect_ai_bots" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">AI Bot Detection</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mendeteksi AI bots dari User-Agent (ChatGPT, Claude, Perplexity, dll)</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_detect_ai_bots" id="protection_detect_ai_bots" 
+                                            value="1" {{ Setting::getSetting('protection_detect_ai_bots', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Headless Browser Detection -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_detect_headless" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Headless Browser Detection</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mendeteksi headless browser (Selenium, Puppeteer, Playwright, dll)</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_detect_headless" id="protection_detect_headless" 
+                                            value="1" {{ Setting::getSetting('protection_detect_headless', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Mouse Movement Detection -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_detect_mouse_movement" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Mouse Movement Detection</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mendeteksi pola pergerakan mouse yang mencurigakan (AI pattern)</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_detect_mouse_movement" id="protection_detect_mouse_movement" 
+                                            value="1" {{ Setting::getSetting('protection_detect_mouse_movement', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Click Pattern Detection -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_detect_click_pattern" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Click Pattern Detection</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mendeteksi pola klik yang mencurigakan (terlalu konsisten seperti AI)</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_detect_click_pattern" id="protection_detect_click_pattern" 
+                                            value="1" {{ Setting::getSetting('protection_detect_click_pattern', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Screen Recording Detection -->
+                            <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex-1">
+                                    <label for="protection_detect_screen_recording" class="flex items-center cursor-pointer">
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-gray-900">Screen Recording Detection</h4>
+                                            <p class="text-xs text-gray-600 mt-1">Mendeteksi upaya screen recording menggunakan canvas fingerprinting</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="ml-4">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="protection_detect_screen_recording" id="protection_detect_screen_recording" 
+                                            value="1" {{ Setting::getSetting('protection_detect_screen_recording', 'content_protection', false) ? 'checked' : '' }}
+                                            class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end pt-4 border-t border-gray-200">
+                            <button type="submit"
+                                class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
+                                Save Content Protection Settings
                             </button>
                         </div>
                     </form>

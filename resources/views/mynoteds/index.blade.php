@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'MyNoteds - AI Memory Platform')
+@section('title', __('messages.mynoteds_ai_memory_platform'))
 
 @section('content')
 <div class="py-8 sm:py-12">

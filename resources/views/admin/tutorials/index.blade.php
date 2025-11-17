@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Admin Tutorials')
+@section('title', __('messages.admin_tutorials'))
 
 @section('content')
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Tutorial Management</h2>
+            <h2 class="text-2xl font-bold text-gray-900">{{ __('messages.tutorial_management') }}</h2>
             <div class="flex gap-4 items-center">
                 <a href="{{ route('admin.tutorials.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     + Tambah Tutorial

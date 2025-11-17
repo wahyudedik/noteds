@@ -329,7 +329,7 @@ class NoteController extends Controller
         }
 
         // Only notify if published immediately (not draft, not scheduled)
-        if (!$isDraft && !$scheduledAt && $note->is_public && $note->status === 'active' && !$note->notificationMeta('published_notified_at')) {
+        if (!$isDraft && !$scheduledPublishAt && $note->is_public && $note->status === 'active' && !$note->notificationMeta('published_notified_at')) {
             app(NotificationService::class)->notifyNewNotePublished($note);
             $note->setNotificationMetaValue('published_notified_at', now()->toIso8601String());
         }
