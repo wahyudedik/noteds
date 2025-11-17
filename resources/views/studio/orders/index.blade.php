@@ -11,7 +11,7 @@
         </div>
         <div class="bg-white shadow-sm sm:rounded-2xl p-6">
             @if($orders->count() === 0)
-                <p class="text-slate-600">{{ __('messages.no_orders') ?? 'Belum ada order.' }}</p>
+                <p class="text-slate-600">{{ __('messages.no_orders') }}</p>
             @else
                 <div class="space-y-4">
                     @foreach($orders as $order)

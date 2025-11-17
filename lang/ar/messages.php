@@ -2215,4 +2215,88 @@ return [
     // Tickets
     'premium_only' => 'مميز فقط',
     'all_users' => 'جميع المستخدمين',
+    
+    // Ecosystem Use Cases
+    'photos_use_website' => 'المواقع الإلكترونية والمدونات وصفحات الهبوط',
+    'photos_use_promo' => 'المواد الترويجية والإعلانات',
+    'photos_use_presentation' => 'قوالب العروض التقديمية',
+    'subscribe_photos_access' => 'اشترك للوصول إلى الصور',
+    'themes_use_quick' => 'إنشاء مواقع إلكترونية سريعة بقوالب متجاوبة',
+    'themes_use_niche' => 'مئات من التخصصات والتخطيطات المختارة',
+    'themes_use_components' => 'مكونات جاهزة للاستخدام للتجارة الإلكترونية والمدونات',
+    'subscribe_themes_access' => 'اشترك للوصول إلى القوالب',
+    'audio_use_video' => 'الفيديو والبودكاست والإعلانات والعروض التقديمية',
+    'audio_use_game' => 'الألعاب والتطبيقات',
+    'audio_use_trailer' => 'العروض الترويجية والمقدمات',
+    'subscribe_audio_access' => 'اشترك للوصول إلى الصوت',
+    'graphics_use_branding' => 'العلامات التجارية السريعة: الشعارات والهوية البصرية',
+    'graphics_use_marketing' => 'مستندات التسويق: الكتيبات والنشرات والملصقات',
+    'graphics_use_social' => 'أصول وسائل التواصل الاجتماعي والعروض التقديمية المهنية',
+    'subscribe_graphics_access' => 'اشترك للوصول إلى الرسوم',
+    'code_use_accelerate' => 'تسريع تطوير التطبيقات أو المواقع الإلكترونية',
+    'code_use_plugins' => 'الإضافات الجاهزة لأنظمة إدارة المحتوى الشائعة',
+    'code_use_components' => 'مكونات واجهة المستخدم/تجربة المستخدم القابلة للتخصيص',
+    'subscribe_code_access' => 'اشترك للوصول إلى الكود',
+    
+    // Studio Services
+    'example_services' => 'خدمات مثال',
+    'service_logo_design' => 'تصميم الشعار والهوية البصرية',
+    'service_video_editing' => 'تحرير الفيديو والرسوم المتحركة',
+    'service_web_development' => 'تطوير المواقع (WordPress/Laravel)',
+    'service_voice_over' => 'التعليق الصوتي ومزج الصوت',
+    
+    // Tuts
+    'tuts_description' => 'منصة تعليمية تحتوي على دروس ودورات حول التصميم والبرمجة والتصوير والإبداع الرقمي.',
+    'search_tutorials' => 'البحث عن دروس...',
+    'all_categories' => 'جميع الفئات',
+    'all_tutorials' => 'جميع الدروس',
+    'featured_only' => 'المميز فقط',
+    'categories' => 'الفئات',
+    'tutorial' => 'درس',
+    'tutorials' => 'دروس',
+    'views' => 'مشاهدات',
+    'no_tutorials_found' => 'لم يتم العثور على دروس',
+    'try_adjusting_search' => 'حاول تعديل معايير البحث أو التصفية.',
+    
+    // Ecosystem Index
+    'ecosystem_explore' => 'استكشف عروض النظام البيئي الشبيهة بـ Envato لـ Noteds.',
+    
+    // Marketplace Ecosystem Filter
+    'all_ecosystem' => 'جميع الأنظمة البيئية',
+    'design' => 'التصميم',
+    'code' => 'الكود',
+    'photo' => 'الصورة',
+    'audio' => 'الصوت',
+    'video' => 'الفيديو',
+    'theme' => 'القالب',
+    'elements' => 'العناصر',
+    
+    // Notes Create
+    'ecosystem_category' => 'النظام البيئي الإبداعي',
+    'note_language' => 'لغة المحتوى',
+    'scheduled_publish_at' => 'جدولة النشر',
+    'scheduled_publish_help' => 'إذا تم ملؤه، سيتم نشر الملاحظة تلقائياً في ذلك الوقت.',
+    
+    // Studio Orders Show
+    'no_quotes_found' => 'لم يتم العثور على عروض أسعار.',
+    
+    // Registration Verification Info
+    'verification_info_title' => 'معلومات التحقق',
+    'verification_info_description' => 'بعد التسجيل، سيُطلب منك إكمال ملفك الشخصي عن طريق تحميل وثيقة الهوية (بطاقة الهوية أو بطاقة الطالب) وصورة سيلفي للتحقق من الهوية.',
+    
+    // Profile Edit - Document Types
+    'ktp_full' => 'بطاقة الهوية (KTP)',
+    'student_card' => 'بطاقة الطالب (للقاصرين/الطلاب)',
+    'select_document_type' => 'اختر نوع وثيقة الهوية المراد تحميلها',
+    'upload_identity_document' => 'تحميل وثيقة الهوية',
+    'student_card_short' => 'بطاقة الطالب',
+    'ktp_short' => 'بطاقة الهوية',
+    'already_uploaded' => 'تم التحميل بالفعل',
+    'document_not_uploaded' => 'لم يتم تحميل وثيقة الهوية بعد',
+    'upload_selfie' => 'تحميل صورة سيلفي',
+    'selfie_already_uploaded' => 'تم تحميل صورة السيلفي بالفعل',
+    'selfie_not_uploaded' => 'لم يتم تحميل صورة السيلفي بعد',
+    'file_format_help' => 'التنسيق: JPG أو PNG أو PDF. الحد الأقصى 5MB.',
+    'document_type_label' => 'نوع وثيقة الهوية',
+    'selfie_upload_help' => 'استخدم صورة مشرقة مع وجه واضح. الحد الأقصى 5MB.',
 ];

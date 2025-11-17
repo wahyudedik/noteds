@@ -2,9 +2,9 @@
     <div class="space-y-6">
         <div>
             <h2 class="text-2xl font-semibold text-slate-900">
-                {{ __('messages.register_title') ?? 'Buat akun Noteds Anda' }}</h2>
+                {{ __('messages.register_title') }}</h2>
             <p class="mt-2 text-sm leading-6 text-slate-500">
-                {{ __('messages.register_subtitle') ?? 'Mulai kelola dan monetisasi catatan digital Anda, atau bergabung dengan tim untuk berkolaborasi.' }}
+                {{ __('messages.register_subtitle') }}
             </p>
         </div>
 
@@ -14,15 +14,15 @@
             <div class="space-y-2">
                 <x-input-label for="name" :value="__('messages.name')" />
                 <x-text-input id="name" type="text" name="name" :value="old('name')" required autofocus
-                    autocomplete="name" placeholder="{{ __('messages.name_placeholder') ?? 'Nama lengkap' }}" />
+                    autocomplete="name" placeholder="{{ __('messages.name_placeholder') }}" />
                 <x-input-error :messages="$errors->get('name')" />
             </div>
 
             @if (isset($invitation) && $invitation)
                 <div class="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-4 text-sm text-blue-800">
-                    <p class="font-semibold">{{ __('messages.workspace_invite_title') ?? 'Undangan Workspace' }}</p>
+                    <p class="font-semibold">{{ __('messages.workspace_invite_title') }}</p>
                     <p class="mt-1 text-blue-700">
-                        {{ __('messages.workspace_invite_copy') ?? 'Anda diundang untuk bergabung dengan workspace:' }}
+                        {{ __('messages.workspace_invite_copy') }}
                         <strong>{{ $invitation->workspace->name }}</strong>
                         ({{ $invitation->role === 'admin' ? 'Admin' : 'Member' }})
                     </p>
@@ -37,7 +37,7 @@
                         value="{{ old('email', $invitation->email) }}" readonly required autocomplete="username"
                         class="bg-slate-100 cursor-not-allowed" />
                     <p class="text-xs text-slate-500">
-                        {{ __('messages.invited_email_hint') ?? 'Email ini sudah ditentukan oleh undangan workspace.' }}
+                        {{ __('messages.invited_email_hint') }}
                     </p>
                 @else
                     <x-text-input id="email" type="email" name="email" :value="old('email')" required
@@ -71,15 +71,14 @@
             <div class="space-y-2">
                 <x-input-label for="password" :value="__('messages.password')" />
                 <x-text-input id="password" type="password" name="password" required autocomplete="new-password"
-                    placeholder="{{ __('messages.password_placeholder') ?? 'Minimal 8 karakter' }}" />
+                    placeholder="{{ __('messages.password_placeholder') }}" />
                 <x-input-error :messages="$errors->get('password')" />
             </div>
 
             <div class="space-y-2">
                 <x-input-label for="password_confirmation" :value="__('messages.confirm_password')" />
                 <x-text-input id="password_confirmation" type="password" name="password_confirmation" required
-                    autocomplete="new-password"
-                    placeholder="{{ __('messages.password_confirm_placeholder') ?? 'Ulangi kata sandi' }}" />
+                    autocomplete="new-password" placeholder="{{ __('messages.password_confirm_placeholder') }}" />
                 <x-input-error :messages="$errors->get('password_confirmation')" />
             </div>
 
@@ -95,11 +94,9 @@
             @endif
 
             <div class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-                <p class="font-semibold">Info Verifikasi</p>
+                <p class="font-semibold">{{ __('messages.verification_info_title') }}</p>
                 <p class="mt-1 text-blue-700">
-                    Setelah registrasi, Anda akan diminta untuk melengkapi profil dengan mengupload dokumen identitas
-                    (KTP atau Kartu Pelajar) dan foto selfie
-                    untuk verifikasi identitas.
+                    {{ __('messages.verification_info_description') }}
                 </p>
             </div>
 
@@ -122,7 +119,7 @@
                     {{ __('messages.register') }}
                 </x-primary-button>
                 <p class="text-center text-sm text-slate-500">
-                    {{ __('messages.already_registered_prompt') ?? 'Sudah punya akun?' }}
+                    {{ __('messages.already_registered_prompt') }}
                     <a href="{{ route('login') }}" class="font-semibold text-blue-600 hover:text-blue-500">
                         {{ __('messages.log_in') }}
                     </a>

@@ -2350,4 +2350,88 @@ return [
     // Tickets
     'premium_only' => 'Premium Only',
     'all_users' => 'All Users',
+    
+    // Ecosystem Use Cases
+    'photos_use_website' => 'Website, blog, and landing pages',
+    'photos_use_promo' => 'Promotional materials & advertisements',
+    'photos_use_presentation' => 'Presentation templates',
+    'subscribe_photos_access' => 'Subscribe for Photo Access',
+    'themes_use_quick' => 'Quick website creation with responsive themes',
+    'themes_use_niche' => 'Hundreds of curated niches and layouts',
+    'themes_use_components' => 'Ready-to-use components for e-commerce & blogs',
+    'subscribe_themes_access' => 'Subscribe for Template Access',
+    'audio_use_video' => 'Video, podcast, advertisements, presentations',
+    'audio_use_game' => 'Games and applications',
+    'audio_use_trailer' => 'Trailers & intros',
+    'subscribe_audio_access' => 'Subscribe for Audio Access',
+    'graphics_use_branding' => 'Quick branding: logos and visual identity',
+    'graphics_use_marketing' => 'Marketing documents: brochures, flyers, posters',
+    'graphics_use_social' => 'Social media assets & professional presentations',
+    'subscribe_graphics_access' => 'Subscribe for Graphics Access',
+    'code_use_accelerate' => 'Accelerate application or website development',
+    'code_use_plugins' => 'Ready-to-use plugins for popular CMS',
+    'code_use_components' => 'Customizable UI/UX components',
+    'subscribe_code_access' => 'Subscribe for Code Access',
+    
+    // Studio Services
+    'example_services' => 'Example Services',
+    'service_logo_design' => 'Logo design & visual identity',
+    'service_video_editing' => 'Video editing & motion graphics',
+    'service_web_development' => 'Website development (WordPress/Laravel)',
+    'service_voice_over' => 'Voice over & audio mixing',
+    
+    // Tuts
+    'tuts_description' => 'Educational platform with tutorials & courses about design, coding, photography, and digital creativity.',
+    'search_tutorials' => 'Search tutorials...',
+    'all_categories' => 'All Categories',
+    'all_tutorials' => 'All Tutorials',
+    'featured_only' => 'Featured Only',
+    'categories' => 'Categories',
+    'tutorial' => 'tutorial',
+    'tutorials' => 'tutorials',
+    'views' => 'views',
+    'no_tutorials_found' => 'No tutorials found',
+    'try_adjusting_search' => 'Try adjusting your search or filter criteria.',
+    
+    // Ecosystem Index
+    'ecosystem_explore' => 'Explore Envato-like ecosystem offerings for Noteds.',
+    
+    // Marketplace Ecosystem Filter
+    'all_ecosystem' => 'All ecosystem',
+    'design' => 'Design',
+    'code' => 'Code',
+    'photo' => 'Photo',
+    'audio' => 'Audio',
+    'video' => 'Video',
+    'theme' => 'Theme',
+    'elements' => 'Elements',
+    
+    // Notes Create
+    'ecosystem_category' => 'Creative Ecosystem',
+    'note_language' => 'Content Language',
+    'scheduled_publish_at' => 'Schedule Publication',
+    'scheduled_publish_help' => 'If filled, the note will be automatically published at that time.',
+    
+    // Studio Orders Show
+    'no_quotes_found' => 'No quotes found.',
+    
+    // Registration Verification Info
+    'verification_info_title' => 'Verification Info',
+    'verification_info_description' => 'After registration, you will be asked to complete your profile by uploading an identity document (ID card or Student card) and a selfie photo for identity verification.',
+    
+    // Profile Edit - Document Types
+    'ktp_full' => 'ID Card (KTP)',
+    'student_card' => 'Student Card (for minors/students)',
+    'select_document_type' => 'Select the type of identity document to upload',
+    'upload_identity_document' => 'Upload Identity Document',
+    'student_card_short' => 'Student Card',
+    'ktp_short' => 'ID Card',
+    'already_uploaded' => 'already uploaded',
+    'document_not_uploaded' => 'Identity document not uploaded yet',
+    'upload_selfie' => 'Upload Selfie Photo',
+    'selfie_already_uploaded' => 'Selfie already uploaded',
+    'selfie_not_uploaded' => 'Selfie photo not uploaded yet',
+    'file_format_help' => 'Format: JPG, PNG, or PDF. Maximum 5MB.',
+    'document_type_label' => 'Identity Document Type',
+    'selfie_upload_help' => 'Use a bright photo with a clear face. Maximum 5MB.',
 ];

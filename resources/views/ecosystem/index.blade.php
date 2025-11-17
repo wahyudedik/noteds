@@ -7,7 +7,7 @@
     <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-10">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl p-8">
             <h1 class="text-3xl font-bold text-slate-900">🌟 {{ __('messages.ecosystem_creative') }}</h1>
-            <p class="mt-3 text-slate-600">{{ __('messages.ecosystem_explore') ?? 'Eksplor penawaran ala ekosistem Envato untuk Noteds.' }}</p>
+            <p class="mt-3 text-slate-600">{{ __('messages.ecosystem_explore') }}</p>
         </div>
 
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl p-8">

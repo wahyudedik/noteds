@@ -7,13 +7,13 @@
     <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 space-y-8">
         <div class="bg-white shadow-sm sm:rounded-2xl p-8">
             <h1 class="text-2xl font-bold text-slate-900">{{ __('messages.vendor_dashboard') }}</h1>
-            <p class="mt-2 text-slate-600">{{ __('messages.vendor_dashboard_description') ?? 'Lihat order yang ditugaskan dan quotes yang Anda kirim.' }}</p>
+            <p class="mt-2 text-slate-600">{{ __('messages.vendor_dashboard_description') }}</p>
         </div>
 
         <div class="bg-white shadow-sm sm:rounded-2xl p-8">
             <h2 class="text-lg font-semibold text-slate-900 mb-4">{{ __('messages.assigned_orders') }}</h2>
             @if($assignedOrders->count() === 0)
-                <p class="text-slate-600 text-sm">{{ __('messages.no_assigned_orders') ?? 'Belum ada order ditugaskan.' }}</p>
+                <p class="text-slate-600 text-sm">{{ __('messages.no_assigned_orders') }}</p>
             @else
                 <div class="space-y-3">
                     @foreach($assignedOrders as $order)
@@ -40,7 +40,7 @@
         <div class="bg-white shadow-sm sm:rounded-2xl p-8">
             <h2 class="text-lg font-semibold text-slate-900 mb-4">{{ __('messages.my_quotes') }}</h2>
             @if($myQuotes->count() === 0)
-                <p class="text-slate-600 text-sm">{{ __('messages.no_quotes') ?? 'Belum ada quotes dikirim.' }}</p>
+                <p class="text-slate-600 text-sm">{{ __('messages.no_quotes') }}</p>
             @else
                 <div class="space-y-3">
                     @foreach($myQuotes as $quote)

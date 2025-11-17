@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('messages.order_detail') ?? 'Detail Order' . ' — ' . __('messages.studio'))
+@section('title', __('messages.order_detail') . ' — ' . __('messages.studio'))
 
 @section('content')
 <div class="py-12">
@@ -102,7 +102,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-yellow-800">{{ __('messages.assign_vendor') }} ({{ __('messages.admin') }})</p>
-                                <p class="text-xs text-yellow-700">{{ __('messages.assign_vendor_description') ?? 'Tetapkan vendor untuk order ini.' }}</p>
+                                <p class="text-xs text-yellow-700">{{ __('messages.assign_vendor_description') }}</p>
                             </div>
                         </div>
                         <form method="POST" action="{{ route('studio.orders.assign-vendor', $order) }}" class="mt-3 flex gap-2 items-center">
@@ -112,7 +112,7 @@
                                     <option value="{{ $v->id }}">{{ $v->name }}</option>
                                 @endforeach
                             </select>
-                            <button type="submit" class="px-3 py-2 rounded-md bg-yellow-600 text-white text-sm">{{ __('messages.assign') ?? 'Assign' }}</button>
+                            <button type="submit" class="px-3 py-2 rounded-md bg-yellow-600 text-white text-sm">{{ __('messages.assign') }}</button>
                         </form>
                     </div>
                 @endif
@@ -155,7 +155,7 @@
             </div>
             @php($quotes = \App\Models\ServiceQuote::where('service_order_id', $order->id)->latest()->get())
             @if($quotes->isEmpty())
-                <p class="text-slate-600 text-sm">{{ __('messages.no_quotes_found') ?? 'Belum ada quote.' }}</p>
+                <p class="text-slate-600 text-sm">{{ __('messages.no_quotes_found') }}</p>
             @else
                 <div class="space-y-3">
                     @foreach($quotes as $quote)

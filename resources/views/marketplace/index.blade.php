@@ -82,18 +82,18 @@
                         </select>
                     </div>
                     <div>
-                        <label for="ecosystem" class="block text-sm font-medium text-gray-700 mb-2">Ecosystem</label>
+                        <label for="ecosystem" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.ecosystem') }}</label>
                         @php
                             $ecosystems = [
-                                '' => 'Semua ecosystem',
-                                'design' => 'Design',
-                                'code' => 'Code',
-                                'photo' => 'Photo',
-                                'audio' => 'Audio',
-                                'video' => 'Video',
-                                'theme' => 'Theme',
+                                '' => __('messages.all_ecosystem'),
+                                'design' => __('messages.design'),
+                                'code' => __('messages.code'),
+                                'photo' => __('messages.photo'),
+                                'audio' => __('messages.audio'),
+                                'video' => __('messages.video'),
+                                'theme' => __('messages.theme'),
                                 '3d' => '3D',
-                                'elements' => 'Elements',
+                                'elements' => __('messages.elements'),
                             ];
                         @endphp
                         <select name="ecosystem" id="ecosystem" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">

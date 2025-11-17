@@ -10,14 +10,14 @@
             <p class="mt-3 text-slate-600">{{ __('messages.audiojungle_description') }}</p>
         </div>
         <div class="bg-white shadow-sm sm:rounded-2xl p-8">
-            <h2 class="text-xl font-semibold text-slate-900">{{ __('messages.use_cases') ?? 'Kegunaan' }}</h2>
+            <h2 class="text-xl font-semibold text-slate-900">{{ __('messages.use_cases') }}</h2>
             <ul class="mt-3 list-disc list-inside text-slate-700 space-y-2">
-                <li>{{ __('messages.audio_use_video') ?? 'Video, podcast, iklan, presentasi' }}</li>
-                <li>{{ __('messages.audio_use_game') ?? 'Game dan aplikasi' }}</li>
-                <li>{{ __('messages.audio_use_trailer') ?? 'Trailer & intros' }}</li>
+                <li>{{ __('messages.audio_use_video') }}</li>
+                <li>{{ __('messages.audio_use_game') }}</li>
+                <li>{{ __('messages.audio_use_trailer') }}</li>
             </ul>
             <div class="mt-6">
-                <a href="{{ route('subscription.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">{{ __('messages.subscribe_audio_access') ?? 'Langganan untuk akses Audio' }}</a>
+                <a href="{{ route('subscription.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">{{ __('messages.subscribe_audio_access') }}</a>
             </div>
         </div>
     </div>

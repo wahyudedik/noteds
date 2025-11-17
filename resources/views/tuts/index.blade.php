@@ -8,7 +8,7 @@
         <!-- Header -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.tuts') }}</h1>
-            <p class="mt-2 text-base text-gray-600">{{ __('messages.tuts_description') ?? 'Platform edukasi berisi tutorial & kursus tentang desain, coding, fotografi, dan kreativitas digital.' }}</p>
+            <p class="mt-2 text-base text-gray-600">{{ __('messages.tuts_description') }}</p>
         </div>
 
         <!-- Search and Filter Form -->
@@ -16,34 +16,34 @@
             <form method="GET" action="{{ route('tuts.index') }}" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
-                        <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                        <label for="search" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.search') }}</label>
                         <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                            placeholder="Search tutorials..."
+                            placeholder="{{ __('messages.search_tutorials') }}"
                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
-                        <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                        <label for="category" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.category') }}</label>
                         <select name="category" id="category" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Categories</option>
+                            <option value="">{{ __('messages.all_categories') }}</option>
                             @foreach($categories as $key => $label)
                                 <option value="{{ $key }}" {{ request('category') === $key ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label for="featured" class="block text-sm font-medium text-gray-700 mb-2">Filter</label>
+                        <label for="featured" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.filter') }}</label>
                         <select name="featured" id="featured" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Tutorials</option>
-                            <option value="1" {{ request('featured') === '1' ? 'selected' : '' }}>Featured Only</option>
+                            <option value="">{{ __('messages.all_tutorials') }}</option>
+                            <option value="1" {{ request('featured') === '1' ? 'selected' : '' }}>{{ __('messages.featured_only') }}</option>
                         </select>
                     </div>
                     <div class="flex items-end gap-2">
                         <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">
-                            Filter
+                            {{ __('messages.filter') }}
                         </button>
                         @if(request()->hasAny(['search', 'category', 'featured']))
                             <a href="{{ route('tuts.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                                Clear
+                                {{ __('messages.clear') }}
                             </a>
                         @endif
                     </div>
@@ -53,7 +53,7 @@
 
         <!-- Categories Info -->
         <div class="bg-white shadow-sm rounded-lg p-6 mb-8">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Categories</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('messages.categories') }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 @foreach($categories as $key => $label)
                     <a href="{{ route('tuts.index', ['category' => $key]) }}" 
@@ -63,7 +63,7 @@
                             @php
                                 $count = \App\Models\Tutorial::published()->category($key)->count();
                             @endphp
-                            {{ $count }} {{ $count === 1 ? 'tutorial' : 'tutorials' }}
+                            {{ $count }} {{ $count === 1 ? __('messages.tutorial') : __('messages.tutorials') }}
                         </p>
                     </a>
                 @endforeach
@@ -111,7 +111,7 @@
                             <div class="flex items-center justify-between text-xs text-gray-500">
                                 <span>{{ $tutorial->author->name }}</span>
                                 <div class="flex items-center gap-2">
-                                    <span>{{ number_format($tutorial->views_count) }} views</span>
+                                    <span>{{ number_format($tutorial->views_count) }} {{ __('messages.views') }}</span>
                                     <span>•</span>
                                     <span>{{ $tutorial->created_at->diffForHumans() }}</span>
                                 </div>
@@ -130,8 +130,8 @@
                 <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">No tutorials found</h3>
-                <p class="text-gray-600">Try adjusting your search or filter criteria.</p>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ __('messages.no_tutorials_found') }}</h3>
+                <p class="text-gray-600">{{ __('messages.try_adjusting_search') }}</p>
             </div>
         @endif
     </div>

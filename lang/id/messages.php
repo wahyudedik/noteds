@@ -2347,4 +2347,88 @@ return [
     // Tickets
     'premium_only' => 'Premium Only',
     'all_users' => 'All Users',
+    
+    // Ecosystem Use Cases
+    'photos_use_website' => 'Website, blog, dan landing page',
+    'photos_use_promo' => 'Materi promosi & iklan',
+    'photos_use_presentation' => 'Template presentasi',
+    'subscribe_photos_access' => 'Langganan untuk akses Foto',
+    'themes_use_quick' => 'Pembuatan website cepat dengan tema responsif',
+    'themes_use_niche' => 'Ratusan niche dan layout yang dikurasi',
+    'themes_use_components' => 'Komponen siap pakai untuk e-commerce & blog',
+    'subscribe_themes_access' => 'Langganan untuk akses Template',
+    'audio_use_video' => 'Video, podcast, iklan, presentasi',
+    'audio_use_game' => 'Game dan aplikasi',
+    'audio_use_trailer' => 'Trailer & intros',
+    'subscribe_audio_access' => 'Langganan untuk akses Audio',
+    'graphics_use_branding' => 'Branding cepat: logo dan identitas visual',
+    'graphics_use_marketing' => 'Dokumen pemasaran: brosur, flyer, poster',
+    'graphics_use_social' => 'Asset sosial media & presentasi profesonal',
+    'subscribe_graphics_access' => 'Langganan untuk akses Grafis',
+    'code_use_accelerate' => 'Percepat pengembangan aplikasi atau website',
+    'code_use_plugins' => 'Plugin siap pakai untuk CMS populer',
+    'code_use_components' => 'Komponen UI/UX yang dapat dikustomisasi',
+    'subscribe_code_access' => 'Langganan untuk akses Kode',
+    
+    // Studio Services
+    'example_services' => 'Contoh Layanan',
+    'service_logo_design' => 'Desain logo & identitas visual',
+    'service_video_editing' => 'Editing video & motion graphics',
+    'service_web_development' => 'Pengembangan website (WordPress/Laravel)',
+    'service_voice_over' => 'Voice over & audio mixing',
+    
+    // Tuts
+    'tuts_description' => 'Platform edukasi berisi tutorial & kursus tentang desain, coding, fotografi, dan kreativitas digital.',
+    'search_tutorials' => 'Search tutorials...',
+    'all_categories' => 'All Categories',
+    'all_tutorials' => 'All Tutorials',
+    'featured_only' => 'Featured Only',
+    'categories' => 'Categories',
+    'tutorial' => 'tutorial',
+    'tutorials' => 'tutorials',
+    'views' => 'views',
+    'no_tutorials_found' => 'No tutorials found',
+    'try_adjusting_search' => 'Try adjusting your search or filter criteria.',
+    
+    // Ecosystem Index
+    'ecosystem_explore' => 'Eksplor penawaran ala ekosistem Envato untuk Noteds.',
+    
+    // Marketplace Ecosystem Filter
+    'all_ecosystem' => 'Semua ecosystem',
+    'design' => 'Design',
+    'code' => 'Code',
+    'photo' => 'Photo',
+    'audio' => 'Audio',
+    'video' => 'Video',
+    'theme' => 'Theme',
+    'elements' => 'Elements',
+    
+    // Notes Create
+    'ecosystem_category' => 'Ekosistem Kreatif',
+    'note_language' => 'Bahasa Konten',
+    'scheduled_publish_at' => 'Jadwalkan Publikasi',
+    'scheduled_publish_help' => 'Jika diisi, catatan akan otomatis dipublikasikan pada waktu tersebut.',
+    
+    // Studio Orders Show
+    'no_quotes_found' => 'Belum ada quote.',
+    
+    // Registration Verification Info
+    'verification_info_title' => 'Info Verifikasi',
+    'verification_info_description' => 'Setelah registrasi, Anda akan diminta untuk melengkapi profil dengan mengupload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk verifikasi identitas.',
+    
+    // Profile Edit - Document Types
+    'ktp_full' => 'KTP (Kartu Tanda Penduduk)',
+    'student_card' => 'Kartu Pelajar (untuk yang belum cukup umur/sekolah)',
+    'select_document_type' => 'Pilih jenis dokumen identitas yang akan diupload',
+    'upload_identity_document' => 'Upload Dokumen Identitas',
+    'student_card_short' => 'Kartu Pelajar',
+    'ktp_short' => 'KTP',
+    'already_uploaded' => 'sudah diupload',
+    'document_not_uploaded' => 'Dokumen identitas belum diupload',
+    'upload_selfie' => 'Upload Foto Selfie',
+    'selfie_already_uploaded' => 'Selfie sudah diupload',
+    'selfie_not_uploaded' => 'Foto selfie belum diupload',
+    'file_format_help' => 'Format: JPG, PNG, atau PDF. Maksimal 5MB.',
+    'document_type_label' => 'Jenis Dokumen Identitas',
+    'selfie_upload_help' => 'Gunakan foto terang dengan wajah terlihat jelas. Maksimal 5MB.',
 ];

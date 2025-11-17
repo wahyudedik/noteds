@@ -87,7 +87,7 @@
                             <!-- Ecosystem Category -->
                             <div>
                                 <label for="ecosystem_category" class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('messages.ecosystem_category') ?? 'Ekosistem Kreatif' }}
+                                    {{ __('messages.ecosystem_category') }}
                                 </label>
                                 <select name="ecosystem_category" id="ecosystem_category"
                                     class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
@@ -364,7 +364,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label for="language" class="block text-sm font-medium text-gray-700 mb-2">
-                                        {{ __('messages.note_language') ?? 'Bahasa Konten' }}
+                                        {{ __('messages.note_language') }}
                                     </label>
                                     <select name="language" id="language"
                                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
@@ -378,11 +378,11 @@
                                 </div>
                                 <div>
                                     <label for="scheduled_publish_at" class="block text-sm font-medium text-gray-700 mb-2">
-                                        {{ __('messages.scheduled_publish_at') ?? 'Jadwalkan Publikasi' }} ({{ __('messages.optional') }})
+                                        {{ __('messages.scheduled_publish_at') }} ({{ __('messages.optional') }})
                                     </label>
                                     <input type="datetime-local" name="scheduled_publish_at" id="scheduled_publish_at" value="{{ old('scheduled_publish_at') }}"
                                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
-                                    <p class="mt-2 text-xs text-gray-600">{{ __('messages.scheduled_publish_help') ?? 'Jika diisi, catatan akan otomatis dipublikasikan pada waktu tersebut.' }}</p>
+                                    <p class="mt-2 text-xs text-gray-600">{{ __('messages.scheduled_publish_help') }}</p>
                                     @error('scheduled_publish_at')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                     @enderror

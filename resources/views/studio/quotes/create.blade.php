@@ -13,7 +13,7 @@
                 @if($user->hasRole('admin'))
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.vendor') }}</label>
-                        <input type="text" list="vendors" name="vendor_id" class="w-full rounded-lg border-gray-300" placeholder="{{ __('messages.enter_vendor_id') ?? 'Masukkan ID User vendor' }}" required>
+                        <input type="text" list="vendors" name="vendor_id" class="w-full rounded-lg border-gray-300" placeholder="{{ __('messages.enter_vendor_id') }}" required>
                         <datalist id="vendors">
                             @foreach(\App\Models\User::role('vendor')->limit(50)->get() as $v)
                                 <option value="{{ $v->id }}">{{ $v->name }} ({{ $v->email }})</option>
@@ -23,7 +23,7 @@
                     </div>
                 @else
                     <div class="p-3 rounded-md bg-gray-50 border text-sm text-gray-700">
-                        {{ __('messages.quote_as_vendor') ?? 'Anda akan mengirim quote sebagai vendor' }}: <strong>{{ $user->name }}</strong>
+                        {{ __('messages.quote_as_vendor') }}: <strong>{{ $user->name }}</strong>
                     </div>
                 @endif
                 <div>
@@ -34,11 +34,11 @@
                 <div x-data="{ rows: 1 }">
                     <div class="flex items-center justify-between">
                         <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.milestones') }} ({{ __('messages.optional') }})</label>
-                        <button type="button" class="text-sm text-blue-600" @click="rows++">+ {{ __('messages.add_milestone') ?? 'Tambah Milestone' }}</button>
+                        <button type="button" class="text-sm text-blue-600" @click="rows++">+ {{ __('messages.add_milestone') }}</button>
                     </div>
                     <template x-for="i in rows" :key="i">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                            <input type="text" name="milestones[][title]" placeholder="{{ __('messages.milestone_title') ?? 'Judul milestone' }}" class="rounded-lg border-gray-300 md:col-span-1">
+                            <input type="text" name="milestones[][title]" placeholder="{{ __('messages.milestone_title') }}" class="rounded-lg border-gray-300 md:col-span-1">
                             <input type="number" name="milestones[][amount]" step="0.01" min="0" placeholder="{{ __('messages.amount') }}" class="rounded-lg border-gray-300">
                             <input type="text" name="milestones[][description]" placeholder="{{ __('messages.order_description') }}" class="rounded-lg border-gray-300 md:col-span-1">
                         </div>
@@ -48,7 +48,7 @@
                 </div>
                 <div class="flex items-center justify-end gap-3">
                     <a href="{{ route('studio.orders.show', $order) }}" class="px-4 py-2 rounded-md border">{{ __('messages.cancel') }}</a>
-                    <button type="submit" class="px-4 py-2 rounded-md bg-blue-600 text-white">{{ __('messages.send') ?? 'Kirim' }}</button>
+                    <button type="submit" class="px-4 py-2 rounded-md bg-blue-600 text-white">{{ __('messages.send') }}</button>
                 </div>
             </form>
         </div>

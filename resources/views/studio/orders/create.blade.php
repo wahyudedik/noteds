@@ -16,7 +16,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.order_description') }}</label>
-                    <textarea name="description" rows="6" required class="w-full rounded-lg border-gray-300" placeholder="{{ __('messages.order_description_placeholder') ?? 'Ceritakan kebutuhan Anda (tujuan, gaya, referensi, deadline, dll)' }}">{{ old('description') }}</textarea>
+                    <textarea name="description" rows="6" required class="w-full rounded-lg border-gray-300" placeholder="{{ __('messages.order_description_placeholder') }}">{{ old('description') }}</textarea>
                     @error('description')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
@@ -26,7 +26,7 @@
                 </div>
                 <div class="flex items-center justify-end gap-3">
                     <a href="{{ route('studio.orders.index') }}" class="px-4 py-2 rounded-md border">{{ __('messages.cancel') }}</a>
-                    <button type="submit" class="px-4 py-2 rounded-md bg-blue-600 text-white">{{ __('messages.submit_brief') ?? 'Kirim Brief' }}</button>
+                    <button type="submit" class="px-4 py-2 rounded-md bg-blue-600 text-white">{{ __('messages.submit_brief') }}</button>
                 </div>
             </form>
         </div>
