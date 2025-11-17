@@ -4,17 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\ServiceOrder;
 use App\Models\ServiceQuote;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class ServiceQuoteController extends Controller
 {
     public function create(ServiceOrder $order): View|RedirectResponse
     {
-        $user = auth()->user();
-        $isAdmin = $user?->hasRole('admin');
-        $isAssignedVendor = $user?->hasRole('vendor') && $order->assigned_user_id === $user->id;
+        /** @var User|null $user */
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        $isAdmin = $user->hasRole('admin');
+        $isAssignedVendor = $user->hasRole('vendor') && $order->assigned_user_id === $user->id;
         if (!$isAdmin && !$isAssignedVendor) {
             return redirect()->route('studio.orders.show', $order)->with('error', 'Tidak diizinkan membuat quote.');
         }
@@ -23,9 +29,13 @@ class ServiceQuoteController extends Controller
 
     public function store(Request $request, ServiceOrder $order): RedirectResponse
     {
-        $user = auth()->user();
-        $isAdmin = $user?->hasRole('admin');
-        $isAssignedVendor = $user?->hasRole('vendor') && $order->assigned_user_id === $user->id;
+        /** @var User|null $user */
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        $isAdmin = $user->hasRole('admin');
+        $isAssignedVendor = $user->hasRole('vendor') && $order->assigned_user_id === $user->id;
         if (!$isAdmin && !$isAssignedVendor) {
             return redirect()->route('studio.orders.show', $order)->with('error', 'Tidak diizinkan mengirim quote.');
         }
@@ -72,23 +82,27 @@ class ServiceQuoteController extends Controller
             'is_read' => false,
             'data' => ['quote_id' => $quote->id],
         ]);
-        \App\Models\OrderActivity::create([
-            'service_order_id' => $order->id,
-            'user_id' => auth()->id(),
-            'action' => 'quote_created',
-            'description' => 'Quote dibuat oleh admin/vendor',
-            'meta' => ['quote_id' => $quote->id],
-        ]);
+        $userId = Auth::id();
+        if ($userId) {
+            \App\Models\OrderActivity::create([
+                'service_order_id' => $order->id,
+                'user_id' => $userId,
+                'action' => 'quote_created',
+                'description' => 'Quote dibuat oleh admin/vendor',
+                'meta' => ['quote_id' => $quote->id],
+            ]);
+        }
         if ((bool) \App\Models\Setting::getSetting('studio_email_quote_created', 'studio', true)) {
             try {
-            \Illuminate\Support\Facades\Mail::to($order->user)->queue(
-                new \App\Mail\StudioNotification(
-                    'Quote baru untuk order Anda',
-                    'Vendor mengirimkan quote untuk "' . $order->title . '".',
-                    route('studio.orders.show', $order)
-                )
-            );
-            } catch (\Throwable $e) {}
+                \Illuminate\Support\Facades\Mail::to($order->user)->queue(
+                    new \App\Mail\StudioNotification(
+                        'Quote baru untuk order Anda',
+                        'Vendor mengirimkan quote untuk "' . $order->title . '".',
+                        route('studio.orders.show', $order)
+                    )
+                );
+            } catch (\Throwable $e) {
+            }
         }
 
         return redirect()->route('studio.orders.show', $order)->with('success', 'Quote dikirim.');
@@ -97,8 +111,9 @@ class ServiceQuoteController extends Controller
     public function accept(ServiceQuote $quote): RedirectResponse
     {
         $order = $quote->order;
+        $userId = Auth::id();
         // Only order owner can accept
-        if ($order->user_id !== auth()->id()) {
+        if (!$userId || $order->user_id !== $userId) {
             return redirect()->route('studio.orders.show', $order)->with('error', 'Tidak diizinkan.');
         }
 
@@ -127,23 +142,26 @@ class ServiceQuoteController extends Controller
             'is_read' => false,
             'data' => ['quote_id' => $quote->id],
         ]);
-        \App\Models\OrderActivity::create([
-            'service_order_id' => $order->id,
-            'user_id' => auth()->id(),
-            'action' => 'quote_accepted',
-            'description' => 'Buyer menerima quote',
-            'meta' => ['quote_id' => $quote->id],
-        ]);
+        if ($userId) {
+            \App\Models\OrderActivity::create([
+                'service_order_id' => $order->id,
+                'user_id' => $userId,
+                'action' => 'quote_accepted',
+                'description' => 'Buyer menerima quote',
+                'meta' => ['quote_id' => $quote->id],
+            ]);
+        }
         if ((bool) \App\Models\Setting::getSetting('studio_email_quote_accepted', 'studio', true)) {
             try {
-            \Illuminate\Support\Facades\Mail::to($quote->vendor)->queue(
-                new \App\Mail\StudioNotification(
-                    'Quote Anda diterima',
-                    'Quote untuk "' . $order->title . '" telah diterima. Order siap didanai (escrow).',
-                    route('studio.orders.show', $order)
-                )
-            );
-            } catch (\Throwable $e) {}
+                \Illuminate\Support\Facades\Mail::to($quote->vendor)->queue(
+                    new \App\Mail\StudioNotification(
+                        'Quote Anda diterima',
+                        'Quote untuk "' . $order->title . '" telah diterima. Order siap didanai (escrow).',
+                        route('studio.orders.show', $order)
+                    )
+                );
+            } catch (\Throwable $e) {
+            }
         }
 
         return redirect()->route('studio.orders.show', $order)->with('success', 'Quote diterima. Silakan fund escrow untuk memulai.');
@@ -152,7 +170,10 @@ class ServiceQuoteController extends Controller
     public function reject(ServiceQuote $quote): RedirectResponse
     {
         $order = $quote->order;
-        if ($order->user_id !== auth()->id() && !auth()->user()?->hasRole('admin')) {
+        /** @var User|null $user */
+        $user = Auth::user();
+        $userId = Auth::id();
+        if (!$user || ($order->user_id !== $userId && !$user->hasRole('admin'))) {
             return redirect()->route('studio.orders.show', $order)->with('error', 'Tidak diizinkan.');
         }
         $quote->status = 'rejected';
@@ -168,27 +189,28 @@ class ServiceQuoteController extends Controller
             'is_read' => false,
             'data' => ['quote_id' => $quote->id],
         ]);
-        \App\Models\OrderActivity::create([
-            'service_order_id' => $order->id,
-            'user_id' => auth()->id(),
-            'action' => 'quote_rejected',
-            'description' => 'Buyer menolak quote',
-            'meta' => ['quote_id' => $quote->id],
-        ]);
+        if ($userId) {
+            \App\Models\OrderActivity::create([
+                'service_order_id' => $order->id,
+                'user_id' => $userId,
+                'action' => 'quote_rejected',
+                'description' => 'Buyer menolak quote',
+                'meta' => ['quote_id' => $quote->id],
+            ]);
+        }
         if ((bool) \App\Models\Setting::getSetting('studio_email_quote_rejected', 'studio', true)) {
             try {
-            \Illuminate\Support\Facades\Mail::to($quote->vendor)->queue(
-                new \App\Mail\StudioNotification(
-                    'Quote Anda ditolak',
-                    'Quote untuk "' . $order->title . '" ditolak.',
-                    route('studio.orders.show', $order)
-                )
-            );
-            } catch (\Throwable $e) {}
+                \Illuminate\Support\Facades\Mail::to($quote->vendor)->queue(
+                    new \App\Mail\StudioNotification(
+                        'Quote Anda ditolak',
+                        'Quote untuk "' . $order->title . '" ditolak.',
+                        route('studio.orders.show', $order)
+                    )
+                );
+            } catch (\Throwable $e) {
+            }
         }
 
         return redirect()->route('studio.orders.show', $order)->with('success', 'Quote ditolak.');
     }
 }
-
-

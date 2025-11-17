@@ -106,7 +106,14 @@ class NoteController extends Controller
             '3docean' => '3DOcean',
         ];
 
-        return view('notes.create', compact('tags', 'folders', 'workspaces', 'selectedWorkspace', 'selectedFolder', 'priceGuidance', 'ecosystems'));
+        $languages = [
+            '' => '— Language —',
+            'en' => 'English',
+            'id' => 'Bahasa Indonesia',
+            'ar' => 'العربية',
+        ];
+
+        return view('notes.create', compact('tags', 'folders', 'workspaces', 'selectedWorkspace', 'selectedFolder', 'priceGuidance', 'ecosystems', 'languages'));
     }
 
     /**
@@ -274,19 +281,22 @@ class NoteController extends Controller
 
         // Handle draft and scheduled publishing
         $isDraft = $request->has('save_as_draft') || $request->input('is_draft', false);
-        $scheduledAt = $request->input('scheduled_at');
+        $scheduledPublishAt = $request->input('scheduled_publish_at');
         
         $validated['is_draft'] = $isDraft;
         
-        if ($scheduledAt && !$isDraft) {
-            $validated['scheduled_at'] = \Carbon\Carbon::parse($scheduledAt);
+        // Use scheduled_publish_at (from form) and also set scheduled_at for compatibility
+        if ($scheduledPublishAt && !$isDraft) {
+            $scheduledDate = \Carbon\Carbon::parse($scheduledPublishAt);
+            $validated['scheduled_publish_at'] = $scheduledDate;
+            $validated['scheduled_at'] = $scheduledDate; // Also set for compatibility
             $validated['status'] = 'active'; // Will be published later
         } else {
             $validated['scheduled_at'] = null;
         }
         
         // If not draft and not scheduled, publish immediately
-        if (!$isDraft && !$scheduledAt) {
+        if (!$isDraft && !$scheduledPublishAt) {
             $validated['published_at'] = now();
         }
 
@@ -319,11 +329,11 @@ class NoteController extends Controller
         \App\Models\NoteHistory::create([
             'note_id' => $note->id,
             'user_id' => auth()->id(),
-            'action' => $isDraft ? 'draft_created' : ($scheduledAt ? 'scheduled' : 'created'),
+            'action' => $isDraft ? 'draft_created' : ($scheduledPublishAt ? 'scheduled' : 'created'),
             'old_data' => null,
-            'new_data' => $note->only(['title', 'content', 'summary', 'price', 'discount_price', 'is_public', 'status', 'is_draft', 'scheduled_at']),
-            'changes' => $isDraft ? 'Note saved as draft' : ($scheduledAt ? 'Note scheduled for publishing' : 'Note created'),
-            'notes' => 'Note ' . ($isDraft ? 'saved as draft' : ($scheduledAt ? 'scheduled' : 'created')) . ' by ' . auth()->user()->name,
+            'new_data' => $note->only(['title', 'content', 'summary', 'price', 'discount_price', 'is_public', 'status', 'is_draft', 'scheduled_at', 'scheduled_publish_at']),
+            'changes' => $isDraft ? 'Note saved as draft' : ($scheduledPublishAt ? 'Note scheduled for publishing' : 'Note created'),
+            'notes' => 'Note ' . ($isDraft ? 'saved as draft' : ($scheduledPublishAt ? 'scheduled' : 'created')) . ' by ' . auth()->user()->name,
         ]);
 
         // Log activity
@@ -662,24 +672,32 @@ class NoteController extends Controller
 
         // Handle draft and scheduled publishing
         $isDraft = $request->has('save_as_draft') || $request->input('is_draft', false);
-        $scheduledAt = $request->input('scheduled_at');
+        $scheduledPublishAt = $request->input('scheduled_publish_at');
+        $scheduledAt = $request->input('scheduled_at'); // Also check for scheduled_at (from edit form)
         $publishNow = $request->has('publish_now');
+        
+        // Use scheduled_publish_at if available, otherwise use scheduled_at
+        $scheduledDate = $scheduledPublishAt ?: $scheduledAt;
         
         if ($publishNow && $note->is_draft) {
             // Publishing draft now
             $validated['is_draft'] = false;
             $validated['scheduled_at'] = null;
+            $validated['scheduled_publish_at'] = null;
             if (!$note->published_at) {
                 $validated['published_at'] = now();
             }
-        } elseif ($scheduledAt && !$isDraft) {
+        } elseif ($scheduledDate && !$isDraft) {
             // Scheduling for later
-            $validated['scheduled_at'] = \Carbon\Carbon::parse($scheduledAt);
+            $scheduled = \Carbon\Carbon::parse($scheduledDate);
+            $validated['scheduled_publish_at'] = $scheduled;
+            $validated['scheduled_at'] = $scheduled; // Also set for compatibility
             $validated['is_draft'] = false;
         } elseif ($isDraft) {
             // Saving as draft
             $validated['is_draft'] = true;
             $validated['scheduled_at'] = null;
+            $validated['scheduled_publish_at'] = null;
         } else {
             // Publishing immediately (if not already published)
             if (!$note->published_at && !$note->is_draft) {
@@ -687,6 +705,7 @@ class NoteController extends Controller
             }
             $validated['is_draft'] = false;
             $validated['scheduled_at'] = null;
+            $validated['scheduled_publish_at'] = null;
         }
 
         // Track changes for activity log and history
@@ -827,12 +846,13 @@ class NoteController extends Controller
         
         // Get price guidance
         $defaultMinPrice = Setting::getDefaultMinPrice();
+        $recommendedPrice = $defaultMinPrice > 0
+            ? round($defaultMinPrice * Setting::getRecommendedPriceMultiplier())
+            : null;
         $priceGuidance = [
             'min_default' => $defaultMinPrice,
             'recommended_multiplier' => Setting::getRecommendedPriceMultiplier(),
-            'recommended_price' => $defaultMinPrice > 0
-                ? round($defaultMinPrice * Setting::getRecommendedPriceMultiplier())
-                : null,
+            'recommended_price' => $recommendedPrice !== null ? (string) number_format($recommendedPrice, 2, '.', '') : null,
             'category_rules' => Setting::getCategoryMinPriceList(),
             'original_price' => $originalPrice,
         ];
@@ -848,8 +868,8 @@ class NoteController extends Controller
         $validated = $request->validated();
         $resalePrice = (float) $validated['resale_price'];
         
-        // Update note price
-        $note->price = $resalePrice;
+        // Update note price (decimal:2 - cast to string for proper decimal handling)
+        $note->price = (string) number_format($resalePrice, 2, '.', '');
         $note->discount_price = null; // Clear discount when reselling
         $note->is_public = true; // Make sure note is public for resale
         $note->status = 'active';
@@ -1250,8 +1270,10 @@ class NoteController extends Controller
                         // Clear progress after upload
                         session()->forget("upload_progress_{$uploadId}");
                     } else {
-                        // Use regular upload for smaller files
-                        $attachment = $uploadService->handleRegularFile($file, $user->id);
+                        // Use regular upload for smaller files (via public method)
+                        // handleLargeFileUpload internally calls handleRegularFile for small files
+                        /** @phpstan-ignore-next-line */
+                        $attachment = $uploadService->handleLargeFileUpload($file, $user->id);
                         $attachments[] = $attachment;
                     }
 
