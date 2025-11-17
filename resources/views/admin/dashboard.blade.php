@@ -62,6 +62,28 @@
                         </svg>
                         <span class="text-sm font-medium text-blue-900">{{ __('messages.users') }}</span>
                     </a>
+                    @php
+                        $pendingVerificationCount = \App\Models\User::whereNotNull('ktp_path')
+                            ->whereNotNull('selfie_path')
+                            ->where(function ($query) {
+                                $query->where('verification_status', 'pending')
+                                    ->orWhereNull('verification_status');
+                            })
+                            ->count();
+                    @endphp
+                    <a href="{{ route('admin.users.pending-verification') }}"
+                        class="flex items-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors relative">
+                        <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-sm font-medium text-yellow-900">Verifikasi User</span>
+                        @if($pendingVerificationCount > 0)
+                            <span class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full absolute top-0 right-0">
+                                {{ $pendingVerificationCount }}
+                            </span>
+                        @endif
+                    </a>
                     <a href="{{ route('admin.notes.index') }}"
                         class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
                         <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,6 +160,14 @@
                                 d="M16 4H8a2 2 0 00-2 2v14l6-3 6 3V6a2 2 0 00-2-2z" />
                         </svg>
                         <span class="text-sm font-medium text-sky-900">{{ __('messages.cms_pages') }}</span>
+                    </a>
+                    <a href="{{ route('admin.tutorials.index') }}"
+                        class="flex items-center p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
+                        <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span class="text-sm font-medium text-indigo-900">Tutorials</span>
                     </a>
                     <a href="{{ route('admin.workspaces.index') }}"
                         class="flex items-center p-4 bg-cyan-50 rounded-lg hover:bg-cyan-100 transition-colors">

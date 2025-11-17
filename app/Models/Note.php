@@ -60,6 +60,31 @@ class Note extends Model
         'is_draft',
         'scheduled_at',
         'published_at',
+        // Code ecosystem fields
+        'code_language',
+        'code_framework',
+        'code_type',
+        // Photo ecosystem fields
+        'photo_resolution',
+        'photo_type',
+        'photo_format',
+        // Design ecosystem fields
+        'design_type',
+        'design_format',
+        // Audio ecosystem fields
+        'audio_duration',
+        'audio_format',
+        'audio_genre',
+        // Video ecosystem fields
+        'video_duration',
+        'video_resolution',
+        'video_format',
+        // Theme ecosystem fields
+        'theme_platform',
+        'theme_type',
+        // 3D ecosystem fields
+        'three_d_format',
+        'three_d_type',
     ];
 
     protected function casts(): array

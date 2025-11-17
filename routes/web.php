@@ -64,10 +64,12 @@ Route::prefix('ecosystem')->name('ecosystem.')->group(function () {
     Route::get('/videos', [\App\Http\Controllers\EcosystemController::class, 'videos'])->name('videos');
     Route::get('/3d', [\App\Http\Controllers\EcosystemController::class, 'threeD'])->name('3d');
 });
+// Tutorial routes (public)
 Route::get('/tuts', [\App\Http\Controllers\TutsController::class, 'index'])->name('tuts.index');
+Route::get('/tuts/{tutorial:slug}', [\App\Http\Controllers\TutsController::class, 'show'])->name('tuts.show');
 Route::get('/studio', [\App\Http\Controllers\StudioController::class, 'index'])->name('studio.index');
 Route::middleware(['auth', 'verified', 'role:vendor|admin'])->get('/vendor', [\App\Http\Controllers\VendorController::class, 'index'])->name('vendor.index');
-Route::middleware(['auth', 'verified', 'username.setup'])->prefix('studio')->name('studio.')->group(function () {
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('studio')->name('studio.')->group(function () {
     Route::get('/orders', [\App\Http\Controllers\ServiceOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/create', [\App\Http\Controllers\ServiceOrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [\App\Http\Controllers\ServiceOrderController::class, 'store'])->name('orders.store');
@@ -102,7 +104,7 @@ Route::get('/marketplace/{note}', [MarketplaceController::class, 'show'])->name(
 Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purchase'])->middleware(['auth', 'verified', 'username.setup', 'buyer'])->name('marketplace.purchase');
 
 // Resale routes - for buyers who own notes (scarcity mode only)
-Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function () {
     Route::get('/notes/{note}/resale', [NoteController::class, 'resaleForm'])->name('notes.resale.form');
     Route::post('/notes/{note}/resale', [NoteController::class, 'resale'])->name('notes.resale');
 });
@@ -110,8 +112,8 @@ Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
     // Public profile routes
     Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('public.profile.show');
 
-    // Forum routes - Available for all authenticated users
-    Route::middleware(['auth', 'verified', 'username.setup'])->prefix('forum')->name('forum.')->group(function () {
+    // Forum routes - KYC required
+    Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('forum')->name('forum.')->group(function () {
         Route::get('/', [\App\Http\Controllers\ForumController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\ForumController::class, 'store'])->name('store');
         Route::get('/analytics', [PostAnalyticsController::class, 'index'])->name('analytics');
@@ -133,7 +135,7 @@ Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
         Route::delete('/post/{post}', [\App\Http\Controllers\ForumController::class, 'destroy'])->name('destroy');
     });
 
-Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function () {
     Route::get('/note-conversations', [NoteConversationController::class, 'index'])->name('note-conversations.index');
     Route::get('/note-conversations/{conversation}', [NoteConversationController::class, 'show'])->name('note-conversations.show');
     Route::post('/note-conversations/{conversation}', [NoteConversationController::class, 'store'])->name('note-conversations.store');
@@ -147,20 +149,32 @@ Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
         return redirect()->route('public.profile.show', $user->username);
     })->name('follow.view');
 
-    Route::middleware(['auth', 'verified', 'username.setup'])->prefix('follow')->name('follow.')->group(function () {
+    Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('follow')->name('follow.')->group(function () {
         Route::post('/{user}', [\App\Http\Controllers\FollowController::class, 'follow'])->name('follow');
         Route::delete('/{user}', [\App\Http\Controllers\FollowController::class, 'unfollow'])->name('unfollow');
     });
 
-// Review routes
-Route::post('/notes/{note}/reviews', [ReviewController::class, 'store'])->middleware(['auth', 'verified', 'username.setup'])->name('reviews.store');
-Route::patch('/reviews/{review}', [ReviewController::class, 'update'])->middleware(['auth', 'verified', 'username.setup'])->name('reviews.update');
-Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->middleware(['auth', 'verified', 'username.setup'])->name('reviews.destroy');
-Route::post('/reviews/{review}/replies', [NoteReviewReplyController::class, 'store'])->middleware(['auth', 'verified', 'username.setup'])->name('reviews.replies.store');
-Route::delete('/review-replies/{reply}', [NoteReviewReplyController::class, 'destroy'])->middleware(['auth', 'verified', 'username.setup'])->name('reviews.replies.destroy');
+// Review routes - KYC required (marketplace actions need KYC)
+Route::post('/notes/{note}/reviews', [ReviewController::class, 'store'])->middleware(['auth', 'verified', 'username.setup', 'kyc'])->name('reviews.store');
+Route::patch('/reviews/{review}', [ReviewController::class, 'update'])->middleware(['auth', 'verified', 'username.setup', 'kyc'])->name('reviews.update');
+Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->middleware(['auth', 'verified', 'username.setup', 'kyc'])->name('reviews.destroy');
+Route::post('/reviews/{review}/replies', [NoteReviewReplyController::class, 'store'])->middleware(['auth', 'verified', 'username.setup', 'kyc'])->name('reviews.replies.store');
+Route::delete('/review-replies/{reply}', [NoteReviewReplyController::class, 'destroy'])->middleware(['auth', 'verified', 'username.setup', 'kyc'])->name('reviews.replies.destroy');
 
 Route::get('/dashboard', function () {
     $user = auth()->user();
+    
+    // Check if user needs to complete profile (KTP and selfie) - redirect once after register
+    // Check session to see if this is first time after register
+    if (!$user->ktp_path || !$user->selfie_path) {
+        // Only redirect if coming from registration (check session or recent registration)
+        $justRegistered = session('just_registered', false);
+        if ($justRegistered || ($user->created_at->gt(now()->subMinutes(5)) && !$user->ktp_path && !$user->selfie_path)) {
+            session()->forget('just_registered');
+            return redirect()->route('profile.edit')
+                ->with('info', 'Silakan lengkapi profil Anda dengan mengupload KTP dan foto selfie untuk verifikasi identitas.');
+        }
+    }
     
     // Workspace users should be redirected to workspaces
     if ($user->role === 'user_workspaces') {
@@ -176,29 +190,25 @@ Route::middleware('auth')->prefix('setup-username')->name('setup-username.')->gr
     Route::post('/', [\App\Http\Controllers\SetupUsernameController::class, 'store'])->name('store');
 });
 
-Route::middleware(['auth', 'verified', 'username.setup', 'workspace.user'])->group(function () {
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'workspace.user'])->group(function () {
     // Notes routes - for sellers and workspace users
-    // Check is done in NoteController and middleware
+    // KYC required: KTP and selfie must be uploaded
     Route::resource('notes', NoteController::class);
     Route::post('/notes/upload-background', [NoteController::class, 'uploadBackground'])->name('notes.upload-background');
     Route::get('/notes/{note}/attachments/{filename}', [NoteAttachmentController::class, 'download'])->name('notes.attachments.download');
     
-    // Batch Download routes - Premium features only
-    Route::middleware('premium')->prefix('batch-download')->name('batch-download.')->group(function () {
+    // Batch Download routes - Now available for all users
+    Route::prefix('batch-download')->name('batch-download.')->group(function () {
         Route::get('/', [NoteAttachmentController::class, 'batchDownloadIndex'])->name('index');
         Route::post('/', [NoteAttachmentController::class, 'batchDownload'])->name('download');
     });
 
-    // Folders (Premium feature - enhanced organization)
-    Route::middleware('premium')->group(function () {
-        Route::resource('folders', \App\Http\Controllers\FolderController::class);
-        Route::post('/folders/update-order', [\App\Http\Controllers\FolderController::class, 'updateOrder'])->name('folders.update-order');
-    });
+    // Folders - Now available for all users
+    Route::resource('folders', \App\Http\Controllers\FolderController::class);
+    Route::post('/folders/update-order', [\App\Http\Controllers\FolderController::class, 'updateOrder'])->name('folders.update-order');
 
-    // Workspaces (Premium feature - multi workspace)
-    // Workspace users can access workspaces even without premium
-    Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
-        // Check access in WorkspaceController
+    // Workspaces - KYC required (nested group to avoid workspace.user middleware on other routes)
+    Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function () {
         Route::resource('workspaces', \App\Http\Controllers\WorkspaceController::class);
         Route::get('/workspaces/{workspace}/invite', [\App\Http\Controllers\WorkspaceController::class, 'invite'])->name('workspaces.invite');
         Route::post('/workspaces/{workspace}/invite', [\App\Http\Controllers\WorkspaceController::class, 'storeInvite'])->name('workspaces.invite.store');
@@ -206,222 +216,52 @@ Route::middleware(['auth', 'verified', 'username.setup', 'workspace.user'])->gro
         Route::post('/workspaces/{workspace}/sell', [\App\Http\Controllers\WorkspaceController::class, 'sell'])->name('workspaces.sell');
         Route::post('/workspaces/{workspace}/purchase', [\App\Http\Controllers\WorkspaceController::class, 'purchase'])->name('workspaces.purchase');
 
-        // AI Features - Only accessible within workspace context
-        // Admin: Free access | Seller/Buyer: Premium required
-        Route::middleware('ai.access')->prefix('workspaces/{workspace}/ai')->name('workspaces.ai.')->group(function () {
-            // AI Assistant for notes (summary, tags)
-            Route::post('/analyze', [\App\Http\Controllers\AiController::class, 'analyze'])->name('analyze');
-            
-            // AI Q&A
-            Route::post('/ask', [\App\Http\Controllers\AiController::class, 'ask'])->name('ask');
-            
-            // Semantic Search
-            Route::post('/semantic-search', [\App\Http\Controllers\AiController::class, 'semanticSearch'])->name('semantic-search');
-            
-            // Context Linking
-            Route::post('/context-links', [\App\Http\Controllers\AiController::class, 'contextLinks'])->name('context-links');
-            
-            // Content Generation
-            Route::post('/generate-content', [\App\Http\Controllers\AiController::class, 'generateContent'])->name('generate-content');
-            
-            // Image Search & Generation
-            Route::post('/search-images', [\App\Http\Controllers\AiController::class, 'searchImages'])->name('search-images');
-            Route::post('/generate-image', [\App\Http\Controllers\AiController::class, 'generateImage'])->name('generate-image');
-            
-            // Video Generation
-            Route::post('/generate-video', [\App\Http\Controllers\AiController::class, 'generateVideo'])->name('generate-video');
-            Route::post('/edit-video', [\App\Http\Controllers\AiController::class, 'editVideo'])->name('edit-video');
-            
-            // Idea Generator
-            Route::post('/generate-ideas', [\App\Http\Controllers\AiController::class, 'generateIdeas'])->name('generate-ideas');
-            
-            // AI Status
-            Route::get('/status', [\App\Http\Controllers\AiController::class, 'status'])->name('status');
-
-            // AI Chat - Chat with AI about workspace notes
-            Route::get('/chat', [\App\Http\Controllers\WorkspaceAiController::class, 'chat'])->name('chat');
-            Route::post('/chat', [\App\Http\Controllers\WorkspaceAiController::class, 'sendMessage'])->name('chat.send');
-        });
-
-        // Buyer AI Features - Only accessible within workspace context
-        Route::middleware('ai.access')->prefix('workspaces/{workspace}/buyer-ai')->name('workspaces.buyer-ai.')->group(function () {
-            // Analyze purchased note
-            Route::post('/notes/{note}/analyze', [\App\Http\Controllers\BuyerAiController::class, 'analyzePurchasedNote'])->name('notes.analyze');
-            
-            // Ask questions about purchased notes
-            Route::post('/ask', [\App\Http\Controllers\BuyerAiController::class, 'askPurchasedNote'])->name('ask');
-            
-            // Generate study materials
-            Route::post('/notes/{note}/study-materials', [\App\Http\Controllers\BuyerAiController::class, 'generateStudyMaterials'])->name('notes.study-materials');
-            
-            // Compare notes
-            Route::post('/compare', [\App\Http\Controllers\BuyerAiController::class, 'compareNotes'])->name('compare');
-            
-            // Get recommendations
-            Route::get('/recommendations', [\App\Http\Controllers\BuyerAiController::class, 'getRecommendations'])->name('recommendations');
-            
-            // Extract content from attachments
-            Route::post('/notes/{note}/extract-content', [\App\Http\Controllers\BuyerAiController::class, 'extractContent'])->name('notes.extract-content');
-        });
-
-        // AI Memory Platform - Only accessible within workspace context
-        Route::middleware('ai.access')->prefix('workspaces/{workspace}/ai-memory')->name('workspaces.ai-memory.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\AiMemoryController::class, 'index'])->name('index');
-            Route::post('/ask', [\App\Http\Controllers\AiMemoryController::class, 'ask'])->name('ask');
-            Route::get('/notes/{note}/contextual-links', [\App\Http\Controllers\AiMemoryController::class, 'getContextualLinks'])->name('notes.contextual-links');
-            Route::post('/insights', [\App\Http\Controllers\AiMemoryController::class, 'generateInsights'])->name('insights');
-            Route::post('/build-knowledge-base', [\App\Http\Controllers\AiMemoryController::class, 'buildKnowledgeBase'])->name('build-knowledge-base');
-            Route::get('/stats', [\App\Http\Controllers\AiMemoryController::class, 'getStats'])->name('stats');
-            
-            // Training data (Admin only)
-            Route::post('/prepare-training-data', [\App\Http\Controllers\AiMemoryController::class, 'prepareTrainingData'])->name('prepare-training-data');
-        });
-
-        // MyNoteds - AI Memory Platform Dashboard (workspace context)
-        Route::middleware('ai.access')->prefix('workspaces/{workspace}/mynoteds')->name('workspaces.mynoteds.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\MyNotedsController::class, 'index'])->name('index');
-            Route::get('/ask', [\App\Http\Controllers\MyNotedsController::class, 'ask'])->name('ask');
-            Route::get('/search', [\App\Http\Controllers\MyNotedsController::class, 'search'])->name('search');
-            Route::get('/insights', [\App\Http\Controllers\MyNotedsController::class, 'insights'])->name('insights');
-        });
+        // AI Features removed - all features are now free and accessible
     });
+});
 
+// Routes that require KYC but not workspace.user middleware
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function () {
+    // Collections (Wishlist) routes - KYC required
+    Route::resource('collections', \App\Http\Controllers\CollectionController::class);
+    Route::post('/collections/{collection}/add-note', [\App\Http\Controllers\CollectionController::class, 'addNote'])->name('collections.add-note');
+    Route::delete('/collections/{collection}/remove-note/{note}', [\App\Http\Controllers\CollectionController::class, 'removeNote'])->name('collections.remove-note');
 
-    // Collections (Wishlist) routes - Premium features only
-    Route::middleware('premium')->resource('collections', \App\Http\Controllers\CollectionController::class);
-    Route::middleware('premium')->post('/collections/{collection}/add-note', [\App\Http\Controllers\CollectionController::class, 'addNote'])->name('collections.add-note');
-    Route::middleware('premium')->delete('/collections/{collection}/remove-note/{note}', [\App\Http\Controllers\CollectionController::class, 'removeNote'])->name('collections.remove-note');
-
-    // Export routes - Premium features only
-    Route::middleware('premium')->prefix('export')->name('export.')->group(function () {
+    // Export routes - Now available for all users
+    Route::prefix('export')->name('export.')->group(function () {
         Route::get('/note/{note}/pdf', [\App\Http\Controllers\ExportController::class, 'exportPdf'])->name('pdf');
         Route::get('/note/{note}/docx', [\App\Http\Controllers\ExportController::class, 'exportDocx'])->name('docx');
         Route::get('/note/{note}/markdown', [\App\Http\Controllers\ExportController::class, 'exportMarkdown'])->name('markdown');
     });
 
-    // Reading Progress routes - Premium features only
-    Route::middleware('premium')->prefix('reading-progress')->name('reading-progress.')->group(function () {
+    // Reading Progress routes - Now available for all users
+    Route::prefix('reading-progress')->name('reading-progress.')->group(function () {
         Route::post('/note/{note}', [\App\Http\Controllers\ReadingProgressController::class, 'update'])->name('update');
         Route::get('/note/{note}', [\App\Http\Controllers\ReadingProgressController::class, 'show'])->name('show');
     });
 
-    // Bookmarks routes - Premium features only
-    Route::middleware('premium')->prefix('bookmarks')->name('bookmarks.')->group(function () {
+    // Bookmarks routes - Now available for all users
+    Route::prefix('bookmarks')->name('bookmarks.')->group(function () {
         Route::get('/note/{note}', [\App\Http\Controllers\BookmarkController::class, 'index'])->name('index');
         Route::post('/note/{note}', [\App\Http\Controllers\BookmarkController::class, 'store'])->name('store');
         Route::put('/{bookmark}', [\App\Http\Controllers\BookmarkController::class, 'update'])->name('update');
         Route::delete('/{bookmark}', [\App\Http\Controllers\BookmarkController::class, 'destroy'])->name('destroy');
     });
 
-    // Buyer Analytics routes - Premium features only
-    Route::middleware('premium')->prefix('buyer-analytics')->name('buyer-analytics.')->group(function () {
+    // Buyer Analytics routes - Now available for all users
+    Route::prefix('buyer-analytics')->name('buyer-analytics.')->group(function () {
         Route::get('/', [\App\Http\Controllers\BuyerAnalyticsController::class, 'index'])->name('index');
         Route::get('/purchase-history', [\App\Http\Controllers\BuyerAnalyticsController::class, 'purchaseHistory'])->name('purchase-history');
     });
 
-    // Reading History routes - Premium features only
-    Route::middleware('premium')->prefix('reading-history')->name('reading-history.')->group(function () {
+    // Reading History routes - Now available for all users
+    Route::prefix('reading-history')->name('reading-history.')->group(function () {
         Route::get('/', [\App\Http\Controllers\ReadingHistoryController::class, 'index'])->name('index');
     });
 
-    // Premium Note Features: Smart Search, Q&A, Insights
-    Route::middleware('premium')->prefix('premium')->name('premium.')->group(function () {
-        // Smart Search
-        Route::get('/search', [\App\Http\Controllers\PremiumNoteController::class, 'search'])->name('search');
-        Route::get('/search/api', [\App\Http\Controllers\PremiumNoteController::class, 'searchApi'])->name('search.api');
-        
-        // Q&A
-        Route::get('/qa', [\App\Http\Controllers\PremiumNoteController::class, 'qa'])->name('qa');
-        Route::post('/notes/{note}/ask', [\App\Http\Controllers\PremiumNoteController::class, 'askQuestion'])->name('notes.ask');
-        Route::get('/notes/{note}/suggested-questions', [\App\Http\Controllers\PremiumNoteController::class, 'getSuggestedQuestions'])->name('notes.suggested-questions');
-        Route::post('/notes/ask-multiple', [\App\Http\Controllers\PremiumNoteController::class, 'askQuestionAboutNotes'])->name('notes.ask-multiple');
-        
-        // Insights
-        Route::get('/insights', [\App\Http\Controllers\PremiumNoteController::class, 'insights'])->name('insights');
-        Route::get('/insights/weekly', [\App\Http\Controllers\PremiumNoteController::class, 'getWeeklyInsights'])->name('insights.weekly');
-        Route::get('/insights/topics', [\App\Http\Controllers\PremiumNoteController::class, 'getTopics'])->name('insights.topics');
-        
-        // Context Linking & Embeddings
-        Route::get('/notes/{note}/related', [\App\Http\Controllers\PremiumNoteController::class, 'getRelatedNotes'])->name('notes.related');
-        Route::post('/notes/{note}/generate-embedding', [\App\Http\Controllers\PremiumNoteController::class, 'generateEmbedding'])->name('notes.generate-embedding');
-        
-        // Monitoring (Admin only)
-        Route::get('/monitoring/metrics', [\App\Http\Controllers\PremiumNoteController::class, 'getMonitoringMetrics'])->name('monitoring.metrics');
-    });
+    // AI Features removed - Premium Note Features (Smart Search, Q&A, Insights) have been removed to reduce API costs
 
-    // AI Memory Platform - Premium feature
-    Route::middleware('premium')->prefix('ai-memory')->name('ai-memory.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\AiMemoryController::class, 'index'])->name('index');
-        Route::post('/ask', [\App\Http\Controllers\AiMemoryController::class, 'ask'])->name('ask');
-        Route::get('/notes/{note}/contextual-links', [\App\Http\Controllers\AiMemoryController::class, 'getContextualLinks'])->name('notes.contextual-links');
-        Route::post('/insights', [\App\Http\Controllers\AiMemoryController::class, 'generateInsights'])->name('insights');
-        Route::post('/build-knowledge-base', [\App\Http\Controllers\AiMemoryController::class, 'buildKnowledgeBase'])->name('build-knowledge-base');
-        Route::get('/stats', [\App\Http\Controllers\AiMemoryController::class, 'getStats'])->name('stats');
-        
-        // Training data (Admin only)
-        Route::post('/prepare-training-data', [\App\Http\Controllers\AiMemoryController::class, 'prepareTrainingData'])->name('prepare-training-data');
-    });
-
-    // AI Features - Premium feature
-    Route::middleware(['auth', 'verified', 'username.setup', 'premium'])->prefix('ai')->name('ai.')->group(function () {
-        // AI Assistant for notes (summary, tags)
-        Route::post('/analyze', [\App\Http\Controllers\AiController::class, 'analyze'])->name('analyze');
-        
-        // AI Q&A
-        Route::post('/ask', [\App\Http\Controllers\AiController::class, 'ask'])->name('ask');
-        
-        // Semantic Search
-        Route::post('/semantic-search', [\App\Http\Controllers\AiController::class, 'semanticSearch'])->name('semantic-search');
-        
-        // Context Linking
-        Route::post('/context-links', [\App\Http\Controllers\AiController::class, 'contextLinks'])->name('context-links');
-        
-        // Content Generation
-        Route::post('/generate-content', [\App\Http\Controllers\AiController::class, 'generateContent'])->name('generate-content');
-        
-        // Image Search & Generation
-        Route::post('/search-images', [\App\Http\Controllers\AiController::class, 'searchImages'])->name('search-images');
-        Route::post('/generate-image', [\App\Http\Controllers\AiController::class, 'generateImage'])->name('generate-image');
-        
-        // Video Generation
-        Route::post('/generate-video', [\App\Http\Controllers\AiController::class, 'generateVideo'])->name('generate-video');
-        Route::post('/edit-video', [\App\Http\Controllers\AiController::class, 'editVideo'])->name('edit-video');
-        
-        // Idea Generator
-        Route::post('/generate-ideas', [\App\Http\Controllers\AiController::class, 'generateIdeas'])->name('generate-ideas');
-        
-        // AI Status
-        Route::get('/status', [\App\Http\Controllers\AiController::class, 'status'])->name('status');
-    });
-
-    // Buyer AI Features - Premium feature for purchased notes
-    Route::middleware(['auth', 'verified', 'username.setup', 'premium'])->prefix('buyer-ai')->name('buyer-ai.')->group(function () {
-        // Analyze purchased note
-        Route::post('/notes/{note}/analyze', [\App\Http\Controllers\BuyerAiController::class, 'analyzePurchasedNote'])->name('notes.analyze');
-        
-        // Ask questions about purchased notes
-        Route::post('/ask', [\App\Http\Controllers\BuyerAiController::class, 'askPurchasedNote'])->name('ask');
-        
-        // Generate study materials
-        Route::post('/notes/{note}/study-materials', [\App\Http\Controllers\BuyerAiController::class, 'generateStudyMaterials'])->name('notes.study-materials');
-        
-        // Compare notes
-        Route::post('/compare', [\App\Http\Controllers\BuyerAiController::class, 'compareNotes'])->name('compare');
-        
-        // Get recommendations
-        Route::get('/recommendations', [\App\Http\Controllers\BuyerAiController::class, 'getRecommendations'])->name('recommendations');
-        
-        // Extract content from attachments
-        Route::post('/notes/{note}/extract-content', [\App\Http\Controllers\BuyerAiController::class, 'extractContent'])->name('notes.extract-content');
-    });
-
-    // MyNoteds - AI Memory Platform Dashboard
-    Route::middleware(['auth', 'verified', 'username.setup', 'premium'])->prefix('mynoteds')->name('mynoteds.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\MyNotedsController::class, 'index'])->name('index');
-        Route::get('/ask', [\App\Http\Controllers\MyNotedsController::class, 'ask'])->name('ask');
-        Route::get('/search', [\App\Http\Controllers\MyNotedsController::class, 'search'])->name('search');
-        Route::get('/insights', [\App\Http\Controllers\MyNotedsController::class, 'insights'])->name('insights');
-    });
+    // AI Features removed - all features are now free and accessible
 
 
     // Subscription routes
@@ -528,8 +368,8 @@ Route::middleware(['auth', 'verified', 'username.setup', 'workspace.user'])->gro
     // Recently Viewed Notes routes
     Route::get('/viewed-notes', [\App\Http\Controllers\NoteViewHistoryController::class, 'index'])->name('viewed-notes.index');
 
-    // Webhook routes (for users to manage their webhooks)
-    Route::middleware('premium')->prefix('webhooks')->name('webhooks.')->group(function () {
+    // Webhook routes (for users to manage their webhooks) - KYC required
+    Route::prefix('webhooks')->name('webhooks.')->group(function () {
         Route::get('/', [\App\Http\Controllers\WebhookController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\WebhookController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\WebhookController::class, 'store'])->name('store');
@@ -544,6 +384,10 @@ Route::middleware(['auth', 'verified', 'username.setup', 'workspace.user'])->gro
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
 
+});
+
+// Profile routes - No KYC required (user needs to access profile to upload KTP/selfie)
+Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -558,12 +402,14 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::post('/users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');
     Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
     Route::post('/users/{user}/release', [UserController::class, 'release'])->name('users.release');
+    Route::get('/users/pending-verification', [UserController::class, 'pendingVerification'])->name('users.pending-verification');
     Route::post('/users/{user}/verify-approve', [UserController::class, 'approveVerification'])->name('users.verify.approve');
     Route::post('/users/{user}/verify-reject', [UserController::class, 'rejectVerification'])->name('users.verify.reject');
     Route::get('/users/{user}/download-doc/{type}', [UserController::class, 'downloadDocument'])->name('users.download-doc');
     Route::resource('commission-tiers', AdminCommissionTierController::class)->except(['show']);
     Route::resource('faqs', AdminFaqController::class);
     Route::resource('cms-pages', AdminCmsPageController::class);
+    Route::resource('tutorials', \App\Http\Controllers\Admin\TutorialController::class);
     Route::get('/transactions', [AdminTransactionController::class, 'index'])->name('transactions.index');
     Route::get('/withdraws', [AdminWithdrawController::class, 'index'])->name('withdraws.index');
     Route::get('/withdraws/{withdraw}', [AdminWithdrawController::class, 'show'])->name('withdraws.show');

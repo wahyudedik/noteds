@@ -39,6 +39,9 @@ class ProfileUpdateRequest extends FormRequest
             'bank_name' => ['nullable', 'string', 'max:100'],
             'bank_account_number' => ['nullable', 'string', 'max:50'],
             'bank_account_name' => ['nullable', 'string', 'max:100'],
+            'document_type' => ['nullable', 'in:ktp,kartu_pelajar'],
+            'ktp_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'selfie_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
         ];
     }
 }

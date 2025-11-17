@@ -40,6 +40,39 @@ class UserController extends Controller
     }
 
     /**
+     * Display users pending verification (Document identity and selfie uploaded but not yet verified).
+     */
+    public function pendingVerification(Request $request): View
+    {
+        $users = User::whereNotNull('ktp_path')
+            ->whereNotNull('selfie_path')
+            ->where(function ($query) {
+                $query->where('verification_status', 'pending')
+                    ->orWhereNull('verification_status');
+            })
+            ->when($request->search, function ($query) use ($request) {
+                return $query->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('email', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->role, function ($query) use ($request) {
+                return $query->where('role', $request->role);
+            })
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        $pendingCount = User::whereNotNull('ktp_path')
+            ->whereNotNull('selfie_path')
+            ->where(function ($query) {
+                $query->where('verification_status', 'pending')
+                    ->orWhereNull('verification_status');
+            })
+            ->count();
+
+        return view('admin.users.pending-verification', compact('users', 'pendingCount'));
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show(User $user): View

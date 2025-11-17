@@ -264,16 +264,8 @@ class MarketplaceController extends Controller
         $isNoteOwner = auth()->check() && auth()->id() === $note->user_id;
         $hasPurchasedBefore = $alreadyPurchased ?? false;
         
-        // Calculate premium discount for display
-        $premiumDiscountPercent = 0;
-        $premiumDiscountPrice = null;
+        // Premium discount removed - all users are now premium
         $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
-        
-        if (auth()->check() && auth()->user()->hasPremium() && $basePrice > 0) {
-            $premiumDiscountPercent = \App\Models\Setting::getPremiumBuyerDiscountPercent();
-            $premiumDiscount = $basePrice * ($premiumDiscountPercent / 100);
-            $premiumDiscountPrice = $basePrice - $premiumDiscount;
-        }
         
         // Check repurchase info for scarcity mode
         $canRepurchase = false;
@@ -322,7 +314,7 @@ class MarketplaceController extends Controller
             $taxService = app(TaxService::class);
             $taxContext = $taxService->resolveTaxForPurchase($note, auth()->user());
             $taxPreview = array_merge(
-                $taxService->calculateAmounts((float) ($premiumDiscountPrice ?? $basePrice), $taxContext),
+                $taxService->calculateAmounts((float) $basePrice, $taxContext),
                 ['country_code' => $taxContext['country_code'] ?? null]
             );
         }
@@ -337,8 +329,6 @@ class MarketplaceController extends Controller
             'showFullContent',
             'isNoteOwner',
             'hasPurchasedBefore',
-            'premiumDiscountPercent',
-            'premiumDiscountPrice',
             'basePrice',
             'conversation',
             'sellerReviewStats',
@@ -450,16 +440,8 @@ class MarketplaceController extends Controller
             $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
         }
 
-        // Apply premium buyer exclusive discount if user has premium
+        // Premium buyer discount removed - all users are now premium
         $finalPrice = $basePrice;
-        $premiumDiscount = 0;
-        $premiumDiscountPercent = 0;
-        
-        if ($buyer->hasPremium() && $basePrice > 0) {
-            $premiumDiscountPercent = \App\Models\Setting::getPremiumBuyerDiscountPercent();
-            $premiumDiscount = $basePrice * ($premiumDiscountPercent / 100);
-            $finalPrice = $basePrice - $premiumDiscount;
-        }
 
             if ($finalPrice <= 0) {
                 DB::rollBack();

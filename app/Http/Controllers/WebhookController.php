@@ -12,7 +12,8 @@ class WebhookController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'premium']);
+        $this->middleware(['auth']);
+        // Premium middleware removed - all users are now premium
     }
 
     /**

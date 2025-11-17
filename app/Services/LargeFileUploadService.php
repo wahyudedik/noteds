@@ -11,14 +11,14 @@ use Exception;
 class LargeFileUploadService
 {
     /**
-     * Large file threshold (40MB)
+     * Maximum file size (10MB)
      */
-    const LARGE_FILE_THRESHOLD = 41943040; // 40MB in bytes
+    const MAX_FILE_SIZE = 10485760; // 10MB in bytes
 
     /**
-     * Chunk size for large files (5MB per chunk)
+     * Maximum files per note
      */
-    const CHUNK_SIZE = 5242880; // 5MB
+    const MAX_FILES_PER_NOTE = 10;
 
     /**
      * Handle large file upload with progress tracking and error handling
@@ -31,15 +31,7 @@ class LargeFileUploadService
      */
     public function handleLargeFileUpload(UploadedFile $file, string $userId, ?callable $progressCallback = null): array
     {
-        $fileSize = $file->getSize();
-        $isLargeFile = $fileSize >= self::LARGE_FILE_THRESHOLD;
-
-        // For large files, use special handling
-        if ($isLargeFile) {
-            return $this->handleLargeFile($file, $userId, $progressCallback);
-        }
-
-        // For regular files, use standard upload
+        // All files use standard upload (max 10MB)
         return $this->handleRegularFile($file, $userId);
     }
 
@@ -209,7 +201,7 @@ class LargeFileUploadService
      */
     public function validateFile(UploadedFile $file, bool $isPremium = false): array
     {
-        $maxSize = $isPremium ? 104857600 : 5242880; // 100MB for premium, 5MB for basic
+        $maxSize = self::MAX_FILE_SIZE; // 10MB for all users
         $fileSize = $file->getSize();
 
         // Check file size
@@ -244,15 +236,6 @@ class LargeFileUploadService
             return [
                 'valid' => false,
                 'error' => "File type '{$mimeType}' is not allowed.",
-            ];
-        }
-
-        // Check if file is too large for memory (warn but allow)
-        if ($fileSize >= self::LARGE_FILE_THRESHOLD) {
-            return [
-                'valid' => true,
-                'warning' => 'Large file detected. Upload may take longer. Please do not close this page.',
-                'is_large' => true,
             ];
         }
 

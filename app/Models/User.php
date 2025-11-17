@@ -54,6 +54,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'agreement_accepted_at',
         'agreement_version',
         'ktp_path',
+        'document_type',
         'selfie_path',
         'verification_status',
         'verification_reviewed_at',
@@ -389,51 +390,32 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if user has active premium subscription.
+     * @deprecated Premium features have been removed. This method always returns true for backward compatibility.
      */
     public function hasPremium(): bool
     {
-        // Admin has full access
-        if ($this->hasRole('admin')) {
-            return true;
-        }
-
-        return $this->subscription && $this->subscription->isPremium();
+        // All users have access to all features (premium removed)
+        return true;
     }
 
     /**
      * Get note creation limit based on subscription.
+     * @deprecated Premium features have been removed. All users have unlimited notes.
      */
     public function getNoteCreationLimit(): int
     {
-        // Admin has unlimited access
-        if ($this->hasRole('admin')) {
-            return -1; // Unlimited
-        }
-
-        if ($this->hasPremium()) {
-            return -1; // Unlimited
-        }
-
-        return 10; // Basic plan: 10 notes
+        // All users have unlimited notes
+        return -1; // Unlimited
     }
 
     /**
      * Check if user can create more notes.
+     * @deprecated Premium features have been removed. All users can create unlimited notes.
      */
     public function canCreateMoreNotes(): bool
     {
-        // Admin can always create notes
-        if ($this->hasRole('admin')) {
-            return true;
-        }
-
-        $limit = $this->getNoteCreationLimit();
-
-        if ($limit === -1) {
-            return true; // Unlimited
-        }
-
-        return $this->notes()->count() < $limit;
+        // All users can create unlimited notes
+        return true;
     }
 
     /**

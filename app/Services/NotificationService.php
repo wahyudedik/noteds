@@ -203,6 +203,63 @@ class NotificationService
         }
     }
 
+    /**
+     * Notify all admins when a user uploads document identity and selfie and needs verification.
+     */
+    public function notifyAdminUserVerificationPending(User $user): void
+    {
+        $admins = User::role('admin')->get();
+        foreach ($admins as $admin) {
+            $documentType = $user->document_type === 'kartu_pelajar' ? 'Kartu Pelajar' : 'KTP';
+            $message = "User baru ({$user->name} - {$user->email}) telah mengupload {$documentType} dan foto selfie dan memerlukan verifikasi identitas.";
+            $data = [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'user_email' => $user->email,
+                'role' => $user->role,
+            ];
+
+            $notification = $this->create(
+                $admin,
+                'admin_user_verification_pending',
+                '📋 User Perlu Verifikasi Identitas',
+                $message,
+                route('admin.users.pending-verification'),
+                $data
+            );
+
+            $this->sendPushIfEnabled($admin, $notification->title, $message, $data);
+        }
+    }
+
+    /**
+     * Notify all admins when a new user registers.
+     */
+    public function notifyAdminNewUserRegistration(User $user): void
+    {
+        $admins = User::role('admin')->get();
+        foreach ($admins as $admin) {
+            $message = "User baru telah mendaftar: {$user->name} ({$user->email}) sebagai {$user->role}.";
+            $data = [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'user_email' => $user->email,
+                'role' => $user->role,
+            ];
+
+            $notification = $this->create(
+                $admin,
+                'admin_new_user_registration',
+                '👤 User Baru Mendaftar',
+                $message,
+                route('admin.users.show', $user),
+                $data
+            );
+
+            $this->sendPushIfEnabled($admin, $notification->title, $message, $data);
+        }
+    }
+
     public function getHighValueWithdrawThreshold(): float
     {
         return (float) Setting::getSetting('withdraw_high_value_threshold', 'wallet', 1000000);

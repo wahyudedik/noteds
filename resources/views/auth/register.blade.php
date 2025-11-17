@@ -1,7 +1,8 @@
 <x-guest-layout>
     <div class="space-y-6">
         <div>
-            <h2 class="text-2xl font-semibold text-slate-900">{{ __('messages.register_title') ?? 'Buat akun Noteds Anda' }}</h2>
+            <h2 class="text-2xl font-semibold text-slate-900">
+                {{ __('messages.register_title') ?? 'Buat akun Noteds Anda' }}</h2>
             <p class="mt-2 text-sm leading-6 text-slate-500">
                 {{ __('messages.register_subtitle') ?? 'Mulai kelola dan monetisasi catatan digital Anda, atau bergabung dengan tim untuk berkolaborasi.' }}
             </p>
@@ -12,11 +13,12 @@
 
             <div class="space-y-2">
                 <x-input-label for="name" :value="__('messages.name')" />
-                <x-text-input id="name" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" placeholder="{{ __('messages.name_placeholder') ?? 'Nama lengkap' }}" />
+                <x-text-input id="name" type="text" name="name" :value="old('name')" required autofocus
+                    autocomplete="name" placeholder="{{ __('messages.name_placeholder') ?? 'Nama lengkap' }}" />
                 <x-input-error :messages="$errors->get('name')" />
             </div>
 
-            @if(isset($invitation) && $invitation)
+            @if (isset($invitation) && $invitation)
                 <div class="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-4 text-sm text-blue-800">
                     <p class="font-semibold">{{ __('messages.workspace_invite_title') ?? 'Undangan Workspace' }}</p>
                     <p class="mt-1 text-blue-700">
@@ -29,22 +31,82 @@
             @endif
 
             <div class="space-y-2">
-                <x-input-label for="ktp_file" :value="__('messages.ktp_upload') ?? 'Upload KTP (JPG/PNG/PDF)'" />
-                <input id="ktp_file" type="file" name="ktp_file" accept=".jpg,.jpeg,.png,.pdf" required class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-blue-500 focus:ring focus:ring-blue-500/20">
-                <p class="text-xs text-slate-500">{{ __('messages.ktp_upload_help') ?? 'Format: JPG, PNG, atau PDF. Maksimal 5MB.' }}</p>
-                <x-input-error :messages="$errors->get('ktp_file')" />
+                <x-input-label for="email" :value="__('messages.email')" />
+                @if (isset($invitation) && $invitation)
+                    <x-text-input id="email" type="email" name="email"
+                        value="{{ old('email', $invitation->email) }}" readonly required autocomplete="username"
+                        class="bg-slate-100 cursor-not-allowed" />
+                    <p class="text-xs text-slate-500">
+                        {{ __('messages.invited_email_hint') ?? 'Email ini sudah ditentukan oleh undangan workspace.' }}
+                    </p>
+                @else
+                    <x-text-input id="email" type="email" name="email" :value="old('email')" required
+                        autocomplete="username" placeholder="name@example.com" />
+                @endif
+                <x-input-error :messages="$errors->get('email')" />
             </div>
 
             <div class="space-y-2">
-                <x-input-label for="selfie_file" :value="__('messages.selfie_upload') ?? 'Upload Foto Wajah / Selfie (JPG/PNG)'" />
-                <input id="selfie_file" type="file" name="selfie_file" accept=".jpg,.jpeg,.png" required class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-blue-500 focus:ring focus:ring-blue-500/20">
-                <p class="text-xs text-slate-500">{{ __('messages.selfie_upload_help') ?? 'Gunakan foto terang dengan wajah terlihat jelas. Maksimal 5MB.' }}</p>
-                <x-input-error :messages="$errors->get('selfie_file')" />
+                <x-input-label for="role" :value="__('messages.i_want_to_be')" />
+                @if (isset($invitation) && $invitation)
+                    <select id="role" name="role"
+                        class="block w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-600 focus:outline-none"
+                        readonly required>
+                        <option value="user_workspaces" selected>Workspace User (Team Collaboration)</option>
+                    </select>
+                    <input type="hidden" name="role" value="user_workspaces">
+                @else
+                    <select id="role" name="role"
+                        class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-blue-500 focus:ring focus:ring-blue-500/20"
+                        required>
+                        <option value="buyer" {{ old('role') === 'buyer' ? 'selected' : '' }}>
+                            {{ __('messages.buyer_option') }}</option>
+                        <option value="seller" {{ old('role') === 'seller' ? 'selected' : '' }}>
+                            {{ __('messages.seller_option') }}</option>
+                    </select>
+                @endif
+                <x-input-error :messages="$errors->get('role')" />
+            </div>
+
+            <div class="space-y-2">
+                <x-input-label for="password" :value="__('messages.password')" />
+                <x-text-input id="password" type="password" name="password" required autocomplete="new-password"
+                    placeholder="{{ __('messages.password_placeholder') ?? 'Minimal 8 karakter' }}" />
+                <x-input-error :messages="$errors->get('password')" />
+            </div>
+
+            <div class="space-y-2">
+                <x-input-label for="password_confirmation" :value="__('messages.confirm_password')" />
+                <x-text-input id="password_confirmation" type="password" name="password_confirmation" required
+                    autocomplete="new-password"
+                    placeholder="{{ __('messages.password_confirm_placeholder') ?? 'Ulangi kata sandi' }}" />
+                <x-input-error :messages="$errors->get('password_confirmation')" />
+            </div>
+
+            @if (!isset($refCode))
+                <div class="space-y-2">
+                    <x-input-label for="referral_code" :value="__('messages.referral_code_optional')" />
+                    <x-text-input id="referral_code" type="text" name="referral_code" :value="old('referral_code')"
+                        autocomplete="off" placeholder="{{ __('messages.enter_referral_code') }}" />
+                    <x-input-error :messages="$errors->get('referral_code')" />
+                </div>
+            @else
+                <input type="hidden" name="referral_code" value="{{ $refCode }}">
+            @endif
+
+            <div class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                <p class="font-semibold">Info Verifikasi</p>
+                <p class="mt-1 text-blue-700">
+                    Setelah registrasi, Anda akan diminta untuk melengkapi profil dengan mengupload dokumen identitas
+                    (KTP atau Kartu Pelajar) dan foto selfie
+                    untuk verifikasi identitas.
+                </p>
             </div>
 
             <div class="space-y-2">
                 <label class="flex items-start gap-3">
-                    <input type="checkbox" name="agree_terms" value="1" required class="mt-1 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                    <input type="checkbox" name="agree_terms" value="1" required
+                        class="mt-1 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
                     <span class="text-sm text-slate-700">
                         {!! __('messages.agreement_consent_copy', [
                             'agreement_url' => route('cms.show', ['cmsPage' => 'user-agreement']),
@@ -54,55 +116,6 @@
                 </label>
                 <x-input-error :messages="$errors->get('agree_terms')" />
             </div>
-
-            <div class="space-y-2">
-                <x-input-label for="email" :value="__('messages.email')" />
-                @if(isset($invitation) && $invitation)
-                    <x-text-input id="email" type="email" name="email" value="{{ old('email', $invitation->email) }}" readonly required autocomplete="username" class="bg-slate-100 cursor-not-allowed" />
-                    <p class="text-xs text-slate-500">{{ __('messages.invited_email_hint') ?? 'Email ini sudah ditentukan oleh undangan workspace.' }}</p>
-                @else
-                    <x-text-input id="email" type="email" name="email" :value="old('email')" required autocomplete="username" placeholder="name@example.com" />
-                @endif
-                <x-input-error :messages="$errors->get('email')" />
-            </div>
-
-            <div class="space-y-2">
-                <x-input-label for="role" :value="__('messages.i_want_to_be')" />
-                @if(isset($invitation) && $invitation)
-                    <select id="role" name="role" class="block w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-600 focus:outline-none" readonly required>
-                        <option value="user_workspaces" selected>Workspace User (Team Collaboration)</option>
-                    </select>
-                    <input type="hidden" name="role" value="user_workspaces">
-                @else
-                    <select id="role" name="role" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-blue-500 focus:ring focus:ring-blue-500/20" required>
-                        <option value="buyer" {{ old('role') === 'buyer' ? 'selected' : '' }}>{{ __('messages.buyer_option') }}</option>
-                        <option value="seller" {{ old('role') === 'seller' ? 'selected' : '' }}>{{ __('messages.seller_option') }}</option>
-                    </select>
-                @endif
-                <x-input-error :messages="$errors->get('role')" />
-            </div>
-
-            <div class="space-y-2">
-                <x-input-label for="password" :value="__('messages.password')" />
-                <x-text-input id="password" type="password" name="password" required autocomplete="new-password" placeholder="{{ __('messages.password_placeholder') ?? 'Minimal 8 karakter' }}" />
-                <x-input-error :messages="$errors->get('password')" />
-            </div>
-
-            <div class="space-y-2">
-                <x-input-label for="password_confirmation" :value="__('messages.confirm_password')" />
-                <x-text-input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="{{ __('messages.password_confirm_placeholder') ?? 'Ulangi kata sandi' }}" />
-                <x-input-error :messages="$errors->get('password_confirmation')" />
-            </div>
-
-            @if(!isset($refCode))
-                <div class="space-y-2">
-                    <x-input-label for="referral_code" :value="__('messages.referral_code_optional')" />
-                    <x-text-input id="referral_code" type="text" name="referral_code" :value="old('referral_code')" autocomplete="off" placeholder="{{ __('messages.enter_referral_code') }}" />
-                    <x-input-error :messages="$errors->get('referral_code')" />
-                </div>
-            @else
-                <input type="hidden" name="referral_code" value="{{ $refCode }}">
-            @endif
 
             <div class="space-y-4">
                 <x-primary-button class="w-full justify-center">

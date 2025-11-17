@@ -4,41 +4,26 @@ namespace App\Services;
 
 use App\Models\Note;
 use App\Models\Tag;
-use App\Services\AiService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class AutoTaggingService
 {
-    public function __construct(
-        protected AiService $aiService
-    ) {}
+    // AI service removed - no dependency needed
 
     /**
      * Auto-tag a note based on its content.
-     * Premium feature - uses AI to extract relevant tags.
+     * @deprecated AI features have been removed. This method now only uses keyword extraction.
      */
-    public function autoTag(Note $note, bool $useAi = true, int $maxTags = 5): array
+    public function autoTag(Note $note, bool $useAi = false, int $maxTags = 5): array
     {
         $tags = [];
 
         // Extract keywords from title and content
         $content = strip_tags($note->title . ' ' . $note->content);
         
-        // Method 1: AI-based tagging (premium feature)
-        if ($useAi && $this->aiService->isAvailable()) {
-            try {
-                $aiTags = $this->aiService->suggestTags($content, $maxTags);
-                $tags = array_merge($tags, $aiTags);
-            } catch (\Exception $e) {
-                Log::warning('AI tagging failed, falling back to keyword extraction', [
-                    'note_id' => $note->id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        // Method 2: Keyword extraction (fallback or supplement)
+        // AI-based tagging has been removed - only use keyword extraction
+        // Method: Keyword extraction
         $keywords = $this->extractKeywords($content);
         $tags = array_merge($tags, $keywords);
 
@@ -109,20 +94,12 @@ class AutoTaggingService
 
     /**
      * Auto-tag note on creation/update.
+     * @deprecated AI features have been removed. Auto-tagging is disabled.
      */
-    public function autoTagOnSave(Note $note, bool $useAi = true): void
+    public function autoTagOnSave(Note $note, bool $useAi = false): void
     {
-        // Only auto-tag if note has content
-        if (empty($note->content) && empty($note->title)) {
-            return;
-        }
-
-        // Check if note already has tags (don't override manual tags)
-        if ($note->tags()->count() > 0) {
-            return; // User has already tagged, don't auto-tag
-        }
-
-        $this->autoTag($note, $useAi);
+        // Auto-tagging disabled - users must tag manually
+        return;
     }
 }
 

@@ -149,7 +149,8 @@ class FeaturedNoteController extends Controller
         }
 
         try {
-            $autoApprove = $user->hasPremium(); // Auto-approve for premium users
+            // All users now have premium access, but featured notes still require admin approval for quality control
+            $autoApprove = false; // Changed: All featured notes require admin approval
             $scheduledDate = $request->scheduled_date ? \Carbon\Carbon::parse($request->scheduled_date) : null;
             
             DB::transaction(function () use ($user, $wallet, $note, $validated, $finalPrice, $autoApprove, $locations, $discountPercent, $isCustomDuration, $scheduledDate) {
@@ -175,7 +176,7 @@ class FeaturedNoteController extends Controller
                         'end_date' => $autoApprove && !$scheduledDate ? now()->addDays($validated['duration_days']) : null,
                         'scheduled_date' => $scheduledDate,
                         'variant' => $validated['variant'] ?? null,
-                        'admin_notes' => $autoApprove ? 'Auto-approved for premium user' : null,
+                        'admin_notes' => null,
                     ]);
                     $parentId = $parentNote->id;
                 }
@@ -198,7 +199,7 @@ class FeaturedNoteController extends Controller
                         'end_date' => $autoApprove && !$scheduledDate ? now()->addDays($validated['duration_days']) : null,
                         'scheduled_date' => $scheduledDate,
                         'variant' => $validated['variant'] ?? null,
-                        'admin_notes' => $autoApprove ? 'Auto-approved for premium user' : null,
+                        'admin_notes' => null,
                     ]);
                 }
 
@@ -221,13 +222,11 @@ class FeaturedNoteController extends Controller
                     'creator_commission' => 0,
                     'status' => $autoApprove ? 'success' : 'pending',
                     'payment_method' => 'wallet',
-                    'notes' => 'Pembayaran iklan featured note: ' . $note->title . ' di ' . $locationText . ' selama ' . $validated['duration_days'] . ' hari.' . ($discountPercent > 0 ? ' (Discount ' . $discountPercent . '%)' : '') . ($autoApprove ? ' (Auto-approved for premium user)' : ''),
+                    'notes' => 'Pembayaran iklan featured note: ' . $note->title . ' di ' . $locationText . ' selama ' . $validated['duration_days'] . ' hari.' . ($discountPercent > 0 ? ' (Discount ' . $discountPercent . '%)' : ''),
                 ]);
             });
 
-            $message = $autoApprove 
-                ? 'Featured note berhasil diaktifkan! (Auto-approved untuk premium user)'
-                : 'Request featured note berhasil dibuat. Menunggu approval admin.';
+            $message = 'Request featured note berhasil dibuat. Menunggu approval admin.';
 
             return redirect()->route('featured-notes.index')
                 ->with('success', $message);

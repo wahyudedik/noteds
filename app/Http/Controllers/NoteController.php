@@ -47,40 +47,41 @@ class NoteController extends Controller
             abort(403, 'Fitur ini hanya tersedia untuk Seller atau Workspace User. Buyer tidak dapat membuat note. Jika ingin membuat note, silakan buat akun Seller dengan email berbeda atau bergabung dengan workspace.');
         }
         
+        // Check if user has uploaded document identity and selfie
+        if (!$user->ktp_path || !$user->selfie_path) {
+            return redirect()->route('profile.edit')
+                ->with('error', 'Silakan lengkapi profil Anda dengan mengupload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk membuat note.');
+        }
+        
         $tags = Tag::orderBy('name')->get();
         
-        // Get folders and workspaces for premium users
-        $folders = [];
-        $workspaces = [];
+        // Get folders and workspaces for all users
+        $folders = $user->allFolders()->get();
+        $workspaces = $user->allWorkspaces();
         $selectedWorkspace = null;
         $selectedFolder = null;
+            
+        // Pre-select workspace if specified
+        if ($request->has('workspace_id')) {
+            $selectedWorkspace = \App\Models\Workspace::where('id', $request->workspace_id)
+                ->where(function($q) use ($user) {
+                    $q->where('owner_id', $user->id)
+                      ->orWhereHas('members', function($q) use ($user) {
+                          $q->where('users.id', $user->id);
+                      });
+                })
+                ->first();
+        }
         
-        if ($user->hasPremium()) {
-            $folders = $user->allFolders()->get();
-            $workspaces = $user->allWorkspaces();
+        // Pre-select folder if specified
+        if ($request->has('folder_id')) {
+            $selectedFolder = \App\Models\Folder::where('id', $request->folder_id)
+                ->where('user_id', $user->id)
+                ->first();
             
-            // Pre-select workspace if specified
-            if ($request->has('workspace_id')) {
-                $selectedWorkspace = \App\Models\Workspace::where('id', $request->workspace_id)
-                    ->where(function($q) use ($user) {
-                        $q->where('owner_id', $user->id)
-                          ->orWhereHas('members', function($q) use ($user) {
-                              $q->where('users.id', $user->id);
-                          });
-                    })
-                    ->first();
-            }
-            
-            // Pre-select folder if specified
-            if ($request->has('folder_id')) {
-                $selectedFolder = \App\Models\Folder::where('id', $request->folder_id)
-                    ->where('user_id', $user->id)
-                    ->first();
-                
-                // If folder has workspace, use it
-                if ($selectedFolder && $selectedFolder->workspace_id && !$selectedWorkspace) {
-                    $selectedWorkspace = $selectedFolder->workspace;
-                }
+            // If folder has workspace, use it
+            if ($selectedFolder && $selectedFolder->workspace_id && !$selectedWorkspace) {
+                $selectedWorkspace = $selectedFolder->workspace;
             }
         }
 
@@ -96,14 +97,14 @@ class NoteController extends Controller
 
         $ecosystems = [
             '' => '— Tidak ditentukan —',
-            'elements' => 'Elements (Unlimited)',
-            'audiojungle' => 'AudioJungle',
-            'codecanyon' => 'CodeCanyon',
-            'graphicriver' => 'GraphicRiver',
-            'photodune' => 'PhotoDune',
-            'themeforest' => 'Themeforest',
-            'videohive' => 'VideoHive',
-            '3docean' => '3DOcean',
+            'design' => 'Design',
+            'code' => 'Code',
+            'photo' => 'Photo',
+            'audio' => 'Audio',
+            'video' => 'Video',
+            'theme' => 'Theme',
+            '3d' => '3D',
+            'elements' => 'Elements',
         ];
 
         $languages = [
@@ -128,43 +129,41 @@ class NoteController extends Controller
             return redirect()->route('dashboard')->with('error', 'Fitur ini hanya tersedia untuk Seller atau Workspace User. Buyer tidak dapat membuat note. Jika ingin membuat note, silakan buat akun Seller dengan email berbeda atau bergabung dengan workspace.');
         }
         
-        // Check if user can create more notes
-        if (!$user->canCreateMoreNotes()) {
-            $limit = auth()->user()->getNoteCreationLimit();
-            return redirect()->route('notes.create')
-                ->with('error', "Note creation limit reached! You can only create {$limit} notes on the Basic plan. Upgrade to Premium for unlimited notes.");
+        // Check if user has uploaded document identity and selfie
+        if (!$user->ktp_path || !$user->selfie_path) {
+            return redirect()->route('profile.edit')
+                ->with('error', 'Silakan lengkapi profil Anda dengan mengupload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk membuat note.');
         }
+        
+        // No note creation limit - all users can create unlimited notes
 
-        // Validate and handle file uploads (including large files)
+        // Validate and handle file uploads
         $user = auth()->user();
         $uploadService = app(LargeFileUploadService::class);
         
         if ($request->hasFile('attachments')) {
             $files = $request->file('attachments');
             $validationErrors = [];
-            $largeFilesWarning = [];
+            
+            // Check maximum files
+            if (count($files) > 10) {
+                return redirect()->route('notes.create')
+                    ->withInput()
+                    ->withErrors(['attachments' => 'Maximum 10 files allowed per note.']);
+            }
             
             foreach ($files as $index => $file) {
-                $validation = $uploadService->validateFile($file, $user->hasPremium());
+                $validation = $uploadService->validateFile($file);
                 
                 if (!$validation['valid']) {
                     $validationErrors["attachments.{$index}"] = $validation['error'];
-                } elseif (isset($validation['is_large']) && $validation['is_large']) {
-                    $sizeInMB = round($file->getSize() / 1048576, 2);
-                    $largeFilesWarning[] = $file->getClientOriginalName() . ' (' . $sizeInMB . 'MB)';
                 }
             }
             
             if (!empty($validationErrors)) {
                 return redirect()->route('notes.create')
                     ->withInput()
-                    ->withErrors($validationErrors)
-                    ->with('upgrade_message', !$user->hasPremium() ? 'Upgrade to Premium to upload files up to 100MB per file.' : null);
-            }
-            
-            // Store large files warning in session for frontend display
-            if (!empty($largeFilesWarning)) {
-                session()->flash('large_files_warning', $largeFilesWarning);
+                    ->withErrors($validationErrors);
             }
         }
 
@@ -303,19 +302,7 @@ class NoteController extends Controller
         $note = Note::create($validated);
         $this->syncTags($note, $tags);
 
-        // Auto-tagging for premium users (if no tags provided)
-        if ($user->hasPremium() && empty($tags)) {
-            try {
-                $autoTaggingService = app(AutoTaggingService::class);
-                $autoTaggingService->autoTag($note, true); // Use AI for premium users
-            } catch (\Exception $e) {
-                // Log but don't fail note creation
-                logger()->warning('Auto-tagging failed', [
-                    'note_id' => $note->id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
+        // No auto-tagging - users must tag manually
 
         if ($workspace) {
             WorkspaceActivityLog::record($workspace, 'note_added', $user, [
@@ -412,14 +399,9 @@ class NoteController extends Controller
         $note->load('tags', 'folder', 'workspace');
         $user = auth()->user();
         
-        // Get folders and workspaces for premium users
-        $folders = [];
-        $workspaces = [];
-        
-        if ($user->hasPremium()) {
-            $folders = $user->allFolders()->get();
-            $workspaces = $user->allWorkspaces();
-        }
+        // Get folders and workspaces for all users
+        $folders = $user->allFolders()->get();
+        $workspaces = $user->allWorkspaces();
 
         $defaultMinPrice = Setting::getDefaultMinPrice();
         $priceGuidance = [
@@ -433,14 +415,14 @@ class NoteController extends Controller
 
         $ecosystems = [
             '' => '— Tidak ditentukan —',
-            'elements' => 'Elements (Unlimited)',
-            'audiojungle' => 'AudioJungle',
-            'codecanyon' => 'CodeCanyon',
-            'graphicriver' => 'GraphicRiver',
-            'photodune' => 'PhotoDune',
-            'themeforest' => 'Themeforest',
-            'videohive' => 'VideoHive',
-            '3docean' => '3DOcean',
+            'design' => 'Design',
+            'code' => 'Code',
+            'photo' => 'Photo',
+            'audio' => 'Audio',
+            'video' => 'Video',
+            'theme' => 'Theme',
+            '3d' => '3D',
+            'elements' => 'Elements',
         ];
 
         $languages = [
@@ -477,35 +459,33 @@ class NoteController extends Controller
             ]);
         }
 
-        // Validate and handle file uploads (including large files)
+        // Validate and handle file uploads
         $uploadService = app(LargeFileUploadService::class);
         
         if ($request->hasFile('attachments')) {
             $files = $request->file('attachments');
             $validationErrors = [];
-            $largeFilesWarning = [];
+            
+            // Check maximum files (including existing)
+            $existingCount = count($note->attachments ?? []);
+            if (count($files) + $existingCount > 10) {
+                return redirect()->route('notes.edit', $note)
+                    ->withInput()
+                    ->withErrors(['attachments' => 'Maximum 10 files allowed per note.']);
+            }
             
             foreach ($files as $index => $file) {
-                $validation = $uploadService->validateFile($file, $user->hasPremium());
+                $validation = $uploadService->validateFile($file);
                 
                 if (!$validation['valid']) {
                     $validationErrors["attachments.{$index}"] = $validation['error'];
-                } elseif (isset($validation['is_large']) && $validation['is_large']) {
-                    $sizeInMB = round($file->getSize() / 1048576, 2);
-                    $largeFilesWarning[] = $file->getClientOriginalName() . ' (' . $sizeInMB . 'MB)';
                 }
             }
             
             if (!empty($validationErrors)) {
                 return redirect()->route('notes.edit', $note)
                     ->withInput()
-                    ->withErrors($validationErrors)
-                    ->with('upgrade_message', !$user->hasPremium() ? 'Upgrade to Premium to upload files up to 100MB per file.' : null);
-            }
-            
-            // Store large files warning in session for frontend display
-            if (!empty($largeFilesWarning)) {
-                session()->flash('large_files_warning', $largeFilesWarning);
+                    ->withErrors($validationErrors);
             }
         }
 
@@ -715,18 +695,7 @@ class NoteController extends Controller
         $note->update($validated);
         $newTags = $this->syncTags($note, $tags);
 
-        // Auto-tagging update for premium users (if tags were removed)
-        if ($user->hasPremium() && $note->tags()->count() === 0) {
-            try {
-                $autoTaggingService = app(AutoTaggingService::class);
-                $autoTaggingService->autoTag($note, true);
-            } catch (\Exception $e) {
-                logger()->warning('Auto-tagging update failed', [
-                    'note_id' => $note->id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
+        // No auto-tagging - users must tag manually
         
         $newData = $note->fresh()->only(['title', 'content', 'summary', 'price', 'discount_price', 'is_public', 'status', 'preview_content', 'preview_percentage']);
 
@@ -881,14 +850,15 @@ class NoteController extends Controller
             'user_id' => auth()->id(),
             'action' => 'resale_price_set',
             'old_data' => ['price' => $note->getOriginal('price')],
-            'new_data' => ['price' => $resalePrice],
+            'new_data' => ['price' => (string) $resalePrice],
             'changes' => 'Resale price set to ' . currency($resalePrice),
             'notes' => 'Note listed for resale by ' . auth()->user()->name,
         ]);
         
         // Log activity
+        $oldPrice = $note->getOriginal('price');
         app(NoteActivityService::class)->logUpdated($note, auth()->user(), 
-            ['price' => $note->getOriginal('price')], 
+            ['price' => $oldPrice], 
             ['price' => $resalePrice]
         );
         
@@ -1041,21 +1011,14 @@ class NoteController extends Controller
         $uploadService = app(LargeFileUploadService::class);
         
         // Validate file
-        $isPremium = $user->hasPremium();
-        $validation = $uploadService->validateFile($file, $isPremium);
+        $validation = $uploadService->validateFile($file);
         
         if (!$validation['valid']) {
             $errorMessage = $validation['error'] ?? 'File validation failed';
             
-            // Add premium upgrade suggestion if file too large for basic user
-            if (!$isPremium && $file->getSize() > 5242880) {
-                $errorMessage .= ' Upgrade ke Premium untuk upload file hingga 100MB.';
-            }
-            
             return response()->json([
                 'success' => false,
                 'error' => $errorMessage,
-                'requires_premium' => !$isPremium && $file->getSize() > 5242880
             ], 400);
         }
 
@@ -1212,7 +1175,7 @@ class NoteController extends Controller
             // Increase execution time and memory limit for large files
             $hasLargeFile = false;
             foreach ($files as $file) {
-                if ($file->getSize() >= LargeFileUploadService::LARGE_FILE_THRESHOLD) {
+                if ($file->getSize() >= LargeFileUploadService::MAX_FILE_SIZE) {
                     $hasLargeFile = true;
                     break;
                 }
@@ -1254,28 +1217,9 @@ class NoteController extends Controller
                         continue; // Skip invalid files
                     }
 
-                    // Check if file is large (40MB+)
-                    $isLargeFile = $file->getSize() >= LargeFileUploadService::LARGE_FILE_THRESHOLD;
-
-                    if ($isLargeFile) {
-                        // Use large file upload service with progress tracking
-                        $uploadId = Str::uuid();
-                        $progressCallback = function($progress, $uploaded, $total) use ($uploadId, $uploadService) {
-                            $uploadService->setUploadProgress($uploadId, $progress, $uploaded, $total);
-                        };
-
-                        $attachment = $uploadService->handleLargeFileUpload($file, $user->id, $progressCallback);
-                        $attachments[] = $attachment;
-
-                        // Clear progress after upload
-                        session()->forget("upload_progress_{$uploadId}");
-                    } else {
-                        // Use regular upload for smaller files (via public method)
-                        // handleLargeFileUpload internally calls handleRegularFile for small files
-                        /** @phpstan-ignore-next-line */
-                        $attachment = $uploadService->handleLargeFileUpload($file, $user->id);
-                        $attachments[] = $attachment;
-                    }
+                    // Use standard upload (max 10MB)
+                    $attachment = $uploadService->handleLargeFileUpload($file, $user->id);
+                    $attachments[] = $attachment;
 
                 } catch (\Exception $e) {
                     // Log error but continue with other files

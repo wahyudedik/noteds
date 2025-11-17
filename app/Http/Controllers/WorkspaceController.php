@@ -27,10 +27,7 @@ class WorkspaceController extends Controller
     {
         $user = $request->user();
         
-        // Check if user can access workspaces
-        if ($user->role !== 'user_workspaces' && !$user->hasPremium() && !$user->hasRole('admin')) {
-            return redirect()->route('dashboard')->with('error', 'Fitur Workspace hanya tersedia untuk Premium users atau Workspace users.');
-        }
+        // Workspace is now available for all authenticated users
         
         // Get owned and member workspaces
         $ownedWorkspaces = $user->ownedWorkspaces()->withCount('notes')->get();
@@ -46,10 +43,7 @@ class WorkspaceController extends Controller
     {
         $user = $request->user();
         
-        // Check if user can access workspaces
-        if ($user->role !== 'user_workspaces' && !$user->hasPremium() && !$user->hasRole('admin')) {
-            abort(403, 'Fitur Workspace hanya tersedia untuk Premium users atau Workspace users.');
-        }
+        // Workspace is now available for all authenticated users
         
         return view('workspaces.create');
     }
@@ -61,10 +55,7 @@ class WorkspaceController extends Controller
     {
         $user = $request->user();
         
-        // Check if user can access workspaces
-        if ($user->role !== 'user_workspaces' && !$user->hasPremium() && !$user->hasRole('admin')) {
-            return redirect()->route('dashboard')->with('error', 'Fitur Workspace hanya tersedia untuk Premium users atau Workspace users.');
-        }
+        // Workspace is now available for all authenticated users
         
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -467,16 +458,8 @@ class WorkspaceController extends Controller
                 $basePrice = $workspace->hasDiscount() ? $workspace->discount_price : $workspace->price;
             }
 
-            // Apply premium buyer exclusive discount if user has premium
+            // Premium buyer discount removed - all users are now premium
             $finalPrice = $basePrice;
-            $premiumDiscount = 0;
-            $premiumDiscountPercent = 0;
-            
-            if ($buyer->hasPremium() && $basePrice > 0) {
-                $premiumDiscountPercent = Setting::getPremiumBuyerDiscountPercent();
-                $premiumDiscount = $basePrice * ($premiumDiscountPercent / 100);
-                $finalPrice = $basePrice - $premiumDiscount;
-            }
 
             if ($finalPrice <= 0) {
                 DB::rollBack();

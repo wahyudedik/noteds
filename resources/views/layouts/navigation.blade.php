@@ -66,14 +66,12 @@
                     ];
                 }
 
-                // Workspaces link (for all users who can access workspaces)
-                if ($user->hasRole('admin') || $user->hasPremium() || $user->role === 'user_workspaces') {
-                    $primaryLinks[] = [
-                        'label' => 'Workspaces',
-                        'href' => route('workspaces.index'),
-                        'active' => request()->routeIs('workspaces.*'),
-                    ];
-                }
+                // Workspaces link - available for all authenticated users with KYC
+                $primaryLinks[] = [
+                    'label' => 'Workspaces',
+                    'href' => route('workspaces.index'),
+                    'active' => request()->routeIs('workspaces.*'),
+                ];
 
                 $primaryLinks[] = [
                     'label' => __('messages.wallet'),
@@ -139,9 +137,9 @@
                     ];
                 }
 
-                // Buyer Library submenu (Premium features)
+                // Buyer Library submenu
                 // Admin has access to all features, including buyer library
-                if (($isBuyerOrAdmin || $isAdmin) && ($hasPremium || $isAdmin)) {
+                if ($isBuyerOrAdmin || $isAdmin) {
                     $buyerLibrarySubmenu = [
                         [
                             'label' => 'Collections',

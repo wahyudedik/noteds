@@ -78,8 +78,7 @@ class RegisteredUserController extends Controller
             'referral_code' => ['nullable', 'string', 'exists:users,referral_code'],
             'invite_token' => ['nullable', 'string'],
             'agree_terms' => ['accepted'],
-            'ktp_file' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
-            'selfie_file' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
+            // KTP dan selfie upload dipindahkan ke profile
         ]);
 
         // If invitation exists, role must be user_workspaces
@@ -110,15 +109,8 @@ class RegisteredUserController extends Controller
             $counter++;
         }
 
-        // Handle uploads (store in private disk)
-        $ktpPath = null;
-        $selfiePath = null;
-        if ($request->hasFile('ktp_file')) {
-            $ktpPath = $request->file('ktp_file')->store('kyc/ktp', 'private');
-        }
-        if ($request->hasFile('selfie_file')) {
-            $selfiePath = $request->file('selfie_file')->store('kyc/selfie', 'private');
-        }
+        // KTP dan selfie upload dipindahkan ke profile
+        // User akan diminta melengkapi di profile setelah registrasi
 
         $user = User::create([
             'name' => $request->name,
@@ -131,8 +123,8 @@ class RegisteredUserController extends Controller
             'suspended_at' => null,
             'agreement_accepted_at' => now(),
             'agreement_version' => 'v1',
-            'ktp_path' => $ktpPath,
-            'selfie_path' => $selfiePath,
+            'ktp_path' => null, // Akan diisi di profile
+            'selfie_path' => null, // Akan diisi di profile
             'verification_status' => 'pending',
         ]);
         
@@ -145,6 +137,10 @@ class RegisteredUserController extends Controller
         }
 
         event(new Registered($user));
+
+        // Notify admins about new user registration
+        $notificationService = app(\App\Services\NotificationService::class);
+        $notificationService->notifyAdminNewUserRegistration($user);
 
         // Process signup reward if referred (only for buyer/seller)
         if ($referrer && $request->role !== 'user_workspaces') {
@@ -180,6 +176,9 @@ class RegisteredUserController extends Controller
 
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
+        
+        // Mark that user just registered for dashboard redirect check
+        session()->put('just_registered', true);
 
         // Redirect based on role
         if ($request->role === 'user_workspaces') {
@@ -189,6 +188,13 @@ class RegisteredUserController extends Controller
                     ->with('success', 'Selamat datang di workspace! Anda telah bergabung sebagai ' . $invitation->role . '.');
             }
             return redirect()->route('workspaces.index');
+        }
+
+        // Redirect to profile untuk melengkapi KTP dan selfie (sekali saja setelah register)
+        // Jika belum lengkap, redirect ke profile
+        if (!$user->ktp_path || !$user->selfie_path) {
+            return redirect()->route('profile.edit')
+                ->with('info', 'Silakan lengkapi profil Anda dengan mengupload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk verifikasi identitas.');
         }
 
         // Redirect to dashboard (username is already set)

@@ -24,8 +24,8 @@ class AdminSeeder extends Seeder
                 'role' => 'admin',
                 'wallet_balance' => 10000000, // Platform wallet - increased for testing
                 'avatar' => 'https://ui-avatars.com/api/?name=Admin',
-                'bio' => 'System Administrator - Full access to all features (Seller, Buyer, Premium, AI)',
-                'location' => 'Bandung, Indonesia',
+                'bio' => 'System Administrator - Full access to all features (Seller, Buyer)',
+                'location' => 'Mojokerto, Indonesia',
                 'is_active' => true,
                 'suspended_at' => null,
             ]

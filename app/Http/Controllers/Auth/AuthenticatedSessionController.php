@@ -28,6 +28,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::user();
+        
+        // Check if user needs to complete profile (KTP and selfie) - hanya sekali setelah register
+        // Jangan redirect setiap login, hanya jika memang belum lengkap dan baru register
+        // Untuk login biasa, tidak perlu redirect ke profile
+        
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

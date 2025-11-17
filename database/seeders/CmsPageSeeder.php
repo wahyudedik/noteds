@@ -177,6 +177,74 @@ HTML,
                 'meta_description' => 'Review the terms and conditions for using Noteds.com and participating in the digital notes marketplace.',
                 'is_active' => true,
             ],
+            [
+                'slug' => 'user-agreement',
+                'title' => 'User Agreement',
+                'content' => <<<HTML
+<h2>User Agreement</h2>
+<p>Effective date: 17 November 2025</p>
+
+<p>Welcome to Noteds. By creating an account, purchasing content, or using Noteds in any manner, you agree to this User Agreement and to our <a href="/page/terms-and-conditions">Terms & Conditions</a> and <a href="/page/privacy-policy">Privacy Policy</a>.</p>
+
+<h3>1. Account Registration</h3>
+<ul>
+    <li>You must be at least 13 years old (or older if required by your jurisdiction) to use Noteds.</li>
+    <li>When registering, you must provide accurate, current, and complete information.</li>
+    <li>You are responsible for safeguarding your login credentials and for all activities occurring under your account.</li>
+    <li>You agree to complete your profile verification by uploading KTP (Identity Card) and selfie photo as required for identity verification.</li>
+</ul>
+
+<h3>2. User Responsibilities</h3>
+<ul>
+    <li><strong>Buyers</strong> agree to use purchased content for personal use only and not to redistribute, resell, or share purchased materials without explicit permission from the seller.</li>
+    <li><strong>Sellers</strong> agree to provide original, lawful content and to accurately describe their listings. Sellers grant Noteds a worldwide, non-exclusive, royalty-free license to host and display their content.</li>
+    <li>All users agree to respect community guidelines, refrain from harassment, hate speech, spam, or illegal activities.</li>
+</ul>
+
+<h3>3. Verification & Identity</h3>
+<ul>
+    <li>Noteds requires identity verification (KTP and selfie) for account security and compliance with legal requirements.</li>
+    <li>Verification documents are securely stored and only accessible by authorized administrators.</li>
+    <li>Your verification status may affect your ability to withdraw funds or use certain platform features.</li>
+</ul>
+
+<h3>4. Payments & Transactions</h3>
+<ul>
+    <li>All transactions on Noteds are processed through secure payment systems.</li>
+    <li>Platform fees may apply to transactions as disclosed at the point of purchase.</li>
+    <li>Digital products are typically non-refundable, except as required by law or at Noteds' discretion.</li>
+</ul>
+
+<h3>5. Platform Fees</h3>
+<ul>
+    <li>Noteds charges platform fees on transactions to support platform operations and development.</li>
+    <li>Fee rates are disclosed at the point of transaction and may vary based on membership status or promotional campaigns.</li>
+</ul>
+
+<h3>6. Content Guidelines</h3>
+<ul>
+    <li>Content must be original, lawful, and clearly described.</li>
+    <li>Prohibited content includes: malware, phishing links, illegal materials, or content that violates intellectual property rights.</li>
+    <li>Noteds reserves the right to remove content that violates these guidelines.</li>
+</ul>
+
+<h3>7. Account Suspension & Termination</h3>
+<ul>
+    <li>Noteds may suspend or terminate accounts that violate this agreement, engage in fraudulent activity, or pose a security risk.</li>
+    <li>Users may deactivate their accounts at any time through account settings.</li>
+    <li>Certain provisions of this agreement shall survive termination, including intellectual property, disclaimers, and limitation of liability.</li>
+</ul>
+
+<h3>8. Changes to This Agreement</h3>
+<p>We may modify this User Agreement to reflect product updates or regulatory changes. Updated agreements will be posted on this page with a new effective date. Continued use of Noteds after changes become effective constitutes acceptance of the revised agreement.</p>
+
+<h3>9. Contact</h3>
+<p>Questions about this User Agreement can be sent to <a href="mailto:info@noteds.com">info@noteds.com</a> or submitted through our support ticket system.</p>
+HTML,
+                'meta_title' => 'User Agreement - Noteds',
+                'meta_description' => 'Review the user agreement for using Noteds.com marketplace platform.',
+                'is_active' => true,
+            ],
         ];
 
         foreach ($pages as $page) {

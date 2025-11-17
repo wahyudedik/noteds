@@ -31,18 +31,6 @@
                     </div>
                     <div class="ml-3 flex-1">
                         <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
-                        @if (!auth()->user()->hasPremium() || session('upgrade_message'))
-                            <div class="mt-3">
-                                <a href="{{ route('subscription.create') }}"
-                                    class="inline-flex items-center text-sm font-semibold text-red-600 hover:text-red-700 transition-colors duration-200">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                    </svg>
-                                    {{ __('messages.upgrade_to_premium') }} →
-                                </a>
-                            </div>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -131,8 +119,265 @@
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                             <p class="mt-2 text-xs text-gray-600">
-                                Ubah kategori ekosistem untuk pengelompokan dan penemuan yang lebih baik.
+                                Pilih kategori ekosistem untuk menampilkan field yang relevan.
                             </p>
+                        </div>
+
+                        <!-- Ecosystem-Specific Fields -->
+                        <div id="ecosystem-fields" class="mt-4 space-y-4 mb-6">
+                            <!-- Code Ecosystem Fields -->
+                            <div id="code-fields" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <h4 class="text-sm font-semibold text-blue-900 mb-3">Detail Code</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label for="code_language" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Bahasa Pemrograman
+                                        </label>
+                                        <input type="text" name="code_language" id="code_language" value="{{ old('code_language', $note->code_language) }}"
+                                            placeholder="PHP, JavaScript, Python, dll"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label for="code_framework" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Framework
+                                        </label>
+                                        <input type="text" name="code_framework" id="code_framework" value="{{ old('code_framework', $note->code_framework) }}"
+                                            placeholder="Laravel, React, Vue, dll"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label for="code_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Tipe Code
+                                        </label>
+                                        <select name="code_type" id="code_type"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                            <option value="">Pilih Tipe</option>
+                                            <option value="plugin" {{ old('code_type', $note->code_type) === 'plugin' ? 'selected' : '' }}>Plugin</option>
+                                            <option value="script" {{ old('code_type', $note->code_type) === 'script' ? 'selected' : '' }}>Script</option>
+                                            <option value="library" {{ old('code_type', $note->code_type) === 'library' ? 'selected' : '' }}>Library</option>
+                                            <option value="component" {{ old('code_type', $note->code_type) === 'component' ? 'selected' : '' }}>Component</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Photo Ecosystem Fields -->
+                            <div id="photo-fields" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg">
+                                <h4 class="text-sm font-semibold text-green-900 mb-3">Detail Photo</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label for="photo_resolution" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Resolusi
+                                        </label>
+                                        <input type="text" name="photo_resolution" id="photo_resolution" value="{{ old('photo_resolution', $note->photo_resolution) }}"
+                                            placeholder="1920x1080, 4K, dll"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500">
+                                    </div>
+                                    <div>
+                                        <label for="photo_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Tipe Photo
+                                        </label>
+                                        <select name="photo_type" id="photo_type"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500">
+                                            <option value="">Pilih Tipe</option>
+                                            <option value="stock" {{ old('photo_type', $note->photo_type) === 'stock' ? 'selected' : '' }}>Stock</option>
+                                            <option value="portrait" {{ old('photo_type', $note->photo_type) === 'portrait' ? 'selected' : '' }}>Portrait</option>
+                                            <option value="landscape" {{ old('photo_type', $note->photo_type) === 'landscape' ? 'selected' : '' }}>Landscape</option>
+                                            <option value="product" {{ old('photo_type', $note->photo_type) === 'product' ? 'selected' : '' }}>Product</option>
+                                            <option value="event" {{ old('photo_type', $note->photo_type) === 'event' ? 'selected' : '' }}>Event</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="photo_format" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Format
+                                        </label>
+                                        <select name="photo_format" id="photo_format"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500">
+                                            <option value="">Pilih Format</option>
+                                            <option value="jpeg" {{ old('photo_format', $note->photo_format) === 'jpeg' ? 'selected' : '' }}>JPEG</option>
+                                            <option value="jpg" {{ old('photo_format', $note->photo_format) === 'jpg' ? 'selected' : '' }}>JPG</option>
+                                            <option value="png" {{ old('photo_format', $note->photo_format) === 'png' ? 'selected' : '' }}>PNG</option>
+                                            <option value="raw" {{ old('photo_format', $note->photo_format) === 'raw' ? 'selected' : '' }}>RAW</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Design Ecosystem Fields -->
+                            <div id="design-fields" class="hidden p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                                <h4 class="text-sm font-semibold text-purple-900 mb-3">Detail Design</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="design_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Tipe Design
+                                        </label>
+                                        <select name="design_type" id="design_type"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                                            <option value="">Pilih Tipe</option>
+                                            <option value="logo" {{ old('design_type', $note->design_type) === 'logo' ? 'selected' : '' }}>Logo</option>
+                                            <option value="flyer" {{ old('design_type', $note->design_type) === 'flyer' ? 'selected' : '' }}>Flyer</option>
+                                            <option value="icon" {{ old('design_type', $note->design_type) === 'icon' ? 'selected' : '' }}>Icon</option>
+                                            <option value="illustration" {{ old('design_type', $note->design_type) === 'illustration' ? 'selected' : '' }}>Illustration</option>
+                                            <option value="print" {{ old('design_type', $note->design_type) === 'print' ? 'selected' : '' }}>Print</option>
+                                            <option value="branding" {{ old('design_type', $note->design_type) === 'branding' ? 'selected' : '' }}>Branding</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="design_format" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Format
+                                        </label>
+                                        <select name="design_format" id="design_format"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                                            <option value="">Pilih Format</option>
+                                            <option value="ai" {{ old('design_format', $note->design_format) === 'ai' ? 'selected' : '' }}>AI (Illustrator)</option>
+                                            <option value="psd" {{ old('design_format', $note->design_format) === 'psd' ? 'selected' : '' }}>PSD (Photoshop)</option>
+                                            <option value="eps" {{ old('design_format', $note->design_format) === 'eps' ? 'selected' : '' }}>EPS</option>
+                                            <option value="pdf" {{ old('design_format', $note->design_format) === 'pdf' ? 'selected' : '' }}>PDF</option>
+                                            <option value="svg" {{ old('design_format', $note->design_format) === 'svg' ? 'selected' : '' }}>SVG</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Audio Ecosystem Fields -->
+                            <div id="audio-fields" class="hidden p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <h4 class="text-sm font-semibold text-yellow-900 mb-3">Detail Audio</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label for="audio_duration" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Durasi (detik)
+                                        </label>
+                                        <input type="number" name="audio_duration" id="audio_duration" value="{{ old('audio_duration', $note->audio_duration) }}"
+                                            min="1" placeholder="120"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500">
+                                    </div>
+                                    <div>
+                                        <label for="audio_format" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Format
+                                        </label>
+                                        <select name="audio_format" id="audio_format"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500">
+                                            <option value="">Pilih Format</option>
+                                            <option value="mp3" {{ old('audio_format', $note->audio_format) === 'mp3' ? 'selected' : '' }}>MP3</option>
+                                            <option value="wav" {{ old('audio_format', $note->audio_format) === 'wav' ? 'selected' : '' }}>WAV</option>
+                                            <option value="flac" {{ old('audio_format', $note->audio_format) === 'flac' ? 'selected' : '' }}>FLAC</option>
+                                            <option value="aac" {{ old('audio_format', $note->audio_format) === 'aac' ? 'selected' : '' }}>AAC</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="audio_genre" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Genre
+                                        </label>
+                                        <input type="text" name="audio_genre" id="audio_genre" value="{{ old('audio_genre', $note->audio_genre) }}"
+                                            placeholder="Pop, Rock, Electronic, dll"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Video Ecosystem Fields -->
+                            <div id="video-fields" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg">
+                                <h4 class="text-sm font-semibold text-red-900 mb-3">Detail Video</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label for="video_duration" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Durasi (detik)
+                                        </label>
+                                        <input type="number" name="video_duration" id="video_duration" value="{{ old('video_duration', $note->video_duration) }}"
+                                            min="1" placeholder="60"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500">
+                                    </div>
+                                    <div>
+                                        <label for="video_resolution" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Resolusi
+                                        </label>
+                                        <input type="text" name="video_resolution" id="video_resolution" value="{{ old('video_resolution', $note->video_resolution) }}"
+                                            placeholder="1920x1080, 4K, dll"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500">
+                                    </div>
+                                    <div>
+                                        <label for="video_format" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Format
+                                        </label>
+                                        <select name="video_format" id="video_format"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500">
+                                            <option value="">Pilih Format</option>
+                                            <option value="mp4" {{ old('video_format', $note->video_format) === 'mp4' ? 'selected' : '' }}>MP4</option>
+                                            <option value="mov" {{ old('video_format', $note->video_format) === 'mov' ? 'selected' : '' }}>MOV</option>
+                                            <option value="avi" {{ old('video_format', $note->video_format) === 'avi' ? 'selected' : '' }}>AVI</option>
+                                            <option value="webm" {{ old('video_format', $note->video_format) === 'webm' ? 'selected' : '' }}>WebM</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Theme Ecosystem Fields -->
+                            <div id="theme-fields" class="hidden p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+                                <h4 class="text-sm font-semibold text-indigo-900 mb-3">Detail Theme</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="theme_platform" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Platform
+                                        </label>
+                                        <select name="theme_platform" id="theme_platform"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
+                                            <option value="">Pilih Platform</option>
+                                            <option value="wordpress" {{ old('theme_platform', $note->theme_platform) === 'wordpress' ? 'selected' : '' }}>WordPress</option>
+                                            <option value="shopify" {{ old('theme_platform', $note->theme_platform) === 'shopify' ? 'selected' : '' }}>Shopify</option>
+                                            <option value="html" {{ old('theme_platform', $note->theme_platform) === 'html' ? 'selected' : '' }}>HTML</option>
+                                            <option value="drupal" {{ old('theme_platform', $note->theme_platform) === 'drupal' ? 'selected' : '' }}>Drupal</option>
+                                            <option value="magento" {{ old('theme_platform', $note->theme_platform) === 'magento' ? 'selected' : '' }}>Magento</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="theme_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Tipe Theme
+                                        </label>
+                                        <select name="theme_type" id="theme_type"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
+                                            <option value="">Pilih Tipe</option>
+                                            <option value="business" {{ old('theme_type', $note->theme_type) === 'business' ? 'selected' : '' }}>Business</option>
+                                            <option value="ecommerce" {{ old('theme_type', $note->theme_type) === 'ecommerce' ? 'selected' : '' }}>E-commerce</option>
+                                            <option value="blog" {{ old('theme_type', $note->theme_type) === 'blog' ? 'selected' : '' }}>Blog</option>
+                                            <option value="portfolio" {{ old('theme_type', $note->theme_type) === 'portfolio' ? 'selected' : '' }}>Portfolio</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3D Ecosystem Fields -->
+                            <div id="three-d-fields" class="hidden p-4 bg-teal-50 border border-teal-200 rounded-lg">
+                                <h4 class="text-sm font-semibold text-teal-900 mb-3">Detail 3D</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="three_d_format" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Format
+                                        </label>
+                                        <select name="three_d_format" id="three_d_format"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500">
+                                            <option value="">Pilih Format</option>
+                                            <option value="obj" {{ old('three_d_format', $note->three_d_format) === 'obj' ? 'selected' : '' }}>OBJ</option>
+                                            <option value="fbx" {{ old('three_d_format', $note->three_d_format) === 'fbx' ? 'selected' : '' }}>FBX</option>
+                                            <option value="blend" {{ old('three_d_format', $note->three_d_format) === 'blend' ? 'selected' : '' }}>Blend</option>
+                                            <option value="dae" {{ old('three_d_format', $note->three_d_format) === 'dae' ? 'selected' : '' }}>DAE</option>
+                                            <option value="3ds" {{ old('three_d_format', $note->three_d_format) === '3ds' ? 'selected' : '' }}>3DS</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="three_d_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Tipe 3D
+                                        </label>
+                                        <select name="three_d_type" id="three_d_type"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500">
+                                            <option value="">Pilih Tipe</option>
+                                            <option value="model" {{ old('three_d_type', $note->three_d_type) === 'model' ? 'selected' : '' }}>Model</option>
+                                            <option value="texture" {{ old('three_d_type', $note->three_d_type) === 'texture' ? 'selected' : '' }}>Texture</option>
+                                            <option value="rig" {{ old('three_d_type', $note->three_d_type) === 'rig' ? 'selected' : '' }}>Rig</option>
+                                            <option value="animation" {{ old('three_d_type', $note->three_d_type) === 'animation' ? 'selected' : '' }}>Animation</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -388,14 +633,6 @@
                         @error('attachments')
                             <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
                                 <p class="text-sm text-red-800">{!! $message !!}</p>
-                                @if(!auth()->user()->hasPremium())
-                                    <a href="{{ route('subscription.create') }}" class="mt-2 inline-flex items-center text-sm font-semibold text-red-600 hover:text-red-700 transition-colors duration-200">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                        </svg>
-                                        {{ __('messages.upgrade_to_premium_arrow') }}
-                                    </a>
-                                @endif
                             </div>
                         @enderror
                         @error('attachments.*')
@@ -547,8 +784,7 @@
                         </label>
                     </div>
 
-                    @if(auth()->user()->hasPremium())
-                    <!-- Organization (Premium Features) -->
+                    <!-- Organization -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
                         <div>
                             <label for="folder_id" class="block text-sm font-medium text-gray-700 mb-2">
@@ -744,6 +980,41 @@ document.addEventListener('DOMContentLoaded', function() {
             ]
         }
     });
+
+    // Ecosystem-specific fields toggle
+    const ecosystemSelect = document.getElementById('ecosystem_category');
+    const ecosystemFields = {
+        'code': document.getElementById('code-fields'),
+        'photo': document.getElementById('photo-fields'),
+        'design': document.getElementById('design-fields'),
+        'audio': document.getElementById('audio-fields'),
+        'video': document.getElementById('video-fields'),
+        'theme': document.getElementById('theme-fields'),
+        '3d': document.getElementById('three-d-fields'),
+        'elements': null, // Elements doesn't have specific fields
+    };
+
+    function toggleEcosystemFields() {
+        const selectedEcosystem = ecosystemSelect.value;
+        
+        // Hide all ecosystem fields first
+        Object.values(ecosystemFields).forEach(field => {
+            if (field) {
+                field.classList.add('hidden');
+            }
+        });
+        
+        // Show selected ecosystem fields
+        if (selectedEcosystem && ecosystemFields[selectedEcosystem]) {
+            ecosystemFields[selectedEcosystem].classList.remove('hidden');
+        }
+    }
+
+    // Initial toggle based on selected value (from note or old input)
+    toggleEcosystemFields();
+    
+    // Listen for changes
+    ecosystemSelect.addEventListener('change', toggleEcosystemFields);
 
     // Draft & Schedule functionality
     const draftCheckbox = document.getElementById('save_as_draft');
@@ -1141,11 +1412,6 @@ updatePriceGuidanceUI();
                                             // Handle error response
                                             let errorMessage = response.error || 'Upload failed';
                                             
-                                            // Check if premium is required
-                                            if (response.requires_premium) {
-                                                errorMessage += ' <a href="{{ route("subscription.create") }}" class="underline font-semibold">Upgrade ke Premium</a>';
-                                            }
-                                            
                                             // Show server limits if provided
                                             if (response.server_limits) {
                                                 errorMessage += ` (Limit server: ${response.server_limits.upload_max_filesize})`;
@@ -1153,16 +1419,6 @@ updatePriceGuidanceUI();
                                             
                                             fileUploadStatus.set(fileIndex, { status: 'error', error: errorMessage, canRetry: response.can_retry !== false });
                                             updateFileItemStatus(fileIndex, 'error', 0, errorMessage);
-                                            
-                                            // Show SweetAlert for important errors (but don't block - file will upload on form submit)
-                                            if (response.requires_premium) {
-                                                Swal.fire({
-                                                    icon: 'warning',
-                                                    title: 'Premium Diperlukan',
-                                                    html: errorMessage,
-                                                    confirmButtonText: 'OK'
-                                                });
-                                            }
                                             
                                             reject(new Error(errorMessage));
                                         }

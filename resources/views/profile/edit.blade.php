@@ -147,6 +147,79 @@
                             @enderror
                         </div>
 
+                        <!-- KYC Verification Section -->
+                        <div class="pt-6 border-t border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Verifikasi Identitas</h3>
+                            <p class="text-sm text-gray-600 mb-4">Upload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk verifikasi identitas Anda. Informasi ini diperlukan untuk proses verifikasi akun.</p>
+                            
+                            @if(session('info'))
+                                <div class="mb-4 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                                    <p class="text-sm font-medium text-blue-800">{{ session('info') }}</p>
+                                </div>
+                            @endif
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label for="document_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Jenis Dokumen Identitas <span class="text-red-500">*</span>
+                                    </label>
+                                    <select name="document_type" id="document_type" 
+                                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 @error('document_type') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                                        <option value="ktp" {{ old('document_type', $user->document_type ?? 'ktp') === 'ktp' ? 'selected' : '' }}>KTP (Kartu Tanda Penduduk)</option>
+                                        <option value="kartu_pelajar" {{ old('document_type', $user->document_type) === 'kartu_pelajar' ? 'selected' : '' }}>Kartu Pelajar (untuk yang belum cukup umur/sekolah)</option>
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500">Pilih jenis dokumen identitas yang akan diupload</p>
+                                    @error('document_type')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+
+                                    <label for="ktp_file" class="block text-sm font-medium text-gray-700 mb-2 mt-4">
+                                        Upload Dokumen Identitas <span class="text-red-500">*</span>
+                                    </label>
+                                    @if($user->ktp_path)
+                                        <div class="mb-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                            <p class="text-sm text-green-800">
+                                                ✓ {{ $user->document_type === 'kartu_pelajar' ? 'Kartu Pelajar' : 'KTP' }} sudah diupload
+                                            </p>
+                                            <p class="text-xs text-green-600 mt-1">Status: {{ ucfirst($user->verification_status ?? 'pending') }}</p>
+                                        </div>
+                                    @else
+                                        <div class="mb-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                            <p class="text-sm text-yellow-800">⚠ Dokumen identitas belum diupload</p>
+                                        </div>
+                                    @endif
+                                    <input type="file" name="ktp_file" id="ktp_file" accept=".jpg,.jpeg,.png,.pdf"
+                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    <p class="mt-1 text-xs text-gray-500">Format: JPG, PNG, atau PDF. Maksimal 5MB.</p>
+                                    @error('ktp_file')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="selfie_file" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Upload Foto Selfie <span class="text-red-500">*</span>
+                                    </label>
+                                    @if($user->selfie_path)
+                                        <div class="mb-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                            <p class="text-sm text-green-800">✓ Selfie sudah diupload</p>
+                                            <p class="text-xs text-green-600 mt-1">Status: {{ ucfirst($user->verification_status ?? 'pending') }}</p>
+                                        </div>
+                                    @else
+                                        <div class="mb-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                            <p class="text-sm text-yellow-800">⚠ Selfie belum diupload</p>
+                                        </div>
+                                    @endif
+                                    <input type="file" name="selfie_file" id="selfie_file" accept=".jpg,.jpeg,.png"
+                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    <p class="mt-1 text-xs text-gray-500">Gunakan foto terang dengan wajah terlihat jelas. Maksimal 5MB.</p>
+                                    @error('selfie_file')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Bank Account Information Section -->
                         <div class="pt-6 border-t border-gray-200">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.bank_account') }}</h3>

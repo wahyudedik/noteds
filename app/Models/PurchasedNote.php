@@ -47,25 +47,21 @@ class PurchasedNote extends Model
     }
 
     /**
-     * Check if user can download more (premium = unlimited, basic = max 5)
+     * Check if user can download more (unlimited for all users)
+     * @deprecated All users now have unlimited downloads
      */
     public function canDownload(): bool
     {
-        $user = $this->user;
-        if ($user->hasPremium()) {
-            return true; // Unlimited for premium
-        }
-        return $this->download_count < 5; // Max 5 for basic
+        return true; // Unlimited for all users
     }
 
     /**
      * Increment download count
+     * @deprecated Download limits removed - all users have unlimited downloads
      */
     public function incrementDownload(): void
     {
-        if (!$this->user->hasPremium()) {
-            $this->increment('download_count');
-        }
+        // Download count tracking disabled - all users have unlimited downloads
     }
 
     /**
