@@ -2431,4 +2431,8 @@ return [
     'file_format_help' => 'Format: JPG, PNG, atau PDF. Maksimal 5MB.',
     'document_type_label' => 'Jenis Dokumen Identitas',
     'selfie_upload_help' => 'Gunakan foto terang dengan wajah terlihat jelas. Maksimal 5MB.',
+    
+    // Notes Show
+    'cannot_delete_sold' => 'Tidak Dapat Dihapus (Terjual)',
+    'cannot_delete_sold_tooltip' => 'Tidak dapat menghapus catatan yang sudah terjual',
 ];

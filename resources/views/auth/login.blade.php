@@ -1,9 +1,9 @@
 <x-guest-layout>
     <div class="space-y-6">
         <div>
-            <h2 class="text-2xl font-semibold text-slate-900">{{ __('messages.log_in_title') ?? 'Masuk ke akun Anda' }}</h2>
+            <h2 class="text-2xl font-semibold text-slate-900">{{ __('messages.log_in_title') }}</h2>
             <p class="mt-2 text-sm leading-6 text-slate-500">
-                {{ __('messages.log_in_subtitle') ?? 'Selamat datang kembali! Masukkan email dan kata sandi untuk melanjutkan ke dashboard Noteds.' }}
+                {{ __('messages.log_in_subtitle') }}
             </p>
         </div>
 
@@ -38,7 +38,7 @@
                     <span>{{ __('messages.remember_me') }}</span>
                 </label>
                 <a href="{{ route('register') }}" class="text-sm font-semibold text-blue-600 hover:text-blue-500">
-                    {{ __('messages.create_account') ?? 'Buat akun baru' }}
+                    {{ __('messages.create_account') }}
                 </a>
             </div>
 

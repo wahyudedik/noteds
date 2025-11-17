@@ -139,13 +139,13 @@ class ProfileController extends Controller
             session()->forget('just_registered');
         }
 
-        // Set verification status to pending if both KTP and selfie are uploaded
-        if ($user->ktp_path && $user->selfie_path && !$user->verification_status) {
+        // Set verification status to pending if both KTP and selfie are uploaded (admin tidak perlu verifikasi)
+        if (!$user->hasRole('admin') && $user->ktp_path && $user->selfie_path && !$user->verification_status) {
             $user->update(['verification_status' => 'pending']);
         }
 
-        // Notify admin if both KTP and selfie are uploaded for the first time
-        if ($bothUploadedForFirstTime && $user->ktp_path && $user->selfie_path) {
+        // Notify admin if both KTP and selfie are uploaded for the first time (admin tidak perlu verifikasi)
+        if (!$user->hasRole('admin') && $bothUploadedForFirstTime && $user->ktp_path && $user->selfie_path) {
             $notificationService = app(\App\Services\NotificationService::class);
             $notificationService->notifyAdminUserVerificationPending($user);
         }

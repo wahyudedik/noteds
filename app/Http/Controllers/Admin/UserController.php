@@ -50,6 +50,9 @@ class UserController extends Controller
                 $query->where('verification_status', 'pending')
                     ->orWhereNull('verification_status');
             })
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'admin');
+            })
             ->when($request->search, function ($query) use ($request) {
                 return $query->where('name', 'like', '%' . $request->search . '%')
                     ->orWhere('email', 'like', '%' . $request->search . '%');
@@ -66,6 +69,9 @@ class UserController extends Controller
             ->where(function ($query) {
                 $query->where('verification_status', 'pending')
                     ->orWhereNull('verification_status');
+            })
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'admin');
             })
             ->count();
 

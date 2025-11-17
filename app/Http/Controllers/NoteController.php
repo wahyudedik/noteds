@@ -47,8 +47,8 @@ class NoteController extends Controller
             abort(403, 'Fitur ini hanya tersedia untuk Seller atau Workspace User. Buyer tidak dapat membuat note. Jika ingin membuat note, silakan buat akun Seller dengan email berbeda atau bergabung dengan workspace.');
         }
         
-        // Check if user has uploaded document identity and selfie
-        if (!$user->ktp_path || !$user->selfie_path) {
+        // Check if user has uploaded document identity and selfie (admin tidak perlu verifikasi)
+        if (!$user->hasRole('admin') && (!$user->ktp_path || !$user->selfie_path)) {
             return redirect()->route('profile.edit')
                 ->with('error', 'Silakan lengkapi profil Anda dengan mengupload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk membuat note.');
         }
@@ -129,8 +129,8 @@ class NoteController extends Controller
             return redirect()->route('dashboard')->with('error', 'Fitur ini hanya tersedia untuk Seller atau Workspace User. Buyer tidak dapat membuat note. Jika ingin membuat note, silakan buat akun Seller dengan email berbeda atau bergabung dengan workspace.');
         }
         
-        // Check if user has uploaded document identity and selfie
-        if (!$user->ktp_path || !$user->selfie_path) {
+        // Check if user has uploaded document identity and selfie (admin tidak perlu verifikasi)
+        if (!$user->hasRole('admin') && (!$user->ktp_path || !$user->selfie_path)) {
             return redirect()->route('profile.edit')
                 ->with('error', 'Silakan lengkapi profil Anda dengan mengupload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk membuat note.');
         }

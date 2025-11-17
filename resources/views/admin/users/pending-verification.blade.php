@@ -39,7 +39,6 @@
                     class="rounded-md border-gray-300 shadow-sm">
                 <select name="role" class="rounded-md border-gray-300 shadow-sm">
                     <option value="">Semua Role</option>
-                    <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
                     <option value="seller" {{ request('role') === 'seller' ? 'selected' : '' }}>Seller</option>
                     <option value="buyer" {{ request('role') === 'buyer' ? 'selected' : '' }}>Buyer</option>
                 </select>

@@ -69,6 +69,9 @@
                                 $query->where('verification_status', 'pending')
                                     ->orWhereNull('verification_status');
                             })
+                            ->whereDoesntHave('roles', function ($query) {
+                                $query->where('name', 'admin');
+                            })
                             ->count();
                     @endphp
                     <a href="{{ route('admin.users.pending-verification') }}"

@@ -147,7 +147,8 @@
                             @enderror
                         </div>
 
-                        <!-- KYC Verification Section -->
+                        <!-- KYC Verification Section (Only for non-admin users) -->
+                        @if(!$user->hasRole('admin'))
                         <div class="pt-6 border-t border-gray-200">
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">Verifikasi Identitas</h3>
                             <p class="text-sm text-gray-600 mb-4">Upload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk verifikasi identitas Anda. Informasi ini diperlukan untuk proses verifikasi akun.</p>
@@ -219,6 +220,7 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
 
                         <!-- Bank Account Information Section -->
                         <div class="pt-6 border-t border-gray-200">

@@ -2434,4 +2434,8 @@ return [
     'file_format_help' => 'Format: JPG, PNG, or PDF. Maximum 5MB.',
     'document_type_label' => 'Identity Document Type',
     'selfie_upload_help' => 'Use a bright photo with a clear face. Maximum 5MB.',
+    
+    // Notes Show
+    'cannot_delete_sold' => 'Cannot Delete (Sold)',
+    'cannot_delete_sold_tooltip' => 'Cannot delete note that has been sold',
 ];

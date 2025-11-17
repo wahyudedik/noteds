@@ -2299,4 +2299,8 @@ return [
     'file_format_help' => 'التنسيق: JPG أو PNG أو PDF. الحد الأقصى 5MB.',
     'document_type_label' => 'نوع وثيقة الهوية',
     'selfie_upload_help' => 'استخدم صورة مشرقة مع وجه واضح. الحد الأقصى 5MB.',
+    
+    // Notes Show
+    'cannot_delete_sold' => 'لا يمكن الحذف (تم البيع)',
+    'cannot_delete_sold_tooltip' => 'لا يمكن حذف الملاحظة التي تم بيعها',
 ];
