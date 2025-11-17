@@ -5,6 +5,84 @@
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Welcome Message for New Users -->
+        @if(session('just_registered') || (auth()->user()->created_at->diffInDays(now()) <= 1 && auth()->user()->notes()->count() === 0))
+            <div class="mb-6 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-xl border-2 border-blue-200 p-6 shadow-lg" id="welcome-banner">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-start gap-4 flex-1">
+                        <div class="flex-shrink-0">
+                            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                                🎉 Selamat Datang di Noteds, {{ auth()->user()->name }}!
+                            </h2>
+                            <p class="text-base text-gray-700 mb-4">
+                                Platform terbaik untuk menjual dan membeli catatan digital. Mari mulai perjalanan Anda!
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                                <div class="bg-white rounded-lg p-3 border border-blue-100">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <span class="font-semibold text-gray-900 text-sm">Buat Note Pertama</span>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Mulai menulis dan jual catatan digital Anda</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-3 border border-green-100">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                        </svg>
+                                        <span class="font-semibold text-gray-900 text-sm">Jelajahi Marketplace</span>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Temukan catatan menarik dari seller lain</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-3 border border-yellow-100">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="font-semibold text-gray-900 text-sm">Top Up Wallet</span>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Isi saldo untuk mulai berbelanja</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                @if(auth()->user()->role === 'seller' || auth()->user()->hasRole('admin'))
+                                    <a href="{{ route('notes.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Buat Note Pertama
+                                    </a>
+                                @endif
+                                <a href="{{ route('marketplace.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-700 font-semibold rounded-lg border-2 border-gray-300 hover:border-blue-500 hover:text-blue-600 shadow-sm hover:shadow-md transition-all duration-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    Jelajahi Marketplace
+                                </a>
+                                <button onclick="document.getElementById('welcome-banner').style.display='none'; sessionStorage.setItem('welcome_banner_dismissed', 'true');" class="inline-flex items-center gap-2 px-4 py-2.5 text-gray-600 hover:text-gray-800 font-medium rounded-lg hover:bg-gray-100 transition-all duration-200">
+                                    Nanti saja
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('welcome-banner').style.display='none'; sessionStorage.setItem('welcome_banner_dismissed', 'true');" class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        @endif
+
         <div class="mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>

@@ -35,11 +35,12 @@
                 </div>
             </div>
 
-            <div class="mt-6">
+            {{-- Subscription removed - all features are now free --}}
+            {{-- <div class="mt-6">
                 <a href="{{ route('subscription.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-sm">
                     {{ __('messages.start_elements_subscription') }}
                 </a>
-            </div>
+            </div> --}}
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -16,9 +16,10 @@
                 <li>{{ __('messages.videos_use_template') }}</li>
                 <li>{{ __('messages.videos_use_motion') }}</li>
             </ul>
-            <div class="mt-6">
+            {{-- Subscription removed - all features are now free --}}
+            {{-- <div class="mt-6">
                 <a href="{{ route('subscription.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">{{ __('messages.subscribe_videos_access') }}</a>
-            </div>
+            </div> --}}
         </div>
     </div>
 </div>

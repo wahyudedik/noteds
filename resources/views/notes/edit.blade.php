@@ -128,7 +128,7 @@
                             <!-- Code Ecosystem Fields -->
                             <div id="code-fields" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-lg">
                                 <h4 class="text-sm font-semibold text-blue-900 mb-3">Detail Code</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                     <div>
                                         <label for="code_language" class="block text-sm font-medium text-gray-700 mb-2">
                                             Bahasa Pemrograman
@@ -159,12 +159,29 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div>
+                                    <label for="code_demo_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <span class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                            </svg>
+                                            Link Demo/Repository (Optional)
+                                        </span>
+                                    </label>
+                                    <input type="url" name="code_demo_link" id="code_demo_link" value="{{ old('code_demo_link', $note->code_demo_link) }}"
+                                        placeholder="https://github.com/... atau https://codepen.io/... atau https://demo.example.com"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                    <p class="mt-1 text-xs text-gray-500">Link ke GitHub, CodePen, atau live demo</p>
+                                    @error('code_demo_link')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
 
                             <!-- Photo Ecosystem Fields -->
                             <div id="photo-fields" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg">
                                 <h4 class="text-sm font-semibold text-green-900 mb-3">Detail Photo</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                     <div>
                                         <label for="photo_resolution" class="block text-sm font-medium text-gray-700 mb-2">
                                             Resolusi
@@ -201,12 +218,29 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div>
+                                    <label for="photo_gallery_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <span class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            Link Gallery (Optional)
+                                        </span>
+                                    </label>
+                                    <input type="url" name="photo_gallery_link" id="photo_gallery_link" value="{{ old('photo_gallery_link', $note->photo_gallery_link) }}"
+                                        placeholder="https://flickr.com/... atau https://500px.com/... atau https://unsplash.com/..."
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500">
+                                    <p class="mt-1 text-xs text-gray-500">Link ke Flickr, 500px, Unsplash, atau platform gallery lainnya</p>
+                                    @error('photo_gallery_link')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
 
                             <!-- Design Ecosystem Fields -->
                             <div id="design-fields" class="hidden p-4 bg-purple-50 border border-purple-200 rounded-lg">
                                 <h4 class="text-sm font-semibold text-purple-900 mb-3">Detail Design</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div>
                                         <label for="design_type" class="block text-sm font-medium text-gray-700 mb-2">
                                             Tipe Design
@@ -237,12 +271,30 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div>
+                                    <label for="design_preview_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <span class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            Link Preview (Optional)
+                                        </span>
+                                    </label>
+                                    <input type="url" name="design_preview_link" id="design_preview_link" value="{{ old('design_preview_link', $note->design_preview_link) }}"
+                                        placeholder="https://behance.net/... atau https://dribbble.com/... atau https://figma.com/..."
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                                    <p class="mt-1 text-xs text-gray-500">Link ke Behance, Dribbble, Figma, atau platform preview lainnya</p>
+                                    @error('design_preview_link')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
 
                             <!-- Audio Ecosystem Fields -->
                             <div id="audio-fields" class="hidden p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                                 <h4 class="text-sm font-semibold text-yellow-900 mb-3">Detail Audio</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                     <div>
                                         <label for="audio_duration" class="block text-sm font-medium text-gray-700 mb-2">
                                             Durasi (detik)
@@ -273,12 +325,29 @@
                                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500">
                                     </div>
                                 </div>
+                                <div>
+                                    <label for="audio_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <span class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                            </svg>
+                                            Link Audio (Optional)
+                                        </span>
+                                    </label>
+                                    <input type="url" name="audio_link" id="audio_link" value="{{ old('audio_link', $note->audio_link) }}"
+                                        placeholder="https://soundcloud.com/... atau https://spotify.com/..."
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500">
+                                    <p class="mt-1 text-xs text-gray-500">Link ke SoundCloud, Spotify, atau platform audio lainnya</p>
+                                    @error('audio_link')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
 
                             <!-- Video Ecosystem Fields -->
                             <div id="video-fields" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg">
                                 <h4 class="text-sm font-semibold text-red-900 mb-3">Detail Video</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                     <div>
                                         <label for="video_duration" class="block text-sm font-medium text-gray-700 mb-2">
                                             Durasi (detik)
@@ -309,12 +378,29 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div>
+                                    <label for="video_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <span class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                            </svg>
+                                            Link Video (Optional)
+                                        </span>
+                                    </label>
+                                    <input type="url" name="video_link" id="video_link" value="{{ old('video_link', $note->video_link) }}"
+                                        placeholder="https://youtube.com/watch?v=... atau https://vimeo.com/..."
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500">
+                                    <p class="mt-1 text-xs text-gray-500">Link ke YouTube, Vimeo, atau platform video lainnya</p>
+                                    @error('video_link')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
 
                             <!-- Theme Ecosystem Fields -->
                             <div id="theme-fields" class="hidden p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
                                 <h4 class="text-sm font-semibold text-indigo-900 mb-3">Detail Theme</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div>
                                         <label for="theme_platform" class="block text-sm font-medium text-gray-700 mb-2">
                                             Platform
@@ -343,12 +429,30 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div>
+                                    <label for="theme_preview_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <span class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            Link Preview/Live Demo (Optional)
+                                        </span>
+                                    </label>
+                                    <input type="url" name="theme_preview_link" id="theme_preview_link" value="{{ old('theme_preview_link', $note->theme_preview_link) }}"
+                                        placeholder="https://demo.example.com atau https://themeforest.net/..."
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
+                                    <p class="mt-1 text-xs text-gray-500">Link ke live demo atau preview theme</p>
+                                    @error('theme_preview_link')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
 
                             <!-- 3D Ecosystem Fields -->
                             <div id="three-d-fields" class="hidden p-4 bg-teal-50 border border-teal-200 rounded-lg">
                                 <h4 class="text-sm font-semibold text-teal-900 mb-3">Detail 3D</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div>
                                         <label for="three_d_format" class="block text-sm font-medium text-gray-700 mb-2">
                                             Format
@@ -376,6 +480,24 @@
                                             <option value="animation" {{ old('three_d_type', $note->three_d_type) === 'animation' ? 'selected' : '' }}>Animation</option>
                                         </select>
                                     </div>
+                                </div>
+                                <div>
+                                    <label for="three_d_preview_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <span class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            Link Preview (Optional)
+                                        </span>
+                                    </label>
+                                    <input type="url" name="three_d_preview_link" id="three_d_preview_link" value="{{ old('three_d_preview_link', $note->three_d_preview_link) }}"
+                                        placeholder="https://sketchfab.com/... atau https://poly.google.com/..."
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500">
+                                    <p class="mt-1 text-xs text-gray-500">Link ke Sketchfab, Poly, atau platform preview 3D lainnya</p>
+                                    @error('three_d_preview_link')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -651,6 +773,90 @@
                                 </ul>
                             </div>
                         @endif
+                    </div>
+
+                    <!-- Demo Link (for apps/software) -->
+                    <div class="mt-6">
+                        <label for="demo_link" class="block text-sm font-medium text-gray-700 mb-2">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Link Demo Aplikasi/Software (Optional)
+                            </span>
+                            <span class="text-xs text-gray-500 font-normal ml-7">
+                                (Khusus untuk aplikasi, software, atau produk digital yang memiliki demo online)
+                            </span>
+                        </label>
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
+                            <p class="text-xs text-green-800 mb-2">
+                                🚀 <strong>Tips:</strong> Jika produk Anda adalah aplikasi, software, atau website, masukkan link demo/live preview di sini. 
+                                Contoh: https://demo.example.com, https://app.example.com/demo, atau link ke Vercel/Netlify preview.
+                            </p>
+                        </div>
+                        <input type="url" 
+                            name="demo_link" 
+                            id="demo_link" 
+                            value="{{ old('demo_link', $note->demo_link) }}"
+                            placeholder="https://demo.example.com atau https://app.example.com/demo"
+                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-all duration-200 @error('demo_link') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror"
+                        >
+                        <p class="mt-1 text-xs text-gray-500">
+                            Link demo akan ditampilkan dengan badge khusus di halaman note untuk menarik perhatian buyer.
+                        </p>
+                        @error('demo_link')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- External Links (for large files) -->
+                    <div class="mt-6">
+                        <label for="external_links" class="block text-sm font-medium text-gray-700 mb-2">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                </svg>
+                                External Links (untuk file besar >10MB)
+                            </span>
+                            <span class="text-xs text-gray-500 font-normal ml-7">
+                                (Opsional - gunakan link eksternal untuk menghemat memori server)
+                            </span>
+                        </label>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
+                            <p class="text-xs text-blue-800 mb-2">
+                                💡 <strong>Tips:</strong> Untuk file besar (>10MB), gunakan link eksternal dari Google Drive, Dropbox, atau hosting lainnya. 
+                                Satu link per baris.
+                            </p>
+                        </div>
+                        @php
+                            // Extract existing external links from attachments
+                            $existingExternalLinks = [];
+                            if ($note->hasAttachments()) {
+                                foreach ($note->attachments as $attachment) {
+                                    if (is_array($attachment) && isset($attachment['type']) && $attachment['type'] === 'external') {
+                                        $existingExternalLinks[] = $attachment['url'];
+                                    } elseif (is_string($attachment) && filter_var($attachment, FILTER_VALIDATE_URL)) {
+                                        $existingExternalLinks[] = $attachment;
+                                    }
+                                }
+                            }
+                        @endphp
+                        <textarea 
+                            name="external_links" 
+                            id="external_links" 
+                            rows="5"
+                            placeholder="https://drive.google.com/file/d/...&#10;https://dropbox.com/s/...&#10;https://example.com/file.zip"
+                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 @error('external_links') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror"
+                        >{{ old('external_links', implode("\n", $existingExternalLinks)) }}</textarea>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Masukkan link eksternal (satu per baris). Link akan ditampilkan sebagai attachment yang dapat diakses langsung.
+                        </p>
+                        @error('external_links')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        @error('external_links.*')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Price and Status -->

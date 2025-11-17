@@ -107,7 +107,8 @@
                                     </span>
                                 @endif
                                 
-                                @if ($user->hasPremium())
+                                {{-- Premium Buyer badge removed - all users now have free access to all features --}}
+                                {{-- @if ($user->hasPremium() && $user->role === 'buyer')
                                     <span
                                         class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-md"
                                         title="Premium Buyer - Akses ke fitur premium">
@@ -116,7 +117,7 @@
                                         </svg>
                                         Premium Buyer
                                     </span>
-                                @endif
+                                @endif --}}
                             </div>
 
                             <!-- Share Profile Buttons -->

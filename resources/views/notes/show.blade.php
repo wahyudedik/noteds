@@ -160,21 +160,164 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             @foreach($note->attachments as $attachment)
                                 @php
-                                    $filename = is_array($attachment) ? ($attachment['filename'] ?? 'Unknown') : basename($attachment);
+                                    $isExternal = false;
+                                    $url = null;
+                                    $filename = 'Unknown';
+                                    
+                                    // Check if it's an external link
+                                    if (is_array($attachment) && isset($attachment['type']) && $attachment['type'] === 'external') {
+                                        $isExternal = true;
+                                        $url = $attachment['url'] ?? '';
+                                        $filename = $attachment['filename'] ?? 'External Link';
+                                    } elseif (is_string($attachment) && filter_var($attachment, FILTER_VALIDATE_URL)) {
+                                        $isExternal = true;
+                                        $url = $attachment;
+                                        $parsedUrl = parse_url($attachment);
+                                        $filename = basename($parsedUrl['path'] ?? '') ?: 'External Link';
+                                    } else {
+                                        $filename = is_array($attachment) ? ($attachment['filename'] ?? 'Unknown') : basename($attachment);
+                                        $url = route('notes.attachments.download', ['note' => $note->id, 'filename' => $filename]);
+                                    }
                                 @endphp
-                                <a href="{{ route('notes.attachments.download', ['note' => $note->id, 'filename' => $filename]) }}" 
+                                <a href="{{ $url }}" 
+                                   target="{{ $isExternal ? '_blank' : '_self' }}"
+                                   rel="{{ $isExternal ? 'noopener noreferrer' : '' }}"
                                    class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:border-blue-300 transition-all duration-200">
-                                    <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                    </svg>
+                                    @if($isExternal)
+                                        <svg class="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                        </svg>
+                                    @else
+                                        <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                    @endif
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm font-medium text-gray-900 truncate">{{ $filename }}</p>
-                                        @if(is_array($attachment) && isset($attachment['size']))
+                                        @if($isExternal)
+                                            <p class="text-xs text-green-600 font-medium">🔗 External Link</p>
+                                        @elseif(is_array($attachment) && isset($attachment['size']))
                                             <p class="text-xs text-gray-500">{{ number_format($attachment['size'] / 1024, 2) }} KB</p>
                                         @endif
                                     </div>
                                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Demo Link (Prominent Display) -->
+                @if($note->demo_link)
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 rounded-xl border-2 border-green-300 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4 flex-1">
+                                    <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-600 text-white uppercase tracking-wide">
+                                                🚀 Demo Live
+                                            </span>
+                                            <h3 class="text-lg font-bold text-gray-900">Coba Demo Sekarang!</h3>
+                                        </div>
+                                        <p class="text-sm text-gray-700 mb-2">Lihat dan coba produk ini secara langsung sebelum membeli</p>
+                                        <p class="text-xs text-gray-500 truncate">{{ $note->demo_link }}</p>
+                                    </div>
+                                </div>
+                                <a href="{{ $note->demo_link }}" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer"
+                                   class="ml-4 flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg shadow-md hover:from-green-700 hover:to-emerald-700 hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                    Buka Demo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Ecosystem Links (if exists) -->
+                @php
+                    $ecosystemLinks = [];
+                    if ($note->ecosystem_category === 'video' && $note->video_link) {
+                        $ecosystemLinks[] = ['type' => 'video', 'label' => 'Video Link', 'url' => $note->video_link, 'icon' => 'video'];
+                    }
+                    if ($note->ecosystem_category === 'audio' && $note->audio_link) {
+                        $ecosystemLinks[] = ['type' => 'audio', 'label' => 'Audio Link', 'url' => $note->audio_link, 'icon' => 'music'];
+                    }
+                    if ($note->ecosystem_category === 'design' && $note->design_preview_link) {
+                        $ecosystemLinks[] = ['type' => 'design', 'label' => 'Design Preview', 'url' => $note->design_preview_link, 'icon' => 'eye'];
+                    }
+                    if ($note->ecosystem_category === 'photo' && $note->photo_gallery_link) {
+                        $ecosystemLinks[] = ['type' => 'photo', 'label' => 'Photo Gallery', 'url' => $note->photo_gallery_link, 'icon' => 'image'];
+                    }
+                    if ($note->ecosystem_category === 'code' && $note->code_demo_link) {
+                        $ecosystemLinks[] = ['type' => 'code', 'label' => 'Demo/Repository', 'url' => $note->code_demo_link, 'icon' => 'code'];
+                    }
+                    if ($note->ecosystem_category === 'theme' && $note->theme_preview_link) {
+                        $ecosystemLinks[] = ['type' => 'theme', 'label' => 'Live Demo', 'url' => $note->theme_preview_link, 'icon' => 'eye'];
+                    }
+                    if ($note->ecosystem_category === '3d' && $note->three_d_preview_link) {
+                        $ecosystemLinks[] = ['type' => '3d', 'label' => '3D Preview', 'url' => $note->three_d_preview_link, 'icon' => 'cube'];
+                    }
+                @endphp
+                @if(count($ecosystemLinks) > 0)
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            External Links
+                        </h3>
+                        <div class="space-y-3">
+                            @foreach($ecosystemLinks as $link)
+                                <a href="{{ $link['url'] }}" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer"
+                                   class="flex items-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all duration-200 group">
+                                    <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
+                                        @if($link['icon'] === 'video')
+                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                            </svg>
+                                        @elseif($link['icon'] === 'music')
+                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                            </svg>
+                                        @elseif($link['icon'] === 'eye')
+                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        @elseif($link['icon'] === 'image')
+                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        @elseif($link['icon'] === 'code')
+                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                            </svg>
+                                        @elseif($link['icon'] === 'cube')
+                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                            </svg>
+                                        @endif
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{{ $link['label'] }}</p>
+                                        <p class="text-xs text-gray-500 truncate mt-1">{{ $link['url'] }}</p>
+                                    </div>
+                                    <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                     </svg>
                                 </a>
                             @endforeach

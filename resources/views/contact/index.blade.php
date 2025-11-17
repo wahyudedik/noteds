@@ -112,14 +112,15 @@
                                     Earnings Calculator
                                 </a>
                             </li>
-                            <li>
+                            {{-- Subscription removed - all features are now free --}}
+                            {{-- <li>
                                 <a href="{{ route('subscription.index') }}" class="text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200 flex items-center">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                     Upgrade Plans
                                 </a>
-                            </li>
+                            </li> --}}
                         </ul>
                     </div>
                 </div>

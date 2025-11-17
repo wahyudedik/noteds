@@ -17,7 +17,8 @@
                 <li>{{ __('messages.photos_use_presentation') }}</li>
             </ul>
             <div class="mt-6">
-                <a href="{{ route('subscription.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">{{ __('messages.subscribe_photos_access') }}</a>
+                {{-- Subscription removed - all features are now free --}}
+                {{-- <a href="{{ route('subscription.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">{{ __('messages.subscribe_photos_access') }}</a> --}}
             </div>
         </div>
     </div>

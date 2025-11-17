@@ -224,9 +224,10 @@
                                     <span class="text-sm text-gray-700 font-medium">{{ __('messages.advanced_analytics') }}</span>
                                 </div>
                             </div>
-                            <a href="{{ route('subscription.create') }}" class="block w-full bg-green-600 hover:bg-green-700 text-white text-center font-semibold py-2 rounded-lg transition-all duration-200">
+                            {{-- Subscription removed - all features are now free --}}
+                            {{-- <a href="{{ route('subscription.create') }}" class="block w-full bg-green-600 hover:bg-green-700 text-white text-center font-semibold py-2 rounded-lg transition-all duration-200">
                                 {{ __('messages.upgrade_now') }}
-                            </a>
+                            </a> --}}
                         </div>
                     </div>
                 </div>

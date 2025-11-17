@@ -17,7 +17,8 @@
                 <li>{{ __('messages.graphics_use_social') }}</li>
             </ul>
             <div class="mt-6">
-                <a href="{{ route('subscription.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">{{ __('messages.subscribe_graphics_access') }}</a>
+                {{-- Subscription removed - all features are now free --}}
+                {{-- <a href="{{ route('subscription.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">{{ __('messages.subscribe_graphics_access') }}</a> --}}
             </div>
         </div>
     </div>

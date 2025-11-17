@@ -30,7 +30,7 @@ class SendNotificationJob implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        public int $userId,
+        public string $userId,
         public string $type,
         public string $title,
         public string $message,

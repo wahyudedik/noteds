@@ -127,10 +127,12 @@
                         <label for="sort" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.sort_by') }}</label>
                         <select name="sort" id="sort" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
                             <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>{{ __('messages.sort_newest') }}</option>
-                            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>{{ __('messages.sort_oldest') }}</option>
+                            <option value="trending" {{ request('sort') == 'trending' ? 'selected' : '' }}>🔥 Trending (7 hari terakhir)</option>
+                            <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>⭐ Popular (Terlaris)</option>
+                            <option value="rating" {{ request('sort') == 'rating' ? 'selected' : '' }}>{{ __('messages.sort_highest_rated') }}</option>
                             <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>{{ __('messages.sort_price_low_high') }}</option>
                             <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>{{ __('messages.sort_price_high_low') }}</option>
-                            <option value="rating" {{ request('sort') == 'rating' ? 'selected' : '' }}>{{ __('messages.sort_highest_rated') }}</option>
+                            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>{{ __('messages.sort_oldest') }}</option>
                         </select>
                     </div>
                 </div>

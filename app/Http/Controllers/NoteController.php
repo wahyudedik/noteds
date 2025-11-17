@@ -263,6 +263,11 @@ class NoteController extends Controller
 
         // Handle file uploads (with large file support)
         $attachments = $this->handleFileUploadsWithProgress($request, $user);
+        
+        // Handle external links
+        $externalLinks = $this->handleExternalLinks($request);
+        $attachments = array_merge($attachments, $externalLinks);
+        
         $validated['attachments'] = $attachments;
         $validated['file_count'] = count($attachments);
 
@@ -616,12 +621,25 @@ class NoteController extends Controller
         // Keep existing attachments unless explicitly removed
         $removedAttachments = $request->input('removed_attachments', []);
         $existingAttachments = array_filter($existingAttachments, function($attachment) use ($removedAttachments) {
+            // Check if it's an external link
+            if (is_array($attachment) && isset($attachment['type']) && $attachment['type'] === 'external') {
+                $url = $attachment['url'] ?? '';
+                return !in_array($url, $removedAttachments);
+            }
+            // Check if it's a URL string
+            if (is_string($attachment) && filter_var($attachment, FILTER_VALIDATE_URL)) {
+                return !in_array($attachment, $removedAttachments);
+            }
+            // Regular file attachment
             $filename = is_array($attachment) ? ($attachment['filename'] ?? '') : basename($attachment);
             return !in_array($filename, $removedAttachments);
         });
 
+        // Handle external links
+        $externalLinks = $this->handleExternalLinks($request);
+        
         // Merge new and existing attachments
-        $validated['attachments'] = array_merge(array_values($existingAttachments), $newAttachments);
+        $validated['attachments'] = array_merge(array_values($existingAttachments), $newAttachments, $externalLinks);
         $validated['file_count'] = count($validated['attachments']);
 
         // Handle thumbnail uploads (merge with existing)
@@ -1175,7 +1193,7 @@ class NoteController extends Controller
             // Increase execution time and memory limit for large files
             $hasLargeFile = false;
             foreach ($files as $file) {
-                if ($file->getSize() >= LargeFileUploadService::MAX_FILE_SIZE) {
+                if ($file->getSize() >= \App\Services\LargeFileUploadService::MAX_FILE_SIZE) {
                     $hasLargeFile = true;
                     break;
                 }
@@ -1243,8 +1261,50 @@ class NoteController extends Controller
             $remainingUploads = array_diff_key($backgroundUploads, array_flip($uploadIds));
             session([$sessionKey => $remainingUploads]);
         }
-
+        
         return $attachments;
+    }
+
+    /**
+     * Handle external links from textarea input
+     * Parse URLs from textarea (one per line) and validate them
+     */
+    protected function handleExternalLinks($request): array
+    {
+        $externalLinks = [];
+        $linksText = $request->input('external_links');
+        
+        if (empty($linksText)) {
+            return $externalLinks;
+        }
+        
+        // Split by newlines and filter empty lines
+        $links = array_filter(
+            array_map('trim', explode("\n", $linksText)),
+            fn($link) => !empty($link)
+        );
+        
+        foreach ($links as $link) {
+            // Validate URL
+            if (filter_var($link, FILTER_VALIDATE_URL)) {
+                // Extract filename from URL if possible
+                $parsedUrl = parse_url($link);
+                $path = $parsedUrl['path'] ?? '';
+                $filename = basename($path);
+                if (empty($filename) || $filename === '/') {
+                    $filename = 'External Link';
+                }
+                
+                $externalLinks[] = [
+                    'type' => 'external',
+                    'url' => $link,
+                    'filename' => $filename,
+                    'size' => null, // External links don't have size
+                ];
+            }
+        }
+        
+        return $externalLinks;
     }
 
     /**

@@ -27,11 +27,11 @@ Platform di mana pengguna bisa:
 - ⚠️ **Standard Mode:** Multiple sales allowed, buyer tidak bisa resell (lihat detail di bagian Note Selling Rules)
 - ⚠️ **Original creator selalu dapat komisi** di setiap penjualan (default: 0%, bisa di-setting di admin)
 - ⚠️ **Withdraw:** Approval admin minimal 24 jam (tidak otomatis)
-- ⚠️ **Paket Premium:** Rp25.000/bln (default, configurable di admin settings)
+- ✅ **All features are free** - Premium subscription has been removed, all users have full access
 - ✅ Iklan catatan unggulan (Featured Notes) — Platform untuk mempromosikan note dengan bayar per iklan
   - Lokasi iklan: Landing Hero, Landing Carousel, Marketplace Banner, Marketplace Grid, Popup Welcome, Popup Exit Intent, Popup Interstitial
   - Durasi: 7, 14, atau 30 hari
-  - Auto-approve untuk premium users
+  - Auto-approve untuk verified sellers
   - Analytics tracking (impressions, clicks, CTR, ROI)
   - Admin approval system dengan refund jika reject
 
@@ -83,10 +83,13 @@ Platform di mana pengguna bisa:
 - ✅ Withdraw management
 - ✅ Rating & reviews
 - ✅ Public profiles with avatar upload & share functionality
-- ✅ Premium subscriptions dengan benefit khusus untuk Seller dan Buyer
-  - **Seller Benefits**: Unlimited notes, advanced analytics, upload file hingga 20MB, featured notes auto-approve, workspace management, cloud backup
-  - **Buyer Benefits**: Collections & wishlist, buyer analytics, reading progress tracking, bookmarks, export notes (PDF/DOCX/Markdown), reading history
-- ✅ File upload limits: Premium users (20MB), Basic users (5MB)
+- ✅ **All users have free access to all features** - Premium subscription feature has been removed
+  - All users can create unlimited notes
+  - All users have access to advanced analytics
+  - All users can upload files up to 20MB
+  - All users have access to workspace management
+  - All users have access to collections, wishlist, and buyer analytics
+- ✅ File upload limits: All users (20MB)
 - ✅ Referral system
 - ✅ Notification system (SweetAlert2)
 - ✅ Support ticket system
@@ -94,16 +97,28 @@ Platform di mana pengguna bisa:
 - ✅ CMS (FAQ, dynamic pages)
 - ✅ Marketing simulators
 - ✅ Multi-Tier Content Protection (Preview, secure file uploads, download control)
+- ✅ **Content Protection Settings** - Admin-configurable anti-copy, anti-AI, and security features
+  - 25+ protection features with on/off toggles
+  - Disable text selection, right-click, keyboard shortcuts, copy/paste
+  - Screenshot protection (Print Screen, Snipping Tool, mobile)
+  - AI bot detection (ChatGPT, Claude, Perplexity, etc.)
+  - Headless browser detection (Selenium, Puppeteer, Playwright)
+  - Mouse movement and click pattern analysis
+  - Clipboard monitoring and periodic clearing
+  - DevTools detection and blocking
+  - Blur overlay protection
+  - All features disabled by default, can be enabled via admin settings
+  - **Smart exclusion**: Protection automatically excludes form pages (create/edit note) and rich text editors to allow normal editing
 - ✅ Internationalization (i18n): 3 languages (EN, ID, AR), 2 currencies (USD, IDR)
 - ✅ Featured Notes Advertising System
   - Seller can request featured placement for their notes
   - Multiple locations: Landing Hero, Carousel, Marketplace Banner/Grid, Popup modals
   - Pricing per location & duration (configurable in admin settings)
-  - Auto-approve for premium users
+  - Auto-approve for verified sellers
   - Analytics tracking (impressions, clicks, CTR, ROI)
   - Admin approval system with refund if rejected
 - ✅ **Workspace System** - Platform masa depan untuk plugin-plugin keren
-  - Multi-workspace support untuk premium users
+  - Multi-workspace support untuk semua users
   - Folder organization dalam workspace
   - AI Features hanya dapat diakses dalam workspace context
   - Navigation update dengan Workspaces link
@@ -412,6 +427,30 @@ Platform di mana pengguna bisa:
 - ✅ MIME type validation + size limits (max 50MB per file)
 - ⚠️ Optional: Virus scanning (ClamAV integration)
 
+**Content Protection Settings (Admin Configurable):**
+- ✅ **25+ Protection Features** - All disabled by default, can be enabled via Admin → Settings → Content Protection
+- ✅ **Anti-Copy Protection:**
+  - Disable text selection, right-click, keyboard shortcuts (Ctrl+C, Ctrl+V, Ctrl+P, etc.)
+  - Disable copy/cut/paste events, drag & drop, image saving
+  - Disable print, view source (Ctrl+U), F12, DevTools shortcuts
+- ✅ **Screenshot Protection:**
+  - Disable Print Screen key and Windows+Print Screen
+  - Disable Snipping Tool (Windows+Shift+S)
+  - Detect window blur and tab visibility changes
+  - Mobile screenshot prevention (iOS/Android)
+  - Blur overlay when screenshot detected
+- ✅ **AI & Bot Detection:**
+  - Detect AI bots from User-Agent (ChatGPT, Claude, Perplexity, etc.)
+  - Detect headless browsers (Selenium, Puppeteer, Playwright)
+  - Analyze mouse movement patterns (detect AI-like behavior)
+  - Analyze click patterns (detect too-consistent AI behavior)
+  - Screen recording detection using canvas fingerprinting
+- ✅ **Advanced Protection:**
+  - Clipboard monitoring and periodic clearing
+  - DevTools detection and warning
+  - Console blocking
+  - Visibility change detection
+
 #### 🔄 Alternative Monetization Models
 
 1. **Freemium + Premium Bundle**
@@ -556,6 +595,7 @@ composer pint
 - ✅ Rich Text Editor (Quill) for Notes
 - ✅ Tag deletion bug fix
 - ✅ Multi-Tier Content Protection (Preview, File Upload, Download Control, Trust Indicators)
+- ✅ Content Protection Settings (25+ admin-configurable anti-copy, anti-AI, and security features)
 - ✅ Featured Notes Advertising System (Landing page, Marketplace, Popup modals)
 - ✅ Seller Analytics Dashboard (Impressions, Clicks, CTR, ROI)
 - ✅ Auto-approve Featured Notes untuk Premium Users

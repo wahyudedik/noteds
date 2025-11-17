@@ -46,6 +46,13 @@ class UpdateNoteRequest extends FormRequest
             'video_duration' => ['nullable', 'integer', 'min:1'], // Duration in seconds
             'video_resolution' => ['nullable', 'string', 'max:50'], // e.g., "1920x1080", "4K", etc.
             'video_format' => ['nullable', 'string', 'in:mp4,mov,avi,webm'],
+            'video_link' => ['nullable', 'url', 'max:500'],
+            'audio_link' => ['nullable', 'url', 'max:500'],
+            'design_preview_link' => ['nullable', 'url', 'max:500'],
+            'photo_gallery_link' => ['nullable', 'url', 'max:500'],
+            'code_demo_link' => ['nullable', 'url', 'max:500'],
+            'theme_preview_link' => ['nullable', 'url', 'max:500'],
+            'three_d_preview_link' => ['nullable', 'url', 'max:500'],
             'theme_platform' => ['nullable', 'string', 'in:wordpress,shopify,html,drupal,magento'],
             'theme_type' => ['nullable', 'string', 'in:business,ecommerce,blog,portfolio'],
             'three_d_format' => ['nullable', 'string', 'in:obj,fbx,blend,dae,3ds'],
@@ -69,6 +76,8 @@ class UpdateNoteRequest extends FormRequest
                 'max:' . ($maxFileSize / 1024), // in KB (10MB)
                 'mimes:pdf,doc,docx,txt,zip,rar,jpg,jpeg,png,gif,xls,xlsx,ppt,pptx'
             ],
+            'external_links' => ['nullable', 'string'], // External links (one per line)
+            'demo_link' => ['nullable', 'url', 'max:500'], // Demo link for apps/software
         ];
     }
 
@@ -86,9 +95,27 @@ class UpdateNoteRequest extends FormRequest
      */
     public function withValidator($validator): void
     {
-        $validator->after(function ($validator) {
-            // Check file sizes manually for better error handling
-            if ($this->hasFile('attachments')) {
+            $validator->after(function ($validator) {
+                // Validate external links
+                $externalLinksText = $this->input('external_links');
+                if (!empty($externalLinksText)) {
+                    $links = array_filter(
+                        array_map('trim', explode("\n", $externalLinksText)),
+                        fn($link) => !empty($link)
+                    );
+                    
+                    foreach ($links as $index => $link) {
+                        if (!filter_var($link, FILTER_VALIDATE_URL)) {
+                            $validator->errors()->add(
+                                'external_links',
+                                "Link tidak valid pada baris " . ($index + 1) . ": {$link}. Pastikan menggunakan URL yang valid (contoh: https://drive.google.com/...)"
+                            );
+                        }
+                    }
+                }
+                
+                // Check file sizes manually for better error handling
+                if ($this->hasFile('attachments')) {
                 $files = $this->file('attachments');
                 $maxSize = 10485760; // 10MB in bytes
                 

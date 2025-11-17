@@ -79,6 +79,15 @@ class MarketplaceController extends Controller
                     'price_asc' => $query->orderBy('price', 'asc'),
                     'price_desc' => $query->orderBy('price', 'desc'),
                     'rating' => $query->orderByDesc('average_rating'),
+                    'popular' => $query->withCount('transactions')
+                        ->orderByDesc('transactions_count')
+                        ->orderByDesc('average_rating')
+                        ->orderByDesc('total_reviews'),
+                    'trending' => $query->withCount(['transactions' => function($q) {
+                            $q->where('created_at', '>=', now()->subDays(7));
+                        }])
+                        ->orderByDesc('transactions_count')
+                        ->orderByDesc('created_at'),
                     'newest' => $query->latest(),
                     'oldest' => $query->oldest(),
                     default => $query->latest(),
@@ -188,6 +197,30 @@ class MarketplaceController extends Controller
             ->get()
             ->pluck('count', 'reaction_type')
             ->toArray();
+
+        // Get related notes (same ecosystem category or same tags, exclude current note)
+        $relatedNotes = Note::publicOnly()
+            ->where('id', '!=', $note->id)
+            ->where('status', 'active')
+            ->where(function($query) use ($note) {
+                // Same ecosystem category
+                if ($note->ecosystem_category) {
+                    $query->where('ecosystem_category', $note->ecosystem_category);
+                }
+                // OR same tags
+                if ($note->tags->count() > 0) {
+                    $tagIds = $note->tags->pluck('id');
+                    $query->orWhereHas('tags', function($q) use ($tagIds) {
+                        $q->whereIn('tags.id', $tagIds);
+                    });
+                }
+            })
+            ->with(['tags', 'user', 'reviews'])
+            ->withCount('transactions')
+            ->orderByDesc('transactions_count')
+            ->orderByDesc('average_rating')
+            ->limit(6)
+            ->get();
 
         // Get user's reaction if authenticated
         $userReaction = null;
@@ -320,6 +353,7 @@ class MarketplaceController extends Controller
         }
 
         return view('marketplace.show', compact(
+            'relatedNotes',
             'note',
             'canBuy',
             'alreadyPurchased',

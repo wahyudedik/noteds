@@ -177,24 +177,25 @@
 
                 // Settings submenu
                 $settingsSubmenu = [];
-                if (!$isAdmin) {
-                    $settingsSubmenu[] = [
-                        'label' => __('messages.subscription'),
-                        'href' => route('subscription.index'),
-                        'active' => request()->routeIs('subscription.*'),
-                    ];
-                }
+                // Subscription removed - all users have free access to all features
+                // if (!$isAdmin) {
+                //     $settingsSubmenu[] = [
+                //         'label' => __('messages.subscription'),
+                //         'href' => route('subscription.index'),
+                //         'active' => request()->routeIs('subscription.*'),
+                //     ];
+                // }
                 $settingsSubmenu[] = [
                     'label' => __('messages.referral'),
                     'href' => route('referral.index'),
                     'active' => request()->routeIs('referral.*'),
                 ];
-                $settingsIsActive = request()->routeIs('subscription.*') || request()->routeIs('referral.*');
+                $settingsIsActive = request()->routeIs('referral.*');
                 
                 if (!empty($settingsSubmenu)) {
                     $moreLinks[] = [
                         'label' => 'Settings',
-                        'href' => !$isAdmin ? route('subscription.index') : route('referral.index'),
+                        'href' => route('referral.index'),
                         'active' => $settingsIsActive,
                         'submenu' => $settingsSubmenu,
                     ];
@@ -554,7 +555,8 @@
                                             {{ __('messages.my_profile') }}
                                         </div>
                                     </a>
-                                    @if (!auth()->user()->hasRole('admin'))
+                                    {{-- Subscription removed - all users have free access to all features --}}
+                                    {{-- @if (!auth()->user()->hasRole('admin'))
                                         <a href="{{ route('subscription.index') }}"
                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
                                             <div class="flex items-center">
@@ -566,7 +568,7 @@
                                                 {{ __('messages.subscription') }}
                                             </div>
                                         </a>
-                                    @endif
+                                    @endif --}}
                                     <div class="border-t border-gray-200 my-1"></div>
                                     <a href="{{ route('support-tickets.create') }}"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">

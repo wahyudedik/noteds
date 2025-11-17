@@ -39,8 +39,20 @@
                 -webkit-touch-callout: none !important;
             }
             
-            /* Allow text selection in input fields and textareas */
-            input, textarea, [contenteditable="true"] {
+            /* Allow text selection in input fields, textareas, and rich text editors */
+            input, textarea, [contenteditable="true"], 
+            .ql-editor, .ql-container, .ql-toolbar,
+            .ql-editor *, .ql-container *,
+            #content-editor, #content-editor *,
+            [class*="ql-"], [class*="ql-"] * {
+                -webkit-user-select: text !important;
+                -moz-user-select: text !important;
+                -ms-user-select: text !important;
+                user-select: text !important;
+            }
+            
+            /* Exclude form pages from text selection protection */
+            body.create-note-page, body.edit-note-page {
                 -webkit-user-select: text !important;
                 -moz-user-select: text !important;
                 -ms-user-select: text !important;
@@ -93,7 +105,7 @@
             };
         </script>
     </head>
-    <body class="font-sans antialiased bg-gray-50 overflow-x-hidden">
+    <body class="font-sans antialiased bg-gray-50 overflow-x-hidden {{ request()->routeIs('notes.create') ? 'create-note-page' : '' }} {{ request()->routeIs('notes.edit') ? 'edit-note-page' : '' }}">
         <div class="min-h-screen flex flex-col">
             @include('layouts.navigation')
 
@@ -443,7 +455,9 @@
                         printScreenPressed = true;
                         
                         // Show blur overlay
-                        blurOverlay.style.display = 'block';
+                        if (typeof blurOverlay !== 'undefined') {
+                            blurOverlay.style.display = 'block';
+                        }
                         
                         // Clear clipboard immediately
                         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -462,7 +476,9 @@
                         
                         // Hide overlay after delay
                         setTimeout(function() {
-                            blurOverlay.style.display = 'none';
+                            if (typeof blurOverlay !== 'undefined') {
+                                blurOverlay.style.display = 'none';
+                            }
                             printScreenPressed = false;
                         }, 2000);
                         
@@ -473,10 +489,12 @@
                     if (e.key === 'PrintScreen' && (e.metaKey || e.ctrlKey)) {
                         e.preventDefault();
                         e.stopPropagation();
-                        blurOverlay.style.display = 'block';
-                        setTimeout(function() {
-                            blurOverlay.style.display = 'none';
-                        }, 2000);
+                        if (typeof blurOverlay !== 'undefined') {
+                            blurOverlay.style.display = 'block';
+                            setTimeout(function() {
+                                blurOverlay.style.display = 'none';
+                            }, 2000);
+                        }
                         return false;
                     }
                     
@@ -522,32 +540,76 @@
                         return false;
                     }
                     
-                    // Disable Ctrl+A (Select All) - except in input fields
-                    if (e.ctrlKey && e.key === 'a' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
+                    // Disable Ctrl+A (Select All) - except in input fields and rich text editors
+                    if (e.ctrlKey && e.key === 'a') {
+                        const target = e.target;
+                        const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                         target.closest('.ql-editor') ||
+                                         target.closest('[contenteditable="true"]') ||
+                                         target.closest('#content-editor') ||
+                                         target.closest('[class*="ql-"]') ||
+                                         document.body.classList.contains('create-note-page') ||
+                                         document.body.classList.contains('edit-note-page');
+                        
+                        if (!isEditable) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return false;
+                        }
                     }
                     
-                    // Disable Ctrl+C (Copy) - except in input fields
-                    if (e.ctrlKey && e.key === 'c' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
+                    // Disable Ctrl+C (Copy) - except in input fields and rich text editors
+                    if (e.ctrlKey && e.key === 'c') {
+                        const target = e.target;
+                        const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                         target.closest('.ql-editor') ||
+                                         target.closest('[contenteditable="true"]') ||
+                                         target.closest('#content-editor') ||
+                                         target.closest('[class*="ql-"]') ||
+                                         document.body.classList.contains('create-note-page') ||
+                                         document.body.classList.contains('edit-note-page');
+                        
+                        if (!isEditable) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return false;
+                        }
                     }
                     
-                    // Disable Ctrl+V (Paste) - except in input fields
-                    if (e.ctrlKey && e.key === 'v' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
+                    // Disable Ctrl+V (Paste) - except in input fields and rich text editors
+                    if (e.ctrlKey && e.key === 'v') {
+                        const target = e.target;
+                        const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                         target.closest('.ql-editor') ||
+                                         target.closest('[contenteditable="true"]') ||
+                                         target.closest('#content-editor') ||
+                                         target.closest('[class*="ql-"]') ||
+                                         document.body.classList.contains('create-note-page') ||
+                                         document.body.classList.contains('edit-note-page');
+                        
+                        if (!isEditable) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return false;
+                        }
                     }
                     
-                    // Disable Ctrl+X (Cut)
+                    // Disable Ctrl+X (Cut) - except in input fields and rich text editors
                     if (e.ctrlKey && e.key === 'x') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
+                        const target = e.target;
+                        const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                         target.closest('.ql-editor') ||
+                                         target.closest('[contenteditable="true"]') ||
+                                         target.closest('#content-editor') ||
+                                         target.closest('[class*="ql-"]') ||
+                                         document.body.classList.contains('create-note-page') ||
+                                         document.body.classList.contains('edit-note-page');
+                        
+                        if (!isEditable) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return false;
+                        }
                     }
                     
                     // Disable Ctrl+U (View Source)
@@ -563,28 +625,56 @@
                         e.stopPropagation();
                         return false;
                     }
+                    @endif
                 }, true);
                 
-                // Disable copy
+                // Disable copy (allow in input, textarea, and rich text editors)
                 document.addEventListener('copy', function(e) {
-                    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    const target = e.target;
+                    const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                     target.closest('.ql-editor') ||
+                                     target.closest('[contenteditable="true"]') ||
+                                     target.closest('#content-editor') ||
+                                     target.closest('[class*="ql-"]') ||
+                                     document.body.classList.contains('create-note-page') ||
+                                     document.body.classList.contains('edit-note-page');
+                    
+                    if (!isEditable) {
                         e.preventDefault();
                         e.clipboardData.setData('text/plain', '');
                         return false;
                     }
                 }, true);
                 
-                // Disable cut
+                // Disable cut (allow in input, textarea, and rich text editors)
                 document.addEventListener('cut', function(e) {
-                    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    const target = e.target;
+                    const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                     target.closest('.ql-editor') ||
+                                     target.closest('[contenteditable="true"]') ||
+                                     target.closest('#content-editor') ||
+                                     target.closest('[class*="ql-"]') ||
+                                     document.body.classList.contains('create-note-page') ||
+                                     document.body.classList.contains('edit-note-page');
+                    
+                    if (!isEditable) {
                         e.preventDefault();
                         return false;
                     }
                 }, true);
                 
-                // Disable paste
+                // Disable paste (allow in input, textarea, and rich text editors)
                 document.addEventListener('paste', function(e) {
-                    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    const target = e.target;
+                    const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                     target.closest('.ql-editor') ||
+                                     target.closest('[contenteditable="true"]') ||
+                                     target.closest('#content-editor') ||
+                                     target.closest('[class*="ql-"]') ||
+                                     document.body.classList.contains('create-note-page') ||
+                                     document.body.classList.contains('edit-note-page');
+                    
+                    if (!isEditable) {
                         e.preventDefault();
                         return false;
                     }
@@ -596,9 +686,18 @@
                     return false;
                 }, true);
                 
-                // Disable select start
+                // Disable select start (allow in input, textarea, and rich text editors)
                 document.addEventListener('selectstart', function(e) {
-                    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    const target = e.target;
+                    const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                     target.closest('.ql-editor') ||
+                                     target.closest('[contenteditable="true"]') ||
+                                     target.closest('#content-editor') ||
+                                     target.closest('[class*="ql-"]') ||
+                                     document.body.classList.contains('create-note-page') ||
+                                     document.body.classList.contains('edit-note-page');
+                    
+                    if (!isEditable) {
                         e.preventDefault();
                         return false;
                     }
@@ -679,10 +778,12 @@
                             // Jika clipboard berubah dan bukan dari input field, clear
                             if (text && text !== lastClipboardCheck && !printScreenPressed) {
                                 navigator.clipboard.writeText('').catch(function() {});
-                                blurOverlay.style.display = 'block';
-                                setTimeout(function() {
-                                    blurOverlay.style.display = 'none';
-                                }, 1500);
+                                if (typeof blurOverlay !== 'undefined') {
+                                    blurOverlay.style.display = 'block';
+                                    setTimeout(function() {
+                                        blurOverlay.style.display = 'none';
+                                    }, 1500);
+                                }
                             }
                             lastClipboardCheck = text;
                         }).catch(function() {});
@@ -700,13 +801,17 @@
                 let windowBlurred = false;
                 window.addEventListener('blur', function() {
                     windowBlurred = true;
-                    blurOverlay.style.display = 'block';
+                    if (typeof blurOverlay !== 'undefined') {
+                        blurOverlay.style.display = 'block';
+                    }
                 });
                 
                 window.addEventListener('focus', function() {
                     if (windowBlurred) {
                         setTimeout(function() {
-                            blurOverlay.style.display = 'none';
+                            if (typeof blurOverlay !== 'undefined') {
+                                blurOverlay.style.display = 'none';
+                            }
                             windowBlurred = false;
                             // Clear clipboard saat window focus kembali
                             if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -720,7 +825,9 @@
                 document.addEventListener('keyup', function(e) {
                     if (e.key === 'PrintScreen' || e.keyCode === 44) {
                         printScreenPressed = true;
-                        blurOverlay.style.display = 'block';
+                        if (typeof blurOverlay !== 'undefined') {
+                            blurOverlay.style.display = 'block';
+                        }
                         
                         // Clear clipboard multiple times
                         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -744,7 +851,9 @@
                         } catch(err) {}
                         
                         setTimeout(function() {
-                            blurOverlay.style.display = 'none';
+                            if (typeof blurOverlay !== 'undefined') {
+                                blurOverlay.style.display = 'none';
+                            }
                             printScreenPressed = false;
                         }, 2000);
                     }
@@ -755,10 +864,12 @@
                     if (e.key === 's' && e.shiftKey && (e.metaKey || e.ctrlKey)) {
                         e.preventDefault();
                         e.stopPropagation();
-                        blurOverlay.style.display = 'block';
-                        setTimeout(function() {
-                            blurOverlay.style.display = 'none';
-                        }, 3000);
+                        if (typeof blurOverlay !== 'undefined') {
+                            blurOverlay.style.display = 'block';
+                            setTimeout(function() {
+                                blurOverlay.style.display = 'none';
+                            }, 3000);
+                        }
                         return false;
                     }
                 }, true);
@@ -766,14 +877,18 @@
                 // Deteksi perubahan visibility (tab switch untuk screenshot)
                 document.addEventListener('visibilitychange', function() {
                     if (document.hidden) {
-                        blurOverlay.style.display = 'block';
+                        if (typeof blurOverlay !== 'undefined') {
+                            blurOverlay.style.display = 'block';
+                        }
                         // Clear clipboard saat tab hidden
                         if (navigator.clipboard && navigator.clipboard.writeText) {
                             navigator.clipboard.writeText('').catch(function() {});
                         }
                     } else {
                         setTimeout(function() {
-                            blurOverlay.style.display = 'none';
+                            if (typeof blurOverlay !== 'undefined') {
+                                blurOverlay.style.display = 'none';
+                            }
                             // Clear clipboard saat tab visible kembali
                             if (navigator.clipboard && navigator.clipboard.writeText) {
                                 navigator.clipboard.writeText('').catch(function() {});
@@ -1004,9 +1119,11 @@
                 // Action jika AI terdeteksi
                 if (aiDetected || suspiciousMovement) {
                     // Blur seluruh konten
-                    blurOverlay.style.display = 'block';
-                    blurOverlay.style.background = 'rgba(255, 0, 0, 0.8)';
-                    blurOverlay.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:24px;font-weight:bold;text-align:center;">AI Tool Detected<br><span style="font-size:16px;">Automated access is not allowed</span></div>';
+                    if (typeof blurOverlay !== 'undefined') {
+                        blurOverlay.style.display = 'block';
+                        blurOverlay.style.background = 'rgba(255, 0, 0, 0.8)';
+                        blurOverlay.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:24px;font-weight:bold;text-align:center;">AI Tool Detected<br><span style="font-size:16px;">Automated access is not allowed</span></div>';
+                    }
                     
                     // Clear semua konten setelah delay
                     setTimeout(function() {

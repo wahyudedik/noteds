@@ -305,7 +305,8 @@
                                         <div class="flex items-center gap-2 flex-wrap">
                                             <span
                                                 class="font-medium text-gray-900 group-hover:text-blue-600">{{ $note->user->name }}</span>
-                                            @if ($note->user->hasPremium())
+                                            {{-- Premium Buyer badge removed - all users now have free access to all features --}}
+                                            {{-- @if ($note->user->hasPremium() && $note->user->role === 'buyer')
                                                 <span
                                                     class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
                                                     title="{{ __('messages.premium_buyer_badge') }}">
@@ -314,7 +315,7 @@
                                                     </svg>
                                                     {{ __('messages.premium_badge_label') }}
                                                 </span>
-                                            @endif
+                                            @endif --}}
                                             @if ($note->user->role === 'seller')
                                                 <span
                                                     class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
@@ -539,6 +540,42 @@
                         <div class="prose max-w-none mb-6" id="note-content">
                             <div class="ql-editor text-gray-900 leading-relaxed">{!! $note->content !!}</div>
                         </div>
+
+                        <!-- Demo Link (Prominent Display) -->
+                        @if($note->demo_link)
+                            <div class="mb-6">
+                                <div class="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 rounded-xl border-2 border-green-300 p-5 shadow-lg hover:shadow-xl transition-all duration-300">
+                                    <div class="flex items-center justify-between flex-wrap gap-4">
+                                        <div class="flex items-center gap-4 flex-1 min-w-0">
+                                            <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-600 text-white uppercase tracking-wide">
+                                                        🚀 Demo Live
+                                                    </span>
+                                                    <h3 class="text-base font-bold text-gray-900">Coba Demo Sekarang!</h3>
+                                                </div>
+                                                <p class="text-sm text-gray-700 mb-1">Lihat dan coba produk ini secara langsung sebelum membeli</p>
+                                                <p class="text-xs text-gray-500 truncate">{{ $note->demo_link }}</p>
+                                            </div>
+                                        </div>
+                                        <a href="{{ $note->demo_link }}" 
+                                           target="_blank" 
+                                           rel="noopener noreferrer"
+                                           class="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg shadow-md hover:from-green-700 hover:to-emerald-700 hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                            </svg>
+                                            Buka Demo
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
                         <!-- Attachments (if purchased or free) -->
                         @if ($note->hasAttachments())
@@ -1463,7 +1500,98 @@
                 </div>
             </div>
         </div>
+
+        <!-- Related Notes Section -->
+        @if(isset($relatedNotes) && $relatedNotes->count() > 0)
+            <div class="mt-12 pt-8 border-t border-gray-200">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                            Catatan Terkait
+                        </h2>
+                        <p class="mt-1 text-sm text-gray-600">Catatan lain yang mungkin Anda sukai</p>
+                    </div>
+                    <a href="{{ route('marketplace.index', ['ecosystem' => $note->ecosystem_category]) }}" class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
+                        Lihat Semua →
+                    </a>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach($relatedNotes as $relatedNote)
+                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 group">
+                            <a href="{{ route('marketplace.show', $relatedNote) }}" class="block">
+                                @if($relatedNote->hasThumbnails())
+                                    <div class="aspect-video bg-gray-100 overflow-hidden">
+                                        <img src="{{ Storage::url($relatedNote->thumbnails[0]) }}" 
+                                             alt="{{ $relatedNote->title }}"
+                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                    </div>
+                                @else
+                                    <div class="aspect-video bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                                        <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                @endif
+                                <div class="p-4">
+                                    <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
+                                        {{ $relatedNote->title }}
+                                    </h3>
+                                    <p class="text-sm text-gray-600 line-clamp-2 mb-3">
+                                        {{ Str::limit(strip_tags($relatedNote->summary ?? $relatedNote->content), 80) }}
+                                    </p>
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+                                                @if($relatedNote->user->avatar)
+                                                    <img src="{{ str_starts_with($relatedNote->user->avatar, 'http') ? $relatedNote->user->avatar : Storage::url($relatedNote->user->avatar) }}" 
+                                                         alt="{{ $relatedNote->user->name }}"
+                                                         class="w-6 h-6 rounded-full object-cover">
+                                                @else
+                                                    <span class="text-xs font-semibold text-gray-600">{{ strtoupper(substr($relatedNote->user->name, 0, 1)) }}</span>
+                                                @endif
+                                            </div>
+                                            <span class="text-xs text-gray-600">{{ Str::limit($relatedNote->user->name, 15) }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            @if($relatedNote->average_rating > 0)
+                                                <div class="flex items-center gap-0.5">
+                                                    <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                    <span class="text-xs font-medium text-gray-700">{{ number_format($relatedNote->average_rating, 1) }}</span>
+                                                </div>
+                                            @endif
+                                            <span class="text-sm font-bold text-blue-600">
+                                                {{ $relatedNote->price > 0 ? currency($relatedNote->price, auth()->user()->currency ?? 'IDR') : 'Gratis' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    @if($relatedNote->tags->count() > 0)
+                                        <div class="mt-3 flex flex-wrap gap-1">
+                                            @foreach($relatedNote->tags->take(2) as $tag)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                                    {{ $tag->name }}
+                                                </span>
+                                            @endforeach
+                                            @if($relatedNote->tags->count() > 2)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-600">
+                                                    +{{ $relatedNote->tags->count() - 2 }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </div>
+</div>
 
     @push('styles')
         <style>

@@ -79,12 +79,25 @@ class Note extends Model
         'video_duration',
         'video_resolution',
         'video_format',
+        'video_link',
         // Theme ecosystem fields
         'theme_platform',
         'theme_type',
+        'theme_preview_link',
         // 3D ecosystem fields
         'three_d_format',
         'three_d_type',
+        'three_d_preview_link',
+        // Audio ecosystem fields
+        'audio_link',
+        // Design ecosystem fields
+        'design_preview_link',
+        // Photo ecosystem fields
+        'photo_gallery_link',
+        // Code ecosystem fields
+        'code_demo_link',
+        // General demo link (for apps/software)
+        'demo_link',
     ];
 
     protected function casts(): array

@@ -264,11 +264,11 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     // AI Features removed - all features are now free and accessible
 
 
-    // Subscription routes
-    Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
-    Route::get('/subscription/create', [SubscriptionController::class, 'create'])->name('subscription.create');
-    Route::post('/subscription', [SubscriptionController::class, 'store'])->name('subscription.store');
-    Route::get('/subscription/{subscription}', [SubscriptionController::class, 'show'])->name('subscription.show');
+    // Subscription routes - REMOVED: All users now have free access to all features
+    // Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
+    // Route::get('/subscription/create', [SubscriptionController::class, 'create'])->name('subscription.create');
+    // Route::post('/subscription', [SubscriptionController::class, 'store'])->name('subscription.store');
+    // Route::get('/subscription/{subscription}', [SubscriptionController::class, 'show'])->name('subscription.show');
 
     // Wallet routes
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');

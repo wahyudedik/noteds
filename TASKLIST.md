@@ -543,6 +543,41 @@ Menjadi **AI Memory Platform** pertama dari Indonesia yang mampu memahami kontek
 - [x] Views: notes/show, notes/edit, notes/create, notes/index, marketplace/show
 - [ ] Security: Virus scanning integration (ClamAV)
 
+### Content Protection Settings (Admin Configurable)
+- [x] Admin Settings UI: Content Protection section with 25+ toggle switches
+- [x] Settings Controller: Handle all protection settings updates
+- [x] Setting Model: Support for content_protection group
+- [x] Seeder: Default all protection settings to disabled (false)
+- [x] Layout Integration: Conditional rendering based on settings
+- [x] **Anti-Copy Protection:**
+  - [x] Disable text selection
+  - [x] Disable right-click
+  - [x] Disable keyboard shortcuts (Ctrl+C, Ctrl+V, Ctrl+P, Ctrl+A, Ctrl+X, Ctrl+U, F12, etc.)
+  - [x] Disable copy/cut/paste events
+  - [x] Disable drag & drop
+  - [x] Disable print
+  - [x] Disable view source
+  - [x] Disable image saving
+- [x] **Screenshot Protection:**
+  - [x] Disable Print Screen key
+  - [x] Disable Snipping Tool (Windows+Shift+S)
+  - [x] Detect window blur
+  - [x] Detect visibility change (tab switch)
+  - [x] Disable screenshot on mobile (iOS/Android)
+  - [x] Blur overlay protection
+- [x] **AI & Bot Detection:**
+  - [x] Detect AI bots from User-Agent
+  - [x] Detect headless browsers
+  - [x] Mouse movement pattern analysis
+  - [x] Click pattern analysis
+  - [x] Screen recording detection
+- [x] **Advanced Protection:**
+  - [x] Monitor clipboard
+  - [x] Clear clipboard periodically
+  - [x] Detect Developer Tools
+  - [x] Disable console
+  - [x] Disable DevTools shortcuts
+
 ### Identity Verification (KYC)
 - [x] Add fields to `users`: agreement_accepted_at, agreement_version, ktp_path, selfie_path, verification_status, verification_reviewed_at, verification_reviewed_by, verification_notes
 - [x] Registration: require agreement checkbox, KTP & selfie uploads (5MB limit)
