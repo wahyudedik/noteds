@@ -1180,7 +1180,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_text_selection" id="protection_disable_text_selection" 
-                                            value="1" {{ Setting::getSetting('protection_disable_text_selection', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_text_selection', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1200,7 +1200,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_right_click" id="protection_disable_right_click" 
-                                            value="1" {{ Setting::getSetting('protection_disable_right_click', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_right_click', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1220,7 +1220,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_keyboard_shortcuts" id="protection_disable_keyboard_shortcuts" 
-                                            value="1" {{ Setting::getSetting('protection_disable_keyboard_shortcuts', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_keyboard_shortcuts', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1240,7 +1240,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_copy_paste" id="protection_disable_copy_paste" 
-                                            value="1" {{ Setting::getSetting('protection_disable_copy_paste', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_copy_paste', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1260,7 +1260,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_drag_drop" id="protection_disable_drag_drop" 
-                                            value="1" {{ Setting::getSetting('protection_disable_drag_drop', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_drag_drop', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1280,7 +1280,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_print" id="protection_disable_print" 
-                                            value="1" {{ Setting::getSetting('protection_disable_print', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_print', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1300,7 +1300,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_view_source" id="protection_disable_view_source" 
-                                            value="1" {{ Setting::getSetting('protection_disable_view_source', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_view_source', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1320,7 +1320,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_devtools" id="protection_detect_devtools" 
-                                            value="1" {{ Setting::getSetting('protection_detect_devtools', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_detect_devtools', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1340,7 +1340,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_screenshot" id="protection_disable_screenshot" 
-                                            value="1" {{ Setting::getSetting('protection_disable_screenshot', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_screenshot', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1360,7 +1360,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_image_saving" id="protection_disable_image_saving" 
-                                            value="1" {{ Setting::getSetting('protection_disable_image_saving', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_image_saving', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1380,7 +1380,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_console" id="protection_disable_console" 
-                                            value="1" {{ Setting::getSetting('protection_disable_console', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_console', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1400,7 +1400,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_monitor_clipboard" id="protection_monitor_clipboard" 
-                                            value="1" {{ Setting::getSetting('protection_monitor_clipboard', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_monitor_clipboard', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1420,7 +1420,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_print_screen" id="protection_disable_print_screen" 
-                                            value="1" {{ Setting::getSetting('protection_disable_print_screen', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_print_screen', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1440,7 +1440,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_snipping_tool" id="protection_disable_snipping_tool" 
-                                            value="1" {{ Setting::getSetting('protection_disable_snipping_tool', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_snipping_tool', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1460,7 +1460,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_window_blur" id="protection_detect_window_blur" 
-                                            value="1" {{ Setting::getSetting('protection_detect_window_blur', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_detect_window_blur', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1480,7 +1480,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_visibility_change" id="protection_detect_visibility_change" 
-                                            value="1" {{ Setting::getSetting('protection_detect_visibility_change', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_detect_visibility_change', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1500,7 +1500,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_clear_clipboard_periodic" id="protection_clear_clipboard_periodic" 
-                                            value="1" {{ Setting::getSetting('protection_clear_clipboard_periodic', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_clear_clipboard_periodic', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1520,7 +1520,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_blur_overlay" id="protection_blur_overlay" 
-                                            value="1" {{ Setting::getSetting('protection_blur_overlay', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_blur_overlay', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1540,7 +1540,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_f12" id="protection_disable_f12" 
-                                            value="1" {{ Setting::getSetting('protection_disable_f12', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_f12', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1560,7 +1560,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_devtools_shortcuts" id="protection_disable_devtools_shortcuts" 
-                                            value="1" {{ Setting::getSetting('protection_disable_devtools_shortcuts', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_disable_devtools_shortcuts', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1580,7 +1580,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_ai_bots" id="protection_detect_ai_bots" 
-                                            value="1" {{ Setting::getSetting('protection_detect_ai_bots', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_detect_ai_bots', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1600,7 +1600,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_headless" id="protection_detect_headless" 
-                                            value="1" {{ Setting::getSetting('protection_detect_headless', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_detect_headless', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1620,7 +1620,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_mouse_movement" id="protection_detect_mouse_movement" 
-                                            value="1" {{ Setting::getSetting('protection_detect_mouse_movement', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_detect_mouse_movement', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1640,7 +1640,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_click_pattern" id="protection_detect_click_pattern" 
-                                            value="1" {{ Setting::getSetting('protection_detect_click_pattern', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_detect_click_pattern', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>
@@ -1660,7 +1660,7 @@
                                 <div class="ml-4">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_screen_recording" id="protection_detect_screen_recording" 
-                                            value="1" {{ Setting::getSetting('protection_detect_screen_recording', 'content_protection', false) ? 'checked' : '' }}
+                                            value="1" {{ \App\Models\Setting::getSetting('protection_detect_screen_recording', 'content_protection', false) ? 'checked' : '' }}
                                             class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                     </label>

@@ -1030,7 +1030,6 @@
                             <p class="mt-1 text-xs text-gray-500">{{ __('messages.assign_to_workspace') }}</p>
                         </div>
                     </div>
-                    @endif
 
                     <!-- Tags -->
                     <div>
