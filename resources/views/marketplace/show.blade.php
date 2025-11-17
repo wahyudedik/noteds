@@ -85,12 +85,15 @@
 
             @if ($conversation)
                 @php
-                    $otherUser = $conversation->buyer_id === auth()->id() ? $conversation->seller : $conversation->buyer;
+                    $otherUser =
+                        $conversation->buyer_id === auth()->id() ? $conversation->seller : $conversation->buyer;
                     $lastMessage = $conversation->latestMessage;
                 @endphp
-                <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div
+                    class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <h3 class="text-sm font-semibold text-blue-900 uppercase tracking-wide mb-1">{{ __('messages.product_conversation_title') }}</h3>
+                        <h3 class="text-sm font-semibold text-blue-900 uppercase tracking-wide mb-1">
+                            {{ __('messages.product_conversation_title') }}</h3>
                         <p class="text-sm text-blue-800">
                             {!! __('messages.product_conversation_description', ['name' => '<strong>' . e($otherUser->name) . '</strong>']) !!}
                             @if ($lastMessage)
@@ -111,13 +114,13 @@
             @endif
 
             <!-- Note Details Card -->
-            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
-                <div class="p-6">
+            <div class="bg-white overflow-hidden shadow-lg rounded-xl border border-gray-200 mb-8">
+                <div class="p-6 sm:p-8">
                     <!-- Badges and Rating -->
-                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <div class="flex flex-wrap items-center gap-2 mb-5">
                         @if ($note->is_public)
                             <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
                                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                     <path fill-rule="evenodd"
@@ -128,135 +131,177 @@
                             </span>
                         @endif
                         <span
-                            class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
                             {{ ucfirst($note->status) }}
                         </span>
                         @if ($note->average_rating > 0)
-                            <div class="inline-flex items-center gap-1">
+                            <div
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-50 border border-yellow-200">
                                 @for ($i = 1; $i <= 5; $i++)
-                                    <svg class="w-4 h-4 {{ $i <= $note->average_rating ? 'text-yellow-400' : 'text-gray-300' }}"
+                                    <svg class="w-3.5 h-3.5 {{ $i <= $note->average_rating ? 'text-yellow-400' : 'text-gray-300' }}"
                                         fill="currentColor" viewBox="0 0 20 20">
                                         <path
                                             d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                     </svg>
                                 @endfor
-                                <span class="text-sm font-medium text-gray-700">{{ $note->average_rating }}</span>
-                                <span class="text-xs text-gray-500">({{ $note->total_reviews }}
+                                <span class="text-sm font-semibold text-gray-800 ml-0.5">{{ $note->average_rating }}</span>
+                                <span class="text-xs text-gray-600">({{ $note->total_reviews }}
                                     {{ $note->total_reviews == 1 ? __('messages.review') : __('messages.reviews_count') }})</span>
                             </div>
                         @endif
-                        
+
                         <!-- Sale Mode Badge -->
-                        @if($note->sale_mode)
-                            <div class="mb-3">
-                                @if($note->isScarcityMode())
-                                    <div class="relative inline-block group">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 cursor-help">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-                                            </svg>
-                                            Scarcity Mode
-                                        </span>
-                                        <!-- Tooltip -->
-                                        <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
-                                            <div class="font-semibold mb-2">Scarcity Mode</div>
-                                            <ul class="space-y-1 text-gray-300">
-                                                <li>• Buyer hanya bisa beli 1x per user</li>
-                                                <li>• Buyer bisa resell dengan harga custom</li>
-                                                <li>• Original creator dapat komisi di setiap penjualan</li>
-                                                <li>• Grace period {{ $note->grace_period_days }} hari untuk pembelian ulang</li>
-                                                <li>• Setelah grace period, harga = original × {{ $note->relist_price_multiplier }}x</li>
-                                            </ul>
-                                            <div class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                        @if ($note->sale_mode)
+                            @if ($note->isScarcityMode())
+                                <div class="relative inline-block group">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200 cursor-help">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        Scarcity Mode
+                                    </span>
+                                    <!-- Tooltip -->
+                                    <div
+                                        class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
+                                        <div class="font-semibold mb-2">Scarcity Mode</div>
+                                        <ul class="space-y-1 text-gray-300">
+                                            <li>• Buyer hanya bisa beli 1x per user</li>
+                                            <li>• Buyer bisa resell dengan harga custom</li>
+                                            <li>• Original creator dapat komisi di setiap penjualan</li>
+                                            <li>• Grace period {{ $note->grace_period_days }} hari untuk pembelian ulang
+                                            </li>
+                                            <li>• Setelah grace period, harga = original ×
+                                                {{ $note->relist_price_multiplier }}x</li>
+                                        </ul>
+                                        <div
+                                            class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900">
                                         </div>
                                     </div>
-                                @elseif($note->isStandardMode())
-                                    <div class="relative inline-block group">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 cursor-help">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                            </svg>
-                                            Standard Mode - Multiple Sales
-                                        </span>
-                                        <!-- Tooltip -->
-                                        <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
-                                            <div class="font-semibold mb-2">Standard Mode</div>
-                                            <ul class="space-y-1 text-gray-300">
-                                                <li>• Multiple sales (bisa dijual ke banyak buyer)</li>
-                                                <li>• Buyer tidak bisa resell</li>
-                                                <li>• Tidak ada komisi untuk original creator</li>
-                                                <li>• Ownership tetap dengan seller</li>
-                                                <li>• Cocok untuk konten yang perlu diakses ulang</li>
-                                            </ul>
-                                            <div class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                </div>
+                            @elseif($note->isStandardMode())
+                                <div class="relative inline-block group">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200 cursor-help">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        Standard Mode - Multiple Sales
+                                    </span>
+                                    <!-- Tooltip -->
+                                    <div
+                                        class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
+                                        <div class="font-semibold mb-2">Standard Mode</div>
+                                        <ul class="space-y-1 text-gray-300">
+                                            <li>• Multiple sales (bisa dijual ke banyak buyer)</li>
+                                            <li>• Buyer tidak bisa resell</li>
+                                            <li>• Tidak ada komisi untuk original creator</li>
+                                            <li>• Ownership tetap dengan seller</li>
+                                            <li>• Cocok untuk konten yang perlu diakses ulang</li>
+                                        </ul>
+                                        <div
+                                            class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900">
                                         </div>
                                     </div>
-                                @endif
-                            </div>
+                                </div>
+                            @endif
                         @endif
-                        
+                    </div>
+
+                    <!-- Pricing Section -->
+                    <div class="mb-6 pb-6 border-b border-gray-200">
                         @if ($note->price > 0)
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-yellow-100 flex-wrap">
+                            <div class="flex flex-wrap items-center gap-3">
                                 @php
                                     $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
                                     $displayPrice = isset($premiumDiscountPrice) ? $premiumDiscountPrice : $basePrice;
                                 @endphp
-                                
-                                @if ($note->hasDiscount())
-                                    <div class="flex flex-col items-end">
-                                        <span class="text-xs text-gray-500 line-through">{{ currency($note->price) }}</span>
-                                        <span class="text-base font-semibold text-green-600">{{ currency($note->discount_price) }}</span>
-                                    </div>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-500 text-white">
-                                        -{{ $note->discount_percent }}%
-                                    </span>
-                                @else
-                                    <span class="text-base font-semibold text-yellow-800">{{ currency($basePrice) }}</span>
-                                @endif
-                                
-                                @if(isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
-                                    <div class="flex flex-col items-end">
-                                        @if(!$note->hasDiscount())
-                                            <span class="text-xs text-gray-500 line-through">{{ currency($basePrice) }}</span>
-                                        @endif
-                                        <span class="text-base font-semibold text-green-600">{{ currency($displayPrice) }}</span>
-                                    </div>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-md">
-                                        <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                        </svg>
-                                        -{{ $premiumDiscountPercent }}% Premium
-                                    </span>
-                                @endif
+
+                                <div class="flex items-baseline gap-3">
+                                    @if ($note->hasDiscount())
+                                        <div class="flex flex-col">
+                                            <span
+                                                class="text-xs text-gray-500 line-through mb-0.5">{{ currency($note->price) }}</span>
+                                            <span
+                                                class="text-2xl font-bold text-green-600">{{ currency($note->discount_price) }}</span>
+                                        </div>
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-red-500 text-white shadow-sm">
+                                            -{{ $note->discount_percent }}%
+                                        </span>
+                                    @else
+                                        <span class="text-2xl font-bold text-gray-900">{{ currency($basePrice) }}</span>
+                                    @endif
+
+                                    @if (isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
+                                        <div class="flex flex-col">
+                                            @if (!$note->hasDiscount())
+                                                <span
+                                                    class="text-xs text-gray-500 line-through mb-0.5">{{ currency($basePrice) }}</span>
+                                            @endif
+                                            <span
+                                                class="text-2xl font-bold text-green-600">{{ currency($displayPrice) }}</span>
+                                        </div>
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-md">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                            -{{ $premiumDiscountPercent }}% Premium
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         @else
-                            <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                {{ __('messages.free') }}
-                            </span>
+                            <div
+                                class="inline-flex items-center px-4 py-2 rounded-lg bg-gray-100 text-gray-800 border border-gray-200">
+                                <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span class="text-lg font-semibold">{{ __('messages.free') }}</span>
+                            </div>
                         @endif
 
                         @if ($taxPreview)
-                            <div class="w-full mt-3 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-gray-700">
-                                <div class="flex justify-between">
-                                    <span>{{ __('messages.tax_subtotal_label') }}</span>
-                                    <span class="font-medium text-gray-900">{{ currency($taxPreview['price_excluding_tax']) }}</span>
+                            <div
+                                class="w-full mt-4 bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-xl p-4 shadow-sm">
+                                <div class="space-y-2.5">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">{{ __('messages.tax_subtotal_label') }}</span>
+                                        <span
+                                            class="text-sm font-semibold text-gray-900">{{ currency($taxPreview['price_excluding_tax']) }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">
+                                            {{ __('messages.tax_label') }} ({{ $taxPreview['tax_percent'] }}%)
+                                            {!! $taxPreview['tax_inclusive']
+                                                ? '<span class="text-xs text-emerald-600 font-semibold ml-1.5 px-1.5 py-0.5 bg-emerald-50 rounded">' .
+                                                    __('messages.tax_inclusive_badge') .
+                                                    '</span>'
+                                                : '' !!}
+                                        </span>
+                                        <span
+                                            class="text-sm font-semibold text-gray-900">{{ currency($taxPreview['tax_amount']) }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center pt-2.5 border-t border-slate-300">
+                                        <span
+                                            class="text-base font-bold text-gray-900">{{ __('messages.tax_total_label') }}</span>
+                                        <span
+                                            class="text-base font-bold text-gray-900">{{ currency($taxPreview['total_amount']) }}</span>
+                                    </div>
                                 </div>
-                                <div class="flex justify-between mt-1">
-                                    <span>
-                                        {{ __('messages.tax_label') }} ({{ $taxPreview['tax_percent'] }}%)
-                                        {!! $taxPreview['tax_inclusive'] ? '<span class="text-xs text-emerald-600 font-semibold ml-1">'.__('messages.tax_inclusive_badge').'</span>' : '' !!}
-                                    </span>
-                                    <span class="font-medium text-gray-900">{{ currency($taxPreview['tax_amount']) }}</span>
-                                </div>
-                                <div class="flex justify-between mt-2 border-t border-slate-200 pt-2">
-                                    <span class="font-semibold text-gray-900">{{ __('messages.tax_total_label') }}</span>
-                                    <span class="font-semibold text-gray-900">{{ currency($taxPreview['total_amount']) }}</span>
-                                </div>
-                                <p class="mt-2 text-xs text-gray-500">
+                                <p class="mt-3 text-xs text-gray-600 leading-relaxed">
                                     {{ $taxPreview['tax_inclusive'] ? __('messages.tax_inclusive_help') : __('messages.tax_exclusive_help') }}
                                     @if (!empty($taxPreview['country_code']))
-                                        <span class="font-semibold text-gray-600">({{ strtoupper($taxPreview['country_code']) }})</span>
+                                        <span
+                                            class="font-semibold text-gray-700">({{ strtoupper($taxPreview['country_code']) }})</span>
                                     @endif
                                 </p>
                             </div>
@@ -264,14 +309,14 @@
                     </div>
 
                     <!-- Title -->
-                    <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ $note->title }}</h1>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-5 leading-tight">{{ $note->title }}</h1>
 
                     <!-- Tags -->
                     @if ($note->tags->count() > 0)
-                        <div class="mb-4 flex flex-wrap gap-2">
+                        <div class="mb-6 flex flex-wrap gap-2">
                             @foreach ($note->tags as $tag)
                                 <span
-                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                    class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors">
                                     {{ $tag->name }}
                                 </span>
                             @endforeach
@@ -279,11 +324,11 @@
                     @endif
 
                     <!-- Author, Meta Info, and Share Buttons -->
-                    <div class="mb-6 text-sm text-gray-600 border-b border-gray-200 pb-4">
+                    <div class="mb-6 text-sm text-gray-600 border-b border-gray-200 pb-6">
                         <div class="flex items-center justify-between flex-wrap gap-4">
                             <div class="flex items-center gap-4 flex-wrap">
                                 <a href="{{ route('public.profile.show', $note->user->username) }}"
-                                    class="flex items-center hover:text-blue-600 transition-colors duration-200 group"
+                                    class="flex items-center text-gray-900 hover:text-blue-600 transition-colors duration-200 group"
                                     title="{{ __('messages.view_all_notes_from', ['name' => $note->user->name]) }}">
                                     <div
                                         class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200">
@@ -304,7 +349,7 @@
                                     <div>
                                         <div class="flex items-center gap-2 flex-wrap">
                                             <span
-                                                class="font-medium text-gray-900 group-hover:text-blue-600">{{ $note->user->name }}</span>
+                                                class="font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-200">{{ $note->user->name }}</span>
                                             {{-- Premium Buyer badge removed - all users now have free access to all features --}}
                                             {{-- @if ($note->user->hasPremium() && $note->user->role === 'buyer')
                                                 <span
@@ -333,7 +378,7 @@
                                             <span class="text-xs text-gray-500">• {{ $note->user->location }}</span>
                                         @endif
                                         <div
-                                            class="text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                            class="text-xs text-gray-900 group-hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-200">
                                             {{ __('messages.view_all_notes_arrow') }}
                                         </div>
                                         <div class="mt-2 flex items-center gap-2">
@@ -356,7 +401,8 @@
                                                     </span>
                                                 </div>
                                             @else
-                                                <span class="text-xs text-gray-500">{{ __('messages.seller_no_ratings_yet') }}</span>
+                                                <span
+                                                    class="text-xs text-gray-500">{{ __('messages.seller_no_ratings_yet') }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -457,7 +503,8 @@
                                 <!-- Reading Progress Bar -->
                                 <div id="reading-progress-container" class="mb-4">
                                     <div class="flex items-center justify-between mb-2">
-                                        <span class="text-sm font-medium text-gray-700">{{ __('messages.reading_progress') }}</span>
+                                        <span
+                                            class="text-sm font-medium text-gray-700">{{ __('messages.reading_progress') }}</span>
                                         <span id="progress-percentage" class="text-sm font-semibold text-blue-600">0%</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-2.5">
@@ -526,7 +573,8 @@
                                             </h4>
                                             <button type="button" onclick="toggleBookmarks()"
                                                 class="text-sm text-purple-700 hover:text-purple-900">
-                                                <span id="bookmarks-toggle-text">{{ __('messages.bookmarks_toggle_show') }}</span>
+                                                <span
+                                                    id="bookmarks-toggle-text">{{ __('messages.bookmarks_toggle_show') }}</span>
                                             </button>
                                         </div>
                                         <div id="bookmarks-list" class="space-y-2">
@@ -542,33 +590,39 @@
                         </div>
 
                         <!-- Demo Link (Prominent Display) -->
-                        @if($note->demo_link)
+                        @if ($note->demo_link)
                             <div class="mb-6">
-                                <div class="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 rounded-xl border-2 border-green-300 p-5 shadow-lg hover:shadow-xl transition-all duration-300">
+                                <div
+                                    class="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 rounded-xl border-2 border-green-300 p-5 shadow-lg hover:shadow-xl transition-all duration-300">
                                     <div class="flex items-center justify-between flex-wrap gap-4">
                                         <div class="flex items-center gap-4 flex-1 min-w-0">
-                                            <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            <div
+                                                class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                 </svg>
                                             </div>
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex items-center gap-2 mb-1 flex-wrap">
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-600 text-white uppercase tracking-wide">
+                                                    <span
+                                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-600 text-white uppercase tracking-wide">
                                                         🚀 Demo Live
                                                     </span>
                                                     <h3 class="text-base font-bold text-gray-900">Coba Demo Sekarang!</h3>
                                                 </div>
-                                                <p class="text-sm text-gray-700 mb-1">Lihat dan coba produk ini secara langsung sebelum membeli</p>
+                                                <p class="text-sm text-gray-700 mb-1">Lihat dan coba produk ini secara
+                                                    langsung sebelum membeli</p>
                                                 <p class="text-xs text-gray-500 truncate">{{ $note->demo_link }}</p>
                                             </div>
                                         </div>
-                                        <a href="{{ $note->demo_link }}" 
-                                           target="_blank" 
-                                           rel="noopener noreferrer"
-                                           class="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg shadow-md hover:from-green-700 hover:to-emerald-700 hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-sm">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                        <a href="{{ $note->demo_link }}" target="_blank" rel="noopener noreferrer"
+                                            class="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg shadow-md hover:from-green-700 hover:to-emerald-700 hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                             </svg>
                                             Buka Demo
                                         </a>
@@ -592,7 +646,7 @@
                                     @foreach ($note->attachments as $attachment)
                                         @php
                                             $filename = is_array($attachment)
-                                                ? ($attachment['filename'] ?? __('messages.unknown_file_name'))
+                                                ? $attachment['filename'] ?? __('messages.unknown_file_name')
                                                 : basename($attachment);
                                         @endphp
                                         <a href="{{ route('notes.attachments.download', ['note' => $note->id, 'filename' => $filename]) }}"
@@ -627,7 +681,8 @@
                                 <div class="grid grid-cols-2 md:grid-cols-{{ min($note->getThumbnailCount(), 5) }} gap-4">
                                     @foreach ($note->thumbnails as $thumbnail)
                                         <div class="relative group">
-                                            <img src="{{ Storage::url($thumbnail) }}" alt="{{ __('messages.note_thumbnail_alt') }}"
+                                            <img src="{{ Storage::url($thumbnail) }}"
+                                                alt="{{ __('messages.note_thumbnail_alt') }}"
                                                 class="w-full h-48 object-cover rounded-lg border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
                                         </div>
                                     @endforeach
@@ -693,8 +748,10 @@
                             @else
                                 <div class="relative rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6">
                                     <div class="flex flex-col items-center text-center space-y-3">
-                                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 text-gray-600">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div
+                                            class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 text-gray-600">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M12 11c.5304 0 1.0391-.2107 1.4142-.5858C13.7893 10.0391 14 9.5304 14 9c0-1.1046-.8954-2-2-2s-2 .8954-2 2c0 .5304.2107 1.0391.5858 1.4142C10.9609 10.7893 11.4696 11 12 11Zm0 0v3m-6 4h12a2 2 0 0 0 2-2v-2.382a2 2 0 0 0-.684-1.5L13.316 6.5a2 2 0 0 0-2.632 0L4.684 10.118A2 2 0 0 0 4 11.618V14a2 2 0 0 0 2 2Z" />
                                             </svg>
@@ -709,8 +766,9 @@
                                         </div>
                                         @if (!empty($previewContent))
                                             @php
-                                                $previewContainsHtml = is_string($previewContent)
-                                                    && $previewContent !== strip_tags($previewContent);
+                                                $previewContainsHtml =
+                                                    is_string($previewContent) &&
+                                                    $previewContent !== strip_tags($previewContent);
                                             @endphp
                                             <div class="max-w-2xl text-xs text-gray-500 leading-relaxed">
                                                 {!! $previewContainsHtml ? $previewContent : nl2br(e($previewContent)) !!}
@@ -755,7 +813,8 @@
                                                     clip-rule="evenodd" />
                                             </svg>
                                             <span>{{ $note->file_count }} {{ __('messages.downloadable_files') }}
-                                                <span class="text-xs text-gray-600">({{ __('messages.locked_until_purchase') }})</span></span>
+                                                <span
+                                                    class="text-xs text-gray-600">({{ __('messages.locked_until_purchase') }})</span></span>
                                         </li>
                                     @endif
                                     <li class="flex items-start">
@@ -835,18 +894,23 @@
                             </div>
                         @elseif($canBuy && $note->price > 0)
                             <div class="mt-6 pt-6 border-t border-gray-200">
-                                @if($note->isStandardMode())
+                                @if ($note->isStandardMode())
                                     <!-- Standard Mode Info for Buyer -->
                                     <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
                                         <div class="flex items-start">
-                                            <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                            <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor"
+                                                viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                    clip-rule="evenodd" />
                                             </svg>
                                             <div class="flex-1">
-                                                <p class="text-sm font-medium text-blue-800 mb-1">Standard Mode - Multiple Sales</p>
+                                                <p class="text-sm font-medium text-blue-800 mb-1">Standard Mode - Multiple
+                                                    Sales</p>
                                                 <p class="text-xs text-blue-700">
-                                                    Note ini menggunakan Standard Mode. Anda bisa membeli dan mengakses note ini kapan saja, 
-                                                    tetapi <strong>tidak bisa menjual kembali</strong> ke buyer lain. 
+                                                    Note ini menggunakan Standard Mode. Anda bisa membeli dan mengakses note ini
+                                                    kapan saja,
+                                                    tetapi <strong>tidak bisa menjual kembali</strong> ke buyer lain.
                                                     Note ini bisa dibeli oleh banyak buyer secara bersamaan.
                                                 </p>
                                             </div>
@@ -862,12 +926,15 @@
                                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
                                         @php
-                                            $displayPrice = $premiumDiscountPrice ?? ($note->hasDiscount() ? $note->discount_price : $note->price);
+                                            $displayPrice =
+                                                $premiumDiscountPrice ??
+                                                ($note->hasDiscount() ? $note->discount_price : $note->price);
                                             $formattedDisplayPrice = currency($displayPrice);
                                         @endphp
                                         {{ __('messages.buy_note_price', ['price' => $formattedDisplayPrice]) }}
-                                        @if(isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
-                                            <span class="ml-2 text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full">
+                                        @if (isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
+                                            <span
+                                                class="ml-2 text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full">
                                                 -{{ $premiumDiscountPercent }}% {{ __('messages.premium_badge_label') }}
                                             </span>
                                         @endif
@@ -878,13 +945,17 @@
                                     <strong
                                         class="font-semibold text-gray-900">{{ currency(auth()->user()->wallet_balance, auth()->user()->currency) }}</strong>
                                     @php
-                                        $finalPrice = $premiumDiscountPrice ?? ($note->hasDiscount() ? $note->discount_price : $note->price);
+                                        $finalPrice =
+                                            $premiumDiscountPrice ??
+                                            ($note->hasDiscount() ? $note->discount_price : $note->price);
                                     @endphp
-                                    @if(isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
+                                    @if (isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
                                         <div class="mt-2 text-xs text-gray-500">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                                            <span
+                                                class="inline-flex items-center px-2 py-0.5 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
                                                 <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    <path
+                                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                 </svg>
                                                 {{ __('messages.premium_discount_badge', ['amount' => currency($basePrice - $finalPrice), 'percent' => $premiumDiscountPercent]) }}
                                             </span>
@@ -908,8 +979,10 @@
                                                 clip-rule="evenodd" />
                                         </svg>
                                         <div>
-                                            <p class="text-sm font-medium text-yellow-800 mb-1">{{ __('messages.seller_cannot_purchase_title') }}</p>
-                                            <p class="text-xs text-yellow-700">{{ __('messages.seller_cannot_purchase_description') }}</p>
+                                            <p class="text-sm font-medium text-yellow-800 mb-1">
+                                                {{ __('messages.seller_cannot_purchase_title') }}</p>
+                                            <p class="text-xs text-yellow-700">
+                                                {{ __('messages.seller_cannot_purchase_description') }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -932,7 +1005,8 @@
                                                     clip-rule="evenodd" />
                                             </svg>
                                             <div>
-                                                <p class="text-sm font-medium text-blue-800 mb-1">{{ __('messages.buyer_owns_note_title') }}</p>
+                                                <p class="text-sm font-medium text-blue-800 mb-1">
+                                                    {{ __('messages.buyer_owns_note_title') }}</p>
                                                 <p class="text-xs text-blue-700 mb-2">
                                                     {{ __('messages.buyer_owns_note_description') }}
                                                 </p>
@@ -946,7 +1020,9 @@
                                                 </div>
                                                 @if ($note->originalCreator)
                                                     <p class="text-xs text-blue-600 mt-2">
-                                                        {!! __('messages.original_creator_notice', ['name' => '<strong>' . e($note->originalCreator->name) . '</strong>']) !!}
+                                                        {!! __('messages.original_creator_notice', [
+                                                            'name' => '<strong>' . e($note->originalCreator->name) . '</strong>',
+                                                        ]) !!}
                                                         @if ($note->originalCreator->id !== auth()->id())
                                                             {{ __('messages.original_creator_commission_note') }}
                                                         @endif
@@ -959,10 +1035,12 @@
                                         {!! __('messages.buyer_resale_notice') !!}
                                     </p>
                                     <div class="mt-4">
-                                        <a href="{{ route('notes.resale.form', $note) }}" 
+                                        <a href="{{ route('notes.resale.form', $note) }}"
                                             class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                             Set Harga & Jual Kembali
                                         </a>
@@ -971,19 +1049,23 @@
                             </div>
                         @elseif($hasPurchasedBefore && !$isNoteOwner)
                             <div class="mt-6 pt-6 border-t border-gray-200">
-                                @if($canRepurchase && $note->isScarcityMode())
+                                @if ($canRepurchase && $note->isScarcityMode())
                                     <!-- Can Repurchase (Scarcity Mode) -->
                                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                                         <div class="flex items-start">
-                                            <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                            <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="currentColor"
+                                                viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                    clip-rule="evenodd" />
                                             </svg>
                                             <div class="flex-1">
                                                 <p class="text-sm font-medium text-blue-800 mb-1">Beli Kembali Catatan Ini</p>
                                                 <p class="text-xs text-blue-700 mb-3">
-                                                    Anda sudah pernah membeli dan menjual catatan ini. Anda bisa membeli kembali sekarang.
+                                                    Anda sudah pernah membeli dan menjual catatan ini. Anda bisa membeli kembali
+                                                    sekarang.
                                                 </p>
-                                                @if($isWithinGracePeriod && $gracePeriodEndsAt)
+                                                @if ($isWithinGracePeriod && $gracePeriodEndsAt)
                                                     <div class="bg-green-100 border border-green-300 rounded p-2 mb-3">
                                                         <p class="text-xs font-semibold text-green-800 mb-1">
                                                             ⏰ Grace Period Aktif
@@ -991,8 +1073,9 @@
                                                         <p class="text-xs text-green-700 mb-2">
                                                             Beli kembali dengan harga original hingga:
                                                         </p>
-                                                        <div id="grace-period-countdown" class="text-xs font-bold text-green-900" 
-                                                             data-end-time="{{ $gracePeriodEndsAt->timestamp }}">
+                                                        <div id="grace-period-countdown"
+                                                            class="text-xs font-bold text-green-900"
+                                                            data-end-time="{{ $gracePeriodEndsAt->timestamp }}">
                                                             Menghitung...
                                                         </div>
                                                     </div>
@@ -1002,18 +1085,23 @@
                                                             ⚠️ Grace Period Berakhir
                                                         </p>
                                                         <p class="text-xs text-yellow-700">
-                                                            Grace period berakhir pada {{ $gracePeriodEndsAt->format('d M Y H:i') }}. Harga pembelian ulang sekarang lebih tinggi.
+                                                            Grace period berakhir pada
+                                                            {{ $gracePeriodEndsAt->format('d M Y H:i') }}. Harga pembelian
+                                                            ulang sekarang lebih tinggi.
                                                         </p>
                                                     </div>
                                                 @endif
                                                 <div class="flex items-center gap-3">
                                                     <div>
                                                         <p class="text-xs text-gray-600">Harga Pembelian Ulang:</p>
-                                                        <p class="text-lg font-bold text-blue-900">{{ currency($repurchasePrice) }}</p>
+                                                        <p class="text-lg font-bold text-blue-900">
+                                                            {{ currency($repurchasePrice) }}</p>
                                                     </div>
-                                                    <form action="{{ route('marketplace.purchase', $note) }}" method="POST" class="ml-auto">
+                                                    <form action="{{ route('marketplace.purchase', $note) }}" method="POST"
+                                                        class="ml-auto">
                                                         @csrf
-                                                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                                                        <button type="submit"
+                                                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
                                                             Beli Kembali
                                                         </button>
                                                     </form>
@@ -1022,7 +1110,7 @@
                                         </div>
                                     </div>
                                 @endif
-                                
+
                                 <!-- Access Revoked Message -->
                                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                                     <div class="flex items-start">
@@ -1033,7 +1121,8 @@
                                                 clip-rule="evenodd" />
                                         </svg>
                                         <div>
-                                            <p class="text-sm font-medium text-yellow-800 mb-1">{{ __('messages.access_revoked_title') }}</p>
+                                            <p class="text-sm font-medium text-yellow-800 mb-1">
+                                                {{ __('messages.access_revoked_title') }}</p>
                                             <p class="text-xs text-yellow-700">
                                                 {!! __('messages.access_revoked_description') !!}
                                             </p>
@@ -1104,7 +1193,8 @@
                                     <div class="mb-4">
                                         <label for="comment"
                                             class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.comment_optional') }}</label>
-                                        <textarea name="comment" id="comment" rows="4" placeholder="{{ __('messages.share_thoughts_about_note') }}"
+                                        <textarea name="comment" id="comment" rows="4"
+                                            placeholder="{{ __('messages.share_thoughts_about_note') }}"
                                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 @error('comment') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror"></textarea>
                                         @error('comment')
                                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -1130,7 +1220,9 @@
                                             ($currentUser->id === $note->user_id ||
                                                 $currentUser->id === $review->user_id ||
                                                 $currentUser->hasRole('admin'));
-                                        $canDeleteReview = $currentUser && ($currentUser->id === $review->user_id || $currentUser->hasRole('admin'));
+                                        $canDeleteReview =
+                                            $currentUser &&
+                                            ($currentUser->id === $review->user_id || $currentUser->hasRole('admin'));
                                     @endphp
                                     <div id="review-{{ $review->id }}"
                                         class="pb-6 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
@@ -1220,7 +1312,10 @@
                                         @if ($review->replies && $review->replies->count() > 0)
                                             <div class="mt-4 space-y-4">
                                                 @foreach ($review->replies as $reply)
-                                                    @include('marketplace.partials.review-reply', ['reply' => $reply, 'review' => $review])
+                                                    @include('marketplace.partials.review-reply', [
+                                                        'reply' => $reply,
+                                                        'review' => $review,
+                                                    ])
                                                 @endforeach
                                             </div>
                                         @endif
@@ -1247,50 +1342,63 @@
                     @auth
                         <div class="mb-4">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <button onclick="toggleReaction('like')" 
+                                <button onclick="toggleReaction('like')"
                                     class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'like' ? 'bg-blue-50 border-blue-300' : '' }}"
                                     data-reaction="like">
                                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.834a1 1 0 001.364.97l5-.833a1 1 0 00.636-.97v-5.834a1 1 0 00-.636-.97l-5-.833a1 1 0 00-1.364.97zM15.5 2a1.5 1.5 0 011.5 1.5v7a1.5 1.5 0 01-1.5 1.5h-4a1.5 1.5 0 01-1.5-1.5v-7A1.5 1.5 0 0111.5 2h4z" />
+                                        <path
+                                            d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.834a1 1 0 001.364.97l5-.833a1 1 0 00.636-.97v-5.834a1 1 0 00-.636-.97l-5-.833a1 1 0 00-1.364.97zM15.5 2a1.5 1.5 0 011.5 1.5v7a1.5 1.5 0 01-1.5 1.5h-4a1.5 1.5 0 01-1.5-1.5v-7A1.5 1.5 0 0111.5 2h4z" />
                                     </svg>
                                     <span>{{ __('Like') }}</span>
-                                    <span class="ml-2 text-sm text-gray-600" id="reaction-count-like">{{ $reactionsSummary['like'] ?? 0 }}</span>
+                                    <span class="ml-2 text-sm text-gray-600"
+                                        id="reaction-count-like">{{ $reactionsSummary['like'] ?? 0 }}</span>
                                 </button>
-                                <button onclick="toggleReaction('love')" 
+                                <button onclick="toggleReaction('love')"
                                     class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'love' ? 'bg-red-50 border-red-300' : '' }}"
                                     data-reaction="love">
                                     <svg class="w-5 h-5 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                                        <path fill-rule="evenodd"
+                                            d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                                            clip-rule="evenodd" />
                                     </svg>
                                     <span>{{ __('Love') }}</span>
-                                    <span class="ml-2 text-sm text-gray-600" id="reaction-count-love">{{ $reactionsSummary['love'] ?? 0 }}</span>
+                                    <span class="ml-2 text-sm text-gray-600"
+                                        id="reaction-count-love">{{ $reactionsSummary['love'] ?? 0 }}</span>
                                 </button>
-                                <button onclick="toggleReaction('helpful')" 
+                                <button onclick="toggleReaction('helpful')"
                                     class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'helpful' ? 'bg-green-50 border-green-300' : '' }}"
                                     data-reaction="helpful">
                                     <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
                                     </svg>
                                     <span>{{ __('Helpful') }}</span>
-                                    <span class="ml-2 text-sm text-gray-600" id="reaction-count-helpful">{{ $reactionsSummary['helpful'] ?? 0 }}</span>
+                                    <span class="ml-2 text-sm text-gray-600"
+                                        id="reaction-count-helpful">{{ $reactionsSummary['helpful'] ?? 0 }}</span>
                                 </button>
-                                <button onclick="toggleReaction('insightful')" 
+                                <button onclick="toggleReaction('insightful')"
                                     class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'insightful' ? 'bg-purple-50 border-purple-300' : '' }}"
                                     data-reaction="insightful">
                                     <svg class="w-5 h-5 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        <path
+                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                     </svg>
                                     <span>{{ __('Insightful') }}</span>
-                                    <span class="ml-2 text-sm text-gray-600" id="reaction-count-insightful">{{ $reactionsSummary['insightful'] ?? 0 }}</span>
+                                    <span class="ml-2 text-sm text-gray-600"
+                                        id="reaction-count-insightful">{{ $reactionsSummary['insightful'] ?? 0 }}</span>
                                 </button>
-                                <button onclick="toggleReaction('thanks')" 
+                                <button onclick="toggleReaction('thanks')"
                                     class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'thanks' ? 'bg-yellow-50 border-yellow-300' : '' }}"
                                     data-reaction="thanks">
                                     <svg class="w-5 h-5 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.986 1.164l-1 7A1 1 0 0115 17H4a1 1 0 01-.986-1.164l1-7A1 1 0 015 8h4V2a1 1 0 011.3-.954z" clip-rule="evenodd" />
+                                        <path fill-rule="evenodd"
+                                            d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.986 1.164l-1 7A1 1 0 0115 17H4a1 1 0 01-.986-1.164l1-7A1 1 0 015 8h4V2a1 1 0 011.3-.954z"
+                                            clip-rule="evenodd" />
                                     </svg>
                                     <span>{{ __('Thanks') }}</span>
-                                    <span class="ml-2 text-sm text-gray-600" id="reaction-count-thanks">{{ $reactionsSummary['thanks'] ?? 0 }}</span>
+                                    <span class="ml-2 text-sm text-gray-600"
+                                        id="reaction-count-thanks">{{ $reactionsSummary['thanks'] ?? 0 }}</span>
                                 </button>
                             </div>
                         </div>
@@ -1303,16 +1411,17 @@
             <!-- Comments Section -->
             <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Comments') }} ({{ $comments->total() }})</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Comments') }} ({{ $comments->total() }})
+                    </h2>
                 </div>
                 <div class="p-6">
                     @auth
                         <!-- Comment Form -->
-                        <form action="{{ route('notes.comments.store', $note) }}" method="POST" class="mb-6 pb-6 border-b border-gray-200">
+                        <form action="{{ route('notes.comments.store', $note) }}" method="POST"
+                            class="mb-6 pb-6 border-b border-gray-200">
                             @csrf
                             <div class="mb-4">
-                                <textarea name="content" rows="3" required
-                                    placeholder="{{ __('Write a comment...') }}"
+                                <textarea name="content" rows="3" required placeholder="{{ __('Write a comment...') }}"
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
                             </div>
                             <button type="submit"
@@ -1325,55 +1434,69 @@
                     @endauth
 
                     <!-- Comments List -->
-                    @if($comments->count() > 0)
+                    @if ($comments->count() > 0)
                         <div class="space-y-6">
-                            @foreach($comments as $comment)
-                                <div id="comment-{{ $comment->id }}" class="pb-6 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
+                            @foreach ($comments as $comment)
+                                <div id="comment-{{ $comment->id }}"
+                                    class="pb-6 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
                                     <div class="flex gap-4">
                                         <div class="flex-shrink-0">
-                                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                                @if($comment->user->avatar)
-                                                    <img src="{{ Storage::url($comment->user->avatar) }}" alt="{{ $comment->user->name }}" class="w-10 h-10 rounded-full object-cover">
+                                            <div
+                                                class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                                @if ($comment->user->avatar)
+                                                    <img src="{{ Storage::url($comment->user->avatar) }}"
+                                                        alt="{{ $comment->user->name }}"
+                                                        class="w-10 h-10 rounded-full object-cover">
                                                 @else
-                                                    <span class="text-sm font-semibold text-gray-600">{{ substr($comment->user->name, 0, 1) }}</span>
+                                                    <span
+                                                        class="text-sm font-semibold text-gray-600">{{ substr($comment->user->name, 0, 1) }}</span>
                                                 @endif
                                             </div>
                                         </div>
                                         <div class="flex-1">
                                             <div class="flex items-start justify-between mb-2">
                                                 <div>
-                                                    <p class="text-sm font-semibold text-gray-900">{{ $comment->user->name }}</p>
-                                                    <p class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</p>
+                                                    <p class="text-sm font-semibold text-gray-900">
+                                                        {{ $comment->user->name }}</p>
+                                                    <p class="text-xs text-gray-500">
+                                                        {{ $comment->created_at->diffForHumans() }}</p>
                                                 </div>
                                                 @auth
-                                                    @if($comment->user_id === auth()->id() || auth()->user()->hasRole('admin'))
-                                                        <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="inline">
+                                                    @if ($comment->user_id === auth()->id() || auth()->user()->hasRole('admin'))
+                                                        <form action="{{ route('comments.destroy', $comment) }}"
+                                                            method="POST" class="inline">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" onclick="return confirm('{{ __('Delete this comment?') }}')"
+                                                            <button type="submit"
+                                                                onclick="return confirm('{{ __('Delete this comment?') }}')"
                                                                 class="text-xs text-red-600 hover:text-red-800">{{ __('Delete') }}</button>
                                                         </form>
                                                     @endif
                                                 @endauth
                                             </div>
-                                            <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $comment->content }}</p>
-                                            
+                                            <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $comment->content }}
+                                            </p>
+
                                             @auth
-                                                <button onclick="showReplyForm({{ $comment->id }})" 
+                                                <button onclick="showReplyForm({{ $comment->id }})"
                                                     class="mt-2 text-xs text-blue-600 hover:text-blue-800">
                                                     {{ __('Reply') }}
                                                 </button>
-                                                
+
                                                 <!-- Reply Form -->
-                                                <form id="reply-form-{{ $comment->id }}" action="{{ route('comments.reply', $comment) }}" method="POST" class="mt-2 hidden">
+                                                <form id="reply-form-{{ $comment->id }}"
+                                                    action="{{ route('comments.reply', $comment) }}" method="POST"
+                                                    class="mt-2 hidden">
                                                     @csrf
                                                     <textarea name="content" rows="2" required
                                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"></textarea>
                                                     <div class="mt-2 flex gap-2">
-                                                        <button type="submit" class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                                                        <button type="submit"
+                                                            class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
                                                             {{ __('Reply') }}
                                                         </button>
-                                                        <button type="button" onclick="hideReplyForm({{ $comment->id }})" class="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                                                        <button type="button" onclick="hideReplyForm({{ $comment->id }})"
+                                                            class="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
                                                             {{ __('Cancel') }}
                                                         </button>
                                                     </div>
@@ -1381,23 +1504,30 @@
                                             @endauth
 
                                             <!-- Replies -->
-                                            @if($comment->replies->count() > 0)
+                                            @if ($comment->replies->count() > 0)
                                                 <div class="mt-4 ml-6 space-y-4 border-l-2 border-gray-200 pl-4">
-                                                    @foreach($comment->replies as $reply)
+                                                    @foreach ($comment->replies as $reply)
                                                         <div class="flex gap-3">
                                                             <div class="flex-shrink-0">
-                                                                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                                                                    @if($reply->user->avatar)
-                                                                        <img src="{{ Storage::url($reply->user->avatar) }}" alt="{{ $reply->user->name }}" class="w-8 h-8 rounded-full object-cover">
+                                                                <div
+                                                                    class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                                                    @if ($reply->user->avatar)
+                                                                        <img src="{{ Storage::url($reply->user->avatar) }}"
+                                                                            alt="{{ $reply->user->name }}"
+                                                                            class="w-8 h-8 rounded-full object-cover">
                                                                     @else
-                                                                        <span class="text-xs font-semibold text-gray-600">{{ substr($reply->user->name, 0, 1) }}</span>
+                                                                        <span
+                                                                            class="text-xs font-semibold text-gray-600">{{ substr($reply->user->name, 0, 1) }}</span>
                                                                     @endif
                                                                 </div>
                                                             </div>
                                                             <div class="flex-1">
-                                                                <p class="text-xs font-semibold text-gray-900">{{ $reply->user->name }}</p>
-                                                                <p class="text-xs text-gray-700 mt-1">{{ $reply->content }}</p>
-                                                                <p class="text-xs text-gray-500 mt-1">{{ $reply->created_at->diffForHumans() }}</p>
+                                                                <p class="text-xs font-semibold text-gray-900">
+                                                                    {{ $reply->user->name }}</p>
+                                                                <p class="text-xs text-gray-700 mt-1">
+                                                                    {{ $reply->content }}</p>
+                                                                <p class="text-xs text-gray-500 mt-1">
+                                                                    {{ $reply->created_at->diffForHumans() }}</p>
                                                             </div>
                                                         </div>
                                                     @endforeach
@@ -1412,7 +1542,8 @@
                             {{ $comments->links() }}
                         </div>
                     @else
-                        <p class="text-center text-gray-500 py-8">{{ __('No comments yet. Be the first to comment!') }}</p>
+                        <p class="text-center text-gray-500 py-8">{{ __('No comments yet. Be the first to comment!') }}
+                        </p>
                     @endif
                 </div>
             </div>
@@ -1420,16 +1551,17 @@
             <!-- Q&A Section -->
             <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Questions & Answers') }} ({{ $questions->total() }})</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Questions & Answers') }}
+                        ({{ $questions->total() }})</h2>
                 </div>
                 <div class="p-6">
                     @auth
                         <!-- Ask Question Form -->
-                        <form action="{{ route('notes.questions.store', $note) }}" method="POST" class="mb-6 pb-6 border-b border-gray-200">
+                        <form action="{{ route('notes.questions.store', $note) }}" method="POST"
+                            class="mb-6 pb-6 border-b border-gray-200">
                             @csrf
                             <div class="mb-4">
-                                <textarea name="question" rows="3" required
-                                    placeholder="{{ __('Ask a question about this note...') }}"
+                                <textarea name="question" rows="3" required placeholder="{{ __('Ask a question about this note...') }}"
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
                             </div>
                             <button type="submit"
@@ -1442,21 +1574,24 @@
                     @endauth
 
                     <!-- Questions List -->
-                    @if($questions->count() > 0)
+                    @if ($questions->count() > 0)
                         <div class="space-y-6">
-                            @foreach($questions as $question)
-                                <div id="question-{{ $question->id }}" class="pb-6 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
+                            @foreach ($questions as $question)
+                                <div id="question-{{ $question->id }}"
+                                    class="pb-6 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
                                     <div class="mb-3">
                                         <div class="flex items-start justify-between mb-2">
                                             <div class="flex-1">
-                                                <p class="text-sm font-semibold text-gray-900 mb-1">{{ $question->user->name }}</p>
+                                                <p class="text-sm font-semibold text-gray-900 mb-1">
+                                                    {{ $question->user->name }}</p>
                                                 <p class="text-sm text-gray-700">{{ $question->question }}</p>
-                                                <p class="text-xs text-gray-500 mt-1">{{ $question->created_at->diffForHumans() }}</p>
+                                                <p class="text-xs text-gray-500 mt-1">
+                                                    {{ $question->created_at->diffForHumans() }}</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    @if($question->isAnswered())
+                                    @if ($question->isAnswered())
                                         <div class="ml-6 pl-4 border-l-2 border-green-200 bg-green-50 rounded p-4">
                                             <div class="flex items-start justify-between mb-2">
                                                 <div class="flex-1">
@@ -1464,29 +1599,32 @@
                                                         {{ __('Answered by') }} {{ $question->answeredBy->name }}
                                                     </p>
                                                     <p class="text-sm text-gray-700">{{ $question->answer }}</p>
-                                                    <p class="text-xs text-gray-500 mt-1">{{ $question->answered_at->diffForHumans() }}</p>
+                                                    <p class="text-xs text-gray-500 mt-1">
+                                                        {{ $question->answered_at->diffForHumans() }}</p>
                                                 </div>
                                             </div>
-                                        @auth
-                                            <button onclick="markHelpful({{ $question->id }}, this)" 
-                                                class="mt-2 text-xs text-green-600 hover:text-green-800">
-                                                {{ __('Helpful') }} ({{ $question->helpful_count }})
-                                            </button>
-                                        @endauth
+                                            @auth
+                                                <button onclick="markHelpful({{ $question->id }}, this)"
+                                                    class="mt-2 text-xs text-green-600 hover:text-green-800">
+                                                    {{ __('Helpful') }} ({{ $question->helpful_count }})
+                                                </button>
+                                            @endauth
                                         </div>
                                     @elseif(auth()->check() && auth()->id() === $note->user_id)
                                         <!-- Answer Form (for seller) -->
-                                        <form action="{{ route('questions.answer', $question) }}" method="POST" class="ml-6 mt-3">
+                                        <form action="{{ route('questions.answer', $question) }}" method="POST"
+                                            class="ml-6 mt-3">
                                             @csrf
-                                            <textarea name="answer" rows="3" required
-                                                placeholder="{{ __('Write your answer...') }}"
+                                            <textarea name="answer" rows="3" required placeholder="{{ __('Write your answer...') }}"
                                                 class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"></textarea>
-                                            <button type="submit" class="mt-2 px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">
+                                            <button type="submit"
+                                                class="mt-2 px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">
                                                 {{ __('Answer') }}
                                             </button>
                                         </form>
                                     @else
-                                        <p class="text-xs text-gray-500 ml-6">{{ __('Waiting for seller to answer...') }}</p>
+                                        <p class="text-xs text-gray-500 ml-6">{{ __('Waiting for seller to answer...') }}
+                                        </p>
                                     @endif
                                 </div>
                             @endforeach
@@ -1502,41 +1640,48 @@
         </div>
 
         <!-- Related Notes Section -->
-        @if(isset($relatedNotes) && $relatedNotes->count() > 0)
+        @if (isset($relatedNotes) && $relatedNotes->count() > 0)
             <div class="mt-12 pt-8 border-t border-gray-200">
                 <div class="flex items-center justify-between mb-6">
                     <div>
                         <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
                             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                             </svg>
                             Catatan Terkait
                         </h2>
                         <p class="mt-1 text-sm text-gray-600">Catatan lain yang mungkin Anda sukai</p>
                     </div>
-                    <a href="{{ route('marketplace.index', ['ecosystem' => $note->ecosystem_category]) }}" class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
+                    <a href="{{ route('marketplace.index', ['ecosystem' => $note->ecosystem_category]) }}"
+                        class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
                         Lihat Semua →
                     </a>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($relatedNotes as $relatedNote)
-                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 group">
+                    @foreach ($relatedNotes as $relatedNote)
+                        <div
+                            class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 group">
                             <a href="{{ route('marketplace.show', $relatedNote) }}" class="block">
-                                @if($relatedNote->hasThumbnails())
+                                @if ($relatedNote->hasThumbnails())
                                     <div class="aspect-video bg-gray-100 overflow-hidden">
-                                        <img src="{{ Storage::url($relatedNote->thumbnails[0]) }}" 
-                                             alt="{{ $relatedNote->title }}"
-                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                        <img src="{{ Storage::url($relatedNote->thumbnails[0]) }}"
+                                            alt="{{ $relatedNote->title }}"
+                                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                     </div>
                                 @else
-                                    <div class="aspect-video bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-                                        <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    <div
+                                        class="aspect-video bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                                        <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                     </div>
                                 @endif
                                 <div class="p-4">
-                                    <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
+                                    <h3
+                                        class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
                                         {{ $relatedNote->title }}
                                     </h3>
                                     <p class="text-sm text-gray-600 line-clamp-2 mb-3">
@@ -1545,23 +1690,28 @@
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center gap-2">
                                             <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                                                @if($relatedNote->user->avatar)
-                                                    <img src="{{ str_starts_with($relatedNote->user->avatar, 'http') ? $relatedNote->user->avatar : Storage::url($relatedNote->user->avatar) }}" 
-                                                         alt="{{ $relatedNote->user->name }}"
-                                                         class="w-6 h-6 rounded-full object-cover">
+                                                @if ($relatedNote->user->avatar)
+                                                    <img src="{{ str_starts_with($relatedNote->user->avatar, 'http') ? $relatedNote->user->avatar : Storage::url($relatedNote->user->avatar) }}"
+                                                        alt="{{ $relatedNote->user->name }}"
+                                                        class="w-6 h-6 rounded-full object-cover">
                                                 @else
-                                                    <span class="text-xs font-semibold text-gray-600">{{ strtoupper(substr($relatedNote->user->name, 0, 1)) }}</span>
+                                                    <span
+                                                        class="text-xs font-semibold text-gray-600">{{ strtoupper(substr($relatedNote->user->name, 0, 1)) }}</span>
                                                 @endif
                                             </div>
-                                            <span class="text-xs text-gray-600">{{ Str::limit($relatedNote->user->name, 15) }}</span>
+                                            <span
+                                                class="text-xs text-gray-600">{{ Str::limit($relatedNote->user->name, 15) }}</span>
                                         </div>
                                         <div class="flex items-center gap-2">
-                                            @if($relatedNote->average_rating > 0)
+                                            @if ($relatedNote->average_rating > 0)
                                                 <div class="flex items-center gap-0.5">
-                                                    <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    <svg class="w-3 h-3 text-yellow-400" fill="currentColor"
+                                                        viewBox="0 0 20 20">
+                                                        <path
+                                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                     </svg>
-                                                    <span class="text-xs font-medium text-gray-700">{{ number_format($relatedNote->average_rating, 1) }}</span>
+                                                    <span
+                                                        class="text-xs font-medium text-gray-700">{{ number_format($relatedNote->average_rating, 1) }}</span>
                                                 </div>
                                             @endif
                                             <span class="text-sm font-bold text-blue-600">
@@ -1569,15 +1719,17 @@
                                             </span>
                                         </div>
                                     </div>
-                                    @if($relatedNote->tags->count() > 0)
+                                    @if ($relatedNote->tags->count() > 0)
                                         <div class="mt-3 flex flex-wrap gap-1">
-                                            @foreach($relatedNote->tags->take(2) as $tag)
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                            @foreach ($relatedNote->tags->take(2) as $tag)
+                                                <span
+                                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
                                                     {{ $tag->name }}
                                                 </span>
                                             @endforeach
-                                            @if($relatedNote->tags->count() > 2)
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-600">
+                                            @if ($relatedNote->tags->count() > 2)
+                                                <span
+                                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-600">
                                                     +{{ $relatedNote->tags->count() - 2 }}
                                                 </span>
                                             @endif
@@ -1591,7 +1743,7 @@
             </div>
         @endif
     </div>
-</div>
+    </div>
 
     @push('styles')
         <style>
@@ -1610,7 +1762,7 @@
                 ctx.textBaseline = 'top';
                 ctx.font = '14px Arial';
                 ctx.fillText('Fingerprint', 2, 2);
-                
+
                 const fingerprint = [
                     navigator.userAgent,
                     navigator.language,
@@ -1621,7 +1773,7 @@
                     navigator.deviceMemory || 0,
                     navigator.platform,
                 ].join('|');
-                
+
                 // Simple hash function
                 let hash = 0;
                 for (let i = 0; i < fingerprint.length; i++) {
@@ -1629,12 +1781,12 @@
                     hash = ((hash << 5) - hash) + char;
                     hash = hash & hash; // Convert to 32bit integer
                 }
-                
+
                 return Math.abs(hash).toString(16);
             }
-            
+
             // Set fingerprint in header for free notes
-            @if($note->price == 0)
+            @if ($note->price == 0)
                 document.addEventListener('DOMContentLoaded', function() {
                     const fingerprint = generateFingerprint();
                     // Store in sessionStorage to reuse
@@ -1646,35 +1798,35 @@
         </script>
         <script>
             const copyTranslations = @js([
-                'success_title' => __('messages.copy_link_success_title'),
-                'success_message' => __('messages.copy_link_success_message'),
-                'error_message' => __('messages.copy_link_error_message'),
-                'error_title' => __('messages.error'),
-            ]);
+    'success_title' => __('messages.copy_link_success_title'),
+    'success_message' => __('messages.copy_link_success_message'),
+    'error_message' => __('messages.copy_link_error_message'),
+    'error_title' => __('messages.error'),
+]);
 
             const reportTranslations = @js([
-                'title' => __('messages.report_modal_title'),
-                'reason_label' => __('messages.report_reason_label'),
-                'reason_placeholder' => __('messages.report_reason_placeholder'),
-                'option_spam' => __('messages.report_reason_spam'),
-                'option_harassment' => __('messages.report_reason_harassment'),
-                'option_inappropriate' => __('messages.report_reason_inappropriate'),
-                'option_fraud' => __('messages.report_reason_fraud'),
-                'option_copyright' => __('messages.report_reason_copyright'),
-                'option_other' => __('messages.report_reason_other'),
-                'description_label' => __('messages.report_description_label'),
-                'description_placeholder' => __('messages.report_description_placeholder'),
-                'submit' => __('messages.report_submit_button'),
-                'cancel' => __('messages.cancel'),
-                'validation_reason' => __('messages.report_validation_reason'),
-                'success_title' => __('messages.report_success_title'),
-                'success_message' => __('messages.report_success_message'),
-                'success_alert' => __('messages.report_success_alert'),
-                'error_title' => __('messages.error'),
-                'error_message' => __('messages.report_error_message'),
-                'prompt_reason' => __('messages.report_prompt_reason'),
-                'prompt_description' => __('messages.report_prompt_description'),
-            ]);
+    'title' => __('messages.report_modal_title'),
+    'reason_label' => __('messages.report_reason_label'),
+    'reason_placeholder' => __('messages.report_reason_placeholder'),
+    'option_spam' => __('messages.report_reason_spam'),
+    'option_harassment' => __('messages.report_reason_harassment'),
+    'option_inappropriate' => __('messages.report_reason_inappropriate'),
+    'option_fraud' => __('messages.report_reason_fraud'),
+    'option_copyright' => __('messages.report_reason_copyright'),
+    'option_other' => __('messages.report_reason_other'),
+    'description_label' => __('messages.report_description_label'),
+    'description_placeholder' => __('messages.report_description_placeholder'),
+    'submit' => __('messages.report_submit_button'),
+    'cancel' => __('messages.cancel'),
+    'validation_reason' => __('messages.report_validation_reason'),
+    'success_title' => __('messages.report_success_title'),
+    'success_message' => __('messages.report_success_message'),
+    'success_alert' => __('messages.report_success_alert'),
+    'error_title' => __('messages.error'),
+    'error_message' => __('messages.report_error_message'),
+    'prompt_reason' => __('messages.report_prompt_reason'),
+    'prompt_description' => __('messages.report_prompt_description'),
+]);
 
             // Copy to clipboard function
             function copyToClipboard(text) {
@@ -1774,7 +1926,10 @@
                                 return false;
                             }
 
-                            return { reason, description };
+                            return {
+                                reason,
+                                description
+                            };
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
@@ -1798,14 +1953,17 @@
                 }
 
                 fetch(noteReportEndpoint, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfTokenMeta.content,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ reason, description })
-                })
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfTokenMeta.content,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            reason,
+                            description
+                        })
+                    })
                     .then(async (response) => {
                         if (!response.ok) {
                             let message = reportTranslations.error_message;
@@ -1834,7 +1992,8 @@
                     })
                     .catch((error) => {
                         if (typeof Swal !== 'undefined') {
-                            Swal.fire(reportTranslations.error_title, error.message || reportTranslations.error_message, 'error');
+                            Swal.fire(reportTranslations.error_title, error.message || reportTranslations.error_message,
+                                'error');
                         } else {
                             alert(error.message || reportTranslations.error_message);
                         }
@@ -1952,7 +2111,7 @@
                         countdownElement.textContent = 'Grace period telah berakhir';
                         countdownElement.classList.remove('text-green-900');
                         countdownElement.classList.add('text-red-600');
-                        
+
                         // Clear interval to stop unnecessary updates
                         if (countdownInterval) {
                             clearInterval(countdownInterval);
@@ -2048,143 +2207,143 @@
         </script>
         @auth
             @if (auth()->user()->hasPremium() && auth()->user()->role === 'buyer' && ($alreadyPurchased ?? false))
-            <script>
-                // Reading Progress Tracking
-                const noteId = '{{ $note->id }}';
-                let progressUpdateTimeout;
-                let currentProgress = 0;
+                <script>
+                    // Reading Progress Tracking
+                    const noteId = '{{ $note->id }}';
+                    let progressUpdateTimeout;
+                    let currentProgress = 0;
 
-                // Load existing progress
-                fetch(`/reading-progress/note/${noteId}`, {
-                headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-                }
-                })
-                .then(response => response.json())
-                .then(data => {
-                if (data.success && data.progress) {
-                currentProgress = data.progress.progress_percentage || 0;
-                updateProgressBar(currentProgress);
-                }
-                })
-                .catch(error => console.error('Error loading progress:', error));
+                    // Load existing progress
+                    fetch(`/reading-progress/note/${noteId}`, {
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.progress) {
+                                currentProgress = data.progress.progress_percentage || 0;
+                                updateProgressBar(currentProgress);
+                            }
+                        })
+                        .catch(error => console.error('Error loading progress:', error));
 
-                // Track scroll position
-                const noteContent = document.getElementById('note-content');
-                if (noteContent) {
-                const totalHeight = noteContent.scrollHeight;
-                const viewportHeight = window.innerHeight;
-                const totalScrollable = totalHeight - viewportHeight;
+                    // Track scroll position
+                    const noteContent = document.getElementById('note-content');
+                    if (noteContent) {
+                        const totalHeight = noteContent.scrollHeight;
+                        const viewportHeight = window.innerHeight;
+                        const totalScrollable = totalHeight - viewportHeight;
 
-                window.addEventListener('scroll', () => {
-                clearTimeout(progressUpdateTimeout);
+                        window.addEventListener('scroll', () => {
+                            clearTimeout(progressUpdateTimeout);
 
-                progressUpdateTimeout = setTimeout(() => {
-                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                const contentTop = noteContent.offsetTop;
-                const scrollPosition = Math.max(0, scrollTop - contentTop);
+                            progressUpdateTimeout = setTimeout(() => {
+                                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                                const contentTop = noteContent.offsetTop;
+                                const scrollPosition = Math.max(0, scrollTop - contentTop);
 
-                const progress = totalScrollable > 0
-                ? Math.min(100, Math.round((scrollPosition / totalScrollable) * 100))
-                : 0;
+                                const progress = totalScrollable > 0 ?
+                                    Math.min(100, Math.round((scrollPosition / totalScrollable) * 100)) :
+                                    0;
 
-                if (progress !== currentProgress) {
-                currentProgress = progress;
-                updateProgressBar(progress);
-                saveProgress(progress, scrollPosition, noteContent.textContent.length);
-                }
-                }, 500); // Debounce: update every 500ms
-                });
-                }
+                                if (progress !== currentProgress) {
+                                    currentProgress = progress;
+                                    updateProgressBar(progress);
+                                    saveProgress(progress, scrollPosition, noteContent.textContent.length);
+                                }
+                            }, 500); // Debounce: update every 500ms
+                        });
+                    }
 
-                function updateProgressBar(percentage) {
-                const progressBar = document.getElementById('progress-bar');
-                const progressPercentage = document.getElementById('progress-percentage');
-                if (progressBar) progressBar.style.width = percentage + '%';
-                if (progressPercentage) progressPercentage.textContent = percentage + '%';
-                }
+                    function updateProgressBar(percentage) {
+                        const progressBar = document.getElementById('progress-bar');
+                        const progressPercentage = document.getElementById('progress-percentage');
+                        if (progressBar) progressBar.style.width = percentage + '%';
+                        if (progressPercentage) progressPercentage.textContent = percentage + '%';
+                    }
 
-                function saveProgress(percentage, position, totalChars) {
-                fetch(`/reading-progress/note/${noteId}`, {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                progress_percentage: percentage,
-                last_position: position,
-                read_characters: Math.round((percentage / 100) * totalChars),
-                total_characters: totalChars
-                })
-                })
-                .catch(error => console.error('Error saving progress:', error));
-                }
+                    function saveProgress(percentage, position, totalChars) {
+                        fetch(`/reading-progress/note/${noteId}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    progress_percentage: percentage,
+                                    last_position: position,
+                                    read_characters: Math.round((percentage / 100) * totalChars),
+                                    total_characters: totalChars
+                                })
+                            })
+                            .catch(error => console.error('Error saving progress:', error));
+                    }
 
-                const bookmarkTranslations = @js([
-                    'empty' => __('messages.bookmarks_empty', ['action' => __('messages.add_bookmark')]),
-                    'default_title' => __('messages.bookmark_default_title'),
-                    'go_to' => __('messages.bookmark_go_to'),
-                    'delete' => __('messages.bookmark_delete'),
-                    'modal_title' => __('messages.bookmark_modal_title'),
-                    'modal_title_placeholder' => __('messages.bookmark_modal_title_placeholder'),
-                    'modal_note_placeholder' => __('messages.bookmark_modal_note_placeholder'),
-                    'modal_confirm' => __('messages.bookmark_modal_confirm'),
-                    'cancel' => __('messages.cancel'),
-                    'success_title' => __('messages.bookmark_success_title'),
-                    'success_message' => __('messages.bookmark_success_message'),
-                    'error_title' => __('messages.bookmark_error_title'),
-                    'error_message' => __('messages.bookmark_error_message'),
-                    'delete_confirm_title' => __('messages.bookmark_delete_confirm_title'),
-                    'delete_confirm_text' => __('messages.bookmark_delete_confirm_text'),
-                    'delete_confirm_button' => __('messages.bookmark_delete_confirm_button'),
-                    'delete_success_title' => __('messages.bookmark_delete_success_title'),
-                    'delete_success_message' => __('messages.bookmark_delete_success_message'),
-                    'delete_error_message' => __('messages.bookmark_delete_error_message'),
-                    'show' => __('messages.bookmarks_toggle_show'),
-                    'hide' => __('messages.bookmarks_toggle_hide'),
-                ]);
+                    const bookmarkTranslations = @js([
+    'empty' => __('messages.bookmarks_empty', ['action' => __('messages.add_bookmark')]),
+    'default_title' => __('messages.bookmark_default_title'),
+    'go_to' => __('messages.bookmark_go_to'),
+    'delete' => __('messages.bookmark_delete'),
+    'modal_title' => __('messages.bookmark_modal_title'),
+    'modal_title_placeholder' => __('messages.bookmark_modal_title_placeholder'),
+    'modal_note_placeholder' => __('messages.bookmark_modal_note_placeholder'),
+    'modal_confirm' => __('messages.bookmark_modal_confirm'),
+    'cancel' => __('messages.cancel'),
+    'success_title' => __('messages.bookmark_success_title'),
+    'success_message' => __('messages.bookmark_success_message'),
+    'error_title' => __('messages.bookmark_error_title'),
+    'error_message' => __('messages.bookmark_error_message'),
+    'delete_confirm_title' => __('messages.bookmark_delete_confirm_title'),
+    'delete_confirm_text' => __('messages.bookmark_delete_confirm_text'),
+    'delete_confirm_button' => __('messages.bookmark_delete_confirm_button'),
+    'delete_success_title' => __('messages.bookmark_delete_success_title'),
+    'delete_success_message' => __('messages.bookmark_delete_success_message'),
+    'delete_error_message' => __('messages.bookmark_delete_error_message'),
+    'show' => __('messages.bookmarks_toggle_show'),
+    'hide' => __('messages.bookmarks_toggle_hide'),
+]);
 
-                // Bookmarks functionality
-                let bookmarks = [];
-                let bookmarksVisible = false;
+                    // Bookmarks functionality
+                    let bookmarks = [];
+                    let bookmarksVisible = false;
 
-                // Load bookmarks
-                function loadBookmarks() {
-                fetch(`/bookmarks/note/${noteId}`, {
-                headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-                }
-                })
-                .then(response => response.json())
-                .then(data => {
-                if (data.success) {
-                bookmarks = data.bookmarks || [];
-                renderBookmarks();
-                }
-                })
-                .catch(error => console.error('Error loading bookmarks:', error));
-                }
+                    // Load bookmarks
+                    function loadBookmarks() {
+                        fetch(`/bookmarks/note/${noteId}`, {
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    bookmarks = data.bookmarks || [];
+                                    renderBookmarks();
+                                }
+                            })
+                            .catch(error => console.error('Error loading bookmarks:', error));
+                    }
 
-                function renderBookmarks() {
-                const bookmarksList = document.getElementById('bookmarks-list');
-                if (!bookmarksList) return;
+                    function renderBookmarks() {
+                        const bookmarksList = document.getElementById('bookmarks-list');
+                        if (!bookmarksList) return;
 
-                if (bookmarks.length === 0) {
-                bookmarksList.innerHTML = `<p class="text-sm text-gray-600">${bookmarkTranslations.empty}</p>`;
-                return;
-                }
+                        if (bookmarks.length === 0) {
+                            bookmarksList.innerHTML = `<p class="text-sm text-gray-600">${bookmarkTranslations.empty}</p>`;
+                            return;
+                        }
 
-                bookmarksList.innerHTML = bookmarks.map(bookmark => `
+                        bookmarksList.innerHTML = bookmarks.map(bookmark => `
                 <div
                     class="flex items-start justify-between p-2 bg-white rounded border border-purple-200 hover:bg-purple-50 transition-colors">
                     <div class="flex-1">
                         <h5 class="text-sm font-medium text-gray-900">${bookmark.title || bookmarkTranslations.default_title}</h5>
                         ${bookmark.section_text ? `<p class="text-xs text-gray-600 mt-1 line-clamp-2">
-                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
+                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
                         ${bookmark.note_text ? `<p class="text-xs text-purple-700 mt-1">${bookmark.note_text}</p>` : ''}
                     </div>
                     <div class="flex items-center space-x-2 ml-3">
@@ -2205,306 +2364,316 @@
                     </div>
                 </div>
                 `).join('');
-                }
+                    }
 
-                function toggleBookmarks() {
-                const section = document.getElementById('bookmarks-section');
-                const toggleText = document.getElementById('bookmarks-toggle-text');
-                if (section) {
-                bookmarksVisible = !bookmarksVisible;
-                section.classList.toggle('hidden', !bookmarksVisible);
-                if (toggleText) {
-                toggleText.textContent = bookmarksVisible ? bookmarkTranslations.hide : bookmarkTranslations.show;
-                }
-                }
-                }
+                    function toggleBookmarks() {
+                        const section = document.getElementById('bookmarks-section');
+                        const toggleText = document.getElementById('bookmarks-toggle-text');
+                        if (section) {
+                            bookmarksVisible = !bookmarksVisible;
+                            section.classList.toggle('hidden', !bookmarksVisible);
+                            if (toggleText) {
+                                toggleText.textContent = bookmarksVisible ? bookmarkTranslations.hide : bookmarkTranslations.show;
+                            }
+                        }
+                    }
 
-                function showAddBookmarkModal() {
-                const noteContent = document.getElementById('note-content');
-                const selection = window.getSelection();
-                let selectedText = '';
-                let position = 0;
+                    function showAddBookmarkModal() {
+                        const noteContent = document.getElementById('note-content');
+                        const selection = window.getSelection();
+                        let selectedText = '';
+                        let position = 0;
 
-                if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                selectedText = range.toString();
-                position = range.startOffset;
-                } else {
-                // Use scroll position as fallback
-                position = window.pageYOffset || document.documentElement.scrollTop;
-                }
+                        if (selection.rangeCount > 0) {
+                            const range = selection.getRangeAt(0);
+                            selectedText = range.toString();
+                            position = range.startOffset;
+                        } else {
+                            // Use scroll position as fallback
+                            position = window.pageYOffset || document.documentElement.scrollTop;
+                        }
 
-                if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                title: bookmarkTranslations.modal_title,
-                html: `
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: bookmarkTranslations.modal_title,
+                                html: `
                 <input id="bookmark-title" class="swal2-input" placeholder="${bookmarkTranslations.modal_title_placeholder.replace(/"/g, '&quot;')}"
                     value="${selectedText.substring(0, 50) || ''}">
                 <textarea id="bookmark-note" class="swal2-textarea" placeholder="${bookmarkTranslations.modal_note_placeholder.replace(/"/g, '&quot;')}"></textarea>
                 `,
-                showCancelButton: true,
-                confirmButtonText: bookmarkTranslations.modal_confirm,
-                cancelButtonText: bookmarkTranslations.cancel,
-                preConfirm: () => {
-                return {
-                title: document.getElementById('bookmark-title').value || bookmarkTranslations.default_title,
-                note_text: document.getElementById('bookmark-note').value || null,
-                section_text: selectedText || null,
-                position: position
-                };
-                }
-                }).then((result) => {
-                if (result.isConfirmed) {
-                createBookmark(result.value);
-                }
-                });
-                }
-                }
-
-                function createBookmark(data) {
-                fetch(`/bookmarks/note/${noteId}`, {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-                },
-                body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(data => {
-                if (data.success) {
-                loadBookmarks();
-                if (typeof Swal !== 'undefined') {
-                Swal.fire(bookmarkTranslations.success_title, bookmarkTranslations.success_message, 'success');
-                }
-                } else {
-                if (typeof Swal !== 'undefined') {
-                Swal.fire(bookmarkTranslations.error_title, data.message || bookmarkTranslations.error_message, 'error');
-                }
-                }
-                })
-                .catch(error => {
-                console.error('Error creating bookmark:', error);
-                if (typeof Swal !== 'undefined') {
-                Swal.fire(bookmarkTranslations.error_title, bookmarkTranslations.error_message, 'error');
-                }
-                });
-                }
-
-                function deleteBookmark(bookmarkId) {
-                if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                title: bookmarkTranslations.delete_confirm_title,
-                text: bookmarkTranslations.delete_confirm_text,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: bookmarkTranslations.delete_confirm_button,
-                cancelButtonText: bookmarkTranslations.cancel
-                }).then((result) => {
-                if (result.isConfirmed) {
-                fetch(`/bookmarks/${bookmarkId}`, {
-                method: 'DELETE',
-                headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-                }
-                })
-                .then(response => response.json())
-                .then(data => {
-                if (data.success) {
-                loadBookmarks();
-                Swal.fire(bookmarkTranslations.delete_success_title, bookmarkTranslations.delete_success_message, 'success');
-                } else {
-                Swal.fire(bookmarkTranslations.error_title, data.message || bookmarkTranslations.delete_error_message, 'error');
-                }
-                })
-                .catch(error => {
-                console.error('Error deleting bookmark:', error);
-                Swal.fire(bookmarkTranslations.error_title, bookmarkTranslations.delete_error_message, 'error');
-                });
-                }
-                });
-                }
-                }
-
-                function scrollToBookmark(position) {
-                window.scrollTo({
-                top: position,
-                behavior: 'smooth'
-                });
-                }
-
-                // Load bookmarks on page load
-                loadBookmarks();
-            </script>
-            @endif
-        @endauth
-    <script>
-        // Reactions functionality
-        function toggleReaction(type) {
-            const btn = document.querySelector(`[data-reaction="${type}"]`);
-            if (!btn) return;
-            
-            // Disable button during request
-            const originalDisabled = btn.disabled;
-            btn.disabled = true;
-            btn.style.opacity = '0.6';
-            
-            fetch(`/notes/{{ $note->id }}/reactions/toggle`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ reaction_type: type })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Update reaction counts
-                    if (data.reactions) {
-                        Object.keys(data.reactions).forEach(reactionType => {
-                            const countEl = document.getElementById(`reaction-count-${reactionType}`);
-                            if (countEl) {
-                                countEl.textContent = data.reactions[reactionType] || 0;
-                            }
-                        });
-                    }
-                    
-                    // Update button states - reset all
-                    document.querySelectorAll('.reaction-btn').forEach(button => {
-                        button.classList.remove('bg-blue-50', 'border-blue-300', 'bg-red-50', 'border-red-300', 'bg-green-50', 'border-green-300', 'bg-purple-50', 'border-purple-300', 'bg-yellow-50', 'border-yellow-300');
-                        button.classList.add('border-gray-300');
-                    });
-                    
-                    // Highlight active reaction
-                    if (data.user_reaction) {
-                        const activeBtn = document.querySelector(`[data-reaction="${data.user_reaction}"]`);
-                        if (activeBtn) {
-                            activeBtn.classList.remove('border-gray-300');
-                            const colorMap = {
-                                'like': ['bg-blue-50', 'border-blue-300'],
-                                'love': ['bg-red-50', 'border-red-300'],
-                                'helpful': ['bg-green-50', 'border-green-300'],
-                                'insightful': ['bg-purple-50', 'border-purple-300'],
-                                'thanks': ['bg-yellow-50', 'border-yellow-300']
-                            };
-                            const colors = colorMap[data.user_reaction];
-                            if (colors) {
-                                activeBtn.classList.add(...colors);
-                            }
+                                showCancelButton: true,
+                                confirmButtonText: bookmarkTranslations.modal_confirm,
+                                cancelButtonText: bookmarkTranslations.cancel,
+                                preConfirm: () => {
+                                    return {
+                                        title: document.getElementById('bookmark-title').value || bookmarkTranslations
+                                            .default_title,
+                                        note_text: document.getElementById('bookmark-note').value || null,
+                                        section_text: selectedText || null,
+                                        position: position
+                                    };
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    createBookmark(result.value);
+                                }
+                            });
                         }
                     }
-                } else {
-                    throw new Error(data.message || 'Failed to update reaction');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: error.message || 'Failed to update reaction. Please try again.',
-                        timer: 3000,
-                        showConfirmButton: false
-                    });
-                } else {
-                    alert('Failed to update reaction. Please try again.');
-                }
-            })
-            .finally(() => {
-                // Re-enable button
-                if (btn) {
-                    btn.disabled = originalDisabled;
-                    btn.style.opacity = '1';
-                }
-            });
-        }
 
-        // Comments reply functionality
-        function showReplyForm(commentId) {
-            const form = document.getElementById(`reply-form-${commentId}`);
-            if (form) {
-                form.classList.remove('hidden');
-                const textarea = form.querySelector('textarea');
-                if (textarea) {
-                    textarea.focus();
+                    function createBookmark(data) {
+                        fetch(`/bookmarks/note/${noteId}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify(data)
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    loadBookmarks();
+                                    if (typeof Swal !== 'undefined') {
+                                        Swal.fire(bookmarkTranslations.success_title, bookmarkTranslations.success_message,
+                                            'success');
+                                    }
+                                } else {
+                                    if (typeof Swal !== 'undefined') {
+                                        Swal.fire(bookmarkTranslations.error_title, data.message || bookmarkTranslations
+                                            .error_message, 'error');
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error creating bookmark:', error);
+                                if (typeof Swal !== 'undefined') {
+                                    Swal.fire(bookmarkTranslations.error_title, bookmarkTranslations.error_message, 'error');
+                                }
+                            });
+                    }
+
+                    function deleteBookmark(bookmarkId) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: bookmarkTranslations.delete_confirm_title,
+                                text: bookmarkTranslations.delete_confirm_text,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: bookmarkTranslations.delete_confirm_button,
+                                cancelButtonText: bookmarkTranslations.cancel
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    fetch(`/bookmarks/${bookmarkId}`, {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json'
+                                            }
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                loadBookmarks();
+                                                Swal.fire(bookmarkTranslations.delete_success_title, bookmarkTranslations
+                                                    .delete_success_message, 'success');
+                                            } else {
+                                                Swal.fire(bookmarkTranslations.error_title, data.message ||
+                                                    bookmarkTranslations.delete_error_message, 'error');
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error('Error deleting bookmark:', error);
+                                            Swal.fire(bookmarkTranslations.error_title, bookmarkTranslations
+                                                .delete_error_message, 'error');
+                                        });
+                                }
+                            });
+                        }
+                    }
+
+                    function scrollToBookmark(position) {
+                        window.scrollTo({
+                            top: position,
+                            behavior: 'smooth'
+                        });
+                    }
+
+                    // Load bookmarks on page load
+                    loadBookmarks();
+                </script>
+            @endif
+        @endauth
+        <script>
+            // Reactions functionality
+            function toggleReaction(type) {
+                const btn = document.querySelector(`[data-reaction="${type}"]`);
+                if (!btn) return;
+
+                // Disable button during request
+                const originalDisabled = btn.disabled;
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+
+                fetch(`/notes/{{ $note->id }}/reactions/toggle`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            reaction_type: type
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Update reaction counts
+                            if (data.reactions) {
+                                Object.keys(data.reactions).forEach(reactionType => {
+                                    const countEl = document.getElementById(`reaction-count-${reactionType}`);
+                                    if (countEl) {
+                                        countEl.textContent = data.reactions[reactionType] || 0;
+                                    }
+                                });
+                            }
+
+                            // Update button states - reset all
+                            document.querySelectorAll('.reaction-btn').forEach(button => {
+                                button.classList.remove('bg-blue-50', 'border-blue-300', 'bg-red-50',
+                                    'border-red-300', 'bg-green-50', 'border-green-300', 'bg-purple-50',
+                                    'border-purple-300', 'bg-yellow-50', 'border-yellow-300');
+                                button.classList.add('border-gray-300');
+                            });
+
+                            // Highlight active reaction
+                            if (data.user_reaction) {
+                                const activeBtn = document.querySelector(`[data-reaction="${data.user_reaction}"]`);
+                                if (activeBtn) {
+                                    activeBtn.classList.remove('border-gray-300');
+                                    const colorMap = {
+                                        'like': ['bg-blue-50', 'border-blue-300'],
+                                        'love': ['bg-red-50', 'border-red-300'],
+                                        'helpful': ['bg-green-50', 'border-green-300'],
+                                        'insightful': ['bg-purple-50', 'border-purple-300'],
+                                        'thanks': ['bg-yellow-50', 'border-yellow-300']
+                                    };
+                                    const colors = colorMap[data.user_reaction];
+                                    if (colors) {
+                                        activeBtn.classList.add(...colors);
+                                    }
+                                }
+                            }
+                        } else {
+                            throw new Error(data.message || 'Failed to update reaction');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: error.message || 'Failed to update reaction. Please try again.',
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            alert('Failed to update reaction. Please try again.');
+                        }
+                    })
+                    .finally(() => {
+                        // Re-enable button
+                        if (btn) {
+                            btn.disabled = originalDisabled;
+                            btn.style.opacity = '1';
+                        }
+                    });
+            }
+
+            // Comments reply functionality
+            function showReplyForm(commentId) {
+                const form = document.getElementById(`reply-form-${commentId}`);
+                if (form) {
+                    form.classList.remove('hidden');
+                    const textarea = form.querySelector('textarea');
+                    if (textarea) {
+                        textarea.focus();
+                    }
                 }
             }
-        }
 
-        function hideReplyForm(commentId) {
-            const form = document.getElementById(`reply-form-${commentId}`);
-            if (form) {
-                form.classList.add('hidden');
-                const textarea = form.querySelector('textarea');
-                if (textarea) {
-                    textarea.value = '';
+            function hideReplyForm(commentId) {
+                const form = document.getElementById(`reply-form-${commentId}`);
+                if (form) {
+                    form.classList.add('hidden');
+                    const textarea = form.querySelector('textarea');
+                    if (textarea) {
+                        textarea.value = '';
+                    }
                 }
             }
-        }
 
-        // Q&A helpful functionality
-        function markHelpful(questionId, element) {
-            const btn = element || (window.event ? window.event.target : null);
-            if (!btn) return;
-            
-            // Disable button during request
-            const originalText = btn.textContent;
-            btn.disabled = true;
-            btn.style.opacity = '0.6';
-            
-            fetch(`/questions/${questionId}/helpful`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    btn.textContent = `{{ __('Helpful') }} (${data.helpful_count || 0})`;
-                    btn.disabled = true;
-                    btn.classList.add('opacity-50');
-                    btn.style.opacity = '0.5';
-                } else {
-                    throw new Error(data.message || 'Failed to mark as helpful');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Re-enable button on error
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.textContent = originalText;
-                
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: error.message || 'Failed to mark as helpful. Please try again.',
-                        timer: 3000,
-                        showConfirmButton: false
+            // Q&A helpful functionality
+            function markHelpful(questionId, element) {
+                const btn = element || (window.event ? window.event.target : null);
+                if (!btn) return;
+
+                // Disable button during request
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+
+                fetch(`/questions/${questionId}/helpful`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            btn.textContent = `{{ __('Helpful') }} (${data.helpful_count || 0})`;
+                            btn.disabled = true;
+                            btn.classList.add('opacity-50');
+                            btn.style.opacity = '0.5';
+                        } else {
+                            throw new Error(data.message || 'Failed to mark as helpful');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Re-enable button on error
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btn.textContent = originalText;
+
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: error.message || 'Failed to mark as helpful. Please try again.',
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            alert('Failed to mark as helpful. Please try again.');
+                        }
                     });
-                } else {
-                    alert('Failed to mark as helpful. Please try again.');
-                }
-            });
-        }
-    </script>
+            }
+        </script>
     @endpush
 @endsection

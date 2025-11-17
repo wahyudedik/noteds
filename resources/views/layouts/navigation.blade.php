@@ -112,12 +112,6 @@
                     'submenu' => $forumSubmenu,
                 ];
 
-                $primaryLinks[] = [
-                    'label' => __('messages.produk_chats'),
-                    'href' => route('note-conversations.index'),
-                    'active' => request()->routeIs('note-conversations.*'),
-                ];
-
                 // Seller Tools submenu
                 if ($isSellerOrAdmin) {
                     $sellerToolsSubmenu = [
@@ -200,6 +194,13 @@
                         'submenu' => $settingsSubmenu,
                     ];
                 }
+
+                // Product Chats
+                $moreLinks[] = [
+                    'label' => __('messages.produk_chats'),
+                    'href' => route('note-conversations.index'),
+                    'active' => request()->routeIs('note-conversations.*'),
+                ];
 
                 // Tools submenu
                 $moreLinks[] = [
