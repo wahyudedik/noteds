@@ -29,7 +29,7 @@
                                 {{ __('messages.studio_platform_fee') }}
                             </h3>
                             <p class="text-sm text-gray-600 mt-1">
-                                {{ __('messages.studio_platform_fee_description') ?? 'Atur persentase fee platform untuk rilis escrow pada Studio (order jasa).' }}
+                                {{ __('messages.studio_platform_fee_description') }}
                             </p>
                         </div>
                     </div>
@@ -55,14 +55,14 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                                 <p class="mt-2 text-xs text-gray-500">
-                                    {{ __('messages.studio_platform_fee_note') ?? 'Dipotong dari jumlah rilis saat escrow dilepas ke vendor.' }}
+                                    {{ __('messages.studio_platform_fee_note') }}
                                 </p>
                             </div>
                         </div>
                         <div class="flex items-center justify-end pt-4 border-t border-gray-200">
                             <button type="submit"
                                 class="px-6 py-2 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-lg transition-colors">
-                                {{ __('messages.save_studio_settings') ?? 'Save Studio Settings' }}
+                                {{ __('messages.save_studio_settings') }}
                             </button>
                         </div>
                     </form>
@@ -80,7 +80,7 @@
                                 </svg>
                                 {{ __('messages.studio_email_notifications') }}
                             </h3>
-                            <p class="text-sm text-gray-600 mt-1">{{ __('messages.studio_email_notifications_description') ?? 'Aktifkan/nonaktifkan email untuk event Studio.' }}</p>
+                            <p class="text-sm text-gray-600 mt-1">{{ __('messages.studio_email_notifications_description') }}</p>
                         </div>
                     </div>
                 </div>
@@ -103,7 +103,7 @@
                                 <div class="flex items-center justify-between border rounded-lg p-3">
                                     <div>
                                         <div class="text-sm font-medium text-gray-800">{{ $label }}</div>
-                                        <div class="text-xs text-gray-500">{{ __('messages.send_email_on_event') ?? 'Kirim email saat event ini terjadi' }}</div>
+                                        <div class="text-xs text-gray-500">{{ __('messages.send_email_on_event') }}</div>
                                     </div>
                                     <div>
                                         <input type="hidden" name="{{ $key }}" value="0">
@@ -117,14 +117,14 @@
                             @endforeach
                         </div>
                         <div class="mt-6 border-t pt-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.sla_funding_reminder_days') ?? 'SLA Funding Reminder (days)' }}</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.sla_funding_reminder_days') }}</label>
                             <input type="number" min="1" max="30" name="studio_sla_funding_reminder_days" value="{{ old('studio_sla_funding_reminder_days', $studioSlaFundingReminderDays ?? 3) }}" class="w-32 rounded-lg border-gray-300">
-                            <p class="text-xs text-gray-500 mt-1">{{ __('messages.sla_funding_reminder_description') ?? 'Kirim pengingat pendanaan untuk order quoted yang belum didanai setelah N hari.' }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('messages.sla_funding_reminder_description') }}</p>
                         </div>
                         <div class="flex items-center justify-end pt-4 border-t border-gray-200">
                             <button type="submit"
                                 class="px-6 py-2 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors">
-                                {{ __('messages.save_studio_email_settings') ?? 'Save Studio Email Settings' }}
+                                {{ __('messages.save_studio_email_settings') }}
                             </button>
                         </div>
                     </form>
@@ -141,10 +141,10 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M3 10h11M9 21V3m5 18v-7m4 7v-4" />
                                 </svg>
-                                Pricing Guidance Settings
+                                {{ __('messages.pricing_guidance_settings') }}
                             </h3>
                             <p class="text-sm text-gray-600 mt-1">
-                                Tetapkan batas harga minimum dan rekomendasi harga untuk setiap kategori note.
+                                {{ __('messages.pricing_guidance_description') }}
                             </p>
                         </div>
                     </div>
@@ -154,7 +154,7 @@
                         @csrf
                         <div>
                             <label for="min_price_default" class="block text-sm font-medium text-gray-700 mb-2">
-                                Default Minimum Price (Rp)
+                                {{ __('messages.default_minimum_price') }}
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -165,45 +165,45 @@
                                     class="mt-1 block w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
                             </div>
                             <p class="mt-2 text-xs text-gray-500">
-                                Harga minimum untuk semua note berbayar (jika tidak ada aturan kategori khusus).
+                                {{ __('messages.default_minimum_price_note') }}
                             </p>
                         </div>
                         <div>
                             <label for="recommended_price_multiplier" class="block text-sm font-medium text-gray-700 mb-2">
-                                Recommended Price Multiplier (x)
+                                {{ __('messages.recommended_price_multiplier') }}
                             </label>
                             <input type="number" name="recommended_price_multiplier" id="recommended_price_multiplier"
                                 value="{{ old('recommended_price_multiplier', $recommendedPriceMultiplier) }}" min="0" max="10" step="0.1"
                                 class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
                             <p class="mt-2 text-xs text-gray-500">
-                                Multiplikator yang digunakan untuk menghitung harga rekomendasi (contoh: 1.5 × minimum).
+                                {{ __('messages.recommended_price_multiplier_note') }}
                             </p>
                         </div>
                         <div class="flex items-end">
                             <button type="submit"
                                 class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition">
-                                Simpan Pengaturan
+                                {{ __('messages.save_settings') }}
                             </button>
                         </div>
                     </form>
 
                     <div class="border-t border-gray-200 pt-6">
-                        <h4 class="text-sm font-semibold text-gray-800 mb-3">Kategori dengan Minimum Price Khusus</h4>
+                        <h4 class="text-sm font-semibold text-gray-800 mb-3">{{ __('messages.categories_with_custom_min_price') }}</h4>
                         <form action="{{ route('admin.price-rules.store') }}" method="POST"
                             class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end mb-4">
                             @csrf
                             <div class="md:col-span-2">
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Tag / Kategori</label>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.tag_category') }}</label>
                                 <select name="tag_id" required
                                     class="block w-full py-2 px-3 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
-                                    <option value="">Pilih Tag</option>
+                                    <option value="">{{ __('messages.select_tag') }}</option>
                                     @foreach ($availableTags as $tag)
                                         <option value="{{ $tag->id }}">{{ $tag->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Minimum Price (Rp)</label>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.minimum_price_rp') }}</label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <span class="text-gray-500 sm:text-sm">Rp</span>
@@ -215,7 +215,7 @@
                             <div class="flex items-center gap-3">
                                 <button type="submit"
                                     class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition">
-                                    Tambah Aturan
+                                    {{ __('messages.add_rule') }}
                                 </button>
                             </div>
                         </form>
@@ -224,9 +224,9 @@
                             <table class="min-w-full divide-y divide-gray-200 text-sm">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">Kategori</th>
-                                        <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">Minimum Price</th>
-                                        <th class="px-4 py-2 text-right font-medium text-gray-600 uppercase tracking-wider">Aksi</th>
+                                        <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">{{ __('messages.category') }}</th>
+                                        <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">{{ __('messages.minimum_price') }}</th>
+                                        <th class="px-4 py-2 text-right font-medium text-gray-600 uppercase tracking-wider">{{ __('messages.action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">

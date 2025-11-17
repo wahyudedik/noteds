@@ -47,10 +47,10 @@
                     </select>
                 </div>
                 <div>
-                    <label for="premium_only" class="block text-sm font-medium text-gray-700 mb-2">Premium Only</label>
+                    <label for="premium_only" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.premium_only') }}</label>
                     <select name="premium_only" id="premium_only" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                        <option value="">All Users</option>
-                        <option value="1" {{ request('premium_only') === '1' ? 'selected' : '' }}>Premium Only</option>
+                        <option value="">{{ __('messages.all_users') }}</option>
+                        <option value="1" {{ request('premium_only') === '1' ? 'selected' : '' }}>{{ __('messages.premium_only') }}</option>
                     </select>
                 </div>
                 <div class="flex items-end gap-2">

@@ -10,44 +10,44 @@
         </div>
 
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Verifikasi Identitas</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.identity_verification_title') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                     <p>
-                        <strong>Status:</strong>
+                        <strong>{{ __('messages.status_label') }}</strong>
                         @if($user->verification_status === 'approved')
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Approved</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">{{ __('messages.approved') }}</span>
                         @elseif($user->verification_status === 'rejected')
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Rejected</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">{{ __('messages.rejected') }}</span>
                         @else
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pending</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">{{ __('messages.pending') }}</span>
                         @endif
                     </p>
                     @if($user->agreement_accepted_at)
-                        <p><strong>Agreement:</strong> Disetujui {{ $user->agreement_accepted_at->format('d M Y H:i') }} ({{ $user->agreement_version ?? 'v1' }})</p>
+                        <p><strong>{{ __('messages.agreement_label') }}</strong> {{ __('messages.accepted') }} {{ $user->agreement_accepted_at->format('d M Y H:i') }} ({{ $user->agreement_version ?? 'v1' }})</p>
                     @endif
                     @if($user->verification_reviewed_at)
-                        <p><strong>Reviewed:</strong> {{ $user->verification_reviewed_at->format('d M Y H:i') }}</p>
+                        <p><strong>{{ __('messages.reviewed_label') }}</strong> {{ $user->verification_reviewed_at->format('d M Y H:i') }}</p>
                     @endif
                     @if($user->verification_notes)
-                        <p class="text-sm"><strong>Catatan:</strong> {{ $user->verification_notes }}</p>
+                        <p class="text-sm"><strong>{{ __('messages.notes_label') }}</strong> {{ $user->verification_notes }}</p>
                     @endif
                 </div>
                 <div class="space-y-3">
                     <div class="flex gap-3">
-                        <a href="{{ $user->ktp_path ? route('admin.users.download-doc', ['user' => $user->id, 'type' => 'ktp']) : '#' }}" class="px-3 py-2 text-xs rounded-md {{ $user->ktp_path ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'bg-slate-50 text-slate-400 cursor-not-allowed' }}" @if(!$user->ktp_path) aria-disabled="true" @endif>Download KTP</a>
-                        <a href="{{ $user->selfie_path ? route('admin.users.download-doc', ['user' => $user->id, 'type' => 'selfie']) : '#' }}" class="px-3 py-2 text-xs rounded-md {{ $user->selfie_path ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'bg-slate-50 text-slate-400 cursor-not-allowed' }}" @if(!$user->selfie_path) aria-disabled="true" @endif>Download Selfie</a>
+                        <a href="{{ $user->ktp_path ? route('admin.users.download-doc', ['user' => $user->id, 'type' => 'ktp']) : '#' }}" class="px-3 py-2 text-xs rounded-md {{ $user->ktp_path ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'bg-slate-50 text-slate-400 cursor-not-allowed' }}" @if(!$user->ktp_path) aria-disabled="true" @endif>{{ __('messages.download_ktp') }}</a>
+                        <a href="{{ $user->selfie_path ? route('admin.users.download-doc', ['user' => $user->id, 'type' => 'selfie']) : '#' }}" class="px-3 py-2 text-xs rounded-md {{ $user->selfie_path ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'bg-slate-50 text-slate-400 cursor-not-allowed' }}" @if(!$user->selfie_path) aria-disabled="true" @endif>{{ __('messages.download_selfie') }}</a>
                     </div>
                     <div class="flex flex-wrap gap-3">
                         <form method="POST" action="{{ route('admin.users.verify.approve', $user) }}">
                             @csrf
                             <input type="hidden" name="notes" value="">
-                            <button type="submit" class="inline-flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-md" @if($user->verification_status==='approved') disabled @endif>Approve</button>
+                            <button type="submit" class="inline-flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-md" @if($user->verification_status==='approved') disabled @endif>{{ __('messages.approve') }}</button>
                         </form>
                         <form method="POST" action="{{ route('admin.users.verify.reject', $user) }}" onsubmit="return confirmRejectIdentity(this);">
                             @csrf
-                            <input type="text" name="reason" placeholder="Alasan penolakan (wajib)" class="rounded-md border-gray-300 text-sm">
-                            <button type="submit" class="inline-flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-md">Reject</button>
+                            <input type="text" name="reason" placeholder="{{ __('messages.rejection_reason_required') }}" class="rounded-md border-gray-300 text-sm">
+                            <button type="submit" class="inline-flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-md">{{ __('messages.reject') }}</button>
                         </form>
                     </div>
                 </div>

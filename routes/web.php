@@ -551,7 +551,7 @@ Route::middleware(['auth', 'verified', 'username.setup', 'workspace.user'])->gro
 
 // Admin routes
 Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.setup'])->name('admin.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/repurchase-report', [DashboardController::class, 'repurchaseReport'])->name('repurchase-report');
     Route::resource('users', UserController::class);
     Route::post('/users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
