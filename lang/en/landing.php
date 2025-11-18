@@ -4,7 +4,7 @@ return [
     'hero' => [
         'badge' => 'Built for creators & learners',
         'title' => 'Notes marketplace that feels like Noteds',
-        'subtitle' => 'Curate, collaborate, and sell beautiful notes with AI assistance, multi-currency wallets, and workspace teams—all in one minimalist experience.',
+        'subtitle' => 'Curate, collaborate, and sell beautiful notes with multi-currency wallets and workspace teams—all in one minimalist experience.',
         'primary_cta' => 'Explore Notes',
         'secondary_cta' => 'Start Selling',
     ],
@@ -15,9 +15,9 @@ return [
             'icon' => 'document-text',
         ],
         [
-            'title' => 'AI-Powered Tools',
-            'description' => 'Generate summaries, extract insights, and help learners with chat assistants trained on your content.',
-            'icon' => 'sparkles',
+            'title' => 'Multi-Currency Wallet',
+            'description' => 'Manage transactions in multiple currencies, withdraw funds easily, and track your wallet balance in real-time.',
+            'icon' => 'wallet',
         ],
         [
             'title' => 'Workspaces & Collaboration',

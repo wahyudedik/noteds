@@ -43,6 +43,11 @@ use App\Http\Controllers\PostAnalyticsController;
 use App\Http\Controllers\ForumPreferenceController;
 use App\Http\Controllers\NoteConversationController;
 use App\Http\Controllers\NoteReviewReplyController;
+use App\Http\Controllers\ShareAnalyticsController;
+use App\Http\Controllers\ShareLeaderboardController;
+use App\Http\Controllers\PointsController;
+use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\Api\NoteShareController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
@@ -112,6 +117,9 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
 
     // Public profile routes
     Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('public.profile.show');
+
+    // Leaderboard routes
+    Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
 
     // Forum routes - KYC required
     Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('forum')->name('forum.')->group(function () {
@@ -273,6 +281,11 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
 
     // Wallet routes
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+
+    // Points routes
+    Route::get('/points', [PointsController::class, 'index'])->name('points.index');
+    Route::post('/points/redeem-discount', [PointsController::class, 'redeemDiscount'])->name('points.redeem-discount');
+    Route::post('/points/redeem-premium', [PointsController::class, 'redeemPremium'])->name('points.redeem-premium');
     Route::post('/wallet/topup', [WalletController::class, 'topup'])->middleware('rate.limit:10,1')->name('wallet.topup');
     Route::get('/wallet/topup-checkout', [WalletController::class, 'topupCheckout'])->name('wallet.topup-checkout');
 
@@ -291,6 +304,10 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     // Referral routes
     Route::get('/referral', [ReferralController::class, 'index'])->name('referral.index');
     Route::get('/referral/statistics', [ReferralController::class, 'statistics'])->name('referral.statistics');
+
+    // Share Analytics routes
+    Route::get('/share/analytics', [ShareAnalyticsController::class, 'index'])->name('share.analytics');
+    Route::get('/share/leaderboard', [ShareLeaderboardController::class, 'index'])->name('share.leaderboard');
 
     // Support Ticket routes
     Route::resource('support-tickets', SupportTicketController::class);
@@ -521,6 +538,12 @@ Route::post('/api/featured-notes/{featuredNote}/click', [\App\Http\Controllers\F
     ->name('api.featured-notes.click');
 Route::post('/api/featured-notes/{featuredNote}/impression', [\App\Http\Controllers\FeaturedNoteController::class, 'trackImpression'])
     ->name('api.featured-notes.impression');
+
+// Note Share API (auth required)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/api/notes/{note}/share-link', [NoteShareController::class, 'getShareLink'])
+        ->name('api.notes.share-link');
+});
 
 // AI Detection API (for logging detected AI bots - no auth required)
 Route::post('/api/ai-detection', function (\Illuminate\Http\Request $request) {

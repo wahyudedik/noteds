@@ -1,8 +1,8 @@
 <x-guest-layout>
     <div class="space-y-6">
-        <div>
-            <h2 class="text-2xl font-semibold text-slate-900">{{ __('messages.verify_email_title') ?? 'Verifikasi email Anda' }}</h2>
-            <p class="mt-2 text-sm leading-6 text-slate-500">
+        <div class="text-center">
+            <h2 class="text-3xl font-semibold text-slate-900">{{ __('messages.verify_email_title') ?? 'Verifikasi email Anda' }}</h2>
+            <p class="mt-2 text-sm text-slate-600">
                 {{ __('messages.verify_email_message') ?? 'Kami telah mengirimkan tautan verifikasi ke email Anda. Jika belum menerima, kirim ulang menggunakan tombol di bawah.' }}
             </p>
         </div>
@@ -25,7 +25,7 @@
             <form method="POST" action="{{ route('logout') }}" class="text-center">
                 @csrf
 
-                <button type="submit" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+                <button type="submit" class="text-sm font-medium text-slate-600 hover:text-slate-900">
                     {{ __('messages.log_out') }}
                 </button>
             </form>

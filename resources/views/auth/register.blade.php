@@ -1,14 +1,14 @@
 <x-guest-layout>
     <div class="space-y-6">
-        <div>
-            <h2 class="text-2xl font-semibold text-slate-900">
+        <div class="text-center">
+            <h2 class="text-3xl font-semibold text-slate-900">
                 {{ __('messages.register_title') }}</h2>
-            <p class="mt-2 text-sm leading-6 text-slate-500">
+            <p class="mt-2 text-sm text-slate-600">
                 {{ __('messages.register_subtitle') }}
             </p>
         </div>
 
-        <form method="POST" action="{{ route('register') }}" class="space-y-6" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('register') }}" class="space-y-5" enctype="multipart/form-data">
             @csrf
 
             <div class="space-y-2">
@@ -19,7 +19,7 @@
             </div>
 
             @if (isset($invitation) && $invitation)
-                <div class="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-4 text-sm text-blue-800">
+                <div class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
                     <p class="font-semibold">{{ __('messages.workspace_invite_title') }}</p>
                     <p class="mt-1 text-blue-700">
                         {{ __('messages.workspace_invite_copy') }}
@@ -118,9 +118,9 @@
                 <x-primary-button class="w-full justify-center">
                     {{ __('messages.register') }}
                 </x-primary-button>
-                <p class="text-center text-sm text-slate-500">
+                <p class="text-center text-sm text-slate-600">
                     {{ __('messages.already_registered_prompt') }}
-                    <a href="{{ route('login') }}" class="font-semibold text-blue-600 hover:text-blue-500">
+                    <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-500">
                         {{ __('messages.log_in') }}
                     </a>
                 </p>

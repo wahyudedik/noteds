@@ -22,6 +22,7 @@ use App\Models\NoteViewRevenue;
 use App\Models\NoteBundle;
 use App\Models\Category;
 use App\Models\NoteSeries;
+use App\Models\NoteShareReferral;
 
 class Note extends Model
 {
@@ -332,6 +333,74 @@ class Note extends Model
     }
 
     /**
+     * Get views count in the last 24 hours.
+     */
+    public function getViews24HoursAttribute(): int
+    {
+        return $this->viewHistory()
+            ->where('viewed_at', '>=', now()->subHours(24))
+            ->count();
+    }
+
+    /**
+     * Get views count in the last 7 days.
+     */
+    public function getViews7DaysAttribute(): int
+    {
+        return $this->viewHistory()
+            ->where('viewed_at', '>=', now()->subDays(7))
+            ->count();
+    }
+
+    /**
+     * Check if note is "hot" (high views in last 24 hours).
+     */
+    public function isHot(): bool
+    {
+        $hotThreshold = \App\Models\Setting::getSetting('hot_note_threshold', 'marketplace', 50);
+        return $this->views_24_hours >= $hotThreshold;
+    }
+
+    /**
+     * Check if note is "viral" (very high views in last 24 hours or high growth rate).
+     */
+    public function isViral(): bool
+    {
+        $viralThreshold = \App\Models\Setting::getSetting('viral_note_threshold', 'marketplace', 200);
+        $views24h = $this->views_24_hours;
+        
+        // Check if views in 24h exceed viral threshold
+        if ($views24h >= $viralThreshold) {
+            return true;
+        }
+
+        // Check growth rate: if 24h views are more than 50% of 7-day views, it's viral
+        $views7d = $this->views_7_days;
+        if ($views7d > 0 && $views24h > 0) {
+            $growthRate = ($views24h / $views7d) * 100;
+            $minGrowthRate = \App\Models\Setting::getSetting('viral_growth_rate_threshold', 'marketplace', 50);
+            if ($growthRate >= $minGrowthRate && $views24h >= ($viralThreshold * 0.5)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get viral/hot status badge text.
+     */
+    public function getViralBadgeTextAttribute(): ?string
+    {
+        if ($this->isViral()) {
+            return 'Viral';
+        } elseif ($this->isHot()) {
+            return 'Hot';
+        }
+        return null;
+    }
+
+    /**
      * Get bundles that include this note.
      */
     public function bundles()
@@ -566,6 +635,14 @@ class Note extends Model
     public function bookmarks()
     {
         return $this->hasMany(Bookmark::class);
+    }
+
+    /**
+     * Get share referrals for this note.
+     */
+    public function shareReferrals()
+    {
+        return $this->hasMany(NoteShareReferral::class);
     }
 
     /**

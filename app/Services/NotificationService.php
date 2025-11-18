@@ -12,6 +12,8 @@ use App\Models\NoteConversation;
 use App\Models\NoteReview;
 use App\Models\NoteReviewReply;
 use App\Models\Setting;
+use App\Models\Badge;
+use App\Models\Level;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Bus;
@@ -769,6 +771,26 @@ class NotificationService
         );
     }
 
+    /**
+     * Notify user about commission earned from sharing a note.
+     */
+    public function notifyShareCommission(User $sharer, Note $note, float $commissionAmount, float $percent): AppNotification
+    {
+        return $this->create(
+            $sharer,
+            'share_commission',
+            '🎁 Share Commission Earned',
+            "Someone purchased '{$note->title}' through your share link! You earned {$this->formatCurrency($commissionAmount)} ({$percent}% commission).",
+            route('marketplace.show', $note),
+            [
+                'note_id' => $note->id,
+                'note_title' => $note->title,
+                'commission_amount' => $commissionAmount,
+                'percent' => $percent,
+            ]
+        );
+    }
+
     public function notifyCreatorCommission(User $creator, Note $note, float $commissionAmount, ?User $seller = null): AppNotification
     {
         $sellerName = $seller ? $seller->name : 'a reseller';
@@ -920,6 +942,51 @@ class NotificationService
                 'review_id' => $review->id,
                 'reply_id' => $reply->id,
                 'note_id' => $review->note_id,
+            ]
+        );
+    }
+
+    /**
+     * Notify user when they earn a badge.
+     */
+    public function notifyBadgeEarned(User $user, Badge $badge): AppNotification
+    {
+        return $this->create(
+            $user,
+            'badge_earned',
+            '🏆 Badge Earned!',
+            "Congratulations! You've earned the '{$badge->name}' badge! {$badge->description}",
+            route('public.profile.show', $user->username),
+            [
+                'badge_id' => $badge->id,
+                'badge_name' => $badge->name,
+                'badge_category' => $badge->category,
+                'badge_icon' => $badge->icon,
+            ]
+        );
+    }
+
+    /**
+     * Notify user when they level up.
+     */
+    public function notifyLevelUp(User $user, Level $level, string $type): AppNotification
+    {
+        $typeLabel = $type === 'seller' ? 'Seller' : 'Buyer';
+        $benefits = $level->benefits_array;
+        $benefitsText = !empty($benefits) ? "\n\nBenefits: " . implode(', ', $benefits) : '';
+
+        return $this->create(
+            $user,
+            'level_up',
+            '🎉 Level Up!',
+            "Congratulations! You've reached {$typeLabel} Level: {$level->name}! {$level->description}{$benefitsText}",
+            route('public.profile.show', $user->username),
+            [
+                'level_id' => $level->id,
+                'level_name' => $level->name,
+                'level_type' => $type,
+                'level_icon' => $level->icon,
+                'commission_discount' => $level->commission_discount_percent,
             ]
         );
     }

@@ -20,6 +20,8 @@
         $featuresIcons = [
             'document-text' =>
                 '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6h4.5m.75 6H6.75A1.75 1.75 0 0 1 5 16.25V7.75A1.75 1.75 0 0 1 6.75 6h5.086a1.75 1.75 0 0 1 1.237.513l3.914 3.914c.328.328.513.775.513 1.237v4.586A1.75 1.75 0 0 1 16.5 18Z"/></svg>',
+            'wallet' =>
+                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 0 0-3 3v6a3 3 0 0 0 3 3h3.75A2.25 2.25 0 0 0 21 18V12Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0Z"/></svg>',
             'sparkles' =>
                 '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 12h.01M12 6h.01m0 12h.01M18 12h.01M9.172 9.172a4 4 0 0 1 5.656 5.656m-8.486 0a4 4 0 0 1 5.657-5.657"/></svg>',
             'users' =>

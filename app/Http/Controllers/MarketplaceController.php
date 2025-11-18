@@ -13,6 +13,7 @@ use App\Services\CommissionService;
 use App\Services\ReferralService;
 use App\Services\TaxService;
 use App\Services\NotificationService;
+use App\Services\NoteShareService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,10 @@ class MarketplaceController extends Controller
                 ->byLocation('marketplace_grid')
                 ->with(['note' => function($q) {
                     $q->select('id', 'title', 'price', 'user_id', 'summary', 'thumbnail', 'ecosystem_category', 'status', 'is_public', 'created_at');
-                }, 'note.tags:id,name', 'note.user:id,name,username,avatar', 'note.reviews:id,note_id,rating'])
+                }, 'note.tags:id,name', 'note.user:id,name,username,avatar', 'note.user.badges:id,name,icon,color,category', 'note.reviews:id,note_id,rating', 'note.viewHistory' => function($q) {
+                    $q->select('id', 'note_id', 'viewed_at')
+                      ->where('viewed_at', '>=', now()->subDays(7));
+                }])
                 ->inRandomOrder()
                 ->limit(6)
                 ->get();
@@ -49,7 +53,10 @@ class MarketplaceController extends Controller
                 ->byLocation('marketplace_banner')
                 ->with(['note' => function($q) {
                     $q->select('id', 'title', 'price', 'user_id', 'summary', 'thumbnail', 'ecosystem_category', 'status', 'is_public', 'created_at');
-                }, 'note.tags:id,name', 'note.user:id,name,username,avatar', 'note.reviews:id,note_id,rating'])
+                }, 'note.tags:id,name', 'note.user:id,name,username,avatar', 'note.user.badges:id,name,icon,color,category', 'note.reviews:id,note_id,rating', 'note.viewHistory' => function($q) {
+                    $q->select('id', 'note_id', 'viewed_at')
+                      ->where('viewed_at', '>=', now()->subDays(7));
+                }])
                 ->inRandomOrder()
                 ->first();
         });
@@ -64,8 +71,14 @@ class MarketplaceController extends Controller
             ->with([
                 'tags:id,name',
                 'user:id,name,username,avatar',
+                'user.badges:id,name,icon,color,category',
+                'user.userLevels.level',
                 'reviews' => function($q) {
                     $q->select('id', 'note_id', 'rating', 'comment', 'created_at');
+                },
+                'viewHistory' => function($q) {
+                    $q->select('id', 'note_id', 'viewed_at')
+                      ->where('viewed_at', '>=', now()->subDays(7));
                 }
             ])
             ->when($request->search, function ($query) use ($request) {
@@ -190,8 +203,17 @@ class MarketplaceController extends Controller
         ]);
     }
 
-    public function show(Note $note): View
+    public function show(Request $request, Note $note, NoteShareService $noteShareService): View
     {
+        // Track share referral click if ref parameter exists
+        if ($request->has('ref')) {
+            $referralToken = $request->input('ref');
+            $noteShareService->trackClick($referralToken);
+            
+            // Store in session for purchase tracking
+            $request->session()->put('share_referral_token', $referralToken);
+        }
+
         if (!$note->is_public || $note->status !== 'active') {
             $note->load('user');
 
@@ -214,6 +236,7 @@ class MarketplaceController extends Controller
         $note->load([
             'tags:id,name',
             'user:id,name,username,avatar,bio',
+            'user.badges:id,name,icon,color,category',
             'originalCreator:id,name,username,avatar',
             'reviews' => function($q) {
                 $q->select('id', 'note_id', 'user_id', 'rating', 'comment', 'created_at')
@@ -241,6 +264,10 @@ class MarketplaceController extends Controller
                   ->with('user:id,name,username,avatar')
                   ->latest()
                   ->limit(20);
+            },
+            'viewHistory' => function($q) {
+                $q->select('id', 'note_id', 'viewed_at')
+                  ->where('viewed_at', '>=', now()->subDays(7));
             }
         ]);
 
@@ -255,24 +282,33 @@ class MarketplaceController extends Controller
             $featuredNote->incrementImpressions();
         }
 
-        // Track note view history for authenticated users (Premium feature)
-        if (auth()->check() && auth()->user()->hasPremium()) {
-            // Check if already viewed today
-            $today = now()->startOfDay();
-            $existingView = \App\Models\NoteViewHistory::where('user_id', auth()->id())
-                ->where('note_id', $note->id)
-                ->whereDate('viewed_at', $today)
-                ->first();
-            
-            if (!$existingView) {
-                \App\Models\NoteViewHistory::create([
-                    'user_id' => auth()->id(),
-                    'note_id' => $note->id,
-                    'viewed_at' => now(),
-                    'ip_address' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-            }
+        // Track note view history for all users (for viral/hot badge calculation)
+        // For authenticated users, track with user_id
+        // For guests, track with IP address only
+        $userId = auth()->check() ? auth()->id() : null;
+        
+        // Prevent duplicate views: check if same user/IP viewed in last hour
+        $oneHourAgo = now()->subHour();
+        $existingView = \App\Models\NoteViewHistory::where('note_id', $note->id)
+            ->where('viewed_at', '>=', $oneHourAgo);
+        
+        if ($userId) {
+            $existingView->where('user_id', $userId);
+        } else {
+            $existingView->whereNull('user_id')
+                        ->where('ip_address', request()->ip());
+        }
+        
+        $existingView = $existingView->first();
+        
+        if (!$existingView) {
+            \App\Models\NoteViewHistory::create([
+                'user_id' => $userId,
+                'note_id' => $note->id,
+                'viewed_at' => now(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
         }
 
         // Process view monetization for free notes (0.01 rupiah per view)
@@ -476,6 +512,12 @@ class MarketplaceController extends Controller
             );
         }
 
+        // Generate share URL for authenticated users
+        $shareUrl = null;
+        if (auth()->check()) {
+            $shareUrl = $noteShareService->generateShareUrl($note, auth()->user());
+        }
+
         return view('marketplace.show', compact(
             'relatedNotes',
             'note',
@@ -498,11 +540,12 @@ class MarketplaceController extends Controller
             'comments',
             'reactionsSummary',
             'userReaction',
-            'questions'
+            'questions',
+            'shareUrl'
         ));
     }
 
-    public function purchase(Note $note, ReferralService $referralService, TaxService $taxService, CommissionService $commissionService): RedirectResponse
+    public function purchase(Request $request, Note $note, ReferralService $referralService, TaxService $taxService, CommissionService $commissionService, NoteShareService $noteShareService): RedirectResponse
     {
         if (!$note->is_public || $note->status !== 'active') {
             return redirect()->route('marketplace.index')->with('error', 'Catatan tidak tersedia untuk dibeli.');
@@ -672,7 +715,13 @@ class MarketplaceController extends Controller
             } else {
                 // Scarcity mode: Apply commission as usual
                 // Get commission rates based on seller tier (fallback to settings)
-                $platformCommissionPercent = $commissionTier?->platform_fee_percent ?? Setting::getSetting('platform_commission_percent', 'marketplace', 20);
+                $basePlatformCommissionPercent = $commissionTier?->platform_fee_percent ?? Setting::getSetting('platform_commission_percent', 'marketplace', 20);
+                
+                // Apply level discount to platform commission
+                $levelService = app(\App\Services\LevelService::class);
+                $levelDiscount = $levelService->getCommissionDiscount($seller);
+                $platformCommissionPercent = max(0, $basePlatformCommissionPercent - $levelDiscount);
+                
                 $creatorCommissionPercent = $commissionTier?->creator_commission_percent ?? Setting::getSetting('creator_commission_percent', 'marketplace', 0);
                 
                 // Platform fee (always deducted from every transaction)
@@ -827,6 +876,18 @@ class MarketplaceController extends Controller
                 $soldAt = now();
             }
 
+            // Get share referral token from request or session
+            $shareReferralToken = $request->input('share_ref') 
+                ?? $request->session()->get('share_referral_token')
+                ?? null;
+
+            // Prepare transaction notes (store share referral token if exists)
+            $transactionNotes = 'Pembelian catatan: ' . $note->title;
+            $transactionNotesData = [];
+            if ($shareReferralToken) {
+                $transactionNotesData['share_referral_token'] = $shareReferralToken;
+            }
+
             // Create transaction record
             $transaction = Transaction::create([
                 'buyer_id' => $buyer->id,
@@ -850,7 +911,7 @@ class MarketplaceController extends Controller
                 'tax_country_code' => $taxContext['country_code'] ?? null,
                 'status' => 'success',
                 'payment_method' => 'wallet',
-                'notes' => 'Pembelian catatan: ' . $note->title,
+                'notes' => !empty($transactionNotesData) ? json_encode($transactionNotesData) : $transactionNotes,
                 'grace_period_ends_at' => $gracePeriodEndsAt,
             ]);
             
@@ -944,6 +1005,45 @@ class MarketplaceController extends Controller
 
             DB::commit();
 
+            // Check and award badges for seller
+            $achievementService = app(\App\Services\AchievementService::class);
+            $achievementService->checkSalesBadges($seller);
+            $achievementService->checkQualityBadges($seller);
+
+            // Check and assign seller level
+            try {
+                $levelService = app(\App\Services\LevelService::class);
+                $levelService->checkSellerLevel($seller);
+            } catch (\Exception $e) {
+                logger()->error('Failed to check seller level', [
+                    'seller_id' => $seller->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            // Check and assign buyer level
+            try {
+                $levelService = app(\App\Services\LevelService::class);
+                $levelService->checkBuyerLevel($buyer);
+            } catch (\Exception $e) {
+                logger()->error('Failed to check buyer level', [
+                    'buyer_id' => $buyer->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            // Award points for purchase (buyer)
+            try {
+                $pointsService = app(\App\Services\PointsService::class);
+                $pointsService->awardPurchasePoints($buyer, $transaction);
+            } catch (\Exception $e) {
+                logger()->error('Failed to award purchase points', [
+                    'buyer_id' => $buyer->id,
+                    'transaction_id' => $transaction->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             // Process transaction reward for referral (outside transaction to avoid deadlock)
             if ($transaction) {
                 try {
@@ -952,6 +1052,18 @@ class MarketplaceController extends Controller
                     // Log error but don't fail the purchase
                     logger()->error('Failed to process transaction reward', [
                         'transaction_id' => $transaction->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+
+                // Process share commission (outside transaction to avoid deadlock)
+                try {
+                    $noteShareService->processShareCommission($transaction, $shareReferralToken);
+                } catch (\Exception $e) {
+                    // Log error but don't fail the purchase
+                    logger()->error('Failed to process share commission', [
+                        'transaction_id' => $transaction->id,
+                        'share_referral_token' => $shareReferralToken,
                         'error' => $e->getMessage(),
                     ]);
                 }

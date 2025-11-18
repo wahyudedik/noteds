@@ -1,13 +1,13 @@
 <x-guest-layout>
     <div class="space-y-6">
-        <div>
-            <h2 class="text-2xl font-semibold text-slate-900">{{ __('messages.reset_password_title') ?? 'Atur ulang kata sandi' }}</h2>
-            <p class="mt-2 text-sm leading-6 text-slate-500">
+        <div class="text-center">
+            <h2 class="text-3xl font-semibold text-slate-900">{{ __('messages.reset_password_title') ?? 'Atur ulang kata sandi' }}</h2>
+            <p class="mt-2 text-sm text-slate-600">
                 {{ __('messages.reset_password_subtitle') ?? 'Masukkan kata sandi baru Anda dan konfirmasi untuk menyelesaikan proses pemulihan akun.' }}
             </p>
         </div>
 
-        <form method="POST" action="{{ route('password.store') }}" class="space-y-6">
+        <form method="POST" action="{{ route('password.store') }}" class="space-y-5">
             @csrf
 
             <input type="hidden" name="token" value="{{ $request->route('token') }}">

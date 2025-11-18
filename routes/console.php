@@ -67,3 +67,10 @@ Schedule::command('views:validate --limit=200')
     ->hourly()
     ->timezone('Asia/Jakarta')
     ->description('Validate pending view revenues and mark as approved or rejected.');
+
+// Schedule expired points processing (run daily at 02:00)
+Schedule::command('points:process-expired')
+    ->daily()
+    ->at('02:00')
+    ->timezone('Asia/Jakarta')
+    ->description('Process expired points and update statistics.');

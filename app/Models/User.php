@@ -17,6 +17,10 @@ use App\Models\NoteReviewReply;
 use App\Models\NoteReview;
 use App\Models\NoteReport;
 use App\Models\UserReport;
+use App\Models\Point;
+use App\Models\PointRedemption;
+use App\Models\Level;
+use App\Models\UserLevel;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -234,6 +238,155 @@ class User extends Authenticatable implements MustVerifyEmail
     public function wallet()
     {
         return $this->hasOne(Wallet::class);
+    }
+
+    public function sharePoints()
+    {
+        return $this->hasMany(SharePoint::class);
+    }
+
+    public function monthlyShareRewards()
+    {
+        return $this->hasMany(MonthlyShareReward::class);
+    }
+
+    public function badges(): BelongsToMany
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges')
+            ->withPivot('earned_at', 'notes')
+            ->withTimestamps()
+            ->orderByPivot('earned_at', 'desc');
+    }
+
+    public function userBadges(): HasMany
+    {
+        return $this->hasMany(UserBadge::class);
+    }
+
+    /**
+     * Check if user has a specific badge.
+     */
+    public function hasBadge(Badge $badge): bool
+    {
+        return $this->badges()->where('badges.id', $badge->id)->exists();
+    }
+
+    /**
+     * Get badges by category.
+     */
+    public function getBadgesByCategory(string $category)
+    {
+        return $this->badges()->where('badges.category', $category)->get();
+    }
+
+    public function points(): HasMany
+    {
+        return $this->hasMany(Point::class, 'user_id');
+    }
+
+    public function pointRedemptions(): HasMany
+    {
+        return $this->hasMany(PointRedemption::class, 'user_id');
+    }
+
+    public function userLevels(): HasMany
+    {
+        return $this->hasMany(UserLevel::class);
+    }
+
+    public function sellerLevel(): BelongsToMany
+    {
+        return $this->belongsToMany(Level::class, 'user_levels')
+            ->where('user_levels.type', 'seller')
+            ->where('levels.type', 'seller')
+            ->withPivot('achieved_at', 'notes')
+            ->withTimestamps()
+            ->orderBy('levels.level_order', 'desc')
+            ->limit(1);
+    }
+
+    public function buyerLevel(): BelongsToMany
+    {
+        return $this->belongsToMany(Level::class, 'user_levels')
+            ->where('user_levels.type', 'buyer')
+            ->where('levels.type', 'buyer')
+            ->withPivot('achieved_at', 'notes')
+            ->withTimestamps()
+            ->orderBy('levels.level_order', 'desc')
+            ->limit(1);
+    }
+
+    /**
+     * Get current seller level.
+     */
+    public function getCurrentSellerLevelAttribute()
+    {
+        return $this->userLevels()
+            ->where('type', 'seller')
+            ->with('level')
+            ->orderBy('achieved_at', 'desc')
+            ->first()?->level;
+    }
+
+    /**
+     * Get current buyer level.
+     */
+    public function getCurrentBuyerLevelAttribute()
+    {
+        return $this->userLevels()
+            ->where('type', 'buyer')
+            ->with('level')
+            ->orderBy('achieved_at', 'desc')
+            ->first()?->level;
+    }
+
+    /**
+     * Get total available points (not redeemed, not expired).
+     */
+    public function getTotalPointsAttribute(): int
+    {
+        return $this->points()
+            ->where('is_redeemed', false)
+            ->where(function($q) {
+                $q->whereNull('expires_at')
+                  ->orWhere('expires_at', '>', now());
+            })
+            ->sum('points');
+    }
+
+    /**
+     * Get total points ever earned.
+     */
+    public function getTotalPointsEarnedAttribute(): int
+    {
+        return $this->points()->sum('points');
+    }
+
+    /**
+     * Get total points redeemed.
+     */
+    public function getTotalPointsRedeemedAttribute(): int
+    {
+        return $this->points()->where('is_redeemed', true)->sum('points');
+    }
+
+    /**
+     * Get total share points earned by user.
+     */
+    public function getTotalSharePointsAttribute(): int
+    {
+        return $this->sharePoints()->sum('points');
+    }
+
+    /**
+     * Get share points for current month.
+     */
+    public function getCurrentMonthSharePointsAttribute(): int
+    {
+        return $this->sharePoints()
+            ->whereYear('earned_date', now()->year)
+            ->whereMonth('earned_date', now()->month)
+            ->sum('points');
     }
 
     public function transactionsAsBuyer()

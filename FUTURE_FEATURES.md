@@ -15,47 +15,47 @@
 ### 1. 🟢 Social Features & Viral Mechanics
 **Impact:** Meningkatkan user acquisition melalui word-of-mouth
 
-- [ ] **Social Sharing Rewards**
+- [x] **Social Sharing Rewards**
   - Reward user yang share note dan menghasilkan purchase 
   - Trackable referral links untuk setiap note
   - Commission untuk user yang share (configurable %)
   
-- [ ] **Viral Note Badge**
+- [x] **Viral Note Badge**
   - Badge otomatis untuk notes yang trending/viral
   - "Hot" indicator untuk notes dengan banyak views dalam 24 jam
   - Social proof yang kuat untuk conversion
 
-- [ ] **Share-to-Earn System**
+- [x] **Share-to-Earn System**
   - User dapat earn points/credit dengan share notes
   - Leaderboard untuk top sharers
   - Monthly rewards untuk top sharers
 
 - [ ] **Social Login Integration**
-  - Login dengan Google, Facebook, Twitter, GitHub
+  - Login dengan Google, Facebook, GitHub
   - One-click registration untuk mengurangi friction
   - Auto-import profile picture dari social media
 
 ### 2. 🟢 Gamification System
 **Impact:** Meningkatkan user engagement & retention
 
-- [ ] **Achievement Badges System**
+- [x] **Achievement Badges System**
   - Badges untuk milestones (First Sale, 10 Sales, 100 Sales, etc.)
   - Badges untuk quality (5-Star Seller, Top Rated, etc.)
   - Badges untuk community (Helpful Reviewer, Active Forum User, etc.)
   - Display badges di profile dan marketplace cards
 
-- [ ] **Points & Rewards System**
+- [x] **Points & Rewards System**
   - Earn points untuk berbagai activities (purchase, review, share, etc.)
   - Redeem points untuk discounts atau premium features
-  - Points expiration system ()
+  - Points expiration system
 
-- [ ] **Leaderboards**
+- [x] **Leaderboards**
   - Top Sellers (by revenue, sales count, ratings)
   - Top Buyers (by purchase count, spending)
   - Top Contributors (by reviews, forum posts, shares)
   - Weekly/Monthly/All-time leaderboards
 
-- [ ] **Level System**
+- [x] **Level System**
   - Seller levels (Bronze, Silver, Gold, Platinum, Diamond)
   - Buyer levels (Explorer, Collector, Enthusiast, etc.)
   - Level benefits (lower commission, priority support, etc.)

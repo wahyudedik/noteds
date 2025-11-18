@@ -85,6 +85,12 @@
                     'active' => request()->routeIs('marketplace.*'),
                 ];
 
+                $primaryLinks[] = [
+                    'label' => 'Leaderboards',
+                    'href' => route('leaderboard.index'),
+                    'active' => request()->routeIs('leaderboard.*'),
+                ];
+
                 // Forum submenu
                 $forumIsActive = request()->routeIs('forum.*');
                 $forumSubmenu = [
@@ -184,7 +190,22 @@
                     'href' => route('referral.index'),
                     'active' => request()->routeIs('referral.*'),
                 ];
-                $settingsIsActive = request()->routeIs('referral.*');
+                $settingsSubmenu[] = [
+                    'label' => 'Share Analytics',
+                    'href' => route('share.analytics'),
+                    'active' => request()->routeIs('share.analytics'),
+                ];
+    $settingsSubmenu[] = [
+        'label' => 'Share Leaderboard',
+        'href' => route('share.leaderboard'),
+        'active' => request()->routeIs('share.leaderboard'),
+    ];
+    $settingsSubmenu[] = [
+        'label' => 'Points & Rewards',
+        'href' => route('points.index'),
+        'active' => request()->routeIs('points.*'),
+    ];
+    $settingsIsActive = request()->routeIs('referral.*') || request()->routeIs('share.*') || request()->routeIs('points.*');
                 
                 if (!empty($settingsSubmenu)) {
                     $moreLinks[] = [

@@ -4,7 +4,7 @@ return [
     'hero' => [
         'badge' => 'Untuk kreator dan pembelajar',
         'title' => 'Marketplace catatan yang berkarakter Noteds',
-        'subtitle' => 'Kurasi, kolaborasi, dan jual catatan premium dengan bantuan AI, dompet multi-mata uang, dan tim workspace dalam tampilan yang minimalis.',
+        'subtitle' => 'Kurasi, kolaborasi, dan jual catatan premium dengan dompet multi-mata uang dan tim workspace dalam tampilan yang minimalis.',
         'primary_cta' => 'Jelajahi Catatan',
         'secondary_cta' => 'Mulai Menjual',
     ],
@@ -15,9 +15,9 @@ return [
             'icon' => 'document-text',
         ],
         [
-            'title' => 'Alat Berbasis AI',
-            'description' => 'Buat ringkasan, ekstrak insight, dan bantu pembelajar dengan asisten chat yang dilatih dari konten Anda.',
-            'icon' => 'sparkles',
+            'title' => 'Dompet Multi-Mata Uang',
+            'description' => 'Kelola transaksi dengan berbagai mata uang, tarik dana dengan mudah, dan pantau saldo wallet Anda secara real-time.',
+            'icon' => 'wallet',
         ],
         [
             'title' => 'Workspace & Kolaborasi',

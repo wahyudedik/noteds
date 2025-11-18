@@ -221,10 +221,22 @@
                         @php($note = $featured->note)
                         <div class="bg-white overflow-hidden shadow-lg rounded-lg border-2 border-yellow-400 hover:shadow-xl hover:border-yellow-500 transition-all duration-200 group relative">
                             <!-- Featured Badge -->
-                            <div class="absolute top-2 right-2 z-10">
+                            <div class="absolute top-2 right-2 z-10 flex flex-col gap-1">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">
                                     ⭐ {{ __('messages.featured_note') }}
                                 </span>
+                                <!-- Viral/Hot Badge -->
+                                @if($note->isViral() || $note->isHot())
+                                    @if($note->isViral())
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg animate-pulse">
+                                            🔥 VIRAL
+                                        </span>
+                                    @elseif($note->isHot())
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
+                                            🔥 HOT
+                                        </span>
+                                    @endif
+                                @endif
                             </div>
                             <!-- Thumbnail -->
                             @if($note->hasThumbnails())
@@ -278,9 +290,49 @@
                                             <span class="text-lg font-bold text-gray-600">{{ __('messages.free') }}</span>
                                         @endif
                                     </div>
-                                    <a href="{{ route('public.profile.show', $note->user->username) }}" class="text-sm text-gray-600 hover:text-blue-600">
-                                        {{ $note->user->name }}
-                                    </a>
+                                    <div class="flex flex-col">
+                                        <a href="{{ route('public.profile.show', $note->user->username) }}" class="text-sm text-gray-600 hover:text-blue-600">
+                                            {{ $note->user->name }}
+                                        </a>
+                                        @if($note->user->badges->count() > 0)
+                                            <div class="flex flex-wrap gap-1 mt-1">
+                                                @foreach($note->user->badges->take(3) as $badge)
+                                                    <span class="inline-flex items-center text-[10px] font-medium 
+                                                        @if($badge->color === 'gold') text-yellow-600
+                                                        @elseif($badge->color === 'green') text-green-600
+                                                        @elseif($badge->color === 'blue') text-blue-600
+                                                        @elseif($badge->color === 'purple') text-purple-600
+                                                        @elseif($badge->color === 'yellow') text-yellow-600
+                                                        @elseif($badge->color === 'orange') text-orange-600
+                                                        @else text-gray-600
+                                                        @endif"
+                                                        title="{{ $badge->name }}">
+                                                        @if($badge->icon)
+                                                            {{ $badge->icon }}
+                                                        @endif
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        @if($note->user->current_seller_level)
+                                            <div class="relative inline-block group mt-1">
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold 
+                                                    @if($note->user->current_seller_level->color === 'bronze') bg-gradient-to-r from-orange-600 to-amber-700 text-white
+                                                    @elseif($note->user->current_seller_level->color === 'silver') bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900
+                                                    @elseif($note->user->current_seller_level->color === 'gold') bg-gradient-to-r from-yellow-400 to-orange-500 text-white
+                                                    @elseif($note->user->current_seller_level->color === 'platinum') bg-gradient-to-r from-gray-400 to-gray-600 text-white
+                                                    @elseif($note->user->current_seller_level->color === 'diamond') bg-gradient-to-r from-cyan-400 to-blue-500 text-white
+                                                    @else bg-gray-100 text-gray-800
+                                                    @endif"
+                                                    title="{{ $note->user->current_seller_level->name }}">
+                                                    @if($note->user->current_seller_level->icon)
+                                                        <span class="mr-0.5">{{ $note->user->current_seller_level->icon }}</span>
+                                                    @endif
+                                                    {{ $note->user->current_seller_level->name }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -297,10 +349,31 @@
         @if($notes->count() > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($notes as $note)
-                    <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 group">
+                    <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 group relative">
+                        <!-- Viral/Hot Badge -->
+                        @if($note->isViral() || $note->isHot())
+                            <div class="absolute top-2 left-2 z-10">
+                                @if($note->isViral())
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg animate-pulse">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                        🔥 VIRAL
+                                    </span>
+                                @elseif($note->isHot())
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.16-.85-.434-1.675-.82-2.45a5.549 5.549 0 00-5.8-2.13A4.5 4.5 0 001 6.477v6c0 1.968.785 3.747 2.05 5.043a4.5 4.5 0 006.95-1.95c0-.64-.13-1.25-.36-1.81a5.389 5.389 0 01-.22-3.68 4.5 4.5 0 00-1.88-2.547 2.5 2.5 0 01-1.32-2.88 1.5 1.5 0 00-1.14-1.86 1.5 1.5 0 00-1.12.12c-1.24.82-2.27 1.9-3.01 3.18-.75 1.3-1.23 2.78-1.23 4.38 0 1.56.48 3.03 1.23 4.33.74 1.28 1.77 2.36 3.01 3.18a1.5 1.5 0 001.12.12c.5-.07.93-.46 1.14-1.86.2-1.4.6-2.88 1.32-2.88.72 0 1.12 1.48 1.32 2.88.21 1.4.64 1.79 1.14 1.86a1.5 1.5 0 001.12-.12c1.24-.82 2.27-1.9 3.01-3.18.75-1.3 1.23-2.78 1.23-4.33 0-1.6-.48-3.08-1.23-4.38z" clip-rule="evenodd" />
+                                        </svg>
+                                        🔥 HOT
+                                    </span>
+                                @endif
+                            </div>
+                        @endif
+                        
                         <!-- Thumbnail -->
                         @if($note->hasThumbnails())
-                            <div class="h-48 overflow-hidden bg-gray-100">
+                            <div class="h-48 overflow-hidden bg-gray-100 relative">
                                 <img src="{{ Storage::url($note->thumbnails[0]) }}" 
                                      alt="{{ $note->title }}" 
                                      loading="lazy"
@@ -424,8 +497,48 @@
                                         @endif
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <div class="flex items-center gap-1.5 flex-wrap">
-                                            <span class="group-hover:text-blue-600">{{ $note->user->name }}</span>
+                                        <div class="flex flex-col">
+                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                <span class="group-hover:text-blue-600">{{ $note->user->name }}</span>
+                                            </div>
+                                            @if($note->user->badges && $note->user->badges->count() > 0)
+                                                <div class="flex flex-wrap gap-1 mt-0.5">
+                                                    @foreach($note->user->badges->take(3) as $badge)
+                                                        <span class="inline-flex items-center text-[10px] font-medium 
+                                                            @if($badge->color === 'gold') text-yellow-600
+                                                            @elseif($badge->color === 'green') text-green-600
+                                                            @elseif($badge->color === 'blue') text-blue-600
+                                                            @elseif($badge->color === 'purple') text-purple-600
+                                                            @elseif($badge->color === 'yellow') text-yellow-600
+                                                            @elseif($badge->color === 'orange') text-orange-600
+                                                            @else text-gray-600
+                                                            @endif"
+                                                            title="{{ $badge->name }}">
+                                                            @if($badge->icon)
+                                                                {{ $badge->icon }}
+                                                            @endif
+                                                        </span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                            @if($note->user->current_seller_level)
+                                                <div class="relative inline-block group mt-0.5">
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold 
+                                                        @if($note->user->current_seller_level->color === 'bronze') bg-gradient-to-r from-orange-600 to-amber-700 text-white
+                                                        @elseif($note->user->current_seller_level->color === 'silver') bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900
+                                                        @elseif($note->user->current_seller_level->color === 'gold') bg-gradient-to-r from-yellow-400 to-orange-500 text-white
+                                                        @elseif($note->user->current_seller_level->color === 'platinum') bg-gradient-to-r from-gray-400 to-gray-600 text-white
+                                                        @elseif($note->user->current_seller_level->color === 'diamond') bg-gradient-to-r from-cyan-400 to-blue-500 text-white
+                                                        @else bg-gray-100 text-gray-800
+                                                        @endif"
+                                                        title="{{ $note->user->current_seller_level->name }}">
+                                                        @if($note->user->current_seller_level->icon)
+                                                            <span class="mr-0.5">{{ $note->user->current_seller_level->icon }}</span>
+                                                        @endif
+                                                        {{ $note->user->current_seller_level->name }}
+                                                    </span>
+                                                </div>
+                                            @endif
                                         </div>
                                         @if($note->user->role === 'seller')
                                             <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="{{ __('messages.seller') }}">

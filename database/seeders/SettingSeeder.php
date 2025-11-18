@@ -62,6 +62,118 @@ class SettingSeeder extends Seeder
             ]
         );
 
+        // Share commission percentage
+        Setting::updateOrCreate(
+            ['key' => 'share_commission_percent', 'group' => 'marketplace'],
+            [
+                'value' => '5',
+                'type' => 'number',
+                'description' => 'Commission percentage for users who share notes and generate purchases',
+            ]
+        );
+
+        // Viral/Hot badge thresholds
+        Setting::updateOrCreate(
+            ['key' => 'hot_note_threshold', 'group' => 'marketplace'],
+            [
+                'value' => '50',
+                'type' => 'number',
+                'description' => 'Minimum views in 24 hours to mark a note as "Hot"',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'viral_note_threshold', 'group' => 'marketplace'],
+            [
+                'value' => '200',
+                'type' => 'number',
+                'description' => 'Minimum views in 24 hours to mark a note as "Viral"',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'viral_growth_rate_threshold', 'group' => 'marketplace'],
+            [
+                'value' => '50',
+                'type' => 'number',
+                'description' => 'Minimum growth rate percentage (24h views / 7d views * 100) to mark as "Viral"',
+            ]
+        );
+
+        // Share-to-Earn points settings
+        Setting::updateOrCreate(
+            ['key' => 'share_points_per_share', 'group' => 'marketplace'],
+            [
+                'value' => '10',
+                'type' => 'number',
+                'description' => 'Points awarded per share action',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'share_points_per_click', 'group' => 'marketplace'],
+            [
+                'value' => '5',
+                'type' => 'number',
+                'description' => 'Points awarded per click on share link',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'share_points_per_purchase', 'group' => 'marketplace'],
+            [
+                'value' => '50',
+                'type' => 'number',
+                'description' => 'Points awarded per purchase through share link',
+            ]
+        );
+
+        // Monthly rewards settings
+        Setting::updateOrCreate(
+            ['key' => 'monthly_reward_rank_1', 'group' => 'marketplace'],
+            [
+                'value' => '100000',
+                'type' => 'number',
+                'description' => 'Monthly reward amount for rank 1 (in IDR)',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'monthly_reward_rank_2', 'group' => 'marketplace'],
+            [
+                'value' => '50000',
+                'type' => 'number',
+                'description' => 'Monthly reward amount for rank 2 (in IDR)',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'monthly_reward_rank_3', 'group' => 'marketplace'],
+            [
+                'value' => '25000',
+                'type' => 'number',
+                'description' => 'Monthly reward amount for rank 3 (in IDR)',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'monthly_reward_top_10', 'group' => 'marketplace'],
+            [
+                'value' => '10000',
+                'type' => 'number',
+                'description' => 'Monthly reward amount for rank 4-10 (in IDR)',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'monthly_reward_top_50', 'group' => 'marketplace'],
+            [
+                'value' => '5000',
+                'type' => 'number',
+                'description' => 'Monthly reward amount for rank 11-50 (in IDR)',
+            ]
+        );
+
         Setting::updateOrCreate(
             ['key' => 'tax_default_percent', 'group' => 'marketplace'],
             [
@@ -182,6 +294,98 @@ class SettingSeeder extends Seeder
                 ]
             );
         }
+
+        // Points & Rewards System Settings
+        Setting::updateOrCreate(
+            ['key' => 'points_expiration_days', 'group' => 'points'],
+            [
+                'value' => '365',
+                'type' => 'number',
+                'description' => 'Number of days before points expire (0 = never expire)',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'points_purchase', 'group' => 'points'],
+            [
+                'value' => '10',
+                'type' => 'number',
+                'description' => 'Points awarded per purchase',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'points_purchase_multiplier', 'group' => 'points'],
+            [
+                'value' => '1',
+                'type' => 'number',
+                'description' => 'Multiplier for purchase points (points = base * multiplier)',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'points_review', 'group' => 'points'],
+            [
+                'value' => '5',
+                'type' => 'number',
+                'description' => 'Points awarded per review',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'points_share', 'group' => 'points'],
+            [
+                'value' => '3',
+                'type' => 'number',
+                'description' => 'Points awarded per share',
+            ]
+        );
+
+        // Redemption Settings
+        Setting::updateOrCreate(
+            ['key' => 'points_redemption_discount_1000', 'group' => 'points'],
+            [
+                'value' => '1000',
+                'type' => 'number',
+                'description' => 'Points required for 1000 IDR discount',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'points_redemption_discount_5000', 'group' => 'points'],
+            [
+                'value' => '4500',
+                'type' => 'number',
+                'description' => 'Points required for 5000 IDR discount',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'points_redemption_discount_10000', 'group' => 'points'],
+            [
+                'value' => '8000',
+                'type' => 'number',
+                'description' => 'Points required for 10000 IDR discount',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'points_redemption_premium_7days', 'group' => 'points'],
+            [
+                'value' => '5000',
+                'type' => 'number',
+                'description' => 'Points required for 7 days premium access',
+            ]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'points_redemption_premium_30days', 'group' => 'points'],
+            [
+                'value' => '20000',
+                'type' => 'number',
+                'description' => 'Points required for 30 days premium access',
+            ]
+        );
     }
 }
 

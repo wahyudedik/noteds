@@ -35,12 +35,24 @@ class ReviewController extends Controller
         }
 
         // Create review
-        NoteReview::create([
+        $review = NoteReview::create([
             'note_id' => $note->id,
             'user_id' => auth()->id(),
             'rating' => $request->rating,
             'comment' => $request->comment,
         ]);
+
+        // Award points for review
+        try {
+            $pointsService = app(\App\Services\PointsService::class);
+            $pointsService->awardReviewPoints(auth()->user(), $review);
+        } catch (\Exception $e) {
+            logger()->error('Failed to award review points', [
+                'user_id' => auth()->id(),
+                'review_id' => $review->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return redirect()->route('marketplace.show', $note)
             ->with('success', 'Thank you for your review!');
