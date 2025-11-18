@@ -570,6 +570,7 @@
         @endif
     </div>
 </div>
+@endsection
 
 @push('scripts')
 <script>
@@ -647,5 +648,4 @@ function fallbackCopyToClipboard(text) {
     });
 </script>
 @endpush
-@endsection
 
