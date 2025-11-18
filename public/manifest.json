@@ -1,0 +1,48 @@
+{
+    "name": "Noteds - Marketplace Catatan Digital",
+    "short_name": "Noteds",
+    "description": "Platform terbaik untuk menjual dan membeli catatan digital. Temukan ide kreatif dan monetisasi pengetahuan Anda.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#2563eb",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "icons": [
+        {
+            "src": "/favicon.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/favicon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["business", "productivity", "education"],
+    "lang": "id",
+    "dir": "ltr",
+    "shortcuts": [
+        {
+            "name": "Marketplace",
+            "short_name": "Marketplace",
+            "description": "Jelajahi catatan digital",
+            "url": "/marketplace",
+            "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Dashboard",
+            "short_name": "Dashboard",
+            "description": "Dashboard Anda",
+            "url": "/dashboard",
+            "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+        }
+    ],
+    "screenshots": [],
+    "related_applications": [],
+    "prefer_related_applications": false
+}
+

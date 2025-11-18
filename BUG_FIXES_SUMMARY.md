@@ -159,6 +159,50 @@
 - **File:** `resources/views/notes/create.blade.php` (15 select elements)
 - **Status:** ✅ Fixed
 
+### 12. **Undefined Variable $hasPurchased in Marketplace Show**
+- **Masalah:** Error `Undefined variable $hasPurchased` di marketplace detail page
+- **Fix:** Mengganti `$hasPurchased` dengan `$showFullContent` yang sudah dikirim dari controller
+- **File:** `resources/views/marketplace/show.blade.php` line 696
+- **Status:** ✅ Fixed
+
+### 13. **Avatar 404 Errors - Wrong Path**
+- **Masalah:** Avatar images menghasilkan 404 error dengan path `/marketplace/avatars/...` yang salah
+- **Fix:** 
+  - Mengganti semua `Storage::url()` dengan `asset('storage/' . $avatarPath)` untuk avatar
+  - Menambahkan logika untuk membersihkan path dari prefix `marketplace/` jika ada (legacy fix)
+  - Menambahkan error handler `onerror` untuk fallback ke initial jika gambar gagal dimuat
+  - Menambahkan `loading="lazy"` untuk performa
+- **Files:** 
+  - `resources/views/marketplace/show.blade.php` (multiple locations: note author, reviews, comments, replies, related notes)
+  - `resources/views/layouts/navigation.blade.php` (dropdown profile)
+- **Status:** ✅ Fixed
+
+### 14. **External Attachments Error - Undefined Array Key "path"**
+- **Masalah:** Error `Undefined array key "path"` saat mengakses external attachments (Google Drive links)
+- **Fix:** 
+  - Menambahkan pengecekan untuk external attachments (type === 'external' dengan url)
+  - Jika external, redirect ke URL eksternal setelah authorization check
+  - Jika internal, tetap menggunakan logika download file yang ada
+  - Update view untuk menampilkan external links dengan indikator "(External Link)"
+- **Files:** 
+  - `app/Http/Controllers/NoteAttachmentController.php`
+  - `resources/views/marketplace/show.blade.php`
+- **Status:** ✅ Fixed
+
+### 15. **Content Display Issues - Missing Prose Styling**
+- **Masalah:** Konten note tampil berantakan tanpa styling yang proper
+- **Fix:** 
+  - Menambahkan class `prose-lg` dan styling prose lengkap untuk headings, paragraphs, lists, links, code, images, blockquotes
+  - Memastikan konten ditampilkan dengan format yang benar dan readable
+- **File:** `resources/views/marketplace/show.blade.php` line 588-590
+- **Status:** ✅ Fixed
+
+### 16. **Thumbnail Images Path Issues**
+- **Masalah:** Thumbnail images menggunakan `Storage::url()` yang menghasilkan path relatif
+- **Fix:** Mengganti `Storage::url()` dengan `asset('storage/' . $thumbnail)` untuk konsistensi
+- **File:** `resources/views/marketplace/show.blade.php` line 706-709
+- **Status:** ✅ Fixed
+
 ## 📝 Notes
 
 - Semua route sudah terverifikasi dan berfungsi
@@ -167,4 +211,7 @@
 - Semua critical flows sudah di-test dan berfungsi
 - **Premium subscription feature telah dihapus** - semua user sekarang memiliki akses gratis ke semua fitur
 - **Content protection** tetap aktif di halaman publik, tapi tidak mempengaruhi halaman create/edit note dan rich text editor
+- **Avatar paths** sekarang menggunakan `asset('storage/' . ...)` untuk memastikan URL absolut yang benar
+- **External attachments** sekarang ditangani dengan benar (redirect ke URL eksternal)
+- **Content styling** sudah diperbaiki dengan Tailwind prose classes untuk readability yang lebih baik
 

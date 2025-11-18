@@ -578,6 +578,45 @@ Menjadi **AI Memory Platform** pertama dari Indonesia yang mampu memahami kontek
   - [x] Disable console
   - [x] Disable DevTools shortcuts
 
+### PWA Support (Progressive Web App)
+- [x] Manifest.json dengan icons, name, description, theme colors
+- [x] Service worker untuk offline support dan caching
+- [x] PWA install prompt banner
+- [x] Meta tags untuk Apple touch icon dan theme color
+- [x] Auto-update detection untuk service worker
+
+### Dark Mode
+- [x] Dark mode toggle button di user menu
+- [x] CSS variables untuk colors dengan smooth transitions
+- [x] LocalStorage persistence untuk preferensi
+- [x] Auto-detect dan apply preferensi saat page load
+- [x] Tailwind dark mode configuration (class-based)
+- [x] Dark mode styles untuk navigation, dropdowns, dan components
+
+### Performance Optimizations
+- [x] Database indexes untuk frequently queried columns
+  - Notes: `is_public`, `status`, `ecosystem_category`, `language`, `price`, `created_at`
+  - Transactions: `status`, `seller_id`, `created_at`, `note_id`
+  - Users: `role`, `username`
+  - Composite indexes untuk common queries
+- [x] Redis cache support dengan auto-detect dan fallback
+- [x] Query optimization dengan select specific columns
+- [x] Eager loading optimization dengan limits
+- [x] Caching untuk popular notes, featured content, tags (1 hour cache)
+- [x] Related notes caching (30 minutes per note)
+- [x] Image lazy loading untuk semua images
+- [x] Responsive images helper function dengan srcset support
+- [x] CDN configuration untuk static assets
+- [x] Image processing service untuk multiple sizes (thumbnail, medium, large)
+- [x] Laravel Telescope query monitoring dengan slow query detection (100ms threshold)
+
+### Search & SEO Enhancements
+- [x] Search autocomplete dengan AJAX suggestions
+- [x] Structured data (JSON-LD) untuk SEO
+  - Product schema untuk note detail
+  - BreadcrumbList schema untuk navigation
+  - CollectionPage schema untuk marketplace
+
 ### Identity Verification (KYC)
 - [x] Add fields to `users`: agreement_accepted_at, agreement_version, ktp_path, selfie_path, verification_status, verification_reviewed_at, verification_reviewed_by, verification_notes
 - [x] Registration: require agreement checkbox, KTP & selfie uploads (5MB limit)
@@ -786,9 +825,13 @@ Menjadi **AI Memory Platform** pertama dari Indonesia yang mampu memahami kontek
 
 **Immediate Focus**
 1. ✅ Marketplace, premium, referral, support & forum ecosystems siap production
-2. 📦 Deployment readiness (VPS provisioning, queue workers, scheduler, Midtrans production switchover)
-3. 🧪 Final QA & Beta launch (end-to-end smoke tests, rollback plan, monitoring)
-4. 📝 Documentation & onboarding (VPS setup, local setup, tasklist kept in sync)
+2. ✅ Performance optimizations (Database indexes, Redis cache, query optimization, image lazy loading)
+3. ✅ PWA support (Installable app, offline support, service worker)
+4. ✅ Dark mode (Toggle dengan persistent preference)
+5. ✅ Search & SEO enhancements (Autocomplete, structured data)
+6. 📦 Deployment readiness (VPS provisioning, queue workers, scheduler, Midtrans production switchover)
+7. 🧪 Final QA & Beta launch (end-to-end smoke tests, rollback plan, monitoring)
+8. 📝 Documentation & onboarding (VPS setup, local setup, tasklist kept in sync)
 
 **AI Memory Platform Plugin (Coming Soon - Future Roadmap)**
 1. 🚧 Workspace upgrades (team/org roles, advanced permissions)
@@ -802,3 +845,4 @@ Menjadi **AI Memory Platform** pertama dari Indonesia yang mampu memahami kontek
 - [README.md](README.md) - Platform Overview
 - [LOCAL_SETUP.md](LOCAL_SETUP.md) - Local Development Guide
 - [VPS_SETUP.md](VPS_SETUP.md) - VPS Deployment Guide
+- [PERFORMANCE_SETUP.md](PERFORMANCE_SETUP.md) - Performance Optimization Setup Guide

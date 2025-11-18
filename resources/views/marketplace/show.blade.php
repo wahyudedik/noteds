@@ -32,6 +32,69 @@
 
     <!-- Additional Meta -->
     <meta name="description" content="{{ Str::limit(strip_tags($note->content), 160) }}">
+
+    <!-- Structured Data (JSON-LD) for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "{{ addslashes($note->title) }}",
+        "description": "{{ addslashes(Str::limit(strip_tags($note->content), 200)) }}",
+        "image": @if($note->hasThumbnails()) "{{ url(Storage::url($note->thumbnails[0])) }}" @else "{{ config('app.url') }}/favicon.png" @endif,
+        "offers": {
+            "@type": "Offer",
+            "price": "{{ $note->price }}",
+            "priceCurrency": "{{ auth()->user()->currency ?? 'IDR' }}",
+            "availability": "https://schema.org/{{ $note->status === 'active' ? 'InStock' : 'OutOfStock' }}",
+            "url": "{{ route('marketplace.show', $note) }}"
+        },
+        "aggregateRating": @if($note->total_reviews > 0) {
+            "@type": "AggregateRating",
+            "ratingValue": "{{ number_format($note->average_rating, 1) }}",
+            "reviewCount": "{{ $note->total_reviews }}",
+            "bestRating": "5",
+            "worstRating": "1"
+        } @else null @endif,
+        "author": {
+            "@type": "Person",
+            "name": "{{ addslashes($note->user->name) }}",
+            "url": "{{ route('public.profile.show', $note->user->username) }}"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "{{ config('app.name') }}",
+            "url": "{{ config('app.url') }}"
+        }
+    }
+    </script>
+
+    <!-- Breadcrumb Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ config('app.url') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Marketplace",
+                "item": "{{ route('marketplace.index') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "{{ addslashes($note->title) }}",
+                "item": "{{ route('marketplace.show', $note) }}"
+            }
+        ]
+    }
+    </script>
 @endpush
 
 @section('content')
@@ -335,11 +398,20 @@
                                         @if ($note->user->avatar)
                                             @if (str_starts_with($note->user->avatar, 'http'))
                                                 <img src="{{ $note->user->avatar }}" alt="{{ $note->user->name }}"
-                                                    class="w-10 h-10 rounded-full object-cover">
+                                                    loading="lazy" class="w-10 h-10 rounded-full object-cover"
+                                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                             @else
-                                                <img src="{{ asset('storage/' . $note->user->avatar) }}"
-                                                    alt="{{ $note->user->name }}"
-                                                    class="w-10 h-10 rounded-full object-cover">
+                                                @php
+                                                    $avatarPath = $note->user->avatar;
+                                                    // Remove leading slash if exists
+                                                    $avatarPath = ltrim($avatarPath, '/');
+                                                    // Remove marketplace/ prefix if exists (legacy fix)
+                                                    $avatarPath = preg_replace('#^marketplace/#', '', $avatarPath);
+                                                @endphp
+                                                <img src="{{ asset('storage/' . $avatarPath) }}"
+                                                    alt="{{ $note->user->name }}" loading="lazy"
+                                                    class="w-10 h-10 rounded-full object-cover"
+                                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                             @endif
                                         @else
                                             <span
@@ -585,8 +657,10 @@
                             @endif
                         @endauth
 
-                        <div class="prose max-w-none mb-6" id="note-content">
-                            <div class="ql-editor text-gray-900 leading-relaxed">{!! $note->content !!}</div>
+                        <div class="prose prose-lg max-w-none mb-6" id="note-content">
+                            <div
+                                class="ql-editor text-gray-900 leading-relaxed prose-headings:font-bold prose-p:mb-4 prose-ul:mb-4 prose-ol:mb-4 prose-li:mb-2 prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-800 prose-strong:font-semibold prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded prose-code:text-sm prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-img:rounded-lg prose-img:shadow-md prose-img:my-4 prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-700">
+                                {!! $note->content !!}</div>
                         </div>
 
                         <!-- Demo Link (Prominent Display) -->
@@ -703,10 +777,10 @@
                             <div class="grid grid-cols-2 md:grid-cols-{{ min($note->getThumbnailCount(), 5) }} gap-4">
                                 @foreach ($note->thumbnails as $thumbnail)
                                     <div class="relative group">
-                                        <img src="{{ Storage::url($thumbnail) }}"
+                                        <img src="{{ asset('storage/' . $thumbnail) }}" loading="lazy"
                                             alt="{{ __('messages.note_thumbnail_alt') }}"
                                             class="w-full h-48 object-cover rounded-lg border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                                            onclick="openImageModal('{{ Storage::url($thumbnail) }}')">
+                                            onclick="openImageModal('{{ asset('storage/' . $thumbnail) }}')">
                                     </div>
                                 @endforeach
                             </div>
@@ -1257,12 +1331,23 @@
                                                     @if ($review->user->avatar)
                                                         @if (str_starts_with($review->user->avatar, 'http'))
                                                             <img src="{{ $review->user->avatar }}"
-                                                                alt="{{ $review->user->name }}"
-                                                                class="w-10 h-10 rounded-full object-cover">
+                                                                alt="{{ $review->user->name }}" loading="lazy"
+                                                                class="w-10 h-10 rounded-full object-cover"
+                                                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                                         @else
-                                                            <img src="{{ asset('storage/' . $review->user->avatar) }}"
-                                                                alt="{{ $review->user->name }}"
-                                                                class="w-10 h-10 rounded-full object-cover">
+                                                            @php
+                                                                $avatarPath = $review->user->avatar;
+                                                                $avatarPath = ltrim($avatarPath, '/');
+                                                                $avatarPath = preg_replace(
+                                                                    '#^marketplace/#',
+                                                                    '',
+                                                                    $avatarPath,
+                                                                );
+                                                            @endphp
+                                                            <img src="{{ asset('storage/' . $avatarPath) }}"
+                                                                alt="{{ $review->user->name }}" loading="lazy"
+                                                                class="w-10 h-10 rounded-full object-cover"
+                                                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                                         @endif
                                                     @else
                                                         <span
@@ -1470,12 +1555,23 @@
                                                 @if ($comment->user->avatar)
                                                     @if (str_starts_with($comment->user->avatar, 'http'))
                                                         <img src="{{ $comment->user->avatar }}"
-                                                            alt="{{ $comment->user->name }}"
-                                                            class="w-10 h-10 rounded-full object-cover">
+                                                            alt="{{ $comment->user->name }}" loading="lazy"
+                                                            class="w-10 h-10 rounded-full object-cover"
+                                                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                                     @else
-                                                        <img src="{{ asset('storage/' . $comment->user->avatar) }}"
-                                                            alt="{{ $comment->user->name }}"
-                                                            class="w-10 h-10 rounded-full object-cover">
+                                                        @php
+                                                            $avatarPath = $comment->user->avatar;
+                                                            $avatarPath = ltrim($avatarPath, '/');
+                                                            $avatarPath = preg_replace(
+                                                                '#^marketplace/#',
+                                                                '',
+                                                                $avatarPath,
+                                                            );
+                                                        @endphp
+                                                        <img src="{{ asset('storage/' . $avatarPath) }}"
+                                                            alt="{{ $comment->user->name }}" loading="lazy"
+                                                            class="w-10 h-10 rounded-full object-cover"
+                                                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                                     @endif
                                                 @else
                                                     <span
@@ -1545,11 +1641,24 @@
                                                                         @if (str_starts_with($reply->user->avatar, 'http'))
                                                                             <img src="{{ $reply->user->avatar }}"
                                                                                 alt="{{ $reply->user->name }}"
-                                                                                class="w-8 h-8 rounded-full object-cover">
+                                                                                loading="lazy"
+                                                                                class="w-8 h-8 rounded-full object-cover"
+                                                                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                                                         @else
-                                                                            <img src="{{ asset('storage/' . $reply->user->avatar) }}"
+                                                                            @php
+                                                                                $avatarPath = $reply->user->avatar;
+                                                                                $avatarPath = ltrim($avatarPath, '/');
+                                                                                $avatarPath = preg_replace(
+                                                                                    '#^marketplace/#',
+                                                                                    '',
+                                                                                    $avatarPath,
+                                                                                );
+                                                                            @endphp
+                                                                            <img src="{{ asset('storage/' . $avatarPath) }}"
                                                                                 alt="{{ $reply->user->name }}"
-                                                                                class="w-8 h-8 rounded-full object-cover">
+                                                                                loading="lazy"
+                                                                                class="w-8 h-8 rounded-full object-cover"
+                                                                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                                                         @endif
                                                                     @else
                                                                         <span
@@ -1702,7 +1811,7 @@
                                 @if ($relatedNote->hasThumbnails())
                                     <div class="aspect-video bg-gray-100 overflow-hidden">
                                         <img src="{{ Storage::url($relatedNote->thumbnails[0]) }}"
-                                            alt="{{ $relatedNote->title }}"
+                                            alt="{{ $relatedNote->title }}" loading="lazy"
                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                     </div>
                                 @else
@@ -1727,9 +1836,21 @@
                                         <div class="flex items-center gap-2">
                                             <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                                                 @if ($relatedNote->user->avatar)
-                                                    <img src="{{ str_starts_with($relatedNote->user->avatar, 'http') ? $relatedNote->user->avatar : asset('storage/' . $relatedNote->user->avatar) }}"
-                                                        alt="{{ $relatedNote->user->name }}"
-                                                        class="w-6 h-6 rounded-full object-cover">
+                                                    @php
+                                                        $avatarPath = $relatedNote->user->avatar;
+                                                        if (!str_starts_with($avatarPath, 'http')) {
+                                                            $avatarPath = ltrim($avatarPath, '/');
+                                                            $avatarPath = preg_replace(
+                                                                '#^marketplace/#',
+                                                                '',
+                                                                $avatarPath,
+                                                            );
+                                                        }
+                                                    @endphp
+                                                    <img src="{{ str_starts_with($relatedNote->user->avatar, 'http') ? $relatedNote->user->avatar : asset('storage/' . $avatarPath) }}"
+                                                        alt="{{ $relatedNote->user->name }}" loading="lazy"
+                                                        class="w-6 h-6 rounded-full object-cover"
+                                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                                 @else
                                                     <span
                                                         class="text-xs font-semibold text-gray-600">{{ strtoupper(substr($relatedNote->user->name, 0, 1)) }}</span>
@@ -2379,7 +2500,7 @@
                     <div class="flex-1">
                         <h5 class="text-sm font-medium text-gray-900">${bookmark.title || bookmarkTranslations.default_title}</h5>
                         ${bookmark.section_text ? `<p class="text-xs text-gray-600 mt-1 line-clamp-2">
-                                                                                                                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
+                                                                                                                                                                                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
                         ${bookmark.note_text ? `<p class="text-xs text-purple-700 mt-1">${bookmark.note_text}</p>` : ''}
                     </div>
                     <div class="flex items-center space-x-2 ml-3">

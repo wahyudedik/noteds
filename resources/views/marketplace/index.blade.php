@@ -2,6 +2,24 @@
 
 @section('title', __('messages.marketplace'))
 
+@push('meta')
+    <!-- Structured Data (JSON-LD) for Marketplace -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "{{ __('messages.marketplace') }} - {{ config('app.name') }}",
+        "description": "Jelajahi dan beli catatan digital berkualitas dari seller terpercaya",
+        "url": "{{ route('marketplace.index') }}",
+        "publisher": {
+            "@type": "Organization",
+            "name": "{{ config('app.name') }}",
+            "url": "{{ config('app.url') }}"
+        }
+    }
+    </script>
+@endpush
+
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -64,11 +82,20 @@
         <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-8">
             <form method="GET" action="{{ route('marketplace.index') }}" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
-                    <div>
+                    <div class="relative">
                         <label for="search" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.search_title') }}</label>
-                        <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                            placeholder="{{ __('messages.search_notes') }}"
-                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                        <div class="relative">
+                            <input type="text" 
+                                   name="search" 
+                                   id="search" 
+                                   value="{{ request('search') }}" 
+                                   placeholder="{{ __('messages.search_notes') }}"
+                                   autocomplete="off"
+                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                            <div id="search-autocomplete" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
+                                <!-- Autocomplete results will be inserted here -->
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label for="tag" class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.tag') }}</label>
@@ -201,9 +228,11 @@
                             </div>
                             <!-- Thumbnail -->
                             @if($note->hasThumbnails())
-                                <div class="h-48 overflow-hidden">
-                                    <img src="{{ Storage::url($note->thumbnails[0]) }}" alt="{{ $note->title }}" 
-                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                <div class="h-48 overflow-hidden bg-gray-100">
+                                    <img src="{{ Storage::url($note->thumbnails[0]) }}" 
+                                         alt="{{ $note->title }}" 
+                                         loading="lazy"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                 </div>
                             @endif
                             <div class="p-6">
@@ -271,9 +300,11 @@
                     <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 group">
                         <!-- Thumbnail -->
                         @if($note->hasThumbnails())
-                            <div class="h-48 overflow-hidden">
-                                <img src="{{ Storage::url($note->thumbnails[0]) }}" alt="{{ $note->title }}" 
-                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="h-48 overflow-hidden bg-gray-100">
+                                <img src="{{ Storage::url($note->thumbnails[0]) }}" 
+                                     alt="{{ $note->title }}" 
+                                     loading="lazy"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             </div>
                         @endif
                         <div class="p-6">
@@ -378,9 +409,15 @@
                                     <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center mr-2 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200">
                                         @if($note->user->avatar)
                                             @if(str_starts_with($note->user->avatar, 'http'))
-                                                <img src="{{ $note->user->avatar }}" alt="{{ $note->user->name }}" class="w-6 h-6 rounded-full object-cover">
+                                                <img src="{{ $note->user->avatar }}" 
+                                                     alt="{{ $note->user->name }}" 
+                                                     loading="lazy"
+                                                     class="w-6 h-6 rounded-full object-cover">
                                             @else
-                                                <img src="{{ Storage::url($note->user->avatar) }}" alt="{{ $note->user->name }}" class="w-6 h-6 rounded-full object-cover">
+                                                <img src="{{ Storage::url($note->user->avatar) }}" 
+                                                     alt="{{ $note->user->name }}" 
+                                                     loading="lazy"
+                                                     class="w-6 h-6 rounded-full object-cover">
                                             @endif
                                         @else
                                             <span class="text-xs font-semibold text-gray-600">{{ substr($note->user->name, 0, 1) }}</span>

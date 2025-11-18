@@ -100,6 +100,7 @@ Route::get('/page/{cmsPage}', [PublicCmsPageController::class, 'show'])->name('c
 
 // Marketplace routes
 Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('/marketplace/autocomplete', [MarketplaceController::class, 'autocomplete'])->name('marketplace.autocomplete');
 Route::get('/marketplace/{note}', [MarketplaceController::class, 'show'])->name('marketplace.show');
 Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purchase'])->middleware(['auth', 'verified', 'username.setup', 'buyer'])->name('marketplace.purchase');
 

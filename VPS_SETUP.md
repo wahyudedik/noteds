@@ -9,8 +9,9 @@
 - Node.js 18+ / NPM
 - Composer 2.x
 - Supervisor (for queue workers)
-- Redis (optional, for caching)
+- Redis (recommended, for caching - auto-detect, fallback to database)
 - Ollama (for AI features - can be installed on same server or separate)
+- PHP GD or Imagick extension (for image processing - optional)
 
 ## 🚀 Deployment Steps
 
@@ -24,7 +25,12 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install software-properties-common -y
 sudo add-apt-repository ppa:ondrej/php -y
 sudo apt update
-sudo apt install php8.2-fpm php8.2-cli php8.2-mysql php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip php8.2-gd php8.2-bcmath php8.2-intl -y
+sudo apt install php8.2-fpm php8.2-cli php8.2-mysql php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip php8.2-gd php8.2-bcmath php8.2-intl php8.2-redis -y
+
+# Install Redis (for caching)
+sudo apt install redis-server -y
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
 
 # Install Nginx
 sudo apt install nginx -y
@@ -112,7 +118,21 @@ OLLAMA_NUMA=false         # NUMA optimization (untuk multi-socket CPU)
 
 QUEUE_CONNECTION=database
 SESSION_DRIVER=database
-CACHE_DRIVER=file
+CACHE_STORE=redis  # Auto-detect Redis if REDIS_HOST is set, fallback to database
+# Redis Configuration (Optional but Recommended)
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+REDIS_CLIENT=phpredis
+REDIS_CACHE_DB=1
+
+# CDN Configuration (Optional)
+CDN_URL=https://cdn.yourdomain.com  # If not set, will use APP_URL
+
+# Telescope Query Monitoring
+TELESCOPE_ENABLED=true
+TELESCOPE_QUERY_WATCHER=true
+TELESCOPE_SLOW_QUERY_THRESHOLD=100  # milliseconds
 
 # Mail Configuration (for notifications & contact form)
 MAIL_MAILER=smtp
@@ -900,18 +920,58 @@ opcache.max_accelerated_files=10000
 opcache.revalidate_freq=2
 ```
 
-### Redis Caching (Optional)
+### Redis Caching (Recommended)
 ```bash
 sudo apt install redis-server -y
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
 ```
 
 Update `.env`:
 ```env
-CACHE_DRIVER=redis
-SESSION_DRIVER=redis
+CACHE_STORE=redis
 REDIS_HOST=127.0.0.1
 REDIS_PASSWORD=null
 REDIS_PORT=6379
+REDIS_CLIENT=phpredis
+REDIS_CACHE_DB=1
+```
+
+**Note:** Aplikasi akan otomatis menggunakan Redis jika `REDIS_HOST` tersedia, fallback ke database jika tidak.
+
+### Database Indexes
+Indexes sudah ditambahkan untuk performa optimal:
+- Notes: `is_public`, `status`, `ecosystem_category`, `language`, `price`, `created_at`
+- Transactions: `status`, `seller_id`, `created_at`, `note_id`
+- Users: `role`, `username`
+
+### CDN Configuration (Optional)
+Untuk static assets (images, CSS, JS), konfigurasi CDN di `.env`:
+```env
+CDN_URL=https://cdn.yourdomain.com
+```
+
+Jika tidak di-set, akan menggunakan `APP_URL`.
+
+### Image Processing (Optional)
+Install intervention/image untuk automatic image resizing:
+```bash
+composer require intervention/image
+```
+
+Service `ImageProcessingService` sudah tersedia untuk generate multiple sizes (thumbnail, medium, large).
+
+### Laravel Telescope Query Monitoring
+Telescope sudah dikonfigurasi untuk query monitoring:
+- Query watcher enabled by default
+- Slow query threshold: 100ms (configurable via `TELESCOPE_SLOW_QUERY_THRESHOLD`)
+- Access di `/telescope` → Queries tab
+
+Environment variables:
+```env
+TELESCOPE_ENABLED=true
+TELESCOPE_QUERY_WATCHER=true
+TELESCOPE_SLOW_QUERY_THRESHOLD=100
 ```
 
 ## 🚨 Troubleshooting

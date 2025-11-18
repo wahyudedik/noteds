@@ -16,6 +16,8 @@ use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class MarketplaceController extends Controller
@@ -26,23 +28,46 @@ class MarketplaceController extends Controller
 
     public function index(Request $request): View
     {
-        // Get featured notes for marketplace grid
-        $featuredNotes = \App\Models\FeaturedNote::active()
-            ->byLocation('marketplace_grid')
-            ->with(['note.tags', 'note.user', 'note.reviews'])
-            ->inRandomOrder()
-            ->limit(6)
-            ->get();
+        // Cache key based on request parameters
+        $cacheKey = 'marketplace_index_' . md5(json_encode($request->all()));
+        
+        // Get featured notes for marketplace grid (cached for 1 hour)
+        $featuredNotes = Cache::remember('marketplace_featured_notes_grid', 3600, function () {
+            return \App\Models\FeaturedNote::active()
+                ->byLocation('marketplace_grid')
+                ->with(['note' => function($q) {
+                    $q->select('id', 'title', 'price', 'user_id', 'summary', 'thumbnail', 'ecosystem_category', 'status', 'is_public', 'created_at');
+                }, 'note.tags:id,name', 'note.user:id,name,username,avatar', 'note.reviews:id,note_id,rating'])
+                ->inRandomOrder()
+                ->limit(6)
+                ->get();
+        });
 
-        // Get featured banner (single note)
-        $featuredBanner = \App\Models\FeaturedNote::active()
-            ->byLocation('marketplace_banner')
-            ->with(['note.tags', 'note.user', 'note.reviews'])
-            ->inRandomOrder()
-            ->first();
+        // Get featured banner (cached for 1 hour)
+        $featuredBanner = Cache::remember('marketplace_featured_banner', 3600, function () {
+            return \App\Models\FeaturedNote::active()
+                ->byLocation('marketplace_banner')
+                ->with(['note' => function($q) {
+                    $q->select('id', 'title', 'price', 'user_id', 'summary', 'thumbnail', 'ecosystem_category', 'status', 'is_public', 'created_at');
+                }, 'note.tags:id,name', 'note.user:id,name,username,avatar', 'note.reviews:id,note_id,rating'])
+                ->inRandomOrder()
+                ->first();
+        });
 
-        $notes = Note::publicOnly()
-            ->with(['tags', 'user', 'reviews'])
+        // Build query with optimized eager loading and select specific columns
+        $notesQuery = Note::publicOnly()
+            ->select([
+                'id', 'user_id', 'title', 'summary', 'price', 'discount_price', 
+                'thumbnail', 'ecosystem_category', 'language', 'status', 
+                'is_public', 'average_rating', 'total_reviews', 'created_at', 'updated_at'
+            ])
+            ->with([
+                'tags:id,name',
+                'user:id,name,username,avatar',
+                'reviews' => function($q) {
+                    $q->select('id', 'note_id', 'rating', 'comment', 'created_at');
+                }
+            ])
             ->when($request->search, function ($query) use ($request) {
                 return $query->where(function($q) use ($request) {
                     $q->where('title', 'like', '%' . $request->search . '%')
@@ -94,16 +119,75 @@ class MarketplaceController extends Controller
                 };
             }, function ($query) {
                 return $query->latest();
-            })
-            ->paginate(12)
-            ->withQueryString();
+            });
 
-        $tags = Tag::withCount('notes')
-            ->having('notes_count', '>', 0)
-            ->orderBy('name')
-            ->get();
+        // Cache tags for 1 hour (they don't change frequently)
+        $tags = Cache::remember('marketplace_tags_list', 3600, function () {
+            return Tag::withCount('notes')
+                ->having('notes_count', '>', 0)
+                ->orderBy('name')
+                ->get(['id', 'name']);
+        });
+
+        // Paginate notes (don't cache paginated results as they change frequently)
+        $notes = $notesQuery->paginate(12)->withQueryString();
 
         return view('marketplace.index', compact('notes', 'tags', 'featuredNotes', 'featuredBanner'));
+    }
+
+    /**
+     * Search autocomplete endpoint
+     */
+    public function autocomplete(Request $request)
+    {
+        $query = $request->get('q', '');
+        
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        // Search notes
+        $notes = Note::publicOnly()
+            ->where('status', 'active')
+            ->where(function($q) use ($query) {
+                $q->where('title', 'like', '%' . $query . '%')
+                  ->orWhere('summary', 'like', '%' . $query . '%');
+            })
+            ->with(['user', 'tags'])
+            ->limit(5)
+            ->get()
+            ->map(function($note) {
+                return [
+                    'type' => 'note',
+                    'id' => $note->id,
+                    'title' => $note->title,
+                    'url' => route('marketplace.show', $note),
+                    'price' => $note->price > 0 ? currency($note->price) : 'Gratis',
+                    'author' => $note->user->name,
+                    'thumbnail' => $note->hasThumbnails() ? Storage::url($note->thumbnails[0]) : null,
+                ];
+            });
+
+        // Search tags
+        $tags = Tag::where('name', 'like', '%' . $query . '%')
+            ->withCount('notes')
+            ->having('notes_count', '>', 0)
+            ->limit(3)
+            ->get()
+            ->map(function($tag) {
+                return [
+                    'type' => 'tag',
+                    'id' => $tag->id,
+                    'title' => $tag->name,
+                    'url' => route('marketplace.index', ['tag' => $tag->id]),
+                    'count' => $tag->notes_count,
+                ];
+            });
+
+        return response()->json([
+            'notes' => $notes,
+            'tags' => $tags,
+        ]);
     }
 
     public function show(Note $note): View
@@ -126,7 +210,39 @@ class MarketplaceController extends Controller
             ]);
         }
 
-        $note->load('tags', 'user', 'originalCreator', 'reviews.user', 'transactions', 'comments.user', 'reactions.user', 'questions.user');
+        // Optimize eager loading with specific columns
+        $note->load([
+            'tags:id,name',
+            'user:id,name,username,avatar,bio',
+            'originalCreator:id,name,username,avatar',
+            'reviews' => function($q) {
+                $q->select('id', 'note_id', 'user_id', 'rating', 'comment', 'created_at')
+                  ->with('user:id,name,username,avatar');
+            },
+            'transactions' => function($q) {
+                $q->select('id', 'note_id', 'buyer_id', 'seller_id', 'amount', 'status', 'created_at')
+                  ->where('status', 'success')
+                  ->limit(10);
+            },
+            'comments' => function($q) {
+                $q->select('id', 'note_id', 'user_id', 'content', 'created_at')
+                  ->with('user:id,name,username,avatar')
+                  ->latest()
+                  ->limit(20);
+            },
+            'reactions' => function($q) {
+                $q->select('id', 'note_id', 'user_id', 'type', 'created_at')
+                  ->with('user:id,name,username,avatar')
+                  ->latest()
+                  ->limit(50);
+            },
+            'questions' => function($q) {
+                $q->select('id', 'note_id', 'user_id', 'question', 'answer', 'created_at', 'is_helpful')
+                  ->with('user:id,name,username,avatar')
+                  ->latest()
+                  ->limit(20);
+            }
+        ]);
 
         // Track impression for featured notes (track for all users, not just authenticated)
         $featuredNote = \App\Models\FeaturedNote::where('note_id', $note->id)
@@ -198,8 +314,10 @@ class MarketplaceController extends Controller
             ->pluck('count', 'reaction_type')
             ->toArray();
 
-        // Get related notes (same ecosystem category or same tags, exclude current note)
-        $relatedNotes = Note::publicOnly()
+        // Get related notes (same ecosystem category or same tags, exclude current note) - optimized with caching
+        $relatedNotesCacheKey = 'related_notes_' . $note->id;
+        $relatedNotes = Cache::remember($relatedNotesCacheKey, 1800, function () use ($note) {
+            return Note::publicOnly()
             ->where('id', '!=', $note->id)
             ->where('status', 'active')
             ->where(function($query) use ($note) {
@@ -215,13 +333,18 @@ class MarketplaceController extends Controller
                     });
                 }
             })
-            ->with(['tags', 'user', 'reviews'])
-            ->withCount('transactions')
-            ->withAvg('reviews', 'rating')
-            ->orderByDesc('transactions_count')
-            ->orderByDesc('reviews_avg_rating')
-            ->limit(6)
-            ->get();
+                ->select([
+                    'id', 'user_id', 'title', 'summary', 'price', 'discount_price', 
+                    'thumbnail', 'ecosystem_category', 'language', 'status', 
+                    'is_public', 'average_rating', 'total_reviews', 'created_at'
+                ])
+                ->with(['tags:id,name', 'user:id,name,username,avatar'])
+                ->withCount('transactions')
+                ->orderByDesc('transactions_count')
+                ->orderByDesc('average_rating')
+                ->limit(6)
+                ->get();
+        });
 
         // Get user's reaction if authenticated
         $userReaction = null;

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" id="html-root">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,6 +13,14 @@
         <!-- Favicon -->
         <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
         <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+        
+        <!-- PWA Manifest -->
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
+        <meta name="theme-color" content="#2563eb">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-title" content="Noteds">
+        <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -21,6 +29,90 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>[x-cloak]{display:none !important;}</style>
+        
+        <!-- Dark Mode Styles -->
+        <style>
+            :root {
+                --bg-primary: #ffffff;
+                --bg-secondary: #f9fafb;
+                --text-primary: #111827;
+                --text-secondary: #6b7280;
+                --border-color: #e5e7eb;
+            }
+            
+            .dark {
+                --bg-primary: #111827;
+                --bg-secondary: #1f2937;
+                --text-primary: #f9fafb;
+                --text-secondary: #d1d5db;
+                --border-color: #374151;
+            }
+            
+            body {
+                background-color: var(--bg-primary);
+                color: var(--text-primary);
+                transition: background-color 0.3s ease, color 0.3s ease;
+            }
+            
+            /* Dark mode transitions for common elements */
+            .bg-white {
+                transition: background-color 0.3s ease;
+            }
+            
+            .dark .bg-white {
+                background-color: var(--bg-secondary) !important;
+            }
+            
+            .text-gray-700, .text-gray-900 {
+                transition: color 0.3s ease;
+            }
+            
+            .border-gray-200 {
+                transition: border-color 0.3s ease;
+            }
+        </style>
+        
+        <!-- Dark Mode Script -->
+        <script>
+            // Initialize dark mode from localStorage
+            (function() {
+                const darkMode = localStorage.getItem('darkMode') === 'true';
+                const html = document.documentElement;
+                
+                if (darkMode) {
+                    html.classList.add('dark');
+                    updateDarkModeIcons(true);
+                } else {
+                    html.classList.remove('dark');
+                    updateDarkModeIcons(false);
+                }
+            })();
+            
+            function toggleDarkMode() {
+                const html = document.documentElement;
+                const isDark = html.classList.toggle('dark');
+                localStorage.setItem('darkMode', isDark);
+                updateDarkModeIcons(isDark);
+            }
+            
+            function updateDarkModeIcons(isDark) {
+                const darkIcon = document.getElementById('dark-mode-icon');
+                const lightIcon = document.getElementById('light-mode-icon');
+                const darkText = document.getElementById('dark-mode-text');
+                
+                if (darkIcon && lightIcon && darkText) {
+                    if (isDark) {
+                        darkIcon.classList.remove('hidden');
+                        lightIcon.classList.add('hidden');
+                        darkText.textContent = 'Light Mode';
+                    } else {
+                        darkIcon.classList.add('hidden');
+                        lightIcon.classList.remove('hidden');
+                        darkText.textContent = 'Dark Mode';
+                    }
+                }
+            }
+        </script>
         
         <!-- Content Protection Styles -->
         @php
@@ -105,13 +197,13 @@
             };
         </script>
     </head>
-    <body class="font-sans antialiased bg-gray-50 overflow-x-hidden {{ request()->routeIs('notes.create') ? 'create-note-page' : '' }} {{ request()->routeIs('notes.edit') ? 'edit-note-page' : '' }}">
+    <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 overflow-x-hidden transition-colors duration-200 {{ request()->routeIs('notes.create') ? 'create-note-page' : '' }} {{ request()->routeIs('notes.edit') ? 'edit-note-page' : '' }}">
         <div class="min-h-screen flex flex-col">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white shadow-sm border-b border-gray-200">
+                <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
@@ -1183,7 +1275,105 @@
             })();
         </script>
         
+        <!-- PWA Install Banner -->
+        <div id="pwa-install-banner" class="hidden fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl p-4 z-50">
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Install Noteds App</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-300 mb-3">Install aplikasi untuk akses lebih cepat dan pengalaman yang lebih baik!</p>
+                    <div class="flex gap-2">
+                        <button onclick="installPWA()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-2 rounded-md transition-colors">
+                            Install
+                        </button>
+                        <button onclick="document.getElementById('pwa-install-banner').classList.add('hidden')" class="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                            Nanti
+                        </button>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('pwa-install-banner').classList.add('hidden')" class="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
         <!-- Featured Notes Popups -->
         @include('components.featured-popups')
+
+        <!-- PWA Service Worker Registration -->
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(function(registration) {
+                            console.log('[SW] Service Worker registered:', registration.scope);
+                            
+                            // Check for updates
+                            registration.addEventListener('updatefound', function() {
+                                const newWorker = registration.installing;
+                                newWorker.addEventListener('statechange', function() {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        // New service worker available
+                                        if (confirm('Update tersedia! Muat ulang halaman untuk mendapatkan versi terbaru?')) {
+                                            window.location.reload();
+                                        }
+                                    }
+                                });
+                            });
+                        })
+                        .catch(function(error) {
+                            console.log('[SW] Service Worker registration failed:', error);
+                        });
+                });
+            }
+
+            // PWA Install Prompt
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Show install button
+                const installBanner = document.getElementById('pwa-install-banner');
+                if (installBanner) {
+                    installBanner.classList.remove('hidden');
+                }
+            });
+
+            // Handle install button click
+            window.installPWA = function() {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted the install prompt');
+                        }
+                        deferredPrompt = null;
+                        const installBanner = document.getElementById('pwa-install-banner');
+                        if (installBanner) {
+                            installBanner.classList.add('hidden');
+                        }
+                    });
+                }
+            };
+
+            // Hide install banner if already installed
+            window.addEventListener('appinstalled', () => {
+                console.log('PWA installed');
+                const installBanner = document.getElementById('pwa-install-banner');
+                if (installBanner) {
+                    installBanner.classList.add('hidden');
+                }
+                deferredPrompt = null;
+            });
+        </script>
     </body>
 </html>

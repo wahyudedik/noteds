@@ -193,7 +193,7 @@ return [
             'enabled' => env('TELESCOPE_QUERY_WATCHER', true),
             'ignore_packages' => true,
             'ignore_paths' => [],
-            'slow' => 100,
+            'slow' => env('TELESCOPE_SLOW_QUERY_THRESHOLD', 100), // Queries slower than 100ms
         ],
 
         Watchers\RedisWatcher::class => env('TELESCOPE_REDIS_WATCHER', true),

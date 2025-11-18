@@ -55,10 +55,12 @@ Platform di mana pengguna bisa:
 
 **Tools:**
 - Midtrans (Payment Gateway)
-- Laravel Telescope (Debugging)
+- Laravel Telescope (Debugging & Query Monitoring)
 - Pest (Testing)
 - Laravel Queue (Background Jobs)
 - Laravel Scheduler (Cron Jobs)
+- Redis (Caching - Optional)
+- Intervention Image (Image Processing - Optional)
 
 **Database:** All tables use **UUID** primary keys for security
 
@@ -70,6 +72,7 @@ Platform di mana pengguna bisa:
 - **[LOCAL_SETUP.md](LOCAL_SETUP.md)** — Complete local development setup guide
 - **[VPS_SETUP.md](VPS_SETUP.md)** — VPS deployment & production setup
 - **[TASKLIST.md](TASKLIST.md)** — Development phases & task tracking
+- **[PERFORMANCE_SETUP.md](PERFORMANCE_SETUP.md)** — Performance optimization setup guide (Redis, CDN, Image Processing, Telescope)
 
 ### Key Features
 
@@ -109,6 +112,26 @@ Platform di mana pengguna bisa:
   - Blur overlay protection
   - All features disabled by default, can be enabled via admin settings
   - **Smart exclusion**: Protection automatically excludes form pages (create/edit note) and rich text editors to allow normal editing
+- ✅ **PWA Support** - Progressive Web App dengan offline support
+  - Installable sebagai aplikasi mobile
+  - Service worker untuk caching dan offline access
+  - Install prompt banner
+  - Manifest dengan shortcuts dan icons
+- ✅ **Dark Mode** - Toggle dark/light mode dengan persistent preference
+  - CSS variables untuk smooth transitions
+  - LocalStorage untuk menyimpan preferensi
+  - Auto-detect system preference
+- ✅ **Performance Optimizations**
+  - Database indexes untuk query optimization
+  - Redis cache support (auto-detect, fallback ke database)
+  - Query optimization dengan select specific columns
+  - Eager loading optimization dengan limits
+  - Caching untuk popular notes, featured content, tags
+  - Image lazy loading untuk semua images
+  - Responsive images dengan srcset support
+  - CDN support untuk static assets
+  - Image processing service untuk multiple sizes (thumbnail, medium, large)
+  - Laravel Telescope query monitoring dengan slow query detection
 - ✅ Internationalization (i18n): 3 languages (EN, ID, AR), 2 currencies (USD, IDR)
 - ✅ Featured Notes Advertising System
   - Seller can request featured placement for their notes
@@ -632,6 +655,12 @@ composer pint
 - ✅ User Verification (Admin verification dengan badges)
 - ✅ JavaScript Fixes (Marketplace show page JavaScript properly wrapped in script tags)
 - ✅ Controller Fixes (Base Controller extends BaseController for middleware support)
+- ✅ PWA Support (Progressive Web App dengan offline support dan install prompt)
+- ✅ Dark Mode (Toggle dark/light mode dengan persistent preference)
+- ✅ Performance Optimizations (Database indexes, Redis cache, query optimization, image lazy loading, CDN support)
+- ✅ Image Processing Service (Generate multiple sizes: thumbnail, medium, large)
+- ✅ Search Autocomplete (AJAX-based search suggestions untuk notes dan tags)
+- ✅ Structured Data (JSON-LD untuk SEO: Product, BreadcrumbList, CollectionPage)
 
 **In Progress:**
 - ⚠️ FASE 8: Deployment & Launch
@@ -697,12 +726,38 @@ See [TASKLIST.md](TASKLIST.md) for full task list
 1. Review [LOCAL_SETUP.md](LOCAL_SETUP.md) untuk development environment
 2. Check [TASKLIST.md](TASKLIST.md) untuk roadmap & priorities
 3. Deploy ke VPS dengan [VPS_SETUP.md](VPS_SETUP.md)
+4. Optimize performance dengan [PERFORMANCE_SETUP.md](PERFORMANCE_SETUP.md) (Redis, CDN, Image Processing)
 
 ---
 
 ## 🔧 Recent Updates (2025)
 
 ### Major Updates (Latest)
+- ✅ **PWA Support**: Progressive Web App dengan offline support
+  - Installable sebagai aplikasi mobile
+  - Service worker untuk caching dan offline access
+  - Install prompt banner otomatis
+  - Manifest dengan shortcuts dan icons
+- ✅ **Dark Mode**: Toggle dark/light mode dengan persistent preference
+  - CSS variables untuk smooth transitions
+  - LocalStorage untuk menyimpan preferensi
+  - Auto-detect dan apply preferensi
+  - Tailwind dark mode configuration
+- ✅ **Performance Optimizations**: Comprehensive performance improvements
+  - Database indexes untuk query optimization
+  - Redis cache support (auto-detect, fallback ke database)
+  - Query optimization dengan select specific columns
+  - Eager loading optimization dengan limits
+  - Caching untuk popular notes, featured content, tags
+  - Image lazy loading untuk semua images
+  - Responsive images dengan srcset support
+  - CDN support untuk static assets
+  - Image processing service untuk multiple sizes
+  - Laravel Telescope query monitoring
+- ✅ **Search & SEO Enhancements**:
+  - Search autocomplete dengan AJAX suggestions
+  - Structured data (JSON-LD) untuk SEO
+  - Product, BreadcrumbList, CollectionPage schemas
 - ✅ **AI Features Migration to Workspace**: Semua fitur AI dipindahkan ke workspace context
   - AI Chat, AI Memory, MyNoteds hanya dapat diakses dalam workspace
   - Workspace sebagai platform masa depan untuk plugin-plugin keren

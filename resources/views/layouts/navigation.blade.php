@@ -9,13 +9,13 @@
         $hasPremium = $user?->hasPremium();
 
         $desktopLinkClasses =
-            'px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200';
-        $desktopActiveClasses = 'text-blue-600 bg-blue-50';
-        $dropdownLinkClasses = 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150';
-        $dropdownActiveClasses = 'bg-blue-50 text-blue-600';
+            'px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-all duration-200';
+        $desktopActiveClasses = 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-800';
+        $dropdownLinkClasses = 'block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150';
+        $dropdownActiveClasses = 'bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-400';
         $mobileLinkClasses =
-            'block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200';
-        $mobileActiveClasses = 'text-blue-600 bg-blue-50';
+            'block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-all duration-200';
+        $mobileActiveClasses = 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-800';
 
         $primaryLinks = [
             [
@@ -259,7 +259,7 @@
             }
         }
     @endphp
-    <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40" x-cloak>
+    <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-40 transition-colors duration-200" x-cloak>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex h-16 items-center justify-between">
                 <div class="flex items-center gap-4 sm:gap-6">
@@ -517,12 +517,25 @@
                                     <div
                                         class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
                                         @if (auth()->user()->avatar)
-                                            <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}"
-                                                class="w-8 h-8 rounded-full object-cover">
-                                        @else
-                                            <span
-                                                class="text-xs font-semibold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                                            @if (str_starts_with(auth()->user()->avatar, 'http'))
+                                                <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}"
+                                                    class="w-8 h-8 rounded-full object-cover"
+                                                    loading="lazy"
+                                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            @else
+                                                @php
+                                                    $avatarPath = auth()->user()->avatar;
+                                                    $avatarPath = ltrim($avatarPath, '/');
+                                                    $avatarPath = preg_replace('#^marketplace/#', '', $avatarPath);
+                                                @endphp
+                                                <img src="{{ asset('storage/' . $avatarPath) }}" alt="{{ auth()->user()->name }}"
+                                                    class="w-8 h-8 rounded-full object-cover"
+                                                    loading="lazy"
+                                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            @endif
                                         @endif
+                                        <span
+                                            class="text-xs font-semibold text-white" style="display: {{ auth()->user()->avatar ? 'none' : 'flex' }};">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
                                     </div>
                                     <span class="hidden sm:inline">{{ auth()->user()->name }}</span>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -533,9 +546,9 @@
 
                                 <!-- Dropdown Menu -->
                                 <div x-show="open" x-cloak @click.away="open = false" x-transition
-                                    class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                                    class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50 transition-colors duration-200">
                                     <a href="{{ route('public.profile.show', auth()->user()->username) }}"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
                                         <div class="flex items-center">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -546,7 +559,7 @@
                                         </div>
                                     </a>
                                     <a href="{{ route('profile.edit') }}"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
                                         <div class="flex items-center">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -572,7 +585,7 @@
                                     @endif --}}
                                     <div class="border-t border-gray-200 my-1"></div>
                                     <a href="{{ route('support-tickets.create') }}"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
                                         <div class="flex items-center">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -584,7 +597,7 @@
                                     </a>
                                     @if (auth()->user()->hasRole('admin'))
                                         <a href="/telescope" target="_blank"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
                                             <div class="flex items-center">
                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -600,11 +613,27 @@
                                             </div>
                                         </a>
                                     @endif
+                                    <!-- Dark Mode Toggle -->
                                     <div class="border-t border-gray-200 my-1"></div>
+                                    <button type="button" onclick="toggleDarkMode()"
+                                        class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 dark:text-gray-300 dark:hover:bg-gray-700">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center">
+                                                <svg id="dark-mode-icon" class="w-4 h-4 mr-2 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                                </svg>
+                                                <svg id="light-mode-icon" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                </svg>
+                                                <span id="dark-mode-text">Dark Mode</span>
+                                            </div>
+                                        </div>
+                                    </button>
+                                    <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit"
-                                            class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150">
+                                            class="w-full text-left block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150">
                                             <div class="flex items-center">
                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
