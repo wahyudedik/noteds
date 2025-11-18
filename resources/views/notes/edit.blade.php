@@ -82,6 +82,404 @@
                         @enderror
                     </div>
 
+                    <!-- Ecosystem Category -->
+                    <div>
+                        <label for="ecosystem_category" class="block text-sm font-medium text-gray-700 mb-2">
+                            Ekosistem Kreatif
+                        </label>
+                        <select name="ecosystem_category" id="ecosystem_category"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                            @foreach($ecosystems as $key => $label)
+                                <option value="{{ $key }}" {{ old('ecosystem_category', $note->ecosystem_category)===$key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('ecosystem_category')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        <p class="mt-2 text-xs text-gray-600">
+                            Pilih kategori ekosistem untuk menampilkan field yang relevan.
+                        </p>
+                    </div>
+
+                    <!-- Ecosystem-Specific Fields -->
+                    <div id="ecosystem-fields" class="mt-4 space-y-4 mb-6">
+                        <!-- Code Ecosystem Fields -->
+                        <div id="code-fields" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h4 class="text-sm font-semibold text-blue-900 mb-3">Detail Code</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label for="code_language" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Bahasa Pemrograman
+                                    </label>
+                                    <input type="text" name="code_language" id="code_language" value="{{ old('code_language', $note->code_language) }}"
+                                        placeholder="PHP, JavaScript, Python, dll"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="code_framework" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Framework
+                                    </label>
+                                    <input type="text" name="code_framework" id="code_framework" value="{{ old('code_framework', $note->code_framework) }}"
+                                        placeholder="Laravel, React, Vue, dll"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="code_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Tipe Code
+                                    </label>
+                                    <select name="code_type" id="code_type"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Pilih Tipe</option>
+                                        <option value="plugin" {{ old('code_type', $note->code_type) === 'plugin' ? 'selected' : '' }}>Plugin</option>
+                                        <option value="script" {{ old('code_type', $note->code_type) === 'script' ? 'selected' : '' }}>Script</option>
+                                        <option value="library" {{ old('code_type', $note->code_type) === 'library' ? 'selected' : '' }}>Library</option>
+                                        <option value="component" {{ old('code_type', $note->code_type) === 'component' ? 'selected' : '' }}>Component</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="code_demo_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                        </svg>
+                                        Link Demo/Repository (Optional)
+                                    </span>
+                                </label>
+                                <input type="url" name="code_demo_link" id="code_demo_link" value="{{ old('code_demo_link', $note->code_demo_link) }}"
+                                    placeholder="https://github.com/... atau https://codepen.io/... atau https://demo.example.com"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                <p class="mt-1 text-xs text-gray-500">Link ke GitHub, CodePen, atau live demo</p>
+                                @error('code_demo_link')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Photo Ecosystem Fields -->
+                        <div id="photo-fields" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg">
+                            <h4 class="text-sm font-semibold text-green-900 mb-3">Detail Photo</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label for="photo_resolution" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Resolusi
+                                    </label>
+                                    <input type="text" name="photo_resolution" id="photo_resolution" value="{{ old('photo_resolution', $note->photo_resolution) }}"
+                                        placeholder="1920x1080, 4K, dll"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label for="photo_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Tipe Photo
+                                    </label>
+                                    <select name="photo_type" id="photo_type"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500">
+                                        <option value="">Pilih Tipe</option>
+                                        <option value="stock" {{ old('photo_type', $note->photo_type) === 'stock' ? 'selected' : '' }}>Stock</option>
+                                        <option value="portrait" {{ old('photo_type', $note->photo_type) === 'portrait' ? 'selected' : '' }}>Portrait</option>
+                                        <option value="landscape" {{ old('photo_type', $note->photo_type) === 'landscape' ? 'selected' : '' }}>Landscape</option>
+                                        <option value="product" {{ old('photo_type', $note->photo_type) === 'product' ? 'selected' : '' }}>Product</option>
+                                        <option value="event" {{ old('photo_type', $note->photo_type) === 'event' ? 'selected' : '' }}>Event</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="photo_format" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Format
+                                    </label>
+                                    <select name="photo_format" id="photo_format"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500">
+                                        <option value="">Pilih Format</option>
+                                        <option value="jpeg" {{ old('photo_format', $note->photo_format) === 'jpeg' ? 'selected' : '' }}>JPEG</option>
+                                        <option value="jpg" {{ old('photo_format', $note->photo_format) === 'jpg' ? 'selected' : '' }}>JPG</option>
+                                        <option value="png" {{ old('photo_format', $note->photo_format) === 'png' ? 'selected' : '' }}>PNG</option>
+                                        <option value="raw" {{ old('photo_format', $note->photo_format) === 'raw' ? 'selected' : '' }}>RAW</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="photo_gallery_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        Link Gallery (Optional)
+                                    </span>
+                                </label>
+                                <input type="url" name="photo_gallery_link" id="photo_gallery_link" value="{{ old('photo_gallery_link', $note->photo_gallery_link) }}"
+                                    placeholder="https://flickr.com/... atau https://500px.com/... atau https://unsplash.com/..."
+                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500">
+                                <p class="mt-1 text-xs text-gray-500">Link ke Flickr, 500px, Unsplash, atau platform gallery lainnya</p>
+                                @error('photo_gallery_link')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Design Ecosystem Fields -->
+                        <div id="design-fields" class="hidden p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                            <h4 class="text-sm font-semibold text-purple-900 mb-3">Detail Design</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label for="design_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Tipe Design
+                                    </label>
+                                    <select name="design_type" id="design_type"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                                        <option value="">Pilih Tipe</option>
+                                        <option value="logo" {{ old('design_type', $note->design_type) === 'logo' ? 'selected' : '' }}>Logo</option>
+                                        <option value="flyer" {{ old('design_type', $note->design_type) === 'flyer' ? 'selected' : '' }}>Flyer</option>
+                                        <option value="icon" {{ old('design_type', $note->design_type) === 'icon' ? 'selected' : '' }}>Icon</option>
+                                        <option value="illustration" {{ old('design_type', $note->design_type) === 'illustration' ? 'selected' : '' }}>Illustration</option>
+                                        <option value="print" {{ old('design_type', $note->design_type) === 'print' ? 'selected' : '' }}>Print</option>
+                                        <option value="branding" {{ old('design_type', $note->design_type) === 'branding' ? 'selected' : '' }}>Branding</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="design_format" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Format
+                                    </label>
+                                    <select name="design_format" id="design_format"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                                        <option value="">Pilih Format</option>
+                                        <option value="ai" {{ old('design_format', $note->design_format) === 'ai' ? 'selected' : '' }}>AI (Illustrator)</option>
+                                        <option value="psd" {{ old('design_format', $note->design_format) === 'psd' ? 'selected' : '' }}>PSD (Photoshop)</option>
+                                        <option value="eps" {{ old('design_format', $note->design_format) === 'eps' ? 'selected' : '' }}>EPS</option>
+                                        <option value="pdf" {{ old('design_format', $note->design_format) === 'pdf' ? 'selected' : '' }}>PDF</option>
+                                        <option value="svg" {{ old('design_format', $note->design_format) === 'svg' ? 'selected' : '' }}>SVG</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="design_preview_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Link Preview (Optional)
+                                    </span>
+                                </label>
+                                <input type="url" name="design_preview_link" id="design_preview_link" value="{{ old('design_preview_link', $note->design_preview_link) }}"
+                                    placeholder="https://behance.net/... atau https://dribbble.com/... atau https://figma.com/..."
+                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500">
+                                <p class="mt-1 text-xs text-gray-500">Link ke Behance, Dribbble, Figma, atau platform preview lainnya</p>
+                                @error('design_preview_link')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Audio Ecosystem Fields -->
+                        <div id="audio-fields" class="hidden p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <h4 class="text-sm font-semibold text-yellow-900 mb-3">Detail Audio</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label for="audio_duration" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Durasi (detik)
+                                    </label>
+                                    <input type="number" name="audio_duration" id="audio_duration" value="{{ old('audio_duration', $note->audio_duration) }}"
+                                        min="1" placeholder="120"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500">
+                                </div>
+                                <div>
+                                    <label for="audio_format" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Format
+                                    </label>
+                                    <select name="audio_format" id="audio_format"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500">
+                                        <option value="">Pilih Format</option>
+                                        <option value="mp3" {{ old('audio_format', $note->audio_format) === 'mp3' ? 'selected' : '' }}>MP3</option>
+                                        <option value="wav" {{ old('audio_format', $note->audio_format) === 'wav' ? 'selected' : '' }}>WAV</option>
+                                        <option value="flac" {{ old('audio_format', $note->audio_format) === 'flac' ? 'selected' : '' }}>FLAC</option>
+                                        <option value="aac" {{ old('audio_format', $note->audio_format) === 'aac' ? 'selected' : '' }}>AAC</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="audio_genre" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Genre
+                                    </label>
+                                    <input type="text" name="audio_genre" id="audio_genre" value="{{ old('audio_genre', $note->audio_genre) }}"
+                                        placeholder="Pop, Rock, Electronic, dll"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="audio_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                        </svg>
+                                        Link Audio (Optional)
+                                    </span>
+                                </label>
+                                <input type="url" name="audio_link" id="audio_link" value="{{ old('audio_link', $note->audio_link) }}"
+                                    placeholder="https://soundcloud.com/... atau https://spotify.com/..."
+                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500">
+                                <p class="mt-1 text-xs text-gray-500">Link ke SoundCloud, Spotify, atau platform audio lainnya</p>
+                                @error('audio_link')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Video Ecosystem Fields -->
+                        <div id="video-fields" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <h4 class="text-sm font-semibold text-red-900 mb-3">Detail Video</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label for="video_duration" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Durasi (detik)
+                                    </label>
+                                    <input type="number" name="video_duration" id="video_duration" value="{{ old('video_duration', $note->video_duration) }}"
+                                        min="1" placeholder="60"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500">
+                                </div>
+                                <div>
+                                    <label for="video_resolution" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Resolusi
+                                    </label>
+                                    <input type="text" name="video_resolution" id="video_resolution" value="{{ old('video_resolution', $note->video_resolution) }}"
+                                        placeholder="1920x1080, 4K, dll"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500">
+                                </div>
+                                <div>
+                                    <label for="video_format" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Format
+                                    </label>
+                                    <select name="video_format" id="video_format"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500">
+                                        <option value="">Pilih Format</option>
+                                        <option value="mp4" {{ old('video_format', $note->video_format) === 'mp4' ? 'selected' : '' }}>MP4</option>
+                                        <option value="mov" {{ old('video_format', $note->video_format) === 'mov' ? 'selected' : '' }}>MOV</option>
+                                        <option value="avi" {{ old('video_format', $note->video_format) === 'avi' ? 'selected' : '' }}>AVI</option>
+                                        <option value="webm" {{ old('video_format', $note->video_format) === 'webm' ? 'selected' : '' }}>WebM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="video_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                        Link Video (Optional)
+                                    </span>
+                                </label>
+                                <input type="url" name="video_link" id="video_link" value="{{ old('video_link', $note->video_link) }}"
+                                    placeholder="https://youtube.com/watch?v=... atau https://vimeo.com/..."
+                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500">
+                                <p class="mt-1 text-xs text-gray-500">Link ke YouTube, Vimeo, atau platform video lainnya</p>
+                                @error('video_link')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Theme Ecosystem Fields -->
+                        <div id="theme-fields" class="hidden p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+                            <h4 class="text-sm font-semibold text-indigo-900 mb-3">Detail Theme</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label for="theme_platform" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Platform
+                                    </label>
+                                    <select name="theme_platform" id="theme_platform"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
+                                        <option value="">Pilih Platform</option>
+                                        <option value="wordpress" {{ old('theme_platform', $note->theme_platform) === 'wordpress' ? 'selected' : '' }}>WordPress</option>
+                                        <option value="shopify" {{ old('theme_platform', $note->theme_platform) === 'shopify' ? 'selected' : '' }}>Shopify</option>
+                                        <option value="html" {{ old('theme_platform', $note->theme_platform) === 'html' ? 'selected' : '' }}>HTML</option>
+                                        <option value="drupal" {{ old('theme_platform', $note->theme_platform) === 'drupal' ? 'selected' : '' }}>Drupal</option>
+                                        <option value="magento" {{ old('theme_platform', $note->theme_platform) === 'magento' ? 'selected' : '' }}>Magento</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="theme_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Tipe Theme
+                                    </label>
+                                    <select name="theme_type" id="theme_type"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
+                                        <option value="">Pilih Tipe</option>
+                                        <option value="business" {{ old('theme_type', $note->theme_type) === 'business' ? 'selected' : '' }}>Business</option>
+                                        <option value="ecommerce" {{ old('theme_type', $note->theme_type) === 'ecommerce' ? 'selected' : '' }}>E-commerce</option>
+                                        <option value="blog" {{ old('theme_type', $note->theme_type) === 'blog' ? 'selected' : '' }}>Blog</option>
+                                        <option value="portfolio" {{ old('theme_type', $note->theme_type) === 'portfolio' ? 'selected' : '' }}>Portfolio</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="theme_preview_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Link Preview/Live Demo (Optional)
+                                    </span>
+                                </label>
+                                <input type="url" name="theme_preview_link" id="theme_preview_link" value="{{ old('theme_preview_link', $note->theme_preview_link) }}"
+                                    placeholder="https://demo.example.com atau https://themeforest.net/..."
+                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
+                                <p class="mt-1 text-xs text-gray-500">Link ke live demo atau preview theme</p>
+                                @error('theme_preview_link')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- 3D Ecosystem Fields -->
+                        <div id="three-d-fields" class="hidden p-4 bg-teal-50 border border-teal-200 rounded-lg">
+                            <h4 class="text-sm font-semibold text-teal-900 mb-3">Detail 3D</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label for="three_d_format" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Format
+                                    </label>
+                                    <select name="three_d_format" id="three_d_format"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500">
+                                        <option value="">Pilih Format</option>
+                                        <option value="obj" {{ old('three_d_format', $note->three_d_format) === 'obj' ? 'selected' : '' }}>OBJ</option>
+                                        <option value="fbx" {{ old('three_d_format', $note->three_d_format) === 'fbx' ? 'selected' : '' }}>FBX</option>
+                                        <option value="blend" {{ old('three_d_format', $note->three_d_format) === 'blend' ? 'selected' : '' }}>Blend</option>
+                                        <option value="dae" {{ old('three_d_format', $note->three_d_format) === 'dae' ? 'selected' : '' }}>DAE</option>
+                                        <option value="3ds" {{ old('three_d_format', $note->three_d_format) === '3ds' ? 'selected' : '' }}>3DS</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="three_d_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Tipe 3D
+                                    </label>
+                                    <select name="three_d_type" id="three_d_type"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500">
+                                        <option value="">Pilih Tipe</option>
+                                        <option value="model" {{ old('three_d_type', $note->three_d_type) === 'model' ? 'selected' : '' }}>Model</option>
+                                        <option value="texture" {{ old('three_d_type', $note->three_d_type) === 'texture' ? 'selected' : '' }}>Texture</option>
+                                        <option value="rig" {{ old('three_d_type', $note->three_d_type) === 'rig' ? 'selected' : '' }}>Rig</option>
+                                        <option value="animation" {{ old('three_d_type', $note->three_d_type) === 'animation' ? 'selected' : '' }}>Animation</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="three_d_preview_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Link Preview (Optional)
+                                    </span>
+                                </label>
+                                <input type="url" name="three_d_preview_link" id="three_d_preview_link" value="{{ old('three_d_preview_link', $note->three_d_preview_link) }}"
+                                    placeholder="https://sketchfab.com/... atau https://poly.google.com/..."
+                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500">
+                                <p class="mt-1 text-xs text-gray-500">Link ke Sketchfab, Poly, atau platform preview 3D lainnya</p>
+                                @error('three_d_preview_link')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Content (Rich Text Editor) -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -104,35 +502,54 @@
 
                     <!-- Summary -->
                     <div>
-                        <!-- Ecosystem Category -->
-                        <div class="mb-6">
-                            <label for="ecosystem_category" class="block text-sm font-medium text-gray-700 mb-2">
-                                Ekosistem Kreatif
+                        <label for="summary" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ __('messages.summary') }} <span
+                                class="text-xs text-gray-500">(Optional)</span>
+                        </label>
+                        <textarea name="summary" id="summary" rows="3"
+                            placeholder="{{ __('messages.auto_generated_summary_placeholder') }}"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 resize-y @error('summary') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">{{ old('summary', $note->summary) }}</textarea>
+                        <p class="mt-1 text-xs text-gray-500">{{ __('messages.brief_summary_note') }}</p>
+                        @error('summary')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Language and Schedule -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label for="language" class="block text-sm font-medium text-gray-700 mb-2">
+                                Bahasa Konten
                             </label>
-                            <select name="ecosystem_category" id="ecosystem_category"
+                            <select name="language" id="language"
                                 class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
-                                @foreach($ecosystems as $key => $label)
-                                    <option value="{{ $key }}" {{ old('ecosystem_category', $note->ecosystem_category)===$key ? 'selected' : '' }}>{{ $label }}</option>
+                                @foreach($languages as $code => $label)
+                                    <option value="{{ $code }}" {{ old('language', $note->language)===$code ? 'selected' : '' }}>{{ $label }}</option>
                                 @endforeach
                             </select>
-                            @error('ecosystem_category')
+                            @error('language')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
-                            <p class="mt-2 text-xs text-gray-600">
-                                Pilih kategori ekosistem untuk menampilkan field yang relevan.
-                            </p>
                         </div>
+                        <div>
+                            <label for="scheduled_publish_at" class="block text-sm font-medium text-gray-700 mb-2">
+                                Jadwalkan Publikasi (opsional)
+                            </label>
+                            <input type="datetime-local" name="scheduled_publish_at" id="scheduled_publish_at" value="{{ old('scheduled_publish_at', optional($note->scheduled_publish_at)->format('Y-m-d\TH:i')) }}"
+                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
+                            <p class="mt-2 text-xs text-gray-600">Jika diisi, catatan akan otomatis dipublikasikan pada waktu tersebut.</p>
+                            @error('scheduled_publish_at')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
 
-                        <!-- Ecosystem-Specific Fields -->
-                        <div id="ecosystem-fields" class="mt-4 space-y-4 mb-6">
-                            <!-- Code Ecosystem Fields -->
-                            <div id="code-fields" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                <h4 class="text-sm font-semibold text-blue-900 mb-3">Detail Code</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                    <div>
-                                        <label for="code_language" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Bahasa Pemrograman
-                                        </label>
+                    <!-- Preview Content (For paid notes - shown before purchase) -->
+                    @if(old('price', $note->price) > 0)
+                    <div id="preview-content-wrapper">
+                        <label for="preview_content" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ __('messages.preview_content') }} <span class="text-xs text-gray-500">{{ __('messages.preview_content_optional') }}</span>
+                        </label>
                                         <input type="text" name="code_language" id="code_language" value="{{ old('code_language', $note->code_language) }}"
                                             placeholder="PHP, JavaScript, Python, dll"
                                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
@@ -775,8 +1192,8 @@
                         @endif
                     </div>
 
-                    <!-- Demo Link (for apps/software) -->
-                    <div class="mt-6">
+                    <!-- Demo Link (for apps/software) - Hidden when ecosystem is selected -->
+                    <div id="demo-link-wrapper" class="mt-6">
                         <label for="demo_link" class="block text-sm font-medium text-gray-700 mb-2">
                             <span class="flex items-center gap-2">
                                 <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -785,12 +1202,12 @@
                                 Link Demo Aplikasi/Software (Optional)
                             </span>
                             <span class="text-xs text-gray-500 font-normal ml-7">
-                                (Khusus untuk aplikasi, software, atau produk digital yang memiliki demo online)
+                                (Hanya untuk note tanpa ecosystem. Jika memilih ecosystem, gunakan field demo link di bagian ecosystem)
                             </span>
                         </label>
                         <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
                             <p class="text-xs text-green-800 mb-2">
-                                🚀 <strong>Tips:</strong> Jika produk Anda adalah aplikasi, software, atau website, masukkan link demo/live preview di sini. 
+                                🚀 <strong>Tips:</strong> Jika produk Anda adalah aplikasi, software, atau website (tanpa ecosystem), masukkan link demo/live preview di sini. 
                                 Contoh: https://demo.example.com, https://app.example.com/demo, atau link ke Vercel/Netlify preview.
                             </p>
                         </div>
@@ -1198,6 +1615,10 @@ document.addEventListener('DOMContentLoaded', function() {
         '3d': document.getElementById('three-d-fields'),
         'elements': null, // Elements doesn't have specific fields
     };
+    
+    // Ecosystems that have their own demo/preview link fields
+    const ecosystemsWithDemoLink = ['code', 'photo', 'design', 'audio', 'video', 'theme', '3d'];
+    const demoLinkWrapper = document.getElementById('demo-link-wrapper');
 
     function toggleEcosystemFields() {
         const selectedEcosystem = ecosystemSelect.value;
@@ -1212,6 +1633,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show selected ecosystem fields
         if (selectedEcosystem && ecosystemFields[selectedEcosystem]) {
             ecosystemFields[selectedEcosystem].classList.remove('hidden');
+        }
+        
+        // Hide general demo_link if ecosystem with its own demo link is selected
+        if (demoLinkWrapper) {
+            if (selectedEcosystem && ecosystemsWithDemoLink.includes(selectedEcosystem)) {
+                demoLinkWrapper.classList.add('hidden');
+            } else {
+                demoLinkWrapper.classList.remove('hidden');
+            }
         }
     }
 

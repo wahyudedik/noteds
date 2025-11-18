@@ -20,7 +20,7 @@ class NoteViewMonetizationService
     /**
      * Process view monetization for free notes
      */
-    public function processView(Note $note, ?string $ipAddress = null, ?string $userAgent = null, ?string $fingerprint = null, ?int $userId = null): ?NoteViewRevenue
+    public function processView(Note $note, ?string $ipAddress = null, ?string $userAgent = null, ?string $fingerprint = null, ?string $userId = null): ?NoteViewRevenue
     {
         // Only process free notes (price = 0)
         if ($note->price > 0) {

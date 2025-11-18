@@ -760,8 +760,8 @@
                                 @endif
                             </div>
 
-                            <!-- Demo Link (for apps/software) -->
-                            <div class="mt-6">
+                            <!-- Demo Link (for apps/software) - Hidden when ecosystem is selected -->
+                            <div id="demo-link-wrapper" class="mt-6">
                                 <label for="demo_link" class="block text-sm font-medium text-gray-700 mb-2">
                                     <span class="flex items-center gap-2">
                                         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -770,12 +770,12 @@
                                         Link Demo Aplikasi/Software (Optional)
                                     </span>
                                     <span class="text-xs text-gray-500 font-normal ml-7">
-                                        (Khusus untuk aplikasi, software, atau produk digital yang memiliki demo online)
+                                        (Hanya untuk note tanpa ecosystem. Jika memilih ecosystem, gunakan field demo link di bagian ecosystem)
                                     </span>
                                 </label>
                                 <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
                                     <p class="text-xs text-green-800 mb-2">
-                                        🚀 <strong>Tips:</strong> Jika produk Anda adalah aplikasi, software, atau website, masukkan link demo/live preview di sini. 
+                                        🚀 <strong>Tips:</strong> Jika produk Anda adalah aplikasi, software, atau website (tanpa ecosystem), masukkan link demo/live preview di sini. 
                                         Contoh: https://demo.example.com, https://app.example.com/demo, atau link ke Vercel/Netlify preview.
                                     </p>
                                 </div>
@@ -1261,6 +1261,10 @@
                         '3d': document.getElementById('three-d-fields'),
                         'elements': null, // Elements doesn't have specific fields
                     };
+                    
+                    // Ecosystems that have their own demo/preview link fields
+                    const ecosystemsWithDemoLink = ['code', 'photo', 'design', 'audio', 'video', 'theme', '3d'];
+                    const demoLinkWrapper = document.getElementById('demo-link-wrapper');
 
                     function toggleEcosystemFields() {
                         const selectedEcosystem = ecosystemSelect.value;
@@ -1275,6 +1279,15 @@
                         // Show selected ecosystem fields
                         if (selectedEcosystem && ecosystemFields[selectedEcosystem]) {
                             ecosystemFields[selectedEcosystem].classList.remove('hidden');
+                        }
+                        
+                        // Hide general demo_link if ecosystem with its own demo link is selected
+                        if (demoLinkWrapper) {
+                            if (selectedEcosystem && ecosystemsWithDemoLink.includes(selectedEcosystem)) {
+                                demoLinkWrapper.classList.add('hidden');
+                            } else {
+                                demoLinkWrapper.classList.remove('hidden');
+                            }
                         }
                     }
 

@@ -543,11 +543,12 @@
                     // Disable Ctrl+A (Select All) - except in input fields and rich text editors
                     if (e.ctrlKey && e.key === 'a') {
                         const target = e.target;
-                        const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
-                                         target.closest('.ql-editor') ||
-                                         target.closest('[contenteditable="true"]') ||
-                                         target.closest('#content-editor') ||
-                                         target.closest('[class*="ql-"]') ||
+                        const isElement = target && target.nodeType === 1;
+                        const isEditable = isElement && (['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                         (target.closest && target.closest('.ql-editor')) ||
+                                         (target.closest && target.closest('[contenteditable="true"]')) ||
+                                         (target.closest && target.closest('#content-editor')) ||
+                                         (target.closest && target.closest('[class*="ql-"]'))) ||
                                          document.body.classList.contains('create-note-page') ||
                                          document.body.classList.contains('edit-note-page');
                         
@@ -561,11 +562,12 @@
                     // Disable Ctrl+C (Copy) - except in input fields and rich text editors
                     if (e.ctrlKey && e.key === 'c') {
                         const target = e.target;
-                        const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
-                                         target.closest('.ql-editor') ||
-                                         target.closest('[contenteditable="true"]') ||
-                                         target.closest('#content-editor') ||
-                                         target.closest('[class*="ql-"]') ||
+                        const isElement = target && target.nodeType === 1;
+                        const isEditable = isElement && (['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                         (target.closest && target.closest('.ql-editor')) ||
+                                         (target.closest && target.closest('[contenteditable="true"]')) ||
+                                         (target.closest && target.closest('#content-editor')) ||
+                                         (target.closest && target.closest('[class*="ql-"]'))) ||
                                          document.body.classList.contains('create-note-page') ||
                                          document.body.classList.contains('edit-note-page');
                         
@@ -579,11 +581,12 @@
                     // Disable Ctrl+V (Paste) - except in input fields and rich text editors
                     if (e.ctrlKey && e.key === 'v') {
                         const target = e.target;
-                        const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
-                                         target.closest('.ql-editor') ||
-                                         target.closest('[contenteditable="true"]') ||
-                                         target.closest('#content-editor') ||
-                                         target.closest('[class*="ql-"]') ||
+                        const isElement = target && target.nodeType === 1;
+                        const isEditable = isElement && (['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                         (target.closest && target.closest('.ql-editor')) ||
+                                         (target.closest && target.closest('[contenteditable="true"]')) ||
+                                         (target.closest && target.closest('#content-editor')) ||
+                                         (target.closest && target.closest('[class*="ql-"]'))) ||
                                          document.body.classList.contains('create-note-page') ||
                                          document.body.classList.contains('edit-note-page');
                         
@@ -597,11 +600,12 @@
                     // Disable Ctrl+X (Cut) - except in input fields and rich text editors
                     if (e.ctrlKey && e.key === 'x') {
                         const target = e.target;
-                        const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
-                                         target.closest('.ql-editor') ||
-                                         target.closest('[contenteditable="true"]') ||
-                                         target.closest('#content-editor') ||
-                                         target.closest('[class*="ql-"]') ||
+                        const isElement = target && target.nodeType === 1;
+                        const isEditable = isElement && (['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                         (target.closest && target.closest('.ql-editor')) ||
+                                         (target.closest && target.closest('[contenteditable="true"]')) ||
+                                         (target.closest && target.closest('#content-editor')) ||
+                                         (target.closest && target.closest('[class*="ql-"]'))) ||
                                          document.body.classList.contains('create-note-page') ||
                                          document.body.classList.contains('edit-note-page');
                         
@@ -631,17 +635,20 @@
                 // Disable copy (allow in input, textarea, and rich text editors)
                 document.addEventListener('copy', function(e) {
                     const target = e.target;
-                    const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
-                                     target.closest('.ql-editor') ||
-                                     target.closest('[contenteditable="true"]') ||
-                                     target.closest('#content-editor') ||
-                                     target.closest('[class*="ql-"]') ||
+                    const isElement = target && target.nodeType === 1;
+                    const isEditable = isElement && (['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                     (target.closest && target.closest('.ql-editor')) ||
+                                     (target.closest && target.closest('[contenteditable="true"]')) ||
+                                     (target.closest && target.closest('#content-editor')) ||
+                                     (target.closest && target.closest('[class*="ql-"]'))) ||
                                      document.body.classList.contains('create-note-page') ||
                                      document.body.classList.contains('edit-note-page');
                     
                     if (!isEditable) {
                         e.preventDefault();
-                        e.clipboardData.setData('text/plain', '');
+                        if (e.clipboardData) {
+                            e.clipboardData.setData('text/plain', '');
+                        }
                         return false;
                     }
                 }, true);
@@ -649,11 +656,12 @@
                 // Disable cut (allow in input, textarea, and rich text editors)
                 document.addEventListener('cut', function(e) {
                     const target = e.target;
-                    const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
-                                     target.closest('.ql-editor') ||
-                                     target.closest('[contenteditable="true"]') ||
-                                     target.closest('#content-editor') ||
-                                     target.closest('[class*="ql-"]') ||
+                    const isElement = target && target.nodeType === 1;
+                    const isEditable = isElement && (['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                     (target.closest && target.closest('.ql-editor')) ||
+                                     (target.closest && target.closest('[contenteditable="true"]')) ||
+                                     (target.closest && target.closest('#content-editor')) ||
+                                     (target.closest && target.closest('[class*="ql-"]'))) ||
                                      document.body.classList.contains('create-note-page') ||
                                      document.body.classList.contains('edit-note-page');
                     
@@ -666,11 +674,12 @@
                 // Disable paste (allow in input, textarea, and rich text editors)
                 document.addEventListener('paste', function(e) {
                     const target = e.target;
-                    const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
-                                     target.closest('.ql-editor') ||
-                                     target.closest('[contenteditable="true"]') ||
-                                     target.closest('#content-editor') ||
-                                     target.closest('[class*="ql-"]') ||
+                    const isElement = target && target.nodeType === 1;
+                    const isEditable = isElement && (['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                     (target.closest && target.closest('.ql-editor')) ||
+                                     (target.closest && target.closest('[contenteditable="true"]')) ||
+                                     (target.closest && target.closest('#content-editor')) ||
+                                     (target.closest && target.closest('[class*="ql-"]'))) ||
                                      document.body.classList.contains('create-note-page') ||
                                      document.body.classList.contains('edit-note-page');
                     
@@ -689,11 +698,12 @@
                 // Disable select start (allow in input, textarea, and rich text editors)
                 document.addEventListener('selectstart', function(e) {
                     const target = e.target;
-                    const isEditable = ['INPUT', 'TEXTAREA'].includes(target.tagName) ||
-                                     target.closest('.ql-editor') ||
-                                     target.closest('[contenteditable="true"]') ||
-                                     target.closest('#content-editor') ||
-                                     target.closest('[class*="ql-"]') ||
+                    const isElement = target && target.nodeType === 1;
+                    const isEditable = isElement && (['INPUT', 'TEXTAREA'].includes(target.tagName) ||
+                                     (target.closest && target.closest('.ql-editor')) ||
+                                     (target.closest && target.closest('[contenteditable="true"]')) ||
+                                     (target.closest && target.closest('#content-editor')) ||
+                                     (target.closest && target.closest('[class*="ql-"]'))) ||
                                      document.body.classList.contains('create-note-page') ||
                                      document.body.classList.contains('edit-note-page');
                     
