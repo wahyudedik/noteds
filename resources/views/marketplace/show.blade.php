@@ -693,7 +693,7 @@
                         </div>
                     @endif
 
-                    @if (!$hasPurchased)
+                    @if (!($showFullContent ?? false))
                         <!-- Preview Content (for paid notes, before purchase) -->
                         <div class="prose max-w-none mb-6 relative">
                             @php
@@ -2347,7 +2347,7 @@
                     <div class="flex-1">
                         <h5 class="text-sm font-medium text-gray-900">${bookmark.title || bookmarkTranslations.default_title}</h5>
                         ${bookmark.section_text ? `<p class="text-xs text-gray-600 mt-1 line-clamp-2">
-                                                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
+                                                                                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
                         ${bookmark.note_text ? `<p class="text-xs text-purple-700 mt-1">${bookmark.note_text}</p>` : ''}
                     </div>
                     <div class="flex items-center space-x-2 ml-3">
