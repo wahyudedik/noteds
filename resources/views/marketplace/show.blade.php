@@ -674,22 +674,26 @@
                                 </div>
                             </div>
                         @endif
-                    @else
-                        <!-- Thumbnail Images -->
-                        @if ($note->hasThumbnails())
-                            <div class="mb-6">
-                                <div class="grid grid-cols-2 md:grid-cols-{{ min($note->getThumbnailCount(), 5) }} gap-4">
-                                    @foreach ($note->thumbnails as $thumbnail)
-                                        <div class="relative group">
-                                            <img src="{{ Storage::url($thumbnail) }}"
-                                                alt="{{ __('messages.note_thumbnail_alt') }}"
-                                                class="w-full h-48 object-cover rounded-lg border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
+                    @endif
 
+                    <!-- Thumbnail Images - Always show if available -->
+                    @if ($note->hasThumbnails())
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Galeri Thumbnail</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-{{ min($note->getThumbnailCount(), 5) }} gap-4">
+                                @foreach ($note->thumbnails as $thumbnail)
+                                    <div class="relative group">
+                                        <img src="{{ Storage::url($thumbnail) }}"
+                                            alt="{{ __('messages.note_thumbnail_alt') }}"
+                                            class="w-full h-48 object-cover rounded-lg border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                                            onclick="openImageModal('{{ Storage::url($thumbnail) }}')">
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    @if (!$hasPurchased)
                         <!-- Preview Content (for paid notes, before purchase) -->
                         <div class="prose max-w-none mb-6 relative">
                             @php
@@ -2343,7 +2347,7 @@
                     <div class="flex-1">
                         <h5 class="text-sm font-medium text-gray-900">${bookmark.title || bookmarkTranslations.default_title}</h5>
                         ${bookmark.section_text ? `<p class="text-xs text-gray-600 mt-1 line-clamp-2">
-                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
+                                                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
                         ${bookmark.note_text ? `<p class="text-xs text-purple-700 mt-1">${bookmark.note_text}</p>` : ''}
                     </div>
                     <div class="flex items-center space-x-2 ml-3">
@@ -2674,6 +2678,46 @@
                         }
                     });
             }
+        </script>
+
+        <!-- Image Modal for Thumbnails -->
+        <div id="imageModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75"
+            onclick="closeImageModal()">
+            <div class="relative max-w-7xl max-h-full p-4" onclick="event.stopPropagation()">
+                <button onclick="closeImageModal()"
+                    class="absolute top-4 right-4 text-white hover:text-gray-300 z-10 bg-black bg-opacity-50 rounded-full p-2 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <img id="modalImage" src="" alt="Thumbnail"
+                    class="max-w-full max-h-[90vh] mx-auto rounded-lg shadow-2xl">
+            </div>
+        </div>
+
+        <script>
+            function openImageModal(imageSrc) {
+                const modal = document.getElementById('imageModal');
+                const modalImage = document.getElementById('modalImage');
+                modalImage.src = imageSrc;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeImageModal() {
+                const modal = document.getElementById('imageModal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = '';
+            }
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeImageModal();
+                }
+            });
         </script>
     @endpush
 @endsection
