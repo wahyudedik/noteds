@@ -214,7 +214,38 @@ TEXT,
                     $price = 0;
                 }
 
-                $note = Note::create([
+                // Random ecosystem category for variety (10% chance for each ecosystem type)
+                $ecosystemCategories = ['general', 'code', 'audio', '3d', 'video', 'photo', 'design', 'theme'];
+                $ecosystemCategory = $ecosystemCategories[rand(0, count($ecosystemCategories) - 1)];
+                
+                // Set ecosystem-specific fields based on category
+                $ecosystemFields = [];
+                if ($ecosystemCategory === 'code') {
+                    $ecosystemFields = [
+                        'code_language' => ['javascript', 'php', 'python', 'java', 'cpp'][rand(0, 4)],
+                        'code_framework' => ['laravel', 'vue', 'react', 'bootstrap', 'tailwind'][rand(0, 4)],
+                        'code_type' => ['plugin', 'script', 'library', 'template'][rand(0, 3)],
+                    ];
+                } elseif ($ecosystemCategory === 'audio') {
+                    $ecosystemFields = [
+                        'audio_format' => ['mp3', 'wav', 'ogg'][rand(0, 2)],
+                        'audio_genre' => ['electronic', 'rock', 'jazz', 'classical', 'ambient'][rand(0, 4)],
+                        'audio_duration' => rand(60, 300), // 1-5 minutes in seconds
+                    ];
+                } elseif ($ecosystemCategory === '3d') {
+                    $ecosystemFields = [
+                        'three_d_format' => ['glb', 'gltf', 'obj', 'fbx'][rand(0, 3)],
+                        'three_d_type' => ['model', 'texture', 'scene', 'animation'][rand(0, 3)],
+                    ];
+                } elseif ($ecosystemCategory === 'video') {
+                    $ecosystemFields = [
+                        'video_format' => ['mp4', 'webm', 'mov'][rand(0, 2)],
+                        'video_resolution' => ['1080p', '720p', '4k'][rand(0, 2)],
+                        'video_duration' => rand(30, 600), // 30 seconds to 10 minutes
+                    ];
+                }
+
+                $note = Note::create(array_merge([
                     'user_id' => $seller->id,
                     'original_creator_id' => $seller->id, // Set original creator
                     'workspace_id' => $workspaceId,
@@ -226,10 +257,11 @@ TEXT,
                     'is_public' => rand(0, 100) > 20, // 80% public
                     'status' => ['active', 'active', 'active', 'active', 'inactive'][rand(0, 4)],
                     'is_sold' => false, // New notes are not sold yet
+                    'ecosystem_category' => $ecosystemCategory,
                     // Monetization approval: only approve if seller already has sales
                     'monetization_approved' => false,
                     'monetization_auto_approved' => false,
-                ]);
+                ], $ecosystemFields));
 
                 // Auto-approve monetization if seller has at least 1 sale (will be checked after TransactionSeeder runs)
                 if ($price == 0) {

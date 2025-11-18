@@ -297,16 +297,17 @@
                                         @if($note->user->badges->count() > 0)
                                             <div class="flex flex-wrap gap-1 mt-1">
                                                 @foreach($note->user->badges->take(3) as $badge)
-                                                    <span class="inline-flex items-center text-[10px] font-medium 
-                                                        @if($badge->color === 'gold') text-yellow-600
-                                                        @elseif($badge->color === 'green') text-green-600
-                                                        @elseif($badge->color === 'blue') text-blue-600
-                                                        @elseif($badge->color === 'purple') text-purple-600
-                                                        @elseif($badge->color === 'yellow') text-yellow-600
-                                                        @elseif($badge->color === 'orange') text-orange-600
-                                                        @else text-gray-600
-                                                        @endif"
-                                                        title="{{ $badge->name }}">
+                                                    @php
+                                                        $badgeColorClass = match($badge->color) {
+                                                            'gold', 'yellow' => 'text-yellow-600',
+                                                            'green' => 'text-green-600',
+                                                            'blue' => 'text-blue-600',
+                                                            'purple' => 'text-purple-600',
+                                                            'orange' => 'text-orange-600',
+                                                            default => 'text-gray-600',
+                                                        };
+                                                    @endphp
+                                                    <span class="inline-flex items-center text-[10px] font-medium {{ $badgeColorClass }}" title="{{ $badge->name }}">
                                                         @if($badge->icon)
                                                             {{ $badge->icon }}
                                                         @endif
@@ -315,16 +316,18 @@
                                             </div>
                                         @endif
                                         @if($note->user->current_seller_level)
+                                            @php
+                                                $sellerLevelClass = match($note->user->current_seller_level->color) {
+                                                    'bronze' => 'bg-gradient-to-r from-orange-600 to-amber-700 text-white',
+                                                    'silver' => 'bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900',
+                                                    'gold' => 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white',
+                                                    'platinum' => 'bg-gradient-to-r from-gray-400 to-gray-600 text-white',
+                                                    'diamond' => 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white',
+                                                    default => 'bg-gray-100 text-gray-800',
+                                                };
+                                            @endphp
                                             <div class="relative inline-block group mt-1">
-                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold 
-                                                    @if($note->user->current_seller_level->color === 'bronze') bg-gradient-to-r from-orange-600 to-amber-700 text-white
-                                                    @elseif($note->user->current_seller_level->color === 'silver') bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900
-                                                    @elseif($note->user->current_seller_level->color === 'gold') bg-gradient-to-r from-yellow-400 to-orange-500 text-white
-                                                    @elseif($note->user->current_seller_level->color === 'platinum') bg-gradient-to-r from-gray-400 to-gray-600 text-white
-                                                    @elseif($note->user->current_seller_level->color === 'diamond') bg-gradient-to-r from-cyan-400 to-blue-500 text-white
-                                                    @else bg-gray-100 text-gray-800
-                                                    @endif"
-                                                    title="{{ $note->user->current_seller_level->name }}">
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold {{ $sellerLevelClass }}" title="{{ $note->user->current_seller_level->name }}">
                                                     @if($note->user->current_seller_level->icon)
                                                         <span class="mr-0.5">{{ $note->user->current_seller_level->icon }}</span>
                                                     @endif
@@ -504,16 +507,17 @@
                                             @if($note->user->badges && $note->user->badges->count() > 0)
                                                 <div class="flex flex-wrap gap-1 mt-0.5">
                                                     @foreach($note->user->badges->take(3) as $badge)
-                                                        <span class="inline-flex items-center text-[10px] font-medium 
-                                                            @if($badge->color === 'gold') text-yellow-600
-                                                            @elseif($badge->color === 'green') text-green-600
-                                                            @elseif($badge->color === 'blue') text-blue-600
-                                                            @elseif($badge->color === 'purple') text-purple-600
-                                                            @elseif($badge->color === 'yellow') text-yellow-600
-                                                            @elseif($badge->color === 'orange') text-orange-600
-                                                            @else text-gray-600
-                                                            @endif"
-                                                            title="{{ $badge->name }}">
+                                                        @php
+                                                            $badgeColorClass = match($badge->color) {
+                                                                'gold', 'yellow' => 'text-yellow-600',
+                                                                'green' => 'text-green-600',
+                                                                'blue' => 'text-blue-600',
+                                                                'purple' => 'text-purple-600',
+                                                                'orange' => 'text-orange-600',
+                                                                default => 'text-gray-600',
+                                                            };
+                                                        @endphp
+                                                        <span class="inline-flex items-center text-[10px] font-medium {{ $badgeColorClass }}" title="{{ $badge->name }}">
                                                             @if($badge->icon)
                                                                 {{ $badge->icon }}
                                                             @endif
@@ -522,16 +526,18 @@
                                                 </div>
                                             @endif
                                             @if($note->user->current_seller_level)
+                                                @php
+                                                    $sellerLevelClass = match($note->user->current_seller_level->color) {
+                                                        'bronze' => 'bg-gradient-to-r from-orange-600 to-amber-700 text-white',
+                                                        'silver' => 'bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900',
+                                                        'gold' => 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white',
+                                                        'platinum' => 'bg-gradient-to-r from-gray-400 to-gray-600 text-white',
+                                                        'diamond' => 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white',
+                                                        default => 'bg-gray-100 text-gray-800',
+                                                    };
+                                                @endphp
                                                 <div class="relative inline-block group mt-0.5">
-                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold 
-                                                        @if($note->user->current_seller_level->color === 'bronze') bg-gradient-to-r from-orange-600 to-amber-700 text-white
-                                                        @elseif($note->user->current_seller_level->color === 'silver') bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900
-                                                        @elseif($note->user->current_seller_level->color === 'gold') bg-gradient-to-r from-yellow-400 to-orange-500 text-white
-                                                        @elseif($note->user->current_seller_level->color === 'platinum') bg-gradient-to-r from-gray-400 to-gray-600 text-white
-                                                        @elseif($note->user->current_seller_level->color === 'diamond') bg-gradient-to-r from-cyan-400 to-blue-500 text-white
-                                                        @else bg-gray-100 text-gray-800
-                                                        @endif"
-                                                        title="{{ $note->user->current_seller_level->name }}">
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold {{ $sellerLevelClass }}" title="{{ $note->user->current_seller_level->name }}">
                                                         @if($note->user->current_seller_level->icon)
                                                             <span class="mr-0.5">{{ $note->user->current_seller_level->icon }}</span>
                                                         @endif

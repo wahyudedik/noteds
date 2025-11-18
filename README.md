@@ -113,6 +113,14 @@ Platform di mana pengguna bisa:
   - Blur overlay protection
   - All features disabled by default, can be enabled via admin settings
   - **Smart exclusion**: Protection automatically excludes form pages (create/edit note) and rich text editors to allow normal editing
+- ✅ **Rich Media & Gallery Features**
+  - Video preview upload with automatic thumbnail generation (max 2 minutes)
+  - Audio preview player for audio ecosystem notes
+  - Interactive code preview with syntax highlighting (Prism.js)
+  - 3D model viewer with model-viewer support (GLB/GLTF formats)
+  - PDF preview with page navigation and zoom controls (PDF.js)
+  - Advanced media gallery with lightbox, zoom, and swipe gestures
+  - Support for multiple thumbnails per note with responsive grid layout
 - ✅ **PWA Support** - Progressive Web App dengan offline support
   - Installable sebagai aplikasi mobile
   - Service worker untuk caching dan offline access
@@ -232,6 +240,19 @@ Platform di mana pengguna bisa:
 - ✅ **Recently Viewed Notes** (Premium) — Track and view recently viewed notes
 - ✅ **Draft & Scheduled Publishing** — Save drafts and schedule notes for future publishing with auto-publish command
 - ✅ **User Verification** — Admin can verify users with verified badges
+- ✅ **Video Previews** — Upload video preview for notes (max 2 minutes) with auto-generated thumbnails and hover-to-play functionality
+- ✅ **Rich Media Support** — Enhanced media previews for different content types:
+  - Audio preview player for audio notes (AudioJungle ecosystem)
+  - Interactive code preview with syntax highlighting for code notes (CodeCanyon ecosystem)
+  - 3D model viewer using model-viewer for 3D assets (3DOcean ecosystem)
+  - PDF preview with page navigation and zoom controls
+- ✅ **Media Gallery** — Advanced image gallery with lightbox viewer:
+  - Multiple image gallery for notes with responsive grid layout
+  - Fullscreen lightbox viewer with smooth transitions
+  - Image zoom functionality (1x to 3x) with pan support
+  - Swipe gestures for mobile navigation
+  - Keyboard navigation (Arrow keys, +/- for zoom, Escape to close)
+  - Touch-friendly controls optimized for mobile devices
 
 **Note:** Semua fitur AI telah dihapus dari aplikasi. Platform sekarang fokus pada marketplace dan fitur premium untuk seller dan buyer.
 
