@@ -117,7 +117,7 @@
   - 3D model viewer untuk 3D assets
   - PDF preview dengan page navigation
 
-- [ ] **Media Gallery**
+- [x] **Media Gallery**
   - Multiple image gallery untuk notes
   - Lightbox viewer
   - Image zoom functionality

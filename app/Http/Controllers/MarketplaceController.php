@@ -66,7 +66,7 @@ class MarketplaceController extends Controller
             ->select([
                 'id', 'user_id', 'title', 'summary', 'price', 'discount_price', 
                 'thumbnails', 'ecosystem_category', 'language', 'status', 
-                'is_public', 'average_rating', 'total_reviews', 'created_at', 'updated_at'
+                'is_public', 'created_at', 'updated_at'
             ])
             ->with([
                 'tags:id,name',
@@ -116,11 +116,26 @@ class MarketplaceController extends Controller
                 return match($request->sort) {
                     'price_asc' => $query->orderBy('price', 'asc'),
                     'price_desc' => $query->orderBy('price', 'desc'),
-                    'rating' => $query->orderByDesc('average_rating'),
+                    'rating' => $query->selectSub(function ($q) {
+                            $q->selectRaw('COALESCE(AVG(rating), 0)')
+                                ->from('note_reviews')
+                                ->whereColumn('note_reviews.note_id', 'notes.id');
+                        }, 'avg_rating')
+                        ->orderByDesc('avg_rating'),
                     'popular' => $query->withCount('transactions')
+                        ->selectSub(function ($q) {
+                            $q->selectRaw('COALESCE(AVG(rating), 0)')
+                                ->from('note_reviews')
+                                ->whereColumn('note_reviews.note_id', 'notes.id');
+                        }, 'avg_rating')
+                        ->selectSub(function ($q) {
+                            $q->selectRaw('COUNT(*)')
+                                ->from('note_reviews')
+                                ->whereColumn('note_reviews.note_id', 'notes.id');
+                        }, 'total_reviews_count')
                         ->orderByDesc('transactions_count')
-                        ->orderByDesc('average_rating')
-                        ->orderByDesc('total_reviews'),
+                        ->orderByDesc('avg_rating')
+                        ->orderByDesc('total_reviews_count'),
                     'trending' => $query->withCount(['transactions' => function($q) {
                             $q->where('created_at', '>=', now()->subDays(7));
                         }])
@@ -372,12 +387,17 @@ class MarketplaceController extends Controller
                 ->select([
                     'id', 'user_id', 'title', 'summary', 'price', 'discount_price', 
                     'thumbnails', 'ecosystem_category', 'language', 'status', 
-                    'is_public', 'average_rating', 'total_reviews', 'created_at'
+                    'is_public', 'created_at'
                 ])
+                ->selectSub(function ($q) {
+                    $q->selectRaw('COALESCE(AVG(rating), 0)')
+                        ->from('note_reviews')
+                        ->whereColumn('note_reviews.note_id', 'notes.id');
+                }, 'avg_rating')
                 ->with(['tags:id,name', 'user:id,name,username,avatar'])
                 ->withCount('transactions')
                 ->orderByDesc('transactions_count')
-                ->orderByDesc('average_rating')
+                ->orderByDesc('avg_rating')
                 ->limit(6)
                 ->get();
         });

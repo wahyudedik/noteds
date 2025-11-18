@@ -827,12 +827,29 @@
                             ])
                         @endif
 
-                        @if($note->ecosystem_category === '3d' && $note->three_d_preview_link)
-                            @include('components.rich-media.3d-viewer', [
-                                'modelUrl' => $note->three_d_preview_link,
-                                'format' => $note->three_d_format ?? 'obj',
-                                'title' => $note->title
-                            ])
+                        @if($note->ecosystem_category === '3d')
+                            @php
+                                $modelUrl = $note->three_d_preview_link;
+                                // Check if there's a 3D model file in attachments
+                                if (!$modelUrl) {
+                                    $modelAttachment = collect($note->attachments ?? [])->first(function($att) {
+                                        $filename = is_array($att) ? ($att['filename'] ?? '') : basename($att);
+                                        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                                        return in_array($ext, ['glb', 'gltf', 'obj', 'fbx', 'dae', '3ds']);
+                                    });
+                                    if ($modelAttachment) {
+                                        $modelFilename = is_array($modelAttachment) ? ($modelAttachment['filename'] ?? basename($modelAttachment)) : basename($modelAttachment);
+                                        $modelUrl = route('notes.attachments.download', ['note' => $note->id, 'filename' => $modelFilename]);
+                                    }
+                                }
+                            @endphp
+                            @if($modelUrl)
+                                @include('components.rich-media.3d-viewer', [
+                                    'modelUrl' => $modelUrl,
+                                    'format' => $note->three_d_format ?? 'obj',
+                                    'title' => $note->title
+                                ])
+                            @endif
                         @endif
 
                         <div class="prose prose-lg max-w-none mb-6" id="note-content">
@@ -966,21 +983,12 @@
                         @endif
                     @endif
 
-                    <!-- Thumbnail Images - Always show if available -->
+                    <!-- Media Gallery - Always show if available -->
                     @if ($note->hasThumbnails())
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Galeri Thumbnail</h3>
-                            <div class="grid grid-cols-2 md:grid-cols-{{ min($note->getThumbnailCount(), 5) }} gap-4">
-                                @foreach ($note->thumbnails as $thumbnail)
-                                    <div class="relative group">
-                                        <img src="{{ asset('storage/' . $thumbnail) }}" loading="lazy"
-                                            alt="{{ __('messages.note_thumbnail_alt') }}"
-                                            class="w-full h-48 object-cover rounded-lg border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                                            onclick="openImageModal('{{ asset('storage/' . $thumbnail) }}')">
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
+                        @include('components.media-gallery', [
+                            'images' => $note->thumbnails,
+                            'title' => __('messages.media_gallery', ['default' => 'Media Gallery'])
+                        ])
                     @endif
 
                     @if (!($showFullContent ?? false))
@@ -2099,6 +2107,8 @@
     </div>
 
     @push('styles')
+        <!-- Prism.js for code syntax highlighting -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
         <style>
             [x-cloak] {
                 display: none !important;
@@ -2107,6 +2117,167 @@
     @endpush
 
     @push('scripts')
+        <!-- Media Gallery Script -->
+        <script>
+            window.mediaGallery = function() {
+                return {
+                    isOpen: false,
+                    currentIndex: 0,
+                    zoomLevel: 1,
+                    translateX: 0,
+                    translateY: 0,
+                    imageLoaded: false,
+                    imageCount: {{ $note->hasThumbnails() ? count($note->thumbnails) : 0 }},
+                    images: @js($note->hasThumbnails() ? $note->thumbnails : []),
+                    
+                    // Touch/swipe handling
+                    touchStartX: 0,
+                    touchStartY: 0,
+                    touchEndX: 0,
+                    touchEndY: 0,
+                    minSwipeDistance: 50,
+                    isDragging: false,
+                    dragStartX: 0,
+                    dragStartY: 0,
+                    
+                    init() {
+                        // Keyboard navigation
+                        document.addEventListener('keydown', (e) => {
+                            if (!this.isOpen) return;
+                            
+                            if (e.key === 'ArrowLeft') {
+                                this.previousImage();
+                            } else if (e.key === 'ArrowRight') {
+                                this.nextImage();
+                            } else if (e.key === '+' || e.key === '=') {
+                                this.zoomIn();
+                            } else if (e.key === '-') {
+                                this.zoomOut();
+                            } else if (e.key === '0') {
+                                this.resetZoom();
+                            }
+                        });
+                        
+                        // Prevent body scroll when lightbox is open
+                        this.$watch('isOpen', (value) => {
+                            if (value) {
+                                document.body.style.overflow = 'hidden';
+                            } else {
+                                document.body.style.overflow = '';
+                            }
+                        });
+                    },
+                    
+                    get currentImageUrl() {
+                        if (this.currentIndex < 0 || this.currentIndex >= this.images.length) return '';
+                        const image = this.images[this.currentIndex];
+                        if (typeof image === 'string') {
+                            return '{{ asset("storage/") }}/' + image;
+                        } else if (typeof image === 'object' && image !== null) {
+                            return image.url || ('{{ asset("storage/") }}/' + (image.path || ''));
+                        }
+                        return image;
+                    },
+                    
+                    openLightbox(index) {
+                        this.currentIndex = index;
+                        this.isOpen = true;
+                        this.resetZoom();
+                        this.imageLoaded = false;
+                    },
+                    
+                    closeLightbox() {
+                        this.isOpen = false;
+                        this.resetZoom();
+                    },
+                    
+                    nextImage() {
+                        if (this.currentIndex < this.imageCount - 1) {
+                            this.currentIndex++;
+                            this.resetZoom();
+                            this.imageLoaded = false;
+                        }
+                    },
+                    
+                    previousImage() {
+                        if (this.currentIndex > 0) {
+                            this.currentIndex--;
+                            this.resetZoom();
+                            this.imageLoaded = false;
+                        }
+                    },
+                    
+                    zoomIn() {
+                        if (this.zoomLevel < 3) {
+                            this.zoomLevel = Math.min(this.zoomLevel + 0.25, 3);
+                        }
+                    },
+                    
+                    zoomOut() {
+                        if (this.zoomLevel > 1) {
+                            this.zoomLevel = Math.max(this.zoomLevel - 0.25, 1);
+                            if (this.zoomLevel === 1) {
+                                this.resetZoom();
+                            }
+                        }
+                    },
+                    
+                    resetZoom() {
+                        this.zoomLevel = 1;
+                        this.translateX = 0;
+                        this.translateY = 0;
+                    },
+                    
+                    // Touch/Swipe handlers
+                    handleTouchStart(e) {
+                        if (this.zoomLevel > 1) {
+                            // If zoomed, allow panning
+                            this.isDragging = true;
+                            this.dragStartX = e.touches[0].clientX - this.translateX;
+                            this.dragStartY = e.touches[0].clientY - this.translateY;
+                        } else {
+                            // If not zoomed, detect swipe
+                            this.touchStartX = e.touches[0].clientX;
+                            this.touchStartY = e.touches[0].clientY;
+                        }
+                    },
+                    
+                    handleTouchMove(e) {
+                        if (this.isDragging && this.zoomLevel > 1) {
+                            // Panning when zoomed
+                            this.translateX = e.touches[0].clientX - this.dragStartX;
+                            this.translateY = e.touches[0].clientY - this.dragStartY;
+                        }
+                    },
+                    
+                    handleTouchEnd(e) {
+                        if (this.isDragging) {
+                            this.isDragging = false;
+                            return;
+                        }
+                        
+                        // Swipe detection
+                        this.touchEndX = e.changedTouches[0].clientX;
+                        this.touchEndY = e.changedTouches[0].clientY;
+                        
+                        const deltaX = this.touchEndX - this.touchStartX;
+                        const deltaY = this.touchEndY - this.touchStartY;
+                        
+                        // Only process horizontal swipes
+                        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > this.minSwipeDistance) {
+                            if (deltaX > 0) {
+                                // Swipe right - previous image
+                                this.previousImage();
+                            } else {
+                                // Swipe left - next image
+                                this.nextImage();
+                            }
+                        }
+                    }
+                }
+            };
+        </script>
+        
         <!-- PDF.js for PDF preview -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
         <script>
