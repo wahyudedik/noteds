@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\EnsureUserIsActive::class,
             \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\SecurityHeaders::class,
+            \App\Http\Middleware\SanitizeInput::class,
         ]);
         
         $middleware->alias([
@@ -27,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'seller' => \App\Http\Middleware\EnsureSellerRole::class,
             'workspace.user' => \App\Http\Middleware\EnsureWorkspaceUser::class,
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
+            'rate.limit' => \App\Http\Middleware\RateLimitSensitive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

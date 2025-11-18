@@ -95,27 +95,63 @@ class UpdateNoteRequest extends FormRequest
      */
     public function withValidator($validator): void
     {
-            $validator->after(function ($validator) {
-                // Validate external links
-                $externalLinksText = $this->input('external_links');
-                if (!empty($externalLinksText)) {
-                    $links = array_filter(
-                        array_map('trim', explode("\n", $externalLinksText)),
-                        fn($link) => !empty($link)
-                    );
+        $validator->after(function ($validator) {
+            // Enhanced file upload security validation
+            if ($this->hasFile('attachments')) {
+                $securityService = app(\App\Services\FileUploadSecurityService::class);
+                
+                foreach ($this->file('attachments') as $index => $file) {
+                    $validation = $securityService->validateFile($file, 'all');
                     
-                    foreach ($links as $index => $link) {
-                        if (!filter_var($link, FILTER_VALIDATE_URL)) {
+                    if (!$validation['valid']) {
+                        foreach ($validation['errors'] as $error) {
                             $validator->errors()->add(
-                                'external_links',
-                                "Link tidak valid pada baris " . ($index + 1) . ": {$link}. Pastikan menggunakan URL yang valid (contoh: https://drive.google.com/...)"
+                                "attachments.{$index}",
+                                $error
                             );
                         }
                     }
                 }
+            }
+            
+            // Enhanced thumbnail security validation
+            if ($this->hasFile('thumbnails')) {
+                $securityService = app(\App\Services\FileUploadSecurityService::class);
                 
-                // Check file sizes manually for better error handling
-                if ($this->hasFile('attachments')) {
+                foreach ($this->file('thumbnails') as $index => $file) {
+                    $validation = $securityService->validateFile($file, 'image');
+                    
+                    if (!$validation['valid']) {
+                        foreach ($validation['errors'] as $error) {
+                            $validator->errors()->add(
+                                "thumbnails.{$index}",
+                                $error
+                            );
+                        }
+                    }
+                }
+            }
+            
+            // Validate external links
+            $externalLinksText = $this->input('external_links');
+            if (!empty($externalLinksText)) {
+                $links = array_filter(
+                    array_map('trim', explode("\n", $externalLinksText)),
+                    fn($link) => !empty($link)
+                );
+                
+                foreach ($links as $index => $link) {
+                    if (!filter_var($link, FILTER_VALIDATE_URL)) {
+                        $validator->errors()->add(
+                            'external_links',
+                            "Link tidak valid pada baris " . ($index + 1) . ": {$link}. Pastikan menggunakan URL yang valid (contoh: https://drive.google.com/...)"
+                        );
+                    }
+                }
+            }
+            
+            // Check file sizes manually for better error handling
+            if ($this->hasFile('attachments')) {
                 $files = $this->file('attachments');
                 $maxSize = 10485760; // 10MB in bytes
                 

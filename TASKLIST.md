@@ -541,7 +541,6 @@ Menjadi **AI Memory Platform** pertama dari Indonesia yang mampu memahami kontek
 - [x] Download control: Secure file serving with access control
 - [x] Trust indicators: Purchase count, money-back badge
 - [x] Views: notes/show, notes/edit, notes/create, notes/index, marketplace/show
-- [ ] Security: Virus scanning integration (ClamAV)
 
 ### Content Protection Settings (Admin Configurable)
 - [x] Admin Settings UI: Content Protection section with 25+ toggle switches
@@ -555,7 +554,7 @@ Menjadi **AI Memory Platform** pertama dari Indonesia yang mampu memahami kontek
   - [x] Disable keyboard shortcuts (Ctrl+C, Ctrl+V, Ctrl+P, Ctrl+A, Ctrl+X, Ctrl+U, F12, etc.)
   - [x] Disable copy/cut/paste events
   - [x] Disable drag & drop
-  - [x] Disable print
+  - [x] Disable print 
   - [x] Disable view source
   - [x] Disable image saving
 - [x] **Screenshot Protection:**
@@ -616,6 +615,21 @@ Menjadi **AI Memory Platform** pertama dari Indonesia yang mampu memahami kontek
   - Product schema untuk note detail
   - BreadcrumbList schema untuk navigation
   - CollectionPage schema untuk marketplace
+
+### Security Hardening
+- [x] Security Headers Middleware (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
+- [x] Rate Limiting Middleware untuk sensitive endpoints
+- [x] Input Sanitization Middleware
+- [x] Enhanced File Upload Security Service
+  - Extension whitelist dan blacklist
+  - MIME type validation
+  - Magic bytes validation untuk images
+  - Filename sanitization
+  - Double extension detection
+- [x] Rate limiting untuk purchase, wallet, withdraw, resale, escrow, quote endpoints
+- [x] File upload security validation di StoreNoteRequest, UpdateNoteRequest, ProfileUpdateRequest
+- [x] Security configuration file (config/security.php)
+- [x] Security documentation (SECURITY.md)
 
 ### Identity Verification (KYC)
 - [x] Add fields to `users`: agreement_accepted_at, agreement_version, ktp_path, selfie_path, verification_status, verification_reviewed_at, verification_reviewed_by, verification_notes

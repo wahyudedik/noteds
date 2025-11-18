@@ -12,6 +12,8 @@
 - Redis (recommended, for caching - auto-detect, fallback to database)
 - Ollama (for AI features - can be installed on same server or separate)
 - PHP GD or Imagick extension (for image processing - optional)
+- Fail2ban (for SSH protection - recommended)
+- Certbot (for SSL certificates - Let's Encrypt)
 
 ## 🚀 Deployment Steps
 
@@ -48,6 +50,15 @@ sudo mv composer.phar /usr/local/bin/composer
 
 # Install additional PHP extensions for Laravel 12
 sudo apt install php8.2-readline php8.2-tokenizer php8.2-fileinfo -y
+
+# Install Supervisor (for queue workers)
+sudo apt install supervisor -y
+
+# Install Fail2ban (for SSH protection)
+sudo apt install fail2ban -y
+
+# Install Certbot (for SSL certificates)
+sudo apt install certbot python3-certbot-nginx -y
 ```
 
 ### 2. Database Setup
@@ -81,6 +92,10 @@ sudo -u www-data npm run build
 # Environment setup
 sudo -u www-data cp .env.example .env
 sudo -u www-data php artisan key:generate
+
+# Set proper permissions for .env
+sudo chmod 600 /var/www/noteds/.env
+sudo chown www-data:www-data /var/www/noteds/.env
 ```
 
 ### 4. Environment Configuration
@@ -146,6 +161,21 @@ MAIL_FROM_NAME="${APP_NAME}"
 
 # Support Email (for contact form - optional, defaults to MAIL_FROM_ADDRESS)
 # Can be configured via Admin Settings UI
+
+# Security Configuration
+SECURITY_CSP_ENABLED=true
+SECURITY_SANITIZE_INPUT=true
+FILE_UPLOAD_MAX_SIZE=10485760  # 10MB in bytes
+FILE_UPLOAD_VALIDATE_MIME=true
+FILE_UPLOAD_VALIDATE_MAGIC=true
+
+# Rate Limiting Configuration (for sensitive endpoints)
+RATE_LIMIT_PURCHASE=5
+RATE_LIMIT_WALLET_TOPUP=10
+RATE_LIMIT_WITHDRAW=3
+RATE_LIMIT_RESALE=5
+RATE_LIMIT_ESCROW=5
+RATE_LIMIT_QUOTE=5
 ```
 
 > Pastikan queue (`QUEUE_CONNECTION=database`) dan mailer sudah dikonfigurasi agar notifikasi forum & email berjalan lancar.
@@ -351,7 +381,10 @@ sudo -u www-data php artisan db:seed --force
 ### 7. Storage & Permissions
 
 ```bash
+# Create storage link
 sudo -u www-data php artisan storage:link
+
+# Set proper permissions for storage
 sudo chmod -R 775 storage bootstrap/cache
 sudo chown -R www-data:www-data storage bootstrap/cache
 
@@ -359,6 +392,18 @@ sudo chown -R www-data:www-data storage bootstrap/cache
 sudo chmod -R 755 /var/www/noteds
 sudo chmod -R 775 /var/www/noteds/storage
 sudo chmod -R 775 /var/www/noteds/bootstrap/cache
+
+# Set secure permissions for private storage (KYC documents)
+sudo chmod -R 750 /var/www/noteds/storage/app/private
+sudo chown -R www-data:www-data /var/www/noteds/storage/app/private
+
+# Set secure permissions for public storage (user uploads)
+sudo chmod -R 775 /var/www/noteds/storage/app/public
+sudo chown -R www-data:www-data /var/www/noteds/storage/app/public
+
+# Set secure permissions for .env file
+sudo chmod 600 /var/www/noteds/.env
+sudo chown www-data:www-data /var/www/noteds/.env
 ```
 
 > Identity verification documents (KTP & selfie) are stored on the `private` disk (`storage/app/private`), downloaded via secured admin routes. No public exposure required.
@@ -379,13 +424,15 @@ sudo -u www-data php artisan view:cache
 
 Create `/etc/nginx/sites-available/noteds`:
 ```nginx
+# HTTP to HTTPS redirect (will be updated by certbot)
 server {
     listen 80;
     server_name your-domain.com;
     root /var/www/noteds/public;
 
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
+    # Temporary headers (will be enhanced after SSL)
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
 
     index index.php;
 
@@ -411,6 +458,16 @@ server {
         deny all;
     }
 
+    # Disable PHP execution in storage directories (security)
+    location ~ ^/storage/.*\.php$ {
+        deny all;
+    }
+
+    # Disable PHP execution in upload directories (security)
+    location ~ ^/public/uploads/.*\.php$ {
+        deny all;
+    }
+
     # Increase upload size for file attachments (support up to 200MB for large files)
     # For premium users: up to 100MB per file, multiple files can exceed 200MB total
     client_max_body_size 200M;
@@ -430,8 +487,16 @@ server {
     gzip_vary on;
     gzip_min_length 1024;
     gzip_types text/plain text/css text/xml text/javascript application/json application/javascript application/xml+rss;
+    gzip_comp_level 6;
+    gzip_disable "msie6";
 }
 ```
+
+**Note:** Setelah menjalankan `certbot --nginx`, konfigurasi akan otomatis di-update dengan:
+- SSL certificate paths
+- HTTPS server block
+- HTTP to HTTPS redirect
+- Enhanced security headers (HSTS, dll)
 
 Enable site:
 ```bash
@@ -442,9 +507,178 @@ sudo systemctl reload nginx
 
 ### 10. SSL Certificate (Let's Encrypt)
 
+**Before running certbot, ensure:**
+- Domain DNS points to your server IP
+- Port 80 and 443 are open in firewall
+- Nginx configuration is correct
+
 ```bash
 sudo apt install certbot python3-certbot-nginx -y
 sudo certbot --nginx -d your-domain.com
+```
+
+**During certbot setup:**
+- Enter email for renewal notifications
+- Agree to terms of service
+- Choose whether to redirect HTTP to HTTPS (recommended: Yes)
+
+**Auto-renewal Setup:**
+```bash
+# Test renewal
+sudo certbot renew --dry-run
+
+# Certbot automatically sets up renewal cronjob
+# Check with: sudo systemctl status certbot.timer
+```
+
+### 10.1. Security Hardening Setup
+
+#### 10.1.1. Security Headers Configuration
+
+Security headers sudah di-handle oleh `SecurityHeaders` middleware, tapi untuk performa lebih baik, bisa juga ditambahkan di Nginx:
+
+Update `/etc/nginx/sites-available/noteds` setelah SSL setup:
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name your-domain.com;
+    root /var/www/noteds/public;
+
+    # SSL Configuration (Let's Encrypt)
+    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # Security Headers (additional layer, middleware juga handle)
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
+    # Remove X-Powered-By (handled by middleware, but also here)
+    fastcgi_hide_header X-Powered-By;
+
+    # ... rest of configuration
+}
+
+# HTTP to HTTPS redirect
+server {
+    listen 80;
+    server_name your-domain.com;
+    return 301 https://$server_name$request_uri;
+}
+```
+
+#### 10.1.2. Fail2Ban Setup (SSH Protection)
+
+```bash
+# Install fail2ban
+sudo apt install fail2ban -y
+
+# Create local configuration
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+
+# Edit configuration
+sudo nano /etc/fail2ban/jail.local
+```
+
+Add/modify in `jail.local`:
+```ini
+[DEFAULT]
+bantime = 3600
+findtime = 600
+maxretry = 5
+
+[sshd]
+enabled = true
+port = 22
+logpath = /var/log/auth.log
+maxretry = 3
+bantime = 7200
+```
+
+Start fail2ban:
+```bash
+sudo systemctl enable fail2ban
+sudo systemctl start fail2ban
+
+# Check status
+sudo fail2ban-client status
+sudo fail2ban-client status sshd
+```
+
+#### 10.1.3. File Upload Security
+
+File upload security sudah di-handle oleh `FileUploadSecurityService`. Pastikan:
+
+1. **Storage Permissions:**
+```bash
+# Private storage untuk KYC documents
+sudo chmod -R 750 /var/www/noteds/storage/app/private
+sudo chown -R www-data:www-data /var/www/noteds/storage/app/private
+
+# Public storage untuk user uploads
+sudo chmod -R 775 /var/www/noteds/storage/app/public
+sudo chown -R www-data:www-data /var/www/noteds/storage/app/public
+```
+
+2. **Disable PHP Execution in Upload Directories:**
+Add to Nginx config:
+```nginx
+# Disable PHP execution in storage directories
+location ~ ^/storage/.*\.php$ {
+    deny all;
+}
+
+# Disable PHP execution in public/uploads
+location ~ ^/public/uploads/.*\.php$ {
+    deny all;
+}
+```
+
+#### 10.1.4. Rate Limiting Verification
+
+Rate limiting sudah dikonfigurasi di routes. Untuk verifikasi:
+
+```bash
+# Test rate limiting (should return 429 after limit)
+for i in {1..6}; do
+  curl -X POST https://your-domain.com/marketplace/{note}/purchase \
+    -H "Cookie: laravel_session=..." \
+    -H "X-CSRF-TOKEN=..."
+done
+```
+
+#### 10.1.5. Security Logging Setup
+
+Security events sudah di-log otomatis. Untuk monitoring:
+
+```bash
+# Monitor security events
+sudo tail -f /var/www/noteds/storage/logs/laravel.log | grep -i "security\|upload\|rate.*limit\|mime"
+
+# Setup log rotation (optional)
+sudo nano /etc/logrotate.d/noteds
+```
+
+Add to `/etc/logrotate.d/noteds`:
+```
+/var/www/noteds/storage/logs/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 www-data www-data
+    sharedscripts
+    postrotate
+        /usr/bin/supervisorctl restart noteds-worker:* > /dev/null 2>&1 || true
+    endscript
+}
 ```
 
 ### 11. Queue Workers (Supervisor)
@@ -735,6 +969,22 @@ RUNWAY_API_KEY=your_runway_api_key
 #### Laravel Telescope (Production Admin Only)
 Already configured in `TelescopeServiceProvider` with admin role gate.
 
+**Access Telescope:**
+- URL: `https://your-domain.com/telescope`
+- Only accessible by admin users (gate: `viewTelescope`)
+- Monitor queries, requests, jobs, exceptions, etc.
+
+**Telescope Configuration:**
+```env
+TELESCOPE_ENABLED=true
+TELESCOPE_QUERY_WATCHER=true
+TELESCOPE_SLOW_QUERY_THRESHOLD=100  # milliseconds
+TELESCOPE_MAIL_WATCHER=true
+TELESCOPE_MODEL_WATCHER=true
+TELESCOPE_REDIS_WATCHER=true
+TELESCOPE_REQUEST_WATCHER=true
+```
+
 #### Sentry (Error Tracking - Optional)
 ```bash
 composer require sentry/sentry-laravel
@@ -744,6 +994,7 @@ Configure in `.env`:
 ```env
 SENTRY_LARAVEL_DSN=your_sentry_dsn
 SENTRY_TRACES_SAMPLE_RATE=1.0
+SENTRY_ENVIRONMENT=production
 ```
 
 #### Log Monitoring
@@ -756,6 +1007,93 @@ sudo tail -f /var/log/nginx/access.log
 
 # View Nginx error logs
 sudo tail -f /var/log/nginx/error.log
+
+# View security-related logs
+sudo tail -f /var/www/noteds/storage/logs/laravel.log | grep -i "security\|upload\|rate.*limit\|mime\|sanitize"
+
+# View queue worker logs
+sudo tail -f /var/www/noteds/storage/logs/worker.log
+```
+
+#### System Resource Monitoring
+
+**Install monitoring tools:**
+```bash
+# htop for process monitoring
+sudo apt install htop -y
+
+# iotop for I/O monitoring
+sudo apt install iotop -y
+
+# nethogs for network monitoring
+sudo apt install nethogs -y
+```
+
+**Monitor system resources:**
+```bash
+# CPU and memory usage
+htop
+
+# Disk usage
+df -h
+du -sh /var/www/noteds/storage/*
+
+# Network connections
+netstat -tulpn | grep :80
+netstat -tulpn | grep :443
+
+# PHP-FPM processes
+ps aux | grep php-fpm
+
+# Queue workers
+ps aux | grep "queue:work"
+```
+
+#### Automated Health Checks
+
+Create health check script `/usr/local/bin/noteds-health-check.sh`:
+```bash
+#!/bin/bash
+
+# Check Laravel application
+if ! curl -f -s https://your-domain.com/up > /dev/null; then
+    echo "ERROR: Application health check failed"
+    exit 1
+fi
+
+# Check database connection
+if ! php /var/www/noteds/artisan db:show > /dev/null 2>&1; then
+    echo "ERROR: Database connection failed"
+    exit 1
+fi
+
+# Check queue workers
+if ! supervisorctl status noteds-worker:* | grep -q RUNNING; then
+    echo "ERROR: Queue workers not running"
+    exit 1
+fi
+
+# Check Redis (if enabled)
+if [ ! -z "$REDIS_HOST" ]; then
+    if ! redis-cli -h $REDIS_HOST ping > /dev/null 2>&1; then
+        echo "ERROR: Redis connection failed"
+        exit 1
+    fi
+fi
+
+echo "OK: All health checks passed"
+exit 0
+```
+
+Make executable:
+```bash
+sudo chmod +x /usr/local/bin/noteds-health-check.sh
+```
+
+Add to crontab for periodic checks:
+```bash
+sudo crontab -e
+# Add: */5 * * * * /usr/local/bin/noteds-health-check.sh || echo "Health check failed" | mail -s "Noteds Health Alert" admin@your-domain.com
 ```
 
 ## 🔄 Deployment Workflow
@@ -775,7 +1113,67 @@ sudo supervisorctl restart noteds-worker:*
 
 ### Automated Deployment (GitHub Actions)
 
-See `.github/workflows/deploy.yml` (create if needed)
+**Create `.github/workflows/deploy.yml`:**
+```yaml
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy to server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd /var/www/noteds
+          git pull origin main
+          sudo -u www-data composer install --no-dev --optimize-autoloader
+          sudo -u www-data php artisan migrate --force
+          sudo -u www-data npm run build
+          sudo -u www-data php artisan optimize
+          sudo supervisorctl restart noteds-worker:*
+```
+
+**GitHub Secrets Required:**
+- `HOST`: Your VPS IP address
+- `USERNAME`: SSH username (usually `root` or `ubuntu`)
+- `SSH_KEY`: Private SSH key for authentication
+
+### Deployment Checklist
+
+**Before Deployment:**
+- [ ] Review changes in git log
+- [ ] Test changes in staging environment (if available)
+- [ ] Backup database: `/usr/local/bin/noteds-backup.sh`
+- [ ] Check disk space: `df -h`
+- [ ] Verify queue workers are running: `supervisorctl status`
+- [ ] Check application health: `curl https://your-domain.com/up`
+
+**During Deployment:**
+- [ ] Pull latest code
+- [ ] Install/update dependencies
+- [ ] Run migrations (with `--force` flag)
+- [ ] Build frontend assets (`npm run build`)
+- [ ] Clear and optimize caches
+- [ ] Restart queue workers
+- [ ] Verify application is running
+
+**After Deployment:**
+- [ ] Test critical paths (login, purchase, upload)
+- [ ] Check error logs: `tail -f storage/logs/laravel.log`
+- [ ] Verify queue processing: `supervisorctl status`
+- [ ] Monitor resource usage: `htop`
+- [ ] Check Telescope for errors: `/telescope`
+- [ ] Verify scheduled tasks are running: Check cron logs
 
 ## 🔒 Security Checklist
 
@@ -787,9 +1185,9 @@ See `.github/workflows/deploy.yml` (create if needed)
 - [ ] Disable PHP execution in storage/public directories
 - [ ] Regular security updates (`sudo apt update && sudo apt upgrade`)
 - [ ] Database backups automated
-- [ ] Rate limiting configured (Laravel throttling)
+- [ ] Rate limiting configured (Laravel throttling + custom middleware)
 - [ ] Email notification for errors
-- [ ] Hide PHP version (X-Powered-By header)
+- [ ] Hide PHP version (X-Powered-By header) - handled by SecurityHeaders middleware
 - [ ] Secure `.env` file (chmod 600)
 - [ ] Restrict MySQL user privileges
 - [ ] Configure fail2ban for SSH protection
@@ -801,6 +1199,32 @@ See `.github/workflows/deploy.yml` (create if needed)
 - [ ] Featured notes auto-expire command scheduled (daily at 01:00 WIB)
 - [ ] Featured notes pricing configured in admin settings
 - [ ] Featured notes analytics tracking enabled
+- [ ] Security headers enabled (CSP, HSTS, X-Frame-Options) - handled by SecurityHeaders middleware
+- [ ] Input sanitization enabled - handled by SanitizeInput middleware
+- [ ] File upload security validation enabled - handled by FileUploadSecurityService
+- [ ] Rate limiting on sensitive endpoints (purchase, wallet, withdraw) - configured in routes
+- [ ] Security logging enabled for monitoring suspicious activities
+- [ ] Review [SECURITY.md](SECURITY.md) for complete security guide
+- [ ] Fail2ban configured for SSH protection
+- [ ] Security headers configured in Nginx (additional layer)
+- [ ] PHP execution disabled in upload directories
+- [ ] Log rotation configured for Laravel logs
+- [ ] Automated backups configured (database + storage)
+- [ ] Health check monitoring setup
+- [ ] SSL certificate auto-renewal verified
+- [ ] Firewall (UFW) rules configured and tested
+- [ ] Database user privileges restricted (not root)
+- [ ] `.env` file permissions set to 600
+- [ ] Storage directories have proper permissions (775/750)
+- [ ] Nginx security headers configured
+- [ ] Rate limiting tested on sensitive endpoints
+- [ ] File upload security validation verified
+- [ ] Input sanitization middleware active
+- [ ] Content Security Policy (CSP) configured
+- [ ] HSTS header enabled for HTTPS
+- [ ] X-Frame-Options, X-Content-Type-Options headers set
+- [ ] Referrer-Policy configured
+- [ ] Security event logging monitored
 
 ## 💳 Midtrans Production Deployment Checklist
 
@@ -883,18 +1307,133 @@ See `.github/workflows/deploy.yml` (create if needed)
 ## 🔄 Backup Strategy
 
 ### Database Backup
-```bash
-# Manual backup
-mysqldump -u noteds_user -p noteds_production > backup_$(date +%Y%m%d).sql
 
-# Automated backup (cronjob)
-0 2 * * * mysqldump -u noteds_user -pPassword noteds_production | gzip > /backups/noteds_$(date +\%Y\%m\%d).sql.gz
+**Manual Backup:**
+```bash
+# Create backup directory
+sudo mkdir -p /backups/noteds
+sudo chown www-data:www-data /backups/noteds
+
+# Manual backup
+mysqldump -u noteds_user -p noteds_production > /backups/noteds/backup_$(date +%Y%m%d_%H%M%S).sql
+
+# Compressed backup
+mysqldump -u noteds_user -p noteds_production | gzip > /backups/noteds/backup_$(date +%Y%m%d_%H%M%S).sql.gz
+```
+
+**Automated Backup Script:**
+Create `/usr/local/bin/noteds-backup.sh`:
+```bash
+#!/bin/bash
+
+BACKUP_DIR="/backups/noteds"
+DB_USER="noteds_user"
+DB_NAME="noteds_production"
+RETENTION_DAYS=30
+
+# Create backup directory if not exists
+mkdir -p $BACKUP_DIR
+
+# Database backup
+mysqldump -u $DB_USER -p$(grep DB_PASSWORD /var/www/noteds/.env | cut -d '=' -f2) $DB_NAME | gzip > $BACKUP_DIR/db_$(date +%Y%m%d_%H%M%S).sql.gz
+
+# File storage backup (exclude cache and logs)
+tar -czf $BACKUP_DIR/storage_$(date +%Y%m%d_%H%M%S).tar.gz \
+    -C /var/www/noteds \
+    --exclude='storage/framework/cache' \
+    --exclude='storage/framework/sessions' \
+    --exclude='storage/framework/views' \
+    --exclude='storage/logs' \
+    storage/app
+
+# Remove old backups (older than RETENTION_DAYS)
+find $BACKUP_DIR -type f -name "*.sql.gz" -mtime +$RETENTION_DAYS -delete
+find $BACKUP_DIR -type f -name "*.tar.gz" -mtime +$RETENTION_DAYS -delete
+
+echo "Backup completed: $(date)"
+```
+
+Make executable:
+```bash
+sudo chmod +x /usr/local/bin/noteds-backup.sh
+```
+
+**Automated Backup Cronjob:**
+```bash
+sudo crontab -e
+# Add: 0 2 * * * /usr/local/bin/noteds-backup.sh >> /var/log/noteds-backup.log 2>&1
 ```
 
 ### File Storage Backup
+
+**Local Backup:**
 ```bash
-# Sync to S3 or remote storage
-aws s3 sync /var/www/noteds/storage/app s3://your-bucket/storage --delete
+# Sync to backup location
+sudo rsync -av --delete /var/www/noteds/storage/app /backups/noteds/storage/
+```
+
+**Cloud Backup (S3):**
+```bash
+# Install AWS CLI
+sudo apt install awscli -y
+
+# Configure AWS credentials
+aws configure
+
+# Sync to S3
+aws s3 sync /var/www/noteds/storage/app s3://your-bucket/noteds/storage --delete
+
+# Automated S3 backup script
+cat > /usr/local/bin/noteds-s3-backup.sh << 'EOF'
+#!/bin/bash
+aws s3 sync /var/www/noteds/storage/app s3://your-bucket/noteds/storage --delete
+echo "S3 backup completed: $(date)"
+EOF
+
+sudo chmod +x /usr/local/bin/noteds-s3-backup.sh
+
+# Add to crontab (daily at 3 AM)
+# 0 3 * * * /usr/local/bin/noteds-s3-backup.sh >> /var/log/noteds-s3-backup.log 2>&1
+```
+
+**Backup Verification:**
+```bash
+# Test database backup restore (on test database)
+mysql -u noteds_user -p noteds_test < /backups/noteds/backup_YYYYMMDD.sql
+
+# Verify backup files
+ls -lh /backups/noteds/
+du -sh /backups/noteds/
+```
+
+### Backup Restoration
+
+**Database Restoration:**
+```bash
+# Stop application (optional, for zero downtime use replication)
+sudo systemctl stop php8.2-fpm
+
+# Restore database
+gunzip < /backups/noteds/db_YYYYMMDD_HHMMSS.sql.gz | mysql -u noteds_user -p noteds_production
+
+# Or from uncompressed backup
+mysql -u noteds_user -p noteds_production < /backups/noteds/backup_YYYYMMDD.sql
+
+# Start application
+sudo systemctl start php8.2-fpm
+```
+
+**File Storage Restoration:**
+```bash
+# From local backup
+sudo rsync -av /backups/noteds/storage/ /var/www/noteds/storage/app/
+
+# From S3
+aws s3 sync s3://your-bucket/noteds/storage /var/www/noteds/storage/app
+
+# Fix permissions
+sudo chown -R www-data:www-data /var/www/noteds/storage
+sudo chmod -R 775 /var/www/noteds/storage
 ```
 
 ## 📊 Performance Optimization
@@ -1671,4 +2210,434 @@ Featured Notes advertising system features:
 - ✅ Auto-expire command untuk expired featured notes
 - ✅ Analytics tracking (impressions & clicks)
 - ✅ Pricing configurable per location & duration
+
+**Security Hardening (2025-01-XX):**
+- ✅ Security Headers Middleware (CSP, HSTS, X-Frame-Options, etc.)
+- ✅ Rate Limiting Middleware untuk sensitive endpoints
+- ✅ Input Sanitization Middleware
+- ✅ Enhanced File Upload Security Service
+  - Extension whitelist dan blacklist
+  - MIME type validation
+  - Magic bytes validation untuk images
+  - Filename sanitization
+  - Double extension detection
+- ✅ Rate limiting untuk purchase, wallet, withdraw, resale, escrow, quote endpoints
+- ✅ File upload security validation di StoreNoteRequest, UpdateNoteRequest, ProfileUpdateRequest
+- ✅ Security configuration file (config/security.php)
+- ✅ Security documentation (SECURITY.md)
+- ✅ Fail2ban setup untuk SSH protection
+- ✅ Automated backup scripts (database + storage)
+- ✅ Health check monitoring
+- ✅ Log rotation configuration
+- ✅ Nginx security headers configuration
+
+## 📋 Post-Deployment Checklist
+
+Setelah semua setup selesai, pastikan checklist berikut sudah dikerjakan:
+
+### Initial Setup
+- [ ] Server requirements terinstall (PHP, MySQL, Nginx, Redis, Node.js, Composer)
+- [ ] Database dibuat dan user dikonfigurasi
+- [ ] Aplikasi di-clone dan dependencies terinstall
+- [ ] Environment file (.env) dikonfigurasi dengan benar
+- [ ] Migrations dan seeders dijalankan
+- [ ] Storage link dibuat dan permissions di-set
+- [ ] Laravel di-optimize (config, route, view cache)
+
+### Security
+- [ ] SSL certificate terinstall (Let's Encrypt)
+- [ ] Security headers dikonfigurasi (Nginx + Middleware)
+- [ ] Fail2ban dikonfigurasi untuk SSH protection
+- [ ] Firewall (UFW) dikonfigurasi dan aktif
+- [ ] Rate limiting di-test pada sensitive endpoints
+- [ ] File upload security validation di-verify
+- [ ] Input sanitization middleware aktif
+- [ ] Security logging di-monitor
+- [ ] `.env` file permissions: 600
+- [ ] Storage directories permissions: 775/750
+- [ ] PHP execution disabled di upload directories
+
+### Services
+- [ ] Nginx dikonfigurasi dan running
+- [ ] PHP-FPM running
+- [ ] MySQL running
+- [ ] Redis running (jika digunakan)
+- [ ] Queue workers (Supervisor) running
+- [ ] Cron job untuk scheduler di-setup
+- [ ] Ollama service running (jika menggunakan AI features)
+
+### Payment Gateway
+- [ ] Midtrans account terverifikasi (untuk production)
+- [ ] Production keys dikonfigurasi di `.env`
+- [ ] URL endpoints dikonfigurasi di Midtrans Dashboard
+- [ ] Webhook endpoint di-test
+- [ ] Payment flow di-test dengan test card
+
+### Monitoring & Backup
+- [ ] Laravel Telescope diakses dan berfungsi
+- [ ] Log monitoring di-setup
+- [ ] Health check script dibuat dan di-test
+- [ ] Automated backup script dibuat
+- [ ] Backup cronjob di-setup
+- [ ] Backup restoration di-test (pada test database)
+
+### Performance
+- [ ] Redis cache dikonfigurasi (jika digunakan)
+- [ ] CDN dikonfigurasi (jika digunakan)
+- [ ] Image processing service di-setup (jika menggunakan intervention/image)
+- [ ] Database indexes sudah ada (migration sudah dijalankan)
+- [ ] OpCache enabled
+- [ ] PHP-FPM tuning dikonfigurasi
+- [ ] Nginx gzip compression enabled
+
+### Testing
+- [ ] User registration dan login di-test
+- [ ] Note creation dan upload di-test
+- [ ] Marketplace browsing dan search di-test
+- [ ] Purchase flow di-test
+- [ ] Wallet top-up di-test
+- [ ] Withdraw request di-test
+- [ ] Admin panel diakses dan berfungsi
+- [ ] Scheduled tasks di-verify (subscription renewal, featured expire, etc.)
+
+### Documentation
+- [ ] Team members memiliki akses ke dokumentasi
+- [ ] Deployment process didokumentasikan
+- [ ] Backup dan restore procedures didokumentasikan
+- [ ] Troubleshooting guide tersedia
+- [ ] Security procedures didokumentasikan
+
+## 🆘 Emergency Procedures
+
+### Application Down
+
+1. **Check Application Status:**
+```bash
+curl https://your-domain.com/up
+sudo systemctl status php8.2-fpm
+sudo systemctl status nginx
+```
+
+2. **Check Logs:**
+```bash
+sudo tail -f /var/www/noteds/storage/logs/laravel.log
+sudo tail -f /var/log/nginx/error.log
+```
+
+3. **Restart Services:**
+```bash
+sudo systemctl restart php8.2-fpm
+sudo systemctl restart nginx
+sudo supervisorctl restart noteds-worker:*
+```
+
+### Database Issues
+
+1. **Check MySQL Status:**
+```bash
+sudo systemctl status mysql
+mysql -u noteds_user -p noteds_production -e "SELECT 1"
+```
+
+2. **Restore from Backup:**
+```bash
+# Stop application
+sudo systemctl stop php8.2-fpm
+
+# Restore database
+gunzip < /backups/noteds/db_YYYYMMDD_HHMMSS.sql.gz | mysql -u noteds_user -p noteds_production
+
+# Start application
+sudo systemctl start php8.2-fpm
+```
+
+### Disk Space Full
+
+1. **Check Disk Usage:**
+```bash
+df -h
+du -sh /var/www/noteds/storage/*
+```
+
+2. **Clean Up:**
+```bash
+# Clear Laravel caches
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+
+# Clear old logs (keep last 7 days)
+find /var/www/noteds/storage/logs -name "*.log" -mtime +7 -delete
+
+# Clear old backups (keep last 30 days)
+find /backups/noteds -name "*.sql.gz" -mtime +30 -delete
+```
+
+### High Server Load
+
+1. **Identify Resource Usage:**
+```bash
+htop
+iotop
+```
+
+2. **Check Queue Workers:**
+```bash
+sudo supervisorctl status
+# If stuck, restart:
+sudo supervisorctl restart noteds-worker:*
+```
+
+3. **Check for Slow Queries:**
+- Access Telescope: `/telescope/queries`
+- Look for queries > 100ms
+
+### Security Incident
+
+1. **Immediate Actions:**
+```bash
+# Check recent security logs
+sudo tail -f /var/www/noteds/storage/logs/laravel.log | grep -i "security\|upload\|rate.*limit"
+
+# Check fail2ban status
+sudo fail2ban-client status sshd
+
+# Review recent file uploads
+ls -lht /var/www/noteds/storage/app/public/uploads | head -20
+```
+
+2. **If Compromised:**
+- Change all passwords immediately
+- Review and revoke suspicious API keys
+- Check for unauthorized database changes
+- Restore from clean backup if necessary
+- Review [SECURITY.md](SECURITY.md) for detailed procedures
+
+## 🔧 PWA & Service Worker Setup
+
+### PWA Manifest
+
+PWA manifest sudah tersedia di `public/manifest.json`. Pastikan:
+
+1. **Verify Manifest File:**
+```bash
+cat /var/www/noteds/public/manifest.json
+```
+
+2. **Update Manifest (if needed):**
+- Edit `public/manifest.json` untuk update app name, icons, colors
+- Icons harus tersedia di `public/icons/` directory
+- Setelah update, clear cache: `php artisan optimize:clear`
+
+### Service Worker
+
+Service worker sudah tersedia di `public/sw.js`. Pastikan:
+
+1. **Verify Service Worker:**
+```bash
+cat /var/www/noteds/public/sw.js
+```
+
+2. **Service Worker Registration:**
+- Service worker otomatis di-register via JavaScript di `layouts/app.blade.php`
+- Pastikan HTTPS aktif (service worker hanya bekerja di HTTPS)
+- Test offline functionality setelah deployment
+
+3. **Update Service Worker:**
+- Jika update service worker, pastikan version number di-update
+- Browser akan auto-update service worker pada visit berikutnya
+
+### Dark Mode Configuration
+
+Dark mode sudah diimplementasikan dengan:
+- CSS variables untuk color management
+- Tailwind CSS `dark:` classes
+- LocalStorage untuk persistence
+- Auto-detect system preference
+
+**No additional server configuration needed** - dark mode bekerja sepenuhnya di client-side.
+
+## 📱 Mobile Optimization
+
+### Responsive Design
+- ✅ Tailwind CSS responsive utilities
+- ✅ Mobile-first approach
+- ✅ Touch-friendly buttons dan interactions
+- ✅ Optimized images dengan lazy loading
+
+### PWA Features
+- ✅ Installable sebagai aplikasi mobile
+- ✅ Offline support via service worker
+- ✅ App icons dan splash screens
+- ✅ Full-screen experience
+
+**No additional server configuration needed** - semua PWA features bekerja di client-side.
+
+## 🔍 Additional Configuration Notes
+
+### Environment Variables Summary
+
+**Required for Production:**
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://your-domain.com
+DB_*=...
+MIDTRANS_*=...
+```
+
+**Optional but Recommended:**
+```env
+REDIS_HOST=127.0.0.1
+CDN_URL=https://cdn.yourdomain.com
+TELESCOPE_ENABLED=true
+SECURITY_CSP_ENABLED=true
+SECURITY_SANITIZE_INPUT=true
+```
+
+**For AI Features (Optional):**
+```env
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+STABILITY_API_KEY=...
+UNSPLASH_ACCESS_KEY=...
+RUNWAY_API_KEY=...
+```
+
+### File Permissions Summary
+
+```bash
+# Application files
+/var/www/noteds: 755 (owner: www-data)
+
+# Storage directories
+/var/www/noteds/storage: 775 (owner: www-data)
+/var/www/noteds/storage/app/private: 750 (owner: www-data)
+/var/www/noteds/storage/app/public: 775 (owner: www-data)
+
+# Bootstrap cache
+/var/www/noteds/bootstrap/cache: 775 (owner: www-data)
+
+# Environment file
+/var/www/noteds/.env: 600 (owner: www-data)
+
+# Backup directory
+/backups/noteds: 750 (owner: www-data)
+```
+
+### Cron Jobs Summary
+
+```cron
+# Laravel Scheduler (runs every minute)
+* * * * * cd /var/www/noteds && php artisan schedule:run >> /dev/null 2>&1
+
+# Database Backup (daily at 2 AM)
+0 2 * * * /usr/local/bin/noteds-backup.sh >> /var/log/noteds-backup.log 2>&1
+
+# Health Check (every 5 minutes)
+*/5 * * * * /usr/local/bin/noteds-health-check.sh || echo "Health check failed" | mail -s "Noteds Health Alert" admin@your-domain.com
+
+# S3 Backup (daily at 3 AM, if using S3)
+0 3 * * * /usr/local/bin/noteds-s3-backup.sh >> /var/log/noteds-s3-backup.log 2>&1
+```
+
+### Service Status Commands
+
+```bash
+# Check all services
+sudo systemctl status nginx
+sudo systemctl status php8.2-fpm
+sudo systemctl status mysql
+sudo systemctl status redis-server
+sudo systemctl status supervisor
+sudo systemctl status ollama  # if using AI features
+
+# Check queue workers
+sudo supervisorctl status noteds-worker:*
+
+# Check scheduled tasks
+sudo -u www-data crontab -l
+
+# Check application health
+curl https://your-domain.com/up
+```
+
+### Useful Commands Reference
+
+```bash
+# Clear all caches
+php artisan optimize:clear
+
+# Optimize application
+php artisan optimize
+
+# Run migrations
+php artisan migrate --force
+
+# Run seeders
+php artisan db:seed --force
+
+# Check configuration
+php artisan config:show
+
+# Test database connection
+php artisan db:show
+
+# View routes
+php artisan route:list
+
+# Queue commands
+php artisan queue:work
+php artisan queue:restart
+
+# Scheduled commands
+php artisan schedule:list
+php artisan schedule:run
+
+# Telescope access
+# Visit: https://your-domain.com/telescope (admin only)
+```
+
+## 📚 Additional Resources
+
+### Documentation Files
+- **[README.md](README.md)** - Project overview dan features
+- **[LOCAL_SETUP.md](LOCAL_SETUP.md)** - Local development setup
+- **[TASKLIST.md](TASKLIST.md)** - Development roadmap dan task tracking
+- **[PERFORMANCE_SETUP.md](PERFORMANCE_SETUP.md)** - Performance optimization guide
+- **[SECURITY.md](SECURITY.md)** - Security hardening guide dan best practices
+- **[FUTURE_FEATURES.md](FUTURE_FEATURES.md)** - Future features roadmap untuk membuat aplikasi sangat terkenal
+
+### External Resources
+- [Laravel 12 Documentation](https://laravel.com/docs/12.x)
+- [Nginx Documentation](https://nginx.org/en/docs/)
+- [MySQL 8.0 Documentation](https://dev.mysql.com/doc/refman/8.0/en/)
+- [Redis Documentation](https://redis.io/documentation)
+- [Let's Encrypt Documentation](https://letsencrypt.org/docs/)
+- [Midtrans Documentation](https://docs.midtrans.com/)
+- [Ollama Documentation](https://ollama.com/docs)
+
+### Support & Community
+- Laravel Community: [Laravel.io](https://laravel.io)
+- Stack Overflow: Tag `laravel`, `nginx`, `mysql`
+- GitHub Issues: Report bugs dan feature requests
+
+---
+
+**Last Updated:** 2025-01-XX  
+**Version:** 1.0  
+**Maintained by:** Noteds Development Team
+
+---
+
+## 🚀 Future Features & Roadmap
+
+Untuk melihat daftar lengkap fitur-fitur tambahan yang akan membuat Noteds menjadi aplikasi marketplace yang sangat terkenal, lihat **[FUTURE_FEATURES.md](FUTURE_FEATURES.md)**.
+
+Fitur-fitur yang direncanakan termasuk:
+- 🟢 **High Priority:** Social features, gamification, mobile app, recommendation engine, video previews
+- 🟡 **Medium Priority:** Advanced analytics, live chat, subscription plans, affiliate program, multi-language
+- 🔵 **Low Priority:** Public API, community challenges, buyer protection, advanced workspace features
+
+Semua fitur diprioritaskan berdasarkan impact pada user acquisition, retention, dan revenue.
 

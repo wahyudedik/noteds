@@ -102,12 +102,12 @@ Route::get('/page/{cmsPage}', [PublicCmsPageController::class, 'show'])->name('c
 Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
 Route::get('/marketplace/autocomplete', [MarketplaceController::class, 'autocomplete'])->name('marketplace.autocomplete');
 Route::get('/marketplace/{note}', [MarketplaceController::class, 'show'])->name('marketplace.show');
-Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purchase'])->middleware(['auth', 'verified', 'username.setup', 'buyer'])->name('marketplace.purchase');
+Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purchase'])->middleware(['auth', 'verified', 'username.setup', 'buyer', 'rate.limit:5,1'])->name('marketplace.purchase');
 
 // Resale routes - for buyers who own notes (scarcity mode only)
 Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function () {
     Route::get('/notes/{note}/resale', [NoteController::class, 'resaleForm'])->name('notes.resale.form');
-    Route::post('/notes/{note}/resale', [NoteController::class, 'resale'])->name('notes.resale');
+    Route::post('/notes/{note}/resale', [NoteController::class, 'resale'])->middleware('rate.limit:5,1')->name('notes.resale');
 });
 
     // Public profile routes
@@ -273,12 +273,12 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
 
     // Wallet routes
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
-    Route::post('/wallet/topup', [WalletController::class, 'topup'])->name('wallet.topup');
+    Route::post('/wallet/topup', [WalletController::class, 'topup'])->middleware('rate.limit:10,1')->name('wallet.topup');
     Route::get('/wallet/topup-checkout', [WalletController::class, 'topupCheckout'])->name('wallet.topup-checkout');
 
     // Withdraw routes
     Route::get('/wallet/withdraw', [WithdrawController::class, 'create'])->name('wallet.withdraw.create');
-    Route::post('/wallet/withdraw', [WithdrawController::class, 'store'])->name('wallet.withdraw.store');
+    Route::post('/wallet/withdraw', [WithdrawController::class, 'store'])->middleware('rate.limit:3,1')->name('wallet.withdraw.store');
 
     // Featured Notes routes - only for sellers
     Route::middleware('seller')->group(function () {

@@ -47,7 +47,7 @@ Platform di mana pengguna bisa:
 - Blade Templates 
 - Tailwind CSS
 - Alpine.js
-- Vite 6.4.1
+- Vite 6.4.1 
 - Quill (Rich Text Editor)
 - SweetAlert2 (Notifications)
 - Laravel Echo (Realtime Notifications)
@@ -73,6 +73,7 @@ Platform di mana pengguna bisa:
 - **[VPS_SETUP.md](VPS_SETUP.md)** — VPS deployment & production setup
 - **[TASKLIST.md](TASKLIST.md)** — Development phases & task tracking
 - **[PERFORMANCE_SETUP.md](PERFORMANCE_SETUP.md)** — Performance optimization setup guide (Redis, CDN, Image Processing, Telescope)
+- **[SECURITY.md](SECURITY.md)** — Security hardening guide dan best practices
 
 ### Key Features
 
@@ -558,15 +559,25 @@ composer pint
 ## 🔒 Security Features
 
 - ✅ **UUID** untuk semua primary keys (prevent enumeration)
-- ✅ **Spatie Permission** untuk role-based access
+- ✅ **Spatie Permission** untuk role-based access control
 - ✅ **HTTPS** mandatory di production
-- ✅ **Rate limiting** on sensitive endpoints (escrow, quotes)
-- ✅ **CSRF** protection on all forms
-- ✅ **SQL injection** prevention via Eloquent
-- ✅ **XSS** protection via Blade escaping
+- ✅ **Security Headers** (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
+- ✅ **Rate Limiting** pada sensitive endpoints (purchase, wallet, withdraw, escrow, quotes)
+- ✅ **Input Sanitization** middleware untuk semua request
+- ✅ **CSRF** protection on all forms (exempt untuk Midtrans webhook)
+- ✅ **SQL Injection** prevention via Eloquent ORM dan parameterized queries
+- ✅ **XSS** protection via Blade escaping dan Content Security Policy
+- ✅ **File Upload Security** dengan:
+  - Extension whitelist dan blacklist
+  - MIME type validation
+  - Magic bytes validation untuk images
+  - Filename sanitization
+  - Double extension detection
+  - File size limits
 - ✅ **Identity Verification (KYC)** dengan secure private storage untuk dokumen sensitif
-- ✅ **File upload validation** dengan MIME type checking dan safe extensions only
 - ✅ **Private disk storage** untuk KTP dan selfie (tidak accessible via public URL)
+- ✅ **Security Logging** untuk suspicious activities (file upload failures, MIME mismatches)
+- ✅ **Session Security** dengan secure cookies dan HTTP-only flags
 
 ---
 
@@ -727,6 +738,7 @@ See [TASKLIST.md](TASKLIST.md) for full task list
 2. Check [TASKLIST.md](TASKLIST.md) untuk roadmap & priorities
 3. Deploy ke VPS dengan [VPS_SETUP.md](VPS_SETUP.md)
 4. Optimize performance dengan [PERFORMANCE_SETUP.md](PERFORMANCE_SETUP.md) (Redis, CDN, Image Processing)
+5. Review security dengan [SECURITY.md](SECURITY.md) (Security headers, rate limiting, file upload security)
 
 ---
 
@@ -758,6 +770,13 @@ See [TASKLIST.md](TASKLIST.md) for full task list
   - Search autocomplete dengan AJAX suggestions
   - Structured data (JSON-LD) untuk SEO
   - Product, BreadcrumbList, CollectionPage schemas
+- ✅ **Security Hardening**: Comprehensive security improvements
+  - Security headers middleware (CSP, HSTS, X-Frame-Options, etc.)
+  - Rate limiting untuk sensitive endpoints (purchase, wallet, withdraw, resale, escrow, quote)
+  - Input sanitization middleware untuk semua request
+  - Enhanced file upload security dengan MIME validation dan magic bytes
+  - Security logging untuk monitoring suspicious activities
+  - Complete security documentation (SECURITY.md)
 - ✅ **AI Features Migration to Workspace**: Semua fitur AI dipindahkan ke workspace context
   - AI Chat, AI Memory, MyNoteds hanya dapat diakses dalam workspace
   - Workspace sebagai platform masa depan untuk plugin-plugin keren

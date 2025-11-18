@@ -44,4 +44,46 @@ class ProfileUpdateRequest extends FormRequest
             'selfie_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
         ];
     }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            // Enhanced file upload security validation
+            if ($this->hasFile('avatar_file')) {
+                $securityService = app(\App\Services\FileUploadSecurityService::class);
+                $validation = $securityService->validateFile($this->file('avatar_file'), 'image');
+                
+                if (!$validation['valid']) {
+                    foreach ($validation['errors'] as $error) {
+                        $validator->errors()->add('avatar_file', $error);
+                    }
+                }
+            }
+            
+            if ($this->hasFile('ktp_file')) {
+                $securityService = app(\App\Services\FileUploadSecurityService::class);
+                $validation = $securityService->validateFile($this->file('ktp_file'), 'document');
+                
+                if (!$validation['valid']) {
+                    foreach ($validation['errors'] as $error) {
+                        $validator->errors()->add('ktp_file', $error);
+                    }
+                }
+            }
+            
+            if ($this->hasFile('selfie_file')) {
+                $securityService = app(\App\Services\FileUploadSecurityService::class);
+                $validation = $securityService->validateFile($this->file('selfie_file'), 'image');
+                
+                if (!$validation['valid']) {
+                    foreach ($validation['errors'] as $error) {
+                        $validator->errors()->add('selfie_file', $error);
+                    }
+                }
+            }
+        });
+    }
 }
