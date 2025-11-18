@@ -645,6 +645,22 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get user preferences.
+     */
+    public function preference()
+    {
+        return $this->hasOne(UserPreference::class);
+    }
+
+    /**
+     * Get view history (alias for noteViewHistory).
+     */
+    public function viewHistory()
+    {
+        return $this->hasMany(NoteViewHistory::class)->latest('viewed_at');
+    }
+
+    /**
      * Get user's posts.
      */
     public function posts()

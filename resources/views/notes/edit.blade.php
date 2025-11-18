@@ -593,6 +593,85 @@
                     </div>
                     @endif
 
+                    <!-- Video Preview -->
+                    <div class="mt-6">
+                        <label for="video_preview" class="block text-sm font-medium text-gray-700 mb-2">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                Video Preview <span class="text-xs text-gray-500 font-normal">(Maksimal 2 menit, opsional)</span>
+                            </span>
+                        </label>
+                        @if($note->hasVideoPreview())
+                            <div class="mb-3 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-700">Video Preview Saat Ini</span>
+                                    <label class="flex items-center gap-2 text-sm text-red-600 hover:text-red-800 cursor-pointer">
+                                        <input type="checkbox" name="remove_video_preview" value="1" class="rounded">
+                                        <span>Hapus Video</span>
+                                    </label>
+                                </div>
+                                <video class="w-full rounded-lg" controls>
+                                    <source src="{{ $note->video_preview_url }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                                @if($note->video_preview_duration)
+                                    <p class="mt-2 text-xs text-gray-600">Durasi: {{ gmdate('i:s', $note->video_preview_duration) }}</p>
+                                @endif
+                            </div>
+                        @endif
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
+                            <p class="text-xs text-blue-800 mb-2">
+                                🎬 <strong>Tips:</strong> Upload video preview untuk menarik perhatian buyer. Video akan otomatis generate thumbnail dan dapat di-play dengan hover.
+                            </p>
+                            <ul class="text-xs text-blue-700 space-y-1 list-disc list-inside">
+                                <li>Format: MP4, WebM, OGG, QuickTime</li>
+                                <li>Maksimal durasi: 2 menit</li>
+                                <li>Maksimal ukuran: 100MB</li>
+                                <li>Thumbnail akan otomatis di-generate</li>
+                            </ul>
+                        </div>
+                        <div class="mt-1 flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-red-400 transition-colors duration-200">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600 justify-center items-center">
+                                    <label for="video_preview"
+                                        class="relative cursor-pointer bg-white rounded-md font-medium text-red-600 hover:text-red-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-red-500">
+                                        <span>{{ $note->hasVideoPreview() ? 'Ganti video' : 'Upload video' }}</span>
+                                        <input type="file" name="video_preview" id="video_preview"
+                                            accept="video/mp4,video/webm,video/ogg,video/quicktime" class="sr-only"
+                                            onchange="handleVideoPreviewUpload(this)">
+                                    </label>
+                                    <p class="pl-1">atau drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500">MP4, WebM, OGG, QuickTime hingga 100MB (maks 2 menit)</p>
+                            </div>
+                        </div>
+                        <div id="video-preview-container" class="mt-4 hidden">
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-700">Video Preview Baru</span>
+                                    <button type="button" onclick="removeVideoPreview()" class="text-red-600 hover:text-red-800 text-sm">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <video id="video-preview-player" class="w-full rounded-lg" controls>
+                                    <source id="video-preview-source" src="" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                                <p id="video-preview-info" class="mt-2 text-xs text-gray-600"></p>
+                            </div>
+                        </div>
+                        @error('video_preview')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <!-- Thumbnail Images -->
                     <div id="thumbnail-wrapper" class="mt-6">
                         <label for="thumbnails" class="block text-sm font-medium text-gray-700 mb-2">
@@ -1939,6 +2018,86 @@ updatePriceGuidanceUI();
         });
     }
 });
-</script>
-@endpush
-@endsection
+            </script>
+
+            <script>
+                // Video Preview Upload Handler
+                window.handleVideoPreviewUpload = function(input) {
+                    const file = input.files[0];
+                    if (!file) return;
+
+                    // Validate file type
+                    const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
+                    if (!allowedTypes.includes(file.type)) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Format Video Tidak Valid',
+                            text: 'Format video harus MP4, WebM, OGG, atau QuickTime.',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                        input.value = '';
+                        return;
+                    }
+
+                    // Validate file size (100MB)
+                    const maxSize = 100 * 1024 * 1024; // 100MB
+                    if (file.size > maxSize) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'File Terlalu Besar',
+                            text: 'Ukuran video maksimal 100MB.',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                        input.value = '';
+                        return;
+                    }
+
+                    // Show video preview
+                    const container = document.getElementById('video-preview-container');
+                    const player = document.getElementById('video-preview-player');
+                    const source = document.getElementById('video-preview-source');
+                    const info = document.getElementById('video-preview-info');
+
+                    const url = URL.createObjectURL(file);
+                    source.src = url;
+                    player.load();
+
+                    // Format file size
+                    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    info.textContent = `File: ${file.name} (${fileSizeMB} MB)`;
+
+                    container.classList.remove('hidden');
+                };
+
+                // Remove Video Preview
+                window.removeVideoPreview = function() {
+                    const input = document.getElementById('video_preview');
+                    const container = document.getElementById('video-preview-container');
+                    const player = document.getElementById('video-preview-player');
+                    const source = document.getElementById('video-preview-source');
+                    const info = document.getElementById('video-preview-info');
+
+                    if (input) input.value = '';
+                    if (source) {
+                        const url = source.src;
+                        if (url && url.startsWith('blob:')) {
+                            URL.revokeObjectURL(url);
+                        }
+                        source.src = '';
+                    }
+                    if (player) {
+                        player.pause();
+                        player.load();
+                    }
+                    if (info) info.textContent = '';
+                    if (container) container.classList.add('hidden');
+                };
+            </script>
+        @endpush
+    @endsection

@@ -90,7 +90,7 @@
   - "Trending in your category" untuk personalized discovery
   - "Users who bought this also bought" recommendations
 
-- [ ] **Personalized Homepage**
+- [x] **Personalized Homepage**
   - Customized feed berdasarkan interests
   - Recently viewed notes
   - Recommended based on browsing history
@@ -105,11 +105,11 @@
 ### 5. 🟢 Video Previews & Rich Media
 **Impact:** Meningkatkan conversion rate
 
-- [ ] **Video Previews**
+- [x] **Video Previews**
   - Upload video preview untuk notes (max 2 minutes)
   - Video thumbnail generation
   - Video player dengan controls
-  - Auto-play on hover ()
+  - Auto-play on hover
 
 - [ ] **Rich Media Support**
   - Audio preview untuk audio notes

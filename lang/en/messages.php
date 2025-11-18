@@ -806,6 +806,18 @@ return [
     
     // Navigation
     'home' => 'Home',
+    'welcome_back' => 'Welcome back, :name!',
+    'personalized_feed_description' => 'Your personalized feed based on your interests and browsing history',
+    'recently_viewed' => 'Recently Viewed',
+    'recommended_for_you' => 'Recommended for You',
+    'based_on_your_interests' => 'Based on your interests and browsing history',
+    'your_interests' => 'Your Interests',
+    'preferred_categories' => 'Preferred Categories',
+    'preferred_tags' => 'Preferred Tags',
+    'update_preferences' => 'Update Preferences',
+    'featured_note' => 'Featured Note',
+    'featured_notes' => 'Featured Notes',
+    'view_note' => 'View Note',
     'dashboard' => 'Dashboard',
     'notes' => 'Notes',
     'wallet' => 'Wallet',

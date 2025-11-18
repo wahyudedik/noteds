@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use App\Models\NoteConversation;
 use App\Models\NoteReport;
 use App\Models\Transaction;
@@ -43,6 +44,9 @@ class Note extends Model
         'preview_percentage',
         'thumbnails',
         'attachments',
+        'video_preview',
+        'video_preview_thumbnail',
+        'video_preview_duration',
         'file_count',
         'price',
         'discount_price',
@@ -578,6 +582,36 @@ class Note extends Model
     public function hasThumbnails(): bool
     {
         return !empty($this->thumbnails) && is_array($this->thumbnails) && count($this->thumbnails) > 0;
+    }
+
+    /**
+     * Check if note has video preview.
+     */
+    public function hasVideoPreview(): bool
+    {
+        return !empty($this->video_preview);
+    }
+
+    /**
+     * Get video preview URL.
+     */
+    public function getVideoPreviewUrlAttribute(): ?string
+    {
+        if (!$this->hasVideoPreview()) {
+            return null;
+        }
+        return Storage::url($this->video_preview);
+    }
+
+    /**
+     * Get video preview thumbnail URL.
+     */
+    public function getVideoPreviewThumbnailUrlAttribute(): ?string
+    {
+        if (empty($this->video_preview_thumbnail)) {
+            return null;
+        }
+        return Storage::url($this->video_preview_thumbnail);
     }
 
     /**

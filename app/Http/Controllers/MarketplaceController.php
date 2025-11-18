@@ -37,7 +37,7 @@ class MarketplaceController extends Controller
             return \App\Models\FeaturedNote::active()
                 ->byLocation('marketplace_grid')
                 ->with(['note' => function($q) {
-                    $q->select('id', 'title', 'price', 'user_id', 'summary', 'thumbnail', 'ecosystem_category', 'status', 'is_public', 'created_at');
+                    $q->select('id', 'title', 'price', 'user_id', 'summary', 'thumbnails', 'ecosystem_category', 'status', 'is_public', 'created_at');
                 }, 'note.tags:id,name', 'note.user:id,name,username,avatar', 'note.user.badges:id,name,icon,color,category', 'note.reviews:id,note_id,rating', 'note.viewHistory' => function($q) {
                     $q->select('id', 'note_id', 'viewed_at')
                       ->where('viewed_at', '>=', now()->subDays(7));
@@ -52,7 +52,7 @@ class MarketplaceController extends Controller
             return \App\Models\FeaturedNote::active()
                 ->byLocation('marketplace_banner')
                 ->with(['note' => function($q) {
-                    $q->select('id', 'title', 'price', 'user_id', 'summary', 'thumbnail', 'ecosystem_category', 'status', 'is_public', 'created_at');
+                    $q->select('id', 'title', 'price', 'user_id', 'summary', 'thumbnails', 'ecosystem_category', 'status', 'is_public', 'created_at');
                 }, 'note.tags:id,name', 'note.user:id,name,username,avatar', 'note.user.badges:id,name,icon,color,category', 'note.reviews:id,note_id,rating', 'note.viewHistory' => function($q) {
                     $q->select('id', 'note_id', 'viewed_at')
                       ->where('viewed_at', '>=', now()->subDays(7));
@@ -65,7 +65,7 @@ class MarketplaceController extends Controller
         $notesQuery = Note::publicOnly()
             ->select([
                 'id', 'user_id', 'title', 'summary', 'price', 'discount_price', 
-                'thumbnail', 'ecosystem_category', 'language', 'status', 
+                'thumbnails', 'ecosystem_category', 'language', 'status', 
                 'is_public', 'average_rating', 'total_reviews', 'created_at', 'updated_at'
             ])
             ->with([
@@ -371,7 +371,7 @@ class MarketplaceController extends Controller
             })
                 ->select([
                     'id', 'user_id', 'title', 'summary', 'price', 'discount_price', 
-                    'thumbnail', 'ecosystem_category', 'language', 'status', 
+                    'thumbnails', 'ecosystem_category', 'language', 'status', 
                     'is_public', 'average_rating', 'total_reviews', 'created_at'
                 ])
                 ->with(['tags:id,name', 'user:id,name,username,avatar'])

@@ -667,6 +667,34 @@
                         </div>
                     </div>
 
+                    <!-- Video Preview -->
+                    @if($note->hasVideoPreview())
+                        <div class="mb-6" x-data="{ isPlaying: false }" 
+                             @mouseenter="if (!isPlaying) { $refs.videoPlayer.play(); isPlaying = true; }"
+                             @mouseleave="if (isPlaying) { $refs.videoPlayer.pause(); isPlaying = false; }">
+                            <div class="relative bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+                                <video 
+                                    x-ref="videoPlayer"
+                                    class="w-full h-auto"
+                                    controls
+                                    preload="metadata"
+                                    poster="{{ $note->video_preview_thumbnail_url }}"
+                                >
+                                    <source src="{{ $note->video_preview_url }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                                @if($note->video_preview_duration)
+                                    <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                        {{ gmdate('i:s', $note->video_preview_duration) }}
+                                    </div>
+                                @endif
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500 text-center">
+                                🎬 Video Preview - Hover untuk auto-play
+                            </p>
+                        </div>
+                    @endif
+
                     <!-- Note Content (Protected for paid notes) -->
                     @if ($showFullContent ?? false)
                         @auth

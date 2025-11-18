@@ -16,6 +16,7 @@ use App\Services\NoteActivityService;
 use App\Services\NotificationService;
 use App\Services\LargeFileUploadService;
 use App\Services\AutoTaggingService;
+use App\Services\VideoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -274,6 +275,21 @@ class NoteController extends Controller
         // Handle thumbnail uploads
         $thumbnails = $this->handleThumbnailUploads($request);
         $validated['thumbnails'] = $thumbnails;
+
+        // Handle video preview upload
+        if ($request->hasFile('video_preview')) {
+            try {
+                $videoService = app(VideoService::class);
+                $videoData = $videoService->processVideoPreview($request->file('video_preview'));
+                $validated['video_preview'] = $videoData['video_path'];
+                $validated['video_preview_thumbnail'] = $videoData['thumbnail_path'];
+                $validated['video_preview_duration'] = $videoData['duration'];
+            } catch (\Exception $e) {
+                return redirect()->route('notes.create')
+                    ->withInput()
+                    ->withErrors(['video_preview' => $e->getMessage()]);
+            }
+        }
 
         // Set default preview_percentage if not provided
         if (!isset($validated['preview_percentage'])) {
@@ -658,6 +674,36 @@ class NoteController extends Controller
         // Limit to 5 thumbnails
         if (count($validated['thumbnails']) > 5) {
             $validated['thumbnails'] = array_slice($validated['thumbnails'], 0, 5);
+        }
+
+        // Handle video preview upload (replace existing if new one is uploaded)
+        if ($request->hasFile('video_preview')) {
+            try {
+                // Delete old video and thumbnail if they exist
+                if ($note->video_preview) {
+                    $videoService = app(VideoService::class);
+                    $videoService->deleteVideoPreview($note->video_preview, $note->video_preview_thumbnail);
+                }
+
+                $videoService = app(VideoService::class);
+                $videoData = $videoService->processVideoPreview($request->file('video_preview'));
+                $validated['video_preview'] = $videoData['video_path'];
+                $validated['video_preview_thumbnail'] = $videoData['thumbnail_path'];
+                $validated['video_preview_duration'] = $videoData['duration'];
+            } catch (\Exception $e) {
+                return redirect()->route('notes.edit', $note)
+                    ->withInput()
+                    ->withErrors(['video_preview' => $e->getMessage()]);
+            }
+        } elseif ($request->has('remove_video_preview') && $request->input('remove_video_preview')) {
+            // Remove video preview if user explicitly removes it
+            if ($note->video_preview) {
+                $videoService = app(VideoService::class);
+                $videoService->deleteVideoPreview($note->video_preview, $note->video_preview_thumbnail);
+            }
+            $validated['video_preview'] = null;
+            $validated['video_preview_thumbnail'] = null;
+            $validated['video_preview_duration'] = null;
         }
 
         // Set default preview_percentage if not provided

@@ -62,6 +62,7 @@ class StoreNoteRequest extends FormRequest
             'preview_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
             'thumbnails' => ['nullable', 'array', 'max:5'],
             'thumbnails.*' => ['image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'], // 5MB per image
+            'video_preview' => ['nullable', 'file', 'mimes:mp4,webm,ogg,quicktime', 'max:102400'], // 100MB max
             'price' => ['nullable', 'numeric', 'min:0'],
             'discount_price' => ['nullable', 'numeric', 'min:0'],
             'is_public' => ['nullable', 'boolean'],
