@@ -337,7 +337,7 @@
                                                 <img src="{{ $note->user->avatar }}" alt="{{ $note->user->name }}"
                                                     class="w-10 h-10 rounded-full object-cover">
                                             @else
-                                                <img src="{{ Storage::url($note->user->avatar) }}"
+                                                <img src="{{ asset('storage/' . $note->user->avatar) }}"
                                                     alt="{{ $note->user->name }}"
                                                     class="w-10 h-10 rounded-full object-cover">
                                             @endif
@@ -648,8 +648,24 @@
                                             $filename = is_array($attachment)
                                                 ? $attachment['filename'] ?? __('messages.unknown_file_name')
                                                 : basename($attachment);
+                                            $isExternal =
+                                                is_array($attachment) &&
+                                                isset($attachment['type']) &&
+                                                $attachment['type'] === 'external';
+                                            $externalUrl =
+                                                $isExternal && isset($attachment['url']) ? $attachment['url'] : null;
+                                            $href =
+                                                $isExternal && $externalUrl
+                                                    ? $externalUrl
+                                                    : route('notes.attachments.download', [
+                                                        'note' => $note->id,
+                                                        'filename' => $filename,
+                                                    ]);
+                                            $target = $isExternal ? '_blank' : '_self';
+                                            $rel = $isExternal ? 'noopener noreferrer' : '';
                                         @endphp
-                                        <a href="{{ route('notes.attachments.download', ['note' => $note->id, 'filename' => $filename]) }}"
+                                        <a href="{{ $href }}" target="{{ $target }}"
+                                            rel="{{ $rel }}"
                                             class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:border-blue-300 transition-all duration-200">
                                             <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -657,7 +673,11 @@
                                                     d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                             </svg>
                                             <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-medium text-gray-900 truncate">{{ $filename }}
+                                                <p class="text-sm font-medium text-gray-900 truncate">
+                                                    {{ $filename }}
+                                                    @if ($isExternal)
+                                                        <span class="ml-1 text-xs text-blue-600">(External Link)</span>
+                                                    @endif
                                                 </p>
                                                 @if (is_array($attachment) && isset($attachment['size']))
                                                     <p class="text-xs text-gray-500">
@@ -1240,7 +1260,7 @@
                                                                 alt="{{ $review->user->name }}"
                                                                 class="w-10 h-10 rounded-full object-cover">
                                                         @else
-                                                            <img src="{{ Storage::url($review->user->avatar) }}"
+                                                            <img src="{{ asset('storage/' . $review->user->avatar) }}"
                                                                 alt="{{ $review->user->name }}"
                                                                 class="w-10 h-10 rounded-full object-cover">
                                                         @endif
@@ -1448,9 +1468,15 @@
                                             <div
                                                 class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                                                 @if ($comment->user->avatar)
-                                                    <img src="{{ Storage::url($comment->user->avatar) }}"
-                                                        alt="{{ $comment->user->name }}"
-                                                        class="w-10 h-10 rounded-full object-cover">
+                                                    @if (str_starts_with($comment->user->avatar, 'http'))
+                                                        <img src="{{ $comment->user->avatar }}"
+                                                            alt="{{ $comment->user->name }}"
+                                                            class="w-10 h-10 rounded-full object-cover">
+                                                    @else
+                                                        <img src="{{ asset('storage/' . $comment->user->avatar) }}"
+                                                            alt="{{ $comment->user->name }}"
+                                                            class="w-10 h-10 rounded-full object-cover">
+                                                    @endif
                                                 @else
                                                     <span
                                                         class="text-sm font-semibold text-gray-600">{{ substr($comment->user->name, 0, 1) }}</span>
@@ -1516,9 +1542,15 @@
                                                                 <div
                                                                     class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                                                                     @if ($reply->user->avatar)
-                                                                        <img src="{{ Storage::url($reply->user->avatar) }}"
-                                                                            alt="{{ $reply->user->name }}"
-                                                                            class="w-8 h-8 rounded-full object-cover">
+                                                                        @if (str_starts_with($reply->user->avatar, 'http'))
+                                                                            <img src="{{ $reply->user->avatar }}"
+                                                                                alt="{{ $reply->user->name }}"
+                                                                                class="w-8 h-8 rounded-full object-cover">
+                                                                        @else
+                                                                            <img src="{{ asset('storage/' . $reply->user->avatar) }}"
+                                                                                alt="{{ $reply->user->name }}"
+                                                                                class="w-8 h-8 rounded-full object-cover">
+                                                                        @endif
                                                                     @else
                                                                         <span
                                                                             class="text-xs font-semibold text-gray-600">{{ substr($reply->user->name, 0, 1) }}</span>
@@ -1695,7 +1727,7 @@
                                         <div class="flex items-center gap-2">
                                             <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                                                 @if ($relatedNote->user->avatar)
-                                                    <img src="{{ str_starts_with($relatedNote->user->avatar, 'http') ? $relatedNote->user->avatar : Storage::url($relatedNote->user->avatar) }}"
+                                                    <img src="{{ str_starts_with($relatedNote->user->avatar, 'http') ? $relatedNote->user->avatar : asset('storage/' . $relatedNote->user->avatar) }}"
                                                         alt="{{ $relatedNote->user->name }}"
                                                         class="w-6 h-6 rounded-full object-cover">
                                                 @else
@@ -2347,7 +2379,7 @@
                     <div class="flex-1">
                         <h5 class="text-sm font-medium text-gray-900">${bookmark.title || bookmarkTranslations.default_title}</h5>
                         ${bookmark.section_text ? `<p class="text-xs text-gray-600 mt-1 line-clamp-2">
-                                                                                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
+                                                                                                                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
                         ${bookmark.note_text ? `<p class="text-xs text-purple-700 mt-1">${bookmark.note_text}</p>` : ''}
                     </div>
                     <div class="flex items-center space-x-2 ml-3">

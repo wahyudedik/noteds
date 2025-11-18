@@ -8,6 +8,7 @@ use App\Models\PurchasedNote;
 use App\Models\NoteDownload;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -21,23 +22,62 @@ class NoteAttachmentController extends Controller
      * 1. Note owner
      * 2. Users who have purchased the note
      */
-    public function download(Note $note, string $filename): Response
+    public function download(Note $note, string $filename): Response|RedirectResponse
     {
         // Get attachments array
         $attachments = $note->attachments ?? [];
         
         // Find the file in attachments
         $filePath = null;
+        $externalUrl = null;
         foreach ($attachments as $attachment) {
             if (is_array($attachment) && isset($attachment['filename']) && $attachment['filename'] === $filename) {
-                $filePath = $attachment['path'];
-                break;
+                // Check if it's an external attachment
+                if (isset($attachment['type']) && $attachment['type'] === 'external' && isset($attachment['url'])) {
+                    $externalUrl = $attachment['url'];
+                    break;
+                }
+                // Internal attachment with path
+                if (isset($attachment['path'])) {
+                    $filePath = $attachment['path'];
+                    break;
+                }
             } elseif (is_string($attachment) && basename($attachment) === $filename) {
                 $filePath = $attachment;
                 break;
             }
         }
 
+        // Handle external attachments - redirect to external URL
+        if ($externalUrl) {
+            // Authorization checks for external links
+            $user = auth()->user();
+            
+            // Allow note owner
+            if ($user && $user->id === $note->user_id) {
+                return redirect($externalUrl);
+            }
+
+            // Allow purchasers (only for paid notes)
+            if ($note->price > 0 && $user) {
+                $purchasedNote = PurchasedNote::where('user_id', $user->id)
+                    ->where('note_id', $note->id)
+                    ->first();
+
+                if ($purchasedNote) {
+                    return redirect($externalUrl);
+                }
+            }
+
+            // For free notes, allow authenticated users
+            if ($note->price == 0 && $user) {
+                return redirect($externalUrl);
+            }
+
+            abort(403, 'You do not have permission to access this link');
+        }
+
+        // Handle internal file attachments
         if (!$filePath || !Storage::disk('private')->exists($filePath)) {
             abort(404, 'File not found');
         }
