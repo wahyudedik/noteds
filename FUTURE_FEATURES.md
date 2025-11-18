@@ -111,7 +111,7 @@
   - Video player dengan controls
   - Auto-play on hover
 
-- [ ] **Rich Media Support**
+- [x] **Rich Media Support**
   - Audio preview untuk audio notes
   - Interactive preview untuk code notes
   - 3D model viewer untuk 3D assets

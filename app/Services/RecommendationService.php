@@ -85,9 +85,13 @@ class RecommendationService
         })->countBy()->sortDesc()->take(5)->keys();
         
         // Find similar notes
+        $viewedNoteIds = $viewedNotes->pluck('id')->toArray();
         $query = Note::publicOnly()
-            ->where('status', 'active')
-            ->where('id', '!=', $viewedNotes->pluck('id')->toArray());
+            ->where('status', 'active');
+        
+        if (!empty($viewedNoteIds)) {
+            $query->whereNotIn('id', $viewedNoteIds);
+        }
         
         if ($categories->isNotEmpty()) {
             $query->whereIn('ecosystem_category', $categories->toArray());
@@ -100,8 +104,19 @@ class RecommendationService
         }
         
         return $query->with(['user', 'tags', 'reviews'])
-            ->orderByDesc('average_rating')
-            ->orderByDesc('total_reviews')
+            ->select('notes.*')
+            ->selectSub(function ($query) {
+                $query->selectRaw('COALESCE(AVG(rating), 0)')
+                    ->from('note_reviews')
+                    ->whereColumn('note_reviews.note_id', 'notes.id');
+            }, 'avg_rating')
+            ->selectSub(function ($query) {
+                $query->selectRaw('COUNT(*)')
+                    ->from('note_reviews')
+                    ->whereColumn('note_reviews.note_id', 'notes.id');
+            }, 'total_reviews_count')
+            ->orderByDesc('avg_rating')
+            ->orderByDesc('total_reviews_count')
             ->limit($limit)
             ->get()
             ->all();
@@ -126,8 +141,19 @@ class RecommendationService
         }
         
         return $query->with(['user', 'tags', 'reviews'])
-            ->orderByDesc('average_rating')
-            ->orderByDesc('total_reviews')
+            ->select('notes.*')
+            ->selectSub(function ($query) {
+                $query->selectRaw('COALESCE(AVG(rating), 0)')
+                    ->from('note_reviews')
+                    ->whereColumn('note_reviews.note_id', 'notes.id');
+            }, 'avg_rating')
+            ->selectSub(function ($query) {
+                $query->selectRaw('COUNT(*)')
+                    ->from('note_reviews')
+                    ->whereColumn('note_reviews.note_id', 'notes.id');
+            }, 'total_reviews_count')
+            ->orderByDesc('avg_rating')
+            ->orderByDesc('total_reviews_count')
             ->limit($limit)
             ->get()
             ->all();
@@ -176,7 +202,13 @@ class RecommendationService
             ->where('status', 'active')
             ->whereIn('id', $recommendedNoteIds->toArray())
             ->with(['user', 'tags', 'reviews'])
-            ->orderByDesc('average_rating')
+            ->select('notes.*')
+            ->selectSub(function ($query) {
+                $query->selectRaw('COALESCE(AVG(rating), 0)')
+                    ->from('note_reviews')
+                    ->whereColumn('note_reviews.note_id', 'notes.id');
+            }, 'avg_rating')
+            ->orderByDesc('avg_rating')
             ->get()
             ->toArray();
     }
@@ -191,8 +223,19 @@ class RecommendationService
             ->whereNotIn('id', $excludeIds);
         
         return $query->with(['user', 'tags', 'reviews'])
-            ->orderByDesc('total_reviews')
-            ->orderByDesc('average_rating')
+            ->select('notes.*')
+            ->selectSub(function ($query) {
+                $query->selectRaw('COALESCE(AVG(rating), 0)')
+                    ->from('note_reviews')
+                    ->whereColumn('note_reviews.note_id', 'notes.id');
+            }, 'avg_rating')
+            ->selectSub(function ($query) {
+                $query->selectRaw('COUNT(*)')
+                    ->from('note_reviews')
+                    ->whereColumn('note_reviews.note_id', 'notes.id');
+            }, 'total_reviews_count')
+            ->orderByDesc('total_reviews_count')
+            ->orderByDesc('avg_rating')
             ->orderByDesc('created_at')
             ->limit($limit)
             ->get()

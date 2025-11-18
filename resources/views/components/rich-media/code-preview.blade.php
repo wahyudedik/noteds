@@ -36,11 +36,24 @@
                     try {
                         const response = await fetch('{{ $codeUrl }}');
                         this.code = await response.text();
+                        // Re-highlight after loading
+                        this.$nextTick(() => {
+                            if (typeof Prism !== 'undefined') {
+                                Prism.highlightAll();
+                            }
+                        });
                     } catch (error) {
                         this.code = 'Error loading code preview.';
                     } finally {
                         this.loading = false;
                     }
+                } else if (this.code) {
+                    // Highlight existing code
+                    this.$nextTick(() => {
+                        if (typeof Prism !== 'undefined') {
+                            Prism.highlightAll();
+                        }
+                    });
                 }
             }
         }" 
@@ -56,15 +69,34 @@
                     <span class="text-xs text-gray-400 font-mono">{{ $language ?? 'code' }}</span>
                 </div>
                 <div class="p-4 overflow-x-auto max-h-96">
-                    <pre x-show="!loading" class="text-sm text-gray-100 font-mono"><code x-text="code || 'No code preview available.'"></code></pre>
+                    <pre x-show="!loading" class="text-sm text-gray-100 font-mono"><code class="language-{{ $language ?? 'javascript' }}" x-text="code || 'No code preview available.'"></code></pre>
                     <div x-show="loading" class="flex items-center justify-center py-8">
                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                     </div>
                 </div>
             </div>
             <button 
-                @click="navigator.clipboard.writeText(code || ''); $dispatch('notify', { type: 'success', message: 'Code copied to clipboard!' })"
-                class="absolute top-16 right-4 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200"
+                @click="
+                    const codeText = code || '';
+                    if (codeText && navigator.clipboard) {
+                        navigator.clipboard.writeText(codeText).then(() => {
+                            // Show success message
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Copied!',
+                                    text: 'Code copied to clipboard',
+                                    toast: true,
+                                    position: 'top-end',
+                                    showConfirmButton: false,
+                                    timer: 2000
+                                });
+                            }
+                        });
+                    }
+                "
+                x-show="code"
+                class="absolute top-16 right-4 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200 z-10"
                 title="Copy code">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -73,4 +105,3 @@
         </div>
     </div>
 </div>
-

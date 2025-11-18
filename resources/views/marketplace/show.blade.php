@@ -784,6 +784,57 @@
                             @endif
                         @endauth
 
+                        <!-- Rich Media Previews -->
+                        @if($note->ecosystem_category === 'audio')
+                            @php
+                                $audioUrl = $note->audio_link;
+                                // Check if there's an audio file in attachments
+                                if (!$audioUrl) {
+                                    $audioAttachment = collect($note->attachments ?? [])->first(function($att) {
+                                        $filename = is_array($att) ? ($att['filename'] ?? '') : basename($att);
+                                        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                                        return in_array($ext, ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac']);
+                                    });
+                                    if ($audioAttachment) {
+                                        $audioFilename = is_array($audioAttachment) ? ($audioAttachment['filename'] ?? basename($audioAttachment)) : basename($audioAttachment);
+                                        $audioUrl = route('notes.attachments.download', ['note' => $note->id, 'filename' => $audioFilename]);
+                                    }
+                                }
+                            @endphp
+                            @if($audioUrl)
+                                @include('components.rich-media.audio-preview', [
+                                    'audioUrl' => $audioUrl,
+                                    'title' => $note->title,
+                                    'duration' => $note->audio_duration
+                                ])
+                            @endif
+                        @endif
+
+                        @if($note->ecosystem_category === 'code')
+                            @php
+                                $codeContent = null;
+                                $codeAttachment = collect($note->attachments ?? [])->first(function($att) {
+                                    $filename = is_array($att) ? ($att['filename'] ?? '') : basename($att);
+                                    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                                    return in_array($ext, ['js', 'jsx', 'ts', 'tsx', 'php', 'py', 'java', 'cpp', 'c', 'html', 'css', 'scss', 'vue', 'jsx']);
+                                });
+                            @endphp
+                            @include('components.rich-media.code-preview', [
+                                'code' => $codeContent,
+                                'language' => $note->code_language ?? 'javascript',
+                                'codeUrl' => $codeAttachment ? route('notes.attachments.download', ['note' => $note->id, 'filename' => is_array($codeAttachment) ? ($codeAttachment['filename'] ?? basename($codeAttachment)) : basename($codeAttachment)]) : null,
+                                'demoLink' => $note->code_demo_link ?? $note->demo_link
+                            ])
+                        @endif
+
+                        @if($note->ecosystem_category === '3d' && $note->three_d_preview_link)
+                            @include('components.rich-media.3d-viewer', [
+                                'modelUrl' => $note->three_d_preview_link,
+                                'format' => $note->three_d_format ?? 'obj',
+                                'title' => $note->title
+                            ])
+                        @endif
+
                         <div class="prose prose-lg max-w-none mb-6" id="note-content">
                             <div
                                 class="ql-editor text-gray-900 leading-relaxed prose-headings:font-bold prose-p:mb-4 prose-ul:mb-4 prose-ol:mb-4 prose-li:mb-2 prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-800 prose-strong:font-semibold prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded prose-code:text-sm prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-img:rounded-lg prose-img:shadow-md prose-img:my-4 prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-700">
@@ -830,6 +881,24 @@
                                     </div>
                                 </div>
                             </div>
+                        @endif
+
+                        <!-- PDF Preview (if PDF attachment exists) -->
+                        @php
+                            $pdfAttachment = collect($note->attachments ?? [])->first(function($att) {
+                                $filename = is_array($att) ? ($att['filename'] ?? '') : basename($att);
+                                return strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'pdf';
+                            });
+                        @endphp
+                        @if($pdfAttachment)
+                            @php
+                                $pdfFilename = is_array($pdfAttachment) ? ($pdfAttachment['filename'] ?? basename($pdfAttachment)) : basename($pdfAttachment);
+                                $pdfUrl = route('notes.attachments.download', ['note' => $note->id, 'filename' => $pdfFilename]);
+                            @endphp
+                            @include('components.rich-media.pdf-preview', [
+                                'pdfUrl' => $pdfUrl,
+                                'filename' => $pdfFilename
+                            ])
                         @endif
 
                         <!-- Attachments (if purchased or free) -->
@@ -2038,6 +2107,20 @@
     @endpush
 
     @push('scripts')
+        <!-- PDF.js for PDF preview -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+        <script>
+            if (typeof pdfjsLib !== 'undefined') {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            }
+        </script>
+        
+        <!-- model-viewer for 3D models -->
+        <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+        
+        <!-- Prism.js for code syntax highlighting -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
         <script>
             // Generate browser fingerprint for bot detection
             function generateFingerprint() {
