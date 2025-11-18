@@ -521,4 +521,19 @@ Route::post('/api/featured-notes/{featuredNote}/click', [\App\Http\Controllers\F
 Route::post('/api/featured-notes/{featuredNote}/impression', [\App\Http\Controllers\FeaturedNoteController::class, 'trackImpression'])
     ->name('api.featured-notes.impression');
 
+// AI Detection API (for logging detected AI bots - no auth required)
+Route::post('/api/ai-detection', function (\Illuminate\Http\Request $request) {
+    // Log AI detection event (optional - can be stored in database or logs)
+    \Log::info('AI Detection Event', [
+        'user_agent' => $request->input('userAgent'),
+        'detected' => $request->input('detected'),
+        'reason' => $request->input('reason'),
+        'timestamp' => $request->input('timestamp'),
+        'ip' => $request->ip(),
+    ]);
+    
+    // Return success response (don't reveal if detection is working)
+    return response()->json(['status' => 'logged'], 200);
+})->name('api.ai-detection');
+
 require __DIR__ . '/auth.php';

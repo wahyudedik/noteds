@@ -908,6 +908,8 @@
                 });
                 
                 // ========== AI DETECTION & PROTECTION ==========
+                // Only run if AI detection is enabled in admin settings
+                if (protectionSettings.detect_ai_bots) {
                 
                 // Deteksi AI Bots dari User-Agent
                 const userAgent = navigator.userAgent.toLowerCase();
@@ -1175,6 +1177,8 @@
                     }
                 }, 5000);
                 */
+                
+                } // End of AI detection check
                 
             })();
         </script>
