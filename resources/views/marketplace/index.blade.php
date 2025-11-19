@@ -231,7 +231,8 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg animate-pulse">
                                             🔥 VIRAL
                                         </span>
-                                    @elseif($note->isHot())
+                                    @endif
+                                    @if($note->isHot())
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
                                             🔥 HOT
                                         </span>
