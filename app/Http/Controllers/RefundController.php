@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Refund;
 use App\Models\Transaction;
 use App\Services\NotificationService;
+use App\Services\BuyerProtectionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,8 +13,10 @@ use Illuminate\View\View;
 
 class RefundController extends Controller
 {
-    public function __construct(private NotificationService $notificationService)
-    {
+    public function __construct(
+        private NotificationService $notificationService,
+        private BuyerProtectionService $buyerProtectionService
+    ) {
         $this->middleware('auth');
     }
 
@@ -50,11 +53,11 @@ class RefundController extends Controller
                 ->with('info', 'Refund request already exists for this transaction.');
         }
 
-        // Check if transaction is eligible for refund (within 7 days)
-        $daysSincePurchase = $transaction->created_at->diffInDays(now());
-        if ($daysSincePurchase > 7) {
+        // Check if transaction is eligible for refund using BuyerProtectionService
+        $eligibility = $this->buyerProtectionService->isEligibleForRefund($transaction);
+        if (!$eligibility['eligible']) {
             return redirect()->route('transactions.show', $transaction)
-                ->with('error', 'Refund can only be requested within 7 days of purchase.');
+                ->with('error', $eligibility['reason']);
         }
 
         return view('refunds.create', compact('transaction'));
@@ -80,11 +83,11 @@ class RefundController extends Controller
                 ->with('error', 'Refund request already exists for this transaction.');
         }
 
-        // Check if transaction is eligible for refund
-        $daysSincePurchase = $transaction->created_at->diffInDays(now());
-        if ($daysSincePurchase > 7) {
+        // Check if transaction is eligible for refund using BuyerProtectionService
+        $eligibility = $this->buyerProtectionService->isEligibleForRefund($transaction);
+        if (!$eligibility['eligible']) {
             return redirect()->route('transactions.show', $transaction)
-                ->with('error', 'Refund can only be requested within 7 days of purchase.');
+                ->with('error', $eligibility['reason']);
         }
 
         $validated = $request->validate([
@@ -102,6 +105,23 @@ class RefundController extends Controller
             'reason' => $validated['reason'],
             'reason_description' => $validated['reason_description'],
         ]);
+
+        // Check refund policy enforcement
+        $policyCheck = $this->buyerProtectionService->enforceRefundPolicy($refund);
+        if (!$policyCheck['compliant']) {
+            // Log violations but don't block refund request
+            \Log::warning('Refund policy violations', [
+                'refund_id' => $refund->id,
+                'violations' => $policyCheck['violations'],
+            ]);
+        }
+
+        // Try auto-approve if eligible
+        $autoApproved = $this->buyerProtectionService->autoApproveRefundIfEligible($refund);
+        if ($autoApproved) {
+            return redirect()->route('refunds.show', $refund)
+                ->with('success', 'Refund request has been automatically approved and processed.');
+        }
 
         // Notify seller
         $this->notificationService->create(

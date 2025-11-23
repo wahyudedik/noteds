@@ -51,6 +51,27 @@ class NoteConversation extends Model
     {
         return $this->hasOne(NoteMessage::class, 'conversation_id')->latestOfMany();
     }
+
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(ChatRating::class);
+    }
+
+    /**
+     * Check if user has rated this conversation.
+     */
+    public function hasRatingFrom(string $userId): bool
+    {
+        return $this->ratings()->where('rater_id', $userId)->exists();
+    }
+
+    /**
+     * Get rating from a specific user.
+     */
+    public function getRatingFrom(string $userId): ?ChatRating
+    {
+        return $this->ratings()->where('rater_id', $userId)->first();
+    }
 }
 
 

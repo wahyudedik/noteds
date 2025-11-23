@@ -26,8 +26,9 @@ class SecurityHeaders
         // Remove X-Powered-By header
         $response->headers->remove('X-Powered-By');
 
-        // HSTS (HTTP Strict Transport Security) - only for HTTPS
-        if ($request->secure()) {
+        // HSTS (HTTP Strict Transport Security) - only for HTTPS and NOT in local development
+        // Disable HSTS in local to prevent Chrome from forcing HTTPS
+        if ($request->secure() && !app()->environment('local')) {
             $response->headers->set(
                 'Strict-Transport-Security',
                 'max-age=31536000; includeSubDomains; preload'
@@ -66,8 +67,13 @@ class SecurityHeaders
             "base-uri 'self'",
             "form-action 'self'",
             "frame-ancestors 'self'",
-            "upgrade-insecure-requests",
         ];
+
+        // Only add upgrade-insecure-requests in production (not in local development)
+        // This prevents Chrome from forcing HTTPS for Vite dev server
+        if (!app()->environment('local')) {
+            $directives[] = "upgrade-insecure-requests";
+        }
 
         return implode('; ', $directives);
     }
@@ -85,6 +91,9 @@ class SecurityHeaders
         } else {
             $sources[] = 'https://app.sandbox.midtrans.com';
         }
+        
+        // Iconify Icons CDN
+        $sources[] = 'https://code.iconify.design';
         
         // CDN URLs
         if ($cdnUrl = config('filesystems.disks.public.url')) {

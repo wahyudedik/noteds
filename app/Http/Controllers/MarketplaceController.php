@@ -9,11 +9,14 @@ use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Models\User;
 use App\Models\NoteConversation;
+use App\Models\SearchHistory;
+use App\Models\SavedSearch;
 use App\Services\CommissionService;
 use App\Services\ReferralService;
 use App\Services\TaxService;
 use App\Services\NotificationService;
 use App\Services\NoteShareService;
+use App\Services\EmailCampaignService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,8 +26,10 @@ use Illuminate\View\View;
 
 class MarketplaceController extends Controller
 {
-    public function __construct(private NotificationService $notificationService)
-    {
+    public function __construct(
+        private NotificationService $notificationService,
+        private EmailCampaignService $emailCampaignService
+    ) {
     }
 
     public function index(Request $request): View
@@ -62,13 +67,26 @@ class MarketplaceController extends Controller
         });
 
         // Build query with optimized eager loading and select specific columns
-        $notesQuery = Note::publicOnly()
-            ->select([
-                'id', 'user_id', 'title', 'summary', 'price', 'discount_price', 
-                'thumbnails', 'ecosystem_category', 'language', 'status', 
-                'is_public', 'created_at', 'updated_at'
-            ])
-            ->with([
+        // Add avg_rating subquery if rating filter is used
+        $hasRatingFilter = $request->min_rating || $request->rating;
+        $baseSelect = [
+            'id', 'user_id', 'title', 'summary', 'price', 'discount_price', 
+            'thumbnails', 'ecosystem_category', 'language', 'status', 
+            'is_public', 'created_at', 'updated_at'
+        ];
+        
+        $notesQuery = Note::publicOnly();
+        
+        // Add avg_rating subquery if rating filter is used
+        if ($hasRatingFilter) {
+            $notesQuery->select(array_merge($baseSelect, [
+                DB::raw('(SELECT COALESCE(AVG(rating), 0) FROM note_reviews WHERE note_reviews.note_id = notes.id) as avg_rating')
+            ]));
+        } else {
+            $notesQuery->select($baseSelect);
+        }
+        
+        $notesQuery = $notesQuery->with([
                 'tags:id,name',
                 'user:id,name,username,avatar',
                 'user.badges:id,name,icon,color,category',
@@ -82,11 +100,22 @@ class MarketplaceController extends Controller
                 }
             ])
             ->when($request->search, function ($query) use ($request) {
-                return $query->where(function($q) use ($request) {
-                    $q->where('title', 'like', '%' . $request->search . '%')
-                      ->orWhere('summary', 'like', '%' . $request->search . '%')
-                      ->orWhere('content', 'like', '%' . $request->search . '%');
+                return $this->applyAdvancedSearch($query, $request->search, $request);
+            })
+            ->when($request->author, function ($query) use ($request) {
+                return $query->whereHas('user', function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->author . '%')
+                      ->orWhere('username', 'like', '%' . $request->author . '%');
                 });
+            })
+            ->when($request->date_from || $request->date_to, function ($query) use ($request) {
+                if ($request->date_from) {
+                    $query->whereDate('created_at', '>=', $request->date_from);
+                }
+                if ($request->date_to) {
+                    $query->whereDate('created_at', '<=', $request->date_to);
+                }
+                return $query;
             })
             ->when($request->ecosystem, function ($query) use ($request) {
                 return $query->where('ecosystem_category', $request->ecosystem);
@@ -100,10 +129,75 @@ class MarketplaceController extends Controller
             ->when($request->max_price, function ($query) use ($request) {
                 return $query->where('price', '<=', $request->max_price);
             })
-            ->when($request->tag, function ($query) use ($request) {
-                return $query->whereHas('tags', function ($q) use ($request) {
-                    $q->where('tags.id', $request->tag);
-                });
+            ->when($request->tag || $request->tags, function ($query) use ($request) {
+                $tagIds = $request->tags ?? [];
+                if ($request->tag) {
+                    $tagIds[] = $request->tag;
+                }
+                if (!empty($tagIds)) {
+                    return $query->whereHas('tags', function ($q) use ($tagIds) {
+                        $q->whereIn('tags.id', $tagIds);
+                    });
+                }
+                return $query;
+            })
+            ->when($request->language || $request->languages, function ($query) use ($request) {
+                $languages = $request->languages ?? [];
+                if ($request->language) {
+                    $languages[] = $request->language;
+                }
+                if (!empty($languages)) {
+                    return $query->whereIn('language', array_unique($languages));
+                }
+                return $query;
+            })
+            ->when($request->min_rating || $request->rating, function ($query) use ($request) {
+                $minRating = (float) ($request->min_rating ?? $request->rating ?? 0);
+                if ($minRating > 0) {
+                    return $query->havingRaw('avg_rating >= ?', [$minRating]);
+                }
+                return $query;
+            })
+            ->when($request->seller_verified, function ($query) use ($request) {
+                if ($request->seller_verified === '1') {
+                    return $query->whereHas('user', function ($q) {
+                        $q->where('is_verified', true);
+                    });
+                }
+                return $query;
+            })
+            ->when($request->seller_type, function ($query) use ($request) {
+                if ($request->seller_type === 'top_rated') {
+                    return $query->whereHas('user', function ($q) {
+                        $q->selectRaw('users.id, AVG(note_reviews.rating) as avg_seller_rating')
+                          ->join('notes', 'notes.user_id', '=', 'users.id')
+                          ->join('note_reviews', 'note_reviews.note_id', '=', 'notes.id')
+                          ->groupBy('users.id')
+                          ->havingRaw('AVG(note_reviews.rating) >= 4.5');
+                    });
+                }
+                return $query;
+            })
+            ->when($request->file_type, function ($query) use ($request) {
+                $fileTypes = is_array($request->file_type) ? $request->file_type : [$request->file_type];
+                $allExtensions = [];
+                foreach ($fileTypes as $fileType) {
+                    $extensions = $this->getExtensionsForFileType($fileType);
+                    if (!empty($extensions)) {
+                        $allExtensions = array_merge($allExtensions, $extensions);
+                    }
+                }
+                if (!empty($allExtensions)) {
+                    return $query->where(function ($q) use ($allExtensions) {
+                        $q->where(function ($subQ) use ($allExtensions) {
+                            foreach ($allExtensions as $extension) {
+                                $subQ->orWhere('attachments', 'like', '%' . $extension . '%')
+                                     ->orWhere('attachments', 'like', '%' . strtoupper($extension) . '%');
+                            }
+                        });
+                    });
+                }
+                return $query;
             })
             ->when($request->seller, function ($query) use ($request) {
                 return $query->whereHas('user', function ($q) use ($request) {
@@ -160,7 +254,49 @@ class MarketplaceController extends Controller
         // Paginate notes (don't cache paginated results as they change frequently)
         $notes = $notesQuery->paginate(12)->withQueryString();
 
-        return view('marketplace.index', compact('notes', 'tags', 'featuredNotes', 'featuredBanner'));
+        // Save search history if user is authenticated or track by IP
+        if ($request->search || $request->hasAny(['author', 'date_from', 'date_to', 'min_rating', 'seller_verified', 'seller_type', 'file_type', 'tags', 'languages'])) {
+            $this->saveSearchHistory($request, $notes->total());
+        }
+
+        // Track affiliate link click if ref parameter exists
+        if ($request->has('ref')) {
+            try {
+                $affiliateService = app(\App\Services\AffiliateService::class);
+                $affiliateService->trackClick(
+                    $request->get('ref'),
+                    request()->ip(),
+                    request()->userAgent()
+                );
+                // Store affiliate code in session
+                session(['affiliate_code' => $request->get('ref')]);
+            } catch (\Exception $e) {
+                // Log error but don't fail the page load
+                logger()->error('Affiliate click tracking failed', [
+                    'error' => $e->getMessage(),
+                    'ref' => $request->get('ref'),
+                ]);
+            }
+        }
+
+        // Get search history for authenticated users (last 10)
+        $searchHistory = [];
+        if (auth()->check()) {
+            $searchHistory = SearchHistory::where('user_id', auth()->id())
+                ->orderBy('searched_at', 'desc')
+                ->limit(10)
+                ->get();
+        }
+
+        // Get saved searches for authenticated users
+        $savedSearches = [];
+        if (auth()->check()) {
+            $savedSearches = SavedSearch::where('user_id', auth()->id())
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
+        return view('marketplace.index', compact('notes', 'tags', 'featuredNotes', 'featuredBanner', 'searchHistory', 'savedSearches'));
     }
 
     /**
@@ -212,10 +348,30 @@ class MarketplaceController extends Controller
                 ];
             });
 
-        return response()->json([
-            'notes' => $notes,
-            'tags' => $tags,
-        ]);
+            return response()->json([
+                'notes' => $notes,
+                'tags' => $tags,
+            ]);
+        }
+
+    /**
+     * Get file extensions for a file type category
+     */
+    private function getExtensionsForFileType(string $fileType): array
+    {
+        return match($fileType) {
+            'pdf' => ['.pdf'],
+            'doc' => ['.doc', '.docx'],
+            'xls' => ['.xls', '.xlsx', '.csv'],
+            'ppt' => ['.ppt', '.pptx'],
+            'txt' => ['.txt'],
+            'zip' => ['.zip', '.rar', '.7z', '.tar', '.gz'],
+            'image' => ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'],
+            'video' => ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv'],
+            'audio' => ['.mp3', '.wav', '.ogg', '.flac', '.m4a'],
+            'code' => ['.js', '.jsx', '.ts', '.tsx', '.php', '.py', '.java', '.cpp', '.c', '.html', '.css', '.scss', '.vue', '.json', '.xml'],
+            default => [],
+        };
     }
 
     public function show(Request $request, Note $note, NoteShareService $noteShareService): View
@@ -269,13 +425,13 @@ class MarketplaceController extends Controller
                   ->limit(20);
             },
             'reactions' => function($q) {
-                $q->select('id', 'note_id', 'user_id', 'type', 'created_at')
+                $q->select('id', 'note_id', 'user_id', 'reaction_type', 'created_at')
                   ->with('user:id,name,username,avatar')
                   ->latest()
                   ->limit(50);
             },
             'questions' => function($q) {
-                $q->select('id', 'note_id', 'user_id', 'question', 'answer', 'created_at', 'is_helpful')
+                $q->select('id', 'note_id', 'user_id', 'question', 'answer', 'created_at', 'helpful_count')
                   ->with('user:id,name,username,avatar')
                   ->latest()
                   ->limit(20);
@@ -295,6 +451,16 @@ class MarketplaceController extends Controller
         
         if ($featuredNote) {
             $featuredNote->incrementImpressions();
+        }
+
+        // Track abandoned cart for email campaigns
+        if ($note->price > 0) {
+            $this->emailCampaignService->trackAbandonedCart(
+                auth()->user(),
+                $note,
+                auth()->check() ? null : $request->input('email'),
+                request()->ip()
+            );
         }
 
         // Track note view history for all users (for viral/hot badge calculation)
@@ -317,12 +483,29 @@ class MarketplaceController extends Controller
         $existingView = $existingView->first();
         
         if (!$existingView) {
+            // Get analytics tracking data
+            $analyticsService = app(\App\Services\AnalyticsTrackingService::class);
+            $trafficSource = $analyticsService->detectTrafficSource($request);
+            $utmParams = $analyticsService->getUtmParameters($request);
+            $geographicData = $analyticsService->getGeographicData(request()->ip());
+            $hour = $analyticsService->getHour();
+            
             \App\Models\NoteViewHistory::create([
                 'user_id' => $userId,
                 'note_id' => $note->id,
                 'viewed_at' => now(),
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
+                'traffic_source' => $trafficSource,
+                'referrer_url' => $request->header('referer'),
+                'utm_source' => $utmParams['utm_source'],
+                'utm_medium' => $utmParams['utm_medium'],
+                'utm_campaign' => $utmParams['utm_campaign'],
+                'country_code' => $geographicData['country_code'],
+                'country_name' => $geographicData['country_name'],
+                'city' => $geographicData['city'],
+                'region' => $geographicData['region'],
+                'hour' => $hour,
             ]);
         }
 
@@ -565,7 +748,7 @@ class MarketplaceController extends Controller
         ));
     }
 
-    public function purchase(Request $request, Note $note, ReferralService $referralService, TaxService $taxService, CommissionService $commissionService, NoteShareService $noteShareService): RedirectResponse
+    public function purchase(Request $request, Note $note, ReferralService $referralService, TaxService $taxService, CommissionService $commissionService, NoteShareService $noteShareService, \App\Services\AffiliateService $affiliateService): RedirectResponse
     {
         if (!$note->is_public || $note->status !== 'active') {
             return redirect()->route('marketplace.index')->with('error', 'Catatan tidak tersedia untuk dibeli.');
@@ -947,7 +1130,7 @@ class MarketplaceController extends Controller
             ]);
 
             // Create purchased note record for buyer premium features
-            \App\Models\PurchasedNote::create([
+            $purchasedNote = \App\Models\PurchasedNote::create([
                 'user_id' => $buyer->id,
                 'note_id' => $note->id,
                 'transaction_id' => $transaction->id,
@@ -955,6 +1138,36 @@ class MarketplaceController extends Controller
                 'purchased_at' => now(),
                 'download_count' => 0,
             ]);
+
+            // Mark abandoned cart as purchased
+            try {
+                $this->emailCampaignService->markAbandonedCartAsPurchased($buyer, $note);
+            } catch (\Exception $e) {
+                logger()->error('Failed to mark abandoned cart as purchased', [
+                    'error' => $e->getMessage(),
+                    'buyer_id' => $buyer->id,
+                    'note_id' => $note->id,
+                ]);
+            }
+
+            // Track affiliate conversion
+            try {
+                $affiliateService->trackConversion(
+                    $buyer,
+                    'purchase',
+                    $transaction,
+                    $purchasedNote,
+                    request()->ip(),
+                    request()->userAgent()
+                );
+            } catch (\Exception $e) {
+                // Log error but don't fail the purchase
+                logger()->error('Affiliate tracking failed', [
+                    'error' => $e->getMessage(),
+                    'buyer_id' => $buyer->id,
+                    'transaction_id' => $transaction->id,
+                ]);
+            }
 
             $sellerNetAmount = $sellerAmount;
             if ($originalCreator && $originalCreator->id === $seller->id) {
@@ -1181,4 +1394,200 @@ class MarketplaceController extends Controller
                 ->with('error', 'Terjadi kesalahan saat memproses pembelian. Silakan coba lagi.');
         }
     }
+
+    /**
+     * Apply advanced search with boolean operators (AND, OR, NOT)
+     */
+    private function applyAdvancedSearch($query, string $searchQuery, Request $request)
+    {
+        // Check if query contains boolean operators
+        $hasBooleanOperators = preg_match('/\b(AND|OR|NOT)\b/i', $searchQuery);
+        
+        if ($hasBooleanOperators) {
+            // Parse boolean query
+            $terms = $this->parseBooleanQuery($searchQuery);
+            return $query->where(function($q) use ($terms) {
+                $this->buildBooleanQuery($q, $terms);
+            });
+        } else {
+            // Simple search (full-text search in title, summary, content)
+            return $query->where(function($q) use ($searchQuery) {
+                $q->where('title', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('summary', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('content', 'like', '%' . $searchQuery . '%');
+            });
+        }
+    }
+
+    /**
+     * Parse boolean query into terms and operators
+     */
+    private function parseBooleanQuery(string $query): array
+    {
+        // Normalize query: convert to uppercase for operators, preserve case for terms
+        $query = preg_replace('/\b(AND|OR|NOT)\b/i', '|$1|', $query);
+        $parts = explode('|', $query);
+        
+        $terms = [];
+        $currentOperator = 'OR'; // Default operator
+        
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if (empty($part)) continue;
+            
+            $upperPart = strtoupper($part);
+            if (in_array($upperPart, ['AND', 'OR', 'NOT'])) {
+                $currentOperator = $upperPart;
+            } else {
+                $terms[] = [
+                    'term' => $part,
+                    'operator' => $currentOperator,
+                ];
+                $currentOperator = 'OR'; // Reset to default after term
+            }
+        }
+        
+        return $terms;
+    }
+
+    /**
+     * Build query from parsed boolean terms
+     */
+    private function buildBooleanQuery($query, array $terms)
+    {
+        if (empty($terms)) return;
+        
+        $firstTerm = true;
+        
+        foreach ($terms as $termData) {
+            $term = trim($termData['term']);
+            $operator = $termData['operator'];
+            
+            if (empty($term)) continue;
+            
+            if ($firstTerm) {
+                // First term - always use where
+                $query->where(function($q) use ($term) {
+                    $q->where('title', 'like', '%' . $term . '%')
+                      ->orWhere('summary', 'like', '%' . $term . '%')
+                      ->orWhere('content', 'like', '%' . $term . '%');
+                });
+                $firstTerm = false;
+            } else {
+                switch ($operator) {
+                    case 'AND':
+                        $query->where(function($q) use ($term) {
+                            $q->where('title', 'like', '%' . $term . '%')
+                              ->orWhere('summary', 'like', '%' . $term . '%')
+                              ->orWhere('content', 'like', '%' . $term . '%');
+                        });
+                        break;
+                    case 'OR':
+                        $query->orWhere(function($q) use ($term) {
+                            $q->where('title', 'like', '%' . $term . '%')
+                              ->orWhere('summary', 'like', '%' . $term . '%')
+                              ->orWhere('content', 'like', '%' . $term . '%');
+                        });
+                        break;
+                    case 'NOT':
+                        $query->where(function($q) use ($term) {
+                            $q->where('title', 'not like', '%' . $term . '%')
+                              ->where('summary', 'not like', '%' . $term . '%')
+                              ->where('content', 'not like', '%' . $term . '%');
+                        });
+                        break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Save search history
+     */
+    private function saveSearchHistory(Request $request, int $resultCount): void
+    {
+        try {
+            $filters = $request->only([
+                'search', 'author', 'date_from', 'date_to', 'min_rating', 
+                'seller_verified', 'seller_type', 'file_type', 'tags', 
+                'languages', 'ecosystem', 'min_price', 'max_price', 'sort'
+            ]);
+            
+            // Remove empty filters
+            $filters = array_filter($filters, function($value) {
+                return !empty($value);
+            });
+            
+            SearchHistory::create([
+                'user_id' => auth()->id(),
+                'ip_address' => $request->ip(),
+                'query' => $request->search ?? '',
+                'filters' => $filters,
+                'result_count' => $resultCount,
+                'searched_at' => now(),
+            ]);
+        } catch (\Exception $e) {
+            // Log error but don't fail the request
+            logger()->error('Failed to save search history', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+            ]);
+        }
+    }
+
+    /**
+     * Save search query
+     */
+    public function saveSearch(Request $request)
+    {
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'query' => 'nullable|string',
+        ]);
+
+        $filters = $request->only([
+            'search', 'author', 'date_from', 'date_to', 'min_rating', 
+            'seller_verified', 'seller_type', 'file_type', 'tags', 
+            'languages', 'ecosystem', 'min_price', 'max_price', 'sort'
+        ]);
+
+        $filters = array_filter($filters, function($value) {
+            return !empty($value);
+        });
+
+        $savedSearch = SavedSearch::create([
+            'user_id' => auth()->id(),
+            'name' => $request->name ?? 'Saved Search ' . now()->format('Y-m-d H:i'),
+            'query' => $request->query ?? $request->search ?? '',
+            'filters' => $filters,
+            'result_count' => 0, // Will be updated when search is executed
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Search saved successfully',
+            'saved_search' => $savedSearch,
+        ]);
+    }
+
+    /**
+     * Delete saved search
+     */
+    public function deleteSavedSearch(SavedSearch $savedSearch)
+    {
+        if ($savedSearch->user_id !== auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
+        $savedSearch->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Saved search deleted successfully',
+        ]);
+    }
+
 }

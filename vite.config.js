@@ -6,20 +6,21 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
+            // Explicitly set dev server URL to use HTTP
+            detectServe: false,
         }),
     ],
     server: {
         host: '0.0.0.0',
         port: 5173,
         strictPort: false,
-        // Use HTTP untuk Vite dev server (lebih stabil)
-        // Untuk development dengan HTTPS, gunakan HTTP untuk Vite
-        // Browser akan block mixed content, jadi akses via HTTP: http://noteds.test
+        // Always use HTTP for Vite dev server (even when app is HTTPS)
+        // This prevents SSL certificate issues
         https: false,
         // HMR configuration
         hmr: {
             host: 'noteds.test',
-            protocol: 'ws',
+            protocol: 'ws', // Use WebSocket (not secure WebSocket) for HTTP
         },
     },
 });

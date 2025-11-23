@@ -710,6 +710,41 @@ class Note extends Model
     }
 
     /**
+     * Get contest entries for this note
+     */
+    public function contestEntries(): HasMany
+    {
+        return $this->hasMany(\App\Models\ContestEntry::class);
+    }
+
+    /**
+     * Get subscriptions for this note
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(\App\Models\NoteSubscription::class);
+    }
+
+    /**
+     * Get active subscriptions for this note
+     */
+    public function activeSubscriptions(): HasMany
+    {
+        return $this->hasMany(\App\Models\NoteSubscription::class)
+            ->where('status', 'active')
+            ->where('current_period_end', '>', now());
+    }
+
+    /**
+     * Check if note supports subscriptions
+     */
+    public function supportsSubscriptions(): bool
+    {
+        // Can be configured per note or globally
+        return $this->is_public && $this->status === 'active';
+    }
+
+    /**
      * Check if a user has purchased this note.
      */
     public function isPurchasedBy($userId): bool

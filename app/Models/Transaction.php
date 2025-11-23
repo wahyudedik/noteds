@@ -95,4 +95,20 @@ class Transaction extends Model
     {
         return $this->belongsTo(User::class, 'original_creator_id');
     }
+
+    /**
+     * Get escrow for this transaction
+     */
+    public function escrow(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Escrow::class);
+    }
+
+    /**
+     * Check if transaction uses escrow
+     */
+    public function usesEscrow(): bool
+    {
+        return $this->escrow()->exists();
+    }
 }

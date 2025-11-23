@@ -147,6 +147,29 @@ class RegisteredUserController extends Controller
             $referralService->processSignupReward($user);
         }
 
+        // Track affiliate conversion for signup
+        try {
+            $affiliateService = app(\App\Services\AffiliateService::class);
+            $affiliateCode = $request->cookie('affiliate_code') ?? session('affiliate_code');
+            
+            if ($affiliateCode && $request->role !== 'user_workspaces') {
+                $affiliateService->trackConversion(
+                    $user,
+                    'signup',
+                    null,
+                    null,
+                    request()->ip(),
+                    request()->userAgent()
+                );
+            }
+        } catch (\Exception $e) {
+            // Log error but don't fail registration
+            logger()->error('Affiliate signup tracking failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+            ]);
+        }
+
         // Handle workspace invitation acceptance
         if ($invitation) {
             $invitation->update([

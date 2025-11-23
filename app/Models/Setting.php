@@ -408,4 +408,31 @@ class Setting extends Model
 
         return $pricing;
     }
+
+    /**
+     * Check if Google Translate API is enabled.
+     */
+    public static function isGoogleTranslateEnabled(): bool
+    {
+        return (bool) self::getSetting('google_translate_enabled', 'translation', false);
+    }
+
+    /**
+     * Get Google Translate API key (decrypted).
+     */
+    public static function getGoogleTranslateApiKey(): ?string
+    {
+        $encryptedKey = self::getSetting('google_translate_api_key', 'translation', '');
+        
+        if (empty($encryptedKey)) {
+            return null;
+        }
+
+        try {
+            return decrypt($encryptedKey);
+        } catch (\Exception $e) {
+            // If decryption fails, return as-is (might be unencrypted old value)
+            return $encryptedKey;
+        }
+    }
 }

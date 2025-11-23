@@ -232,6 +232,54 @@ class Workspace extends Model
     }
 
     /**
+     * Get workspace tasks
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(\App\Models\WorkspaceTask::class);
+    }
+
+    /**
+     * Get workspace reminders
+     */
+    public function reminders(): HasMany
+    {
+        return $this->hasMany(\App\Models\WorkspaceReminder::class);
+    }
+
+    /**
+     * Get workspace timeline
+     */
+    public function timeline(): HasMany
+    {
+        return $this->hasMany(\App\Models\WorkspaceTimeline::class);
+    }
+
+    /**
+     * Get workspace insights
+     */
+    public function insights(): HasMany
+    {
+        return $this->hasMany(\App\Models\WorkspaceInsight::class);
+    }
+
+    /**
+     * Get workspace semantic embeddings
+     */
+    public function semanticEmbeddings(): HasMany
+    {
+        return $this->hasMany(\App\Models\WorkspaceSemanticEmbedding::class);
+    }
+
+    /**
+     * Get workspace knowledge graph
+     */
+    public function knowledgeGraph(): HasMany
+    {
+        return $this->hasMany(\App\Models\WorkspaceKnowledgeGraph::class);
+    }
+
+    /**
      * Check if attachments exist
      */
     public function hasAttachments(): bool

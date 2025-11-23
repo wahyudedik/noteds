@@ -1,0 +1,195 @@
+@extends('layouts.app')
+
+@section('title', 'Create Contest')
+
+@section('content')
+<div class="py-12">
+    <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <div class="mb-4">
+            <a href="{{ route('admin.contests.index') }}" class="text-blue-600 hover:text-blue-800">
+                ← Back to Contests
+            </a>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="text-lg font-semibold text-gray-900">Create Contest</h2>
+            </div>
+            <div class="p-6">
+                <form action="{{ route('admin.contests.store') }}" method="POST">
+                    @csrf
+
+                    <div class="space-y-6">
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+                                Title <span class="text-red-600">*</span>
+                            </label>
+                            <input type="text" name="title" id="title" value="{{ old('title') }}" required
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                                Description <span class="text-red-600">*</span>
+                            </label>
+                            <textarea name="description" id="description" rows="4" required
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('description') }}</textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="type" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Type <span class="text-red-600">*</span>
+                                </label>
+                                <select name="type" id="type" required
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="monthly" {{ old('type') === 'monthly' ? 'selected' : '' }}>Monthly Challenge</option>
+                                    <option value="themed" {{ old('type') === 'themed' ? 'selected' : '' }}>Themed Contest</option>
+                                    <option value="custom" {{ old('type') === 'custom' ? 'selected' : '' }}>Custom Contest</option>
+                                </select>
+                            </div>
+
+                            <div id="theme-field" style="display: none;">
+                                <label for="theme" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Theme
+                                </label>
+                                <input type="text" name="theme" id="theme" value="{{ old('theme') }}"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+                                Status <span class="text-red-600">*</span>
+                            </label>
+                            <select name="status" id="status" required
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>Draft</option>
+                                <option value="open" {{ old('status') === 'open' ? 'selected' : '' }}>Open</option>
+                                <option value="voting" {{ old('status') === 'voting' ? 'selected' : '' }}>Voting</option>
+                                <option value="closed" {{ old('status') === 'closed' ? 'selected' : '' }}>Closed</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Start Date
+                                </label>
+                                <input type="datetime-local" name="start_date" id="start_date" value="{{ old('start_date') }}"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">
+                                    End Date
+                                </label>
+                                <input type="datetime-local" name="end_date" id="end_date" value="{{ old('end_date') }}"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="voting_start_date" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Voting Start Date
+                                </label>
+                                <input type="datetime-local" name="voting_start_date" id="voting_start_date" value="{{ old('voting_start_date') }}"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label for="voting_end_date" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Voting End Date
+                                </label>
+                                <input type="datetime-local" name="voting_end_date" id="voting_end_date" value="{{ old('voting_end_date') }}"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="max_entries_per_user" class="block text-sm font-medium text-gray-700 mb-2">
+                                Max Entries Per User <span class="text-red-600">*</span>
+                            </label>
+                            <input type="number" name="max_entries_per_user" id="max_entries_per_user" value="{{ old('max_entries_per_user', 1) }}" min="1" required
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Prizes (JSON format)
+                            </label>
+                            <textarea name="prizes_json" id="prizes_json" rows="6"
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono text-sm"
+                                placeholder='[{"position": 1, "type": "cash", "value": 100}, {"position": 2, "type": "badge", "badge_id": "..."}]'>{{ old('prizes_json') }}</textarea>
+                            <p class="mt-1 text-sm text-gray-500">Format: [{"position": 1, "type": "cash", "value": 100}, {"type": "badge", "badge_id": "..."}]</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Rules (one per line)
+                            </label>
+                            <textarea name="rules_text" id="rules_text" rows="4"
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder="Rule 1&#10;Rule 2&#10;Rule 3">{{ old('rules_text') }}</textarea>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-4">
+                            <a href="{{ route('admin.contests.index') }}" 
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                                Cancel
+                            </a>
+                            <button type="submit" 
+                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">
+                                Create Contest
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('type').addEventListener('change', function() {
+    const themeField = document.getElementById('theme-field');
+    if (this.value === 'themed') {
+        themeField.style.display = 'block';
+    } else {
+        themeField.style.display = 'none';
+    }
+});
+
+// Convert prizes JSON and rules text to arrays on submit
+document.querySelector('form').addEventListener('submit', function(e) {
+    const prizesJson = document.getElementById('prizes_json').value;
+    const rulesText = document.getElementById('rules_text').value;
+
+    if (prizesJson) {
+        try {
+            const prizes = JSON.parse(prizesJson);
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'prizes';
+            hiddenInput.value = JSON.stringify(prizes);
+            this.appendChild(hiddenInput);
+        } catch (e) {
+            alert('Invalid JSON format for prizes');
+            e.preventDefault();
+            return false;
+        }
+    }
+
+    if (rulesText) {
+        const rules = rulesText.split('\n').filter(r => r.trim());
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'rules';
+        hiddenInput.value = JSON.stringify(rules);
+        this.appendChild(hiddenInput);
+    }
+});
+</script>
+@endsection
+

@@ -21,6 +21,14 @@ use App\Models\Point;
 use App\Models\PointRedemption;
 use App\Models\Level;
 use App\Models\UserLevel;
+use App\Models\ChatQuickReply;
+use App\Models\ChatRating;
+use App\Models\AffiliateLink;
+use App\Models\AffiliateConversion;
+use App\Models\AffiliateCommission;
+use App\Models\AffiliatePayout;
+use App\Models\Certification;
+use App\Models\UserCertification;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -760,5 +768,172 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasBookmarked(Post $post): bool
     {
         return $this->bookmarkedPosts()->where('post_id', $post->id)->exists();
+    }
+
+    /**
+     * Get chat quick replies for user.
+     */
+    public function chatQuickReplies(): HasMany
+    {
+        return $this->hasMany(ChatQuickReply::class);
+    }
+
+    /**
+     * Get chat ratings given by user.
+     */
+    public function chatRatingsGiven(): HasMany
+    {
+        return $this->hasMany(ChatRating::class, 'rater_id');
+    }
+
+    /**
+     * Get chat ratings received by user.
+     */
+    public function chatRatingsReceived(): HasMany
+    {
+        return $this->hasMany(ChatRating::class, 'rated_user_id');
+    }
+
+    /**
+     * Get affiliate links.
+     */
+    public function affiliateLinks(): HasMany
+    {
+        return $this->hasMany(AffiliateLink::class, 'affiliate_id');
+    }
+
+    /**
+     * Get affiliate conversions.
+     */
+    public function affiliateConversions(): HasMany
+    {
+        return $this->hasMany(AffiliateConversion::class, 'affiliate_id');
+    }
+
+    /**
+     * Get affiliate commissions.
+     */
+    public function affiliateCommissions(): HasMany
+    {
+        return $this->hasMany(AffiliateCommission::class, 'affiliate_id');
+    }
+
+    /**
+     * Get affiliate payouts.
+     */
+    public function affiliatePayouts(): HasMany
+    {
+        return $this->hasMany(AffiliatePayout::class, 'affiliate_id');
+    }
+
+    /**
+     * Get user email preferences
+     */
+    public function emailPreference(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(UserEmailPreference::class);
+    }
+
+    /**
+     * Get user certifications
+     */
+    public function certifications(): BelongsToMany
+    {
+        return $this->belongsToMany(Certification::class, 'user_certifications')
+            ->withPivot('status', 'application_notes', 'admin_notes', 'approved_by', 'applied_at', 'approved_at', 'rejected_at', 'expires_at', 'evidence')
+            ->withTimestamps()
+            ->orderByPivot('approved_at', 'desc');
+    }
+
+    /**
+     * Get user certification records
+     */
+    public function userCertifications(): HasMany
+    {
+        return $this->hasMany(UserCertification::class);
+    }
+
+    /**
+     * Get approved certifications
+     */
+    public function approvedCertifications()
+    {
+        return $this->userCertifications()
+            ->where('status', 'approved')
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->with('certification')
+            ->get();
+    }
+
+    /**
+     * Check if user has a specific certification (approved)
+     */
+    public function hasCertification(Certification $certification): bool
+    {
+        return $this->userCertifications()
+            ->where('certification_id', $certification->id)
+            ->where('status', 'approved')
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->exists();
+    }
+
+    /**
+     * Get contest entries
+     */
+    public function contestEntries(): HasMany
+    {
+        return $this->hasMany(\App\Models\ContestEntry::class);
+    }
+
+    /**
+     * Get contest votes
+     */
+    public function contestVotes(): HasMany
+    {
+        return $this->hasMany(\App\Models\ContestVote::class);
+    }
+
+    /**
+     * Get contest wins
+     */
+    public function contestWins(): HasMany
+    {
+        return $this->hasMany(\App\Models\ContestWinner::class);
+    }
+
+    /**
+     * Get note subscriptions
+     */
+    public function noteSubscriptions(): HasMany
+    {
+        return $this->hasMany(\App\Models\NoteSubscription::class);
+    }
+
+    /**
+     * Get active note subscriptions
+     */
+    public function activeNoteSubscriptions(): HasMany
+    {
+        return $this->hasMany(\App\Models\NoteSubscription::class)
+            ->where('status', 'active')
+            ->where('current_period_end', '>', now());
+    }
+
+    /**
+     * Check if user has active subscription to a note
+     */
+    public function hasNoteSubscription(\App\Models\Note $note): bool
+    {
+        return $this->noteSubscriptions()
+            ->where('note_id', $note->id)
+            ->where('status', 'active')
+            ->where('current_period_end', '>', now())
+            ->exists();
     }
 }

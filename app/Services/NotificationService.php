@@ -21,6 +21,7 @@ use App\Mail\ForumNotificationMail;
 use App\Jobs\SendNotificationJob;
 use App\Jobs\SendBatchNotificationsJob;
 use App\Jobs\SendEmailJob;
+use App\Models\NoteMessage;
 
 class NotificationService
 {
@@ -712,6 +713,17 @@ class NotificationService
                 ]
             );
         }
+
+        // Also send email notifications via EmailCampaignService
+        try {
+            $emailCampaignService = app(\App\Services\EmailCampaignService::class);
+            $emailCampaignService->sendNewNoteNotificationToFollowers($note);
+        } catch (\Exception $e) {
+            logger()->error('Failed to send email notifications for new note', [
+                'note_id' => $note->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function getPopularityThresholds(): array
@@ -927,7 +939,44 @@ class NotificationService
             ]
         );
 
+        // Send push notification
+        $this->sendPushIfEnabled($recipient, '💬 New Chat Message', $messagePreview, [
+            'conversation_id' => $conversation->id,
+            'note_id' => $conversation->note_id,
+            'sender_id' => $sender?->id,
+        ]);
+
         return $notification;
+    }
+
+    /**
+     * Send email notification for chat message.
+     */
+    public function sendChatEmailNotification(User $recipient, NoteConversation $conversation, NoteMessage $message, ?User $sender = null): void
+    {
+        if (empty($recipient->email)) {
+            return;
+        }
+
+        // Check if user has email notifications enabled for chat
+        // This could be a user preference in the future
+        // For now, send email notification
+
+        $senderName = $sender?->name ?? 'pengguna';
+        $noteTitle = $conversation->note->title ?? 'Unknown Note';
+        $subject = __('chat.email_subject', ['sender' => $senderName]);
+        $emailMessage = __('chat.email_body', [
+            'sender' => $senderName,
+            'note' => $noteTitle,
+            'message' => Str::limit($message->message, 200),
+        ]);
+
+        if (config('queue.default') !== 'sync') {
+            SendEmailJob::dispatch($recipient->email, new \App\Mail\ChatNotificationMail($subject, $emailMessage, route('note-conversations.show', $conversation)))
+                ->onQueue('emails');
+        } else {
+            Mail::to($recipient->email)->send(new \App\Mail\ChatNotificationMail($subject, $emailMessage, route('note-conversations.show', $conversation)));
+        }
     }
 
     public function notifyReviewReplied(User $recipient, NoteReview $review, NoteReviewReply $reply): AppNotification

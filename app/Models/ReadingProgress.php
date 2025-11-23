@@ -21,6 +21,7 @@ class ReadingProgress extends Model
         'started_at',
         'last_read_at',
         'completed_at',
+        'reading_time',
     ];
 
     protected function casts(): array
@@ -30,6 +31,7 @@ class ReadingProgress extends Model
             'last_position' => 'integer',
             'total_characters' => 'integer',
             'read_characters' => 'integer',
+            'reading_time' => 'integer',
             'started_at' => 'datetime',
             'last_read_at' => 'datetime',
             'completed_at' => 'datetime',

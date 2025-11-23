@@ -29,7 +29,7 @@
         ];
     @endphp
 
-    <div class="overflow-hidden bg-white text-slate-900">
+    <div class="overflow-hidden bg-white dark:bg-gray-900 text-slate-900 dark:text-slate-100">
         <!-- Hero -->
         <section class="relative pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pb-24">
             <div class="absolute inset-0">

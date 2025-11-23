@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
+            BadgeSeeder::class, // Gamification: Badges system
+            LevelSeeder::class, // Gamification: Seller/Buyer levels
             AdminSeeder::class,
             SettingSeeder::class,
             ExchangeRateSeeder::class,

@@ -44,6 +44,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Email Campaign Services Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for email campaign services (Mailchimp, SendGrid, etc.)
+    | Default provider is 'laravel' which uses Laravel's built-in mail system
+    |
+    */
+
+    'email_campaign' => [
+        'provider' => env('EMAIL_CAMPAIGN_PROVIDER', 'laravel'), // laravel, mailchimp, sendgrid
+        'mailchimp' => [
+            'api_key' => env('MAILCHIMP_API_KEY'),
+            'list_id' => env('MAILCHIMP_LIST_ID'),
+        ],
+        'sendgrid' => [
+            'api_key' => env('SENDGRID_API_KEY'),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | AI Services Configuration
     |--------------------------------------------------------------------------
     |

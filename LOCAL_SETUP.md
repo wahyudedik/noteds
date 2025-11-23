@@ -62,7 +62,28 @@ OLLAMA_MODEL=llama3.2
 php artisan migrate
 php artisan db:seed
 ```
-> Seeder paket sudah mencakup tax rules default, commission tiers, price guidance, dan halaman legal (Privacy Policy, Terms & Conditions). Jika ingin mengulang sebagian, gunakan kelas seeder spesifik, misalnya `php artisan db:seed --class=TaxRuleSeeder`.
+> Seeder akan mengisi database dengan data awal untuk testing dan development. Semua seeder dijalankan dalam urutan yang tepat untuk memastikan dependencies terpenuhi.
+
+**Seeder yang tersedia:**
+- **Core System:** Roles, Badges, Levels, Admin, Settings, Exchange Rates, Commission Tiers, Tax Rules
+- **Users & Commerce:** Users, Wallets, Referrals, Transactions, Monetization Approvals, Withdrawals
+- **Workspace & Content:** Workspaces, Folders, Notes, Study Materials, Categories, Templates, Series
+- **Social Features:** Reviews, Comments, Reactions, Questions, Activities, Messages, Notifications
+- **CMS:** Documentation, Landing Pages, CMS Pages, FAQs, Social Media Links
+- **Services:** Studio Orders, Support Tickets, Webhooks
+
+**Menjalankan seeder spesifik:**
+```bash
+# Seed seeder tertentu saja
+php artisan db:seed --class=BadgeSeeder
+php artisan db:seed --class=LevelSeeder
+php artisan db:seed --class=TaxRuleSeeder
+
+# Fresh migration + seed
+php artisan migrate:fresh --seed
+```
+
+Lihat [README.md](README.md) untuk daftar lengkap semua seeder yang tersedia.
 
 ### 5. Storage Link
 ```bash

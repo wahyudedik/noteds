@@ -69,6 +69,17 @@ class BadgeSeeder extends Seeder
                 'criteria_value' => 500,
                 'sort_order' => 5,
             ],
+            [
+                'name' => '1000 Sales',
+                'slug' => '1000-sales',
+                'description' => 'Reached 1000 successful sales',
+                'icon' => '💯',
+                'color' => 'gold',
+                'category' => 'milestone',
+                'criteria_type' => 'sales_count',
+                'criteria_value' => 1000,
+                'sort_order' => 6,
+            ],
         ];
 
         // Quality Badges
@@ -95,6 +106,17 @@ class BadgeSeeder extends Seeder
                 'criteria_value' => 40, // 4.0 * 10
                 'sort_order' => 11,
             ],
+            [
+                'name' => 'Best Seller',
+                'slug' => 'best-seller',
+                'description' => 'Top 10% of sellers by sales volume',
+                'icon' => '🔥',
+                'color' => 'red',
+                'category' => 'quality',
+                'criteria_type' => 'top_seller',
+                'criteria_value' => 10, // Top 10%
+                'sort_order' => 12,
+            ],
         ];
 
         // Community Badges
@@ -109,6 +131,28 @@ class BadgeSeeder extends Seeder
                 'criteria_type' => 'helpful_reviews',
                 'criteria_value' => 10,
                 'sort_order' => 20,
+            ],
+            [
+                'name' => 'Active User',
+                'slug' => 'active-user',
+                'description' => 'Active in the last 7 days with 5+ activities',
+                'icon' => '⚡',
+                'color' => 'green',
+                'category' => 'community',
+                'criteria_type' => 'activity',
+                'criteria_value' => 5,
+                'sort_order' => 21,
+            ],
+            [
+                'name' => 'Community Helper',
+                'slug' => 'community-helper',
+                'description' => 'Provided 5+ helpful answers to questions',
+                'icon' => '🤝',
+                'color' => 'purple',
+                'category' => 'community',
+                'criteria_type' => 'helpful_answers',
+                'criteria_value' => 5,
+                'sort_order' => 22,
             ],
         ];
 

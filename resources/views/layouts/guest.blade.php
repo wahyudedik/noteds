@@ -13,6 +13,48 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        <!-- Fix Vite URLs in development - Client-side fix -->
+        @if(config('app.env') === 'local')
+        <script>
+            (function() {
+                // Fix Vite URLs from HTTPS to HTTP
+                const host = window.location.hostname;
+                const port = ':5173';
+                
+                // Fix all Vite asset URLs
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Fix link tags
+                    document.querySelectorAll('link[href*=":5173"]').forEach(function(link) {
+                        link.href = link.href.replace('https://' + host + port, 'http://' + host + port);
+                    });
+                    
+                    // Fix script tags
+                    document.querySelectorAll('script[src*=":5173"]').forEach(function(script) {
+                        script.src = script.src.replace('https://' + host + port, 'http://' + host + port);
+                    });
+                });
+                
+                // Also fix dynamically added scripts
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1) {
+                                if (node.tagName === 'LINK' && node.href && node.href.includes(':5173')) {
+                                    node.href = node.href.replace('https://' + host + port, 'http://' + host + port);
+                                }
+                                if (node.tagName === 'SCRIPT' && node.src && node.src.includes(':5173')) {
+                                    node.src = node.src.replace('https://' + host + port, 'http://' + host + port);
+                                }
+                            }
+                        });
+                    });
+                });
+                
+                observer.observe(document.head, { childList: true, subtree: true });
+            })();
+        </script>
+        @endif
     </head>
     <body class="font-sans antialiased bg-white text-slate-900">
         <div class="min-h-screen flex flex-col">

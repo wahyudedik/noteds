@@ -4,6 +4,16 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        
+        @if(config('app.env') === 'local')
+        <!-- Force HTTP for Chrome in development -->
+        <script>
+            // Redirect to HTTP if accessed via HTTPS in development
+            if (window.location.protocol === 'https:' && window.location.hostname === 'noteds.test') {
+                window.location.href = window.location.href.replace('https://', 'http://');
+            }
+        </script>
+        @endif
 
         <title>@yield('title', config('app.name', 'Laravel'))</title>
 
@@ -17,6 +27,7 @@
         <!-- PWA Manifest -->
         <link rel="manifest" href="{{ asset('manifest.json') }}">
         <meta name="theme-color" content="#2563eb">
+        <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
         <meta name="apple-mobile-web-app-title" content="Noteds">
@@ -29,6 +40,48 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>[x-cloak]{display:none !important;}</style>
+        
+        <!-- Fix Vite URLs in development - Client-side fix -->
+        @if(config('app.env') === 'local')
+        <script>
+            (function() {
+                // Fix Vite URLs from HTTPS to HTTP
+                const host = window.location.hostname;
+                const port = ':5173';
+                
+                // Fix all Vite asset URLs
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Fix link tags
+                    document.querySelectorAll('link[href*=":5173"]').forEach(function(link) {
+                        link.href = link.href.replace('https://' + host + port, 'http://' + host + port);
+                    });
+                    
+                    // Fix script tags
+                    document.querySelectorAll('script[src*=":5173"]').forEach(function(script) {
+                        script.src = script.src.replace('https://' + host + port, 'http://' + host + port);
+                    });
+                });
+                
+                // Also fix dynamically added scripts
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1) {
+                                if (node.tagName === 'LINK' && node.href && node.href.includes(':5173')) {
+                                    node.href = node.href.replace('https://' + host + port, 'http://' + host + port);
+                                }
+                                if (node.tagName === 'SCRIPT' && node.src && node.src.includes(':5173')) {
+                                    node.src = node.src.replace('https://' + host + port, 'http://' + host + port);
+                                }
+                            }
+                        });
+                    });
+                });
+                
+                observer.observe(document.head, { childList: true, subtree: true });
+            })();
+        </script>
+        @endif
         
         <!-- Dark Mode Styles -->
         <style>
@@ -198,30 +251,33 @@
         </script>
     </head>
     <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 overflow-x-hidden transition-colors duration-200 {{ request()->routeIs('notes.create') ? 'create-note-page' : '' }} {{ request()->routeIs('notes.edit') ? 'edit-note-page' : '' }}">
-        <div class="min-h-screen flex flex-col">
-            @include('layouts.navigation')
+        <div class="min-h-screen flex h-screen">
+            @include('components.sidebar')
+            
+            <div class="flex-1 flex flex-col overflow-hidden min-w-0 h-full">
+                @include('components.top-nav')
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+                <!-- Page Heading -->
+                @isset($header)
+                    <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-200 flex-shrink-0">
+                        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8"> 
+                            {{ $header }}
+                        </div>
+                    </header>
+                @endisset
 
-            <!-- Page Content -->
-            <main class="flex-1 overflow-x-hidden">
-                @hasSection('content')
-                    @yield('content')
-                @else
-                    {{ $slot }}
-                @endif
-            </main>
-
-            <!-- Footer -->
-            <footer class="bg-white border-t border-gray-200 mt-auto">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <!-- Page Content -->
+                <main class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 min-w-0">
+                    <div class="w-full">
+                        @hasSection('content')
+                            @yield('content')
+                        @else
+                            {{ $slot }}
+                        @endif
+                        
+                        <!-- Footer - Only visible when scrolling to bottom -->
+                        <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 w-full mt-12">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                         <!-- About -->
                         <div>
@@ -348,13 +404,16 @@
                         </div>
                     </div>
 
-                    <div class="border-t border-gray-200 pt-8">
-                        <p class="text-center text-sm text-gray-500">
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                        <p class="text-center text-sm text-gray-500 dark:text-gray-400">
                             &copy; {{ date('Y') }} {{ config('app.name', 'Noteds') }}. {{ __('messages.all_rights_reserved') }}.
                         </p>
                     </div>
                 </div>
-            </footer>
+                        </footer>
+                    </div>
+                </main>
+            </div>
         </div>
         
         <!-- Global SweetAlert2 Toast Helper -->
@@ -497,7 +556,7 @@
             ];
         @endphp
         <script>
-            (function() {
+            (function() { 
                 'use strict';
                 
                 // Protection settings from server

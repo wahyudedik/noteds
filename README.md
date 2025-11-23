@@ -559,6 +559,98 @@ php artisan schedule:run  # For scheduled tasks (or setup cron)
 
 See [LOCAL_SETUP.md](LOCAL_SETUP.md) for detailed instructions
 
+### Database Seeding
+
+Sistem menggunakan banyak seeder untuk mengisi database dengan data awal. Berikut daftar lengkap seeder yang tersedia:
+
+**Core System Seeders:**
+- `RoleSeeder` - Roles dan permissions (admin, seller, buyer, vendor)
+- `BadgeSeeder` - Gamification badges (milestone, quality, community)
+- `LevelSeeder` - Seller/Buyer level system (Bronze, Silver, Gold, Platinum, Diamond)
+- `AdminSeeder` - Admin users dengan workspace testing
+- `SettingSeeder` - System settings dan configurations
+- `ExchangeRateSeeder` - Exchange rates untuk multi-currency
+- `CommissionTierSeeder` - Tiered commission system
+- `TaxRuleSeeder` - Dynamic tax rules (country/category based)
+- `UserSeeder` - Sample users untuk testing
+- `WalletSeeder` - Wallet instances untuk users
+- `ReferralCodeSeeder` - Referral codes
+- `ReferralSeeder` - Referral relationships
+
+**Workspace & Content Seeders:**
+- `WorkspaceSeeder` - Workspaces untuk testing
+- `WorkspaceCollaborationSeeder` - Workspace members dan collaborations
+- `FolderSeeder` - Folders dalam workspaces
+- `NoteSeeder` - Sample notes dengan berbagai ecosystem categories
+- `StudyMaterialSeeder` - Study materials
+- `DocumentationSeeder` - Documentation entries (22+ entries)
+- `CategorySeeder` - Hierarchical category system
+- `NoteTemplateSeeder` - Reusable note templates
+- `NoteSeriesSeeder` - Note series organization
+
+**Marketplace & Commerce Seeders:**
+- `TransactionSeeder` - Sample transactions
+- `MonetizationApprovalSeeder` - Monetization approvals untuk free notes
+- `PurchasedNoteSeeder` - Purchased notes history
+- `NoteEngagementSeeder` - Note engagement metrics
+- `FeaturedNoteSeeder` - Featured notes advertising
+- `NoteBundleSeeder` - Note bundles
+- `RefundSeeder` - Refund requests dan history
+- `GiftNoteSeeder` - Gift notes
+- `WithdrawSeeder` - Withdrawal requests
+
+**Social & Community Seeders:**
+- `NoteReviewSeeder` - Note reviews dan ratings
+- `NoteCommentSeeder` - Threaded comments
+- `NoteReactionSeeder` - Reactions (Like, Love, Helpful, etc.)
+- `NoteQuestionSeeder` - Q&A system
+- `SocialFeatureSeeder` - Social features (shares, likes)
+- `ActivitySeeder` - Activity feed entries
+- `MessageSeeder` - In-app messaging conversations
+- `AppNotificationSeeder` - App notifications
+
+**CMS & Content Seeders:**
+- `LandingPageSectionSeeder` - Landing page sections
+- `CmsPageSeeder` - CMS pages
+- `FaqSeeder` - FAQ entries
+- `SocialMediaLinkSeeder` - Social media links
+
+**Studio & Services Seeders:**
+- `StudioSeeder` - Studio orders (service marketplace)
+- `SupportSeeder` - Support tickets
+
+**Advanced Features Seeders:**
+- `NoteCollaborationSeeder` - Note collaborations
+- `NoteReportSeeder` - Note reports
+- `WebhookSeeder` - Webhook configurations
+
+**Disabled Seeders:**
+- `AiAnalysisSeeder` - AI features are now workspace-based (commented out)
+
+**Menjalankan Seeder:**
+```bash
+# Seed semua data
+php artisan db:seed
+
+# Seed seeder spesifik
+php artisan db:seed --class=BadgeSeeder
+php artisan db:seed --class=LevelSeeder
+
+# Fresh migration + seed
+php artisan migrate:fresh --seed
+```
+
+**Urutan Seeding:**
+Seeder dijalankan dalam urutan tertentu di `DatabaseSeeder.php` untuk memastikan dependencies terpenuhi:
+1. Core system (Roles, Badges, Levels, Admin)
+2. Settings & configurations
+3. Users & wallets
+4. Workspaces & folders
+5. Notes & content
+6. Transactions & commerce
+7. Social features
+8. CMS content
+
 ### Testing
 ```bash
 # Run all tests

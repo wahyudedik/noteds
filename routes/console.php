@@ -74,3 +74,61 @@ Schedule::command('points:process-expired')
     ->at('02:00')
     ->timezone('Asia/Jakarta')
     ->description('Process expired points and update statistics.');
+
+// Email Campaign Schedules
+// Send abandoned cart emails (run every 2 hours)
+Schedule::command('email:abandoned-cart')
+    ->everyTwoHours()
+    ->timezone('Asia/Jakarta')
+    ->description('Send abandoned cart reminder emails to users who viewed notes but didn\'t purchase.');
+
+// Send weekly digest (run every Monday at 09:00)
+Schedule::command('email:weekly-digest')
+    ->weeklyOn(1, '09:00')
+    ->timezone('Asia/Jakarta')
+    ->description('Send weekly digest emails with recommended notes to users.');
+
+// Process email sequences (run every hour)
+Schedule::command('email:process-sequences')
+    ->hourly()
+    ->timezone('Asia/Jakarta')
+    ->description('Process and send automated email sequences based on user triggers.');
+
+// Expire certifications (run daily at 00:00)
+Schedule::command('certifications:expire')
+    ->daily()
+    ->at('00:00')
+    ->timezone('Asia/Jakarta')
+    ->description('Check and expire certifications that have passed their expiration date.');
+
+// Auto-release escrows (run hourly)
+Schedule::command('escrow:auto-release')
+    ->hourly()
+    ->timezone('Asia/Jakarta')
+    ->description('Auto-release escrows that have passed their auto-release date.');
+
+// Auto-renew note subscriptions (run daily at 00:00)
+Schedule::command('subscriptions:auto-renew')
+    ->daily()
+    ->at('00:00')
+    ->timezone('Asia/Jakarta')
+    ->description('Auto-renew note subscriptions that are due for renewal.');
+
+// Expire note subscriptions (run daily at 01:00)
+Schedule::command('subscriptions:expire')
+    ->daily()
+    ->at('01:00')
+    ->timezone('Asia/Jakarta')
+    ->description('Expire note subscriptions that have passed their expiration date.');
+
+// Generate workspace insights (run weekly on Monday at 09:00)
+Schedule::command('workspaces:generate-insights')
+    ->weeklyOn(1, '9:00')
+    ->timezone('Asia/Jakarta')
+    ->description('Generate weekly digests and detect anomalies for all workspaces.');
+
+// Send workspace reminders (run hourly)
+Schedule::command('workspaces:send-reminders')
+    ->hourly()
+    ->timezone('Asia/Jakarta')
+    ->description('Send due reminders for workspace tasks and notes.');

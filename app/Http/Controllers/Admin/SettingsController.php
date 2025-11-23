@@ -71,6 +71,10 @@ class SettingsController extends Controller
         $currencyInfo = \App\Helpers\CurrencyHelper::getCurrencyInfo($baseCurrency);
         $currencySymbol = $currencyInfo['symbol'] ?? $baseCurrency;
 
+        // Google Translate API settings
+        $googleTranslateEnabled = (bool) Setting::getSetting('google_translate_enabled', 'translation', false);
+        $googleTranslateApiKey = Setting::getSetting('google_translate_api_key', 'translation', '');
+
         return view('admin.settings.index', compact(
             'settings',
             's3Settings',
@@ -96,7 +100,9 @@ class SettingsController extends Controller
             'aiFreeUsageLimit',
             'aiFeaturePrices',
             'currencySymbol',
-            'baseCurrency'
+            'baseCurrency',
+            'googleTranslateEnabled',
+            'googleTranslateApiKey'
         ));
     }
 
@@ -164,6 +170,9 @@ class SettingsController extends Controller
             'protection_detect_mouse_movement' => 'nullable|boolean',
             'protection_detect_click_pattern' => 'nullable|boolean',
             'protection_detect_screen_recording' => 'nullable|boolean',
+            // Google Translate API settings
+            'google_translate_enabled' => 'nullable|boolean',
+            'google_translate_api_key' => 'nullable|string|max:500|required_if:google_translate_enabled,1',
         ]);
 
         // Update or create S3 settings
@@ -503,6 +512,46 @@ class SettingsController extends Controller
 
         if ($request->hasAny($protectionSettings)) {
             $updates[] = 'Content protection settings updated';
+        }
+
+        // Update Google Translate API settings
+        $isEnablingGoogleTranslate = $request->has('google_translate_enabled') && $request->boolean('google_translate_enabled');
+        $hasExistingApiKey = (bool) Setting::getGoogleTranslateApiKey();
+        
+        // Validate API key is required when enabling for the first time
+        if ($isEnablingGoogleTranslate && !$hasExistingApiKey) {
+            $request->validate([
+                'google_translate_api_key' => 'required|string|min:10',
+            ], [
+                'google_translate_api_key.required' => 'API key is required when enabling Google Translate API.',
+                'google_translate_api_key.min' => 'API key must be at least 10 characters.',
+            ]);
+        }
+
+        if ($request->has('google_translate_enabled')) {
+            Setting::setSetting(
+                'google_translate_enabled',
+                $request->boolean('google_translate_enabled'),
+                'boolean',
+                'translation',
+                'Enable Google Translate API for chat message translation'
+            );
+            $updates[] = 'Google Translate API ' . ($request->boolean('google_translate_enabled') ? 'enabled' : 'disabled');
+        }
+
+        if ($request->has('google_translate_api_key')) {
+            $apiKey = $request->input('google_translate_api_key');
+            // Only update if it's a new key (not the masked value and not empty)
+            if ($apiKey && !str_starts_with($apiKey, '••••') && strlen(trim($apiKey)) > 0) {
+                Setting::setSetting(
+                    'google_translate_api_key',
+                    encrypt(trim($apiKey)),
+                    'string',
+                    'translation',
+                    'Google Translate API key (encrypted)'
+                );
+                $updates[] = 'Google Translate API key updated';
+            }
         }
 
         if (!empty($updates)) {

@@ -1888,6 +1888,7 @@ return [
     'scheduled_publish_help' => 'سيتم نشر الملاحظة تلقائياً في الوقت المحدد',
     'publish_now' => 'نشر الآن',
     'publish_scheduled' => 'نشر مجدول',
+    'close' => 'إغلاق',
     
     // System Health
     'system_health' => 'صحة النظام',

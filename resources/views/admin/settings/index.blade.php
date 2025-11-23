@@ -1698,9 +1698,143 @@
                 </div>
             </div>
         </div>
+
+        <!-- Google Translate API Configuration -->
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                            </svg>
+                            Google Translate API
+                        </h3>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Enable Google Translate API for automatic translation of chat messages
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
+                    @csrf
+                    
+                    <!-- Enable Google Translate -->
+                    <div class="flex items-center">
+                        <input type="checkbox" name="google_translate_enabled" id="google_translate_enabled" value="1"
+                            {{ old('google_translate_enabled', $googleTranslateEnabled ?? false) ? 'checked' : '' }}
+                            class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                        <label for="google_translate_enabled" class="ml-3 text-sm font-medium text-gray-700">
+                            Enable Google Translate API
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 ml-7">
+                        When enabled, chat messages will be automatically translated using Google Translate API
+                    </p>
+
+                    <div id="google-translate-config"
+                        class="space-y-4 {{ old('google_translate_enabled', $googleTranslateEnabled ?? false) ? '' : 'hidden' }}">
+                        <!-- API Key -->
+                        <div>
+                            <label for="google_translate_api_key" class="block text-sm font-medium text-gray-700 mb-2">
+                                API Key
+                                @if (!$googleTranslateApiKey)
+                                    <span class="text-red-500">*</span>
+                                @endif
+                            </label>
+                            @if ($googleTranslateApiKey)
+                                <div class="mb-2 bg-green-50 border border-green-200 rounded-lg p-3">
+                                    <div class="flex items-center">
+                                        <svg class="h-5 w-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="text-sm text-green-800">API key is configured. Enter a new key below to update it.</span>
+                                    </div>
+                                </div>
+                            @endif
+                            <div class="relative">
+                                <input type="password" name="google_translate_api_key" id="google_translate_api_key"
+                                    value="{{ old('google_translate_api_key', '') }}"
+                                    placeholder="{{ $googleTranslateApiKey ? 'Enter new API key to update' : 'AIzaSy...' }}"
+                                    {{ !$googleTranslateApiKey ? 'required' : '' }}
+                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('google_translate_api_key') border-red-500 @enderror">
+                                <button type="button" onclick="toggleApiKeyVisibility()" 
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700">
+                                    <svg id="eye-icon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            @error('google_translate_api_key')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-1 text-xs text-gray-500">
+                                Your Google Translate API key. Get one from <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-green-600 hover:underline">Google Cloud Console</a>
+                            </p>
+                        </div>
+
+                        <!-- Info Alert -->
+                        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-blue-700">
+                                        <strong>Note:</strong> API key will be encrypted and stored securely. If you're updating an existing key, enter the full new key (not just the masked value).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center justify-end pt-4 border-t border-gray-200">
+                            <button type="submit"
+                                class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
+                                {{ __('messages.save_settings') }}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     @push('scripts')
+        <script>
+            // Show/hide Google Translate config based on enabled checkbox
+            document.addEventListener('DOMContentLoaded', function() {
+                const googleTranslateEnabled = document.getElementById('google_translate_enabled');
+                const googleTranslateConfig = document.getElementById('google-translate-config');
+                
+                if (googleTranslateEnabled && googleTranslateConfig) {
+                    googleTranslateEnabled.addEventListener('change', function() {
+                        if (this.checked) {
+                            googleTranslateConfig.classList.remove('hidden');
+                        } else {
+                            googleTranslateConfig.classList.add('hidden');
+                        }
+                    });
+                }
+            });
+
+            function toggleApiKeyVisibility() {
+                const input = document.getElementById('google_translate_api_key');
+                const eyeIcon = document.getElementById('eye-icon');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />';
+                } else {
+                    input.type = 'password';
+                    eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
+                }
+            }
+        </script>
         <script>
             // Show/hide S3 config based on enabled checkbox
             document.getElementById('s3_enabled').addEventListener('change', function() {

@@ -11,12 +11,23 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [
+        $webMiddleware = [
             \App\Http\Middleware\EnsureUserIsActive::class,
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\SecurityHeaders::class,
             \App\Http\Middleware\SanitizeInput::class,
-        ]);
+        ];
+        
+        $middleware->web(append: $webMiddleware);
+        
+        // Fix Vite URLs to use HTTP in development when app is served over HTTPS
+        // This prevents SSL errors when Vite dev server is on HTTP
+        // Add at the end to process final HTML output
+        if (env('APP_ENV') === 'local') {
+            $middleware->web(append: [
+                \App\Http\Middleware\FixViteUrls::class,
+            ]);
+        }
         
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,

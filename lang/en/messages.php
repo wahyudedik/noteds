@@ -1895,6 +1895,7 @@ return [
     'premium_buyer_badge' => 'Premium Buyer',
     'ask_ai_about_notes' => 'Ask AI about :name\'s notes',
     'link_copied' => 'Link copied to clipboard!',
+    'close' => 'Close',
 
     // Plugins
     'plugins' => 'Plugins',

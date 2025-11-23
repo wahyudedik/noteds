@@ -16,6 +16,15 @@ class WorkspaceMember extends Model
         'role',
         'is_active',
         'joined_at',
+        'permissions',
+        'team_role',
+        'can_manage_members',
+        'can_manage_workspace',
+        'can_create_notes',
+        'can_edit_notes',
+        'can_delete_notes',
+        'can_manage_folders',
+        'can_invite_members',
     ];
 
     protected function casts(): array
@@ -23,6 +32,14 @@ class WorkspaceMember extends Model
         return [
             'is_active' => 'boolean',
             'joined_at' => 'datetime',
+            'permissions' => 'array',
+            'can_manage_members' => 'boolean',
+            'can_manage_workspace' => 'boolean',
+            'can_create_notes' => 'boolean',
+            'can_edit_notes' => 'boolean',
+            'can_delete_notes' => 'boolean',
+            'can_manage_folders' => 'boolean',
+            'can_invite_members' => 'boolean',
         ];
     }
 

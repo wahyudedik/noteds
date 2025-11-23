@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\TransactionController as AdminTransactionControll
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawController as AdminWithdrawController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\AffiliateController as AdminAffiliateController;
 use App\Http\Controllers\Admin\CommissionTierController as AdminCommissionTierController;
 use App\Http\Controllers\Admin\PostModerationController;
 use App\Http\Controllers\Admin\NoteModerationController;
@@ -23,6 +24,8 @@ use App\Http\Controllers\UserReportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\AffiliateController;
+use App\Http\Controllers\AffiliateLeaderboardController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SimulatorController;
 use App\Http\Controllers\SupportTicketController;
@@ -51,6 +54,15 @@ use App\Http\Controllers\Api\NoteShareController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
+
+// Email tracking and unsubscribe routes (public, no auth required)
+Route::prefix('email')->name('email.')->group(function () {
+    Route::get('/track/open/{token}', [\App\Http\Controllers\EmailTrackingController::class, 'trackOpen'])->name('track-open');
+    Route::get('/track/click/{token}', [\App\Http\Controllers\EmailTrackingController::class, 'trackClick'])->name('track-click');
+    Route::get('/unsubscribe/{token}', [\App\Http\Controllers\EmailUnsubscribeController::class, 'show'])->name('unsubscribe');
+    Route::post('/unsubscribe/{token}', [\App\Http\Controllers\EmailUnsubscribeController::class, 'unsubscribe'])->name('unsubscribe.post');
+    Route::post('/unsubscribe-email', [\App\Http\Controllers\EmailUnsubscribeController::class, 'unsubscribeByEmail'])->name('unsubscribe-email');
+});
 
 // Locale & i18n routes
 Route::get('/locale/{locale}', [LocaleController::class, 'switchLocale'])->name('locale.switch');
@@ -106,6 +118,8 @@ Route::get('/page/{cmsPage}', [PublicCmsPageController::class, 'show'])->name('c
 // Marketplace routes
 Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
 Route::get('/marketplace/autocomplete', [MarketplaceController::class, 'autocomplete'])->name('marketplace.autocomplete');
+Route::post('/marketplace/save-search', [MarketplaceController::class, 'saveSearch'])->middleware(['auth'])->name('marketplace.save-search');
+Route::delete('/marketplace/saved-search/{savedSearch}', [MarketplaceController::class, 'deleteSavedSearch'])->middleware(['auth'])->name('marketplace.delete-saved-search');
 Route::get('/marketplace/{note}', [MarketplaceController::class, 'show'])->name('marketplace.show');
 Route::post('/marketplace/{note}/purchase', [MarketplaceController::class, 'purchase'])->middleware(['auth', 'verified', 'username.setup', 'buyer', 'rate.limit:5,1'])->name('marketplace.purchase');
 
@@ -148,6 +162,17 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     Route::get('/note-conversations', [NoteConversationController::class, 'index'])->name('note-conversations.index');
     Route::get('/note-conversations/{conversation}', [NoteConversationController::class, 'show'])->name('note-conversations.show');
     Route::post('/note-conversations/{conversation}', [NoteConversationController::class, 'store'])->name('note-conversations.store');
+    Route::post('/note-conversations/messages/{message}/translate', [NoteConversationController::class, 'translate'])->name('note-conversations.translate');
+
+    // Chat Quick Replies
+    Route::get('/chat-quick-replies', [\App\Http\Controllers\ChatQuickReplyController::class, 'index'])->name('chat-quick-replies.index');
+    Route::post('/chat-quick-replies', [\App\Http\Controllers\ChatQuickReplyController::class, 'store'])->name('chat-quick-replies.store');
+    Route::put('/chat-quick-replies/{chatQuickReply}', [\App\Http\Controllers\ChatQuickReplyController::class, 'update'])->name('chat-quick-replies.update');
+    Route::delete('/chat-quick-replies/{chatQuickReply}', [\App\Http\Controllers\ChatQuickReplyController::class, 'destroy'])->name('chat-quick-replies.destroy');
+
+    // Chat Ratings
+    Route::post('/chat-ratings/conversations/{conversation}', [\App\Http\Controllers\ChatRatingController::class, 'store'])->name('chat-ratings.store');
+    Route::put('/chat-ratings/{chatRating}', [\App\Http\Controllers\ChatRatingController::class, 'update'])->name('chat-ratings.update');
 
     Route::post('/notes/{note}/report', [NoteReportController::class, 'store'])->name('notes.report');
     Route::post('/users/{user}/report', [UserReportController::class, 'store'])->name('users.report');
@@ -197,6 +222,50 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->prefix('setup-username')->name('setup-username.')->group(function () {
     Route::get('/', [\App\Http\Controllers\SetupUsernameController::class, 'create'])->name('create');
     Route::post('/', [\App\Http\Controllers\SetupUsernameController::class, 'store'])->name('store');
+});
+
+// Certifications routes
+Route::middleware(['auth', 'verified', 'username.setup'])->prefix('certifications')->name('certifications.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\CertificationController::class, 'index'])->name('index');
+    Route::get('/{certification}', [\App\Http\Controllers\CertificationController::class, 'show'])->name('show');
+    Route::post('/{certification}/apply', [\App\Http\Controllers\CertificationController::class, 'apply'])->name('apply');
+});
+
+// Contests routes
+Route::prefix('contests')->name('contests.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\ContestController::class, 'index'])->name('index');
+    Route::get('/{contest}', [\App\Http\Controllers\ContestController::class, 'show'])->name('show');
+    Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
+        Route::get('/{contest}/submit', [\App\Http\Controllers\ContestController::class, 'showSubmitForm'])->name('submit');
+        Route::post('/{contest}/submit', [\App\Http\Controllers\ContestController::class, 'submitEntry'])->name('submit-entry');
+        Route::post('/{contest}/vote', [\App\Http\Controllers\ContestController::class, 'vote'])->name('vote');
+    });
+});
+
+// Disputes routes
+Route::middleware(['auth', 'verified', 'username.setup'])->prefix('disputes')->name('disputes.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\DisputeController::class, 'index'])->name('index');
+    Route::get('/create/{transaction}', [\App\Http\Controllers\DisputeController::class, 'create'])->name('create');
+    Route::post('/create/{transaction}', [\App\Http\Controllers\DisputeController::class, 'store'])->name('store');
+    Route::get('/{dispute}', [\App\Http\Controllers\DisputeController::class, 'show'])->name('show');
+    Route::post('/{dispute}/respond', [\App\Http\Controllers\DisputeController::class, 'respond'])->name('respond');
+});
+
+// Escrow routes
+Route::middleware(['auth', 'verified', 'username.setup'])->prefix('escrows')->name('escrows.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\EscrowController::class, 'index'])->name('index');
+    Route::get('/{escrow}', [\App\Http\Controllers\EscrowController::class, 'show'])->name('show');
+    Route::post('/{escrow}/confirm-receipt', [\App\Http\Controllers\EscrowController::class, 'confirmReceipt'])->name('confirm-receipt');
+    Route::post('/{escrow}/create-dispute', [\App\Http\Controllers\EscrowController::class, 'createDispute'])->name('create-dispute');
+});
+
+// Note Subscription routes
+Route::middleware(['auth', 'verified', 'username.setup'])->prefix('subscriptions')->name('subscriptions.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\NoteSubscriptionController::class, 'index'])->name('index');
+    Route::get('/{subscription}', [\App\Http\Controllers\NoteSubscriptionController::class, 'show'])->name('show');
+    Route::post('/notes/{note}/subscribe', [\App\Http\Controllers\NoteSubscriptionController::class, 'subscribe'])->name('subscribe');
+    Route::post('/{subscription}/cancel', [\App\Http\Controllers\NoteSubscriptionController::class, 'cancel'])->name('cancel');
+    Route::post('/{subscription}/reactivate', [\App\Http\Controllers\NoteSubscriptionController::class, 'reactivate'])->name('reactivate');
 });
 
 Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'workspace.user'])->group(function () {
@@ -299,11 +368,36 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
         Route::get('/featured-notes/create', [\App\Http\Controllers\FeaturedNoteController::class, 'create'])->name('featured-notes.create');
         Route::post('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'store'])->name('featured-notes.store');
         Route::get('/featured-notes/export', [\App\Http\Controllers\FeaturedNoteController::class, 'exportReport'])->name('featured-notes.export');
+        
+        // Seller Analytics routes
+        Route::prefix('seller-analytics')->name('seller-analytics.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\SellerAnalyticsController::class, 'index'])->name('index');
+            Route::get('/api/revenue', [\App\Http\Controllers\SellerAnalyticsController::class, 'apiRevenue'])->name('api.revenue');
+        });
     });
 
     // Referral routes
     Route::get('/referral', [ReferralController::class, 'index'])->name('referral.index');
     Route::get('/referral/statistics', [ReferralController::class, 'statistics'])->name('referral.statistics');
+
+    // Affiliate routes
+    Route::prefix('affiliate')->name('affiliate.')->group(function () {
+        Route::get('/', [AffiliateController::class, 'index'])->name('index');
+        Route::post('/links', [AffiliateController::class, 'storeLink'])->name('links.store');
+        Route::put('/links/{affiliateLink}', [AffiliateController::class, 'updateLink'])->name('links.update');
+        Route::delete('/links/{affiliateLink}', [AffiliateController::class, 'deleteLink'])->name('links.delete');
+        Route::put('/links/{affiliateLink}/landing', [AffiliateController::class, 'updateLandingPage'])->name('links.landing.update');
+        Route::post('/links/{affiliateLink}/promotional-materials', [AffiliateController::class, 'storePromotionalMaterial'])->name('promotional-materials.store');
+        Route::put('/promotional-materials/{promotionalMaterial}', [AffiliateController::class, 'updatePromotionalMaterial'])->name('promotional-materials.update');
+        Route::delete('/promotional-materials/{promotionalMaterial}', [AffiliateController::class, 'deletePromotionalMaterial'])->name('promotional-materials.delete');
+        Route::post('/payouts', [AffiliateController::class, 'requestPayout'])->name('payouts.request');
+    });
+
+    // Public affiliate landing pages
+    Route::get('/a/{slug}', [AffiliateController::class, 'showLanding'])->name('affiliate.landing');
+    
+    // Affiliate leaderboard
+    Route::get('/affiliate-leaderboard', [AffiliateLeaderboardController::class, 'index'])->name('affiliate.leaderboard');
 
     // Share Analytics routes
     Route::get('/share/analytics', [ShareAnalyticsController::class, 'index'])->name('share.analytics');
@@ -442,6 +536,31 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::post('/notes/{note}/approve-monetization', [AdminNoteController::class, 'approveMonetization'])->name('notes.approve-monetization');
     Route::post('/notes/{note}/reject-monetization', [AdminNoteController::class, 'rejectMonetization'])->name('notes.reject-monetization');
     Route::get('/workspaces', [\App\Http\Controllers\Admin\WorkspaceController::class, 'index'])->name('workspaces.index');
+    Route::resource('certifications', \App\Http\Controllers\Admin\CertificationController::class);
+    Route::get('/certifications/applications', [\App\Http\Controllers\Admin\CertificationController::class, 'applications'])->name('certifications.applications');
+    Route::get('/certifications/applications/{userCertification}', [\App\Http\Controllers\Admin\CertificationController::class, 'showApplication'])->name('certifications.applications.show');
+    Route::post('/certifications/applications/{userCertification}/approve', [\App\Http\Controllers\Admin\CertificationController::class, 'approveApplication'])->name('certifications.applications.approve');
+    Route::post('/certifications/applications/{userCertification}/reject', [\App\Http\Controllers\Admin\CertificationController::class, 'rejectApplication'])->name('certifications.applications.reject');
+    Route::resource('badges', \App\Http\Controllers\Admin\BadgeController::class);
+    Route::get('/badges/{badge}/users', [\App\Http\Controllers\Admin\BadgeController::class, 'showUsers'])->name('badges.users');
+    Route::post('/badges/{badge}/award', [\App\Http\Controllers\Admin\BadgeController::class, 'awardToUser'])->name('badges.award');
+    Route::resource('contests', \App\Http\Controllers\Admin\ContestController::class);
+    Route::get('/contests/{contest}/entries', [\App\Http\Controllers\Admin\ContestController::class, 'entries'])->name('contests.entries');
+    Route::get('/contests/entries/{entry}', [\App\Http\Controllers\Admin\ContestController::class, 'showEntry'])->name('contests.entries.show');
+    Route::post('/contests/entries/{entry}/approve', [\App\Http\Controllers\Admin\ContestController::class, 'approveEntry'])->name('contests.entries.approve');
+    Route::post('/contests/entries/{entry}/reject', [\App\Http\Controllers\Admin\ContestController::class, 'rejectEntry'])->name('contests.entries.reject');
+    Route::post('/contests/{contest}/select-winners', [\App\Http\Controllers\Admin\ContestController::class, 'selectWinners'])->name('contests.select-winners');
+    Route::post('/contests/{contest}/distribute-prizes', [\App\Http\Controllers\Admin\ContestController::class, 'distributePrizes'])->name('contests.distribute-prizes');
+    Route::get('/buyer-protection', [\App\Http\Controllers\Admin\BuyerProtectionController::class, 'index'])->name('buyer-protection.index');
+    Route::put('/buyer-protection', [\App\Http\Controllers\Admin\BuyerProtectionController::class, 'update'])->name('buyer-protection.update');
+    Route::resource('disputes', \App\Http\Controllers\Admin\DisputeController::class)->only(['index', 'show']);
+    Route::post('/disputes/{dispute}/resolve', [\App\Http\Controllers\Admin\DisputeController::class, 'resolve'])->name('disputes.resolve');
+    Route::resource('quality-checks', \App\Http\Controllers\Admin\QualityCheckController::class)->only(['index', 'show']);
+    Route::post('/quality-checks/check-note/{note}', [\App\Http\Controllers\Admin\QualityCheckController::class, 'checkNote'])->name('quality-checks.check-note');
+    Route::resource('escrows', \App\Http\Controllers\Admin\EscrowController::class)->only(['index', 'show']);
+    Route::post('/escrows/{escrow}/release', [\App\Http\Controllers\Admin\EscrowController::class, 'release'])->name('escrows.release');
+    Route::post('/escrows/{escrow}/refund', [\App\Http\Controllers\Admin\EscrowController::class, 'refund'])->name('escrows.refund');
+    Route::resource('note-subscriptions', \App\Http\Controllers\Admin\NoteSubscriptionController::class)->only(['index', 'show']);
     Route::get('/workspaces/{workspace}', [\App\Http\Controllers\Admin\WorkspaceController::class, 'show'])->name('workspaces.show');
     Route::get('/view-history', [\App\Http\Controllers\Admin\ViewHistoryController::class, 'index'])->name('view-history.index');
     Route::get('/view-history/export', [\App\Http\Controllers\Admin\ViewHistoryController::class, 'export'])->name('view-history.export');
@@ -503,6 +622,16 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::get('/featured-notes/{featuredNote}', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'show'])->name('featured-notes.show');
     Route::post('/featured-notes/{featuredNote}/approve', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'approve'])->name('featured-notes.approve');
     Route::post('/featured-notes/{featuredNote}/reject', [\App\Http\Controllers\Admin\FeaturedNoteController::class, 'reject'])->name('featured-notes.reject');
+
+    // Affiliate Management
+    Route::prefix('affiliate')->name('affiliate.')->group(function () {
+        Route::get('/', [AdminAffiliateController::class, 'index'])->name('index');
+        Route::get('/payouts', [AdminAffiliateController::class, 'payouts'])->name('payouts');
+        Route::get('/payouts/{payout}', [AdminAffiliateController::class, 'showPayout'])->name('payouts.show');
+        Route::patch('/payouts/{payout}', [AdminAffiliateController::class, 'updatePayout'])->name('payouts.update');
+        Route::get('/commissions', [AdminAffiliateController::class, 'commissions'])->name('commissions');
+        Route::post('/commissions/approve', [AdminAffiliateController::class, 'approveCommissions'])->name('commissions.approve');
+    });
 });
 
 // Public Documentation routes

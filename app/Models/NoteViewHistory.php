@@ -24,6 +24,16 @@ class NoteViewHistory extends Model
         'viewed_at',
         'ip_address',
         'user_agent',
+        'traffic_source',
+        'referrer_url',
+        'utm_source',
+        'utm_medium',
+        'utm_campaign',
+        'country_code',
+        'country_name',
+        'city',
+        'region',
+        'hour',
     ];
 
     protected function casts(): array

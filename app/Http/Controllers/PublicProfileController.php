@@ -19,7 +19,7 @@ class PublicProfileController extends Controller
                 ->where('status', 'active')
                 ->with(['tags', 'reviews'])
                 ->latest();
-        }, 'badges', 'userLevels.level']);
+        }, 'badges', 'userLevels.level', 'approvedCertifications.certification']);
 
         // Get public notes with pagination
         $publicNotes = $user->notes()

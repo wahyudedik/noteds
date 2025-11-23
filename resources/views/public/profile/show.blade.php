@@ -210,6 +210,48 @@
                                         </span>
                                     @endif
                                 @endif
+
+                                {{-- Certifications --}}
+                                @if($user->approvedCertifications && $user->approvedCertifications->count() > 0)
+                                    @foreach($user->approvedCertifications->take(5) as $userCertification)
+                                        @php
+                                            $cert = $userCertification->certification;
+                                        @endphp
+                                        <div class="relative inline-block group">
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border-2"
+                                                style="background-color: {{ $cert->color }}20; border-color: {{ $cert->color }}; color: {{ $cert->color }};"
+                                                title="{{ $cert->name }}">
+                                                @if($cert->icon)
+                                                    <span class="mr-1">{{ $cert->icon }}</span>
+                                                @endif
+                                                {{ $cert->name }}
+                                            </span>
+                                            <!-- Tooltip -->
+                                            <div class="absolute right-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
+                                                <div class="font-semibold mb-1">{{ $cert->name }}</div>
+                                                <p class="text-gray-300 mb-2">{{ $cert->description }}</p>
+                                                @if($cert->benefits)
+                                                    <div class="mt-2 pt-2 border-t border-gray-700">
+                                                        <p class="font-semibold mb-1">Benefits:</p>
+                                                        <p class="text-gray-300">{{ $cert->benefits }}</p>
+                                                    </div>
+                                                @endif
+                                                @if($userCertification->approved_at)
+                                                    <div class="mt-2 pt-2 border-t border-gray-700 text-gray-400">
+                                                        Certified: {{ $userCertification->approved_at->format('M Y') }}
+                                                    </div>
+                                                @endif
+                                                <div class="absolute right-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                    @if($user->approvedCertifications->count() > 5)
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600"
+                                            title="View all certifications">
+                                            +{{ $user->approvedCertifications->count() - 5 }} more
+                                        </span>
+                                    @endif
+                                @endif
                             </div>
 
                             <!-- Share Profile Buttons -->

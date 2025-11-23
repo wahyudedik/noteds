@@ -23,6 +23,9 @@ class Badge extends Model
         'criteria_value',
         'sort_order',
         'is_active',
+        'is_custom',
+        'created_by',
+        'custom_criteria',
     ];
 
     protected function casts(): array
@@ -31,6 +34,8 @@ class Badge extends Model
             'criteria_value' => 'integer',
             'sort_order' => 'integer',
             'is_active' => 'boolean',
+            'is_custom' => 'boolean',
+            'custom_criteria' => 'array',
         ];
     }
 
@@ -53,5 +58,29 @@ class Badge extends Model
     public function hasUser(User $user): bool
     {
         return $this->users()->where('users.id', $user->id)->exists();
+    }
+
+    /**
+     * Get creator of custom badge
+     */
+    public function creator(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get custom badges
+     */
+    public static function custom()
+    {
+        return static::where('is_custom', true);
+    }
+
+    /**
+     * Get system badges (non-custom)
+     */
+    public static function system()
+    {
+        return static::where('is_custom', false);
     }
 }
