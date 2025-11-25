@@ -940,6 +940,9 @@
                         @enderror
                     </div>
 
+                    <!-- Content Protection -->
+                    @include('notes.partials.content-protection', ['note' => $note])
+
                     <!-- Price and Status -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>

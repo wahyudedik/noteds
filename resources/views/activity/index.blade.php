@@ -1,99 +1,211 @@
 @extends('layouts.app')
 
-@section('title', __('Activity Feed'))
+@section('title', 'Activity Feed')
 
 @section('content')
 <div class="py-8 sm:py-12">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
-        <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('Activity Feed') }}</h1>
-                <p class="mt-2 text-sm text-gray-600">{{ __('See what\'s happening in your network') }}</p>
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h1 class="text-3xl font-bold text-gray-900">Activity Feed</h1>
+                <div class="flex gap-2">
+                    <a href="{{ route('activity.following') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">
+                        Following
+                    </a>
+                </div>
             </div>
-            <a href="{{ route('activity.following') }}"
-                class="text-sm text-blue-600 hover:text-blue-800">
-                {{ __('Following') }} →
-            </a>
+            <p class="text-base text-gray-600">See what's happening in the community</p>
         </div>
 
-        <!-- Filter -->
-        <form method="GET" action="{{ route('activity.index') }}" class="mb-6">
-            <select name="type" onchange="this.form.submit()"
-                class="block w-full sm:w-auto rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                <option value="">{{ __('All Activities') }}</option>
-                <option value="note_created" {{ request('type') === 'note_created' ? 'selected' : '' }}>{{ __('Notes Created') }}</option>
-                <option value="note_purchased" {{ request('type') === 'note_purchased' ? 'selected' : '' }}>{{ __('Notes Purchased') }}</option>
-                <option value="user_followed" {{ request('type') === 'user_followed' ? 'selected' : '' }}>{{ __('User Followed') }}</option>
-            </select>
-        </form>
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <form method="GET" action="{{ route('activity.index') }}" class="flex flex-wrap gap-4">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Type</label>
+                    <select name="type" class="w-full rounded-md border-gray-300 shadow-sm">
+                        <option value="">All Activities</option>
+                        @foreach($activityTypes as $type)
+                            <option value="{{ $type }}" {{ request('type') === $type ? 'selected' : '' }}>
+                                {{ ucfirst(str_replace('.', ' ', $type)) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-md">
+                        Filter
+                    </button>
+                    @if(request()->hasAny(['type', 'user_id']))
+                        <a href="{{ route('activity.index') }}" class="ml-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-md">
+                            Clear
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
 
-        <!-- Activities List -->
-        @if($activities->count() > 0)
-            <div class="space-y-4">
-                @foreach($activities as $activity)
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0">
-                                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                    @if($activity->user->avatar)
-                                        <img src="{{ Storage::url($activity->user->avatar) }}" alt="{{ $activity->user->name }}" class="w-10 h-10 rounded-full object-cover">
-                                    @else
-                                        <span class="text-sm font-semibold text-gray-600">{{ substr($activity->user->name, 0, 1) }}</span>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-start justify-between">
-                                    <div>
-                                        <p class="text-sm text-gray-900">
-                                            <a href="{{ route('public.profile.show', $activity->user->username) }}" class="font-semibold hover:text-blue-600">
-                                                {{ $activity->user->name }}
-                                            </a>
-                                            @if($activity->type === 'note_created')
-                                                {{ __('created a new note') }}
-                                            @elseif($activity->type === 'note_purchased')
-                                                {{ __('purchased a note') }}
-                                            @elseif($activity->type === 'user_followed')
-                                                {{ __('followed') }}
-                                                <a href="{{ route('public.profile.show', $activity->subject->username ?? '#') }}" class="font-semibold hover:text-blue-600">
-                                                    {{ $activity->subject->name ?? '' }}
-                                                </a>
-                                            @endif
-                                        </p>
-                                        <p class="text-xs text-gray-500 mt-1">{{ $activity->created_at->diffForHumans() }}</p>
-                                    </div>
-                                </div>
-                                @if($activity->subject && $activity->type === 'note_created')
-                                    <div class="mt-3 p-3 bg-gray-50 rounded-lg">
-                                        <a href="{{ route('marketplace.show', $activity->subject) }}" class="block">
-                                            <h4 class="text-sm font-semibold text-gray-900">{{ $activity->subject->title }}</h4>
-                                            @if($activity->subject->summary)
-                                                <p class="text-xs text-gray-600 mt-1 line-clamp-2">
-                                                    {{ Str::limit(strip_tags($activity->subject->summary), 100) }}
-                                                </p>
-                                            @endif
-                                        </a>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-            <div class="mt-6">
-                {{ $activities->links() }}
-            </div>
-        @else
-            <div class="bg-white rounded-lg shadow-sm p-12 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h3 class="mt-4 text-lg font-medium text-gray-900">{{ __('No activities yet') }}</h3>
-                <p class="mt-2 text-sm text-gray-500">{{ __('Activity feed will appear here.') }}</p>
-            </div>
-        @endif
+        <!-- Activity Feed -->
+        <div id="activity-feed" class="space-y-4">
+            @forelse($activities as $activity)
+                @include('activity.partials.activity-item', ['activity' => $activity])
+            @empty
+                <div class="bg-white rounded-lg shadow-sm p-8 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No activities yet</h3>
+                    <p class="mt-1 text-sm text-gray-500">Start following users or create content to see activities here.</p>
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-6">
+            {{ $activities->links() }}
+        </div>
     </div>
 </div>
-@endsection
 
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Real-time updates via Laravel Echo
+        // Note: For development, broadcasting uses 'log' driver by default
+        // For production, configure Pusher/Redis and install Laravel Echo
+        @if(config('broadcasting.default') !== 'log' && config('broadcasting.default') !== null)
+        if (typeof Echo !== 'undefined') {
+            // Listen for new activities
+            Echo.channel('activity-feed')
+                .listen('.activity.created', (e) => {
+                    // Reload page or prepend new activity
+                    location.reload();
+                });
+
+            // Listen for activity updates (likes, comments)
+            @foreach($activities as $activity)
+            Echo.channel('activity.{{ $activity->id }}')
+                .listen('.activity.liked', (e) => {
+                    updateActivityLikes('{{ $activity->id }}', e.likes_count, e.liked);
+                })
+                .listen('.activity.commented', (e) => {
+                    updateActivityComments('{{ $activity->id }}', e.comments_count);
+                })
+                .listen('.activity.shared', (e) => {
+                    updateActivityShares('{{ $activity->id }}', e.shares_count);
+                });
+            @endforeach
+        }
+        @endif
+
+        // Like functionality
+        window.likeActivity = function(activityId) {
+            fetch(`/activity/${activityId}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateActivityLikes(activityId, data.likes_count, data.liked);
+            })
+            .catch(error => console.error('Error:', error));
+        };
+
+        // Comment functionality
+        window.commentActivity = function(activityId, parentId = null) {
+            const content = parentId 
+                ? document.querySelector(`#reply-content-${parentId}`).value
+                : document.querySelector(`#comment-content-${activityId}`).value;
+            
+            if (!content.trim()) {
+                alert('Please enter a comment');
+                return;
+            }
+
+            fetch(`/activity/${activityId}/comment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    content: content,
+                    parent_id: parentId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                location.reload(); // Reload to show new comment
+            })
+            .catch(error => console.error('Error:', error));
+        };
+
+        // Share functionality
+        window.shareActivity = function(activityId, platform = 'copy_link') {
+            fetch(`/activity/${activityId}/share`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    platform: platform
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (platform === 'copy_link') {
+                    navigator.clipboard.writeText(data.share_url).then(() => {
+                        alert('Link copied to clipboard!');
+                    });
+                } else {
+                    // Open share dialog for social media
+                    const shareUrl = encodeURIComponent(data.share_url);
+                    const text = encodeURIComponent('Check out this activity on Noteds!');
+                    const urls = {
+                        facebook: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`,
+                        twitter: `https://twitter.com/intent/tweet?url=${shareUrl}&text=${text}`,
+                        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`
+                    };
+                    if (urls[platform]) {
+                        window.open(urls[platform], '_blank', 'width=600,height=400');
+                    }
+                }
+                updateActivityShares(activityId, data.shares_count);
+            })
+            .catch(error => console.error('Error:', error));
+        };
+
+        function updateActivityLikes(activityId, count, liked) {
+            const likeBtn = document.querySelector(`#like-btn-${activityId}`);
+            const likeCount = document.querySelector(`#like-count-${activityId}`);
+            
+            if (likeBtn) {
+                likeBtn.classList.toggle('text-red-600', liked);
+                likeBtn.classList.toggle('text-gray-400', !liked);
+            }
+            if (likeCount) {
+                likeCount.textContent = count;
+            }
+        }
+
+        function updateActivityComments(activityId, count) {
+            const commentCount = document.querySelector(`#comment-count-${activityId}`);
+            if (commentCount) {
+                commentCount.textContent = count;
+            }
+        }
+
+        function updateActivityShares(activityId, count) {
+            const shareCount = document.querySelector(`#share-count-${activityId}`);
+            if (shareCount) {
+                shareCount.textContent = count;
+            }
+        }
+    });
+</script>
+@endpush
+@endsection

@@ -29,6 +29,10 @@ use App\Models\AffiliateCommission;
 use App\Models\AffiliatePayout;
 use App\Models\Certification;
 use App\Models\UserCertification;
+use App\Models\VirusScan;
+use App\Models\NotificationPreference;
+use App\Models\SocialAccount;
+use App\Models\BuyerSubscription;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -72,6 +76,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'verification_reviewed_at',
         'verification_reviewed_by',
         'verification_notes',
+        'quiet_hours_start',
+        'quiet_hours_end',
+        'quiet_hours_enabled',
+        'timezone',
+        'email_digest_frequency',
+        'email_digest_time',
+        'email_digest_timezone',
+        'last_digest_sent_at',
     ];
 
     /**
@@ -100,6 +112,11 @@ class User extends Authenticatable implements MustVerifyEmail
             'suspended_at' => 'datetime',
             'agreement_accepted_at' => 'datetime',
             'verification_reviewed_at' => 'datetime',
+        'quiet_hours_start' => 'datetime',
+        'quiet_hours_end' => 'datetime',
+        'quiet_hours_enabled' => 'boolean',
+        'email_digest_time' => 'datetime',
+        'last_digest_sent_at' => 'datetime',
         ];
     }
 
@@ -447,6 +464,176 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(SupportTicket::class);
     }
 
+    /**
+     * Get social accounts for this user.
+     */
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    /**
+     * Get social account for a specific provider.
+     */
+    public function getSocialAccount(string $provider): ?SocialAccount
+    {
+        return $this->socialAccounts()->where('provider', $provider)->first();
+    }
+
+    /**
+     * Check if user has social account for provider.
+     */
+    public function hasSocialAccount(string $provider): bool
+    {
+        return $this->socialAccounts()->where('provider', $provider)->exists();
+    }
+
+    /**
+     * Get buyer subscriptions for this user.
+     */
+    public function buyerSubscriptions(): HasMany
+    {
+        return $this->hasMany(BuyerSubscription::class);
+    }
+
+    /**
+     * Get active buyer subscription.
+     */
+    public function activeBuyerSubscription(): ?BuyerSubscription
+    {
+        return BuyerSubscription::activeForUser($this->id);
+    }
+
+    /**
+     * Check if user has active subscription.
+     */
+    public function hasActiveSubscription(): bool
+    {
+        return $this->activeBuyerSubscription() !== null;
+    }
+
+    /**
+     * Check if user can access premium note with subscription.
+     */
+    public function canAccessPremiumNote(): bool
+    {
+        // Admin always has access
+        if ($this->hasRole('admin')) {
+            return true;
+        }
+
+        return $this->hasActiveSubscription();
+    }
+
+    /**
+     * Get subscription discount percentage.
+     */
+    public function getSubscriptionDiscount(): int
+    {
+        $subscription = $this->activeBuyerSubscription();
+        
+        if (!$subscription) {
+            return 0;
+        }
+
+        // Return discount based on plan tier
+        return match($subscription->plan->slug) {
+            'basic' => 10,
+            'pro' => 20,
+            'enterprise' => 30,
+            default => 0,
+        };
+    }
+
+    /**
+     * Get notification preferences for this user.
+     */
+    public function notificationPreferences(): HasMany
+    {
+        return $this->hasMany(NotificationPreference::class);
+    }
+
+    /**
+     * Get notification preference for a specific type.
+     */
+    public function getNotificationPreference(string $type): ?NotificationPreference
+    {
+        return $this->notificationPreferences()->where('notification_type', $type)->first();
+    }
+
+    /**
+     * Check if user allows in-app notifications for a type.
+     */
+    public function allowsInAppNotification(string $type): bool
+    {
+        $preference = $this->getNotificationPreference($type);
+        return $preference ? $preference->allowsInApp() : true; // Default: enabled
+    }
+
+    /**
+     * Check if user allows email notifications for a type.
+     */
+    public function allowsEmailNotification(string $type): bool
+    {
+        $preference = $this->getNotificationPreference($type);
+        return $preference ? $preference->allowsEmail() : true; // Default: enabled
+    }
+
+    /**
+     * Check if user allows push notifications for a type.
+     */
+    public function allowsPushNotification(string $type): bool
+    {
+        $preference = $this->getNotificationPreference($type);
+        return $preference ? $preference->allowsPush() : false; // Default: disabled
+    }
+
+    /**
+     * Check if current time is within quiet hours.
+     */
+    public function isInQuietHours(): bool
+    {
+        if (!$this->quiet_hours_enabled || !$this->quiet_hours_start || !$this->quiet_hours_end) {
+            return false;
+        }
+
+        $timezone = $this->timezone ?? config('app.timezone', 'UTC');
+        $now = now()->setTimezone($timezone);
+        $start = $now->copy()->setTimeFromTimeString($this->quiet_hours_start);
+        $end = $now->copy()->setTimeFromTimeString($this->quiet_hours_end);
+
+        // Handle quiet hours that span midnight
+        if ($start->greaterThan($end)) {
+            return $now->greaterThanOrEqualTo($start) || $now->lessThan($end);
+        }
+
+        return $now->greaterThanOrEqualTo($start) && $now->lessThan($end);
+    }
+
+    /**
+     * Check if user wants email digest.
+     */
+    public function wantsEmailDigest(): bool
+    {
+        return $this->email_digest_frequency !== 'none';
+    }
+
+    /**
+     * Check if user wants daily digest.
+     */
+    public function wantsDailyDigest(): bool
+    {
+        return $this->email_digest_frequency === 'daily';
+    }
+
+    /**
+     * Check if user wants weekly digest.
+     */
+    public function wantsWeeklyDigest(): bool
+    {
+        return $this->email_digest_frequency === 'weekly';
+    }
+
     public function notifications()
     {
         return $this->hasMany(AppNotification::class);
@@ -485,6 +672,26 @@ class User extends Authenticatable implements MustVerifyEmail
     public function submittedAccountReports(): HasMany
     {
         return $this->hasMany(UserReport::class, 'user_id');
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    public function activityLikes(): HasMany
+    {
+        return $this->hasMany(ActivityLike::class);
+    }
+
+    public function activityComments(): HasMany
+    {
+        return $this->hasMany(ActivityComment::class);
+    }
+
+    public function activityShares(): HasMany
+    {
+        return $this->hasMany(ActivityShare::class);
     }
 
     public function sellerReviewStats(): array
@@ -918,6 +1125,11 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get active note subscriptions
      */
+    public function virusScans(): HasMany
+    {
+        return $this->hasMany(VirusScan::class, 'scanned_by_user_id');
+    }
+
     public function activeNoteSubscriptions(): HasMany
     {
         return $this->hasMany(\App\Models\NoteSubscription::class)

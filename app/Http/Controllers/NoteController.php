@@ -17,6 +17,8 @@ use App\Services\NotificationService;
 use App\Services\LargeFileUploadService;
 use App\Services\AutoTaggingService;
 use App\Services\VideoService;
+use App\Services\ClamAVService;
+use App\Services\WatermarkingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -265,6 +267,32 @@ class NoteController extends Controller
         // Handle file uploads (with large file support)
         $attachments = $this->handleFileUploadsWithProgress($request, $user);
         
+        // Scan uploaded files for viruses (if enabled)
+        if (config('clamav.realtime_scanning', true)) {
+            $clamAVService = app(ClamAVService::class);
+            if ($clamAVService->isAvailable()) {
+                $infectedFiles = [];
+                foreach ($attachments as $index => $attachment) {
+                    if (is_array($attachment) && isset($attachment['path'])) {
+                        $filePath = Storage::disk($attachment['disk'] ?? 'private')->path($attachment['path']);
+                        $scan = $clamAVService->scanFile($filePath, $attachment['filename'] ?? basename($attachment['path']), $user, 'realtime');
+                        
+                        if ($scan->isInfected()) {
+                            $infectedFiles[] = $attachment['filename'] ?? basename($attachment['path']);
+                            // Remove infected file from attachments
+                            unset($attachments[$index]);
+                        }
+                    }
+                }
+                
+                if (!empty($infectedFiles)) {
+                    return redirect()->route('notes.create')
+                        ->withInput()
+                        ->withErrors(['attachments' => 'Virus terdeteksi pada file: ' . implode(', ', $infectedFiles) . '. File telah dihapus.']);
+                }
+            }
+        }
+        
         // Handle external links
         $externalLinks = $this->handleExternalLinks($request);
         $attachments = array_merge($attachments, $externalLinks);
@@ -322,6 +350,21 @@ class NoteController extends Controller
 
         $note = Note::create($validated);
         $this->syncTags($note, $tags);
+
+        // Create watermark settings if provided
+        if ($request->has('watermark_enabled')) {
+            $this->createWatermarkSettings($note, $request);
+        }
+
+        // Create DRM settings if provided
+        if ($request->has('drm_enabled')) {
+            $this->createDrmSettings($note, $request);
+        }
+
+        // Apply watermarking to uploaded files if enabled
+        if ($note->watermarkSetting && $note->watermarkSetting->enabled) {
+            $this->applyWatermarkingToAttachments($note, $attachments);
+        }
 
         // No auto-tagging - users must tag manually
 
@@ -657,6 +700,9 @@ class NoteController extends Controller
         // Merge new and existing attachments
         $validated['attachments'] = array_merge(array_values($existingAttachments), $newAttachments, $externalLinks);
         $validated['file_count'] = count($validated['attachments']);
+        
+        // Store new attachments for watermarking
+        $newAttachmentsForWatermarking = $newAttachments;
 
         // Handle thumbnail uploads (merge with existing)
         $existingThumbnails = $note->thumbnails ?? [];
@@ -758,6 +804,23 @@ class NoteController extends Controller
 
         $note->update($validated);
         $newTags = $this->syncTags($note, $tags);
+
+        // Update watermark settings if provided
+        if ($request->has('watermark_enabled')) {
+            $this->createWatermarkSettings($note, $request);
+        }
+
+        // Update DRM settings if provided
+        if ($request->has('drm_enabled')) {
+            $this->createDrmSettings($note, $request);
+        }
+
+        // Re-apply watermarking if enabled and new files uploaded
+        if (isset($newAttachmentsForWatermarking) && !empty($newAttachmentsForWatermarking)) {
+            if ($note->watermarkSetting && $note->watermarkSetting->enabled) {
+                $this->applyWatermarkingToAttachments($note, $newAttachmentsForWatermarking);
+            }
+        }
 
         // No auto-tagging - users must tag manually
         
@@ -1283,6 +1346,22 @@ class NoteController extends Controller
 
                     // Use standard upload (max 10MB)
                     $attachment = $uploadService->handleLargeFileUpload($file, $user->id);
+                    
+                    // Scan file for viruses (if enabled)
+                    if (config('clamav.realtime_scanning', true)) {
+                        $clamAVService = app(ClamAVService::class);
+                        if ($clamAVService->isAvailable() && isset($attachment['path'])) {
+                            $filePath = Storage::disk($attachment['disk'] ?? 'private')->path($attachment['path']);
+                            $scan = $clamAVService->scanFile($filePath, $attachment['filename'] ?? $file->getClientOriginalName(), $user, 'realtime');
+                            
+                            if ($scan->isInfected()) {
+                                // Delete infected file
+                                Storage::disk($attachment['disk'] ?? 'private')->delete($attachment['path']);
+                                throw new \Exception('Virus terdeteksi pada file: ' . ($attachment['filename'] ?? $file->getClientOriginalName()));
+                            }
+                        }
+                    }
+                    
                     $attachments[] = $attachment;
 
                 } catch (\Exception $e) {
@@ -1384,6 +1463,80 @@ class NoteController extends Controller
         }
 
         return $thumbnails;
+    }
+
+    /**
+     * Create watermark settings for note
+     */
+    protected function createWatermarkSettings(Note $note, Request $request): void
+    {
+        \App\Models\WatermarkSetting::updateOrCreate(
+            ['note_id' => $note->id],
+            [
+                'enabled' => $request->boolean('watermark_enabled'),
+                'type' => $request->input('watermark_type', 'text'),
+                'text' => $request->input('watermark_text'),
+                'text_color' => $request->input('watermark_text_color', '#000000'),
+                'text_size' => $request->input('watermark_text_size', 24),
+                'text_font' => $request->input('watermark_text_font'),
+                'position' => $request->input('watermark_position', 'center'),
+                'opacity' => $request->input('watermark_opacity', 50),
+                'image_path' => $request->input('watermark_image_path'),
+                'image_size' => $request->input('watermark_image_size'),
+                'margin' => $request->input('watermark_margin', 10),
+                'apply_to_images' => $request->boolean('watermark_apply_to_images', true),
+                'apply_to_pdfs' => $request->boolean('watermark_apply_to_pdfs', true),
+            ]
+        );
+    }
+
+    /**
+     * Create DRM settings for note
+     */
+    protected function createDrmSettings(Note $note, Request $request): void
+    {
+        \App\Models\DrmSetting::updateOrCreate(
+            ['note_id' => $note->id],
+            [
+                'enabled' => $request->boolean('drm_enabled'),
+                'encrypt_files' => $request->boolean('drm_encrypt_files'),
+                'time_limited_access' => $request->boolean('drm_time_limited_access'),
+                'access_duration_days' => $request->input('drm_access_duration_days'),
+                'device_limit_enabled' => $request->boolean('drm_device_limit_enabled'),
+                'max_devices' => $request->input('drm_max_devices', 3),
+                'license_key_enabled' => $request->boolean('drm_license_key_enabled'),
+                'license_key_type' => $request->input('drm_license_key_type', 'per_user'),
+            ]
+        );
+    }
+
+    /**
+     * Apply watermarking to attachments
+     */
+    protected function applyWatermarkingToAttachments(Note $note, array $attachments): void
+    {
+        $watermarkSetting = $note->watermarkSetting;
+        if (!$watermarkSetting || !$watermarkSetting->enabled) {
+            return;
+        }
+
+        $watermarkingService = app(WatermarkingService::class);
+
+        foreach ($attachments as $attachment) {
+            if (is_array($attachment) && isset($attachment['path'])) {
+                $disk = $attachment['disk'] ?? 'private';
+                $watermarkedPath = $watermarkingService->applyWatermark(
+                    $attachment['path'],
+                    $disk,
+                    $watermarkSetting
+                );
+
+                // Update attachment path if watermarked
+                if ($watermarkedPath !== $attachment['path']) {
+                    $attachment['watermarked_path'] = $watermarkedPath;
+                }
+            }
+        }
     }
 
     private function generateContentHash(?string $content): string

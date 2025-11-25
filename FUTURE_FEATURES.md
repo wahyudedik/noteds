@@ -30,7 +30,7 @@
   - Leaderboard untuk top sharers
   - Monthly rewards untuk top sharers
 
-- [ ] **Social Login Integration**
+- [x] **Social Login Integration**
   - Login dengan Google, Facebook, GitHub
   - One-click registration untuk mengurangi friction
   - Auto-import profile picture dari social media
@@ -161,17 +161,17 @@
   - Auto-translate untuk multi-language support
   - Chat notifications (email + push)
 
-### 8. 🟡 Subscription Plans untuk Buyers
+### 8. ✅ Subscription Plans untuk Buyers
 **Impact:** Recurring revenue & user retention
 
-- [ ] **Buyer Subscription Plans**
+- [x] **Buyer Subscription Plans**
   - Monthly/Yearly subscription untuk unlimited access
   - Tiered plans (Basic, Pro, Enterprise)
   - Access to premium notes dengan subscription
   - Discount untuk subscription members
   - Cancel anytime
 
-- [ ] **Subscription Features**
+- [x] **Subscription Features**
   - Auto-renewal
   - Prorated upgrades/downgrades
   - Family/Team plans
@@ -254,7 +254,6 @@
 
 - [ ] **2FA Implementation**
   - TOTP (Time-based One-Time Password)
-  - SMS verification
   - Email verification
   - Backup codes
   - Recovery process
@@ -341,7 +340,7 @@
 ### 21. 🔵 Virus Scanning Integration
 **Impact:** Security (from TASKLIST.md - pending)
 
-- [ ] **ClamAV Integration**
+- [x] **ClamAV Integration**
   - Virus scanning untuk uploaded files
   - Auto-quarantine infected files
   - Scan reports untuk admin
@@ -350,13 +349,13 @@
 ### 22. 🔵 Advanced Content Protection
 **Impact:** Content security
 
-- [ ] **Watermarking**
+- [x] **Watermarking**
   - Auto-watermark untuk images
   - PDF watermarking
   - Customizable watermark (text/logo)
   - Invisible watermarks (steganography)
 
-- [ ] **DRM Protection**
+- [x] **DRM Protection**
   - Encrypted file downloads
   - Time-limited access
   - Device limit untuk downloads
@@ -365,7 +364,7 @@
 ### 23. 🔵 Social Feed & Activity Stream
 **Impact:** Community engagement
 
-- [ ] **Activity Feed**
+- [x] **Activity Feed**
   - Real-time activity stream
   - Filter by activity type
   - Like/comment on activities
@@ -374,7 +373,7 @@
 ### 24. 🔵 Note Collaboration
 **Impact:** Team work
 
-- [ ] **Collaborative Editing**
+- [x] **Collaborative Editing**
   - Multiple authors untuk satu note
   - Real-time collaboration (like Google Docs)
   - Version control
@@ -383,10 +382,9 @@
 ### 25. 🔵 Advanced Notification System
 **Impact:** User engagement
 
-- [ ] **Smart Notifications**
+- [x] **Smart Notifications**
   - Push notifications untuk mobile app
   - Email digests (daily/weekly)
-  - SMS notifications ()
   - Notification preferences per type
   - Quiet hours
 

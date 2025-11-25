@@ -274,6 +274,17 @@ class NotificationService
             return;
         }
 
+        // Check if user allows push notifications (need to extract type from payload or pass it)
+        $type = $payload['type'] ?? 'general';
+        if (!$user->allowsPushNotification($type)) {
+            return;
+        }
+
+        // Don't send push during quiet hours
+        if ($user->isInQuietHours()) {
+            return;
+        }
+
         try {
             logger()->info('Push notification queued', [
                 'user_id' => $user->id,
@@ -293,9 +304,33 @@ class NotificationService
     /**
      * Create a notification for a user.
      * Uses queue for better performance.
+     * Respects user preferences and quiet hours.
      */
-    public function create(User $user, string $type, string $title, string $message, ?string $link = null, ?array $data = null, bool $useQueue = true): AppNotification
+    public function create(User $user, string $type, string $title, string $message, ?string $link = null, ?array $data = null, bool $useQueue = true): ?AppNotification
     {
+        // Check if user is in quiet hours
+        if ($user->isInQuietHours()) {
+            // Still create notification but don't send immediate email/push
+            // User will see it when quiet hours end
+            $notification = AppNotification::create([
+                'user_id' => $user->id,
+                'type' => $type,
+                'title' => $title,
+                'message' => $message,
+                'link' => $link,
+                'data' => $data,
+            ]);
+            return $notification;
+        }
+
+        // Check in-app notification preference
+        $allowInApp = $user->allowsInAppNotification($type);
+        
+        if (!$allowInApp) {
+            // User disabled this notification type, skip entirely
+            return null;
+        }
+
         if ($useQueue && config('queue.default') !== 'sync') {
             // Dispatch to queue for async processing
             SendNotificationJob::dispatch($user->id, $type, $title, $message, $link, $data)
@@ -322,7 +357,10 @@ class NotificationService
                 'data' => $data,
             ]);
 
+            // Check email preference before sending
+            if ($user->allowsEmailNotification($type)) {
             $this->sendForumEmailIfEnabled($user, $type, $title, $message, $link);
+            }
         }
 
         return $notification;
@@ -903,6 +941,16 @@ class NotificationService
     protected function sendForumEmailIfEnabled(User $user, string $type, string $title, string $message, ?string $link = null): void
     {
         if (!Str::startsWith($type, 'forum_')) {
+            return;
+        }
+
+        // Check email preference
+        if (!$user->allowsEmailNotification($type)) {
+            return;
+        }
+
+        // Don't send email during quiet hours
+        if ($user->isInQuietHours()) {
             return;
         }
 

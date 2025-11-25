@@ -223,7 +223,10 @@
                             <div class="flex flex-wrap items-center gap-3">
                                 @php
                                     $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
-                                    $displayPrice = isset($premiumDiscountPrice) ? $premiumDiscountPrice : $basePrice;
+                                    // Apply subscription discount if available
+                                    $displayPrice = isset($subscriptionDiscountPrice) && $subscriptionDiscountPrice < $basePrice 
+                                        ? $subscriptionDiscountPrice 
+                                        : $basePrice;
                                 @endphp
 
                                 <div class="flex items-baseline gap-3">
@@ -242,7 +245,7 @@
                                         <span class="text-2xl font-bold text-gray-900">{{ currency($basePrice) }}</span>
                                     @endif
 
-                                    @if (isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
+                                    @if (isset($subscriptionDiscount) && $subscriptionDiscount > 0 && $displayPrice < $basePrice)
                                         <div class="flex flex-col">
                                             @if (!$note->hasDiscount())
                                                 <span
@@ -252,12 +255,12 @@
                                                 class="text-2xl font-bold text-green-600">{{ currency($displayPrice) }}</span>
                                         </div>
                                         <span
-                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-md">
+                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md">
                                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                 <path
-                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                             </svg>
-                                            -{{ $premiumDiscountPercent }}% Premium
+                                            -{{ $subscriptionDiscount }}% {{ $activeSubscription->plan->name }}
                                         </span>
                                     @endif
                                 </div>
@@ -310,6 +313,19 @@
                                     @endif
                                 </p>
                             </div>
+                        @endif
+
+                        <!-- Subscription Benefits -->
+                        @if(auth()->check() && $note->price > 0)
+                            @if($activeSubscription)
+                                <div class="mt-4">
+                                    <x-subscription-benefits :plan="$activeSubscription->plan" />
+                                </div>
+                            @else
+                                <div class="mt-4">
+                                    <x-subscription-benefits />
+                                </div>
+                            @endif
                         @endif
                     </div>
 

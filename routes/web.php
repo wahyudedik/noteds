@@ -260,12 +260,26 @@ Route::middleware(['auth', 'verified', 'username.setup'])->prefix('escrows')->na
 });
 
 // Note Subscription routes
-Route::middleware(['auth', 'verified', 'username.setup'])->prefix('subscriptions')->name('subscriptions.')->group(function () {
+// Note Subscriptions (per-note subscriptions)
+Route::middleware(['auth', 'verified', 'username.setup'])->prefix('note-subscriptions')->name('note-subscriptions.')->group(function () {
     Route::get('/', [\App\Http\Controllers\NoteSubscriptionController::class, 'index'])->name('index');
     Route::get('/{subscription}', [\App\Http\Controllers\NoteSubscriptionController::class, 'show'])->name('show');
     Route::post('/notes/{note}/subscribe', [\App\Http\Controllers\NoteSubscriptionController::class, 'subscribe'])->name('subscribe');
     Route::post('/{subscription}/cancel', [\App\Http\Controllers\NoteSubscriptionController::class, 'cancel'])->name('cancel');
     Route::post('/{subscription}/reactivate', [\App\Http\Controllers\NoteSubscriptionController::class, 'reactivate'])->name('reactivate');
+});
+
+// Buyer Subscription Plans (unlimited access plans)
+Route::middleware(['auth', 'verified', 'username.setup'])->prefix('subscriptions')->name('subscriptions.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\BuyerSubscriptionController::class, 'index'])->name('index');
+    Route::get('/plans/{plan}', [\App\Http\Controllers\BuyerSubscriptionController::class, 'show'])->name('show');
+    Route::post('/plans/{plan}/subscribe', [\App\Http\Controllers\BuyerSubscriptionController::class, 'subscribe'])->name('subscribe');
+    Route::get('/my-subscription', [\App\Http\Controllers\BuyerSubscriptionController::class, 'mySubscription'])->name('my-subscription');
+    Route::post('/{subscription}/cancel', [\App\Http\Controllers\BuyerSubscriptionController::class, 'cancel'])->name('cancel');
+    Route::post('/{subscription}/change-plan', [\App\Http\Controllers\BuyerSubscriptionController::class, 'changePlan'])->name('change-plan');
+    Route::post('/plans/{plan}/gift', [\App\Http\Controllers\BuyerSubscriptionController::class, 'gift'])->name('gift');
+    Route::get('/payment/{subscription}', [\App\Http\Controllers\BuyerSubscriptionController::class, 'payment'])->name('payment');
+    Route::post('/callback', [\App\Http\Controllers\BuyerSubscriptionController::class, 'callback'])->name('callback');
 });
 
 Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'workspace.user'])->group(function () {
@@ -441,12 +455,45 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
 
     // Note Q&A routes
     Route::post('/notes/{note}/questions', [\App\Http\Controllers\NoteQuestionController::class, 'store'])->name('notes.questions.store');
+
+    // Note Collaboration routes
+    Route::prefix('notes/{note}/collaboration')->name('notes.collaboration.')->group(function () {
+        Route::post('/invite', [\App\Http\Controllers\NoteCollaborationController::class, 'invite'])->name('invite');
+        Route::get('/collaborators', [\App\Http\Controllers\NoteCollaborationController::class, 'getCollaborators'])->name('collaborators');
+        Route::delete('/collaborators/{collaborator}', [\App\Http\Controllers\NoteCollaborationController::class, 'removeCollaborator'])->name('collaborators.remove');
+        Route::put('/collaborators/{collaborator}', [\App\Http\Controllers\NoteCollaborationController::class, 'updateCollaborator'])->name('collaborators.update');
+        
+        // Session management
+        Route::post('/session/join', [\App\Http\Controllers\NoteCollaborationController::class, 'joinSession'])->name('session.join');
+        Route::post('/session/leave', [\App\Http\Controllers\NoteCollaborationController::class, 'leaveSession'])->name('session.leave');
+        Route::post('/session/activity', [\App\Http\Controllers\NoteCollaborationController::class, 'updateSessionActivity'])->name('session.activity');
+        Route::get('/session/active', [\App\Http\Controllers\NoteCollaborationController::class, 'getActiveCollaborators'])->name('session.active');
+        
+        // Version control
+        Route::post('/versions', [\App\Http\Controllers\NoteCollaborationController::class, 'saveVersion'])->name('versions.save');
+        Route::get('/versions', [\App\Http\Controllers\NoteCollaborationController::class, 'getVersions'])->name('versions.index');
+        Route::post('/versions/{version}/restore', [\App\Http\Controllers\NoteCollaborationController::class, 'restoreVersion'])->name('versions.restore');
+        
+        // Comments
+        Route::post('/comments', [\App\Http\Controllers\NoteCollaborationController::class, 'addComment'])->name('comments.add');
+        Route::get('/comments', [\App\Http\Controllers\NoteCollaborationController::class, 'getComments'])->name('comments.index');
+        Route::post('/comments/{comment}/resolve', [\App\Http\Controllers\NoteCollaborationController::class, 'resolveComment'])->name('comments.resolve');
+    });
     // Handle GET requests (e.g., browser refresh after POST) by redirecting to marketplace
     Route::get('/notes/{note}/questions', function (App\Models\Note $note) {
         return redirect()->route('marketplace.show', $note)->withFragment('questions');
     })->name('notes.questions.index');
     Route::post('/questions/{question}/answer', [\App\Http\Controllers\NoteQuestionController::class, 'answer'])->name('questions.answer');
     Route::post('/questions/{question}/helpful', [\App\Http\Controllers\NoteQuestionController::class, 'markHelpful'])->name('questions.helpful');
+
+    // Notification Preferences routes
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/preferences', [\App\Http\Controllers\NotificationPreferenceController::class, 'index'])->name('preferences.index');
+        Route::put('/preferences/{type}', [\App\Http\Controllers\NotificationPreferenceController::class, 'updatePreference'])->name('preferences.update');
+        Route::put('/preferences', [\App\Http\Controllers\NotificationPreferenceController::class, 'bulkUpdate'])->name('preferences.bulk-update');
+        Route::put('/quiet-hours', [\App\Http\Controllers\NotificationPreferenceController::class, 'updateQuietHours'])->name('quiet-hours.update');
+        Route::put('/email-digest', [\App\Http\Controllers\NotificationPreferenceController::class, 'updateEmailDigest'])->name('email-digest.update');
+    });
 
     // Note Templates routes
     Route::get('/templates', [\App\Http\Controllers\NoteTemplateController::class, 'index'])->name('templates.index');
@@ -470,6 +517,10 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     // Activity Feed routes
     Route::get('/activity', [\App\Http\Controllers\ActivityController::class, 'index'])->name('activity.index');
     Route::get('/activity/following', [\App\Http\Controllers\ActivityController::class, 'following'])->name('activity.following');
+    Route::get('/activity/{activity}', [\App\Http\Controllers\ActivityController::class, 'show'])->name('activity.show');
+    Route::post('/activity/{activity}/like', [\App\Http\Controllers\ActivityController::class, 'like'])->name('activity.like');
+    Route::post('/activity/{activity}/comment', [\App\Http\Controllers\ActivityController::class, 'comment'])->name('activity.comment');
+    Route::post('/activity/{activity}/share', [\App\Http\Controllers\ActivityController::class, 'share'])->name('activity.share');
 
     // Messaging routes
     Route::get('/messages', [\App\Http\Controllers\MessageController::class, 'index'])->name('messages.index');
@@ -547,6 +598,18 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::resource('contests', \App\Http\Controllers\Admin\ContestController::class);
     Route::get('/contests/{contest}/entries', [\App\Http\Controllers\Admin\ContestController::class, 'entries'])->name('contests.entries');
     Route::get('/contests/entries/{entry}', [\App\Http\Controllers\Admin\ContestController::class, 'showEntry'])->name('contests.entries.show');
+    Route::resource('virus-scans', \App\Http\Controllers\Admin\VirusScanController::class)->only(['index', 'show']);
+    Route::post('/virus-scans/{virusScan}/quarantine', [\App\Http\Controllers\Admin\VirusScanController::class, 'quarantine'])->name('virus-scans.quarantine');
+    Route::post('/virus-scans/{virusScan}/restore', [\App\Http\Controllers\Admin\VirusScanController::class, 'restore'])->name('virus-scans.restore');
+    Route::delete('/virus-scans/{virusScan}', [\App\Http\Controllers\Admin\VirusScanController::class, 'destroy'])->name('virus-scans.destroy');
+    Route::post('/virus-scans/scan', [\App\Http\Controllers\Admin\VirusScanController::class, 'scan'])->name('virus-scans.scan');
+    Route::get('/virus-scans/statistics', [\App\Http\Controllers\Admin\VirusScanController::class, 'statistics'])->name('virus-scans.statistics');
+    Route::get('/notes/{note}/content-protection', [\App\Http\Controllers\Admin\ContentProtectionController::class, 'show'])->name('content-protection.show');
+    Route::post('/notes/{note}/content-protection/watermark', [\App\Http\Controllers\Admin\ContentProtectionController::class, 'updateWatermark'])->name('content-protection.watermark');
+    Route::post('/notes/{note}/content-protection/drm', [\App\Http\Controllers\Admin\ContentProtectionController::class, 'updateDrm'])->name('content-protection.drm');
+    Route::post('/notes/{note}/content-protection/license-keys', [\App\Http\Controllers\Admin\ContentProtectionController::class, 'generateLicenseKeys'])->name('content-protection.license-keys');
+    Route::get('/notes/{note}/content-protection/access-logs', [\App\Http\Controllers\Admin\ContentProtectionController::class, 'accessLogs'])->name('content-protection.access-logs');
+    Route::get('/notes/{note}/content-protection/license-keys', [\App\Http\Controllers\Admin\ContentProtectionController::class, 'licenseKeys'])->name('content-protection.license-keys-list');
     Route::post('/contests/entries/{entry}/approve', [\App\Http\Controllers\Admin\ContestController::class, 'approveEntry'])->name('contests.entries.approve');
     Route::post('/contests/entries/{entry}/reject', [\App\Http\Controllers\Admin\ContestController::class, 'rejectEntry'])->name('contests.entries.reject');
     Route::post('/contests/{contest}/select-winners', [\App\Http\Controllers\Admin\ContestController::class, 'selectWinners'])->name('contests.select-winners');

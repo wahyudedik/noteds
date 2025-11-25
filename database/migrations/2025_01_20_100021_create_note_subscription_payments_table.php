@@ -22,8 +22,13 @@ return new class extends Migration
             $table->integer('attempt_number')->default(1);
             $table->timestamps();
 
-            $table->foreign('subscription_id')->references('id')->on('note_subscriptions')->onDelete('cascade');
-            $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('set null');
+            // Add foreign keys only if tables exist
+            if (Schema::hasTable('note_subscriptions')) {
+                $table->foreign('subscription_id')->references('id')->on('note_subscriptions')->onDelete('cascade');
+            }
+            if (Schema::hasTable('transactions')) {
+                $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('set null');
+            }
             $table->index('status');
             $table->index('paid_at');
         });

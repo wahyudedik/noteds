@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Activity;
 use App\Models\User;
+use App\Events\ActivityCreated;
 use Illuminate\Database\Eloquent\Model;
 
 class ActivityService
@@ -13,13 +14,18 @@ class ActivityService
      */
     public function log(string $type, Model $subject, ?User $user = null, array $properties = []): Activity
     {
-        return Activity::create([
+        $activity = Activity::create([
             'user_id' => $user?->id ?? auth()->id(),
             'type' => $type,
             'subject_type' => get_class($subject),
             'subject_id' => $subject->id,
             'properties' => $properties,
         ]);
+
+        // Broadcast real-time update
+        event(new ActivityCreated($activity));
+
+        return $activity;
     }
 
     /**

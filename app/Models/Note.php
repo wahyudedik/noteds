@@ -24,6 +24,13 @@ use App\Models\NoteBundle;
 use App\Models\Category;
 use App\Models\NoteSeries;
 use App\Models\NoteShareReferral;
+use App\Models\VirusScan;
+use App\Models\WatermarkSetting;
+use App\Models\DrmSetting;
+use App\Models\NoteCollaborator;
+use App\Models\NoteVersion;
+use App\Models\NoteCollaborationComment;
+use App\Models\NoteCollaborationSession;
 
 class Note extends Model
 {
@@ -254,6 +261,21 @@ class Note extends Model
     public function histories()
     {
         return $this->hasMany(NoteHistory::class)->latest();
+    }
+
+    public function virusScans()
+    {
+        return $this->hasMany(VirusScan::class);
+    }
+
+    public function watermarkSetting()
+    {
+        return $this->hasOne(WatermarkSetting::class);
+    }
+
+    public function drmSetting()
+    {
+        return $this->hasOne(DrmSetting::class);
     }
 
     /**
@@ -723,6 +745,103 @@ class Note extends Model
     public function subscriptions(): HasMany
     {
         return $this->hasMany(\App\Models\NoteSubscription::class);
+    }
+
+    /**
+     * Get collaborators for this note.
+     */
+    public function collaborators(): HasMany
+    {
+        return $this->hasMany(NoteCollaborator::class);
+    }
+
+    /**
+     * Get all authors (including owner and collaborators with author role).
+     */
+    public function authors(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'note_collaborators', 'note_id', 'user_id')
+            ->wherePivot('role', 'author')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get versions for this note.
+     */
+    public function versions(): HasMany
+    {
+        return $this->hasMany(NoteVersion::class)->orderBy('version_number', 'desc');
+    }
+
+    /**
+     * Get current version for this note.
+     */
+    public function currentVersion(): HasMany
+    {
+        return $this->hasMany(NoteVersion::class)->where('is_current', true);
+    }
+
+    /**
+     * Get collaboration comments for this note.
+     */
+    public function collaborationComments(): HasMany
+    {
+        return $this->hasMany(NoteCollaborationComment::class)->whereNull('parent_id')->latest();
+    }
+
+    /**
+     * Get all collaboration comments including replies.
+     */
+    public function allCollaborationComments(): HasMany
+    {
+        return $this->hasMany(NoteCollaborationComment::class)->latest();
+    }
+
+    /**
+     * Get active collaboration sessions for this note.
+     */
+    public function activeCollaborationSessions(): HasMany
+    {
+        return $this->hasMany(NoteCollaborationSession::class)->where('is_active', true);
+    }
+
+    /**
+     * Check if user is a collaborator on this note.
+     */
+    public function isCollaborator(string $userId): bool
+    {
+        return $this->collaborators()->where('user_id', $userId)->exists();
+    }
+
+    /**
+     * Check if user can edit this note (owner or collaborator with edit permission).
+     */
+    public function canUserEdit(string $userId): bool
+    {
+        // Owner can always edit
+        if ($this->user_id === $userId) {
+            return true;
+        }
+
+        // Check collaborator permissions
+        $collaborator = $this->collaborators()->where('user_id', $userId)->first();
+        return $collaborator && $collaborator->can_edit;
+    }
+
+    /**
+     * Get all users who can edit this note.
+     */
+    public function getEditorsAttribute(): \Illuminate\Support\Collection
+    {
+        $editors = collect([$this->user]); // Owner is always an editor
+
+        $collaborators = $this->collaborators()
+            ->where('can_edit', true)
+            ->with('user')
+            ->get()
+            ->pluck('user');
+
+        return $editors->merge($collaborators)->unique('id');
     }
 
     /**

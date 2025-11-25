@@ -64,6 +64,7 @@ class DatabaseSeeder extends Seeder
             ActivitySeeder::class,
             MessageSeeder::class,
             WebhookSeeder::class,
+            SubscriptionPlanSeeder::class, // Buyer Subscription Plans
         ]);
     }
 }

@@ -25,12 +25,21 @@ return new class extends Migration
             $table->json('evidence')->nullable(); // Evidence files/links
             $table->timestamps();
 
-            $table->foreign('refund_id')->references('id')->on('refunds')->onDelete('set null');
-            $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
-            $table->foreign('buyer_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('seller_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('note_id')->references('id')->on('notes')->onDelete('cascade');
-            $table->foreign('resolved_by')->references('id')->on('users')->onDelete('set null');
+            // Add foreign keys only if tables exist
+            if (Schema::hasTable('refunds')) {
+                $table->foreign('refund_id')->references('id')->on('refunds')->onDelete('set null');
+            }
+            if (Schema::hasTable('transactions')) {
+                $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
+            }
+            if (Schema::hasTable('users')) {
+                $table->foreign('buyer_id')->references('id')->on('users')->onDelete('cascade');
+                $table->foreign('seller_id')->references('id')->on('users')->onDelete('cascade');
+                $table->foreign('resolved_by')->references('id')->on('users')->onDelete('set null');
+            }
+            if (Schema::hasTable('notes')) {
+                $table->foreign('note_id')->references('id')->on('notes')->onDelete('cascade');
+            }
             $table->index('status');
             $table->index('type');
         });

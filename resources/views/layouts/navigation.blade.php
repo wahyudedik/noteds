@@ -7,6 +7,7 @@
         $isSellerOrAdmin = $user && ($isSeller || $isAdmin);
         $isBuyerOrAdmin = $user && ($isBuyer || $isAdmin);
         $hasPremium = $user?->hasPremium();
+        $activeSubscription = $user?->activeBuyerSubscription();
 
         $desktopLinkClasses =
             'px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-all duration-200';
@@ -84,6 +85,15 @@
                     'href' => route('marketplace.index'),
                     'active' => request()->routeIs('marketplace.*'),
                 ];
+
+                // Subscription link for buyers
+                if ($isBuyerOrAdmin) {
+                    $primaryLinks[] = [
+                        'label' => 'Subscriptions',
+                        'href' => route('subscriptions.index'),
+                        'active' => request()->routeIs('subscriptions.*'),
+                    ];
+                }
 
                 $primaryLinks[] = [
                     'label' => 'Leaderboards',
@@ -590,20 +600,37 @@
                                             {{ __('messages.my_profile') }}
                                         </div>
                                     </a>
-                                    {{-- Subscription removed - all users have free access to all features --}}
-                                    {{-- @if (!auth()->user()->hasRole('admin'))
-                                        <a href="{{ route('subscription.index') }}"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
-                                            <div class="flex items-center">
-                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                                </svg>
-                                                {{ __('messages.subscription') }}
+                                    <a href="{{ route('notifications.preferences.index') }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                            </svg>
+                                            Notification Preferences
+                                        </div>
+                                    </a>
+                                    @if ($isBuyerOrAdmin)
+                                        <a href="{{ route('subscriptions.my-subscription') }}"
+                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center">
+                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                                    </svg>
+                                                    Subscription
+                                                </div>
+                                                @if($activeSubscription)
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                        Active
+                                                    </span>
+                                                @endif
                                             </div>
                                         </a>
-                                    @endif --}}
+                                    @endif
                                     <div class="border-t border-gray-200 my-1"></div>
                                     <a href="{{ route('support-tickets.create') }}"
                                         class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">

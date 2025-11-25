@@ -132,3 +132,16 @@ Schedule::command('workspaces:send-reminders')
     ->hourly()
     ->timezone('Asia/Jakarta')
     ->description('Send due reminders for workspace tasks and notes.');
+
+// Send daily notification digests (run hourly to check user preferences)
+Schedule::command('notifications:send-daily-digest')
+    ->hourly()
+    ->timezone('UTC')
+    ->description('Send daily email digests to users who have enabled it.');
+
+// Send weekly notification digests (run daily on Monday to check user preferences)
+Schedule::command('notifications:send-weekly-digest')
+    ->daily()
+    ->at('09:00')
+    ->timezone('UTC')
+    ->description('Send weekly email digests to users who have enabled it.');

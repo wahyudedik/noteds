@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Check if workspace_members table exists
+        if (!Schema::hasTable('workspace_members')) {
+            return;
+        }
+
         Schema::table('workspace_members', function (Blueprint $table) {
             $table->json('permissions')->nullable()->after('role'); // Custom permissions per member
             $table->string('team_role')->nullable()->after('permissions'); // Team-specific role (e.g., developer, designer, manager)

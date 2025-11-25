@@ -19,7 +19,29 @@
             Hello {{ $user->name }},
         </p>
         
-        <p style="font-size: 16px; color: #374151;">
+        @if(!empty($summary))
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #667eea;">
+            <h3 style="color: #1f2937; margin-top: 0;">Summary</h3>
+            <p style="margin: 5px 0;"><strong>Total Notifications:</strong> {{ $summary['total'] ?? 0 }}</p>
+            @if(!empty($summary['by_type']))
+                @foreach($summary['by_type'] as $type => $count)
+                <p style="margin: 5px 0;"><strong>{{ ucfirst(str_replace('_', ' ', $type)) }}:</strong> {{ $count }}</p>
+                @endforeach
+            @endif
+        </div>
+        @endif
+
+        @if(!empty($notifications))
+        <h3 style="color: #1f2937; margin-top: 20px;">Your Notifications This Week</h3>
+        @foreach($notifications as $notification)
+            <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #3b82f6;">
+                <h4 style="color: #1f2937; margin: 0 0 5px 0;">{{ $notification['title'] ?? 'Notification' }}</h4>
+                <p style="color: #6b7280; margin: 0; font-size: 14px;">{{ $notification['message'] ?? '' }}</p>
+            </div>
+        @endforeach
+        @endif
+
+        <p style="font-size: 16px; color: #374151; margin-top: 30px;">
             Here are some recommended notes for you this week:
         </p>
         
@@ -52,9 +74,16 @@
             </a>
         </div>
         
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{ route('notifications.index') }}" 
+               style="display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-right: 10px;">
+                View All Notifications
+            </a>
+        </div>
+
         <p style="color: #6b7280; font-size: 14px; margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
             You're receiving this weekly digest because you have it enabled. 
-            <a href="{{ route('profile.edit') }}" style="color: #667eea;">Manage your email preferences</a>.
+            <a href="{{ route('notifications.preferences.index') }}" style="color: #667eea;">Manage your notification preferences</a>.
         </p>
         
         <p style="color: #6b7280; font-size: 12px; margin-top: 20px; text-align: center;">

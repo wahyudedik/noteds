@@ -20,9 +20,16 @@ return new class extends Migration
             $table->timestamp('checked_at')->nullable();
             $table->timestamps();
 
-            $table->foreign('note_id')->references('id')->on('notes')->onDelete('cascade');
-            $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('set null');
-            $table->foreign('checked_by')->references('id')->on('users')->onDelete('set null');
+            // Add foreign keys only if tables exist
+            if (Schema::hasTable('notes')) {
+                $table->foreign('note_id')->references('id')->on('notes')->onDelete('cascade');
+            }
+            if (Schema::hasTable('transactions')) {
+                $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('set null');
+            }
+            if (Schema::hasTable('users')) {
+                $table->foreign('checked_by')->references('id')->on('users')->onDelete('set null');
+            }
             $table->index(['note_id', 'status']);
             $table->index('check_type');
         });

@@ -21,10 +21,17 @@ return new class extends Migration
             $table->timestamp('reviewed_at')->nullable();
             $table->timestamps();
 
-            $table->foreign('contest_id')->references('id')->on('contests')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('note_id')->references('id')->on('notes')->onDelete('cascade');
-            $table->foreign('reviewed_by')->references('id')->on('users')->onDelete('set null');
+            // Add foreign keys only if tables exist
+            if (Schema::hasTable('contests')) {
+                $table->foreign('contest_id')->references('id')->on('contests')->onDelete('cascade');
+            }
+            if (Schema::hasTable('users')) {
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+                $table->foreign('reviewed_by')->references('id')->on('users')->onDelete('set null');
+            }
+            if (Schema::hasTable('notes')) {
+                $table->foreign('note_id')->references('id')->on('notes')->onDelete('cascade');
+            }
             $table->unique(['contest_id', 'note_id']); // One note per contest
             $table->index(['contest_id', 'user_id']);
             $table->index('status');

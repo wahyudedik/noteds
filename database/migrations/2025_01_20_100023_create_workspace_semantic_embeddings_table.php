@@ -18,8 +18,13 @@ return new class extends Migration
             $table->json('metadata')->nullable(); // Additional metadata
             $table->timestamps();
 
-            $table->foreign('workspace_id')->references('id')->on('workspaces')->onDelete('cascade');
-            $table->foreign('note_id')->references('id')->on('notes')->onDelete('cascade');
+            // Add foreign keys only if tables exist
+            if (Schema::hasTable('workspaces')) {
+                $table->foreign('workspace_id')->references('id')->on('workspaces')->onDelete('cascade');
+            }
+            if (Schema::hasTable('notes')) {
+                $table->foreign('note_id')->references('id')->on('notes')->onDelete('cascade');
+            }
             $table->index(['workspace_id', 'content_type']);
         });
     }

@@ -660,8 +660,23 @@ class MarketplaceController extends Controller
         $isNoteOwner = auth()->check() && auth()->id() === $note->user_id;
         $hasPurchasedBefore = $alreadyPurchased ?? false;
         
-        // Premium discount removed - all users are now premium
+        // Calculate base price (with note discount if any)
         $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
+        
+        // Calculate subscription discount if user has active subscription
+        $subscriptionDiscount = 0;
+        $subscriptionDiscountPrice = $basePrice;
+        $activeSubscription = null;
+        
+        if (auth()->check() && $note->price > 0) {
+            $activeSubscription = auth()->user()->activeBuyerSubscription();
+            if ($activeSubscription) {
+                $subscriptionDiscount = auth()->user()->getSubscriptionDiscount();
+                if ($subscriptionDiscount > 0) {
+                    $subscriptionDiscountPrice = $basePrice * (1 - ($subscriptionDiscount / 100));
+                }
+            }
+        }
         
         // Check repurchase info for scarcity mode
         $canRepurchase = false;
@@ -722,6 +737,9 @@ class MarketplaceController extends Controller
         }
 
         return view('marketplace.show', compact(
+            'subscriptionDiscount',
+            'subscriptionDiscountPrice',
+            'activeSubscription',
             'relatedNotes',
             'note',
             'canBuy',
@@ -844,8 +862,17 @@ class MarketplaceController extends Controller
             $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
         }
 
-        // Premium buyer discount removed - all users are now premium
+        // Apply subscription discount if user has active subscription
         $finalPrice = $basePrice;
+        $subscriptionDiscount = 0;
+        $activeSubscription = $buyer->activeBuyerSubscription();
+        
+        if ($activeSubscription && $basePrice > 0) {
+            $subscriptionDiscount = $buyer->getSubscriptionDiscount();
+            if ($subscriptionDiscount > 0) {
+                $finalPrice = $basePrice * (1 - ($subscriptionDiscount / 100));
+            }
+        }
 
             if ($finalPrice <= 0) {
                 DB::rollBack();

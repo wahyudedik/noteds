@@ -70,7 +70,8 @@ Platform di mana pengguna bisa:
 
 ### Quick Start
 - **[LOCAL_SETUP.md](LOCAL_SETUP.md)** — Complete local development setup guide
-- **[VPS_SETUP.md](VPS_SETUP.md)** — VPS deployment & production setup
+- **[VPS_SETUP.md](VPS_SETUP.md)** — VPS deployment & production setup (manual configuration)
+- **[PRODUCTION_SETUP.md](PRODUCTION_SETUP.md)** — Production setup guide for Ubuntu & aaPanel (recommended)
 - **[TASKLIST.md](TASKLIST.md)** — Development phases & task tracking
 - **[PERFORMANCE_SETUP.md](PERFORMANCE_SETUP.md)** — Performance optimization setup guide (Redis, CDN, Image Processing, Telescope)
 - **[SECURITY.md](SECURITY.md)** — Security hardening guide dan best practices
@@ -849,7 +850,9 @@ See [TASKLIST.md](TASKLIST.md) for full task list
 
 1. Review [LOCAL_SETUP.md](LOCAL_SETUP.md) untuk development environment
 2. Check [TASKLIST.md](TASKLIST.md) untuk roadmap & priorities
-3. Deploy ke VPS dengan [VPS_SETUP.md](VPS_SETUP.md)
+3. Deploy ke production:
+   - **Ubuntu + aaPanel:** [PRODUCTION_SETUP.md](PRODUCTION_SETUP.md) (recommended)
+   - **Manual VPS Setup:** [VPS_SETUP.md](VPS_SETUP.md)
 4. Optimize performance dengan [PERFORMANCE_SETUP.md](PERFORMANCE_SETUP.md) (Redis, CDN, Image Processing)
 5. Review security dengan [SECURITY.md](SECURITY.md) (Security headers, rate limiting, file upload security)
 

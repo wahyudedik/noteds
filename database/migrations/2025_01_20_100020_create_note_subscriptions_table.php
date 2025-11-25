@@ -26,8 +26,13 @@ return new class extends Migration
             $table->integer('billing_cycle_count')->default(0); // Number of successful renewals
             $table->timestamps();
 
-            $table->foreign('note_id')->references('id')->on('notes')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            // Add foreign keys only if tables exist
+            if (Schema::hasTable('notes')) {
+                $table->foreign('note_id')->references('id')->on('notes')->onDelete('cascade');
+            }
+            if (Schema::hasTable('users')) {
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            }
             $table->unique(['note_id', 'user_id']); // One subscription per user per note
             $table->index('status');
             $table->index('next_billing_date');

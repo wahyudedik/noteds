@@ -30,13 +30,22 @@ return new class extends Migration
             $table->uuid('dispute_id')->nullable(); // Linked dispute
             $table->timestamps();
 
-            $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
-            $table->foreign('buyer_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('seller_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('note_id')->references('id')->on('notes')->onDelete('cascade');
-            $table->foreign('released_by')->references('id')->on('users')->onDelete('set null');
-            $table->foreign('refunded_by')->references('id')->on('users')->onDelete('set null');
-            $table->foreign('dispute_id')->references('id')->on('disputes')->onDelete('set null');
+            // Add foreign keys only if tables exist
+            if (Schema::hasTable('transactions')) {
+                $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
+            }
+            if (Schema::hasTable('users')) {
+                $table->foreign('buyer_id')->references('id')->on('users')->onDelete('cascade');
+                $table->foreign('seller_id')->references('id')->on('users')->onDelete('cascade');
+                $table->foreign('released_by')->references('id')->on('users')->onDelete('set null');
+                $table->foreign('refunded_by')->references('id')->on('users')->onDelete('set null');
+            }
+            if (Schema::hasTable('notes')) {
+                $table->foreign('note_id')->references('id')->on('notes')->onDelete('cascade');
+            }
+            if (Schema::hasTable('disputes')) {
+                $table->foreign('dispute_id')->references('id')->on('disputes')->onDelete('set null');
+            }
             $table->index('status');
             $table->index('auto_release_at');
         });

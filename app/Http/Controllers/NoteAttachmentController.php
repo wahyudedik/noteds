@@ -6,6 +6,8 @@ use App\Models\Note;
 use App\Models\Transaction;
 use App\Models\PurchasedNote;
 use App\Models\NoteDownload;
+use App\Services\DrmService;
+use App\Services\WatermarkingService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
@@ -102,23 +104,108 @@ class NoteAttachmentController extends Controller
                     abort(403, 'Anda telah mencapai batas download (5x). Upgrade ke Premium untuk unlimited downloads.');
                 }
 
+                // Check DRM access
+                $drmService = app(DrmService::class);
+                $licenseKey = $request->input('license_key');
+                $accessCheck = $drmService->checkAccess($note, $user, $filePath, $licenseKey);
+
+                if (!$accessCheck['allowed']) {
+                    abort(403, $accessCheck['message']);
+                }
+
+                // Log DRM access
+                $drmService->logAccess($note, $user, $filePath, 'download', $licenseKey);
+
                 // Track download
                 $this->trackDownload($user, $note, $filename, $filePath, 'attachment');
                 
                 // Increment download count
                 $purchasedNote->incrementDownload();
+
+                // Apply DRM encryption if enabled
+                $finalFilePath = $this->applyDrmProtection($note, $filePath);
                 
-                return $this->sendFile($filePath);
+                return $this->sendFile($finalFilePath);
             }
         }
 
         // For free notes, allow authenticated users
         if ($note->price == 0 && $user) {
+            // Check DRM access even for free notes
+            $drmService = app(DrmService::class);
+            $licenseKey = $request->input('license_key');
+            $accessCheck = $drmService->checkAccess($note, $user, $filePath, $licenseKey);
+
+            if (!$accessCheck['allowed']) {
+                abort(403, $accessCheck['message']);
+            }
+
+            // Log DRM access
+            $drmService->logAccess($note, $user, $filePath, 'download', $licenseKey);
+
             $this->trackDownload($user, $note, $filename, $filePath, 'attachment');
-            return $this->sendFile($filePath);
+            
+            // Apply DRM encryption if enabled
+            $finalFilePath = $this->applyDrmProtection($note, $filePath);
+            
+            return $this->sendFile($finalFilePath);
         }
 
         abort(403, 'You do not have permission to download this file');
+    }
+
+    /**
+     * Apply DRM protection to file
+     */
+    protected function applyDrmProtection(Note $note, string $filePath): string
+    {
+        $drmSetting = $note->drmSetting;
+
+        if (!$drmSetting || !$drmSetting->enabled || !$drmSetting->encrypt_files) {
+            // Check if watermarked version exists
+            return $this->getWatermarkedPath($filePath) ?? $filePath;
+        }
+
+        $drmService = app(DrmService::class);
+        
+        // Check if encrypted version exists
+        $encryptedPath = $this->getEncryptedPath($filePath);
+        if (Storage::disk('private')->exists($encryptedPath)) {
+            // Decrypt for download
+            $tempPath = $drmService->decryptFile($encryptedPath, 'private');
+            return $tempPath;
+        }
+
+        // Encrypt file
+        $encryptedPath = $drmService->encryptFile($filePath, 'private');
+        
+        // Decrypt for download
+        $tempPath = $drmService->decryptFile($encryptedPath, 'private');
+        return $tempPath;
+    }
+
+    /**
+     * Get watermarked file path if exists
+     */
+    protected function getWatermarkedPath(string $originalPath): ?string
+    {
+        $pathInfo = pathinfo($originalPath);
+        $watermarkedPath = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '_watermarked.' . $pathInfo['extension'];
+        
+        if (Storage::disk('private')->exists($watermarkedPath)) {
+            return $watermarkedPath;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get encrypted file path
+     */
+    protected function getEncryptedPath(string $originalPath): string
+    {
+        $pathInfo = pathinfo($originalPath);
+        return $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '_encrypted.' . $pathInfo['extension'] . '.enc';
     }
 
     /**
@@ -126,18 +213,33 @@ class NoteAttachmentController extends Controller
      */
     protected function sendFile(string $filePath): Response
     {
-        $fullPath = Storage::disk('private')->path($filePath);
+        // Check if it's a temp file (decrypted)
+        $isTemp = str_contains($filePath, storage_path('app/temp'));
+        
+        if ($isTemp) {
+            $fullPath = $filePath;
+            $originalName = basename($filePath, '.tmp');
+        } else {
+            $fullPath = Storage::disk('private')->path($filePath);
+            $originalName = basename($filePath);
+        }
         
         if (!file_exists($fullPath)) {
             abort(404, 'File not found');
         }
 
-        $originalName = basename($filePath);
-        $mimeType = Storage::disk('private')->mimeType($filePath) ?? 'application/octet-stream';
+        $mimeType = mime_content_type($fullPath) ?? 'application/octet-stream';
 
-        return response()->download($fullPath, $originalName, [
+        $response = response()->download($fullPath, $originalName, [
             'Content-Type' => $mimeType,
         ]);
+
+        // Delete temp file after download
+        if ($isTemp) {
+            $response->deleteFileAfterSend(true);
+        }
+
+        return $response;
     }
 
     /**

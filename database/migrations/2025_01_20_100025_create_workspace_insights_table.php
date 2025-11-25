@@ -22,8 +22,13 @@ return new class extends Migration
             $table->timestamp('generated_at');
             $table->timestamps();
 
-            $table->foreign('workspace_id')->references('id')->on('workspaces')->onDelete('cascade');
-            $table->foreign('created_for_user_id')->references('id')->on('users')->onDelete('cascade');
+            // Add foreign keys only if tables exist
+            if (Schema::hasTable('workspaces')) {
+                $table->foreign('workspace_id')->references('id')->on('workspaces')->onDelete('cascade');
+            }
+            if (Schema::hasTable('users')) {
+                $table->foreign('created_for_user_id')->references('id')->on('users')->onDelete('cascade');
+            }
             $table->index(['workspace_id', 'type', 'generated_at']);
             $table->index('is_read');
         });

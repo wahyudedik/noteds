@@ -2603,6 +2603,8 @@ php artisan schedule:run
 ### Documentation Files
 - **[README.md](README.md)** - Project overview dan features
 - **[LOCAL_SETUP.md](LOCAL_SETUP.md)** - Local development setup
+- **[PRODUCTION_SETUP.md](PRODUCTION_SETUP.md)** - Production setup guide for Ubuntu & aaPanel (recommended)
+- **[VPS_SETUP.md](VPS_SETUP.md)** - Manual VPS deployment guide
 - **[TASKLIST.md](TASKLIST.md)** - Development roadmap dan task tracking
 - **[PERFORMANCE_SETUP.md](PERFORMANCE_SETUP.md)** - Performance optimization guide
 - **[SECURITY.md](SECURITY.md)** - Security hardening guide dan best practices

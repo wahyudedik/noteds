@@ -892,6 +892,9 @@
                                 @enderror
                             </div>
 
+                            <!-- Content Protection -->
+                            @include('notes.partials.content-protection')
+
                             <!-- Price and Public Toggle -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
