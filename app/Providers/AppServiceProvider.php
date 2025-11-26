@@ -35,13 +35,16 @@ class AppServiceProvider extends ServiceProvider
                 if ($request) {
                     $host = $request->getHost();
                     $viteDevServerUrl = "http://{$host}:5173";
-                    
+
                     // Set environment variable for Laravel Vite plugin
                     if (!env('VITE_DEV_SERVER_URL')) {
-                        putenv("VITE_DEV_SERVER_URL={$viteDevServerUrl}");
+                        // Use global putenv() function explicitly
+                        if (function_exists('putenv')) {
+                            \putenv("VITE_DEV_SERVER_URL={$viteDevServerUrl}");
+                        }
                         $_ENV['VITE_DEV_SERVER_URL'] = $viteDevServerUrl;
                     }
-                    
+
                     // Use View Composer to fix Vite URLs in rendered views
                     \Illuminate\Support\Facades\View::composer('*', function ($view) use ($host) {
                         $view->with('_vite_host', $host);
