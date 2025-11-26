@@ -53,6 +53,114 @@
                 </div>
             @endif
 
+            <!-- Validation Errors with SweetAlert2 -->
+            @if ($errors->any())
+                @push('scripts')
+                <script>
+                    (function showValidationErrors() {
+                        if (typeof Swal === 'undefined') {
+                            setTimeout(showValidationErrors, 100);
+                            return;
+                        }
+
+                        const errors = @json($errors->all());
+                        const errorFields = @json($errors->keys());
+                        
+                        // Get field labels mapping
+                        const fieldLabels = {
+                            'title': 'Judul',
+                            'content': 'Konten',
+                            'price': 'Harga',
+                            'discount_price': 'Harga Diskon',
+                            'attachments': 'File Lampiran',
+                            'attachments.*': 'File Lampiran',
+                            'thumbnails': 'Thumbnail',
+                            'thumbnails.*': 'Thumbnail',
+                            'video_preview': 'Video Preview',
+                            'external_links': 'Link Eksternal',
+                            'workspace_id': 'Workspace',
+                            'folder_id': 'Folder',
+                            'tags': 'Tag',
+                            'tags.*': 'Tag',
+                            'ecosystem_category': 'Kategori Ekosistem',
+                            'code_language': 'Bahasa Pemrograman',
+                            'code_framework': 'Framework',
+                            'code_type': 'Tipe Code',
+                            'code_demo_link': 'Link Demo Code',
+                            'photo_resolution': 'Resolusi Photo',
+                            'photo_type': 'Tipe Photo',
+                            'photo_format': 'Format Photo',
+                            'photo_gallery_link': 'Link Gallery Photo',
+                            'design_type': 'Tipe Design',
+                            'design_format': 'Format Design',
+                            'design_preview_link': 'Link Preview Design',
+                            'audio_duration': 'Durasi Audio',
+                            'audio_format': 'Format Audio',
+                            'audio_genre': 'Genre Audio',
+                            'audio_link': 'Link Audio',
+                            'video_duration': 'Durasi Video',
+                            'video_resolution': 'Resolusi Video',
+                            'video_format': 'Format Video',
+                            'video_link': 'Link Video',
+                            'theme_platform': 'Platform Theme',
+                            'theme_type': 'Tipe Theme',
+                            'theme_preview_link': 'Link Preview Theme',
+                            'three_d_format': 'Format 3D',
+                            'three_d_type': 'Tipe 3D',
+                            'three_d_preview_link': 'Link Preview 3D',
+                            'language': 'Bahasa',
+                            'scheduled_publish_at': 'Jadwal Publikasi',
+                            'summary': 'Ringkasan',
+                            'preview_content': 'Konten Preview',
+                            'preview_percentage': 'Persentase Preview',
+                        };
+
+                        // Build error message
+                        let errorMessage = '<div class="text-left">';
+                        errorMessage += '<p class="font-semibold mb-2">Mohon perbaiki kesalahan berikut:</p>';
+                        errorMessage += '<ul class="list-disc list-inside space-y-1 text-sm">';
+                        
+                        errors.forEach((error, index) => {
+                            const field = errorFields[index] || '';
+                            const fieldLabel = fieldLabels[field] || field;
+                            errorMessage += `<li>${error}</li>`;
+                        });
+                        
+                        errorMessage += '</ul>';
+                        errorMessage += '</div>';
+
+                        // Show SweetAlert2 error
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Validasi Gagal',
+                            html: errorMessage,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#dc2626',
+                            width: '500px',
+                            customClass: {
+                                popup: 'text-left'
+                            }
+                        });
+
+                        // Scroll to first error field
+                        const firstErrorField = errorFields[0];
+                        if (firstErrorField) {
+                            const fieldElement = document.querySelector(`[name="${firstErrorField}"], [name="${firstErrorField}.*"]`);
+                            if (fieldElement) {
+                                setTimeout(() => {
+                                    fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    fieldElement.focus();
+                                    if (fieldElement.classList) {
+                                        fieldElement.classList.add('border-red-500', 'ring-2', 'ring-red-500');
+                                    }
+                                }, 500);
+                            }
+                        }
+                    })();
+                </script>
+                @endpush
+            @endif
+
 
             <!-- Form Card -->
             <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
@@ -67,7 +175,8 @@
                             <!-- Title -->
                             <div>
                                 <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('messages.title') }} <span class="text-red-500">*</span>
+                                    {{ __('messages.title') }} <span class="text-red-500 font-bold" title="Wajib diisi">*</span>
+                                    <span class="text-xs text-gray-500 ml-1">(Wajib)</span>
                                 </label>
                                 <input type="text" name="title" id="title" value="{{ old('title') }}" required
                                     :placeholder="__('messages.enter_note_title')"
@@ -527,10 +636,11 @@
                             <!-- Content (Rich Text Editor) -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('messages.content') }} <span class="text-red-500">*</span>
+                                    {{ __('messages.content') }} <span class="text-red-500 font-bold" title="Wajib diisi">*</span>
+                                    <span class="text-xs text-gray-500 ml-1">(Wajib)</span>
                                 </label>
                                 <div class="mt-1" id="editor-wrapper" style="min-height: 300px;">
-                                    <div id="content-editor" style="min-height: 300px;"></div>
+                                    <div id="content-editor" style="min-height: 300px;" class="@error('content') border-2 border-red-500 rounded-lg @enderror"></div>
                                 </div>
                                 <textarea name="content" id="content" class="hidden" required>{{ old('content') }}</textarea>
                                 @error('content')
@@ -543,6 +653,9 @@
                                         {{ $message }}
                                     </p>
                                 @enderror
+                                <p class="mt-2 text-xs text-gray-500">
+                                    <span class="font-semibold text-red-500">*</span> Field ini wajib diisi untuk membuat note.
+                                </p>
                             </div>
 
                             <!-- Summary -->

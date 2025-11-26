@@ -56,7 +56,8 @@ return [
     'tier' => 'Tier',
     'rate' => 'Rate',
     'no_commissions' => 'No commissions yet',
-    'status' => [
+    'status' => 'Status',
+    'statuses' => [
         'pending' => 'Pending',
         'approved' => 'Approved',
         'paid' => 'Paid',

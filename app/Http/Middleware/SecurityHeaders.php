@@ -95,6 +95,9 @@ class SecurityHeaders
         // Iconify Icons CDN
         $sources[] = 'https://code.iconify.design';
         
+        // Quill.js CDN (Rich Text Editor)
+        $sources[] = 'https://cdn.quilljs.com';
+        
         // CDN URLs
         if ($cdnUrl = config('filesystems.disks.public.url')) {
             $sources[] = parse_url($cdnUrl, PHP_URL_HOST);
@@ -121,6 +124,9 @@ class SecurityHeaders
         
         // Bunny Fonts
         $sources[] = 'https://fonts.bunny.net';
+        
+        // Quill.js CDN (Rich Text Editor CSS)
+        $sources[] = 'https://cdn.quilljs.com';
         
         // CDN URLs
         if ($cdnUrl = config('filesystems.disks.public.url')) {

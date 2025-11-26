@@ -56,7 +56,8 @@ return [
     'tier' => 'Tier',
     'rate' => 'Tingkat',
     'no_commissions' => 'Belum ada komisi',
-    'status' => [
+    'status' => 'Status',
+    'statuses' => [
         'pending' => 'Pending',
         'approved' => 'Disetujui',
         'paid' => 'Dibayar',

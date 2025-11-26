@@ -36,7 +36,7 @@
                 <p class="text-2xl font-bold text-blue-600 mt-2">{{ currency($approvedCommissions) }}</p>
             </div>
             <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 p-6">
-                <p class="text-sm font-medium text-gray-500">{{ __('affiliate.status.paid') }}</p>
+                <p class="text-sm font-medium text-gray-500">{{ __('affiliate.statuses.paid') }}</p>
                 <p class="text-2xl font-bold text-green-600 mt-2">{{ currency($paidCommissions) }}</p>
             </div>
         </div>
@@ -46,9 +46,9 @@
             <form method="GET" action="{{ route('admin.affiliate.commissions') }}" class="flex gap-4 flex-wrap">
                 <select name="status" class="rounded-md border-gray-300 shadow-sm">
                     <option value="">{{ __('messages.all_status') }}</option>
-                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>{{ __('affiliate.status.pending') }}</option>
-                    <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>{{ __('affiliate.status.approved') }}</option>
-                    <option value="paid" {{ request('status') === 'paid' ? 'selected' : '' }}>{{ __('affiliate.status.paid') }}</option>
+                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>{{ __('affiliate.statuses.pending') }}</option>
+                    <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>{{ __('affiliate.statuses.approved') }}</option>
+                    <option value="paid" {{ request('status') === 'paid' ? 'selected' : '' }}>{{ __('affiliate.statuses.paid') }}</option>
                 </select>
                 <select name="tier" class="rounded-md border-gray-300 shadow-sm">
                     <option value="">{{ __('messages.all_tiers') ?: 'All Tiers' }}</option>
@@ -139,7 +139,7 @@
                                         <span class="px-2 py-1 rounded text-xs font-medium 
                                             {{ $commission->status === 'paid' ? 'bg-green-100 text-green-800' : 
                                                ($commission->status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                            {{ __('affiliate.status.' . $commission->status) }}
+                                            {{ __('affiliate.statuses.' . $commission->status) }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">

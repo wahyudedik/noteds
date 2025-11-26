@@ -771,7 +771,7 @@ Menjadi **AI Memory Platform** pertama dari Indonesia yang mampu memahami kontek
 ### Ekosistem Kreatif (Roadmap/Marketing)
 - [x] Elements: Langganan kreatif unlimited (akses jutaan aset)
 - [x] AudioJungle: Musik & SFX katalog besar (royalty-safe)
-- [x] CodeCanyon: Plugin, kode, skrip (Bootstrap/JS/PHP/WordPress/HTML5)
+- [x] Code: Plugin, kode, skrip (Bootstrap/JS/PHP/WordPress/HTML5)
 - [x] GraphicRiver: Aset grafis (logo, font, Photoshop actions, materi cetak)
 - [x] PhotoDune: Fotografi stok bebas royalti
 - [x] Themeforest: Template premium (WordPress, Shopify, dsb)

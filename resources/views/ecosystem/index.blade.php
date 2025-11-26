@@ -60,10 +60,10 @@
                 <h3 class="text-xl font-semibold text-slate-900">{{ __('messages.codecanyon') }}</h3>
                 <p class="mt-2 text-slate-600">{{ __('messages.codecanyon_description') }}</p>
                 <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <a href="{{ route('marketplace.index', ['ecosystem' => 'codecanyon']) }}" class="block p-4 rounded-lg border border-slate-200 hover:border-blue-300 hover:shadow">
+                    <a href="{{ route('marketplace.index', ['ecosystem' => 'code']) }}" class="block p-4 rounded-lg border border-slate-200 hover:border-blue-300 hover:shadow">
                         {{ __('messages.collection_laravel_snippets') }}
                     </a>
-                    <a href="{{ route('marketplace.index', ['ecosystem' => 'codecanyon']) }}" class="block p-4 rounded-lg border border-slate-200 hover:border-blue-300 hover:shadow">
+                    <a href="{{ route('marketplace.index', ['ecosystem' => 'code']) }}" class="block p-4 rounded-lg border border-slate-200 hover:border-blue-300 hover:shadow">
                         {{ __('messages.collection_wordpress_plugins') }}
                     </a>
                 </div>

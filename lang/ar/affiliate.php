@@ -56,7 +56,8 @@ return [
     'tier' => 'المستوى',
     'rate' => 'المعدل',
     'no_commissions' => 'لا توجد عمولات بعد',
-    'status' => [
+    'status' => 'الحالة',
+    'statuses' => [
         'pending' => 'معلق',
         'approved' => 'معتمد',
         'paid' => 'مدفوع',

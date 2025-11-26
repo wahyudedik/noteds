@@ -1862,7 +1862,7 @@ return [
     'elements_description' => 'الوصول إلى ملايين الأصول الإبداعية برسوم منخفضة واحدة شهرياً/سنوياً.',
     'audiojungle' => 'AudioJungle',
     'audiojungle_description' => 'مئات الآلاف من مسارات الموسيقى ومؤثرات الصوت من المجتمع المهني.',
-    'codecanyon' => 'CodeCanyon',
+    'codecanyon' => 'Code',
     'codecanyon_description' => 'الآلاف من الإضافات والكودات والنصوص البرمجية لـ Bootstrap و JS و PHP و WordPress و HTML5.',
     'graphicriver' => 'GraphicRiver',
     'graphicriver_description' => 'الأصول والتصاميم الرسومية: قوالب الشعارات، الخطوط، إجراءات Photoshop، مواد الطباعة.',

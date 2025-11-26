@@ -1990,7 +1990,7 @@ return [
     'elements_description' => 'Akses ke jutaan aset kreatif hanya dengan satu biaya rendah per bulan/tahun.',
     'audiojungle' => 'AudioJungle',
     'audiojungle_description' => 'Ratusan ribu trek musik dan efek suara oleh komunitas profesional.',
-    'codecanyon' => 'CodeCanyon',
+    'codecanyon' => 'Code',
     'codecanyon_description' => 'Ribuan plugin, kode, dan skrip untuk Bootstrap, JS, PHP, WordPress, HTML5.',
     'graphicriver' => 'GraphicRiver',
     'graphicriver_description' => 'Aset grafis dan desain: template logo, font, Photoshop actions, materi cetak.',

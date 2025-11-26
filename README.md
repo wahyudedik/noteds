@@ -196,7 +196,7 @@ Platform di mana pengguna bisa:
 - ✅ Ecosystem Creative (Envato-like)
   - Elements: Unlimited creative subscription
   - AudioJungle: Music tracks & sound effects
-  - CodeCanyon: Plugins, code, scripts
+  - Code: Plugins, code, scripts
   - GraphicRiver: Graphic assets & designs
   - PhotoDune: Royalty-free stock photography
   - Themeforest: Premium website templates
@@ -244,7 +244,7 @@ Platform di mana pengguna bisa:
 - ✅ **Video Previews** — Upload video preview for notes (max 2 minutes) with auto-generated thumbnails and hover-to-play functionality
 - ✅ **Rich Media Support** — Enhanced media previews for different content types:
   - Audio preview player for audio notes (AudioJungle ecosystem)
-  - Interactive code preview with syntax highlighting for code notes (CodeCanyon ecosystem)
+  - Interactive code preview with syntax highlighting for code notes (Code ecosystem)
   - 3D model viewer using model-viewer for 3D assets (3DOcean ecosystem)
   - PDF preview with page navigation and zoom controls
 - ✅ **Media Gallery** — Advanced image gallery with lightbox viewer:
@@ -288,7 +288,7 @@ Platform di mana pengguna bisa:
   - Dibuat oleh komunitas profesional musik global
   - Cocok untuk video, podcast, game, dan iklan
 
-- **CodeCanyon (Kode & Plugin):**
+- **Code (Kode & Plugin):**
   - Ribuan plugin, kode, dan skrip
   - Dukungan framework populer: Bootstrap, JavaScript, PHP, WordPress, HTML5, dsb.
   - Cocok untuk mempercepat pengembangan produk digital
@@ -758,7 +758,7 @@ composer pint
 - ✅ Sale Mode System (Scarcity & Standard modes dengan repurchase, resale, analytics)
 - ✅ Comprehensive Documentation System (22 documentation entries via DocumentationSeeder)
 - ✅ Identity Verification (KYC) dengan admin approval workflow
-- ✅ Ecosystem Creative (8 categories: Elements, AudioJungle, CodeCanyon, GraphicRiver, PhotoDune, Themeforest, VideoHive, 3DOcean)
+- ✅ Ecosystem Creative (8 categories: Elements, AudioJungle, Code, GraphicRiver, PhotoDune, Themeforest, VideoHive, 3DOcean)
 - ✅ Studio Order Flow (Brief, Quote, Escrow, Milestones, Vendor dashboard)
 - ✅ Note Time & Language Management (Scheduled publish, language filtering)
 - ✅ System Health Monitoring dengan realtime alerts

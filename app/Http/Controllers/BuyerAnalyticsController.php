@@ -70,9 +70,10 @@ class BuyerAnalyticsController extends Controller
         // Favorite categories/topics (from note categories)
         $favoriteCategories = DB::table('purchased_notes')
             ->join('notes', 'purchased_notes.note_id', '=', 'notes.id')
-            ->join('note_category', 'notes.id', '=', 'note_category.note_id')
-            ->join('categories', 'note_category.category_id', '=', 'categories.id')
+            ->leftJoin('note_category', 'notes.id', '=', 'note_category.note_id')
+            ->leftJoin('categories', 'note_category.category_id', '=', 'categories.id')
             ->where('purchased_notes.user_id', $user->id)
+            ->whereNotNull('categories.id') // Only include notes that have categories
             ->select('categories.id', 'categories.name', 'categories.slug', DB::raw('COUNT(DISTINCT purchased_notes.note_id) as note_count'))
             ->groupBy('categories.id', 'categories.name', 'categories.slug')
             ->orderByDesc('note_count')

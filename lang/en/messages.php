@@ -2010,7 +2010,7 @@ return [
     'elements_description' => 'Access to millions of creative assets with one low monthly/yearly fee.',
     'audiojungle' => 'AudioJungle',
     'audiojungle_description' => 'Hundreds of thousands of music tracks and sound effects by professional community.',
-    'codecanyon' => 'CodeCanyon',
+    'codecanyon' => 'Code',
     'codecanyon_description' => 'Thousands of plugins, code, and scripts for Bootstrap, JS, PHP, WordPress, HTML5.',
     'graphicriver' => 'GraphicRiver',
     'graphicriver_description' => 'Graphic assets and designs: logo templates, fonts, Photoshop actions, print materials.',
