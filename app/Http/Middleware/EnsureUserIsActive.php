@@ -16,24 +16,36 @@ class EnsureUserIsActive
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
+        // Only check for authenticated users
+        if (!Auth::check()) {
+            return $next($request);
+        }
 
-        if ($user && (! $user->is_active || $user->isSuspended())) {
-            Auth::guard('web')->logout();
+        try {
+            $user = Auth::user();
 
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+            if ($user && (! $user->is_active || $user->isSuspended())) {
+                Auth::guard('web')->logout();
 
-            $message = $user->isSuspended()
-                ? __('auth.suspended')
-                : __('auth.inactive');
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
 
-            return redirect()->route('login')->withErrors([
-                'email' => $message,
+                $message = $user->isSuspended()
+                    ? __('auth.suspended')
+                    : __('auth.inactive');
+
+                return redirect()->route('login')->withErrors([
+                    'email' => $message,
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Log error but don't break the request
+            \Log::error('Error in EnsureUserIsActive middleware', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
         }
 
         return $next($request);
     }
 }
-
