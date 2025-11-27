@@ -1,4 +1,15 @@
-<div x-data="{ mobileMenuOpen: false }" class="relative">
+<div x-data="{
+    mobileMenuOpen: false,
+    init() {
+        // Close menu when window is resized to desktop width
+        const closeOnResize = () => {
+            if (window.innerWidth >= 1024) { // lg breakpoint
+                this.mobileMenuOpen = false;
+            }
+        };
+        window.addEventListener('resize', closeOnResize);
+    }
+}" class="relative">
     @php
         $user = auth()->user();
         $isAdmin = $user?->hasRole('admin');
@@ -714,8 +725,11 @@
     <div x-show="mobileMenuOpen" x-cloak x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 -translate-y-1" @click.away="mobileMenuOpen = false"
-        class="lg:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50 max-h-[calc(100vh-4rem)] overflow-y-auto">
+        x-transition:leave-end="opacity-0 -translate-y-1" 
+        @click.away="mobileMenuOpen = false"
+        @keydown.escape="mobileMenuOpen = false"
+        class="lg:hidden fixed inset-0 top-[3.5rem] bg-white border-b border-gray-200 shadow-lg z-50 max-h-[calc(100vh-3.5rem)] overflow-y-auto"
+        style="display: none;">
         <div class="px-4 py-4 space-y-1">
             @foreach ($primaryLinks as $link)
                 @if (isset($link['submenu']) && !empty($link['submenu']))
