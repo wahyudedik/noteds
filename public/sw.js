@@ -2,11 +2,10 @@
 const CACHE_NAME = 'noteds-v1';
 const RUNTIME_CACHE = 'noteds-runtime-v1';
 
-// Assets to cache on install
+// Assets to cache on install (only public pages, NOT protected routes)
 const STATIC_ASSETS = [
     '/',
     '/marketplace',
-    '/dashboard',
     '/favicon.png',
     '/favicon.ico',
 ];
@@ -54,6 +53,20 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // For navigation requests (HTML pages), always go to network first
+    // This prevents serving stale HTML and caching protected pages
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request, { redirect: 'follow' })
+                .catch(() => {
+                    // Fallback to home page if network fails
+                    return caches.match('/');
+                })
+        );
+        return;
+    }
+
+    // For other requests (assets, API calls), use cache-first strategy
     event.respondWith(
         caches.match(event.request)
             .then((cachedResponse) => {
@@ -62,16 +75,16 @@ self.addEventListener('fetch', (event) => {
                 }
 
                 return caches.open(RUNTIME_CACHE).then((cache) => {
-                    return fetch(event.request)
+                    return fetch(event.request, { redirect: 'follow' })
                         .then((response) => {
-                            // Cache successful responses
+                            // Only cache successful responses with status 200
                             if (response.status === 200) {
                                 cache.put(event.request, response.clone());
                             }
                             return response;
                         })
                         .catch(() => {
-                            // Return offline page if available
+                            // Return offline fallback if available
                             return caches.match('/');
                         });
                 });
