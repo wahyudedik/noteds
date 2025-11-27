@@ -2,5 +2,6 @@
 
 return [
     App\Providers\AppServiceProvider::class,
-    App\Providers\TelescopeServiceProvider::class,
+    // Telescope disabled in production
+    // App\Providers\TelescopeServiceProvider::class,
 ];
