@@ -44,44 +44,44 @@ class NoteController extends Controller
     public function create(Request $request): View
     {
         $user = auth()->user();
-        
+
         // Check if user is seller or workspace user (middleware already checks, but double check for security)
         if (!in_array($user->role, ['seller', 'user_workspaces']) && !$user->hasRole('admin')) {
             abort(403, 'Fitur ini hanya tersedia untuk Seller atau Workspace User. Buyer tidak dapat membuat note. Jika ingin membuat note, silakan buat akun Seller dengan email berbeda atau bergabung dengan workspace.');
         }
-        
+
         // Check if user has uploaded document identity and selfie (admin tidak perlu verifikasi)
         if (!$user->hasRole('admin') && (!$user->ktp_path || !$user->selfie_path)) {
             return redirect()->route('profile.edit')
                 ->with('error', 'Silakan lengkapi profil Anda dengan mengupload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk membuat note.');
         }
-        
+
         $tags = Tag::orderBy('name')->get();
-        
+
         // Get folders and workspaces for all users
         $folders = $user->allFolders()->get();
         $workspaces = $user->allWorkspaces();
         $selectedWorkspace = null;
         $selectedFolder = null;
-            
+
         // Pre-select workspace if specified
         if ($request->has('workspace_id')) {
             $selectedWorkspace = \App\Models\Workspace::where('id', $request->workspace_id)
-                ->where(function($q) use ($user) {
+                ->where(function ($q) use ($user) {
                     $q->where('owner_id', $user->id)
-                      ->orWhereHas('members', function($q) use ($user) {
-                          $q->where('users.id', $user->id);
-                      });
+                        ->orWhereHas('members', function ($q) use ($user) {
+                            $q->where('users.id', $user->id);
+                        });
                 })
                 ->first();
         }
-        
+
         // Pre-select folder if specified
         if ($request->has('folder_id')) {
             $selectedFolder = \App\Models\Folder::where('id', $request->folder_id)
                 ->where('user_id', $user->id)
                 ->first();
-            
+
             // If folder has workspace, use it
             if ($selectedFolder && $selectedFolder->workspace_id && !$selectedWorkspace) {
                 $selectedWorkspace = $selectedFolder->workspace;
@@ -126,43 +126,43 @@ class NoteController extends Controller
     public function store(StoreNoteRequest $request): RedirectResponse
     {
         $user = auth()->user();
-        
+
         // Check if user is seller or workspace user (middleware already checks, but double check for security)
         if (!in_array($user->role, ['seller', 'user_workspaces']) && !$user->hasRole('admin')) {
             return redirect()->route('dashboard')->with('error', 'Fitur ini hanya tersedia untuk Seller atau Workspace User. Buyer tidak dapat membuat note. Jika ingin membuat note, silakan buat akun Seller dengan email berbeda atau bergabung dengan workspace.');
         }
-        
+
         // Check if user has uploaded document identity and selfie (admin tidak perlu verifikasi)
         if (!$user->hasRole('admin') && (!$user->ktp_path || !$user->selfie_path)) {
             return redirect()->route('profile.edit')
                 ->with('error', 'Silakan lengkapi profil Anda dengan mengupload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk membuat note.');
         }
-        
+
         // No note creation limit - all users can create unlimited notes
 
         // Validate and handle file uploads
         $user = auth()->user();
         $uploadService = app(LargeFileUploadService::class);
-        
+
         if ($request->hasFile('attachments')) {
             $files = $request->file('attachments');
             $validationErrors = [];
-            
+
             // Check maximum files
             if (count($files) > 10) {
                 return redirect()->route('notes.create')
                     ->withInput()
                     ->withErrors(['attachments' => 'Maximum 10 files allowed per note.']);
             }
-            
+
             foreach ($files as $index => $file) {
                 $validation = $uploadService->validateFile($file);
-                
+
                 if (!$validation['valid']) {
                     $validationErrors["attachments.{$index}"] = $validation['error'];
                 }
             }
-            
+
             if (!empty($validationErrors)) {
                 return redirect()->route('notes.create')
                     ->withInput()
@@ -197,22 +197,22 @@ class NoteController extends Controller
                 ]);
         }
         $validated['content_hash'] = $contentHash;
-        
+
         // Handle workspace and folder with validation
         $workspace = null;
         $folder = null;
         $validationErrors = [];
-        
+
         if (!empty($validated['workspace_id'])) {
             $workspace = \App\Models\Workspace::where('id', $validated['workspace_id'])
-                ->where(function($q) use ($user) {
+                ->where(function ($q) use ($user) {
                     $q->where('owner_id', $user->id)
-                      ->orWhereHas('members', function($q) use ($user) {
-                          $q->where('users.id', $user->id);
-                      });
+                        ->orWhereHas('members', function ($q) use ($user) {
+                            $q->where('users.id', $user->id);
+                        });
                 })
                 ->first();
-            
+
             if ($workspace) {
                 $validated['workspace_id'] = $workspace->id;
             } else {
@@ -220,26 +220,26 @@ class NoteController extends Controller
                 unset($validated['workspace_id']);
             }
         }
-        
+
         if (!empty($validated['folder_id'])) {
             $folder = \App\Models\Folder::where('id', $validated['folder_id'])
                 ->where('user_id', $user->id)
                 ->first();
-            
+
             if ($folder) {
                 $validated['folder_id'] = $folder->id;
                 // If folder has workspace, use it
                 if ($folder->workspace_id && !$workspace) {
                     // Validate folder's workspace access
                     $folderWorkspace = \App\Models\Workspace::where('id', $folder->workspace_id)
-                        ->where(function($q) use ($user) {
+                        ->where(function ($q) use ($user) {
                             $q->where('owner_id', $user->id)
-                              ->orWhereHas('members', function($q) use ($user) {
-                                  $q->where('users.id', $user->id);
-                              });
+                                ->orWhereHas('members', function ($q) use ($user) {
+                                    $q->where('users.id', $user->id);
+                                });
                         })
                         ->first();
-                    
+
                     if ($folderWorkspace) {
                         $validated['workspace_id'] = $folderWorkspace->id;
                         $workspace = $folderWorkspace;
@@ -250,7 +250,7 @@ class NoteController extends Controller
                 unset($validated['folder_id']);
             }
         }
-        
+
         // Return validation errors if any
         if (!empty($validationErrors)) {
             return redirect()->route('notes.create')
@@ -266,7 +266,7 @@ class NoteController extends Controller
 
         // Handle file uploads (with large file support)
         $attachments = $this->handleFileUploadsWithProgress($request, $user);
-        
+
         // Scan uploaded files for viruses (if enabled)
         if (config('clamav.realtime_scanning', true)) {
             $clamAVService = app(ClamAVService::class);
@@ -276,7 +276,7 @@ class NoteController extends Controller
                     if (is_array($attachment) && isset($attachment['path'])) {
                         $filePath = Storage::disk($attachment['disk'] ?? 'private')->path($attachment['path']);
                         $scan = $clamAVService->scanFile($filePath, $attachment['filename'] ?? basename($attachment['path']), $user, 'realtime');
-                        
+
                         if ($scan->isInfected()) {
                             $infectedFiles[] = $attachment['filename'] ?? basename($attachment['path']);
                             // Remove infected file from attachments
@@ -284,7 +284,7 @@ class NoteController extends Controller
                         }
                     }
                 }
-                
+
                 if (!empty($infectedFiles)) {
                     return redirect()->route('notes.create')
                         ->withInput()
@@ -292,11 +292,11 @@ class NoteController extends Controller
                 }
             }
         }
-        
+
         // Handle external links
         $externalLinks = $this->handleExternalLinks($request);
         $attachments = array_merge($attachments, $externalLinks);
-        
+
         $validated['attachments'] = $attachments;
         $validated['file_count'] = count($attachments);
 
@@ -330,9 +330,9 @@ class NoteController extends Controller
         // Handle draft and scheduled publishing
         $isDraft = $request->has('save_as_draft') || $request->input('is_draft', false);
         $scheduledPublishAt = $request->input('scheduled_publish_at');
-        
+
         $validated['is_draft'] = $isDraft;
-        
+
         // Use scheduled_publish_at (from form) and also set scheduled_at for compatibility
         if ($scheduledPublishAt && !$isDraft) {
             $scheduledDate = \Carbon\Carbon::parse($scheduledPublishAt);
@@ -342,7 +342,7 @@ class NoteController extends Controller
         } else {
             $validated['scheduled_at'] = null;
         }
-        
+
         // If not draft and not scheduled, publish immediately
         if (!$isDraft && !$scheduledPublishAt) {
             $validated['published_at'] = now();
@@ -404,13 +404,25 @@ class NoteController extends Controller
             if ($folder) {
                 $redirectParams['folder'] = $folder->id;
             }
+            // Clear caches to ensure new note appears immediately
+            \Illuminate\Support\Facades\Cache::forget("workspace_notes_{$workspace->id}");
+            \Illuminate\Support\Facades\Cache::forget("user_notes_{$user->id}");
+            if ($folder) {
+                \Illuminate\Support\Facades\Cache::forget("folder_notes_{$folder->id}");
+            }
             return redirect()->route('workspaces.show', $redirectParams)
                 ->with('success', __('messages.note_created_successfully'));
         } elseif ($folder) {
+            // Clear caches to ensure new note appears immediately
+            \Illuminate\Support\Facades\Cache::forget("folder_notes_{$folder->id}");
+            \Illuminate\Support\Facades\Cache::forget("user_notes_{$user->id}");
             return redirect()->route('folders.show', $folder)
                 ->with('success', __('messages.note_created_successfully'));
         }
-        
+
+        // Clear caches to ensure new note appears immediately
+        \Illuminate\Support\Facades\Cache::forget("user_notes_{$user->id}");
+        \Illuminate\Support\Facades\Cache::forget("user_all_notes_{$user->id}");
         return redirect()->route('notes.index')
             ->with('success', __('messages.note_created_successfully'));
     }
@@ -423,7 +435,7 @@ class NoteController extends Controller
         $this->authorize('view', $note);
 
         $note->load('tags', 'user', 'reviews', 'histories.user', 'transactions.buyer', 'transactions.seller', 'transactions.originalCreator');
-        
+
         // Get buyer history (all successful transactions) - visible to original creator
         $buyerHistory = collect();
         if (auth()->check() && ($note->original_creator_id === auth()->id() || $note->user_id === auth()->id())) {
@@ -433,7 +445,7 @@ class NoteController extends Controller
                 ->orderBy('created_at', 'asc')
                 ->get();
         }
-        
+
         // Get update history (all history records except 'sold') - visible to original creator
         $updateHistory = collect();
         if (auth()->check() && ($note->original_creator_id === auth()->id() || $note->user_id === auth()->id())) {
@@ -443,7 +455,7 @@ class NoteController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
         }
-        
+
         // Check if note has been sold (cannot delete)
         $hasTransactions = $note->transactions()
             ->where('status', 'success')
@@ -462,7 +474,7 @@ class NoteController extends Controller
         $tags = Tag::orderBy('name')->get();
         $note->load('tags', 'folder', 'workspace');
         $user = auth()->user();
-        
+
         // Get folders and workspaces for all users
         $folders = $user->allFolders()->get();
         $workspaces = $user->allWorkspaces();
@@ -507,12 +519,12 @@ class NoteController extends Controller
         $this->authorize('update', $note);
 
         $user = auth()->user();
-        
+
         // Check if note has been sold - prevent changing certain fields
         $hasTransactions = $note->transactions()
             ->where('status', 'success')
             ->exists();
-        
+
         if ($hasTransactions) {
             // If note has been sold, prevent changing sale_mode and price-related fields
             // These fields should remain unchanged to maintain transaction integrity
@@ -525,11 +537,11 @@ class NoteController extends Controller
 
         // Validate and handle file uploads
         $uploadService = app(LargeFileUploadService::class);
-        
+
         if ($request->hasFile('attachments')) {
             $files = $request->file('attachments');
             $validationErrors = [];
-            
+
             // Check maximum files (including existing)
             $existingCount = count($note->attachments ?? []);
             if (count($files) + $existingCount > 10) {
@@ -537,15 +549,15 @@ class NoteController extends Controller
                     ->withInput()
                     ->withErrors(['attachments' => 'Maximum 10 files allowed per note.']);
             }
-            
+
             foreach ($files as $index => $file) {
                 $validation = $uploadService->validateFile($file);
-                
+
                 if (!$validation['valid']) {
                     $validationErrors["attachments.{$index}"] = $validation['error'];
                 }
             }
-            
+
             if (!empty($validationErrors)) {
                 return redirect()->route('notes.edit', $note)
                     ->withInput()
@@ -563,7 +575,7 @@ class NoteController extends Controller
         $workspace = null;
         $folder = null;
         $validationErrors = [];
-        
+
         // Handle folder first (because folder can determine workspace)
         if ($request->has('folder_id')) {
             $folderId = $request->input('folder_id');
@@ -571,20 +583,20 @@ class NoteController extends Controller
                 $folder = \App\Models\Folder::where('id', $folderId)
                     ->where('user_id', $user->id)
                     ->first();
-                
+
                 if ($folder) {
                     $validated['folder_id'] = $folder->id;
                     // If folder has workspace, validate access to it
                     if ($folder->workspace_id) {
                         $folderWorkspace = \App\Models\Workspace::where('id', $folder->workspace_id)
-                            ->where(function($q) use ($user) {
+                            ->where(function ($q) use ($user) {
                                 $q->where('owner_id', $user->id)
-                                  ->orWhereHas('members', function($q) use ($user) {
-                                      $q->where('users.id', $user->id);
-                                  });
+                                    ->orWhereHas('members', function ($q) use ($user) {
+                                        $q->where('users.id', $user->id);
+                                    });
                             })
                             ->first();
-                        
+
                         if ($folderWorkspace) {
                             $workspace = $folderWorkspace;
                             $validated['workspace_id'] = $workspace->id;
@@ -605,7 +617,7 @@ class NoteController extends Controller
             }
         }
         // If folder_id not in request, keep existing (don't add to validated, will not be updated)
-        
+
         // Handle workspace (can be set independently or by folder)
         if ($request->has('workspace_id')) {
             $workspaceId = $request->input('workspace_id');
@@ -613,14 +625,14 @@ class NoteController extends Controller
                 // Only process if not already set by folder
                 if (!isset($validated['workspace_id'])) {
                     $workspace = \App\Models\Workspace::where('id', $workspaceId)
-                        ->where(function($q) use ($user) {
+                        ->where(function ($q) use ($user) {
                             $q->where('owner_id', $user->id)
-                              ->orWhereHas('members', function($q) use ($user) {
-                                  $q->where('users.id', $user->id);
-                              });
+                                ->orWhereHas('members', function ($q) use ($user) {
+                                    $q->where('users.id', $user->id);
+                                });
                         })
                         ->first();
-                    
+
                     if ($workspace) {
                         $validated['workspace_id'] = $workspace->id;
                     } else {
@@ -638,14 +650,14 @@ class NoteController extends Controller
             }
         }
         // If workspace_id not in request, keep existing (don't add to validated, will not be updated)
-        
+
         // Load workspace and folder for activity log and redirect
         if (isset($validated['workspace_id'])) {
             $workspace = $workspace ?? \App\Models\Workspace::find($validated['workspace_id']);
         } else if ($note->workspace_id) {
             $workspace = $note->workspace;
         }
-        
+
         if (isset($validated['folder_id'])) {
             $folder = $folder ?? ($validated['folder_id'] ? \App\Models\Folder::find($validated['folder_id']) : null);
         } else if ($note->folder_id) {
@@ -676,10 +688,10 @@ class NoteController extends Controller
         // Handle file uploads (merge with existing, with large file support)
         $newAttachments = $this->handleFileUploadsWithProgress($request, $user);
         $existingAttachments = $note->attachments ?? [];
-        
+
         // Keep existing attachments unless explicitly removed
         $removedAttachments = $request->input('removed_attachments', []);
-        $existingAttachments = array_filter($existingAttachments, function($attachment) use ($removedAttachments) {
+        $existingAttachments = array_filter($existingAttachments, function ($attachment) use ($removedAttachments) {
             // Check if it's an external link
             if (is_array($attachment) && isset($attachment['type']) && $attachment['type'] === 'external') {
                 $url = $attachment['url'] ?? '';
@@ -696,11 +708,11 @@ class NoteController extends Controller
 
         // Handle external links
         $externalLinks = $this->handleExternalLinks($request);
-        
+
         // Merge new and existing attachments
         $validated['attachments'] = array_merge(array_values($existingAttachments), $newAttachments, $externalLinks);
         $validated['file_count'] = count($validated['attachments']);
-        
+
         // Store new attachments for watermarking
         $newAttachmentsForWatermarking = $newAttachments;
 
@@ -708,15 +720,15 @@ class NoteController extends Controller
         $existingThumbnails = $note->thumbnails ?? [];
         $newThumbnails = $this->handleThumbnailUploads($request);
         $removedThumbnails = $request->input('removed_thumbnails', []);
-        
+
         // Remove deleted thumbnails
-        $existingThumbnails = array_filter($existingThumbnails, function($thumbnail) use ($removedThumbnails) {
+        $existingThumbnails = array_filter($existingThumbnails, function ($thumbnail) use ($removedThumbnails) {
             return !in_array($thumbnail, $removedThumbnails);
         });
-        
+
         // Merge new and existing thumbnails
         $validated['thumbnails'] = array_merge(array_values($existingThumbnails), $newThumbnails);
-        
+
         // Limit to 5 thumbnails
         if (count($validated['thumbnails']) > 5) {
             $validated['thumbnails'] = array_slice($validated['thumbnails'], 0, 5);
@@ -765,10 +777,10 @@ class NoteController extends Controller
         $scheduledPublishAt = $request->input('scheduled_publish_at');
         $scheduledAt = $request->input('scheduled_at'); // Also check for scheduled_at (from edit form)
         $publishNow = $request->has('publish_now');
-        
+
         // Use scheduled_publish_at if available, otherwise use scheduled_at
         $scheduledDate = $scheduledPublishAt ?: $scheduledAt;
-        
+
         if ($publishNow && $note->is_draft) {
             // Publishing draft now
             $validated['is_draft'] = false;
@@ -823,7 +835,7 @@ class NoteController extends Controller
         }
 
         // No auto-tagging - users must tag manually
-        
+
         $newData = $note->fresh()->only(['title', 'content', 'summary', 'price', 'discount_price', 'is_public', 'status', 'preview_content', 'preview_percentage']);
 
         // Create note history record for versioning
@@ -834,7 +846,7 @@ class NoteController extends Controller
                 $changes[] = ucfirst(str_replace('_', ' ', $key)) . ': "' . (is_string($oldValue) ? Str::limit($oldValue, 50) : $oldValue) . '" → "' . (is_string($newValue) ? Str::limit($newValue, 50) : $newValue) . '"';
             }
         }
-        
+
         // Tag changes
         $addedTags = array_diff($newTags, $oldTags);
         $removedTags = array_diff($oldTags, $newTags);
@@ -844,7 +856,7 @@ class NoteController extends Controller
         if (!empty($removedTags)) {
             $changes[] = 'Tags removed: ' . implode(', ', $removedTags);
         }
-        
+
         // Create history record
         \App\Models\NoteHistory::create([
             'note_id' => $note->id,
@@ -859,7 +871,7 @@ class NoteController extends Controller
         // Log activity
         $activityService = app(NoteActivityService::class);
         $activityService->logUpdated($note, auth()->user(), $oldData, $newData);
-        
+
         // Log tag changes if any
         if (!empty($addedTags) || !empty($removedTags)) {
             $activityService->logTagged($note, auth()->user(), $addedTags, $removedTags);
@@ -888,13 +900,28 @@ class NoteController extends Controller
             if ($folder) {
                 $redirectParams['folder'] = $folder->id;
             }
+            // Clear caches to ensure updates appear immediately
+            \Illuminate\Support\Facades\Cache::forget("note_{$note->id}");
+            \Illuminate\Support\Facades\Cache::forget("workspace_notes_{$workspace->id}");
+            \Illuminate\Support\Facades\Cache::forget("user_notes_{$user->id}");
+            if ($folder) {
+                \Illuminate\Support\Facades\Cache::forget("folder_notes_{$folder->id}");
+            }
             return redirect()->route('workspaces.show', $redirectParams)
                 ->with('success', 'Note updated successfully.');
         } elseif ($folder) {
+            // Clear caches to ensure updates appear immediately
+            \Illuminate\Support\Facades\Cache::forget("note_{$note->id}");
+            \Illuminate\Support\Facades\Cache::forget("folder_notes_{$folder->id}");
+            \Illuminate\Support\Facades\Cache::forget("user_notes_{$user->id}");
             return redirect()->route('folders.show', $folder)
                 ->with('success', 'Note updated successfully.');
         }
-        
+
+        // Clear caches to ensure updates appear immediately
+        \Illuminate\Support\Facades\Cache::forget("note_{$note->id}");
+        \Illuminate\Support\Facades\Cache::forget("user_notes_{$user->id}");
+        \Illuminate\Support\Facades\Cache::forget("user_all_notes_{$user->id}");
         return redirect()->route('notes.index')->with('success', 'Note updated successfully.');
     }
 
@@ -904,42 +931,42 @@ class NoteController extends Controller
     public function resaleForm(Note $note): View|RedirectResponse
     {
         $user = auth()->user();
-        
+
         // Check authorization
         if (!$user || $user->role !== 'buyer') {
             return redirect()->route('marketplace.show', $note)
                 ->with('error', 'Hanya buyer yang bisa menjual kembali note.');
         }
-        
+
         if ($note->user_id !== $user->id) {
             return redirect()->route('marketplace.show', $note)
                 ->with('error', 'Anda bukan pemilik note ini.');
         }
-        
+
         if (!$note->isScarcityMode()) {
             return redirect()->route('marketplace.show', $note)
                 ->with('error', 'Note dengan Standard Mode tidak bisa di-resell. Hanya Scarcity Mode yang bisa di-resell.');
         }
-        
+
         // Check if user has purchased this note
         $purchasedNote = PurchasedNote::where('user_id', $user->id)
             ->where('note_id', $note->id)
             ->first();
-        
+
         if (!$purchasedNote) {
             return redirect()->route('marketplace.show', $note)
                 ->with('error', 'Anda belum pernah membeli note ini.');
         }
-        
+
         // Get original purchase price
         $purchaseTransaction = Transaction::where('buyer_id', $user->id)
             ->where('note_id', $note->id)
             ->where('status', 'success')
             ->first();
-        
+
         $originalPrice = $purchaseTransaction ? (float) $purchaseTransaction->amount : 0;
         $currentPrice = $note->price > 0 ? (float) $note->price : $originalPrice;
-        
+
         // Get price guidance
         $defaultMinPrice = Setting::getDefaultMinPrice();
         $recommendedPrice = $defaultMinPrice > 0
@@ -952,7 +979,7 @@ class NoteController extends Controller
             'category_rules' => Setting::getCategoryMinPriceList(),
             'original_price' => $originalPrice,
         ];
-        
+
         return view('notes.resale', compact('note', 'originalPrice', 'currentPrice', 'priceGuidance'));
     }
 
@@ -963,14 +990,14 @@ class NoteController extends Controller
     {
         $validated = $request->validated();
         $resalePrice = (float) $validated['resale_price'];
-        
+
         // Update note price (decimal:2 - cast to string for proper decimal handling)
         $note->price = (string) number_format($resalePrice, 2, '.', '');
         $note->discount_price = null; // Clear discount when reselling
         $note->is_public = true; // Make sure note is public for resale
         $note->status = 'active';
         $note->save();
-        
+
         // Create note history record
         \App\Models\NoteHistory::create([
             'note_id' => $note->id,
@@ -981,14 +1008,16 @@ class NoteController extends Controller
             'changes' => 'Resale price set to ' . currency($resalePrice),
             'notes' => 'Note listed for resale by ' . auth()->user()->name,
         ]);
-        
+
         // Log activity
         $oldPrice = $note->getOriginal('price');
-        app(NoteActivityService::class)->logUpdated($note, auth()->user(), 
-            ['price' => $oldPrice], 
+        app(NoteActivityService::class)->logUpdated(
+            $note,
+            auth()->user(),
+            ['price' => $oldPrice],
             ['price' => $resalePrice]
         );
-        
+
         return redirect()->route('marketplace.show', $note)
             ->with('success', 'Note berhasil dipasang untuk dijual dengan harga ' . currency($resalePrice) . '. Buyer lain sekarang bisa membeli note ini dari Anda.');
     }
@@ -1004,13 +1033,28 @@ class NoteController extends Controller
         $hasTransactions = $note->transactions()
             ->where('status', 'success')
             ->exists();
-        
+
         if ($hasTransactions) {
             return redirect()->route('notes.show', $note)
                 ->with('error', 'Cannot delete note that has been sold. Note has been purchased by buyers and cannot be deleted. You can still update it, but deletion is not allowed.');
         }
 
+        $user = $note->user;
+        $workspace = $note->workspace;
+        $folder = $note->folder;
+
         $note->delete();
+
+        // Clear caches to ensure deletion appears immediately
+        \Illuminate\Support\Facades\Cache::forget("note_{$note->id}");
+        \Illuminate\Support\Facades\Cache::forget("user_notes_{$user->id}");
+        \Illuminate\Support\Facades\Cache::forget("user_all_notes_{$user->id}");
+        if ($workspace) {
+            \Illuminate\Support\Facades\Cache::forget("workspace_notes_{$workspace->id}");
+        }
+        if ($folder) {
+            \Illuminate\Support\Facades\Cache::forget("folder_notes_{$folder->id}");
+        }
 
         return redirect()->route('notes.index')->with('success', 'Note deleted successfully.');
     }
@@ -1063,9 +1107,9 @@ class NoteController extends Controller
         set_time_limit(900); // 15 minutes for very large files (51MB+)
         ini_set('max_execution_time', '900');
         ini_set('max_input_time', '900'); // Also increase input time
-        
+
         $user = auth()->user();
-        
+
         // Check if file was actually uploaded
         if (!$request->hasFile('file')) {
             // Check if it's a PHP upload error
@@ -1080,17 +1124,17 @@ class NoteController extends Controller
                     UPLOAD_ERR_CANT_WRITE => 'Gagal menulis file ke disk.',
                     UPLOAD_ERR_EXTENSION => 'Upload dihentikan oleh extension PHP.',
                 ];
-                
+
                 $errorCode = is_numeric($uploadError) ? (int)$uploadError : UPLOAD_ERR_NO_FILE;
                 $errorMessage = $errorMessages[$errorCode] ?? 'Unknown upload error';
-                
+
                 return response()->json([
                     'success' => false,
                     'error' => $errorMessage,
                     'error_code' => $errorCode
                 ], 400);
             }
-            
+
             return response()->json([
                 'success' => false,
                 'error' => 'Tidak ada file yang dipilih atau file terlalu besar (melebihi post_max_size atau upload_max_filesize di PHP).'
@@ -1098,7 +1142,7 @@ class NoteController extends Controller
         }
 
         $file = $request->file('file');
-        
+
         // Check if file upload was successful
         if (!$file->isValid()) {
             $errorCode = $file->getError();
@@ -1111,18 +1155,18 @@ class NoteController extends Controller
                 UPLOAD_ERR_CANT_WRITE => 'Gagal menulis file ke disk.',
                 UPLOAD_ERR_EXTENSION => 'Upload dihentikan oleh extension PHP.',
             ];
-            
+
             $errorMessage = $errorMessages[$errorCode] ?? 'File upload error: ' . $errorCode;
-            
+
             // Check PHP configuration limits
             $uploadMaxFilesize = ini_get('upload_max_filesize');
             $postMaxSize = ini_get('post_max_size');
             $fileSizeMB = round($file->getSize() / 1048576, 2);
-            
+
             if ($errorCode == UPLOAD_ERR_INI_SIZE || $errorCode == UPLOAD_ERR_FORM_SIZE) {
                 $errorMessage .= " File Anda: {$fileSizeMB}MB. Limit server: upload_max_filesize={$uploadMaxFilesize}, post_max_size={$postMaxSize}";
             }
-            
+
             return response()->json([
                 'success' => false,
                 'error' => $errorMessage,
@@ -1136,13 +1180,13 @@ class NoteController extends Controller
         }
 
         $uploadService = app(LargeFileUploadService::class);
-        
+
         // Validate file
         $validation = $uploadService->validateFile($file);
-        
+
         if (!$validation['valid']) {
             $errorMessage = $validation['error'] ?? 'File validation failed';
-            
+
             return response()->json([
                 'success' => false,
                 'error' => $errorMessage,
@@ -1158,17 +1202,17 @@ class NoteController extends Controller
                 'memory_limit' => ini_get('memory_limit'),
                 'max_execution_time' => ini_get('max_execution_time'),
             ]);
-            
+
             // Memory limit and execution time already increased at the start of method
             // Upload file (memory limit already set to 512M)
             $attachment = $uploadService->handleLargeFileUpload($file, $user->id);
-            
+
             // Store in session for later use in form submission
             // Only store minimal data to avoid session size issues
             $sessionKey = 'background_uploads_' . $user->id;
             $backgroundUploads = session($sessionKey, []);
             $uploadId = Str::uuid();
-            
+
             // Store only essential data (not the full file content)
             $backgroundUploads[$uploadId] = [
                 'filename' => $attachment['filename'],
@@ -1177,10 +1221,10 @@ class NoteController extends Controller
                 'mime' => $attachment['mime'],
                 'is_large' => $attachment['is_large'] ?? false,
             ];
-            
+
             // Save session with minimal data
             session([$sessionKey => $backgroundUploads]);
-            
+
             // Log successful upload
             \Log::info('Background upload completed', [
                 'user_id' => $user->id,
@@ -1188,14 +1232,13 @@ class NoteController extends Controller
                 'filename' => $attachment['filename'],
                 'file_size_mb' => round($attachment['size'] / 1048576, 2),
             ]);
-            
+
             return response()->json([
                 'success' => true,
                 'upload_id' => $uploadId,
                 'attachment' => $attachment,
                 'message' => 'File uploaded successfully'
             ]);
-            
         } catch (\Exception $e) {
             $errorMessage = $e->getMessage();
             $fileSize = $file->getSize() ?? 0;
@@ -1208,13 +1251,13 @@ class NoteController extends Controller
             $currentMemoryUsageMB = round($currentMemoryUsage / 1048576, 2);
             $memoryLimitBytes = $this->convertMemoryToBytes($memoryLimit);
             $memoryLimitMB = round($memoryLimitBytes / 1048576, 2);
-            
+
             // Check if it's a memory exhaustion error
-            $isMemoryError = str_contains($errorMessage, 'memory') 
-                || str_contains($errorMessage, 'Memory') 
-                || str_contains($errorMessage, 'Allowed memory') 
+            $isMemoryError = str_contains($errorMessage, 'memory')
+                || str_contains($errorMessage, 'Memory')
+                || str_contains($errorMessage, 'Allowed memory')
                 || str_contains($errorMessage, 'exhausted');
-            
+
             // Provide more helpful error messages with reassurance
             if ($isMemoryError) {
                 $errorMessage = "Out of memory. File terlalu besar ({$fileSizeMB}MB). Memory limit: {$memoryLimitMB}MB, Usage: {$currentMemoryUsageMB}MB. File akan otomatis diupload saat form disubmit dengan memory limit yang lebih besar.";
@@ -1228,7 +1271,7 @@ class NoteController extends Controller
                 // Generic error with reassuring message
                 $errorMessage = "Upload gagal: {$errorMessage}. File: {$fileSizeMB}MB. File akan otomatis diupload saat form disubmit.";
             }
-            
+
             \Log::error('Background file upload failed', [
                 'user_id' => $user->id,
                 'filename' => $file->getClientOriginalName(),
@@ -1245,7 +1288,7 @@ class NoteController extends Controller
                 'post_max_size' => $postMaxSize,
                 'max_execution_time' => $maxExecutionTime,
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'error' => $errorMessage,
@@ -1270,28 +1313,28 @@ class NoteController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(600);
         ini_set('max_execution_time', '600');
-        
+
         $attachments = [];
         $uploadService = app(LargeFileUploadService::class);
-        
+
         // Get background uploaded files from session
         $sessionKey = 'background_uploads_' . $user->id;
         $backgroundUploads = session($sessionKey, []);
         $uploadIds = $request->input('background_upload_ids', []);
-        
+
         // Add background uploaded files
         foreach ($uploadIds as $uploadId) {
             if (isset($backgroundUploads[$uploadId])) {
                 $attachments[] = $backgroundUploads[$uploadId];
             }
         }
-        
+
         // Handle regular file uploads (< 5MB or files not uploaded in background)
         if ($request->hasFile('attachments')) {
             $files = $request->file('attachments');
             $backgroundUploadIds = $request->input('background_upload_ids', []);
             $backgroundFileNames = [];
-            
+
             // Get filenames of background uploaded files
             foreach ($backgroundUploadIds as $uploadId) {
                 if (isset($backgroundUploads[$uploadId])) {
@@ -1320,7 +1363,7 @@ class NoteController extends Controller
                 if (in_array($file->getClientOriginalName(), $backgroundFileNames)) {
                     continue;
                 }
-                
+
                 try {
                     // Validate MIME type
                     $allowedMimes = [
@@ -1346,14 +1389,14 @@ class NoteController extends Controller
 
                     // Use standard upload (max 10MB)
                     $attachment = $uploadService->handleLargeFileUpload($file, $user->id);
-                    
+
                     // Scan file for viruses (if enabled)
                     if (config('clamav.realtime_scanning', true)) {
                         $clamAVService = app(ClamAVService::class);
                         if ($clamAVService->isAvailable() && isset($attachment['path'])) {
                             $filePath = Storage::disk($attachment['disk'] ?? 'private')->path($attachment['path']);
                             $scan = $clamAVService->scanFile($filePath, $attachment['filename'] ?? $file->getClientOriginalName(), $user, 'realtime');
-                            
+
                             if ($scan->isInfected()) {
                                 // Delete infected file
                                 Storage::disk($attachment['disk'] ?? 'private')->delete($attachment['path']);
@@ -1361,9 +1404,8 @@ class NoteController extends Controller
                             }
                         }
                     }
-                    
-                    $attachments[] = $attachment;
 
+                    $attachments[] = $attachment;
                 } catch (\Exception $e) {
                     // Log error but continue with other files
                     \Log::error('File upload failed', [
@@ -1380,13 +1422,13 @@ class NoteController extends Controller
                 }
             }
         }
-        
+
         // Clear background uploads from session after use
         if (!empty($uploadIds)) {
             $remainingUploads = array_diff_key($backgroundUploads, array_flip($uploadIds));
             session([$sessionKey => $remainingUploads]);
         }
-        
+
         return $attachments;
     }
 
@@ -1398,17 +1440,17 @@ class NoteController extends Controller
     {
         $externalLinks = [];
         $linksText = $request->input('external_links');
-        
+
         if (empty($linksText)) {
             return $externalLinks;
         }
-        
+
         // Split by newlines and filter empty lines
         $links = array_filter(
             array_map('trim', explode("\n", $linksText)),
             fn($link) => !empty($link)
         );
-        
+
         foreach ($links as $link) {
             // Validate URL
             if (filter_var($link, FILTER_VALIDATE_URL)) {
@@ -1419,7 +1461,7 @@ class NoteController extends Controller
                 if (empty($filename) || $filename === '/') {
                     $filename = 'External Link';
                 }
-                
+
                 $externalLinks[] = [
                     'type' => 'external',
                     'url' => $link,
@@ -1428,7 +1470,7 @@ class NoteController extends Controller
                 ];
             }
         }
-        
+
         return $externalLinks;
     }
 
@@ -1557,7 +1599,7 @@ class NoteController extends Controller
 
         $duplicate = Note::query()
             ->where('content_hash', $contentHash)
-            ->when($ignoreNoteId, fn ($query) => $query->where('id', '!=', $ignoreNoteId))
+            ->when($ignoreNoteId, fn($query) => $query->where('id', '!=', $ignoreNoteId))
             ->where(function ($query) use ($user) {
                 $query->whereNull('original_creator_id')
                     ->orWhere('original_creator_id', '!=', $user->id);
@@ -1600,7 +1642,7 @@ class NoteController extends Controller
         if (empty($memoryLimit) || $memoryLimit === '-1') {
             return PHP_INT_MAX;
         }
-        
+
         $last = strtolower($memoryLimit[strlen($memoryLimit) - 1]);
         $value = (int) $memoryLimit;
 

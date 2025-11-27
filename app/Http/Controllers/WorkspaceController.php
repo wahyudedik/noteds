@@ -26,9 +26,9 @@ class WorkspaceController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
-        
+
         // Workspace is now available for all authenticated users
-        
+
         // Get owned and member workspaces
         $ownedWorkspaces = $user->ownedWorkspaces()->withCount('notes')->get();
         $memberWorkspaces = $user->workspaces()->withCount('notes')->get();
@@ -42,9 +42,9 @@ class WorkspaceController extends Controller
     public function create(Request $request): View
     {
         $user = $request->user();
-        
+
         // Workspace is now available for all authenticated users
-        
+
         return view('workspaces.create');
     }
 
@@ -54,9 +54,9 @@ class WorkspaceController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $user = $request->user();
-        
+
         // Workspace is now available for all authenticated users
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:personal,team,organization',
@@ -85,6 +85,10 @@ class WorkspaceController extends Controller
             'type' => $workspace->type,
         ]);
 
+        // Clear user-related caches to ensure new workspace appears immediately
+        \Illuminate\Support\Facades\Cache::forget("user_workspaces_{$user->id}");
+        \Illuminate\Support\Facades\Cache::forget("user_owned_workspaces_{$user->id}");
+
         return redirect()->route('workspaces.index')
             ->with('success', 'Workspace created successfully.');
     }
@@ -95,7 +99,7 @@ class WorkspaceController extends Controller
     public function show(Workspace $workspace, Request $request): View|\Illuminate\Http\RedirectResponse
     {
         $user = $request->user();
-        
+
         // Check if user can access this workspace
         if ($workspace->owner_id !== $user->id && !$workspace->hasMember($user)) {
             abort(403);
@@ -107,7 +111,7 @@ class WorkspaceController extends Controller
             ->orderBy('order')
             ->get()
             ->keyBy('id');
-        
+
         // Build tree structure with all children loaded
         foreach ($allFolders as $folder) {
             if ($folder->parent_id && isset($allFolders[$folder->parent_id])) {
@@ -118,22 +122,22 @@ class WorkspaceController extends Controller
                 $parent->children->push($folder);
             }
         }
-        
+
         $rootFolders = $allFolders->whereNull('parent_id')->values();
-        
+
         // Load notes
         $workspace->load([
-            'notes' => function($query) use ($workspace) {
+            'notes' => function ($query) use ($workspace) {
                 $query->whereNull('folder_id')
                     ->where('workspace_id', $workspace->id)
                     ->latest();
             },
             'members'
         ]);
-        
+
         // Attach root folders to workspace for view
         $workspace->setRelation('folders', $rootFolders);
-        
+
         // Get current folder if specified
         $currentFolder = null;
         if ($request->has('folder')) {
@@ -141,12 +145,12 @@ class WorkspaceController extends Controller
                 ->where('workspace_id', $workspace->id)
                 ->with(['children', 'notes'])
                 ->first();
-            
+
             if (!$currentFolder) {
                 return redirect()->route('workspaces.show', $workspace);
             }
         }
-        
+
         return view('workspaces.show', compact('workspace', 'currentFolder'));
     }
 
@@ -156,7 +160,7 @@ class WorkspaceController extends Controller
     public function edit(Workspace $workspace): View
     {
         $user = request()->user();
-        
+
         // Only owner or admin can edit
         if (!$workspace->canManage($user)) {
             abort(403);
@@ -171,7 +175,7 @@ class WorkspaceController extends Controller
     public function update(Request $request, Workspace $workspace): RedirectResponse
     {
         $user = $request->user();
-        
+
         // Only owner or admin can update
         if (!$workspace->canManage($user)) {
             abort(403);
@@ -186,6 +190,11 @@ class WorkspaceController extends Controller
 
         $workspace->update($validated);
 
+        // Clear user-related caches to ensure updates appear immediately
+        \Illuminate\Support\Facades\Cache::forget("user_workspaces_{$user->id}");
+        \Illuminate\Support\Facades\Cache::forget("user_owned_workspaces_{$user->id}");
+        \Illuminate\Support\Facades\Cache::forget("workspace_{$workspace->id}");
+
         return redirect()->route('workspaces.index')
             ->with('success', 'Workspace updated successfully.');
     }
@@ -196,7 +205,7 @@ class WorkspaceController extends Controller
     public function sell(Request $request, Workspace $workspace): RedirectResponse
     {
         $user = $request->user();
-        
+
         // Only owner can sell
         if ($workspace->owner_id !== $user->id) {
             abort(403);
@@ -244,7 +253,7 @@ class WorkspaceController extends Controller
             // Handle file uploads for bundle workspace
             $attachments = [];
             $thumbnails = [];
-            
+
             if ($request->hasFile('attachments')) {
                 $uploadService = app(\App\Services\LargeFileUploadService::class);
                 foreach ($request->file('attachments') as $file) {
@@ -268,19 +277,19 @@ class WorkspaceController extends Controller
                     }
                 }
             }
-            
+
             // Handle thumbnail uploads with error handling
             if ($request->hasFile('thumbnails')) {
                 foreach ($request->file('thumbnails') as $file) {
                     try {
                         if ($file->isValid() && str_starts_with($file->getMimeType(), 'image/')) {
                             $filename = \Illuminate\Support\Str::uuid() . '_' . time() . '.' . $file->getClientOriginalExtension();
-                            
+
                             // Ensure directory exists
                             if (!Storage::disk('public')->exists('thumbnails/' . $user->id)) {
                                 Storage::disk('public')->makeDirectory('thumbnails/' . $user->id);
                             }
-                            
+
                             $path = $file->storeAs('thumbnails/' . $user->id, $filename, 'public');
                             $thumbnails[] = $path;
                         }
@@ -296,25 +305,25 @@ class WorkspaceController extends Controller
                     }
                 }
             }
-            
+
             // Merge with existing attachments/thumbnails if updating
             $existingAttachments = $workspace->attachments ?? [];
             $existingThumbnails = $workspace->thumbnails ?? [];
-            
+
             // Keep existing unless explicitly removed
             $removedAttachments = $request->input('removed_attachments', []);
             $removedThumbnails = $request->input('removed_thumbnails', []);
-            
-            $existingAttachments = array_filter($existingAttachments, function($attachment) use ($removedAttachments) {
+
+            $existingAttachments = array_filter($existingAttachments, function ($attachment) use ($removedAttachments) {
                 $filename = is_array($attachment) ? ($attachment['filename'] ?? '') : basename($attachment);
                 return !in_array($filename, $removedAttachments);
             });
-            
-            $existingThumbnails = array_filter($existingThumbnails, function($thumbnail) use ($removedThumbnails) {
+
+            $existingThumbnails = array_filter($existingThumbnails, function ($thumbnail) use ($removedThumbnails) {
                 $filename = is_array($thumbnail) ? ($thumbnail['filename'] ?? '') : basename($thumbnail);
                 return !in_array($filename, $removedThumbnails);
             });
-            
+
             $finalAttachments = array_merge(array_values($existingAttachments), $attachments);
             $finalThumbnails = array_merge(array_values($existingThumbnails), $thumbnails);
 
@@ -340,7 +349,7 @@ class WorkspaceController extends Controller
                 ->with('success', __('messages.workspace_listed_for_sale'));
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             \Log::error('Workspace sell failed', [
                 'user_id' => $user->id,
                 'workspace_id' => $workspace->id,
@@ -358,26 +367,26 @@ class WorkspaceController extends Controller
      * Purchase workspace.
      */
     public function purchase(
-        Request $request, 
-        Workspace $workspace, 
+        Request $request,
+        Workspace $workspace,
         CommissionService $commissionService,
         TaxService $taxService
     ): RedirectResponse {
         $buyer = $request->user();
-        
+
         // Use DB transaction with lock to prevent race conditions
         try {
             DB::beginTransaction();
-            
+
             // Lock the workspace row to prevent concurrent purchases
             $workspace = Workspace::lockForUpdate()->find($workspace->id);
-            
+
             if (!$workspace) {
                 DB::rollBack();
                 return redirect()->route('workspaces.show', $workspace)
                     ->with('error', 'Workspace tidak ditemukan.');
             }
-            
+
             // Re-check status after lock (might have been sold during request)
             if (!$workspace->is_public || $workspace->status !== 'active' || !$workspace->is_for_sale) {
                 DB::rollBack();
@@ -418,7 +427,7 @@ class WorkspaceController extends Controller
                     return redirect()->route('workspaces.show', $workspace)
                         ->with('error', 'Workspace ini sudah terjual. Setiap workspace scarcity hanya bisa dibeli 1x.');
                 }
-                
+
                 $existingTransaction = Transaction::where('buyer_id', $buyer->id)
                     ->where('workspace_id', $workspace->id)
                     ->where('status', 'success')
@@ -474,7 +483,7 @@ class WorkspaceController extends Controller
                 'is_inclusive' => true,
                 'country_code' => null,
             ];
-            
+
             // Try to get tax from buyer's country if available
             if ($buyer->currency) {
                 // Simplified: use default tax percent from settings
@@ -529,13 +538,13 @@ class WorkspaceController extends Controller
             $commissionTier = $commissionService->resolveTierForSeller($seller);
 
             $amount = $buyerPaysAmount;
-            
+
             // Handle commission based on sale mode
             $platformFee = 0;
             $creatorCommission = 0;
             $originalCreator = null;
             $sellerAmount = $priceExcludingTax;
-            
+
             if ($workspace->isStandardMode()) {
                 // Standard mode: No commission, seller gets full amount (minus tax)
                 // No original creator commission
@@ -544,10 +553,10 @@ class WorkspaceController extends Controller
                 // Get commission rates based on seller tier (fallback to settings)
                 $platformCommissionPercent = $commissionTier?->platform_fee_percent ?? Setting::getPlatformCommissionPercent();
                 $creatorCommissionPercent = $commissionTier?->creator_commission_percent ?? Setting::getCreatorCommissionPercent();
-                
+
                 // Platform fee (always deducted from every transaction)
                 $platformFee = $priceExcludingTax * ($platformCommissionPercent / 100);
-                
+
                 // Original creator commission (always for original creator in every transaction)
                 if ($workspace->original_creator_id) {
                     $originalCreator = $workspace->originalCreator;
@@ -557,7 +566,7 @@ class WorkspaceController extends Controller
                         ->where('status', 'success')
                         ->orderBy('created_at', 'asc')
                         ->first();
-                    
+
                     if ($firstTransaction && $firstTransaction->original_creator_id) {
                         $originalCreator = User::find($firstTransaction->original_creator_id);
                     } else {
@@ -565,21 +574,21 @@ class WorkspaceController extends Controller
                         $originalCreator = $seller;
                     }
                 }
-                
+
                 // Set original_creator_id on workspace if not set (for future resells)
                 if (!$workspace->original_creator_id) {
                     $workspace->original_creator_id = $originalCreator->id;
                 }
-                
+
                 if ($originalCreator && $creatorCommissionPercent > 0) {
                     // Original creator always gets commission (if setting is > 0)
                     $creatorCommission = $priceExcludingTax * ($creatorCommissionPercent / 100);
                 }
-                
+
                 // Seller gets: amount - platform_fee - creator_commission
                 $sellerAmount = $priceExcludingTax - $platformFee - $creatorCommission;
             }
-            
+
             $taxAmount = $taxBreakdown['tax_amount'];
 
             // Deduct from buyer
@@ -699,7 +708,6 @@ class WorkspaceController extends Controller
 
             return redirect()->route('workspaces.show', $workspace)
                 ->with('success', __('messages.workspace_purchased_successfully'));
-
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Workspace purchase failed', [
@@ -720,7 +728,7 @@ class WorkspaceController extends Controller
     public function invite(Workspace $workspace): View
     {
         $user = request()->user();
-        
+
         // Only owner or admin can invite
         if (!$workspace->canManage($user)) {
             abort(403);
@@ -741,7 +749,7 @@ class WorkspaceController extends Controller
     public function storeInvite(Request $request, Workspace $workspace): RedirectResponse
     {
         $user = $request->user();
-        
+
         // Only owner or admin can invite
         if (!$workspace->canManage($user)) {
             abort(403);
@@ -754,7 +762,7 @@ class WorkspaceController extends Controller
 
         // Check if user already exists
         $existingUser = \App\Models\User::where('email', $validated['email'])->first();
-        
+
         // If user exists and is already a member, don't create invitation
         if ($existingUser && $workspace->hasMember($existingUser)) {
             return redirect()->route('workspaces.invite', $workspace)
@@ -816,7 +824,7 @@ class WorkspaceController extends Controller
     public function cancelInvite(Workspace $workspace, \App\Models\WorkspaceInvitation $invitation): RedirectResponse
     {
         $user = request()->user();
-        
+
         // Only owner or admin can cancel invitation
         if (!$workspace->canManage($user)) {
             abort(403);
@@ -842,7 +850,7 @@ class WorkspaceController extends Controller
     public function destroy(Workspace $workspace): RedirectResponse
     {
         $user = request()->user();
-        
+
         // Only owner can delete
         if ($workspace->owner_id !== $user->id) {
             abort(403);
@@ -850,11 +858,16 @@ class WorkspaceController extends Controller
 
         // Move notes to personal (no workspace)
         $workspace->notes()->update(['workspace_id' => null]);
-        
+
         // Move folders to personal
         $workspace->folders()->update(['workspace_id' => null]);
 
         $workspace->delete();
+
+        // Clear user-related caches to ensure deletion appears immediately
+        \Illuminate\Support\Facades\Cache::forget("user_workspaces_{$user->id}");
+        \Illuminate\Support\Facades\Cache::forget("user_owned_workspaces_{$user->id}");
+        \Illuminate\Support\Facades\Cache::forget("workspace_{$workspace->id}");
 
         return redirect()->route('workspaces.index')
             ->with('success', 'Workspace deleted successfully.');
