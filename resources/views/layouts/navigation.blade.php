@@ -724,13 +724,21 @@
         </div>
     </nav>
 
+    <!-- Mobile Menu Overlay -->
+    <div x-show="mobileMenuOpen" x-cloak x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0" @click="mobileMenuOpen = false"
+        class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+        style="display: none;"></div>
+
     <!-- Mobile Menu -->
     <div x-show="mobileMenuOpen" x-cloak x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 -translate-y-1" @click.away="mobileMenuOpen = false"
-        @keydown.escape="mobileMenuOpen = false"
-        class="lg:hidden fixed inset-0 top-[3.5rem] bg-white border-b border-gray-200 shadow-lg z-50 max-h-[calc(100vh-3.5rem)] overflow-y-auto"
+        x-transition:leave-end="opacity-0 -translate-y-1"
+        @keydown.escape.window="mobileMenuOpen = false"
+        class="lg:hidden fixed top-[3.5rem] left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50 max-h-[calc(100vh-3.5rem)] overflow-y-auto"
         style="display: none;">
         <div class="px-4 py-4 space-y-1">
             @foreach ($primaryLinks as $link)
