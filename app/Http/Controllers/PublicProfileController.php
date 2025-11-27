@@ -14,14 +14,10 @@ class PublicProfileController extends Controller
         $user = User::where('username', $username)->firstOrFail();
         $viewer = auth()->user();
         
-        $user->load(['notes' => function ($query) {
-            $query->where('is_public', true)
-                ->where('status', 'active')
-                ->with(['tags', 'reviews'])
-                ->latest();
-        }, 'badges', 'userLevels.level', 'approvedCertifications.certification']);
+        // Load relationships (but don't use load with closure to avoid Collection conversion issues)
+        $user->load(['badges', 'userLevels.level', 'approvedCertifications.certification']);
 
-        // Get public notes with pagination
+        // Get public notes with pagination (use fresh query, not loaded relationship)
         $publicNotes = $user->notes()
             ->where('is_public', true)
             ->where('status', 'active')
