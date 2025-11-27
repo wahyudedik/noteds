@@ -23,7 +23,8 @@
         $desktopLinkClasses =
             'px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-all duration-200';
         $desktopActiveClasses = 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-800';
-        $dropdownLinkClasses = 'block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150';
+        $dropdownLinkClasses =
+            'block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150';
         $dropdownActiveClasses = 'bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-400';
         $mobileLinkClasses =
             'block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-all duration-200';
@@ -118,7 +119,11 @@
                     [
                         'label' => __('messages.forum'),
                         'href' => route('forum.index'),
-                        'active' => request()->routeIs('forum.index') || (request()->routeIs('forum.*') && !request()->routeIs('forum.analytics') && !request()->routeIs('forum.preferences.*')),
+                        'active' =>
+                            request()->routeIs('forum.index') ||
+                            (request()->routeIs('forum.*') &&
+                                !request()->routeIs('forum.analytics') &&
+                                !request()->routeIs('forum.preferences.*')),
                     ],
                     [
                         'label' => __('messages.analytics'),
@@ -149,7 +154,7 @@
                         ],
                     ];
                     $sellerToolsIsActive = request()->routeIs('featured-notes.*');
-                    
+
                     $moreLinks[] = [
                         'label' => __('messages.seller_tools'),
                         'href' => route('featured-notes.index'),
@@ -183,11 +188,12 @@
                             'active' => request()->routeIs('batch-download.*'),
                         ],
                     ];
-                    $buyerLibraryIsActive = request()->routeIs('collections.*') || 
-                                            request()->routeIs('buyer-analytics.*') || 
-                                            request()->routeIs('reading-history.*') || 
-                                            request()->routeIs('batch-download.*');
-                    
+                    $buyerLibraryIsActive =
+                        request()->routeIs('collections.*') ||
+                        request()->routeIs('buyer-analytics.*') ||
+                        request()->routeIs('reading-history.*') ||
+                        request()->routeIs('batch-download.*');
+
                     $moreLinks[] = [
                         'label' => __('messages.my_library'),
                         'href' => route('collections.index'),
@@ -216,18 +222,19 @@
                     'href' => route('share.analytics'),
                     'active' => request()->routeIs('share.analytics'),
                 ];
-    $settingsSubmenu[] = [
-        'label' => 'Share Leaderboard',
-        'href' => route('share.leaderboard'),
-        'active' => request()->routeIs('share.leaderboard'),
-    ];
-    $settingsSubmenu[] = [
-        'label' => 'Points & Rewards',
-        'href' => route('points.index'),
-        'active' => request()->routeIs('points.*'),
-    ];
-    $settingsIsActive = request()->routeIs('referral.*') || request()->routeIs('share.*') || request()->routeIs('points.*');
-                
+                $settingsSubmenu[] = [
+                    'label' => 'Share Leaderboard',
+                    'href' => route('share.leaderboard'),
+                    'active' => request()->routeIs('share.leaderboard'),
+                ];
+                $settingsSubmenu[] = [
+                    'label' => 'Points & Rewards',
+                    'href' => route('points.index'),
+                    'active' => request()->routeIs('points.*'),
+                ];
+                $settingsIsActive =
+                    request()->routeIs('referral.*') || request()->routeIs('share.*') || request()->routeIs('points.*');
+
                 if (!empty($settingsSubmenu)) {
                     $moreLinks[] = [
                         'label' => 'Settings',
@@ -301,7 +308,8 @@
             }
         }
     @endphp
-    <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-40 transition-colors duration-200" x-cloak>
+    <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-40 transition-colors duration-200"
+        x-cloak>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex h-16 items-center justify-between">
                 <div class="flex items-center gap-4 sm:gap-6">
@@ -317,9 +325,7 @@
                             @if (isset($link['submenu']) && !empty($link['submenu']))
                                 <!-- Submenu Dropdown -->
                                 <div class="relative" x-data="{ open: false }">
-                                    <a href="{{ $link['href'] }}"
-                                        @mouseenter="open = true"
-                                        @mouseleave="open = false"
+                                    <a href="{{ $link['href'] }}" @mouseenter="open = true" @mouseleave="open = false"
                                         class="{{ $desktopLinkClasses }} flex items-center gap-1 {{ $link['active'] ? $desktopActiveClasses : '' }}">
                                         {{ $link['label'] }}
                                         <svg class="w-4 h-4" :class="{ 'rotate-180': open }" fill="none"
@@ -328,9 +334,7 @@
                                                 d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </a>
-                                    <div x-show="open" x-cloak 
-                                        @mouseenter="open = true"
-                                        @mouseleave="open = false"
+                                    <div x-show="open" x-cloak @mouseenter="open = true" @mouseleave="open = false"
                                         x-transition
                                         class="absolute left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
                                         @foreach ($link['submenu'] as $subLink)
@@ -366,7 +370,8 @@
                                     @foreach ($moreLinks as $link)
                                         @if (isset($link['submenu']) && !empty($link['submenu']))
                                             <!-- Submenu in More dropdown -->
-                                            <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100 mb-1">
+                                            <div
+                                                class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100 mb-1">
                                                 {{ $link['label'] }}
                                             </div>
                                             @foreach ($link['submenu'] as $subLink)
@@ -390,7 +395,8 @@
                                         @if (!empty($moreLinks))
                                             <div class="border-t border-gray-200 my-1"></div>
                                         @endif
-                                        <div class="px-4 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                        <div
+                                            class="px-4 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                                             Admin
                                         </div>
                                         @foreach ($adminMoreLinks as $link)
@@ -451,7 +457,7 @@
                     @auth
                         <div class="flex items-center gap-3">
                             <!-- Notifications Bell -->
-                            <div class="relative" x-data="{ 
+                            <div class="relative" x-data="{
                                 open: false,
                                 init() {
                                     try {
@@ -482,7 +488,8 @@
                                     </svg>
                                     @if ($unreadCount > 0)
                                         <span
-                                            class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full" data-notif-badge>{{ $unreadCount }}</span>
+                                            class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full"
+                                            data-notif-badge>{{ $unreadCount }}</span>
                                     @endif
                                 </button>
 
@@ -502,7 +509,9 @@
                                     @endphp
                                     <div id="notif-list">
                                         @forelse($notifications as $notification)
-                                            @include('partials.notification-item', ['notification' => $notification])
+                                            @include('partials.notification-item', [
+                                                'notification' => $notification,
+                                            ])
                                         @empty
                                             <div class="px-4 py-8 text-center" data-notif-empty>
                                                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none"
@@ -542,7 +551,7 @@
                                                         <div class="flex-shrink-0"><span class="w-2 h-2 bg-blue-600 rounded-full block"></span></div>
                                                     </div>`;
                                                 list.prepend(a);
-                                            } catch(e) {}
+                                            } catch (e) {}
                                         }
                                         if (window.Echo && {{ auth()->check() ? 'true' : 'false' }}) {
                                             window.Echo.private('user.{{ auth()->id() }}')
@@ -561,8 +570,7 @@
                                         @if (auth()->user()->avatar)
                                             @if (str_starts_with(auth()->user()->avatar, 'http'))
                                                 <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}"
-                                                    class="w-8 h-8 rounded-full object-cover"
-                                                    loading="lazy"
+                                                    class="w-8 h-8 rounded-full object-cover" loading="lazy"
                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                             @else
                                                 @php
@@ -570,14 +578,14 @@
                                                     $avatarPath = ltrim($avatarPath, '/');
                                                     $avatarPath = preg_replace('#^marketplace/#', '', $avatarPath);
                                                 @endphp
-                                                <img src="{{ asset('storage/' . $avatarPath) }}" alt="{{ auth()->user()->name }}"
-                                                    class="w-8 h-8 rounded-full object-cover"
-                                                    loading="lazy"
+                                                <img src="{{ asset('storage/' . $avatarPath) }}"
+                                                    alt="{{ auth()->user()->name }}"
+                                                    class="w-8 h-8 rounded-full object-cover" loading="lazy"
                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                             @endif
                                         @endif
-                                        <span
-                                            class="text-xs font-semibold text-white" style="display: {{ auth()->user()->avatar ? 'none' : 'flex' }};">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                                        <span class="text-xs font-semibold text-white"
+                                            style="display: {{ auth()->user()->avatar ? 'none' : 'flex' }};">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
                                     </div>
                                     <span class="hidden sm:inline">{{ auth()->user()->name }}</span>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -629,13 +637,15 @@
                                                 <div class="flex items-center">
                                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                         viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
                                                             d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                                     </svg>
                                                     Subscription
                                                 </div>
-                                                @if($activeSubscription)
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                @if ($activeSubscription)
+                                                    <span
+                                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                                                         Active
                                                     </span>
                                                 @endif
@@ -678,11 +688,15 @@
                                         class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 dark:text-gray-300 dark:hover:bg-gray-700">
                                         <div class="flex items-center justify-between">
                                             <div class="flex items-center">
-                                                <svg id="dark-mode-icon" class="w-4 h-4 mr-2 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                                <svg id="dark-mode-icon" class="w-4 h-4 mr-2 hidden" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                                                 </svg>
-                                                <svg id="light-mode-icon" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                <svg id="light-mode-icon" class="w-4 h-4 mr-2" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                                                 </svg>
                                                 <span id="dark-mode-text">Dark Mode</span>
                                             </div>
@@ -725,8 +739,7 @@
     <div x-show="mobileMenuOpen" x-cloak x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 -translate-y-1" 
-        @click.away="mobileMenuOpen = false"
+        x-transition:leave-end="opacity-0 -translate-y-1" @click.away="mobileMenuOpen = false"
         @keydown.escape="mobileMenuOpen = false"
         class="lg:hidden fixed inset-0 top-[3.5rem] bg-white border-b border-gray-200 shadow-lg z-50 max-h-[calc(100vh-3.5rem)] overflow-y-auto"
         style="display: none;">
@@ -738,8 +751,8 @@
                         <button @click="open = !open"
                             class="{{ $mobileLinkClasses }} flex items-center justify-between w-full {{ $link['active'] ? $mobileActiveClasses : '' }}">
                             <span>{{ $link['label'] }}</span>
-                            <svg class="w-5 h-5" :class="{ 'rotate-180': open }" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
