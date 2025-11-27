@@ -10,6 +10,21 @@ window.Alpine = Alpine;
 window.Swal = Swal;
 window.Quill = Quill;
 
+// Navigation menu component with responsive behavior
+window.navigationMenu = () => ({
+    mobileMenuOpen: false,
+    init() {
+        // Close menu when screen resizes to desktop width
+        const handleResize = () => {
+            if (window.innerWidth >= 1024) { // lg breakpoint
+                this.mobileMenuOpen = false;
+            }
+        };
+        
+        window.addEventListener('resize', handleResize);
+    }
+});
+
 // Initialize SweetAlert utilities immediately (not waiting for DOMContentLoaded)
 // This ensures window.showSuccess, window.showError, etc. are available immediately
 initializeSweetAlertUtils();

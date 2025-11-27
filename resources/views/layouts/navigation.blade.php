@@ -1,15 +1,4 @@
-<div x-data="{
-    mobileMenuOpen: false,
-    init() {
-        // Close menu when window is resized to desktop width
-        const closeOnResize = () => {
-            if (window.innerWidth >= 1024) { // lg breakpoint
-                this.mobileMenuOpen = false;
-            }
-        };
-        window.addEventListener('resize', closeOnResize);
-    }
-}" class="relative">
+<div x-data="navigationMenu()" class="relative">
     @php
         $user = auth()->user();
         $isAdmin = $user?->hasRole('admin');
