@@ -1071,8 +1071,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 $query->whereNull('expires_at')
                     ->orWhere('expires_at', '>', now());
             })
-            ->with('certification')
-            ->get();
+            ->with('certification');
     }
 
     /**
