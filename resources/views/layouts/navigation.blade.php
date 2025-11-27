@@ -729,23 +729,21 @@
         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0" @click="mobileMenuOpen = false"
-        class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-        style="display: none;"></div>
+        class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"></div>
 
     <!-- Mobile Menu -->
     <div x-show="mobileMenuOpen" x-cloak x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 -translate-y-1"
-        @keydown.escape.window="mobileMenuOpen = false"
-        class="lg:hidden fixed top-[3.5rem] left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50 max-h-[calc(100vh-3.5rem)] overflow-y-auto"
-        style="display: none;">
+        x-transition:leave-end="opacity-0 -translate-y-1" @keydown.escape.window="mobileMenuOpen = false"
+        @click.stop
+        class="lg:hidden fixed top-[3.5rem] left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
         <div class="px-4 py-4 space-y-1">
             @foreach ($primaryLinks as $link)
                 @if (isset($link['submenu']) && !empty($link['submenu']))
                     <!-- Mobile Submenu -->
                     <div x-data="{ open: false }" class="space-y-1">
-                        <button @click="open = !open"
+                        <button @click.stop="open = !open"
                             class="{{ $mobileLinkClasses }} flex items-center justify-between w-full {{ $link['active'] ? $mobileActiveClasses : '' }}">
                             <span>{{ $link['label'] }}</span>
                             <svg class="w-5 h-5" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
