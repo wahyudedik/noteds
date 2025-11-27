@@ -13,7 +13,7 @@ class PublicProfileController extends Controller
     {
         $user = User::where('username', $username)->firstOrFail();
         $viewer = auth()->user();
-        
+
         // Load relationships (but don't use load with closure to avoid Collection conversion issues)
         $user->load(['badges', 'userLevels.level', 'approvedCertifications.certification']);
 
@@ -56,13 +56,13 @@ class PublicProfileController extends Controller
     private function calculateAverageRating(User $user): float
     {
         $notes = $user->notes()->where('is_public', true)->pluck('id');
-        
+
         if ($notes->isEmpty()) {
             return 0;
         }
 
         $avgRating = \App\Models\NoteReview::whereIn('note_id', $notes)->avg('rating');
-        
+
         return round($avgRating ?? 0, 1);
     }
 
@@ -72,12 +72,11 @@ class PublicProfileController extends Controller
     private function getTotalReviewsCount(User $user): int
     {
         $notes = $user->notes()->where('is_public', true)->pluck('id');
-        
+
         if ($notes->isEmpty()) {
             return 0;
         }
 
         return \App\Models\NoteReview::whereIn('note_id', $notes)->count();
     }
-
 }
