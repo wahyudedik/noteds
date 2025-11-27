@@ -22,7 +22,7 @@ class SecurityHeaders
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        
+
         // Remove X-Powered-By header
         $response->headers->remove('X-Powered-By');
 
@@ -84,25 +84,29 @@ class SecurityHeaders
     private function getAllowedScriptSources(): string
     {
         $sources = [];
-        
+
         // Midtrans Snap.js
         if (config('services.midtrans.is_production', false)) {
             $sources[] = 'https://app.midtrans.com';
         } else {
             $sources[] = 'https://app.sandbox.midtrans.com';
         }
-        
+
         // Iconify Icons CDN
         $sources[] = 'https://code.iconify.design';
-        
+
         // Quill.js CDN (Rich Text Editor)
         $sources[] = 'https://cdn.quilljs.com';
-        
+
+        // Cloudflare Insights & Rocket Loader
+        $sources[] = 'https://static.cloudflareinsights.com';
+        $sources[] = 'https://cdn.jsdelivr.net';
+
         // CDN URLs
         if ($cdnUrl = config('filesystems.disks.public.url')) {
             $sources[] = parse_url($cdnUrl, PHP_URL_HOST);
         }
-        
+
         // Vite HMR (development only)
         if (app()->environment('local')) {
             $sources[] = 'http://localhost:5173';
@@ -121,18 +125,18 @@ class SecurityHeaders
     private function getAllowedStyleSources(): string
     {
         $sources = [];
-        
+
         // Bunny Fonts
         $sources[] = 'https://fonts.bunny.net';
-        
+
         // Quill.js CDN (Rich Text Editor CSS)
         $sources[] = 'https://cdn.quilljs.com';
-        
+
         // CDN URLs
         if ($cdnUrl = config('filesystems.disks.public.url')) {
             $sources[] = parse_url($cdnUrl, PHP_URL_HOST);
         }
-        
+
         // Vite HMR (development only)
         if (app()->environment('local')) {
             $host = request()->getHost();
@@ -149,12 +153,12 @@ class SecurityHeaders
     private function getAllowedImageSources(): string
     {
         $sources = [];
-        
+
         // CDN URLs
         if ($cdnUrl = config('filesystems.disks.public.url')) {
             $sources[] = parse_url($cdnUrl, PHP_URL_HOST);
         }
-        
+
         // Allow external images for avatars and notes (if using URLs)
         $sources[] = 'https:';
 
@@ -167,25 +171,29 @@ class SecurityHeaders
     private function getAllowedConnectSources(): string
     {
         $sources = [];
-        
+
         // Midtrans API
         if (config('services.midtrans.is_production', false)) {
             $sources[] = 'https://api.midtrans.com';
         } else {
             $sources[] = 'https://api.sandbox.midtrans.com';
         }
-        
+
         // Pusher/Ably for broadcasting
         if ($pusherKey = config('broadcasting.connections.pusher.key')) {
             $sources[] = 'https://*.pusher.com';
             $sources[] = 'wss://*.pusher.com';
         }
-        
+
+        // Cloudflare Insights & Analytics
+        $sources[] = 'https://*.cloudflare.com';
+        $sources[] = 'https://cloudflareinsights.com';
+
         // CDN URLs
         if ($cdnUrl = config('filesystems.disks.public.url')) {
             $sources[] = parse_url($cdnUrl, PHP_URL_HOST);
         }
-        
+
         // Vite HMR WebSocket (development only)
         if (app()->environment('local')) {
             $sources[] = 'ws://localhost:5173';
@@ -198,4 +206,3 @@ class SecurityHeaders
         return implode(' ', $sources);
     }
 }
-
