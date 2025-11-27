@@ -112,11 +112,11 @@ class User extends Authenticatable implements MustVerifyEmail
             'suspended_at' => 'datetime',
             'agreement_accepted_at' => 'datetime',
             'verification_reviewed_at' => 'datetime',
-        'quiet_hours_start' => 'datetime',
-        'quiet_hours_end' => 'datetime',
-        'quiet_hours_enabled' => 'boolean',
-        'email_digest_time' => 'datetime',
-        'last_digest_sent_at' => 'datetime',
+            'quiet_hours_start' => 'datetime',
+            'quiet_hours_end' => 'datetime',
+            'quiet_hours_enabled' => 'boolean',
+            'email_digest_time' => 'datetime',
+            'last_digest_sent_at' => 'datetime',
         ];
     }
 
@@ -372,9 +372,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->points()
             ->where('is_redeemed', false)
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->whereNull('expires_at')
-                  ->orWhere('expires_at', '>', now());
+                    ->orWhere('expires_at', '>', now());
             })
             ->sum('points');
     }
@@ -531,13 +531,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getSubscriptionDiscount(): int
     {
         $subscription = $this->activeBuyerSubscription();
-        
+
         if (!$subscription) {
             return 0;
         }
 
         // Return discount based on plan tier
-        return match($subscription->plan->slug) {
+        return match ($subscription->plan->slug) {
             'basic' => 10,
             'pro' => 20,
             'enterprise' => 30,
