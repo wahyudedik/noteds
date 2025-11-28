@@ -51,12 +51,27 @@ class ServiceOrderController extends Controller
     public function show(ServiceOrder $order): View
     {
         abort_unless($order->user_id === auth()->id() || auth()->user()->hasRole('admin') || auth()->user()->id === $order->assigned_user_id, 403);
+
         $vendors = [];
         if (auth()->user()->hasRole('admin')) {
             // Get vendors list for manual assignment
             $vendors = \App\Models\User::role('vendor')->orderBy('name')->get(['id', 'name']);
         }
-        return view('studio.orders.show', compact('order', 'vendors'));
+
+        // Preload related data to avoid N+1 queries in view
+        $ledger = \App\Models\EscrowLedger::where('service_order_id', $order->id)
+            ->latest()
+            ->get();
+
+        $activities = \App\Models\OrderActivity::where('service_order_id', $order->id)
+            ->latest()
+            ->get();
+
+        $quotes = \App\Models\ServiceQuote::where('service_order_id', $order->id)
+            ->latest()
+            ->get();
+
+        return view('studio.orders.show', compact('order', 'vendors', 'ledger', 'activities', 'quotes'));
     }
 
     public function assignVendor(Request $request, ServiceOrder $order): RedirectResponse
@@ -84,17 +99,18 @@ class ServiceOrderController extends Controller
             'is_read' => false,
             'data' => ['order_id' => $order->id],
         ]);
-            if ((bool) \App\Models\Setting::getSetting('studio_email_vendor_assigned', 'studio', true)) {
-                try {
-            \Illuminate\Support\Facades\Mail::to($vendor)->queue(
-                new \App\Mail\StudioNotification(
-                    'Order ditugaskan ke Anda',
-                    'Anda ditugaskan sebagai vendor untuk order "' . $order->title . '".',
-                    route('studio.orders.show', $order)
-                )
-            );
-                } catch (\Throwable $e) {}
+        if ((bool) \App\Models\Setting::getSetting('studio_email_vendor_assigned', 'studio', true)) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($vendor)->queue(
+                    new \App\Mail\StudioNotification(
+                        'Order ditugaskan ke Anda',
+                        'Anda ditugaskan sebagai vendor untuk order "' . $order->title . '".',
+                        route('studio.orders.show', $order)
+                    )
+                );
+            } catch (\Throwable $e) {
             }
+        }
 
         \App\Models\OrderActivity::create([
             'service_order_id' => $order->id,
@@ -171,17 +187,18 @@ class ServiceOrderController extends Controller
             ]);
             if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_funded', 'studio', true)) {
                 try {
-                $vendor = \App\Models\User::find($order->assigned_user_id);
-                if ($vendor) {
-                    \Illuminate\Support\Facades\Mail::to($vendor)->queue(
-                        new \App\Mail\StudioNotification(
-                            'Escrow didanai',
-                            'Buyer mendanai escrow untuk order "' . $order->title . '".',
-                            route('studio.orders.show', $order)
-                        )
-                    );
+                    $vendor = \App\Models\User::find($order->assigned_user_id);
+                    if ($vendor) {
+                        \Illuminate\Support\Facades\Mail::to($vendor)->queue(
+                            new \App\Mail\StudioNotification(
+                                'Escrow didanai',
+                                'Buyer mendanai escrow untuk order "' . $order->title . '".',
+                                route('studio.orders.show', $order)
+                            )
+                        );
+                    }
+                } catch (\Throwable $e) {
                 }
-                } catch (\Throwable $e) {}
             }
         } else {
             \App\Models\AppNotification::create([
@@ -195,14 +212,15 @@ class ServiceOrderController extends Controller
             ]);
             if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_funded', 'studio', true)) {
                 try {
-                \Illuminate\Support\Facades\Mail::to($order->user)->queue(
-                    new \App\Mail\StudioNotification(
-                        'Escrow didanai',
-                        'Escrow berhasil didanai untuk order "' . $order->title . '".',
-                        route('studio.orders.show', $order)
-                    )
-                );
-                } catch (\Throwable $e) {}
+                    \Illuminate\Support\Facades\Mail::to($order->user)->queue(
+                        new \App\Mail\StudioNotification(
+                            'Escrow didanai',
+                            'Escrow berhasil didanai untuk order "' . $order->title . '".',
+                            route('studio.orders.show', $order)
+                        )
+                    );
+                } catch (\Throwable $e) {
+                }
             }
         }
 
@@ -317,14 +335,15 @@ class ServiceOrderController extends Controller
         ]);
         if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_released', 'studio', true)) {
             try {
-            \Illuminate\Support\Facades\Mail::to($vendor)->queue(
-                new \App\Mail\StudioNotification(
-                    'Escrow dirilis',
-                    'Dana escrow dirilis untuk order "' . $order->title . '".',
-                    route('studio.orders.show', $order)
-                )
-            );
-            } catch (\Throwable $e) {}
+                \Illuminate\Support\Facades\Mail::to($vendor)->queue(
+                    new \App\Mail\StudioNotification(
+                        'Escrow dirilis',
+                        'Dana escrow dirilis untuk order "' . $order->title . '".',
+                        route('studio.orders.show', $order)
+                    )
+                );
+            } catch (\Throwable $e) {
+            }
         }
         \App\Models\AppNotification::create([
             'user_id' => $order->user_id,
@@ -337,14 +356,15 @@ class ServiceOrderController extends Controller
         ]);
         if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_released', 'studio', true)) {
             try {
-            \Illuminate\Support\Facades\Mail::to($order->user)->queue(
-                new \App\Mail\StudioNotification(
-                    'Escrow dirilis',
-                    'Anda merilis dana escrow untuk order "' . $order->title . '".',
-                    route('studio.orders.show', $order)
-                )
-            );
-            } catch (\Throwable $e) {}
+                \Illuminate\Support\Facades\Mail::to($order->user)->queue(
+                    new \App\Mail\StudioNotification(
+                        'Escrow dirilis',
+                        'Anda merilis dana escrow untuk order "' . $order->title . '".',
+                        route('studio.orders.show', $order)
+                    )
+                );
+            } catch (\Throwable $e) {
+            }
         }
 
         return back()->with('success', 'Escrow dilepas ke vendor.');
@@ -363,7 +383,7 @@ class ServiceOrderController extends Controller
 
         // Decrease escrow
         $order->escrow_amount -= $amount;
-        if ($order->escrow_amount <= 0 && in_array($order->status, ['submitted','quoted','in_progress'])) {
+        if ($order->escrow_amount <= 0 && in_array($order->status, ['submitted', 'quoted', 'in_progress'])) {
             $order->status = 'cancelled';
         }
         $order->save();
@@ -404,18 +424,17 @@ class ServiceOrderController extends Controller
         ]);
         if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_refunded', 'studio', true)) {
             try {
-            \Illuminate\Support\Facades\Mail::to($order->user)->queue(
-                new \App\Mail\StudioNotification(
-                    'Escrow direfund',
-                    'Dana escrow dikembalikan ke wallet Anda untuk order "' . $order->title . '".',
-                    route('studio.orders.show', $order)
-                )
-            );
-            } catch (\Throwable $e) {}
+                \Illuminate\Support\Facades\Mail::to($order->user)->queue(
+                    new \App\Mail\StudioNotification(
+                        'Escrow direfund',
+                        'Dana escrow dikembalikan ke wallet Anda untuk order "' . $order->title . '".',
+                        route('studio.orders.show', $order)
+                    )
+                );
+            } catch (\Throwable $e) {
+            }
         }
 
         return back()->with('success', 'Escrow dikembalikan ke wallet Anda.');
     }
 }
-
-

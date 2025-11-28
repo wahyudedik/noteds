@@ -78,51 +78,51 @@ return [
     'username_alpha_dash' => 'Username hanya boleh berisi huruf, angka, tanda hubung dan garis bawah.',
     'username_lowercase' => 'Username harus menggunakan huruf kecil.',
     'username_unique' => 'Username ini sudah digunakan. Silakan pilih yang lain.',
-    
-// Authentication
-'auth_hero_title' => 'Masuk ke Noteds dan mulai berkarya',
-'auth_hero_subtitle' => 'Kelola catatan digital, berkolaborasi dengan tim, dan kembangkan karya Anda di marketplace Noteds.',
-'log_in_title' => 'Masuk ke akun Anda',
-'log_in_subtitle' => 'Selamat datang kembali! Masukkan email dan kata sandi untuk melanjutkan.',
-'email' => 'Email',
-'password' => 'Kata Sandi',
-'name' => 'Nama',
-'confirm_password' => 'Konfirmasi Kata Sandi',
-'name_placeholder' => 'Nama lengkap',
-'password_placeholder' => 'Minimal 8 karakter',
-'password_confirm_placeholder' => 'Ulangi kata sandi',
+
+    // Authentication
+    'auth_hero_title' => 'Masuk ke Noteds dan mulai berkarya',
+    'auth_hero_subtitle' => 'Kelola catatan digital, berkolaborasi dengan tim, dan kembangkan karya Anda di marketplace Noteds.',
+    'log_in_title' => 'Masuk ke akun Anda',
+    'log_in_subtitle' => 'Selamat datang kembali! Masukkan email dan kata sandi untuk melanjutkan.',
+    'email' => 'Email',
+    'password' => 'Kata Sandi',
+    'name' => 'Nama',
+    'confirm_password' => 'Konfirmasi Kata Sandi',
+    'name_placeholder' => 'Nama lengkap',
+    'password_placeholder' => 'Minimal 8 karakter',
+    'password_confirm_placeholder' => 'Ulangi kata sandi',
     'remember_me' => 'Ingat saya',
     'forgot_password' => 'Lupa kata sandi Anda?',
     'log_in' => 'Masuk',
     'log_out' => 'Keluar',
     'register' => 'Daftar',
-'create_account' => 'Buat akun baru',
-'already_registered_prompt' => 'Sudah punya akun?',
+    'create_account' => 'Buat akun baru',
+    'already_registered_prompt' => 'Sudah punya akun?',
     'already_registered' => 'Sudah terdaftar?',
-'register_title' => 'Buat akun Noteds Anda',
-'register_subtitle' => 'Mulai kelola dan monetisasi catatan Anda, atau bergabung dengan tim untuk berkolaborasi.',
-'workspace_invite_title' => 'Undangan Workspace',
-'workspace_invite_copy' => 'Anda diundang untuk bergabung dengan workspace :workspace sebagai :role.',
-'invited_email_hint' => 'Email ini sudah ditentukan oleh undangan workspace.',
-'back_to_login' => 'Kembali ke halaman masuk',
+    'register_title' => 'Buat akun Noteds Anda',
+    'register_subtitle' => 'Mulai kelola dan monetisasi catatan Anda, atau bergabung dengan tim untuk berkolaborasi.',
+    'workspace_invite_title' => 'Undangan Workspace',
+    'workspace_invite_copy' => 'Anda diundang untuk bergabung dengan workspace :workspace sebagai :role.',
+    'invited_email_hint' => 'Email ini sudah ditentukan oleh undangan workspace.',
+    'back_to_login' => 'Kembali ke halaman masuk',
     'i_want_to_be' => 'Saya ingin menjadi',
     'buyer_option' => '🛒 Pembeli — Saya ingin membeli dan belajar dari catatan',
     'seller_option' => '💰 Penjual — Saya ingin menjual pengetahuan saya dan menghasilkan',
     'referral_code_optional' => 'Kode Referral (Opsional)',
     'enter_referral_code' => 'Masukkan kode referral jika Anda memilikinya',
-'forgot_password_title' => 'Lupa kata sandi?',
+    'forgot_password_title' => 'Lupa kata sandi?',
     'forgot_password_message' => 'Lupa kata sandi Anda? Tidak masalah. Beri tahu kami alamat email Anda dan kami akan mengirimkan tautan reset kata sandi yang memungkinkan Anda memilih yang baru.',
     'email_password_reset_link' => 'Kirim Tautan Reset Kata Sandi',
-'reset_password_title' => 'Buat kata sandi baru',
-'reset_password_subtitle' => 'Masukkan kata sandi baru Anda dan konfirmasi untuk memulihkan akses akun.',
+    'reset_password_title' => 'Buat kata sandi baru',
+    'reset_password_subtitle' => 'Masukkan kata sandi baru Anda dan konfirmasi untuk memulihkan akses akun.',
     'reset_password' => 'Reset Kata Sandi',
-'verify_email_title' => 'Verifikasi alamat email Anda',
+    'verify_email_title' => 'Verifikasi alamat email Anda',
     'verify_email_message' => 'Terima kasih telah mendaftar! Sebelum memulai, mohon verifikasi alamat email Anda dengan mengklik tautan yang baru saja kami kirimkan. Jika Anda tidak menerima email, kami akan dengan senang hati mengirimkan yang lain.',
     'verification_link_sent' => 'Tautan verifikasi baru telah dikirim ke alamat email yang Anda berikan saat pendaftaran.',
     'resend_verification_email' => 'Kirim Ulang Email Verifikasi',
-'confirm_password_title' => 'Konfirmasi kata sandi',
+    'confirm_password_title' => 'Konfirmasi kata sandi',
     'confirm_password_message' => 'Ini adalah area aman dari aplikasi. Mohon konfirmasi kata sandi Anda sebelum melanjutkan.',
-    
+
     // Dashboard
     'start_writing_note' => 'Mulai menulis catatan baru',
     'discover_public_notes' => 'Temukan catatan publik',
@@ -130,7 +130,7 @@ return [
     'recent_notes' => 'Catatan Terbaru',
     'view' => 'Lihat',
     'status' => 'Status',
-    
+
     // FAQ
     'faq' => 'FAQ',
     'frequently_asked_questions' => 'Pertanyaan yang Sering Diajukan',
@@ -140,7 +140,7 @@ return [
     'still_have_questions' => 'Masih Ada Pertanyaan?',
     'cant_find_what_youre_looking_for' => 'Tidak dapat menemukan apa yang Anda cari? Kami siap membantu!',
     'contact_support' => 'Hubungi Dukungan',
-    
+
     // Profile
     'profile_settings' => 'Pengaturan Profil',
     'manage_account_settings' => 'Kelola pengaturan akun dan informasi profil Anda',
@@ -158,7 +158,7 @@ return [
     'save_changes' => 'Simpan Perubahan',
     'update_password' => 'Perbarui Kata Sandi',
     'delete_account' => 'Hapus Akun',
-    
+
     // Notes
     'my_notes' => 'Catatan Saya',
     'create_new_note' => 'Buat Catatan Baru',
@@ -183,7 +183,7 @@ return [
     'notes_remaining' => 'catatan tersisa di paket Basic Anda.',
     'you_have' => 'Anda memiliki',
     'private' => 'Pribadi',
-    
+
     // Marketplace
     'discover_purchase_notes' => 'Temukan dan beli catatan berkualitas dari komunitas',
     'search_title' => 'Cari Judul',
@@ -237,7 +237,7 @@ return [
     'note_unavailable_suggestions_title' => 'Mungkin kamu tertarik dengan ini',
     'visibility_public' => 'Publik',
     'visibility_private' => 'Pribadi',
-    
+
     // Wallet
     'wallet_balance_title' => 'Saldo Dompet',
     'top_up' => 'Isi Saldo',
@@ -254,7 +254,7 @@ return [
     'bank_name' => 'Nama Bank',
     'request_withdraw' => 'Ajukan Penarikan',
     'withdraw_request_success' => 'Permintaan penarikan berhasil dikirim',
-    
+
     // Subscription
     'subscription' => 'Berlangganan',
     'current_plan' => 'Paket Saat Ini',
@@ -263,7 +263,7 @@ return [
     'unlimited_notes' => 'Catatan Tak Terbatas',
     'ai_powered_features' => 'Fitur Berbasis AI',
     'priority_support' => 'Dukungan Prioritas',
-    
+
     // Support Tickets
     'support_tickets' => 'Tiket Dukungan',
     'create_ticket' => 'Buat Tiket',
@@ -278,7 +278,7 @@ return [
     'reply' => 'Balas',
     'no_tickets' => 'Belum ada tiket',
     'create_first_ticket' => 'Buat tiket dukungan pertama Anda',
-    
+
     // Referral
     'referral_program' => 'Program Referral',
     'your_referral_code' => 'Kode Referral Anda',
@@ -287,13 +287,13 @@ return [
     'total_referrals' => 'Total Referral',
     'total_earnings' => 'Total Penghasilan',
     'pending_earnings' => 'Penghasilan Tertunda',
-    
+
     // Notifications
     'notifications' => 'Notifikasi',
     'no_notifications' => 'Tidak ada notifikasi',
     'mark_all_read' => 'Tandai Semua Dibaca',
     'mark_as_read' => 'Tandai Dibaca',
-    
+
     // Additional Notes fields
     'summary' => 'Ringkasan',
     'summary_optional' => '(Opsional - AI dapat menghasilkan ini)',
@@ -321,11 +321,11 @@ return [
     'try_again' => 'Coba Lagi',
     'no_content' => 'Tidak Ada Konten',
     'enter_note_content_first' => 'Mohon masukkan konten catatan terlebih dahulu sebelum menggunakan fitur AI.',
-    
+
     // Marketplace additional
     'free' => 'Gratis',
     'try_adjusting_criteria' => 'Coba sesuaikan kriteria pencarian atau filter Anda untuk menemukan apa yang Anda cari.',
-    
+
     // Notes Edit & Show
     'edit_note' => 'Edit Catatan',
     'update_note_information' => 'Perbarui informasi catatan Anda',
@@ -363,7 +363,7 @@ return [
     'payment_will_be_deducted_from_wallet' => 'Pembayaran akan otomatis dipotong dari saldo dompet Anda.',
     'activate_premium' => 'Aktifkan Premium',
     'cancel' => 'Batal',
-    
+
     // Marketplace Show additional
     'published' => 'Diterbitkan',
     'full_content_available_after_purchase' => '🔒 Konten lengkap tersedia setelah pembelian',
@@ -377,7 +377,7 @@ return [
     'popular' => 'Populer',
     'to_purchase_please_login' => 'Untuk membeli catatan ini, silakan login terlebih dahulu.',
     'no_reviews_yet_be_first' => 'Belum ada ulasan. Jadilah yang pertama mengulas catatan ini!',
-    
+
     // Wallet
     'my_wallet' => 'Dompet Saya',
     'manage_balance_view_history' => 'Kelola saldo Anda dan lihat riwayat transaksi',
@@ -395,7 +395,7 @@ return [
     'copy' => 'Salin',
     'copied' => 'Tersalin!',
     'all_notifications_one_place' => 'Semua notifikasi Anda di satu tempat',
-    
+
     // Subscription
     'my_subscription' => 'Berlangganan Saya',
     'manage_premium_subscription' => 'Kelola langganan premium Anda',
@@ -410,7 +410,7 @@ return [
     'subscription_request_reviewed' => 'Permintaan langganan Anda sedang ditinjau oleh admin',
     'request_premium_subscription' => 'Minta Langganan Premium',
     'upgrade_to_premium_now' => 'Upgrade ke Premium Sekarang',
-    
+
     // Support Tickets
     'my_support_tickets' => 'Tiket Dukungan Saya',
     'manage_support_requests' => 'Kelola permintaan dukungan Anda',
@@ -437,7 +437,7 @@ return [
     'last_updated' => 'Terakhir Diperbarui',
     'no_tickets_found' => 'Tidak ada tiket ditemukan',
     'create_first_ticket' => 'Buat tiket dukungan pertama Anda',
-    
+
     // Subscription additional
     'no_active_subscription' => 'Tidak Ada Langganan Aktif',
     'currently_on_basic_plan' => 'Anda saat ini menggunakan paket Basic',
@@ -468,7 +468,7 @@ return [
     'export_notes' => 'Ekspor Catatan',
     'export_pdf_docx_markdown' => 'Ekspor catatan ke format PDF, DOCX, atau Markdown',
     'view_all_read_notes' => 'Lihat semua riwayat catatan yang dibaca',
-    
+
     // Subscription Create
     'upgrade_to_premium' => 'Upgrade ke Premium',
     'request_premium_access' => 'Minta akses premium dengan fitur tak terbatas',
@@ -481,7 +481,7 @@ return [
     'note' => 'Catatan',
     'after_submitting_request' => 'Setelah mengirimkan permintaan Anda dengan bukti pembayaran, tim admin kami akan meninjau dan menyetujui langganan premium Anda. Anda akan menerima notifikasi setelah disetujui.',
     'submit_request' => 'Kirim Permintaan',
-    
+
     // Wallet Withdraw
     'withdraw_wallet' => 'Tarik Dompet',
     'request_withdrawal_bank' => 'Minta penarikan ke akun bank Anda',
@@ -497,7 +497,7 @@ return [
     'enter_withdrawal_amount' => 'Masukkan jumlah penarikan',
     'minimum_withdraw_amount' => 'Jumlah penarikan minimum adalah :amount',
     'cannot_exceed_balance' => 'Tidak boleh melebihi saldo Anda saat ini',
-    
+
     // Public Profile
     'joined' => 'Bergabung',
     'public_notes' => 'Catatan Publik',
@@ -506,7 +506,7 @@ return [
     'total_followers' => 'Total Pengikut',
     'followers' => 'pengikut',
     'follower' => 'pengikut',
-    
+
     // Contact
     'contact_us' => 'Hubungi Kami',
     'have_question_need_help' => 'Punya pertanyaan atau butuh bantuan? Kami siap membantu!',
@@ -532,7 +532,7 @@ return [
     'name_as_appears_bank' => 'Nama sesuai yang tertera di akun bank',
     'please_double_check_bank' => 'Mohon periksa kembali detail akun bank Anda. Permintaan penarikan diproses secara manual oleh tim admin kami dalam 1-3 hari kerja.',
     'range' => 'Rentang',
-    
+
     // Support Tickets Edit & Show
     'edit_support_ticket' => 'Edit Tiket Dukungan',
     'support_ticket_details' => 'Detail Tiket Dukungan',
@@ -540,7 +540,7 @@ return [
     'update_ticket' => 'Perbarui Tiket',
     'back_to_tickets' => 'Kembali ke Tiket',
     'save_changes' => 'Simpan Perubahan',
-    
+
     // Wallet Topup Checkout
     'topup_checkout' => 'Checkout Top-up',
     'complete_wallet_topup_payment' => 'Selesaikan pembayaran top-up dompet Anda',
@@ -554,7 +554,7 @@ return [
     'complete_payment_instructed' => 'Selesaikan pembayaran sesuai instruksi',
     'wallet_balance_updated_automatically' => 'Saldo dompet Anda akan diperbarui secara otomatis setelah pembayaran berhasil',
     'if_payment_pending_wait' => 'Jika pembayaran tertunda, mohon tunggu konfirmasi',
-    
+
     // Support Tickets Show additional
     'conversation' => 'Percakapan',
     'original_message' => 'Pesan Asli',
@@ -563,7 +563,7 @@ return [
     'type_your_reply_here' => 'Ketik balasan Anda di sini...',
     'send_reply' => 'Kirim Balasan',
     'ticket_closed_no_replies' => 'Tiket ini ditutup. Anda tidak dapat menambahkan balasan lagi.',
-    
+
     // Subscription Show
     'subscription_details' => 'Detail Langganan',
     'view_subscription_information' => 'Lihat informasi langganan Anda',
@@ -581,10 +581,10 @@ return [
     'expired' => 'Kedaluwarsa',
     'cancelled' => 'Dibatalkan',
     'active' => 'Aktif',
-    
+
     // Welcome
     'welcome_to_noteds' => 'Selamat Datang di ' . config('app.name'),
-    
+
     // Documentation
     'documentation' => 'Dokumentasi',
     'find_guides_tutorials' => 'Temukan panduan, tutorial, dan referensi untuk membantu Anda memaksimalkan Noteds',
@@ -593,7 +593,7 @@ return [
     'clear_search' => 'Hapus pencarian',
     'article' => 'artikel',
     'articles' => 'artikel',
-    
+
     // Folders
     'folders' => 'Folder',
     'organize_notes_with_folders' => 'Organisir catatan Anda dengan folder',
@@ -605,7 +605,7 @@ return [
     'no_folders_yet' => 'Belum ada folder',
     'create_first_folder' => 'Buat folder pertama Anda untuk mengorganisir catatan',
     'are_you_sure_delete_folder' => 'Apakah Anda yakin? Catatan di folder ini akan dipindahkan ke root.',
-    
+
     // Workspaces
     'workspaces' => 'Workspace',
     'manage_workspaces' => 'Kelola workspace pribadi, tim, dan organisasi Anda',
@@ -620,7 +620,7 @@ return [
     'manage_workspaces_button' => 'Kelola Workspace',
     'filter_by_workspace' => 'Filter berdasarkan Workspace',
     'all_workspaces' => 'Semua Workspace',
-    
+
     // MyNoteds
     'mynoteds' => 'MyNoteds',
     'mynoteds_description' => 'Platform memori berbasis AI Anda. Ajukan pertanyaan, temukan wawasan, dan hubungkan pemikiran Anda.',
@@ -637,7 +637,7 @@ return [
     'total_questions' => 'Total Pertanyaan',
     'total_insights' => 'Total Wawasan',
     'total_connections' => 'Total Koneksi',
-    
+
     // Simulators
     'marketing_simulators' => 'Simulator Pemasaran',
     'calculate_potential_earnings' => 'Hitung potensi pendapatan Anda dan rencanakan strategi di Noteds',
@@ -686,10 +686,10 @@ return [
     'signup_rewards' => 'Hadiah pendaftaran',
     'transaction_commissions' => 'Komisi transaksi',
     'total_monthly' => 'Total bulanan',
-    
+
     // CMS Show
     'back' => 'Kembali',
-    
+
     // Docs Show & Category
     'back_to_all_documentation' => '← Kembali ke Semua Dokumentasi',
     'related_links' => 'Tautan Terkait',
@@ -705,7 +705,7 @@ return [
     'solutions_common_problems' => 'Solusi untuk masalah dan isu umum.',
     'technical_api_documentation' => 'Dokumentasi API teknis untuk pengembang.',
     'video_tutorials_walkthroughs' => 'Tutorial video dan panduan.',
-    
+
     // Folders Create/Edit/Show
     'create_folder' => 'Buat Folder',
     'create_new_folder' => 'Buat Folder Baru',
@@ -723,7 +723,7 @@ return [
     'no_notes_in_folder' => 'Belum ada catatan di folder ini',
     'create_first_note_folder' => 'Buat catatan pertama Anda di folder ini',
     'optional' => 'Opsional',
-    
+
     // Workspaces Create/Edit
     'create_workspace' => 'Buat Workspace',
     'create_new_workspace' => 'Buat Workspace Baru',
@@ -741,7 +741,7 @@ return [
     'active_workspace' => 'Workspace Aktif',
     'inactive_workspaces_wont_appear' => 'Workspace tidak aktif tidak akan muncul di sebagian besar daftar',
     'workspace_name_placeholder' => 'misalnya, Tim Saya, Catatan Perusahaan',
-    
+
     // MyNoteds Ask/Search/Insights
     'ask_your_notes_title' => 'Tanya Catatan Anda - MyNoteds',
     'ask_natural_language_questions_description' => 'Ajukan pertanyaan bahasa alami tentang catatan Anda. AI akan mencari melalui konten Anda dan memberikan jawaban.',
@@ -793,7 +793,7 @@ return [
     'note' => 'Catatan',
     'tip' => 'Tip',
     'new_note' => 'Catatan Baru',
-    
+
     // Welcome/Landing Page
     'welcome_to_noteds_title' => 'Selamat Datang di :name',
     'welcome_to_noteds' => 'Selamat Datang di :name',
@@ -803,7 +803,7 @@ return [
     'get_started_free' => 'Mulai Gratis',
     'sign_in' => 'Masuk',
     'locale_changed' => 'Bahasa berhasil diubah',
-    
+
     // Navigation
     'home' => 'Beranda',
     'dashboard' => 'Dashboard',
@@ -825,7 +825,7 @@ return [
     'notifications' => 'Notifikasi',
     'view_all' => 'Lihat Semua',
     'no_notifications_yet' => 'Belum ada notifikasi',
-    
+
     // Footer
     'about' => 'Tentang',
     'about_description' => 'Pasar digital yang menghubungkan pencipta dengan pembelajar. Bagikan pengetahuan, temukan wawasan, dan tumbuh bersama.',
@@ -837,7 +837,7 @@ return [
     'terms_and_conditions' => 'Syarat dan Ketentuan',
     'connect' => 'Terhubung',
     'all_rights_reserved' => 'Hak cipta dilindungi',
-    
+
     // Admin Dashboard
     'admin_dashboard' => 'Dashboard Admin',
     'total_users' => 'Total Pengguna',
@@ -858,13 +858,13 @@ return [
     'settings' => 'Pengaturan',
     'documentations' => 'Dokumentasi',
     'cms_pages' => 'Halaman CMS',
-'cms_pages_intro' => 'Jelajahi halaman kebijakan, panduan, dan informasi yang telah kami kurasi.',
-'cms_highlight_badge' => 'Pembaruan Terbaru',
-'cms_highlight_settings' => 'Pengaturan Sorotan CMS',
-'cms_highlight_limit_label' => 'Jumlah halaman yang ditampilkan',
-'cms_highlight_button_text_label' => 'Teks tombol',
-'cms_highlight_button_link_label' => 'Tautan tombol (opsional)',
-'cms_highlight_default_button' => 'Lihat Semua Halaman',
+    'cms_pages_intro' => 'Jelajahi halaman kebijakan, panduan, dan informasi yang telah kami kurasi.',
+    'cms_highlight_badge' => 'Pembaruan Terbaru',
+    'cms_highlight_settings' => 'Pengaturan Sorotan CMS',
+    'cms_highlight_limit_label' => 'Jumlah halaman yang ditampilkan',
+    'cms_highlight_button_text_label' => 'Teks tombol',
+    'cms_highlight_button_link_label' => 'Tautan tombol (opsional)',
+    'cms_highlight_default_button' => 'Lihat Semua Halaman',
     'landing_page' => 'Halaman Depan',
     'social_media' => 'Media Sosial',
     'wallet_analytics' => 'Analitik Dompet',
@@ -945,7 +945,7 @@ return [
     'view_all_withdraws' => 'Lihat semua penarikan',
     'no_withdraws' => 'Belum ada penarikan.',
     'action' => 'Aksi',
-    
+
     // Admin Users
     'admin_users' => 'Admin - Pengguna',
     'users_management' => 'Manajemen Pengguna',
@@ -961,7 +961,7 @@ return [
     'joined' => 'Bergabung',
     'edit' => 'Edit',
     'no_users_found' => 'Tidak ada pengguna ditemukan.',
-    
+
     // Admin Notes
     'admin_notes' => 'Admin - Catatan',
     'notes_management' => 'Manajemen Catatan',
@@ -978,7 +978,7 @@ return [
     'created' => 'Dibuat',
     'free' => 'Gratis',
     'no_notes_found' => 'Tidak ada catatan ditemukan.',
-    
+
     // Admin Tickets
     'admin_support_tickets' => 'Admin - Tiket Dukungan',
     'support_tickets' => 'Tiket Dukungan',
@@ -1020,7 +1020,7 @@ return [
     'type_your_response' => 'Ketik respons Anda kepada pengguna di sini...',
     'minimum_10_characters' => 'Minimum 10 karakter diperlukan.',
     'ticket_closed_no_replies' => 'Tiket ini ditutup. Anda tidak dapat menambahkan balasan lagi.',
-    
+
     // Admin Withdraws
     'admin_withdraws' => 'Admin - Penarikan',
     'withdraw_requests' => 'Permintaan Penarikan',
@@ -1043,7 +1043,7 @@ return [
     'notes_for_user' => 'Catatan untuk pengguna...',
     'approve_withdraw' => 'Setujui Penarikan',
     'reject_withdraw' => 'Tolak Penarikan',
-    
+
     // Admin Subscriptions
     'admin_subscriptions' => 'Admin - Langganan',
     'subscription_management' => 'Manajemen Langganan',
@@ -1090,7 +1090,7 @@ return [
     'add_notes_approval' => 'Tambahkan catatan tentang persetujuan ini...',
     'reason_for_rejection' => 'Alasan Penolakan',
     'explain_rejection' => 'Silakan jelaskan mengapa langganan ini ditolak...',
-    
+
     // Admin Transactions
     'admin_transactions' => 'Admin - Transaksi',
     'total_revenue' => 'Total Pendapatan',
@@ -1102,7 +1102,7 @@ return [
     'note' => 'Catatan',
     'method' => 'Metode',
     'no_transactions_found' => 'Tidak ada transaksi ditemukan.',
-    
+
     // Admin FAQs
     'admin_faqs' => 'Admin - FAQ',
     'faqs_management' => 'Manajemen FAQ',
@@ -1114,7 +1114,7 @@ return [
     'order' => 'Urutan',
     'question' => 'Pertanyaan',
     'inactive' => 'Tidak Aktif',
-    
+
     // Admin CMS Pages
     'admin_cms_pages' => 'Admin - Halaman CMS',
     'cms_pages_management' => 'Manajemen Halaman CMS',
@@ -1124,7 +1124,7 @@ return [
     'add_page' => 'Tambah Halaman',
     'slug' => 'Slug',
     'updated' => 'Diperbarui',
-    
+
     // Admin Settings
     'settings_admin' => 'Pengaturan - Admin',
     'system_settings' => 'Pengaturan Sistem',
@@ -1141,7 +1141,7 @@ return [
     's3_endpoint' => 'Endpoint S3',
     's3_path_prefix' => 'Awalan Jalur S3',
     'save_settings' => 'Simpan Pengaturan',
-    
+
     // Admin Landing Page
     'landing_page_sections' => 'Bagian Halaman Depan',
     'manage_homepage_sections' => 'Kelola bagian yang ditampilkan di halaman beranda',
@@ -1155,7 +1155,7 @@ return [
     'to_date' => 'Hingga',
     'no_end_date' => 'Tidak ada tanggal akhir',
     'no_sections_found' => 'Tidak ada bagian ditemukan.',
-    
+
     // Admin Documentations
     'admin_documentations' => 'Dokumentasi',
     'manage_documentation_articles' => 'Kelola artikel dokumentasi, panduan, dan referensi',
@@ -1165,7 +1165,7 @@ return [
     'author' => 'Penulis',
     'views' => 'Dilihat',
     'no_documentations_found' => 'Tidak ada dokumentasi ditemukan.',
-    
+
     // Admin Social Media
     'social_media_links' => 'Tautan Media Sosial',
     'manage_footer_social_links' => 'Kelola tautan media sosial yang ditampilkan di footer',
@@ -1174,7 +1174,7 @@ return [
     'platform' => 'Platform',
     'url' => 'URL',
     'no_social_media_links' => 'Tidak ada tautan media sosial ditemukan.',
-    
+
     // Admin Exchange Rates
     'admin_exchange_rates' => 'Nilai Tukar',
     'manage_currency_exchange_rates' => 'Kelola nilai tukar mata uang untuk konversi top-up',
@@ -1190,7 +1190,7 @@ return [
     'get_started_creating_first_section' => 'Mulai dengan membuat bagian halaman depan pertama Anda.',
     'get_started_adding_first_link' => 'Mulai dengan menambahkan tautan media sosial pertama Anda.',
     'get_started_creating_first_documentation' => 'Mulai dengan membuat artikel dokumentasi pertama Anda.',
-    
+
     // Admin FAQs Create/Edit
     'admin_create_faq' => 'Admin - Buat FAQ',
     'admin_edit_faq' => 'Admin - Edit FAQ',
@@ -1201,7 +1201,7 @@ return [
     'use_new_lines_for_formatting' => 'Anda dapat menggunakan baris baru untuk pemformatan.',
     'active_visible_public_faq' => 'Aktif (terlihat di halaman FAQ publik)',
     'update_faq' => 'Perbarui FAQ',
-    
+
     // Admin CMS Pages Create/Edit
     'admin_create_cms_page' => 'Admin - Buat Halaman CMS',
     'admin_edit_cms_page' => 'Admin - Edit Halaman CMS',
@@ -1214,7 +1214,7 @@ return [
     'meta_description_seo' => 'Deskripsi Meta (SEO)',
     'active_visible_public' => 'Aktif (terlihat di halaman publik)',
     'update_page' => 'Perbarui Halaman',
-    
+
     // Admin Documentations Create/Edit
     'admin_create_documentation' => 'Buat Dokumentasi',
     'admin_edit_documentation' => 'Edit Dokumentasi',
@@ -1235,7 +1235,7 @@ return [
     'related_links' => 'Tautan Terkait',
     'add_link' => '+ Tambah Tautan',
     'save_documentation' => 'Simpan Dokumentasi',
-    
+
     // Admin Social Media Create/Edit
     'admin_add_social_media' => 'Tambah Tautan Media Sosial',
     'admin_edit_social_media' => 'Edit Tautan Media Sosial',
@@ -1254,7 +1254,7 @@ return [
     'active_visible_footer' => 'Aktif (terlihat di footer)',
     'create_link' => 'Buat Tautan',
     'update_link' => 'Perbarui Tautan',
-    
+
     // Admin Exchange Rates Create/Edit
     'admin_create_exchange_rate' => 'Buat Nilai Tukar',
     'admin_edit_exchange_rate' => 'Edit Nilai Tukar',
@@ -1271,7 +1271,7 @@ return [
     'notes_optional' => 'Catatan (Opsional)',
     'create_exchange_rate' => 'Buat Nilai Tukar',
     'update_exchange_rate' => 'Perbarui Nilai Tukar',
-    
+
     // Admin Landing Page Create/Edit
     'admin_create_landing_section' => 'Buat Bagian Halaman Depan',
     'admin_edit_landing_section' => 'Edit Bagian Halaman Depan',
@@ -1296,7 +1296,7 @@ return [
     'active_visible_homepage' => 'Aktif (terlihat di halaman beranda)',
     'create_section' => 'Buat Bagian',
     'update_section' => 'Perbarui Bagian',
-    
+
     // Landing Page Content Builder (JavaScript templates)
     'hero_section_content' => 'Konten Bagian Hero:',
     'primary_button_text' => 'Teks Tombol Utama',
@@ -1334,7 +1334,7 @@ return [
     'custom_section_json' => 'Bagian Kustom (JSON):',
     'enter_json_content' => 'Masukkan konten JSON untuk bagian kustom',
     'remove' => 'Hapus',
-    
+
     // Profile Information Form
     'profile_information' => 'Informasi Profil',
     'update_account_profile_info' => 'Perbarui informasi profil dan alamat email akun Anda.',
@@ -1342,21 +1342,21 @@ return [
     'click_here_resend_verification' => 'Klik di sini untuk mengirim ulang email verifikasi.',
     'new_verification_link_sent' => 'Tautan verifikasi baru telah dikirim ke alamat email Anda.',
     'saved' => 'Tersimpan.',
-    
+
     // Update Password Form
     'current_password' => 'Password Saat Ini',
     'new_password' => 'Password Baru',
     'confirm_password_label' => 'Konfirmasi Password',
     'saved_successfully' => 'Berhasil disimpan!',
     'update_password' => 'Perbarui Password',
-    
+
     // Delete User Form
     'delete_account_warning' => 'Setelah akun Anda dihapus, semua sumber daya dan data akan dihapus secara permanen. Sebelum menghapus akun Anda, harap unduh semua data atau informasi yang ingin Anda pertahankan.',
     'delete_account' => 'Hapus Akun',
     'are_you_sure_delete_account' => 'Apakah Anda yakin ingin menghapus akun Anda?',
     'delete_account_confirmation' => 'Setelah akun Anda dihapus, semua sumber daya dan data akan dihapus secara permanen. Masukkan password Anda untuk mengonfirmasi bahwa Anda ingin menghapus akun secara permanen.',
     'enter_your_password' => 'Masukkan password Anda',
-    
+
     // Admin Users Show/Edit
     'admin_user_detail' => 'Detail Pengguna - Admin',
     'admin_edit_user' => 'Edit Pengguna - Admin',
@@ -1377,7 +1377,7 @@ return [
     'transactions_seller' => 'Transaksi (Penjual)',
     'recent_withdraws' => 'Penarikan Terbaru',
     'update_user' => 'Perbarui Pengguna',
-    
+
     // Email Template - Contact Form
     'contact_form_submission' => 'Pengiriman Formulir Kontak',
     'new_contact_form_submission' => 'Pengiriman Formulir Kontak Baru',
@@ -1386,7 +1386,7 @@ return [
     'reply_directly_to_email' => 'Anda dapat membalas langsung ke email ini untuk merespons :name.',
     'subject_label' => 'Subjek:',
     'message_label' => 'Pesan:',
-    
+
     // Additional Admin Labels
     'tags_comma_separated' => 'Tag (Dipisahkan dengan koma)',
     'comma_separated' => 'Dipisahkan dengan koma',
@@ -1397,7 +1397,7 @@ return [
     'green' => 'Hijau',
     'purple' => 'Ungu',
     'yellow' => 'Kuning',
-    
+
     // JavaScript Templates - Landing Page
     'get_started_free' => 'Mulai Gratis',
     'sign_in' => 'Masuk',
@@ -1405,7 +1405,7 @@ return [
     'claim_now' => 'Klaim Sekarang',
     'link_title' => 'Judul tautan',
     'wasabi' => 'Wasabi',
-    
+
     // Simulators - Plan Comparison
     'plan_comparison' => 'Perbandingan Paket',
     'compare_features' => 'Bandingkan fitur',
@@ -1434,11 +1434,11 @@ return [
     'category' => 'Kategori',
     'tutorial' => 'Tutorial',
     'template' => 'Template',
-    
+
     // SweetAlert Messages
     'content_required' => 'Konten Diperlukan',
     'please_provide_documentation_content' => 'Harap berikan konten dokumentasi.',
-    
+
     // Simulators - Additional Labels
     'current_balance' => 'Saldo Saat Ini',
     'topup_amount' => 'Jumlah Topup (Rp)',
@@ -1495,7 +1495,7 @@ return [
     'competitive' => 'Kompetitif',
     'your_price' => 'Harga Anda:',
     'position' => 'Posisi:',
-    
+
     // Notes Create/Edit
     'upload_files' => 'Unggah file',
     'or_drag_and_drop' => 'atau seret dan lepas',
@@ -1589,20 +1589,20 @@ return [
     'add_more_files' => 'Tambah File Lainnya',
     'make_public' => 'Buat Publik',
     'price_rp_0_for_free' => '(Rp 0 untuk berbagi gratis)',
-    
+
     // Wallet & Referral
     'date' => 'Tanggal',
     'type' => 'Tipe',
     'description' => 'Deskripsi',
     'no_transactions_yet' => 'Belum ada transaksi',
     'reward_type' => 'Tipe Reward',
-    
+
     // Marketplace
     'rating' => 'Rating',
-    
+
     // Docs
     'no_documentation_found' => 'Dokumentasi tidak ditemukan',
-    
+
     // Notes - Additional Labels
     'file_attachments' => 'Lampiran File',
     'preview_content' => 'Konten Pratinjau',
@@ -1623,7 +1623,7 @@ return [
     'active' => 'Aktif',
     'sold' => 'Terjual',
     'inactive' => 'Tidak Aktif',
-    
+
     // Notes - Additional Labels
     'summary' => 'Ringkasan',
     'summary_optional_ai' => '(Opsional - AI dapat membuat ini)',
@@ -1635,12 +1635,12 @@ return [
     'share_thoughts_about_note' => 'Bagikan pemikiran Anda tentang catatan ini...',
     'rating_summary' => 'Ringkasan Rating',
     'example_how_to_create_first_note' => 'contoh, Cara Membuat Catatan Pertama Anda',
-    
+
     // JavaScript Confirm Messages
     'delete_social_media_link_confirm' => 'Apakah Anda yakin ingin menghapus tautan media sosial ini?',
     'delete_section_confirm' => 'Apakah Anda yakin ingin menghapus bagian ini?',
     'delete_documentation_confirm' => 'Apakah Anda yakin ingin menghapus dokumentasi ini?',
-    
+
     // Controller Messages - General
     'ticket_updated_successfully' => 'Tiket berhasil diperbarui!',
     'ticket_assigned_successfully' => 'Tiket berhasil ditugaskan!',
@@ -1661,13 +1661,13 @@ return [
     'fill_required_s3_credentials' => 'Silakan isi semua kredensial S3 yang diperlukan.',
     's3_connection_test_successful' => 'Uji koneksi S3 berhasil! Anda sekarang dapat menggunakan S3 untuk backup.',
     's3_connection_test_failed' => 'Uji koneksi S3 gagal: :error',
-    
+
     // Additional Labels
     'comment_optional' => 'Komentar (opsional)',
     'none_root' => 'Tidak Ada (Root)',
     'select_existing_tag' => 'Pilih tag yang ada...',
     'delete_ticket_confirm' => 'Apakah Anda yakin ingin menghapus tiket ini? Tindakan ini tidak dapat dibatalkan.',
-    
+
     // Admin Dashboard - Topup & Midtrans
     'topup_statistics' => 'Statistik Top-up',
     'midtrans_statistics' => 'Statistik Midtrans',
@@ -1683,7 +1683,7 @@ return [
     'this_month' => 'Bulan ini',
     'day_count' => ':count Hari',
     'order_id' => 'ID Pesanan',
-    
+
     // Workspace & Folder UI
     'workspace_root' => 'Akar Workspace',
     'empty_workspace' => 'Workspace Kosong',
@@ -1698,7 +1698,7 @@ return [
     'back_to_workspace' => 'Kembali ke Workspace',
     'creating_folder_in_workspace' => 'Membuat folder di workspace',
     'creating_folder_in' => 'Membuat folder di dalam',
-    
+
     // Workspace Marketplace
     'for_sale' => 'Dijual',
     'sold' => 'Terjual',
@@ -1821,12 +1821,12 @@ return [
     'review_reply_delete_confirmation' => 'Hapus balasan ini?',
     'user_placeholder_name' => 'Pengguna',
     'rating_count' => '{1}:count penilaian|[2,*]:count penilaian',
-    
+
     // Plugins
     'plugins' => 'Plugin',
     'plugins_coming_soon' => 'Segera Hadir',
     'plugins_description' => 'Plugins akan memungkinkan Anda untuk menambahkan fitur-fitur tambahan ke workspace Anda. Fitur ini masih dalam pengembangan.',
-    
+
     // Withdraw approval
     'time_elapsed' => 'Waktu Berlalu',
     'hours' => 'jam',
@@ -1835,10 +1835,10 @@ return [
     'minimum_24_hours_required' => 'Minimal 24 jam diperlukan sebelum persetujuan',
     'withdraw_approval_wait_time' => 'Waktu tunggu untuk persetujuan',
     'hours_remaining' => 'jam tersisa',
-    
+
     // Note selling
     'already_sold' => 'Sudah Terjual',
-    
+
     // Featured Notes
     'featured_note' => 'Catatan Unggulan',
     'featured_notes' => 'Catatan Unggulan',
@@ -1860,7 +1860,7 @@ return [
     'featured_badge' => 'Unggulan',
     'by_label' => 'oleh',
     'viewed_time_ago' => 'Dilihat :time',
-    
+
     // Collections
     'collection_add_purchased_button' => 'Tambah Catatan yang Dibeli',
     'collection_select_notes_title' => 'Pilih Catatan untuk Ditambahkan',
@@ -1872,7 +1872,7 @@ return [
     'collection_empty_with_purchased' => 'Anda memiliki :count catatan yang sudah dibeli. Klik ":button" di atas untuk menambahkannya ke koleksi ini.',
     'collection_empty_without_purchased' => 'Tambahkan catatan dari marketplace ke koleksi ini, atau beli catatan terlebih dahulu.',
     'collection_browse_marketplace' => 'Jelajahi Marketplace',
-    
+
     // Marketplace
     'share_marketplace' => 'Bagikan Marketplace:',
     'share_on_facebook' => 'Bagikan ke Facebook',
@@ -1893,7 +1893,7 @@ return [
     'link_copied' => 'Tautan berhasil disalin!',
     'close' => 'Tutup',
     'view' => 'Lihat',
-    
+
     // Identity Verification (KYC)
     'ktp_upload' => 'Upload KTP (JPG/PNG/PDF)',
     'ktp_upload_help' => 'Format: JPG, PNG, atau PDF. Maksimal 5MB.',
@@ -1915,7 +1915,7 @@ return [
     'reject_verification' => 'Tolak Verifikasi',
     'verification_notes' => 'Catatan Verifikasi',
     'verification_notes_placeholder' => 'Tambahkan catatan tentang verifikasi ini...',
-    
+
     // Studio (Service Orders)
     'studio' => 'Studio',
     'studio_title' => 'Studio — Jasa Kreatif',
@@ -1981,7 +1981,7 @@ return [
     'studio_email_vendor_assigned' => 'Email saat vendor ditugaskan',
     'sla_funding_reminder_days' => 'SLA Funding Reminder (hari)',
     'sla_reminder_sent' => 'Pengingat SLA dikirim',
-    
+
     // Ecosystem Creative
     'ecosystem' => 'Ekosistem',
     'ecosystem_creative' => 'Ekosistem Kreatif',
@@ -2016,7 +2016,7 @@ return [
     'scheduled_publish_help' => 'Catatan akan otomatis dipublikasikan pada waktu yang ditentukan',
     'publish_now' => 'Publikasikan Sekarang',
     'publish_scheduled' => 'Publikasikan Terjadwal',
-    
+
     // System Health
     'system_health' => 'System Health',
     'system_health_title' => 'System Health & Configuration',
@@ -2047,14 +2047,14 @@ return [
     'configuration' => 'Configuration',
     'scheduled_commands' => 'Scheduled Commands',
     'queue_worker_detected' => 'Queue Worker Detected',
-    
+
     // Studio Services
     'example_services' => 'Contoh Layanan',
     'service_logo_design' => 'Desain logo & identitas visual',
     'service_video_editing' => 'Editing video & motion graphics',
     'service_web_development' => 'Pengembangan website (WordPress/Laravel)',
     'service_voice_over' => 'Voice over & audio mixing',
-    
+
     // Additional Studio translations
     'no_orders' => 'Belum ada order.',
     'no_assigned_orders' => 'Belum ada order ditugaskan.',
@@ -2119,7 +2119,7 @@ return [
     'order' => 'order',
     'order_singular' => 'order',
     'orders' => 'orders',
-    
+
     // Navigation
     'workspaces' => 'Workspaces',
     'forum' => 'Forum',
@@ -2132,11 +2132,11 @@ return [
     'reading_history' => 'Reading History',
     'batch_download' => 'Batch Download',
     'my_library' => 'My Library',
-    
+
     // Forum
     'post_details' => 'Post Details',
     'back_to_forum' => 'Back to Forum',
-    
+
     // Refunds
     'refund_requests' => 'Refund Requests',
     'view_and_manage_refunds' => 'View and manage your refund requests',
@@ -2144,65 +2144,65 @@ return [
     'no_refund_requests_description' => 'You haven\'t submitted any refund requests yet.',
     'view_details' => 'View Details',
     'processed' => 'Processed',
-    
+
     // Series
     'back_to_series' => 'Back to Series',
     'notes_in_series' => 'Notes in this Series',
     'no_notes_in_series' => 'No notes in this series yet.',
     'active' => 'Active',
     'inactive' => 'Inactive',
-    
+
     // Admin Tutorials
     'admin_tutorials' => 'Admin Tutorials',
     'tutorial_management' => 'Tutorial Management',
     'create_tutorial' => 'Create Tutorial',
     'edit_tutorial' => 'Edit Tutorial',
     'back_to_tutorials' => '← Back to Tutorials',
-    
+
     // Notes Resale
     'resale_note' => 'Jual Kembali Catatan',
-    
+
     // AI Memory
     'ai_memory_platform' => 'AI Memory Platform',
-    
+
     // AI Chat
     'ai_chat' => 'AI Chat',
-    
+
     // Forum Moderation
     'post_moderation' => 'Post Moderation',
     'forum_moderation' => 'Forum Moderation',
-    
+
     // Note Moderation
     'note_moderation' => 'Note Moderation',
     'moderate_note' => 'Moderate Note',
-    
+
     // Account Moderation
     'account_moderation' => 'Account Moderation',
     'moderate_account' => 'Moderate Account',
-    
+
     // Forum Pages
     'forum_index' => 'Forum',
     'forum_analytics' => 'Forum Analytics',
     'forum_email_preferences' => 'Forum Email Preferences',
     'forum_email_notifications' => 'Forum Email Notifications',
     'bookmarked_posts_forum' => 'Bookmarked Posts - Forum',
-    
+
     // Reading History
     'reading_history' => 'Reading History',
-    
+
     // Collections
     'my_collections' => 'My Collections',
     'create_collection' => 'Create Collection',
-    
+
     // Workspaces
     'invite_team' => 'Invite Team',
-    
+
     // Forum Hashtag
     'hashtag_forum' => 'Forum',
-    
+
     // MyNoteds
     'mynoteds_ai_memory_platform' => 'MyNoteds - AI Memory Platform',
-    
+
     // AI Memory
     'ai_memory_description' => 'Tanya apapun tentang catatan Anda menggunakan AI yang memahami semua data Anda',
     'total_notes' => 'Total Catatan',
@@ -2212,7 +2212,7 @@ return [
     'ai_processing' => 'AI sedang memproses pertanyaan Anda...',
     'quick_actions' => 'Quick Actions',
     'popular_topics' => 'Topik Populer',
-    
+
     // Note Conversations
     'product_conversations' => 'Percakapan Produk',
     'product_conversations_description' => 'Chat pribadi antara buyer dan seller setelah pembelian. Setiap produk memiliki forum percakapan sendiri.',
@@ -2234,7 +2234,8 @@ return [
     'message_label' => 'Pesan',
     'write_message_placeholder' => 'Tulis pesan (maks 2000 karakter)',
     'send_message' => 'Kirim Pesan',
-    
+    'type_to_search_more' => 'Ketik untuk mencari vendor lainnya',
+
     // Tuts+ & Education
     'education_creative_coding' => 'Edukasi Kreatif & Coding',
     'tuts_description' => 'Platform edukasi berisi tutorial & kursus tentang desain, coding, fotografi, dan kreativitas digital.',
@@ -2243,7 +2244,7 @@ return [
     'tuts_category_photo' => 'Fotografi & video editing',
     'tuts_category_business' => 'Productivity & creative business',
     'access_with_premium' => 'Akses dengan Premium',
-    
+
     // Ecosystem Sub-pages
     'music_sfx' => 'Musik & SFX',
     'plugins_code_scripts' => 'Plugin, Kode, dan Skrip',
@@ -2281,7 +2282,7 @@ return [
     '3d_use_game' => 'Game assets dan prototyping',
     '3d_use_material' => 'Material/texture untuk pipeline 3D',
     'subscribe_3d_access' => 'Langganan untuk akses Aset 3D',
-    
+
     // Admin Settings - Studio
     'studio_platform_fee' => 'Studio Platform Fee',
     'studio_platform_fee_description' => 'Atur persentase fee platform untuk rilis escrow pada Studio (order jasa).',
@@ -2293,7 +2294,7 @@ return [
     'sla_funding_reminder_days' => 'SLA Funding Reminder (days)',
     'sla_funding_reminder_description' => 'Kirim pengingat pendanaan untuk order quoted yang belum didanai setelah N hari.',
     'save_studio_email_settings' => 'Save Studio Email Settings',
-    
+
     // View History
     'view_history_title' => 'View History & Revenue',
     'export_csv' => 'Export CSV',
@@ -2323,7 +2324,7 @@ return [
     'invalid' => 'Invalid',
     'no_view_history_found' => 'No view history found.',
     'views_today' => 'views today',
-    
+
     // Repurchase Report
     'repurchase_statistics_report' => 'Repurchase Statistics Report',
     'repurchase_statistics_description' => 'Detailed analytics for note repurchases in Scarcity Mode',
@@ -2352,7 +2353,7 @@ return [
     'after' => 'After',
     'no_repurchases_found' => 'No repurchases found',
     'no_repurchase_transactions_found' => 'No repurchase transactions found for the selected date range.',
-    
+
     // View History Show
     'view_revenue_details' => 'Detail Pendapatan View',
     'back_to_view_history' => 'Kembali ke View History',
@@ -2370,7 +2371,7 @@ return [
     'bot_detection_data' => 'Data Deteksi Bot',
     'related_views' => 'View Terkait',
     'same_ip_fingerprint' => 'IP/Fingerprint Sama',
-    
+
     // Refund Management
     'admin_refund_management' => 'Admin - Manajemen Refund',
     'refund_management' => 'Manajemen Refund',
@@ -2398,7 +2399,7 @@ return [
     'explain_why_rejected' => 'Jelaskan mengapa refund ini ditolak...',
     'message_will_be_sent_to_buyer' => 'Pesan ini akan dikirim ke pembeli.',
     'reject_refund' => 'Tolak Refund',
-    
+
     // Workspaces Management
     'workspaces_management' => 'Manajemen Workspaces',
     'workspace_details' => 'Detail Workspace',
@@ -2419,7 +2420,7 @@ return [
     'no_notes_found' => 'Tidak ada catatan ditemukan.',
     'total_folders' => 'Total Folder',
     'total_members' => 'Total Anggota',
-    
+
     // Notes Management
     'all_sale_mode' => 'Semua Sale Mode',
     'sale_mode' => 'Sale Mode',
@@ -2435,7 +2436,7 @@ return [
     'reject' => 'Reject',
     'confirm_reject_monetization' => 'Yakin reject monetization?',
     'rejected_by_admin' => 'Rejected by admin',
-    
+
     // Identity Verification
     'identity_verification_title' => 'Verifikasi Identitas',
     'status_label' => 'Status:',
@@ -2444,7 +2445,7 @@ return [
     'reviewed_label' => 'Reviewed:',
     'notes_label' => 'Catatan:',
     'rejection_reason_required' => 'Alasan penolakan (wajib)',
-    
+
     // Pricing Guidance Settings
     'pricing_guidance_settings' => 'Pricing Guidance Settings',
     'pricing_guidance_description' => 'Tetapkan batas harga minimum dan rekomendasi harga untuk setiap kategori note.',
@@ -2463,11 +2464,11 @@ return [
     'action' => 'Aksi',
     'save_studio_email_settings' => 'Save Studio Email Settings',
     'sla_funding_reminder_days' => 'SLA Funding Reminder (days)',
-    
+
     // Tickets
     'premium_only' => 'Premium Only',
     'all_users' => 'All Users',
-    
+
     // Ecosystem Use Cases
     'photos_use_website' => 'Website, blog, dan landing page',
     'photos_use_promo' => 'Materi promosi & iklan',
@@ -2489,14 +2490,14 @@ return [
     'code_use_plugins' => 'Plugin siap pakai untuk CMS populer',
     'code_use_components' => 'Komponen UI/UX yang dapat dikustomisasi',
     'subscribe_code_access' => 'Langganan untuk akses Kode',
-    
+
     // Studio Services
     'example_services' => 'Contoh Layanan',
     'service_logo_design' => 'Desain logo & identitas visual',
     'service_video_editing' => 'Editing video & motion graphics',
     'service_web_development' => 'Pengembangan website (WordPress/Laravel)',
     'service_voice_over' => 'Voice over & audio mixing',
-    
+
     // Tuts
     'tuts_description' => 'Platform edukasi berisi tutorial & kursus tentang desain, coding, fotografi, dan kreativitas digital.',
     'search_tutorials' => 'Search tutorials...',
@@ -2509,10 +2510,10 @@ return [
     'views' => 'views',
     'no_tutorials_found' => 'No tutorials found',
     'try_adjusting_search' => 'Try adjusting your search or filter criteria.',
-    
+
     // Ecosystem Index
     'ecosystem_explore' => 'Eksplor penawaran ala ekosistem Envato untuk Noteds.',
-    
+
     // Marketplace Ecosystem Filter
     'all_ecosystem' => 'Semua ecosystem',
     'design' => 'Design',
@@ -2522,20 +2523,20 @@ return [
     'video' => 'Video',
     'theme' => 'Theme',
     'elements' => 'Elements',
-    
+
     // Notes Create
     'ecosystem_category' => 'Ekosistem Kreatif',
     'note_language' => 'Bahasa Konten',
     'scheduled_publish_at' => 'Jadwalkan Publikasi',
     'scheduled_publish_help' => 'Jika diisi, catatan akan otomatis dipublikasikan pada waktu tersebut.',
-    
+
     // Studio Orders Show
     'no_quotes_found' => 'Belum ada quote.',
-    
+
     // Registration Verification Info
     'verification_info_title' => 'Info Verifikasi',
     'verification_info_description' => 'Setelah registrasi, Anda akan diminta untuk melengkapi profil dengan mengupload dokumen identitas (KTP atau Kartu Pelajar) dan foto selfie untuk verifikasi identitas.',
-    
+
     // Profile Edit - Document Types
     'ktp_full' => 'KTP (Kartu Tanda Penduduk)',
     'student_card' => 'Kartu Pelajar (untuk yang belum cukup umur/sekolah)',
@@ -2551,11 +2552,11 @@ return [
     'file_format_help' => 'Format: JPG, PNG, atau PDF. Maksimal 5MB.',
     'document_type_label' => 'Jenis Dokumen Identitas',
     'selfie_upload_help' => 'Gunakan foto terang dengan wajah terlihat jelas. Maksimal 5MB.',
-    
+
     // Notes Show
     'cannot_delete_sold' => 'Tidak Dapat Dihapus (Terjual)',
     'cannot_delete_sold_tooltip' => 'Tidak dapat menghapus catatan yang sudah terjual',
-    
+
     // Admin Pending Verification
     'user_verification_pending_title' => 'User Verification Pending',
     'verification_pending_title' => 'Verifikasi User Pending',

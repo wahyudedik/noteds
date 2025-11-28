@@ -25,7 +25,7 @@ class RegisteredUserController extends Controller
     {
         // Get referral code from URL parameter
         $refCode = $request->get('ref');
-        
+
         // Check for workspace invitation token
         $inviteToken = $request->get('invite');
         $invitation = null;
@@ -36,7 +36,7 @@ class RegisteredUserController extends Controller
                 ->with('workspace')
                 ->first();
         }
-        
+
         return view('auth.register', compact('refCode', 'invitation', 'inviteToken'));
     }
 
@@ -55,13 +55,13 @@ class RegisteredUserController extends Controller
                 ->whereNull('accepted_at')
                 ->where('expires_at', '>', now())
                 ->first();
-            
+
             if (!$invitation) {
                 return redirect()->route('register', ['invite' => $inviteToken])
                     ->withInput()
                     ->with('error', 'Invitation tidak valid atau sudah kadaluarsa.');
             }
-            
+
             // Validate email matches invitation (case-insensitive)
             if (strtolower($invitation->email) !== strtolower($request->email)) {
                 return redirect()->route('register', ['invite' => $inviteToken])
@@ -72,7 +72,7 @@ class RegisteredUserController extends Controller
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => ['required', 'in:buyer,seller,user_workspaces'],
             'referral_code' => ['nullable', 'string', 'exists:users,referral_code'],
@@ -96,17 +96,29 @@ class RegisteredUserController extends Controller
 
         // Auto-generate username from name
         $baseUsername = Str::slug(Str::lower($request->name), '');
+
+        // Fallback if baseUsername is empty or too short
+        if (strlen($baseUsername) < 1) {
+            $baseUsername = 'user';
+        }
+
         $username = $baseUsername;
         $counter = 1;
-        
+        $maxIterations = 10000; // Prevent infinite loop
+
         // Ensure username is at least 3 characters and unique
-        while (strlen($username) < 3 || User::where('username', $username)->exists()) {
+        while ((strlen($username) < 3 || User::where('username', $username)->exists()) && $counter < $maxIterations) {
             if (strlen($baseUsername) < 3) {
                 $username = $baseUsername . str_pad((string)$counter, 3 - strlen($baseUsername), '0', STR_PAD_LEFT);
             } else {
                 $username = $baseUsername . $counter;
             }
             $counter++;
+        }
+
+        // Final safety check
+        if ($counter >= $maxIterations) {
+            throw new \Exception('Unable to generate unique username. Please try again.');
         }
 
         // KTP dan selfie upload dipindahkan ke profile
@@ -127,7 +139,7 @@ class RegisteredUserController extends Controller
             'selfie_path' => null, // Akan diisi di profile
             'verification_status' => 'pending',
         ]);
-        
+
         // Assign Spatie role
         $user->assignRole($request->role);
 
@@ -151,7 +163,7 @@ class RegisteredUserController extends Controller
         try {
             $affiliateService = app(\App\Services\AffiliateService::class);
             $affiliateCode = $request->cookie('affiliate_code') ?? session('affiliate_code');
-            
+
             if ($affiliateCode && $request->role !== 'user_workspaces') {
                 $affiliateService->trackConversion(
                     $user,
@@ -176,7 +188,7 @@ class RegisteredUserController extends Controller
                 'accepted_at' => now(),
                 'accepted_by' => $user->id,
             ]);
-            
+
             // Add user to workspace
             WorkspaceMember::create([
                 'workspace_id' => $invitation->workspace->id,
@@ -199,7 +211,7 @@ class RegisteredUserController extends Controller
 
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
-        
+
         // Mark that user just registered for dashboard redirect check
         session()->put('just_registered', true);
 

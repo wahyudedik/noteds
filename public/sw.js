@@ -1,6 +1,6 @@
 // Service Worker for Noteds PWA
-const CACHE_NAME = 'noteds-v1';
-const RUNTIME_CACHE = 'noteds-runtime-v1';
+const CACHE_NAME = 'noteds-v2';
+const RUNTIME_CACHE = 'noteds-runtime-v2';
 
 // Assets to cache on install (only public pages, NOT protected routes)
 const STATIC_ASSETS = [
@@ -53,15 +53,40 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // Skip locale change requests - let them pass through directly
+    if (event.request.url.includes('/locale/')) {
+        event.respondWith(
+            fetch(event.request, {
+                redirect: 'manual',
+                credentials: 'same-origin'
+            }).then(response => {
+                // If it's a redirect, follow it manually
+                if (response.type === 'opaqueredirect' || response.status === 302 || response.status === 301) {
+                    return fetch(response.url || event.request.referrer || '/', {
+                        redirect: 'follow',
+                        credentials: 'same-origin'
+                    });
+                }
+                return response;
+            }).catch(() => {
+                // Fallback to referrer or home page
+                return caches.match('/');
+            })
+        );
+        return;
+    }
+
     // For navigation requests (HTML pages), always go to network first
     // This prevents serving stale HTML and caching protected pages
     if (event.request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request, { redirect: 'follow' })
-                .catch(() => {
-                    // Fallback to home page if network fails
-                    return caches.match('/');
-                })
+            fetch(event.request, {
+                redirect: 'follow',
+                credentials: 'same-origin'
+            }).catch(() => {
+                // Fallback to home page if network fails
+                return caches.match('/');
+            })
         );
         return;
     }
@@ -75,14 +100,16 @@ self.addEventListener('fetch', (event) => {
                 }
 
                 return caches.open(RUNTIME_CACHE).then((cache) => {
-                    return fetch(event.request, { redirect: 'follow' })
-                        .then((response) => {
-                            // Only cache successful responses with status 200
-                            if (response.status === 200) {
-                                cache.put(event.request, response.clone());
-                            }
-                            return response;
-                        })
+                    return fetch(event.request, {
+                        redirect: 'follow',
+                        credentials: 'same-origin'
+                    }).then((response) => {
+                        // Only cache successful responses with status 200
+                        if (response.status === 200) {
+                            cache.put(event.request, response.clone());
+                        }
+                        return response;
+                    })
                         .catch(() => {
                             // Return offline fallback if available
                             return caches.match('/');

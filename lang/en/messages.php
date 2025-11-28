@@ -78,7 +78,7 @@ return [
     'username_alpha_dash' => 'Username may only contain letters, numbers, dashes and underscores.',
     'username_lowercase' => 'Username must be lowercase.',
     'username_unique' => 'This username is already taken. Please choose another one.',
-    
+
     // Authentication
     'auth_hero_title' => 'Sign in to Noteds and start creating',
     'auth_hero_subtitle' => 'Manage digital notes, collaborate with teams, and grow your presence in the Noteds marketplace.',
@@ -122,7 +122,7 @@ return [
     'verification_link_sent' => 'A new verification link has been sent to the email address you provided during registration.',
     'resend_verification_email' => 'Resend Verification Email',
     'confirm_password_message' => 'This is a secure area of the application. Please confirm your password before continuing.',
-    
+
     // Dashboard
     'start_writing_note' => 'Start writing a new note',
     'discover_public_notes' => 'Discover public notes',
@@ -130,7 +130,7 @@ return [
     'recent_notes' => 'Recent Notes',
     'view' => 'View',
     'status' => 'Status',
-    
+
     // FAQ
     'faq' => 'FAQ',
     'frequently_asked_questions' => 'Frequently Asked Questions',
@@ -140,7 +140,7 @@ return [
     'still_have_questions' => 'Still Have Questions?',
     'cant_find_what_youre_looking_for' => 'Can\'t find what you\'re looking for? We\'re here to help!',
     'contact_support' => 'Contact Support',
-    
+
     // Profile
     'profile_settings' => 'Profile Settings',
     'manage_account_settings' => 'Manage your account settings and profile information',
@@ -158,7 +158,7 @@ return [
     'save_changes' => 'Save Changes',
     'update_password' => 'Update Password',
     'delete_account' => 'Delete Account',
-    
+
     // Notes
     'my_notes' => 'My Notes',
     'create_new_note' => 'Create New Note',
@@ -183,7 +183,7 @@ return [
     'notes_remaining' => 'notes remaining on your Basic plan.',
     'you_have' => 'You have',
     'private' => 'Private',
-    
+
     // Marketplace
     'discover_purchase_notes' => 'Discover and purchase quality notes from the community',
     'search_title' => 'Search Title',
@@ -237,7 +237,7 @@ return [
     'note_unavailable_suggestions_title' => 'Looking for something else?',
     'visibility_public' => 'Public',
     'visibility_private' => 'Private',
-    
+
     // Wallet
     'wallet_balance_title' => 'Wallet Balance',
     'top_up' => 'Top Up',
@@ -254,7 +254,7 @@ return [
     'bank_name' => 'Bank Name',
     'request_withdraw' => 'Request Withdraw',
     'withdraw_request_success' => 'Withdrawal request submitted successfully',
-    
+
     // Subscription
     'subscription' => 'Subscription',
     'current_plan' => 'Current Plan',
@@ -263,7 +263,7 @@ return [
     'unlimited_notes' => 'Unlimited Notes',
     'ai_powered_features' => 'AI-Powered Features',
     'priority_support' => 'Priority Support',
-    
+
     // Support Tickets
     'support_tickets' => 'Support Tickets',
     'create_ticket' => 'Create Ticket',
@@ -278,7 +278,7 @@ return [
     'reply' => 'Reply',
     'no_tickets' => 'No tickets yet',
     'create_first_ticket' => 'Create your first support ticket',
-    
+
     // Referral
     'referral_program' => 'Referral Program',
     'your_referral_code' => 'Your Referral Code',
@@ -287,13 +287,13 @@ return [
     'total_referrals' => 'Total Referrals',
     'total_earnings' => 'Total Earnings',
     'pending_earnings' => 'Pending Earnings',
-    
+
     // Notifications
     'notifications' => 'Notifications',
     'no_notifications' => 'No notifications',
     'mark_all_read' => 'Mark All as Read',
     'mark_as_read' => 'Mark as Read',
-    
+
     // Additional Notes fields
     'summary' => 'Summary',
     'summary_optional' => '(Optional - AI can generate this)',
@@ -321,11 +321,11 @@ return [
     'try_again' => 'Try Again',
     'no_content' => 'No Content',
     'enter_note_content_first' => 'Please enter note content first before using AI features.',
-    
+
     // Marketplace additional
     'free' => 'Free',
     'try_adjusting_criteria' => 'Try adjusting your search criteria or filters to find what you\'re looking for.',
-    
+
     // Notes Edit & Show
     'edit_note' => 'Edit Note',
     'update_note_information' => 'Update your note information',
@@ -363,7 +363,7 @@ return [
     'payment_will_be_deducted_from_wallet' => 'Payment will be automatically deducted from your wallet balance.',
     'activate_premium' => 'Activate Premium',
     'cancel' => 'Cancel',
-    
+
     // Marketplace Show additional
     'published' => 'Published',
     'full_content_available_after_purchase' => '🔒 Full content available after purchase',
@@ -377,7 +377,7 @@ return [
     'popular' => 'Popular',
     'to_purchase_please_login' => 'To purchase this note, please login first.',
     'no_reviews_yet_be_first' => 'No reviews yet. Be the first to review this note!',
-    
+
     // Wallet
     'my_wallet' => 'My Wallet',
     'manage_balance_view_history' => 'Manage your balance and view transaction history',
@@ -395,7 +395,7 @@ return [
     'copy' => 'Copy',
     'copied' => 'Copied!',
     'all_notifications_one_place' => 'All your notifications in one place',
-    
+
     // Subscription
     'my_subscription' => 'My Subscription',
     'manage_premium_subscription' => 'Manage your premium subscription',
@@ -410,7 +410,7 @@ return [
     'subscription_request_reviewed' => 'Your subscription request is being reviewed by admin',
     'request_premium_subscription' => 'Request Premium Subscription',
     'upgrade_to_premium_now' => 'Upgrade to Premium Now',
-    
+
     // Support Tickets
     'my_support_tickets' => 'My Support Tickets',
     'manage_support_requests' => 'Manage your support requests',
@@ -437,7 +437,7 @@ return [
     'last_updated' => 'Last Updated',
     'no_tickets_found' => 'No tickets found',
     'create_first_ticket' => 'Create your first support ticket',
-    
+
     // Subscription additional
     'no_active_subscription' => 'No Active Subscription',
     'currently_on_basic_plan' => 'You\'re currently on the Basic plan',
@@ -468,7 +468,7 @@ return [
     'export_notes' => 'Export Notes',
     'export_pdf_docx_markdown' => 'Export notes to PDF, DOCX, or Markdown format',
     'view_all_read_notes' => 'View all your read notes history',
-    
+
     // Subscription Create
     'upgrade_to_premium' => 'Upgrade to Premium',
     'request_premium_access' => 'Request premium access with unlimited features',
@@ -481,7 +481,7 @@ return [
     'note' => 'Note',
     'after_submitting_request' => 'After submitting your request with payment proof, our admin team will review and approve your premium subscription. You\'ll receive a notification once approved.',
     'submit_request' => 'Submit Request',
-    
+
     // Wallet Withdraw
     'withdraw_wallet' => 'Withdraw Wallet',
     'request_withdrawal_bank' => 'Request a withdrawal to your bank account',
@@ -497,7 +497,7 @@ return [
     'enter_withdrawal_amount' => 'Enter withdrawal amount',
     'minimum_withdraw_amount' => 'Minimum withdrawal amount is :amount',
     'cannot_exceed_balance' => 'Cannot exceed your current balance',
-    
+
     // Public Profile
     'joined' => 'Joined',
     'public_notes' => 'Public Notes',
@@ -506,7 +506,7 @@ return [
     'total_followers' => 'Total Followers',
     'followers' => 'followers',
     'follower' => 'follower',
-    
+
     // Contact
     'contact_us' => 'Contact Us',
     'have_question_need_help' => 'Have a question or need help? We\'re here for you!',
@@ -532,7 +532,7 @@ return [
     'name_as_appears_bank' => 'Name as it appears on bank account',
     'please_double_check_bank' => 'Please double-check your bank account details. Withdrawal requests are processed manually by our admin team within 1-3 business days.',
     'range' => 'Range',
-    
+
     // Support Tickets Edit & Show
     'edit_support_ticket' => 'Edit Support Ticket',
     'support_ticket_details' => 'Support Ticket Details',
@@ -540,7 +540,7 @@ return [
     'update_ticket' => 'Update Ticket',
     'back_to_tickets' => 'Back to Tickets',
     'save_changes' => 'Save Changes',
-    
+
     // Wallet Topup Checkout
     'topup_checkout' => 'Top-up Checkout',
     'complete_wallet_topup_payment' => 'Complete your wallet top-up payment',
@@ -554,7 +554,7 @@ return [
     'complete_payment_instructed' => 'Complete the payment as instructed',
     'wallet_balance_updated_automatically' => 'Your wallet balance will be updated automatically upon successful payment',
     'if_payment_pending_wait' => 'If payment is pending, please wait for confirmation',
-    
+
     // Support Tickets Show additional
     'conversation' => 'Conversation',
     'original_message' => 'Original Message',
@@ -563,7 +563,7 @@ return [
     'type_your_reply_here' => 'Type your reply here...',
     'send_reply' => 'Send Reply',
     'ticket_closed_no_replies' => 'This ticket is closed. You cannot add more replies.',
-    
+
     // Subscription Show
     'subscription_details' => 'Subscription Details',
     'view_subscription_information' => 'View your subscription information',
@@ -581,10 +581,10 @@ return [
     'expired' => 'Expired',
     'cancelled' => 'Cancelled',
     'active' => 'Active',
-    
+
     // Welcome
     'welcome_to_noteds' => 'Welcome to ' . config('app.name'),
-    
+
     // Documentation
     'documentation' => 'Documentation',
     'find_guides_tutorials' => 'Find guides, tutorials, and references to help you get the most out of Noteds',
@@ -593,7 +593,7 @@ return [
     'clear_search' => 'Clear search',
     'article' => 'article',
     'articles' => 'articles',
-    
+
     // Folders
     'folders' => 'Folders',
     'organize_notes_with_folders' => 'Organize your notes with folders',
@@ -605,7 +605,7 @@ return [
     'no_folders_yet' => 'No folders yet',
     'create_first_folder' => 'Create your first folder to organize your notes',
     'are_you_sure_delete_folder' => 'Are you sure? Notes in this folder will be moved to root.',
-    
+
     // Workspaces
     'workspaces' => 'Workspaces',
     'manage_workspaces' => 'Manage your personal, team, and organization workspaces',
@@ -620,7 +620,7 @@ return [
     'manage_workspaces_button' => 'Manage Workspaces',
     'filter_by_workspace' => 'Filter by Workspace',
     'all_workspaces' => 'All Workspaces',
-    
+
     // MyNoteds
     'mynoteds' => 'MyNoteds',
     'mynoteds_description' => 'Your AI-powered memory platform. Ask questions, discover insights, and connect your thoughts.',
@@ -637,7 +637,7 @@ return [
     'total_questions' => 'Total Questions',
     'total_insights' => 'Total Insights',
     'total_connections' => 'Total Connections',
-    
+
     // Simulators
     'marketing_simulators' => 'Marketing Simulators',
     'calculate_potential_earnings' => 'Calculate your potential earnings and plan your strategy on Noteds',
@@ -686,10 +686,10 @@ return [
     'signup_rewards' => 'Signup rewards',
     'transaction_commissions' => 'Transaction commissions',
     'total_monthly' => 'Total monthly',
-    
+
     // CMS Show
     'back' => 'Back',
-    
+
     // Docs Show & Category
     'back_to_all_documentation' => '← Back to All Documentation',
     'related_links' => 'Related Links',
@@ -705,7 +705,7 @@ return [
     'solutions_common_problems' => 'Solutions to common problems and issues.',
     'technical_api_documentation' => 'Technical API documentation for developers.',
     'video_tutorials_walkthroughs' => 'Video tutorials and walkthroughs.',
-    
+
     // Folders Create/Edit/Show
     'create_folder' => 'Create Folder',
     'create_new_folder' => 'Create New Folder',
@@ -723,7 +723,7 @@ return [
     'no_notes_in_folder' => 'No notes in this folder yet',
     'create_first_note_folder' => 'Create your first note in this folder',
     'optional' => 'Optional',
-    
+
     // Workspaces Create/Edit
     'create_workspace' => 'Create Workspace',
     'create_new_workspace' => 'Create New Workspace',
@@ -741,7 +741,7 @@ return [
     'active_workspace' => 'Active Workspace',
     'inactive_workspaces_wont_appear' => 'Inactive workspaces won\'t appear in most lists',
     'workspace_name_placeholder' => 'e.g., My Team, Company Notes',
-    
+
     // MyNoteds Ask/Search/Insights
     'ask_your_notes_title' => 'Ask Your Notes - MyNoteds',
     'ask_natural_language_questions_description' => 'Ask natural language questions about your notes. The AI will search through your content and provide answers.',
@@ -793,7 +793,7 @@ return [
     'note' => 'Note',
     'tip' => 'Tip',
     'new_note' => 'New Note',
-    
+
     // Welcome/Landing Page
     'welcome_to_noteds_title' => 'Welcome to :name',
     'welcome_to_noteds' => 'Welcome to :name',
@@ -803,7 +803,7 @@ return [
     'get_started_free' => 'Get Started Free',
     'sign_in' => 'Sign In',
     'locale_changed' => 'Language changed successfully',
-    
+
     // Navigation
     'home' => 'Home',
     'welcome_back' => 'Welcome back, :name!',
@@ -837,7 +837,7 @@ return [
     'notifications' => 'Notifications',
     'view_all' => 'View All',
     'no_notifications_yet' => 'No notifications yet',
-    
+
     // Footer
     'about' => 'About',
     'about_description' => 'A digital marketplace connecting creators with learners. Share knowledge, discover insights, and grow together.',
@@ -849,7 +849,7 @@ return [
     'terms_and_conditions' => 'Terms & Conditions',
     'connect' => 'Connect',
     'all_rights_reserved' => 'All rights reserved',
-    
+
     // Admin Dashboard
     'admin_dashboard' => 'Admin Dashboard',
     'total_users' => 'Total Users',
@@ -870,13 +870,13 @@ return [
     'settings' => 'Settings',
     'documentations' => 'Documentations',
     'cms_pages' => 'CMS Pages',
-'cms_pages_intro' => 'Explore curated policy pages, guides, and helpful information.',
-'cms_highlight_badge' => 'Latest Update',
-'cms_highlight_settings' => 'CMS Highlight Settings',
-'cms_highlight_limit_label' => 'Number of pages to display',
-'cms_highlight_button_text_label' => 'Button text',
-'cms_highlight_button_link_label' => 'Button link (optional)',
-'cms_highlight_default_button' => 'View All Pages',
+    'cms_pages_intro' => 'Explore curated policy pages, guides, and helpful information.',
+    'cms_highlight_badge' => 'Latest Update',
+    'cms_highlight_settings' => 'CMS Highlight Settings',
+    'cms_highlight_limit_label' => 'Number of pages to display',
+    'cms_highlight_button_text_label' => 'Button text',
+    'cms_highlight_button_link_label' => 'Button link (optional)',
+    'cms_highlight_default_button' => 'View All Pages',
     'landing_page' => 'Landing Page',
     'social_media' => 'Social Media',
     'wallet_analytics' => 'Wallet Analytics',
@@ -957,7 +957,7 @@ return [
     'view_all_withdraws' => 'View all withdraws',
     'no_withdraws' => 'No withdraws yet.',
     'action' => 'Action',
-    
+
     // Admin Users
     'admin_users' => 'Admin - Users',
     'users_management' => 'Users Management',
@@ -973,7 +973,7 @@ return [
     'joined' => 'Joined',
     'edit' => 'Edit',
     'no_users_found' => 'No users found.',
-    
+
     // Admin Notes
     'admin_notes' => 'Admin - Notes',
     'notes_management' => 'Notes Management',
@@ -990,7 +990,7 @@ return [
     'created' => 'Created',
     'free' => 'Free',
     'no_notes_found' => 'No notes found.',
-    
+
     // Admin Tickets
     'admin_support_tickets' => 'Admin - Support Tickets',
     'support_tickets' => 'Support Tickets',
@@ -1032,7 +1032,7 @@ return [
     'type_your_response' => 'Type your response to the user here...',
     'minimum_10_characters' => 'Minimum 10 characters required.',
     'ticket_closed_no_replies' => 'This ticket is closed. You cannot add more replies.',
-    
+
     // Admin Withdraws
     'admin_withdraws' => 'Admin - Withdraws',
     'withdraw_requests' => 'Withdraw Requests',
@@ -1055,7 +1055,7 @@ return [
     'notes_for_user' => 'Notes for user...',
     'approve_withdraw' => 'Approve Withdraw',
     'reject_withdraw' => 'Reject Withdraw',
-    
+
     // Admin Subscriptions
     'admin_subscriptions' => 'Admin - Subscriptions',
     'subscription_management' => 'Subscription Management',
@@ -1102,7 +1102,7 @@ return [
     'add_notes_approval' => 'Add any notes about this approval...',
     'reason_for_rejection' => 'Reason for Rejection',
     'explain_rejection' => 'Please explain why this subscription is being rejected...',
-    
+
     // Admin Transactions
     'admin_transactions' => 'Admin - Transactions',
     'total_revenue' => 'Total Revenue',
@@ -1114,7 +1114,7 @@ return [
     'note' => 'Note',
     'method' => 'Method',
     'no_transactions_found' => 'No transactions found.',
-    
+
     // Admin FAQs
     'admin_faqs' => 'Admin - FAQs',
     'faqs_management' => 'FAQs Management',
@@ -1126,7 +1126,7 @@ return [
     'order' => 'Order',
     'question' => 'Question',
     'inactive' => 'Inactive',
-    
+
     // Admin CMS Pages
     'admin_cms_pages' => 'Admin - CMS Pages',
     'cms_pages_management' => 'CMS Pages Management',
@@ -1136,7 +1136,7 @@ return [
     'add_page' => 'Add Page',
     'slug' => 'Slug',
     'updated' => 'Updated',
-    
+
     // Admin Settings
     'settings_admin' => 'Settings - Admin',
     'system_settings' => 'System Settings',
@@ -1153,7 +1153,7 @@ return [
     's3_endpoint' => 'S3 Endpoint',
     's3_path_prefix' => 'S3 Path Prefix',
     'save_settings' => 'Save Settings',
-    
+
     // Admin Landing Page
     'landing_page_sections' => 'Landing Page Sections',
     'manage_homepage_sections' => 'Manage sections displayed on the homepage',
@@ -1167,7 +1167,7 @@ return [
     'to_date' => 'To',
     'no_end_date' => 'No end date',
     'no_sections_found' => 'No sections found.',
-    
+
     // Admin Documentations
     'admin_documentations' => 'Documentations',
     'manage_documentation_articles' => 'Manage documentation articles, guides, and references',
@@ -1177,7 +1177,7 @@ return [
     'author' => 'Author',
     'views' => 'Views',
     'no_documentations_found' => 'No documentations found.',
-    
+
     // Admin Social Media
     'social_media_links' => 'Social Media Links',
     'manage_footer_social_links' => 'Manage social media links displayed in the footer',
@@ -1186,7 +1186,7 @@ return [
     'platform' => 'Platform',
     'url' => 'URL',
     'no_social_media_links' => 'No social media links found.',
-    
+
     // Admin Exchange Rates
     'admin_exchange_rates' => 'Exchange Rates',
     'manage_currency_exchange_rates' => 'Manage currency exchange rates for top-up conversions',
@@ -1202,7 +1202,7 @@ return [
     'get_started_creating_first_section' => 'Get started by creating your first landing page section.',
     'get_started_adding_first_link' => 'Get started by adding your first social media link.',
     'get_started_creating_first_documentation' => 'Get started by creating your first documentation article.',
-    
+
     // Admin FAQs Create/Edit
     'admin_create_faq' => 'Admin - Create FAQ',
     'admin_edit_faq' => 'Admin - Edit FAQ',
@@ -1213,7 +1213,7 @@ return [
     'use_new_lines_for_formatting' => 'You can use new lines for formatting.',
     'active_visible_public_faq' => 'Active (visible on public FAQ page)',
     'update_faq' => 'Update FAQ',
-    
+
     // Admin CMS Pages Create/Edit
     'admin_create_cms_page' => 'Admin - Create CMS Page',
     'admin_edit_cms_page' => 'Admin - Edit CMS Page',
@@ -1226,7 +1226,7 @@ return [
     'meta_description_seo' => 'Meta Description (SEO)',
     'active_visible_public' => 'Active (visible on public pages)',
     'update_page' => 'Update Page',
-    
+
     // Admin Documentations Create/Edit
     'admin_create_documentation' => 'Create Documentation',
     'admin_edit_documentation' => 'Edit Documentation',
@@ -1247,7 +1247,7 @@ return [
     'related_links' => 'Related Links',
     'add_link' => '+ Add Link',
     'save_documentation' => 'Save Documentation',
-    
+
     // Admin Social Media Create/Edit
     'admin_add_social_media' => 'Add Social Media Link',
     'admin_edit_social_media' => 'Edit Social Media Link',
@@ -1266,7 +1266,7 @@ return [
     'active_visible_footer' => 'Active (visible in footer)',
     'create_link' => 'Create Link',
     'update_link' => 'Update Link',
-    
+
     // Admin Exchange Rates Create/Edit
     'admin_create_exchange_rate' => 'Create Exchange Rate',
     'admin_edit_exchange_rate' => 'Edit Exchange Rate',
@@ -1283,7 +1283,7 @@ return [
     'notes_optional' => 'Notes (Optional)',
     'create_exchange_rate' => 'Create Exchange Rate',
     'update_exchange_rate' => 'Update Exchange Rate',
-    
+
     // Admin Landing Page Create/Edit
     'admin_create_landing_section' => 'Create Landing Page Section',
     'admin_edit_landing_section' => 'Edit Landing Page Section',
@@ -1308,7 +1308,7 @@ return [
     'active_visible_homepage' => 'Active (visible on homepage)',
     'create_section' => 'Create Section',
     'update_section' => 'Update Section',
-    
+
     // Landing Page Content Builder (JavaScript templates)
     'hero_section_content' => 'Hero Section Content:',
     'primary_button_text' => 'Primary Button Text',
@@ -1346,7 +1346,7 @@ return [
     'custom_section_json' => 'Custom Section (JSON):',
     'enter_json_content' => 'Enter JSON content for custom section',
     'remove' => 'Remove',
-    
+
     // Profile Information Form
     'profile_information' => 'Profile Information',
     'update_account_profile_info' => 'Update your account\'s profile information and email address.',
@@ -1354,21 +1354,21 @@ return [
     'click_here_resend_verification' => 'Click here to re-send the verification email.',
     'new_verification_link_sent' => 'A new verification link has been sent to your email address.',
     'saved' => 'Saved.',
-    
+
     // Update Password Form
     'current_password' => 'Current Password',
     'new_password' => 'New Password',
     'confirm_password_label' => 'Confirm Password',
     'saved_successfully' => 'Saved successfully!',
     'update_password' => 'Update Password',
-    
+
     // Delete User Form
     'delete_account_warning' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.',
     'delete_account' => 'Delete Account',
     'are_you_sure_delete_account' => 'Are you sure you want to delete your account?',
     'delete_account_confirmation' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
     'enter_your_password' => 'Enter your password',
-    
+
     // Admin Users Show/Edit
     'admin_user_detail' => 'User Detail - Admin',
     'admin_edit_user' => 'Edit User - Admin',
@@ -1389,7 +1389,7 @@ return [
     'transactions_seller' => 'Transactions (Seller)',
     'recent_withdraws' => 'Recent Withdraws',
     'update_user' => 'Update User',
-    
+
     // Email Template - Contact Form
     'contact_form_submission' => 'Contact Form Submission',
     'new_contact_form_submission' => 'New Contact Form Submission',
@@ -1398,7 +1398,7 @@ return [
     'reply_directly_to_email' => 'You can reply directly to this email to respond to :name.',
     'subject_label' => 'Subject:',
     'message_label' => 'Message:',
-    
+
     // Additional Admin Labels
     'tags_comma_separated' => 'Tags (Comma-separated)',
     'comma_separated' => 'Comma-separated',
@@ -1409,7 +1409,7 @@ return [
     'green' => 'Green',
     'purple' => 'Purple',
     'yellow' => 'Yellow',
-    
+
     // JavaScript Templates - Landing Page
     'get_started_free' => 'Get Started Free',
     'sign_in' => 'Sign In',
@@ -1417,7 +1417,7 @@ return [
     'claim_now' => 'Claim Now',
     'link_title' => 'Link title',
     'wasabi' => 'Wasabi',
-    
+
     // Simulators - Plan Comparison
     'plan_comparison' => 'Plan Comparison',
     'compare_features' => 'Compare features',
@@ -1446,11 +1446,11 @@ return [
     'category' => 'Category',
     'tutorial' => 'Tutorial',
     'template' => 'Template',
-    
+
     // SweetAlert Messages
     'content_required' => 'Content Required',
     'please_provide_documentation_content' => 'Please provide documentation content.',
-    
+
     // Simulators - Additional Labels
     'current_balance' => 'Current Balance',
     'topup_amount' => 'Topup Amount (Rp)',
@@ -1507,7 +1507,7 @@ return [
     'competitive' => 'Competitive',
     'your_price' => 'Your Price:',
     'position' => 'Position:',
-    
+
     // Notes Create/Edit
     'upload_files' => 'Upload files',
     'or_drag_and_drop' => 'or drag and drop',
@@ -1601,20 +1601,20 @@ return [
     'add_more_files' => 'Add More Files',
     'make_public' => 'Make Public',
     'price_rp_0_for_free' => '(Rp 0 for free sharing)',
-    
+
     // Wallet & Referral
     'date' => 'Date',
     'type' => 'Type',
     'description' => 'Description',
     'no_transactions_yet' => 'No transactions yet',
     'reward_type' => 'Reward Type',
-    
+
     // Marketplace
     'rating' => 'Rating',
-    
+
     // Docs
     'no_documentation_found' => 'No documentation found',
-    
+
     // Notes - Additional Labels
     'file_attachments' => 'File Attachments',
     'preview_content' => 'Preview Content',
@@ -1635,7 +1635,7 @@ return [
     'active' => 'Active',
     'sold' => 'Sold',
     'inactive' => 'Inactive',
-    
+
     // Notes - Additional Labels
     'summary' => 'Summary',
     'summary_optional_ai' => '(Optional - AI can generate this)',
@@ -1647,12 +1647,12 @@ return [
     'share_thoughts_about_note' => 'Share your thoughts about this note...',
     'rating_summary' => 'Rating Summary',
     'example_how_to_create_first_note' => 'e.g., How to Create Your First Note',
-    
+
     // JavaScript Confirm Messages
     'delete_social_media_link_confirm' => 'Are you sure you want to delete this social media link?',
     'delete_section_confirm' => 'Are you sure you want to delete this section?',
     'delete_documentation_confirm' => 'Are you sure you want to delete this documentation?',
-    
+
     // Controller Messages - General
     'ticket_updated_successfully' => 'Ticket updated successfully!',
     'ticket_assigned_successfully' => 'Ticket assigned successfully!',
@@ -1673,13 +1673,13 @@ return [
     'fill_required_s3_credentials' => 'Please fill all required S3 credentials.',
     's3_connection_test_successful' => 'S3 connection test successful! You can now use S3 for backups.',
     's3_connection_test_failed' => 'S3 connection test failed: :error',
-    
+
     // Additional Labels
     'comment_optional' => 'Comment (optional)',
     'none_root' => 'None (Root)',
     'select_existing_tag' => 'Select existing tag...',
     'delete_ticket_confirm' => 'Are you sure you want to delete this ticket? This action cannot be undone.',
-    
+
     // Subscription Renewal
     'subscription_renewal_failed_subject' => 'Premium Subscription Renewal Failed - Action Required',
     'subscription_renewal_failed_title' => 'Subscription Renewal Failed',
@@ -1692,7 +1692,7 @@ return [
     'need_help' => 'Need help?',
     'email_footer' => '© :year :app. All rights reserved.',
     'note' => 'Note',
-    
+
     // Admin Dashboard - Topup & Midtrans
     'topup_statistics' => 'Top-up Statistics',
     'midtrans_statistics' => 'Midtrans Statistics',
@@ -1708,7 +1708,7 @@ return [
     'this_month' => 'This month',
     'day_count' => ':count Days',
     'order_id' => 'Order ID',
-    
+
     // Workspace & Folder UI
     'workspace_root' => 'Workspace Root',
     'empty_workspace' => 'Empty Workspace',
@@ -1723,7 +1723,7 @@ return [
     'back_to_workspace' => 'Back to Workspace',
     'creating_folder_in_workspace' => 'Creating folder in workspace',
     'creating_folder_in' => 'Creating folder inside',
-    
+
     // Workspace Marketplace
     'for_sale' => 'For Sale',
     'sold' => 'Sold',
@@ -1846,7 +1846,7 @@ return [
     'review_reply_delete_confirmation' => 'Delete this reply?',
     'user_placeholder_name' => 'User',
     'rating_count' => '{1}:count rating|[2,*]:count ratings',
-    
+
     // Featured Notes
     'featured_note' => 'Featured Note',
     'featured_notes' => 'Featured Notes',
@@ -1864,7 +1864,7 @@ return [
     'featured_badge' => 'Featured',
     'by_label' => 'by',
     'viewed_time_ago' => 'Viewed :time',
-    
+
     // Collections
     'collection_add_purchased_button' => 'Add Purchased Notes',
     'collection_select_notes_title' => 'Select Notes to Add',
@@ -1876,7 +1876,7 @@ return [
     'collection_empty_with_purchased' => 'You have :count purchased notes. Click ":button" above to add them to this collection.',
     'collection_empty_without_purchased' => 'Add notes from the marketplace to this collection, or purchase notes first.',
     'collection_browse_marketplace' => 'Browse Marketplace',
-    
+
     // Marketplace
     'share_marketplace' => 'Share Marketplace:',
     'share_on_facebook' => 'Share on Facebook',
@@ -1901,7 +1901,7 @@ return [
     'plugins' => 'Plugins',
     'plugins_coming_soon' => 'Coming Soon',
     'plugins_description' => 'Plugins will allow you to add additional features to your workspace. This feature is still in development.',
-    
+
     // Withdraw approval
     'time_elapsed' => 'Time Elapsed',
     'hours' => 'hours',
@@ -1910,10 +1910,10 @@ return [
     'minimum_24_hours_required' => 'Minimum 24 hours required before approval',
     'withdraw_approval_wait_time' => 'Waiting time for approval',
     'hours_remaining' => 'hours remaining',
-    
+
     // Note selling
     'already_sold' => 'Already Sold',
-    
+
     // Identity Verification (KYC)
     'ktp_upload' => 'Upload ID Card (JPG/PNG/PDF)',
     'ktp_upload_help' => 'Format: JPG, PNG, or PDF. Maximum 5MB.',
@@ -1935,7 +1935,7 @@ return [
     'reject_verification' => 'Reject Verification',
     'verification_notes' => 'Verification Notes',
     'verification_notes_placeholder' => 'Add notes about this verification...',
-    
+
     // Studio (Service Orders)
     'studio' => 'Studio',
     'studio_title' => 'Studio — Creative Services',
@@ -2001,7 +2001,7 @@ return [
     'studio_email_vendor_assigned' => 'Email when vendor is assigned',
     'sla_funding_reminder_days' => 'SLA Funding Reminder (days)',
     'sla_reminder_sent' => 'SLA reminder sent',
-    
+
     // Ecosystem Creative
     'ecosystem' => 'Ecosystem',
     'ecosystem_creative' => 'Creative Ecosystem',
@@ -2036,7 +2036,7 @@ return [
     'scheduled_publish_help' => 'Note will be automatically published at the specified time',
     'publish_now' => 'Publish Now',
     'publish_scheduled' => 'Publish Scheduled',
-    
+
     // System Health
     'system_health' => 'System Health',
     'system_health_title' => 'System Health & Configuration',
@@ -2067,14 +2067,14 @@ return [
     'configuration' => 'Configuration',
     'scheduled_commands' => 'Scheduled Commands',
     'queue_worker_detected' => 'Queue Worker Detected',
-    
+
     // Studio Services
     'example_services' => 'Example Services',
     'service_logo_design' => 'Logo design & visual identity',
     'service_video_editing' => 'Video editing & motion graphics',
     'service_web_development' => 'Web development (WordPress/Laravel)',
     'service_voice_over' => 'Voice over & audio mixing',
-    
+
     // Additional Studio translations
     'no_orders' => 'No orders yet.',
     'no_assigned_orders' => 'No assigned orders yet.',
@@ -2137,7 +2137,7 @@ return [
     'order_id' => 'Order ID (UUID)',
     'bulk_assign' => 'Bulk Assign',
     'order' => 'order',
-    
+
     // Tuts+ & Education
     'education_creative_coding' => 'Creative & Coding Education',
     'tuts_description' => 'Educational platform with tutorials & courses on design, coding, photography, and digital creativity.',
@@ -2146,7 +2146,7 @@ return [
     'tuts_category_photo' => 'Photography & video editing',
     'tuts_category_business' => 'Productivity & creative business',
     'access_with_premium' => 'Access with Premium',
-    
+
     // Ecosystem Sub-pages
     'music_sfx' => 'Music & SFX',
     'plugins_code_scripts' => 'Plugins, Code, and Scripts',
@@ -2184,7 +2184,7 @@ return [
     '3d_use_game' => 'Game assets and prototyping',
     '3d_use_material' => 'Materials/textures for 3D pipeline',
     'subscribe_3d_access' => 'Subscribe for 3D Assets Access',
-    
+
     // Admin Settings - Studio
     'studio_platform_fee' => 'Studio Platform Fee',
     'studio_platform_fee_description' => 'Set platform fee percentage for escrow release on Studio (service orders).',
@@ -2196,7 +2196,7 @@ return [
     'sla_funding_reminder_days' => 'SLA Funding Reminder (days)',
     'sla_funding_reminder_description' => 'Send funding reminder for quoted orders that haven\'t been funded after N days.',
     'save_studio_email_settings' => 'Save Studio Email Settings',
-    
+
     // View History
     'view_history_title' => 'View History & Revenue',
     'export_csv' => 'Export CSV',
@@ -2226,7 +2226,7 @@ return [
     'invalid' => 'Invalid',
     'no_view_history_found' => 'No view history found.',
     'views_today' => 'views today',
-    
+
     // Repurchase Report
     'repurchase_statistics_report' => 'Repurchase Statistics Report',
     'repurchase_statistics_description' => 'Detailed analytics for note repurchases in Scarcity Mode',
@@ -2255,7 +2255,7 @@ return [
     'after' => 'After',
     'no_repurchases_found' => 'No repurchases found',
     'no_repurchase_transactions_found' => 'No repurchase transactions found for the selected date range.',
-    
+
     // View History Show
     'view_revenue_details' => 'View Revenue Details',
     'back_to_view_history' => 'Back to View History',
@@ -2273,7 +2273,7 @@ return [
     'bot_detection_data' => 'Bot Detection Data',
     'related_views' => 'Related Views',
     'same_ip_fingerprint' => 'Same IP/Fingerprint',
-    
+
     // Refund Management
     'admin_refund_management' => 'Admin - Refund Management',
     'refund_management' => 'Refund Management',
@@ -2301,7 +2301,7 @@ return [
     'explain_why_rejected' => 'Please explain why this refund is being rejected...',
     'message_will_be_sent_to_buyer' => 'This message will be sent to the buyer.',
     'reject_refund' => 'Reject Refund',
-    
+
     // Workspaces Management
     'workspaces_management' => 'Workspaces Management',
     'workspace_details' => 'Workspace Details',
@@ -2322,7 +2322,7 @@ return [
     'no_notes_found' => 'No notes found.',
     'total_folders' => 'Total Folders',
     'total_members' => 'Total Members',
-    
+
     // Notes Management
     'all_sale_mode' => 'All Sale Mode',
     'sale_mode' => 'Sale Mode',
@@ -2338,7 +2338,7 @@ return [
     'reject' => 'Reject',
     'confirm_reject_monetization' => 'Are you sure you want to reject monetization?',
     'rejected_by_admin' => 'Rejected by admin',
-    
+
     // Identity Verification
     'identity_verification_title' => 'Identity Verification',
     'status_label' => 'Status:',
@@ -2347,7 +2347,7 @@ return [
     'reviewed_label' => 'Reviewed:',
     'notes_label' => 'Notes:',
     'rejection_reason_required' => 'Rejection reason (required)',
-    
+
     // Pricing Guidance Settings
     'pricing_guidance_settings' => 'Pricing Guidance Settings',
     'pricing_guidance_description' => 'Set minimum price limits and recommended prices for each note category.',
@@ -2366,11 +2366,11 @@ return [
     'action' => 'Action',
     'save_studio_email_settings' => 'Save Studio Email Settings',
     'sla_funding_reminder_days' => 'SLA Funding Reminder (days)',
-    
+
     // Tickets
     'premium_only' => 'Premium Only',
     'all_users' => 'All Users',
-    
+
     // Ecosystem Use Cases
     'photos_use_website' => 'Website, blog, and landing pages',
     'photos_use_promo' => 'Promotional materials & advertisements',
@@ -2392,14 +2392,14 @@ return [
     'code_use_plugins' => 'Ready-to-use plugins for popular CMS',
     'code_use_components' => 'Customizable UI/UX components',
     'subscribe_code_access' => 'Subscribe for Code Access',
-    
+
     // Studio Services
     'example_services' => 'Example Services',
     'service_logo_design' => 'Logo design & visual identity',
     'service_video_editing' => 'Video editing & motion graphics',
     'service_web_development' => 'Website development (WordPress/Laravel)',
     'service_voice_over' => 'Voice over & audio mixing',
-    
+
     // Tuts
     'tuts_description' => 'Educational platform with tutorials & courses about design, coding, photography, and digital creativity.',
     'search_tutorials' => 'Search tutorials...',
@@ -2412,10 +2412,10 @@ return [
     'views' => 'views',
     'no_tutorials_found' => 'No tutorials found',
     'try_adjusting_search' => 'Try adjusting your search or filter criteria.',
-    
+
     // Ecosystem Index
     'ecosystem_explore' => 'Explore Envato-like ecosystem offerings for Noteds.',
-    
+
     // Marketplace Ecosystem Filter
     'all_ecosystem' => 'All ecosystem',
     'design' => 'Design',
@@ -2425,20 +2425,20 @@ return [
     'video' => 'Video',
     'theme' => 'Theme',
     'elements' => 'Elements',
-    
+
     // Notes Create
     'ecosystem_category' => 'Creative Ecosystem',
     'note_language' => 'Content Language',
     'scheduled_publish_at' => 'Schedule Publication',
     'scheduled_publish_help' => 'If filled, the note will be automatically published at that time.',
-    
+
     // Studio Orders Show
     'no_quotes_found' => 'No quotes found.',
-    
+
     // Registration Verification Info
     'verification_info_title' => 'Verification Info',
     'verification_info_description' => 'After registration, you will be asked to complete your profile by uploading an identity document (ID card or Student card) and a selfie photo for identity verification.',
-    
+
     // Profile Edit - Document Types
     'ktp_full' => 'ID Card (KTP)',
     'student_card' => 'Student Card (for minors/students)',
@@ -2454,11 +2454,11 @@ return [
     'file_format_help' => 'Format: JPG, PNG, or PDF. Maximum 5MB.',
     'document_type_label' => 'Identity Document Type',
     'selfie_upload_help' => 'Use a bright photo with a clear face. Maximum 5MB.',
-    
+
     // Notes Show
     'cannot_delete_sold' => 'Cannot Delete (Sold)',
     'cannot_delete_sold_tooltip' => 'Cannot delete note that has been sold',
-    
+
     // Admin Pending Verification
     'user_verification_pending_title' => 'User Verification Pending',
     'verification_pending_title' => 'User Verification Pending',
@@ -2480,11 +2480,11 @@ return [
     'confirm_reject_verification' => 'Are you sure you want to reject verification for this user?',
     'verified_by_admin' => 'Verified by admin',
     'selfie' => 'Selfie',
-    
+
     // Studio Orders
     'order_singular' => 'order',
     'orders' => 'orders',
-    
+
     // Navigation
     'workspaces' => 'Workspaces',
     'forum' => 'Forum',
@@ -2497,11 +2497,11 @@ return [
     'reading_history' => 'Reading History',
     'batch_download' => 'Batch Download',
     'my_library' => 'My Library',
-    
+
     // Forum
     'post_details' => 'Post Details',
     'back_to_forum' => 'Back to Forum',
-    
+
     // Refunds
     'refund_requests' => 'Refund Requests',
     'view_and_manage_refunds' => 'View and manage your refund requests',
@@ -2509,65 +2509,65 @@ return [
     'no_refund_requests_description' => 'You haven\'t submitted any refund requests yet.',
     'view_details' => 'View Details',
     'processed' => 'Processed',
-    
+
     // Series
     'back_to_series' => 'Back to Series',
     'notes_in_series' => 'Notes in this Series',
     'no_notes_in_series' => 'No notes in this series yet.',
     'active' => 'Active',
     'inactive' => 'Inactive',
-    
+
     // Admin Tutorials
     'admin_tutorials' => 'Admin Tutorials',
     'tutorial_management' => 'Tutorial Management',
     'create_tutorial' => 'Create Tutorial',
     'edit_tutorial' => 'Edit Tutorial',
     'back_to_tutorials' => '← Back to Tutorials',
-    
+
     // Notes Resale
     'resale_note' => 'Resale Note',
-    
+
     // AI Memory
     'ai_memory_platform' => 'AI Memory Platform',
-    
+
     // AI Chat
     'ai_chat' => 'AI Chat',
-    
+
     // Forum Moderation
     'post_moderation' => 'Post Moderation',
     'forum_moderation' => 'Forum Moderation',
-    
+
     // Note Moderation
     'note_moderation' => 'Note Moderation',
     'moderate_note' => 'Moderate Note',
-    
+
     // Account Moderation
     'account_moderation' => 'Account Moderation',
     'moderate_account' => 'Moderate Account',
-    
+
     // Forum Pages
     'forum_index' => 'Forum',
     'forum_analytics' => 'Forum Analytics',
     'forum_email_preferences' => 'Forum Email Preferences',
     'forum_email_notifications' => 'Forum Email Notifications',
     'bookmarked_posts_forum' => 'Bookmarked Posts - Forum',
-    
+
     // Reading History
     'reading_history' => 'Reading History',
-    
+
     // Collections
     'my_collections' => 'My Collections',
     'create_collection' => 'Create Collection',
-    
+
     // Workspaces
     'invite_team' => 'Invite Team',
-    
+
     // Forum Hashtag
     'hashtag_forum' => 'Forum',
-    
+
     // MyNoteds
     'mynoteds_ai_memory_platform' => 'MyNoteds - AI Memory Platform',
-    
+
     // AI Memory
     'ai_memory_description' => 'Ask anything about your notes using AI that understands all your data',
     'total_notes' => 'Total Notes',
@@ -2577,7 +2577,7 @@ return [
     'ai_processing' => 'AI is processing your question...',
     'quick_actions' => 'Quick Actions',
     'popular_topics' => 'Popular Topics',
-    
+
     // Note Conversations
     'product_conversations' => 'Product Conversations',
     'product_conversations_description' => 'Private chat between buyer and seller after purchase. Each product has its own conversation forum.',
@@ -2599,4 +2599,5 @@ return [
     'message_label' => 'Message',
     'write_message_placeholder' => 'Write a message (max 2000 characters)',
     'send_message' => 'Send Message',
+    'type_to_search_more' => 'Type to search for more vendors',
 ];

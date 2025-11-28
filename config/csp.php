@@ -1,68 +1,16 @@
 <?php
 
-namespace Database\Seeders;
+return [
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-
-class DatabaseSeeder extends Seeder
-{
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
+    /*
+     * Content Security Policy configuration
+     * 
+     * Note: spatie/laravel-csp package is not installed.
+     * This is a stub configuration file.
      */
-    public function run(): void
-    {
-        $this->call([
-            RoleSeeder::class,
-            BadgeSeeder::class, // Gamification: Badges system
-            LevelSeeder::class, // Gamification: Seller/Buyer levels
-            AdminSeeder::class,
-            SettingSeeder::class,
-            ExchangeRateSeeder::class,
-            CommissionTierSeeder::class,
-            TaxRuleSeeder::class,
-            UserSeeder::class,
-            WalletSeeder::class,
-            ReferralCodeSeeder::class,
-            ReferralSeeder::class,
-            WorkspaceSeeder::class,
-            WorkspaceCollaborationSeeder::class,
-            FolderSeeder::class,
-            NoteSeeder::class,
-            StudyMaterialSeeder::class,
-            // AiAnalysisSeeder::class, // AI features are now workspace-based
-            DocumentationSeeder::class,
-            LandingPageSectionSeeder::class,
-            CmsPageSeeder::class,
-            FaqSeeder::class,
-            SocialMediaLinkSeeder::class,
-            FeaturedNoteSeeder::class,
-            TransactionSeeder::class,
-            MonetizationApprovalSeeder::class,
-            NoteEngagementSeeder::class,
-            NoteReviewSeeder::class,
-            NoteCollaborationSeeder::class,
-            NoteReportSeeder::class,
-            SupportSeeder::class,
-            AppNotificationSeeder::class,
-            SocialFeatureSeeder::class,
-            WithdrawSeeder::class,
-            StudioSeeder::class,
-            CategorySeeder::class,
-            NoteTemplateSeeder::class,
-            NoteSeriesSeeder::class,
-            NoteCommentSeeder::class,
-            NoteReactionSeeder::class,
-            NoteQuestionSeeder::class,
-            NoteBundleSeeder::class,
-            RefundSeeder::class,
-            GiftNoteSeeder::class,
-            ActivitySeeder::class,
-            MessageSeeder::class,
-            WebhookSeeder::class,
-            SubscriptionPlanSeeder::class,
-        ]);
-    }
-}
+
+    'enabled' => env('CSP_ENABLED', false),
+
+    'report_uri' => env('CSP_REPORT_URI', ''),
+
+];

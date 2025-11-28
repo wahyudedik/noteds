@@ -1,12 +1,13 @@
-<div x-data="navigationMenu()" class="relative">
+<div class="relative">
     @php
+        use Illuminate\Support\Facades\Cache;
+
         $user = auth()->user();
         $isAdmin = $user?->hasRole('admin');
         $isSeller = $user?->role === 'seller';
         $isBuyer = $user?->role === 'buyer';
         $isSellerOrAdmin = $user && ($isSeller || $isAdmin);
         $isBuyerOrAdmin = $user && ($isBuyer || $isAdmin);
-        $hasPremium = $user?->hasPremium();
         $activeSubscription = $user?->activeBuyerSubscription();
 
         $desktopLinkClasses =
@@ -15,9 +16,6 @@
         $dropdownLinkClasses =
             'block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150';
         $dropdownActiveClasses = 'bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-400';
-        $mobileLinkClasses =
-            'block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-all duration-200';
-        $mobileActiveClasses = 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-800';
 
         $primaryLinks = [
             [
@@ -152,9 +150,9 @@
                     ];
                 }
 
-                // Buyer Library submenu
-                // Admin has access to all features, including buyer library
-                if ($isBuyerOrAdmin || $isAdmin) {
+                // My Library submenu - available for Buyer, Seller, and Admin
+                // Seller can also buy notes from other sellers, so they need library access
+                if ($isBuyerOrAdmin || $isSellerOrAdmin) {
                     $buyerLibrarySubmenu = [
                         [
                             'label' => __('messages.collections'),
@@ -308,8 +306,8 @@
                         <span class="hidden sm:inline">{{ config('app.name', 'Noteds') }}</span>
                     </a>
 
-                    <!-- Desktop Navigation -->
-                    <nav class="hidden lg:flex items-center gap-1">
+                    <!-- Desktop Navigation - Always Visible -->
+                    <nav class="flex items-center gap-1 overflow-x-auto scrollbar-hide">
                         @foreach ($primaryLinks as $link)
                             @if (isset($link['submenu']) && !empty($link['submenu']))
                                 <!-- Submenu Dropdown -->
@@ -399,21 +397,6 @@
                             </div>
                         @endif
                     </nav>
-
-                    <!-- Mobile Menu Button -->
-                    <button @click="mobileMenuOpen = !mobileMenuOpen"
-                        class="lg:hidden p-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md transition-colors duration-200">
-                        <svg x-show="!mobileMenuOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <svg x-show="mobileMenuOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
                 </div>
                 <div class="flex items-center gap-3 sm:gap-4">
                     <!-- Locale Switcher -->
@@ -494,7 +477,12 @@
                                         @endif
                                     </div>
                                     @php
-                                        $notifications = auth()->user()->notifications()->latest()->take(5)->get();
+                                        // Cache notifications for 1 minute to reduce DB load
+                                        $notifications = Cache::remember(
+                                            'user_notifications_' . auth()->id(),
+                                            now()->addMinute(),
+                                            fn() => auth()->user()->notifications()->latest()->take(5)->get(),
+                                        );
                                     @endphp
                                     <div id="notif-list">
                                         @forelse($notifications as $notification)
@@ -723,112 +711,4 @@
             </div>
         </div>
     </nav>
-
-    <!-- Mobile Menu Overlay -->
-    <div x-show="mobileMenuOpen" x-cloak x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0" @click="mobileMenuOpen = false"
-        class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" style="top: 4rem;"></div>
-
-    <!-- Mobile Sidebar Menu -->
-    <div x-show="mobileMenuOpen" x-cloak x-transition:enter="transition ease-out duration-300 transform"
-        x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
-        x-transition:leave="transition ease-in duration-200 transform"
-        x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-full"
-        @keydown.escape.window="mobileMenuOpen = false" @click.stop
-        class="lg:hidden fixed top-16 left-0 bottom-0 w-80 max-w-[85vw] bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-2xl z-50 overflow-y-auto">
-        <div class="px-4 py-4 space-y-1">
-            @foreach ($primaryLinks as $link)
-                @if (isset($link['submenu']) && !empty($link['submenu']))
-                    <!-- Mobile Submenu -->
-                    <div x-data="{ open: {{ $link['active'] ? 'true' : 'false' }} }" class="space-y-1">
-                        <button @click.stop="open = !open"
-                            class="{{ $mobileLinkClasses }} flex items-center justify-between w-full {{ $link['active'] ? $mobileActiveClasses : '' }}">
-                            <span>{{ $link['label'] }}</span>
-                            <svg class="w-5 h-5 transition-transform duration-200" :class="{ 'rotate-180': open }"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                        <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0 -translate-y-1"
-                            x-transition:enter-end="opacity-100 translate-y-0"
-                            class="pl-4 space-y-1 border-l-2 border-blue-200 dark:border-blue-800 ml-2">
-                            @foreach ($link['submenu'] as $subLink)
-                                <a href="{{ $subLink['href'] }}"
-                                    class="{{ $mobileLinkClasses }} {{ $subLink['active'] ? $mobileActiveClasses : '' }}"
-                                    @click="mobileMenuOpen = false">
-                                    {{ $subLink['label'] }}
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                @else
-                    <a href="{{ $link['href'] }}"
-                        class="{{ $mobileLinkClasses }} {{ $link['active'] ? $mobileActiveClasses : '' }}"
-                        @click="mobileMenuOpen = false">
-                        {{ $link['label'] }}
-                    </a>
-                @endif
-            @endforeach
-
-            @if ($user && $user->role !== 'user_workspaces' && (!empty($moreLinks) || !empty($adminMoreLinks)))
-                <div class="border-t border-gray-200 dark:border-gray-700 my-3"></div>
-                <div class="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    More</div>
-
-                @foreach ($moreLinks as $link)
-                    @if (isset($link['submenu']) && !empty($link['submenu']))
-                        <!-- Mobile Submenu in More -->
-                        <div x-data="{ open: {{ $link['active'] ? 'true' : 'false' }} }" class="space-y-1">
-                            <button @click.stop="open = !open"
-                                class="{{ $mobileLinkClasses }} flex items-center justify-between w-full {{ $link['active'] ? $mobileActiveClasses : '' }}">
-                                <span>{{ $link['label'] }}</span>
-                                <svg class="w-5 h-5 transition-transform duration-200" :class="{ 'rotate-180': open }"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                            <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200"
-                                x-transition:enter-start="opacity-0 -translate-y-1"
-                                x-transition:enter-end="opacity-100 translate-y-0"
-                                class="pl-4 space-y-1 border-l-2 border-blue-200 dark:border-blue-800 ml-2">
-                                @foreach ($link['submenu'] as $subLink)
-                                    <a href="{{ $subLink['href'] }}"
-                                        class="{{ $mobileLinkClasses }} {{ $subLink['active'] ? $mobileActiveClasses : '' }}"
-                                        @click="mobileMenuOpen = false">
-                                        {{ $subLink['label'] }}
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    @else
-                        <a href="{{ $link['href'] }}"
-                            class="{{ $mobileLinkClasses }} {{ $link['active'] ? $mobileActiveClasses : '' }}"
-                            @click="mobileMenuOpen = false">
-                            {{ $link['label'] }}
-                        </a>
-                    @endif
-                @endforeach
-
-                @if (!empty($adminMoreLinks))
-                    <div class="border-t border-gray-200 dark:border-gray-700 my-3"></div>
-                    <div
-                        class="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Admin</div>
-
-                    @foreach ($adminMoreLinks as $link)
-                        <a href="{{ $link['href'] }}"
-                            class="{{ $mobileLinkClasses }} {{ $link['active'] ? $mobileActiveClasses : '' }}"
-                            @click="mobileMenuOpen = false">
-                            {{ $link['label'] }}
-                        </a>
-                    @endforeach
-                @endif
-            @endif
-        </div>
-    </div>
 </div>

@@ -21,6 +21,8 @@ use App\Services\ClamAVService;
 use App\Services\WatermarkingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -989,10 +991,10 @@ class NoteController extends Controller
     public function resale(ResaleNoteRequest $request, Note $note): RedirectResponse
     {
         $validated = $request->validated();
-        $resalePrice = (float) $validated['resale_price'];
+        $resalePrice = $validated['resale_price'];
 
         // Update note price (decimal:2 - use setAttribute to handle type conversion)
-        $note->setAttribute('price', $resalePrice);
+        $note->setAttribute('price', (string) $resalePrice);
         $note->discount_price = null; // Clear discount when reselling
         $note->is_public = true; // Make sure note is public for resale
         $note->status = 'active';
@@ -1195,7 +1197,7 @@ class NoteController extends Controller
 
         try {
             // Log upload start for debugging
-            \Log::info('Background upload started', [
+            Log::info('Background upload started', [
                 'user_id' => $user->id,
                 'filename' => $file->getClientOriginalName(),
                 'file_size_mb' => round($file->getSize() / 1048576, 2),
@@ -1226,7 +1228,7 @@ class NoteController extends Controller
             session([$sessionKey => $backgroundUploads]);
 
             // Log successful upload
-            \Log::info('Background upload completed', [
+            Log::info('Background upload completed', [
                 'user_id' => $user->id,
                 'upload_id' => $uploadId,
                 'filename' => $attachment['filename'],
@@ -1272,7 +1274,7 @@ class NoteController extends Controller
                 $errorMessage = "Upload gagal: {$errorMessage}. File: {$fileSizeMB}MB. File akan otomatis diupload saat form disubmit.";
             }
 
-            \Log::error('Background file upload failed', [
+            Log::error('Background file upload failed', [
                 'user_id' => $user->id,
                 'filename' => $file->getClientOriginalName(),
                 'file_size' => $fileSize,
@@ -1408,7 +1410,7 @@ class NoteController extends Controller
                     $attachments[] = $attachment;
                 } catch (\Exception $e) {
                     // Log error but continue with other files
-                    \Log::error('File upload failed', [
+                    Log::error('File upload failed', [
                         'user_id' => $user->id,
                         'filename' => $file->getClientOriginalName(),
                         'error' => $e->getMessage(),
