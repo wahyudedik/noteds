@@ -129,34 +129,34 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     Route::post('/notes/{note}/resale', [NoteController::class, 'resale'])->middleware('rate.limit:5,1')->name('notes.resale');
 });
 
-    // Public profile routes
-    Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('public.profile.show');
+// Public profile routes
+Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('public.profile.show');
 
-    // Leaderboard routes
-    Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
+// Leaderboard routes
+Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
 
-    // Forum routes - KYC required
-    Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('forum')->name('forum.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\ForumController::class, 'index'])->name('index');
-        Route::post('/', [\App\Http\Controllers\ForumController::class, 'store'])->name('store');
-        Route::get('/analytics', [PostAnalyticsController::class, 'index'])->name('analytics');
-        Route::get('/preferences', [ForumPreferenceController::class, 'edit'])->name('preferences.edit');
-        Route::put('/preferences', [ForumPreferenceController::class, 'update'])->name('preferences.update');
-        Route::get('/hashtag/{slug}', [\App\Http\Controllers\ForumController::class, 'hashtag'])->name('hashtag');
-        Route::get('/bookmarks', [\App\Http\Controllers\PostBookmarkController::class, 'index'])->name('bookmarks');
-        Route::post('/post/{post}/bookmark', [\App\Http\Controllers\PostBookmarkController::class, 'toggle'])->name('bookmark');
-        Route::get('/post/{post}', [\App\Http\Controllers\ForumController::class, 'show'])->name('show');
-        Route::put('/post/{post}', [\App\Http\Controllers\ForumController::class, 'update'])->name('update');
-        Route::post('/post/{post}/like', [\App\Http\Controllers\ForumController::class, 'like'])->name('like');
-        Route::post('/post/{post}/share', [\App\Http\Controllers\ForumController::class, 'share'])->name('share');
-        Route::post('/post/{post}/comment', [\App\Http\Controllers\ForumController::class, 'comment'])->name('comment');
-        Route::put('/comment/{comment}', [\App\Http\Controllers\ForumController::class, 'updateComment'])->name('comment.update');
-        Route::delete('/comment/{comment}', [\App\Http\Controllers\ForumController::class, 'destroyComment'])->name('comment.destroy');
-        Route::post('/comment/{comment}/like', [\App\Http\Controllers\ForumController::class, 'likeComment'])->name('comment.like');
-        Route::post('/post/{post}/pin', [\App\Http\Controllers\ForumController::class, 'pin'])->name('pin');
-        Route::post('/post/{post}/report', [\App\Http\Controllers\PostReportController::class, 'store'])->name('report');
-        Route::delete('/post/{post}', [\App\Http\Controllers\ForumController::class, 'destroy'])->name('destroy');
-    });
+// Forum routes - KYC required
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('forum')->name('forum.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\ForumController::class, 'index'])->name('index');
+    Route::post('/', [\App\Http\Controllers\ForumController::class, 'store'])->name('store');
+    Route::get('/analytics', [PostAnalyticsController::class, 'index'])->name('analytics');
+    Route::get('/preferences', [ForumPreferenceController::class, 'edit'])->name('preferences.edit');
+    Route::put('/preferences', [ForumPreferenceController::class, 'update'])->name('preferences.update');
+    Route::get('/hashtag/{slug}', [\App\Http\Controllers\ForumController::class, 'hashtag'])->name('hashtag');
+    Route::get('/bookmarks', [\App\Http\Controllers\PostBookmarkController::class, 'index'])->name('bookmarks');
+    Route::post('/post/{post}/bookmark', [\App\Http\Controllers\PostBookmarkController::class, 'toggle'])->name('bookmark');
+    Route::get('/post/{post}', [\App\Http\Controllers\ForumController::class, 'show'])->name('show');
+    Route::put('/post/{post}', [\App\Http\Controllers\ForumController::class, 'update'])->name('update');
+    Route::post('/post/{post}/like', [\App\Http\Controllers\ForumController::class, 'like'])->name('like');
+    Route::post('/post/{post}/share', [\App\Http\Controllers\ForumController::class, 'share'])->name('share');
+    Route::post('/post/{post}/comment', [\App\Http\Controllers\ForumController::class, 'comment'])->name('comment');
+    Route::put('/comment/{comment}', [\App\Http\Controllers\ForumController::class, 'updateComment'])->name('comment.update');
+    Route::delete('/comment/{comment}', [\App\Http\Controllers\ForumController::class, 'destroyComment'])->name('comment.destroy');
+    Route::post('/comment/{comment}/like', [\App\Http\Controllers\ForumController::class, 'likeComment'])->name('comment.like');
+    Route::post('/post/{post}/pin', [\App\Http\Controllers\ForumController::class, 'pin'])->name('pin');
+    Route::post('/post/{post}/report', [\App\Http\Controllers\PostReportController::class, 'store'])->name('report');
+    Route::delete('/post/{post}', [\App\Http\Controllers\ForumController::class, 'destroy'])->name('destroy');
+});
 
 Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function () {
     Route::get('/note-conversations', [NoteConversationController::class, 'index'])->name('note-conversations.index');
@@ -178,15 +178,15 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     Route::post('/users/{user}/report', [UserReportController::class, 'store'])->name('users.report');
 });
 
-    // Follow routes
-    Route::get('/follow/{user}', function (\App\Models\User $user) {
-        return redirect()->route('public.profile.show', $user->username);
-    })->name('follow.view');
+// Follow routes
+Route::get('/follow/{user}', function (\App\Models\User $user) {
+    return redirect()->route('public.profile.show', $user->username);
+})->name('follow.view');
 
-    Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('follow')->name('follow.')->group(function () {
-        Route::post('/{user}', [\App\Http\Controllers\FollowController::class, 'follow'])->name('follow');
-        Route::delete('/{user}', [\App\Http\Controllers\FollowController::class, 'unfollow'])->name('unfollow');
-    });
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('follow')->name('follow.')->group(function () {
+    Route::post('/{user}', [\App\Http\Controllers\FollowController::class, 'follow'])->name('follow');
+    Route::delete('/{user}', [\App\Http\Controllers\FollowController::class, 'unfollow'])->name('unfollow');
+});
 
 // Review routes - KYC required (marketplace actions need KYC)
 Route::post('/notes/{note}/reviews', [ReviewController::class, 'store'])->middleware(['auth', 'verified', 'username.setup', 'kyc'])->name('reviews.store');
@@ -197,7 +197,7 @@ Route::delete('/review-replies/{reply}', [NoteReviewReplyController::class, 'des
 
 Route::get('/dashboard', function () {
     $user = auth()->user();
-    
+
     // Check if user needs to complete profile (KTP and selfie) - redirect once after register
     // Check session to see if this is first time after register (admin tidak perlu verifikasi)
     if (!$user->hasRole('admin') && (!$user->ktp_path || !$user->selfie_path)) {
@@ -209,12 +209,12 @@ Route::get('/dashboard', function () {
                 ->with('info', 'Silakan lengkapi profil Anda dengan mengupload KTP dan foto selfie untuk verifikasi identitas.');
         }
     }
-    
+
     // Workspace users should be redirected to workspaces
     if ($user->role === 'user_workspaces') {
         return redirect()->route('workspaces.index');
     }
-    
+
     return view('dashboard');
 })->middleware(['auth', 'verified', 'username.setup'])->name('dashboard');
 
@@ -288,7 +288,7 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'workspace.user'
     Route::resource('notes', NoteController::class);
     Route::post('/notes/upload-background', [NoteController::class, 'uploadBackground'])->name('notes.upload-background');
     Route::get('/notes/{note}/attachments/{filename}', [NoteAttachmentController::class, 'download'])->name('notes.attachments.download');
-    
+
     // Batch Download routes - Now available for all users
     Route::prefix('batch-download')->name('batch-download.')->group(function () {
         Route::get('/', [NoteAttachmentController::class, 'batchDownloadIndex'])->name('index');
@@ -382,7 +382,7 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
         Route::get('/featured-notes/create', [\App\Http\Controllers\FeaturedNoteController::class, 'create'])->name('featured-notes.create');
         Route::post('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'store'])->name('featured-notes.store');
         Route::get('/featured-notes/export', [\App\Http\Controllers\FeaturedNoteController::class, 'exportReport'])->name('featured-notes.export');
-        
+
         // Seller Analytics routes
         Route::prefix('seller-analytics')->name('seller-analytics.')->group(function () {
             Route::get('/', [\App\Http\Controllers\SellerAnalyticsController::class, 'index'])->name('index');
@@ -409,7 +409,7 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
 
     // Public affiliate landing pages
     Route::get('/a/{slug}', [AffiliateController::class, 'showLanding'])->name('affiliate.landing');
-    
+
     // Affiliate leaderboard
     Route::get('/affiliate-leaderboard', [AffiliateLeaderboardController::class, 'index'])->name('affiliate.leaderboard');
 
@@ -462,18 +462,18 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
         Route::get('/collaborators', [\App\Http\Controllers\NoteCollaborationController::class, 'getCollaborators'])->name('collaborators');
         Route::delete('/collaborators/{collaborator}', [\App\Http\Controllers\NoteCollaborationController::class, 'removeCollaborator'])->name('collaborators.remove');
         Route::put('/collaborators/{collaborator}', [\App\Http\Controllers\NoteCollaborationController::class, 'updateCollaborator'])->name('collaborators.update');
-        
+
         // Session management
         Route::post('/session/join', [\App\Http\Controllers\NoteCollaborationController::class, 'joinSession'])->name('session.join');
         Route::post('/session/leave', [\App\Http\Controllers\NoteCollaborationController::class, 'leaveSession'])->name('session.leave');
         Route::post('/session/activity', [\App\Http\Controllers\NoteCollaborationController::class, 'updateSessionActivity'])->name('session.activity');
         Route::get('/session/active', [\App\Http\Controllers\NoteCollaborationController::class, 'getActiveCollaborators'])->name('session.active');
-        
+
         // Version control
         Route::post('/versions', [\App\Http\Controllers\NoteCollaborationController::class, 'saveVersion'])->name('versions.save');
         Route::get('/versions', [\App\Http\Controllers\NoteCollaborationController::class, 'getVersions'])->name('versions.index');
         Route::post('/versions/{version}/restore', [\App\Http\Controllers\NoteCollaborationController::class, 'restoreVersion'])->name('versions.restore');
-        
+
         // Comments
         Route::post('/comments', [\App\Http\Controllers\NoteCollaborationController::class, 'addComment'])->name('comments.add');
         Route::get('/comments', [\App\Http\Controllers\NoteCollaborationController::class, 'getComments'])->name('comments.index');
@@ -546,7 +546,6 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
-
 });
 
 // Profile routes - No KYC required (user needs to access profile to upload KTP/selfie)
@@ -560,20 +559,20 @@ Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
 Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.setup'])->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/repurchase-report', [DashboardController::class, 'repurchaseReport'])->name('repurchase-report');
-    
+
     // User verification routes - MUST be before resource routes
     Route::get('/users/pending-verification', [UserController::class, 'pendingVerification'])->name('users.pending-verification');
     Route::post('/users/{user}/verify-approve', [UserController::class, 'approveVerification'])->name('users.verify.approve');
     Route::post('/users/{user}/verify-reject', [UserController::class, 'rejectVerification'])->name('users.verify.reject');
     Route::get('/users/{user}/download-doc/{type}', [UserController::class, 'downloadDocument'])->name('users.download-doc');
-    
+
     // User management
     Route::resource('users', UserController::class);
     Route::post('/users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
     Route::post('/users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');
     Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
     Route::post('/users/{user}/release', [UserController::class, 'release'])->name('users.release');
-    
+
     Route::resource('commission-tiers', AdminCommissionTierController::class)->except(['show']);
     Route::resource('faqs', AdminFaqController::class);
     Route::resource('cms-pages', AdminCmsPageController::class);
@@ -752,7 +751,7 @@ Route::post('/api/ai-detection', function (\Illuminate\Http\Request $request) {
         'timestamp' => $request->input('timestamp'),
         'ip' => $request->ip(),
     ]);
-    
+
     // Return success response (don't reveal if detection is working)
     return response()->json(['status' => 'logged'], 200);
 })->name('api.ai-detection');
