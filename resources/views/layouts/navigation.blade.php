@@ -729,31 +729,33 @@
         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0" @click="mobileMenuOpen = false"
-        class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+        class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" style="top: 4rem;"></div>
 
-    <!-- Mobile Menu -->
-    <div x-show="mobileMenuOpen" x-cloak x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 -translate-y-1" @keydown.escape.window="mobileMenuOpen = false"
-        @click.stop
-        class="lg:hidden fixed top-[3.5rem] left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
+    <!-- Mobile Sidebar Menu -->
+    <div x-show="mobileMenuOpen" x-cloak x-transition:enter="transition ease-out duration-300 transform"
+        x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
+        x-transition:leave="transition ease-in duration-200 transform"
+        x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-full"
+        @keydown.escape.window="mobileMenuOpen = false" @click.stop
+        class="lg:hidden fixed top-16 left-0 bottom-0 w-80 max-w-[85vw] bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-2xl z-50 overflow-y-auto">
         <div class="px-4 py-4 space-y-1">
             @foreach ($primaryLinks as $link)
                 @if (isset($link['submenu']) && !empty($link['submenu']))
                     <!-- Mobile Submenu -->
-                    <div x-data="{ open: false }" class="space-y-1">
+                    <div x-data="{ open: {{ $link['active'] ? 'true' : 'false' }} }" class="space-y-1">
                         <button @click.stop="open = !open"
                             class="{{ $mobileLinkClasses }} flex items-center justify-between w-full {{ $link['active'] ? $mobileActiveClasses : '' }}">
                             <span>{{ $link['label'] }}</span>
-                            <svg class="w-5 h-5" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 transition-transform duration-200" :class="{ 'rotate-180': open }"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
-                        <div x-show="open" x-cloak x-transition
-                            class="pl-4 space-y-1 border-l-2 border-gray-200 ml-2">
+                        <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 -translate-y-1"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            class="pl-4 space-y-1 border-l-2 border-blue-200 dark:border-blue-800 ml-2">
                             @foreach ($link['submenu'] as $subLink)
                                 <a href="{{ $subLink['href'] }}"
                                     class="{{ $mobileLinkClasses }} {{ $subLink['active'] ? $mobileActiveClasses : '' }}"
@@ -773,24 +775,27 @@
             @endforeach
 
             @if ($user && $user->role !== 'user_workspaces' && (!empty($moreLinks) || !empty($adminMoreLinks)))
-                <div class="border-t border-gray-200 my-2"></div>
-                <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">More</div>
+                <div class="border-t border-gray-200 dark:border-gray-700 my-3"></div>
+                <div class="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    More</div>
 
                 @foreach ($moreLinks as $link)
                     @if (isset($link['submenu']) && !empty($link['submenu']))
                         <!-- Mobile Submenu in More -->
-                        <div x-data="{ open: false }" class="space-y-1">
-                            <button @click="open = !open"
+                        <div x-data="{ open: {{ $link['active'] ? 'true' : 'false' }} }" class="space-y-1">
+                            <button @click.stop="open = !open"
                                 class="{{ $mobileLinkClasses }} flex items-center justify-between w-full {{ $link['active'] ? $mobileActiveClasses : '' }}">
                                 <span>{{ $link['label'] }}</span>
-                                <svg class="w-5 h-5" :class="{ 'rotate-180': open }" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 transition-transform duration-200" :class="{ 'rotate-180': open }"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            <div x-show="open" x-cloak x-transition
-                                class="pl-4 space-y-1 border-l-2 border-gray-200 ml-2">
+                            <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="pl-4 space-y-1 border-l-2 border-blue-200 dark:border-blue-800 ml-2">
                                 @foreach ($link['submenu'] as $subLink)
                                     <a href="{{ $subLink['href'] }}"
                                         class="{{ $mobileLinkClasses }} {{ $subLink['active'] ? $mobileActiveClasses : '' }}"
@@ -810,8 +815,10 @@
                 @endforeach
 
                 @if (!empty($adminMoreLinks))
-                    <div class="border-t border-gray-200 my-2"></div>
-                    <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</div>
+                    <div class="border-t border-gray-200 dark:border-gray-700 my-3"></div>
+                    <div
+                        class="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Admin</div>
 
                     @foreach ($adminMoreLinks as $link)
                         <a href="{{ $link['href'] }}"

@@ -41,7 +41,7 @@ class NoteController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request): View
+    public function create(Request $request): View|RedirectResponse
     {
         $user = auth()->user();
 
@@ -991,8 +991,8 @@ class NoteController extends Controller
         $validated = $request->validated();
         $resalePrice = (float) $validated['resale_price'];
 
-        // Update note price (decimal:2 - cast to string for proper decimal handling)
-        $note->price = (string) number_format($resalePrice, 2, '.', '');
+        // Update note price (decimal:2 - use setAttribute to handle type conversion)
+        $note->setAttribute('price', $resalePrice);
         $note->discount_price = null; // Clear discount when reselling
         $note->is_public = true; // Make sure note is public for resale
         $note->status = 'active';

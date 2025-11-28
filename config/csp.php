@@ -15,74 +15,52 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            // 1. Core System - Must run first
             RoleSeeder::class,
+            BadgeSeeder::class, // Gamification: Badges system
+            LevelSeeder::class, // Gamification: Seller/Buyer levels
+            AdminSeeder::class,
             SettingSeeder::class,
-
-            // 2. Reference Data
-            CategorySeeder::class,
-            BadgeSeeder::class,
-            LevelSeeder::class,
             ExchangeRateSeeder::class,
             CommissionTierSeeder::class,
             TaxRuleSeeder::class,
-            NoteTemplateSeeder::class,
-
-            // 3. Users - Depends on roles
-            AdminSeeder::class,
             UserSeeder::class,
-
-            // 4. User-related - Depends on users
             WalletSeeder::class,
             ReferralCodeSeeder::class,
             ReferralSeeder::class,
-
-            // 5. Workspaces - Depends on users
             WorkspaceSeeder::class,
             WorkspaceCollaborationSeeder::class,
             FolderSeeder::class,
-
-            // 6. Content - Depends on users and categories
             NoteSeeder::class,
-            NoteSeriesSeeder::class,
-            NoteBundleSeeder::class,
             StudyMaterialSeeder::class,
-
-            // 7. CMS Content
+            // AiAnalysisSeeder::class, // AI features are now workspace-based
             DocumentationSeeder::class,
             LandingPageSectionSeeder::class,
             CmsPageSeeder::class,
             FaqSeeder::class,
             SocialMediaLinkSeeder::class,
-
-            // 8. Marketplace - Depends on notes
             FeaturedNoteSeeder::class,
             TransactionSeeder::class,
             MonetizationApprovalSeeder::class,
-
-            // 9. Engagement - Depends on notes and users
             NoteEngagementSeeder::class,
             NoteReviewSeeder::class,
+            NoteCollaborationSeeder::class,
+            NoteReportSeeder::class,
+            SupportSeeder::class,
+            AppNotificationSeeder::class,
+            SocialFeatureSeeder::class,
+            WithdrawSeeder::class,
+            StudioSeeder::class,
+            CategorySeeder::class,
+            NoteTemplateSeeder::class,
+            NoteSeriesSeeder::class,
             NoteCommentSeeder::class,
             NoteReactionSeeder::class,
             NoteQuestionSeeder::class,
-            NoteCollaborationSeeder::class,
-            NoteReportSeeder::class,
-
-            // 10. Gifts & Refunds - Depends on transactions
-            GiftNoteSeeder::class,
+            NoteBundleSeeder::class,
             RefundSeeder::class,
-
-            // 11. Support & Activities
-            SupportSeeder::class,
-            AppNotificationSeeder::class,
+            GiftNoteSeeder::class,
             ActivitySeeder::class,
-            SocialFeatureSeeder::class,
             MessageSeeder::class,
-
-            // 12. System - Last
-            WithdrawSeeder::class,
-            StudioSeeder::class,
             WebhookSeeder::class,
             SubscriptionPlanSeeder::class,
         ]);

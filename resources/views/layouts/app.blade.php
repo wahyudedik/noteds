@@ -471,77 +471,13 @@
         </div>
     </div>
 
-    <!-- Global SweetAlert2 Toast Helper -->
-    @push('scripts')
-        <script>
-            (function initNotedsToast() {
-                if (typeof Swal === 'undefined') {
-                    return setTimeout(initNotedsToast, 100);
-                }
-
-                if (window.NotedsToast) {
-                    return;
-                }
-
-                const toastMixin = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3200,
-                    timerProgressBar: true,
-                });
-
-                window.NotedsToast = function(icon, title, options = {}) {
-                    if (!title) {
-                        return;
-                    }
-
-                    const navigation = (performance.getEntriesByType && performance.getEntriesByType('navigation')[
-                        0]) || null;
-                    const isBackForward = navigation ?
-                        navigation.type === 'back_forward' :
-                        (performance.navigation && performance.navigation.type === 2);
-
-                    if (isBackForward && options.skipBackForward !== false) {
-                        return;
-                    }
-
-                    const {
-                        skipBackForward,
-                        ...restOptions
-                    } = options || {};
-
-                    if (isBackForward && skipBackForward !== false) {
-                        return;
-                    }
-
-                    const fireOptions = Object.assign({
-                        icon: icon || 'info',
-                        title,
-                    }, restOptions);
-
-                    toastMixin.fire(fireOptions);
-                };
-            })();
-        </script>
-    @endpush
-
-    <!-- Flash Messages with SweetAlert2 Toast (Simplified) -->
+    <!-- Flash Messages -->
     @if (session('success'))
         @push('scripts')
             <script>
-                (function() {
-                    const show = () => {
-                        if (typeof window.showSuccess === 'function') {
-                            window.showSuccess(@json(session('success')), {
-                                skipBackForward: true
-                            });
-                        } else {
-                            setTimeout(show, 50);
-                        }
-                    };
-                    show();
-                })();
+                document.addEventListener('DOMContentLoaded', () => {
+                    window.showSuccess(@json(session('success')));
+                });
             </script>
         @endpush
     @endif
@@ -549,18 +485,9 @@
     @if (session('error'))
         @push('scripts')
             <script>
-                (function() {
-                    const show = () => {
-                        if (typeof window.showError === 'function') {
-                            window.showError(@json(session('error')), {
-                                skipBackForward: true
-                            });
-                        } else {
-                            setTimeout(show, 50);
-                        }
-                    };
-                    show();
-                })();
+                document.addEventListener('DOMContentLoaded', () => {
+                    window.showError(@json(session('error')));
+                });
             </script>
         @endpush
     @endif
@@ -568,18 +495,9 @@
     @if (session('warning'))
         @push('scripts')
             <script>
-                (function() {
-                    const show = () => {
-                        if (typeof window.showWarning === 'function') {
-                            window.showWarning(@json(session('warning')), {
-                                skipBackForward: true
-                            });
-                        } else {
-                            setTimeout(show, 50);
-                        }
-                    };
-                    show();
-                })();
+                document.addEventListener('DOMContentLoaded', () => {
+                    window.showWarning(@json(session('warning')));
+                });
             </script>
         @endpush
     @endif
@@ -587,18 +505,9 @@
     @if (session('info'))
         @push('scripts')
             <script>
-                (function() {
-                    const show = () => {
-                        if (typeof window.showInfo === 'function') {
-                            window.showInfo(@json(session('info')), {
-                                skipBackForward: true
-                            });
-                        } else {
-                            setTimeout(show, 50);
-                        }
-                    };
-                    show();
-                })();
+                document.addEventListener('DOMContentLoaded', () => {
+                    window.showInfo(@json(session('info')));
+                });
             </script>
         @endpush
     @endif
@@ -1566,7 +1475,7 @@
                                     // New service worker available
                                     if (confirm(
                                             'Update tersedia! Muat ulang halaman untuk mendapatkan versi terbaru?'
-                                            )) {
+                                        )) {
                                         window.location.reload();
                                     }
                                 }

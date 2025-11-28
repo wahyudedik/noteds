@@ -16,6 +16,11 @@ class LargeFileUploadService
     const MAX_FILE_SIZE = 10485760; // 10MB in bytes
 
     /**
+     * Threshold for large file handling (40MB)
+     */
+    const LARGE_FILE_THRESHOLD = 41943040; // 40MB in bytes
+
+    /**
      * Maximum files per note
      */
     const MAX_FILES_PER_NOTE = 10;
@@ -42,7 +47,7 @@ class LargeFileUploadService
      * @param string $userId
      * @return array
      */
-    protected function handleRegularFile(UploadedFile $file, string $userId): array
+    public function handleRegularFile(UploadedFile $file, string $userId): array
     {
         // Ensure private storage directory exists
         if (!Storage::disk('private')->exists('notes/' . $userId)) {
@@ -81,7 +86,7 @@ class LargeFileUploadService
             if ($currentMemoryLimitBytes < 512 * 1024 * 1024) { // Less than 512MB
                 ini_set('memory_limit', '512M');
             }
-            
+
             // Ensure private storage directory exists
             if (!Storage::disk('private')->exists('notes/' . $userId)) {
                 Storage::disk('private')->makeDirectory('notes/' . $userId);
@@ -91,7 +96,7 @@ class LargeFileUploadService
             $originalFilename = $file->getClientOriginalName();
             $fileSize = $file->getSize();
             $mimeType = $file->getMimeType();
-            
+
             // Generate unique filename
             $filename = Str::uuid() . '_' . Str::slug($originalFilename);
 
@@ -99,7 +104,7 @@ class LargeFileUploadService
             set_time_limit(900); // 15 minutes for very large files
             ini_set('max_execution_time', '900');
             ini_set('max_input_time', '900');
-            
+
             // Use Laravel Storage's putFileAs which handles large files efficiently
             // putFileAs uses move_uploaded_file internally which is more memory efficient
             // than reading the entire file into memory
@@ -107,16 +112,16 @@ class LargeFileUploadService
                 // Use putFileAs which is optimized for uploaded files
                 // It uses move_uploaded_file internally, which is memory efficient
                 $path = Storage::disk('private')->putFileAs('notes/' . $userId, $file, $filename);
-                
+
                 if (!$path) {
                     throw new Exception('Failed to upload file to storage.');
                 }
-                
+
                 // Verify the file was uploaded correctly
                 if (!Storage::disk('private')->exists($path)) {
                     throw new Exception('File upload verification failed: file does not exist.');
                 }
-                
+
                 $uploadedSize = Storage::disk('private')->size($path);
                 if ($uploadedSize !== $fileSize) {
                     Storage::disk('private')->delete($path);
@@ -149,7 +154,6 @@ class LargeFileUploadService
                 'mime' => $mimeType,
                 'is_large' => true,
             ];
-
         } catch (Exception $e) {
             Log::error('Large file upload failed', [
                 'user_id' => $userId,
@@ -285,4 +289,3 @@ class LargeFileUploadService
         ]);
     }
 }
-

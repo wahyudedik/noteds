@@ -185,7 +185,7 @@ class NotificationService
     {
         $admins = User::role('admin')->get();
         foreach ($admins as $admin) {
-            $message = "Withdraw sebesar {$this->formatCurrency($withdraw->amount)} membutuhkan review. Threshold: {$this->formatCurrency($threshold)}.";
+            $message = "Withdraw sebesar {$this->formatCurrency((float)$withdraw->amount)} membutuhkan review. Threshold: {$this->formatCurrency($threshold)}.";
             $data = [
                 'withdraw_id' => $withdraw->id,
                 'user_id' => $withdraw->user_id,
@@ -325,7 +325,7 @@ class NotificationService
 
         // Check in-app notification preference
         $allowInApp = $user->allowsInAppNotification($type);
-        
+
         if (!$allowInApp) {
             // User disabled this notification type, skip entirely
             return null;
@@ -335,7 +335,7 @@ class NotificationService
             // Dispatch to queue for async processing
             SendNotificationJob::dispatch($user->id, $type, $title, $message, $link, $data)
                 ->onQueue('notifications');
-            
+
             // Still create notification immediately for instant display
             // The queue job will handle email sending
             $notification = AppNotification::create([
@@ -359,7 +359,7 @@ class NotificationService
 
             // Check email preference before sending
             if ($user->allowsEmailNotification($type)) {
-            $this->sendForumEmailIfEnabled($user, $type, $title, $message, $link);
+                $this->sendForumEmailIfEnabled($user, $type, $title, $message, $link);
             }
         }
 
@@ -374,7 +374,7 @@ class NotificationService
         if (config('queue.default') !== 'sync') {
             // Split into chunks for better performance
             $chunks = array_chunk($userIds, 100);
-            
+
             foreach ($chunks as $chunk) {
                 SendBatchNotificationsJob::dispatch($chunk, $type, $title, $message, $link, $data)
                     ->onQueue('notifications');
@@ -566,7 +566,7 @@ class NotificationService
     public function notifyWithdrawal(User $user, string $status, float $amount): AppNotification
     {
         $title = $status === 'approved' ? '✅ Withdrawal Approved!' : '❌ Withdrawal Rejected';
-        $message = $status === 'approved' 
+        $message = $status === 'approved'
             ? "Your withdrawal of Rp " . number_format($amount, 0, ',', '.') . " has been approved."
             : "Your withdrawal request was rejected. Please contact support.";
 
@@ -927,7 +927,7 @@ class NotificationService
         // Get follower user to get their username
         $follower = User::where('name', $followerName)->first();
         $followerUsername = $follower ? $follower->username : null;
-        
+
         return $this->create(
             $user,
             'forum_new_follower',
@@ -1088,4 +1088,3 @@ class NotificationService
         );
     }
 }
-

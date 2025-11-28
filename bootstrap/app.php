@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,9 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SecurityHeaders::class,
             \App\Http\Middleware\SanitizeInput::class,
         ];
-        
+
         $middleware->web(append: $webMiddleware);
-        
+
         // Fix Vite URLs to use HTTP in development when app is served over HTTPS
         // This prevents SSL errors when Vite dev server is on HTTP
         // Add at the end to process final HTML output
@@ -28,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 \App\Http\Middleware\FixViteUrls::class,
             ]);
         }
-        
+
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
@@ -42,13 +43,16 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'rate.limit' => \App\Http\Middleware\RateLimitSensitive::class,
         ]);
+        $middleware->web(append: [
+            \App\Http\Middleware\ContentSecurityPolicy::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // AI exception handlers removed - AI features have been removed
         // Ensure JSON responses for background upload routes
         $exceptions->render(function (\Exception $e, $request) {
             if ($request->is('notes/upload-background') || $request->routeIs('notes.upload-background')) {
-                \Log::error('Unhandled exception in upload background route', [
+                Log::error('Unhandled exception in upload background route', [
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                     'file' => $e->getFile(),

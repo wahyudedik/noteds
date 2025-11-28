@@ -27,6 +27,64 @@
 - **Masalah:** Error pada line 1254 tentang `handleRegularFile` visibility
 - **Status:** ✅ False Positive - Method `handleLargeFileUpload` adalah public dan sudah menggunakan `@phpstan-ignore-next-line` untuk suppress warning
 
+### 5. **WorkspaceController: Undefined LARGE_FILE_THRESHOLD Constant**
+- **Masalah:** WorkspaceController menggunakan `LARGE_FILE_THRESHOLD` yang belum didefinisikan di LargeFileUploadService
+- **Fix:** Menambahkan constant `LARGE_FILE_THRESHOLD = 41943040` (40MB) di LargeFileUploadService class
+- **File:** `app/Services/LargeFileUploadService.php` line 18-21
+- **Status:** ✅ Fixed
+- **Tanggal:** 2025-11-28
+
+### 6. **WorkspaceController: Protected Method Access**
+- **Masalah:** WorkspaceController memanggil method `handleRegularFile()` yang visibility-nya protected
+- **Fix:** Mengubah visibility method `handleRegularFile()` dari protected menjadi public
+- **File:** `app/Services/LargeFileUploadService.php` line 45
+- **Status:** ✅ Fixed
+- **Tanggal:** 2025-11-28
+
+### 7. **NotificationService: Type Mismatch formatCurrency**
+- **Masalah:** Method `formatCurrency()` expects float tapi menerima decimal|null dari `$withdraw->amount`
+- **Fix:** Explicitly cast `$withdraw->amount` ke float: `(float) $withdraw->amount`
+- **File:** `app/Services/NotificationService.php` line 188
+- **Status:** ✅ Fixed
+- **Tanggal:** 2025-11-28
+
+### 8. **NoteController: Return Type Mismatch**
+- **Masalah:** Method `create()` return type adalah `View` tapi bisa return `RedirectResponse`
+- **Fix:** Mengubah return type menjadi `View|RedirectResponse`
+- **File:** `app/Http/Controllers/NoteController.php` line 45
+- **Status:** ✅ Fixed
+- **Tanggal:** 2025-11-28
+
+### 9. **NoteController: Price Assignment Type Error**
+- **Masalah:** Tidak bisa assign float langsung ke decimal column
+- **Fix:** Menggunakan `setAttribute()` method untuk handle type conversion: `$note->setAttribute('price', $resalePrice)`
+- **File:** `app/Http/Controllers/NoteController.php` line 995
+- **Status:** ✅ Fixed
+- **Tanggal:** 2025-11-28
+
+### 10. **Mobile Sidebar Tidak Bisa Di-Hide**
+- **Masalah:** Mobile sidebar menu tidak bisa ditutup karena script navigationMenu menggunakan `position: fixed` yang mengakibatkan konflik
+- **Fix:** Menghapus `position: fixed` dan `width: 100%` dari script Alpine.js, hanya menggunakan `overflow: hidden`
+- **File:** `resources/js/app.js` line 32-37
+- **Status:** ✅ Fixed
+- **Tanggal:** 2025-11-28
+
+### 11. **Mengganti SweetAlert dengan Notifikasi Native**
+- **Masalah:** SweetAlert membuat aplikasi lebih berat dan kompleks
+- **Fix:** 
+  - Menghapus dependency `sweetalert2` dari package.json
+  - Membuat utility notifikasi sederhana di `resources/js/utils/notifications.js`
+  - Update flash messages di `app.blade.php` untuk menggunakan notifikasi native
+  - Menambahkan backward compatibility untuk kode lama yang masih menggunakan `Swal`
+- **File:** 
+  - `package.json` - hapus sweetalert2
+  - `resources/js/app.js` - hapus import sweetalert
+  - `resources/js/utils/notifications.js` - NEW FILE
+  - `resources/views/layouts/app.blade.php` - update flash messages
+- **Status:** ✅ Fixed
+- **Tanggal:** 2025-11-28
+- **Note:** Kode lama yang menggunakan Swal.fire() tetap akan bekerja dengan basic compatibility layer
+
 ## ✅ Flow Verification
 
 ### Authentication Flow
