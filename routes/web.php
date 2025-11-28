@@ -560,15 +560,20 @@ Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
 Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.setup'])->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/repurchase-report', [DashboardController::class, 'repurchaseReport'])->name('repurchase-report');
+    
+    // User verification routes - MUST be before resource routes
+    Route::get('/users/pending-verification', [UserController::class, 'pendingVerification'])->name('users.pending-verification');
+    Route::post('/users/{user}/verify-approve', [UserController::class, 'approveVerification'])->name('users.verify.approve');
+    Route::post('/users/{user}/verify-reject', [UserController::class, 'rejectVerification'])->name('users.verify.reject');
+    Route::get('/users/{user}/download-doc/{type}', [UserController::class, 'downloadDocument'])->name('users.download-doc');
+    
+    // User management
     Route::resource('users', UserController::class);
     Route::post('/users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
     Route::post('/users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');
     Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
     Route::post('/users/{user}/release', [UserController::class, 'release'])->name('users.release');
-    Route::get('/users/pending-verification', [UserController::class, 'pendingVerification'])->name('users.pending-verification');
-    Route::post('/users/{user}/verify-approve', [UserController::class, 'approveVerification'])->name('users.verify.approve');
-    Route::post('/users/{user}/verify-reject', [UserController::class, 'rejectVerification'])->name('users.verify.reject');
-    Route::get('/users/{user}/download-doc/{type}', [UserController::class, 'downloadDocument'])->name('users.download-doc');
+    
     Route::resource('commission-tiers', AdminCommissionTierController::class)->except(['show']);
     Route::resource('faqs', AdminFaqController::class);
     Route::resource('cms-pages', AdminCmsPageController::class);
