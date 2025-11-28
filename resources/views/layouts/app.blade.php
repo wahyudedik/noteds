@@ -25,15 +25,6 @@
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#2563eb">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Noteds">
-    <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
-
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -1458,76 +1449,21 @@
     <!-- Featured Notes Popups -->
     @include('components.featured-popups')
 
-    <!-- PWA Service Worker Registration -->
+    <!-- Unregister old Service Workers (cleanup) -->
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                        console.log('[SW] Service Worker registered:', registration.scope);
-
-                        // Check for updates
-                        registration.addEventListener('updatefound', function() {
-                            const newWorker = registration.installing;
-                            newWorker.addEventListener('statechange', function() {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker
-                                    .controller) {
-                                    // New service worker available
-                                    if (confirm(
-                                            'Update tersedia! Muat ulang halaman untuk mendapatkan versi terbaru?'
-                                        )) {
-                                        window.location.reload();
-                                    }
-                                }
-                            });
-                        });
-                    })
-                    .catch(function(error) {
-                        console.log('[SW] Service Worker registration failed:', error);
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for (let registration of registrations) {
+                    registration.unregister().then(function(success) {
+                        if (success) {
+                            console.log('[SW] Service Worker unregistered successfully');
+                        }
                     });
+                }
             });
         }
-
-        // PWA Install Prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-
-            // Show install button
-            const installBanner = document.getElementById('pwa-install-banner');
-            if (installBanner) {
-                installBanner.classList.remove('hidden');
-            }
-        });
-
-        // Handle install button click
-        window.installPWA = function() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the install prompt');
-                    }
-                    deferredPrompt = null;
-                    const installBanner = document.getElementById('pwa-install-banner');
-                    if (installBanner) {
-                        installBanner.classList.add('hidden');
-                    }
-                });
-            }
-        };
-
-        // Hide install banner if already installed
-        window.addEventListener('appinstalled', () => {
-            console.log('PWA installed');
-            const installBanner = document.getElementById('pwa-install-banner');
-            if (installBanner) {
-                installBanner.classList.add('hidden');
-            }
-            deferredPrompt = null;
-        });
     </script>
+
 </body>
 
 </html>
