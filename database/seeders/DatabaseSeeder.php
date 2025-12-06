@@ -46,8 +46,8 @@ class DatabaseSeeder extends Seeder
             // DEVELOPMENT/TESTING ONLY - DISABLED FOR PRODUCTION
             // ========================================
 
-            // AdminSeeder::class, // Create admin manually via CLI
-            // UserSeeder::class, // Real users will register
+            AdminSeeder::class, // Create admin manually via CLI
+            // UserSeeder::class, // Real users will register 
             // WalletSeeder::class, // Auto-created on user registration
             // ReferralCodeSeeder::class, // Auto-created on user registration
             // ReferralSeeder::class, // Real data from actual referrals

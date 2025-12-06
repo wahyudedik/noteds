@@ -78,7 +78,7 @@ Platform di mana pengguna bisa:
 
 ### Key Features
 
-**Marketplace Platform (Current):**
+**Marketplace Platform (Current):** 
 - ✅ User authentication (Breeze)
 - ✅ Notes CRUD with tagging & Rich Text Editor (Quill)
 - ✅ Marketplace with search & filters
