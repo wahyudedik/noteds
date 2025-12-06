@@ -24,7 +24,7 @@ class UpdateNoteRequest extends FormRequest
     public function rules(): array
     {
         $maxFileSize = 10485760; // 10MB for all users
-        
+
         return [
             'title' => ['required', 'string', 'max:255'],
             'content' => ['required', 'string', 'max:1000000'], // Max 1MB to prevent database truncation errors
@@ -102,10 +102,10 @@ class UpdateNoteRequest extends FormRequest
             // Enhanced file upload security validation
             if ($this->hasFile('attachments')) {
                 $securityService = app(\App\Services\FileUploadSecurityService::class);
-                
+
                 foreach ($this->file('attachments') as $index => $file) {
                     $validation = $securityService->validateFile($file, 'all');
-                    
+
                     if (!$validation['valid']) {
                         foreach ($validation['errors'] as $error) {
                             $validator->errors()->add(
@@ -116,14 +116,14 @@ class UpdateNoteRequest extends FormRequest
                     }
                 }
             }
-            
+
             // Enhanced thumbnail security validation
             if ($this->hasFile('thumbnails')) {
                 $securityService = app(\App\Services\FileUploadSecurityService::class);
-                
+
                 foreach ($this->file('thumbnails') as $index => $file) {
                     $validation = $securityService->validateFile($file, 'image');
-                    
+
                     if (!$validation['valid']) {
                         foreach ($validation['errors'] as $error) {
                             $validator->errors()->add(
@@ -134,7 +134,7 @@ class UpdateNoteRequest extends FormRequest
                     }
                 }
             }
-            
+
             // Validate external links
             $externalLinksText = $this->input('external_links');
             if (!empty($externalLinksText)) {
@@ -142,7 +142,7 @@ class UpdateNoteRequest extends FormRequest
                     array_map('trim', explode("\n", $externalLinksText)),
                     fn($link) => !empty($link)
                 );
-                
+
                 foreach ($links as $index => $link) {
                     if (!filter_var($link, FILTER_VALIDATE_URL)) {
                         $validator->errors()->add(
@@ -152,12 +152,12 @@ class UpdateNoteRequest extends FormRequest
                     }
                 }
             }
-            
+
             // Check file sizes manually for better error handling
             if ($this->hasFile('attachments')) {
                 $files = $this->file('attachments');
                 $maxSize = 10485760; // 10MB in bytes
-                
+
                 // Check maximum number of files
                 if (count($files) > 10) {
                     $validator->errors()->add(
@@ -165,7 +165,7 @@ class UpdateNoteRequest extends FormRequest
                         'Maximum 10 files allowed per note.'
                     );
                 }
-                
+
                 foreach ($files as $index => $file) {
                     if ($file->getSize() > $maxSize) {
                         $sizeInMB = round($file->getSize() / 1048576, 2);
@@ -180,7 +180,7 @@ class UpdateNoteRequest extends FormRequest
             // Validate discount_price
             $price = $this->input('price', 0);
             $discountPrice = $this->input('discount_price');
-            
+
             if ($discountPrice !== null && $discountPrice !== '') {
                 $discountPrice = (float) $discountPrice;
                 if ($price <= 0) {
@@ -197,7 +197,7 @@ class UpdateNoteRequest extends FormRequest
                 $minPrice = Setting::getDefaultMinPrice();
                 $categoryRules = Setting::getCategoryMinPrices();
                 $tags = collect($this->input('tags', []))
-                    ->map(fn ($tag) => Str::slug($tag))
+                    ->map(fn($tag) => Str::slug($tag))
                     ->filter()
                     ->all();
 
