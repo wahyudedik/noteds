@@ -102,6 +102,10 @@ class SecurityHeaders
         $sources[] = 'https://static.cloudflareinsights.com';
         $sources[] = 'https://cdn.jsdelivr.net';
 
+        // cdnjs.cloudflare.com (Prism, PDF.js, Model Viewer, etc.)
+        $sources[] = 'https://cdnjs.cloudflare.com';
+        $sources[] = 'https://ajax.googleapis.com';
+
         // CDN URLs
         if ($cdnUrl = config('filesystems.disks.public.url')) {
             $sources[] = parse_url($cdnUrl, PHP_URL_HOST);
@@ -131,6 +135,9 @@ class SecurityHeaders
 
         // Quill.js CDN (Rich Text Editor CSS)
         $sources[] = 'https://cdn.quilljs.com';
+
+        // cdnjs.cloudflare.com (Prism syntax highlighting CSS)
+        $sources[] = 'https://cdnjs.cloudflare.com';
 
         // CDN URLs
         if ($cdnUrl = config('filesystems.disks.public.url')) {

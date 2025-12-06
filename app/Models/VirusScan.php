@@ -55,7 +55,7 @@ class VirusScan extends Model
     /**
      * Check if scan is clean
      */
-    public function isClean(): bool
+    public function isScanClean(): bool
     {
         return $this->scan_status === 'clean';
     }
@@ -92,5 +92,3 @@ class VirusScan extends Model
         return $this->scan_status === 'error';
     }
 }
-
-

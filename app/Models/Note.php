@@ -394,7 +394,7 @@ class Note extends Model
     {
         $viralThreshold = \App\Models\Setting::getSetting('viral_note_threshold', 'marketplace', 200);
         $views24h = $this->views_24_hours;
-        
+
         // Check if views in 24h exceed viral threshold
         if ($views24h >= $viralThreshold) {
             return true;
@@ -469,7 +469,7 @@ class Note extends Model
         if (!empty($value)) {
             return $value;
         }
-        
+
         // Auto-generate preview from content (first 300 chars, strip HTML)
         $content = strip_tags($this->attributes['content'] ?? '');
         return Str::limit($content, 300);
@@ -492,7 +492,7 @@ class Note extends Model
             }
             return round($this->reviews->avg('rating'), 1);
         }
-        
+
         // Fallback to query if not eager loaded
         return round($this->reviews()->avg('rating') ?? 0, 1);
     }
@@ -506,7 +506,7 @@ class Note extends Model
         if ($this->relationLoaded('reviews')) {
             return $this->reviews->count();
         }
-        
+
         // Fallback to query if not eager loaded
         return $this->reviews()->count();
     }
@@ -553,7 +553,7 @@ class Note extends Model
         if ($this->discount_price === null || $this->discount_price <= 0 || $this->price <= 0) {
             return null;
         }
-        
+
         $discount = $this->price - $this->discount_price;
         return round(($discount / $this->price) * 100, 0);
     }
@@ -563,8 +563,8 @@ class Note extends Model
      */
     public function hasDiscount(): bool
     {
-        return $this->discount_price !== null 
-            && $this->discount_price > 0 
+        return $this->discount_price !== null
+            && $this->discount_price > 0
             && $this->discount_price < $this->price;
     }
 
@@ -587,13 +587,13 @@ class Note extends Model
         $content = $this->content;
         $lines = preg_split('/\r\n|\r|\n/', $content);
         $totalLines = count($lines);
-        
+
         // Calculate how many lines to show
         $previewLines = (int) ceil($totalLines * ($this->preview_percentage / 100));
-        
+
         // Take first N lines
         $previewLinesArray = array_slice($lines, 0, $previewLines);
-        
+
         // Join back with newlines
         return implode("\n", $previewLinesArray);
     }
@@ -647,7 +647,7 @@ class Note extends Model
         return count($this->thumbnails);
     }
 
-    public function notificationMeta(string $key = null, $default = null)
+    public function notificationMeta(?string $key = null, $default = null)
     {
         $meta = $this->notification_meta ?? [];
 

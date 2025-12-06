@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\AccountModerationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicCmsPageController;
 use App\Http\Controllers\MarketplaceController;
+use Illuminate\Http\Request;
 use App\Http\Controllers\NoteReportController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\UserReportController;
