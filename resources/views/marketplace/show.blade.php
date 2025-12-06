@@ -180,36 +180,49 @@
                         @endif
 
                         <!-- Viral/Hot Badge -->
-                        @if($note->isViral() || $note->isHot())
+                        @if ($note->isViral() || $note->isHot())
                             <div class="mt-2">
-                                @if($note->isViral())
+                                @if ($note->isViral())
                                     <div class="relative inline-block group">
-                                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg animate-pulse">
+                                        <span
+                                            class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg animate-pulse">
                                             <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                <path
+                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                             </svg>
                                             🔥 VIRAL
                                         </span>
                                         <!-- Tooltip -->
-                                        <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
+                                        <div
+                                            class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
                                             <div class="font-semibold mb-2">🔥 Viral Note</div>
-                                            <p class="text-gray-300">This note is trending! It has {{ number_format($note->views_24_hours) }} views in the last 24 hours.</p>
-                                            <div class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                            <p class="text-gray-300">This note is trending! It has
+                                                {{ number_format($note->views_24_hours) }} views in the last 24 hours.</p>
+                                            <div
+                                                class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900">
+                                            </div>
                                         </div>
                                     </div>
                                 @elseif($note->isHot())
                                     <div class="relative inline-block group">
-                                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
+                                        <span
+                                            class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
                                             <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.16-.85-.434-1.675-.82-2.45a5.549 5.549 0 00-5.8-2.13A4.5 4.5 0 001 6.477v6c0 1.968.785 3.747 2.05 5.043a4.5 4.5 0 006.95-1.95c0-.64-.13-1.25-.36-1.81a5.389 5.389 0 01-.22-3.68 4.5 4.5 0 00-1.88-2.547 2.5 2.5 0 01-1.32-2.88 1.5 1.5 0 00-1.14-1.86 1.5 1.5 0 00-1.12.12c-1.24.82-2.27 1.9-3.01 3.18-.75 1.3-1.23 2.78-1.23 4.38 0 1.56.48 3.03 1.23 4.33.74 1.28 1.77 2.36 3.01 3.18a1.5 1.5 0 001.12.12c.5-.07.93-.46 1.14-1.86.2-1.4.6-2.88 1.32-2.88.72 0 1.12 1.48 1.32 2.88.21 1.4.64 1.79 1.14 1.86a1.5 1.5 0 001.12-.12c1.24-.82 2.27-1.9 3.01-3.18.75-1.3 1.23-2.78 1.23-4.33 0-1.6-.48-3.08-1.23-4.38z" clip-rule="evenodd" />
+                                                <path fill-rule="evenodd"
+                                                    d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.16-.85-.434-1.675-.82-2.45a5.549 5.549 0 00-5.8-2.13A4.5 4.5 0 001 6.477v6c0 1.968.785 3.747 2.05 5.043a4.5 4.5 0 006.95-1.95c0-.64-.13-1.25-.36-1.81a5.389 5.389 0 01-.22-3.68 4.5 4.5 0 00-1.88-2.547 2.5 2.5 0 01-1.32-2.88 1.5 1.5 0 00-1.14-1.86 1.5 1.5 0 00-1.12.12c-1.24.82-2.27 1.9-3.01 3.18-.75 1.3-1.23 2.78-1.23 4.38 0 1.56.48 3.03 1.23 4.33.74 1.28 1.77 2.36 3.01 3.18a1.5 1.5 0 001.12.12c.5-.07.93-.46 1.14-1.86.2-1.4.6-2.88 1.32-2.88.72 0 1.12 1.48 1.32 2.88.21 1.4.64 1.79 1.14 1.86a1.5 1.5 0 001.12-.12c1.24-.82 2.27-1.9 3.01-3.18.75-1.3 1.23-2.78 1.23-4.33 0-1.6-.48-3.08-1.23-4.38z"
+                                                    clip-rule="evenodd" />
                                             </svg>
                                             🔥 HOT
                                         </span>
                                         <!-- Tooltip -->
-                                        <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
+                                        <div
+                                            class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
                                             <div class="font-semibold mb-2">🔥 Hot Note</div>
-                                            <p class="text-gray-300">This note is getting popular! It has {{ number_format($note->views_24_hours) }} views in the last 24 hours.</p>
-                                            <div class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                            <p class="text-gray-300">This note is getting popular! It has
+                                                {{ number_format($note->views_24_hours) }} views in the last 24 hours.</p>
+                                            <div
+                                                class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900">
+                                            </div>
                                         </div>
                                     </div>
                                 @endif
@@ -224,9 +237,10 @@
                                 @php
                                     $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
                                     // Apply subscription discount if available
-                                    $displayPrice = isset($subscriptionDiscountPrice) && $subscriptionDiscountPrice < $basePrice 
-                                        ? $subscriptionDiscountPrice 
-                                        : $basePrice;
+                                    $displayPrice =
+                                        isset($subscriptionDiscountPrice) && $subscriptionDiscountPrice < $basePrice
+                                            ? $subscriptionDiscountPrice
+                                            : $basePrice;
                                 @endphp
 
                                 <div class="flex items-baseline gap-3">
@@ -316,8 +330,8 @@
                         @endif
 
                         <!-- Subscription Benefits -->
-                        @if(auth()->check() && $note->price > 0)
-                            @if($activeSubscription)
+                        @if (auth()->check() && $note->price > 0)
+                            @if ($activeSubscription)
                                 <div class="mt-4">
                                     <x-subscription-benefits :plan="$activeSubscription->plan" />
                                 </div>
@@ -380,19 +394,19 @@
                                         <div class="flex items-center gap-2 flex-wrap">
                                             <span
                                                 class="font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-200">{{ $note->user->name }}</span>
-                                            @if($note->user->badges && $note->user->badges->count() > 0)
-                                                @foreach($note->user->badges->take(5) as $badge)
-                                                    <span class="inline-flex items-center text-xs font-medium 
-                                                        @if($badge->color === 'gold') text-yellow-600
+                                            @if ($note->user->badges && $note->user->badges->count() > 0)
+                                                @foreach ($note->user->badges->take(5) as $badge)
+                                                    <span
+                                                        class="inline-flex items-center text-xs font-medium 
+                                                        @if ($badge->color === 'gold') text-yellow-600
                                                         @elseif($badge->color === 'green') text-green-600
                                                         @elseif($badge->color === 'blue') text-blue-600
                                                         @elseif($badge->color === 'purple') text-purple-600
                                                         @elseif($badge->color === 'yellow') text-yellow-600
                                                         @elseif($badge->color === 'orange') text-orange-600
-                                                        @else text-gray-600
-                                                        @endif"
+                                                        @else text-gray-600 @endif"
                                                         title="{{ $badge->name }}">
-                                                        @if($badge->icon)
+                                                        @if ($badge->icon)
                                                             {{ $badge->icon }}
                                                         @endif
                                                     </span>
@@ -473,43 +487,52 @@
                                     $shareTitle = urlencode($note->title);
                                     $shareText = urlencode(Str::limit(strip_tags($note->content), 100));
                                 @endphp
-                                
+
                                 @auth
-                                    @if(isset($shareUrl) && $shareUrl)
+                                    @if (isset($shareUrl) && $shareUrl)
                                         <!-- Share with Referral Link (Earn Commission) -->
                                         <div class="relative group">
                                             <button type="button" onclick="copyShareReferralLink('{{ $shareUrl }}')"
                                                 class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-md hover:shadow-lg"
                                                 title="Copy share link with referral (Earn commission when someone purchases)">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M12 4v16m8-8H4" />
                                                 </svg>
                                             </button>
                                             <!-- Tooltip -->
-                                            <div class="absolute right-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
+                                            <div
+                                                class="absolute right-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
                                                 <div class="font-semibold mb-2">🎁 Share & Earn</div>
-                                                <p class="text-gray-300">Copy this link to share. You'll earn commission when someone purchases through your link!</p>
-                                                <div class="absolute right-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                                <p class="text-gray-300">Copy this link to share. You'll earn commission when
+                                                    someone purchases through your link!</p>
+                                                <div
+                                                    class="absolute right-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900">
+                                                </div>
                                             </div>
                                         </div>
-                                        
+
                                         <!-- Share Statistics (if user has shared this note) -->
                                         @php
                                             $userShareStats = null;
                                             if (auth()->check()) {
                                                 $shareService = app(\App\Services\NoteShareService::class);
                                                 $userShareStats = $shareService->getUserShareStats(auth()->user());
-                                                $currentNoteShare = $userShareStats['share_referrals']->where('note_id', $note->id)->first();
+                                                $currentNoteShare = $userShareStats['share_referrals']
+                                                    ->where('note_id', $note->id)
+                                                    ->first();
                                             }
                                         @endphp
-                                        @if(isset($currentNoteShare) && $currentNoteShare)
+                                        @if (isset($currentNoteShare) && $currentNoteShare)
                                             <div class="relative group">
                                                 <button type="button" onclick="showShareStatsModal()"
                                                     class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-md"
                                                     title="View share statistics">
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                                     </svg>
                                                     Stats
                                                 </button>
@@ -589,23 +612,19 @@
                     </div>
 
                     <!-- Video Preview -->
-                    @if($note->hasVideoPreview())
-                        <div class="mb-6" x-data="{ isPlaying: false }" 
-                             @mouseenter="if (!isPlaying) { $refs.videoPlayer.play(); isPlaying = true; }"
-                             @mouseleave="if (isPlaying) { $refs.videoPlayer.pause(); isPlaying = false; }">
+                    @if ($note->hasVideoPreview())
+                        <div class="mb-6" x-data="{ isPlaying: false }"
+                            @mouseenter="if (!isPlaying) { $refs.videoPlayer.play(); isPlaying = true; }"
+                            @mouseleave="if (isPlaying) { $refs.videoPlayer.pause(); isPlaying = false; }">
                             <div class="relative bg-gray-900 rounded-lg overflow-hidden shadow-lg">
-                                <video 
-                                    x-ref="videoPlayer"
-                                    class="w-full h-auto"
-                                    controls
-                                    preload="metadata"
-                                    poster="{{ $note->video_preview_thumbnail_url }}"
-                                >
+                                <video x-ref="videoPlayer" class="w-full h-auto" controls preload="metadata"
+                                    poster="{{ $note->video_preview_thumbnail_url }}">
                                     <source src="{{ $note->video_preview_url }}" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
-                                @if($note->video_preview_duration)
-                                    <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                @if ($note->video_preview_duration)
+                                    <div
+                                        class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
                                         {{ gmdate('i:s', $note->video_preview_duration) }}
                                     </div>
                                 @endif
@@ -706,69 +725,101 @@
                         @endauth
 
                         <!-- Rich Media Previews -->
-                        @if($note->ecosystem_category === 'audio')
+                        @if ($note->ecosystem_category === 'audio')
                             @php
                                 $audioUrl = $note->audio_link;
                                 // Check if there's an audio file in attachments
-                                if (!$audioUrl) {
-                                    $audioAttachment = collect($note->attachments ?? [])->first(function($att) {
-                                        $filename = is_array($att) ? ($att['filename'] ?? '') : basename($att);
-                                        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-                                        return in_array($ext, ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac']);
-                                    });
-                                    if ($audioAttachment) {
-                                        $audioFilename = is_array($audioAttachment) ? ($audioAttachment['filename'] ?? basename($audioAttachment)) : basename($audioAttachment);
-                                        $audioUrl = route('notes.attachments.download', ['note' => $note->id, 'filename' => $audioFilename]);
+if (!$audioUrl) {
+    $audioAttachment = collect($note->attachments ?? [])->first(function ($att) {
+        $filename = is_array($att) ? $att['filename'] ?? '' : basename($att);
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        return in_array($ext, ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac']);
+    });
+    if ($audioAttachment) {
+        $audioFilename = is_array($audioAttachment)
+            ? $audioAttachment['filename'] ?? ''
+            : basename($audioAttachment);
+        $audioUrl = route('notes.attachments.download', [
+            'note' => $note->id,
+            'filename' => $audioFilename,
+                                        ]);
                                     }
                                 }
                             @endphp
-                            @if($audioUrl)
+                            @if ($audioUrl)
                                 @include('components.rich-media.audio-preview', [
                                     'audioUrl' => $audioUrl,
                                     'title' => $note->title,
-                                    'duration' => $note->audio_duration
+                                    'duration' => $note->audio_duration,
                                 ])
                             @endif
                         @endif
 
-                        @if($note->ecosystem_category === 'code')
+                        @if ($note->ecosystem_category === 'code')
                             @php
                                 $codeContent = null;
-                                $codeAttachment = collect($note->attachments ?? [])->first(function($att) {
-                                    $filename = is_array($att) ? ($att['filename'] ?? '') : basename($att);
+                                $codeAttachment = collect($note->attachments ?? [])->first(function ($att) {
+                                    $filename = is_array($att) ? $att['filename'] ?? '' : basename($att);
                                     $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-                                    return in_array($ext, ['js', 'jsx', 'ts', 'tsx', 'php', 'py', 'java', 'cpp', 'c', 'html', 'css', 'scss', 'vue', 'jsx']);
+                                    return in_array($ext, [
+                                        'js',
+                                        'jsx',
+                                        'ts',
+                                        'tsx',
+                                        'php',
+                                        'py',
+                                        'java',
+                                        'cpp',
+                                        'c',
+                                        'html',
+                                        'css',
+                                        'scss',
+                                        'vue',
+                                        'jsx',
+                                    ]);
                                 });
                             @endphp
                             @include('components.rich-media.code-preview', [
                                 'code' => $codeContent,
                                 'language' => $note->code_language ?? 'javascript',
-                                'codeUrl' => $codeAttachment ? route('notes.attachments.download', ['note' => $note->id, 'filename' => is_array($codeAttachment) ? ($codeAttachment['filename'] ?? basename($codeAttachment)) : basename($codeAttachment)]) : null,
-                                'demoLink' => $note->code_demo_link ?? $note->demo_link
+                                'codeUrl' => $codeAttachment
+                                    ? route('notes.attachments.download', [
+                                        'note' => $note->id,
+                                        'filename' => is_array($codeAttachment)
+                                            ? $codeAttachment['filename'] ?? ''
+                                            : basename($codeAttachment),
+                                    ])
+                                    : null,
+                                'demoLink' => $note->code_demo_link ?? $note->demo_link,
                             ])
                         @endif
 
-                        @if($note->ecosystem_category === '3d')
+                        @if ($note->ecosystem_category === '3d')
                             @php
                                 $modelUrl = $note->three_d_preview_link;
                                 // Check if there's a 3D model file in attachments
-                                if (!$modelUrl) {
-                                    $modelAttachment = collect($note->attachments ?? [])->first(function($att) {
-                                        $filename = is_array($att) ? ($att['filename'] ?? '') : basename($att);
-                                        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-                                        return in_array($ext, ['glb', 'gltf', 'obj', 'fbx', 'dae', '3ds']);
-                                    });
-                                    if ($modelAttachment) {
-                                        $modelFilename = is_array($modelAttachment) ? ($modelAttachment['filename'] ?? basename($modelAttachment)) : basename($modelAttachment);
-                                        $modelUrl = route('notes.attachments.download', ['note' => $note->id, 'filename' => $modelFilename]);
+if (!$modelUrl) {
+    $modelAttachment = collect($note->attachments ?? [])->first(function ($att) {
+        $filename = is_array($att) ? $att['filename'] ?? '' : basename($att);
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        return in_array($ext, ['glb', 'gltf', 'obj', 'fbx', 'dae', '3ds']);
+    });
+    if ($modelAttachment) {
+        $modelFilename = is_array($modelAttachment)
+            ? $modelAttachment['filename'] ?? ''
+            : basename($modelAttachment);
+        $modelUrl = route('notes.attachments.download', [
+            'note' => $note->id,
+            'filename' => $modelFilename,
+                                        ]);
                                     }
                                 }
                             @endphp
-                            @if($modelUrl)
+                            @if ($modelUrl)
                                 @include('components.rich-media.3d-viewer', [
                                     'modelUrl' => $modelUrl,
                                     'format' => $note->three_d_format ?? 'obj',
-                                    'title' => $note->title
+                                    'title' => $note->title,
                                 ])
                             @endif
                         @endif
@@ -823,19 +874,24 @@
 
                         <!-- PDF Preview (if PDF attachment exists) -->
                         @php
-                            $pdfAttachment = collect($note->attachments ?? [])->first(function($att) {
-                                $filename = is_array($att) ? ($att['filename'] ?? '') : basename($att);
+                            $pdfAttachment = collect($note->attachments ?? [])->first(function ($att) {
+                                $filename = is_array($att) ? $att['filename'] ?? '' : basename($att);
                                 return strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'pdf';
                             });
                         @endphp
-                        @if($pdfAttachment)
+                        @if ($pdfAttachment)
                             @php
-                                $pdfFilename = is_array($pdfAttachment) ? ($pdfAttachment['filename'] ?? basename($pdfAttachment)) : basename($pdfAttachment);
-                                $pdfUrl = route('notes.attachments.download', ['note' => $note->id, 'filename' => $pdfFilename]);
+                                $pdfFilename = is_array($pdfAttachment)
+                                    ? $pdfAttachment['filename'] ?? ''
+                                    : basename($pdfAttachment);
+                                $pdfUrl = route('notes.attachments.download', [
+                                    'note' => $note->id,
+                                    'filename' => $pdfFilename,
+                                ]);
                             @endphp
                             @include('components.rich-media.pdf-preview', [
                                 'pdfUrl' => $pdfUrl,
-                                'filename' => $pdfFilename
+                                'filename' => $pdfFilename,
                             ])
                         @endif
 
@@ -908,7 +964,7 @@
                     @if ($note->hasThumbnails())
                         @include('components.media-gallery', [
                             'images' => $note->thumbnails,
-                            'title' => __('messages.media_gallery', ['default' => 'Media Gallery'])
+                            'title' => __('messages.media_gallery', ['default' => 'Media Gallery']),
                         ])
                     @endif
 
@@ -1166,7 +1222,7 @@
                                 <p class="text-sm text-gray-600 mt-3">
                                     {{ __('messages.wallet_balance_label') }}
                                     <strong
-                                        class="font-semibold text-gray-900">{{ currency(auth()->user()->wallet_balance, auth()->user()->currency) }}</strong>
+                                        class="font-semibold text-gray-900">{{ currency((float) auth()->user()->wallet_balance, auth()->user()->currency) }}</strong>
                                     @php
                                         $finalPrice =
                                             $premiumDiscountPrice ??
@@ -1934,7 +1990,7 @@
                     imageLoaded: false,
                     imageCount: {{ $note->hasThumbnails() ? count($note->thumbnails) : 0 }},
                     images: @js($note->hasThumbnails() ? $note->thumbnails : []),
-                    
+
                     // Touch/swipe handling
                     touchStartX: 0,
                     touchStartY: 0,
@@ -1944,12 +2000,12 @@
                     isDragging: false,
                     dragStartX: 0,
                     dragStartY: 0,
-                    
+
                     init() {
                         // Keyboard navigation
                         document.addEventListener('keydown', (e) => {
                             if (!this.isOpen) return;
-                            
+
                             if (e.key === 'ArrowLeft') {
                                 this.previousImage();
                             } else if (e.key === 'ArrowRight') {
@@ -1962,7 +2018,7 @@
                                 this.resetZoom();
                             }
                         });
-                        
+
                         // Prevent body scroll when lightbox is open
                         this.$watch('isOpen', (value) => {
                             if (value) {
@@ -1972,30 +2028,30 @@
                             }
                         });
                     },
-                    
+
                     get currentImageUrl() {
                         if (this.currentIndex < 0 || this.currentIndex >= this.images.length) return '';
                         const image = this.images[this.currentIndex];
                         if (typeof image === 'string') {
-                            return '{{ asset("storage/") }}/' + image;
+                            return '{{ asset('storage/') }}/' + image;
                         } else if (typeof image === 'object' && image !== null) {
-                            return image.url || ('{{ asset("storage/") }}/' + (image.path || ''));
+                            return image.url || ('{{ asset('storage/') }}/' + (image.path || ''));
                         }
                         return image;
                     },
-                    
+
                     openLightbox(index) {
                         this.currentIndex = index;
                         this.isOpen = true;
                         this.resetZoom();
                         this.imageLoaded = false;
                     },
-                    
+
                     closeLightbox() {
                         this.isOpen = false;
                         this.resetZoom();
                     },
-                    
+
                     nextImage() {
                         if (this.currentIndex < this.imageCount - 1) {
                             this.currentIndex++;
@@ -2003,7 +2059,7 @@
                             this.imageLoaded = false;
                         }
                     },
-                    
+
                     previousImage() {
                         if (this.currentIndex > 0) {
                             this.currentIndex--;
@@ -2011,13 +2067,13 @@
                             this.imageLoaded = false;
                         }
                     },
-                    
+
                     zoomIn() {
                         if (this.zoomLevel < 3) {
                             this.zoomLevel = Math.min(this.zoomLevel + 0.25, 3);
                         }
                     },
-                    
+
                     zoomOut() {
                         if (this.zoomLevel > 1) {
                             this.zoomLevel = Math.max(this.zoomLevel - 0.25, 1);
@@ -2026,13 +2082,13 @@
                             }
                         }
                     },
-                    
+
                     resetZoom() {
                         this.zoomLevel = 1;
                         this.translateX = 0;
                         this.translateY = 0;
                     },
-                    
+
                     // Touch/Swipe handlers
                     handleTouchStart(e) {
                         if (this.zoomLevel > 1) {
@@ -2046,7 +2102,7 @@
                             this.touchStartY = e.touches[0].clientY;
                         }
                     },
-                    
+
                     handleTouchMove(e) {
                         if (this.isDragging && this.zoomLevel > 1) {
                             // Panning when zoomed
@@ -2054,20 +2110,20 @@
                             this.translateY = e.touches[0].clientY - this.dragStartY;
                         }
                     },
-                    
+
                     handleTouchEnd(e) {
                         if (this.isDragging) {
                             this.isDragging = false;
                             return;
                         }
-                        
+
                         // Swipe detection
                         this.touchEndX = e.changedTouches[0].clientX;
                         this.touchEndY = e.changedTouches[0].clientY;
-                        
+
                         const deltaX = this.touchEndX - this.touchStartX;
                         const deltaY = this.touchEndY - this.touchStartY;
-                        
+
                         // Only process horizontal swipes
                         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > this.minSwipeDistance) {
                             if (deltaX > 0) {
@@ -2082,18 +2138,19 @@
                 }
             };
         </script>
-        
+
         <!-- PDF.js for PDF preview -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
         <script>
             if (typeof pdfjsLib !== 'undefined') {
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                pdfjsLib.GlobalWorkerOptions.workerSrc =
+                    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
             }
         </script>
-        
+
         <!-- model-viewer for 3D models -->
         <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
-        
+
         <!-- Prism.js for code syntax highlighting -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
@@ -2209,7 +2266,7 @@
                     });
 
                     let shareUrl = baseUrl;
-                    
+
                     if (response.ok) {
                         const data = await response.json();
                         if (data.share_url) {
@@ -2243,7 +2300,7 @@
 
             // Show share statistics modal
             function showShareStatsModal() {
-                @if(isset($currentNoteShare) && $currentNoteShare)
+                @if (isset($currentNoteShare) && $currentNoteShare)
                     const stats = {
                         clicks: {{ $currentNoteShare->click_count }},
                         purchases: {{ $currentNoteShare->purchase_count }},
@@ -2280,11 +2337,12 @@
                             cancelButtonText: 'Close'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                window.location.href = '{{ route("share.analytics") }}';
+                                window.location.href = '{{ route('share.analytics') }}';
                             }
                         });
                     } else {
-                        alert(`Clicks: ${stats.clicks}\nPurchases: ${stats.purchases}\nCommission: Rp ${stats.commission}\nRevenue: Rp ${stats.revenue}`);
+                        alert(
+                            `Clicks: ${stats.clicks}\nPurchases: ${stats.purchases}\nCommission: Rp ${stats.commission}\nRevenue: Rp ${stats.revenue}`);
                     }
                 @endif
             }
@@ -2779,7 +2837,7 @@
                     <div class="flex-1">
                         <h5 class="text-sm font-medium text-gray-900">${bookmark.title || bookmarkTranslations.default_title}</h5>
                         ${bookmark.section_text ? `<p class="text-xs text-gray-600 mt-1 line-clamp-2">
-                                                                                                                                                                                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
+                                                                                                                                                                                                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
                         ${bookmark.note_text ? `<p class="text-xs text-purple-700 mt-1">${bookmark.note_text}</p>` : ''}
                     </div>
                     <div class="flex items-center space-x-2 ml-3">
