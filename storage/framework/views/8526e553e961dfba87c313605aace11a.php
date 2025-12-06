@@ -1,16 +1,16 @@
-@if ($images && count($images) > 0)
+<?php if($images && count($images) > 0): ?>
     <div class="mt-8 mb-8">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ $title }}</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4"><?php echo e($title); ?></h3>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            @foreach ($images as $index => $image)
+            <?php $__currentLoopData = $images; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group cursor-pointer"
-                    onclick="openImageModal('{{ asset('storage/' . $image) }}', {{ $index }}, {{ count($images) }})">
-                    <img src="{{ asset('storage/' . $image) }}" alt="{{ $title }}"
+                    onclick="openImageModal('<?php echo e(asset('storage/' . $image)); ?>', <?php echo e($index); ?>, <?php echo e(count($images)); ?>)">
+                    <img src="<?php echo e(asset('storage/' . $image)); ?>" alt="<?php echo e($title); ?>"
                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                     <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300">
                     </div>
                 </div>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
     </div>
 
@@ -47,18 +47,19 @@
             <!-- Counter -->
             <div
                 class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-full text-sm">
-                <span id="imageCounter">1</span> / {{ count($images) }}
+                <span id="imageCounter">1</span> / <?php echo e(count($images)); ?>
+
             </div>
         </div>
     </div>
 
     <script>
         let currentImageIndex = 0;
-        const totalImages = {{ count($images) }};
+        const totalImages = <?php echo e(count($images)); ?>;
         const images = [
-            @foreach ($images as $image)
-                '{{ asset('storage/' . $image) }}',
-            @endforeach
+            <?php $__currentLoopData = $images; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                '<?php echo e(asset('storage/' . $image)); ?>',
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         ];
 
         function openImageModal(imageSrc, index, total) {
@@ -109,4 +110,5 @@
             if (e.key === 'Escape') closeImageModal();
         });
     </script>
-@endif
+<?php endif; ?>
+<?php /**PATH D:\PROJECT\LARAVEL\noteds\resources\views/components/media-gallery.blade.php ENDPATH**/ ?>

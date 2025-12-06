@@ -29,23 +29,22 @@ class MarketplaceController extends Controller
     public function __construct(
         private NotificationService $notificationService,
         private EmailCampaignService $emailCampaignService
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): View
     {
         // Cache key based on request parameters
         $cacheKey = 'marketplace_index_' . md5(json_encode($request->all()));
-        
+
         // Get featured notes for marketplace grid (cached for 1 hour)
         $featuredNotes = Cache::remember('marketplace_featured_notes_grid', 3600, function () {
             return \App\Models\FeaturedNote::active()
                 ->byLocation('marketplace_grid')
-                ->with(['note' => function($q) {
+                ->with(['note' => function ($q) {
                     $q->select('id', 'title', 'price', 'user_id', 'summary', 'thumbnails', 'ecosystem_category', 'status', 'is_public', 'created_at');
-                }, 'note.tags:id,name', 'note.user:id,name,username,avatar', 'note.user.badges:id,name,icon,color,category', 'note.reviews:id,note_id,rating', 'note.viewHistory' => function($q) {
+                }, 'note.tags:id,name', 'note.user:id,name,username,avatar', 'note.user.badges:id,name,icon,color,category', 'note.reviews:id,note_id,rating', 'note.viewHistory' => function ($q) {
                     $q->select('id', 'note_id', 'viewed_at')
-                      ->where('viewed_at', '>=', now()->subDays(7));
+                        ->where('viewed_at', '>=', now()->subDays(7));
                 }])
                 ->inRandomOrder()
                 ->limit(6)
@@ -56,11 +55,11 @@ class MarketplaceController extends Controller
         $featuredBanner = Cache::remember('marketplace_featured_banner', 3600, function () {
             return \App\Models\FeaturedNote::active()
                 ->byLocation('marketplace_banner')
-                ->with(['note' => function($q) {
+                ->with(['note' => function ($q) {
                     $q->select('id', 'title', 'price', 'user_id', 'summary', 'thumbnails', 'ecosystem_category', 'status', 'is_public', 'created_at');
-                }, 'note.tags:id,name', 'note.user:id,name,username,avatar', 'note.user.badges:id,name,icon,color,category', 'note.reviews:id,note_id,rating', 'note.viewHistory' => function($q) {
+                }, 'note.tags:id,name', 'note.user:id,name,username,avatar', 'note.user.badges:id,name,icon,color,category', 'note.reviews:id,note_id,rating', 'note.viewHistory' => function ($q) {
                     $q->select('id', 'note_id', 'viewed_at')
-                      ->where('viewed_at', '>=', now()->subDays(7));
+                        ->where('viewed_at', '>=', now()->subDays(7));
                 }])
                 ->inRandomOrder()
                 ->first();
@@ -70,13 +69,23 @@ class MarketplaceController extends Controller
         // Add avg_rating subquery if rating filter is used
         $hasRatingFilter = $request->min_rating || $request->rating;
         $baseSelect = [
-            'id', 'user_id', 'title', 'summary', 'price', 'discount_price', 
-            'thumbnails', 'ecosystem_category', 'language', 'status', 
-            'is_public', 'created_at', 'updated_at'
+            'id',
+            'user_id',
+            'title',
+            'summary',
+            'price',
+            'discount_price',
+            'thumbnails',
+            'ecosystem_category',
+            'language',
+            'status',
+            'is_public',
+            'created_at',
+            'updated_at'
         ];
-        
+
         $notesQuery = Note::publicOnly();
-        
+
         // Add avg_rating subquery if rating filter is used
         if ($hasRatingFilter) {
             $notesQuery->select(array_merge($baseSelect, [
@@ -85,27 +94,27 @@ class MarketplaceController extends Controller
         } else {
             $notesQuery->select($baseSelect);
         }
-        
+
         $notesQuery = $notesQuery->with([
-                'tags:id,name',
-                'user:id,name,username,avatar',
-                'user.badges:id,name,icon,color,category',
-                'user.userLevels.level',
-                'reviews' => function($q) {
-                    $q->select('id', 'note_id', 'rating', 'comment', 'created_at');
-                },
-                'viewHistory' => function($q) {
-                    $q->select('id', 'note_id', 'viewed_at')
-                      ->where('viewed_at', '>=', now()->subDays(7));
-                }
-            ])
+            'tags:id,name',
+            'user:id,name,username,avatar',
+            'user.badges:id,name,icon,color,category',
+            'user.userLevels.level',
+            'reviews' => function ($q) {
+                $q->select('id', 'note_id', 'rating', 'comment', 'created_at');
+            },
+            'viewHistory' => function ($q) {
+                $q->select('id', 'note_id', 'viewed_at')
+                    ->where('viewed_at', '>=', now()->subDays(7));
+            }
+        ])
             ->when($request->search, function ($query) use ($request) {
                 return $this->applyAdvancedSearch($query, $request->search, $request);
             })
             ->when($request->author, function ($query) use ($request) {
                 return $query->whereHas('user', function ($q) use ($request) {
                     $q->where('name', 'like', '%' . $request->author . '%')
-                      ->orWhere('username', 'like', '%' . $request->author . '%');
+                        ->orWhere('username', 'like', '%' . $request->author . '%');
                 });
             })
             ->when($request->date_from || $request->date_to, function ($query) use ($request) {
@@ -141,10 +150,10 @@ class MarketplaceController extends Controller
                 }
                 return $query;
             })
-            ->when($request->language || $request->languages, function ($query) use ($request) {
-                $languages = $request->languages ?? [];
-                if ($request->language) {
-                    $languages[] = $request->language;
+            ->when($request->input('language') || $request->input('languages'), function ($query) use ($request) {
+                $languages = $request->input('languages') ?? [];
+                if ($request->input('language')) {
+                    $languages[] = $request->input('language');
                 }
                 if (!empty($languages)) {
                     return $query->whereIn('language', array_unique($languages));
@@ -170,10 +179,10 @@ class MarketplaceController extends Controller
                 if ($request->seller_type === 'top_rated') {
                     return $query->whereHas('user', function ($q) {
                         $q->selectRaw('users.id, AVG(note_reviews.rating) as avg_seller_rating')
-                          ->join('notes', 'notes.user_id', '=', 'users.id')
-                          ->join('note_reviews', 'note_reviews.note_id', '=', 'notes.id')
-                          ->groupBy('users.id')
-                          ->havingRaw('AVG(note_reviews.rating) >= 4.5');
+                            ->join('notes', 'notes.user_id', '=', 'users.id')
+                            ->join('note_reviews', 'note_reviews.note_id', '=', 'notes.id')
+                            ->groupBy('users.id')
+                            ->havingRaw('AVG(note_reviews.rating) >= 4.5');
                     });
                 }
                 return $query;
@@ -192,7 +201,7 @@ class MarketplaceController extends Controller
                         $q->where(function ($subQ) use ($allExtensions) {
                             foreach ($allExtensions as $extension) {
                                 $subQ->orWhere('attachments', 'like', '%' . $extension . '%')
-                                     ->orWhere('attachments', 'like', '%' . strtoupper($extension) . '%');
+                                    ->orWhere('attachments', 'like', '%' . strtoupper($extension) . '%');
                             }
                         });
                     });
@@ -202,19 +211,19 @@ class MarketplaceController extends Controller
             ->when($request->seller, function ($query) use ($request) {
                 return $query->whereHas('user', function ($q) use ($request) {
                     $q->where('users.id', $request->seller)
-                      ->orWhere('users.username', 'like', '%' . $request->seller . '%')
-                      ->orWhere('users.name', 'like', '%' . $request->seller . '%');
+                        ->orWhere('users.username', 'like', '%' . $request->seller . '%')
+                        ->orWhere('users.name', 'like', '%' . $request->seller . '%');
                 });
             })
             ->when($request->sort, function ($query) use ($request) {
-                return match($request->sort) {
+                return match ($request->sort) {
                     'price_asc' => $query->orderBy('price', 'asc'),
                     'price_desc' => $query->orderBy('price', 'desc'),
                     'rating' => $query->selectSub(function ($q) {
-                            $q->selectRaw('COALESCE(AVG(rating), 0)')
-                                ->from('note_reviews')
-                                ->whereColumn('note_reviews.note_id', 'notes.id');
-                        }, 'avg_rating')
+                        $q->selectRaw('COALESCE(AVG(rating), 0)')
+                            ->from('note_reviews')
+                            ->whereColumn('note_reviews.note_id', 'notes.id');
+                    }, 'avg_rating')
                         ->orderByDesc('avg_rating'),
                     'popular' => $query->withCount('transactions')
                         ->selectSub(function ($q) {
@@ -230,9 +239,9 @@ class MarketplaceController extends Controller
                         ->orderByDesc('transactions_count')
                         ->orderByDesc('avg_rating')
                         ->orderByDesc('total_reviews_count'),
-                    'trending' => $query->withCount(['transactions' => function($q) {
-                            $q->where('created_at', '>=', now()->subDays(7));
-                        }])
+                    'trending' => $query->withCount(['transactions' => function ($q) {
+                        $q->where('created_at', '>=', now()->subDays(7));
+                    }])
                         ->orderByDesc('transactions_count')
                         ->orderByDesc('created_at'),
                     'newest' => $query->latest(),
@@ -305,7 +314,7 @@ class MarketplaceController extends Controller
     public function autocomplete(Request $request)
     {
         $query = $request->get('q', '');
-        
+
         if (strlen($query) < 2) {
             return response()->json([]);
         }
@@ -313,20 +322,20 @@ class MarketplaceController extends Controller
         // Search notes
         $notes = Note::publicOnly()
             ->where('status', 'active')
-            ->where(function($q) use ($query) {
+            ->where(function ($q) use ($query) {
                 $q->where('title', 'like', '%' . $query . '%')
-                  ->orWhere('summary', 'like', '%' . $query . '%');
+                    ->orWhere('summary', 'like', '%' . $query . '%');
             })
             ->with(['user', 'tags'])
             ->limit(5)
             ->get()
-            ->map(function($note) {
+            ->map(function ($note) {
                 return [
                     'type' => 'note',
                     'id' => $note->id,
                     'title' => $note->title,
                     'url' => route('marketplace.show', $note),
-                    'price' => $note->price > 0 ? currency($note->price) : 'Gratis',
+                    'price' => $note->price > 0 ? currency((float) $note->price) : 'Gratis',
                     'author' => $note->user->name,
                     'thumbnail' => $note->hasThumbnails() ? Storage::url($note->thumbnails[0]) : null,
                 ];
@@ -338,7 +347,7 @@ class MarketplaceController extends Controller
             ->having('notes_count', '>', 0)
             ->limit(3)
             ->get()
-            ->map(function($tag) {
+            ->map(function ($tag) {
                 return [
                     'type' => 'tag',
                     'id' => $tag->id,
@@ -348,18 +357,18 @@ class MarketplaceController extends Controller
                 ];
             });
 
-            return response()->json([
-                'notes' => $notes,
-                'tags' => $tags,
-            ]);
-        }
+        return response()->json([
+            'notes' => $notes,
+            'tags' => $tags,
+        ]);
+    }
 
     /**
      * Get file extensions for a file type category
      */
     private function getExtensionsForFileType(string $fileType): array
     {
-        return match($fileType) {
+        return match ($fileType) {
             'pdf' => ['.pdf'],
             'doc' => ['.doc', '.docx'],
             'xls' => ['.xls', '.xlsx', '.csv'],
@@ -380,7 +389,7 @@ class MarketplaceController extends Controller
         if ($request->has('ref')) {
             $referralToken = $request->input('ref');
             $noteShareService->trackClick($referralToken);
-            
+
             // Store in session for purchase tracking
             $request->session()->put('share_referral_token', $referralToken);
         }
@@ -409,36 +418,36 @@ class MarketplaceController extends Controller
             'user:id,name,username,avatar,bio',
             'user.badges:id,name,icon,color,category',
             'originalCreator:id,name,username,avatar',
-            'reviews' => function($q) {
+            'reviews' => function ($q) {
                 $q->select('id', 'note_id', 'user_id', 'rating', 'comment', 'created_at')
-                  ->with('user:id,name,username,avatar');
+                    ->with('user:id,name,username,avatar');
             },
-            'transactions' => function($q) {
+            'transactions' => function ($q) {
                 $q->select('id', 'note_id', 'buyer_id', 'seller_id', 'amount', 'status', 'created_at')
-                  ->where('status', 'success')
-                  ->limit(10);
+                    ->where('status', 'success')
+                    ->limit(10);
             },
-            'comments' => function($q) {
+            'comments' => function ($q) {
                 $q->select('id', 'note_id', 'user_id', 'content', 'created_at')
-                  ->with('user:id,name,username,avatar')
-                  ->latest()
-                  ->limit(20);
+                    ->with('user:id,name,username,avatar')
+                    ->latest()
+                    ->limit(20);
             },
-            'reactions' => function($q) {
+            'reactions' => function ($q) {
                 $q->select('id', 'note_id', 'user_id', 'reaction_type', 'created_at')
-                  ->with('user:id,name,username,avatar')
-                  ->latest()
-                  ->limit(50);
+                    ->with('user:id,name,username,avatar')
+                    ->latest()
+                    ->limit(50);
             },
-            'questions' => function($q) {
+            'questions' => function ($q) {
                 $q->select('id', 'note_id', 'user_id', 'question', 'answer', 'created_at', 'helpful_count')
-                  ->with('user:id,name,username,avatar')
-                  ->latest()
-                  ->limit(20);
+                    ->with('user:id,name,username,avatar')
+                    ->latest()
+                    ->limit(20);
             },
-            'viewHistory' => function($q) {
+            'viewHistory' => function ($q) {
                 $q->select('id', 'note_id', 'viewed_at')
-                  ->where('viewed_at', '>=', now()->subDays(7));
+                    ->where('viewed_at', '>=', now()->subDays(7));
             }
         ]);
 
@@ -448,7 +457,7 @@ class MarketplaceController extends Controller
             ->where('start_date', '<=', now())
             ->where('end_date', '>=', now())
             ->first();
-        
+
         if ($featuredNote) {
             $featuredNote->incrementImpressions();
         }
@@ -467,21 +476,21 @@ class MarketplaceController extends Controller
         // For authenticated users, track with user_id
         // For guests, track with IP address only
         $userId = auth()->check() ? auth()->id() : null;
-        
+
         // Prevent duplicate views: check if same user/IP viewed in last hour
         $oneHourAgo = now()->subHour();
         $existingView = \App\Models\NoteViewHistory::where('note_id', $note->id)
             ->where('viewed_at', '>=', $oneHourAgo);
-        
+
         if ($userId) {
             $existingView->where('user_id', $userId);
         } else {
             $existingView->whereNull('user_id')
-                        ->where('ip_address', request()->ip());
+                ->where('ip_address', request()->ip());
         }
-        
+
         $existingView = $existingView->first();
-        
+
         if (!$existingView) {
             // Get analytics tracking data
             $analyticsService = app(\App\Services\AnalyticsTrackingService::class);
@@ -489,7 +498,7 @@ class MarketplaceController extends Controller
             $utmParams = $analyticsService->getUtmParameters($request);
             $geographicData = $analyticsService->getGeographicData(request()->ip());
             $hour = $analyticsService->getHour();
-            
+
             \App\Models\NoteViewHistory::create([
                 'user_id' => $userId,
                 'note_id' => $note->id,
@@ -514,7 +523,7 @@ class MarketplaceController extends Controller
             $monetizationService = app(\App\Services\NoteViewMonetizationService::class);
             // Get fingerprint from session or generate from request data
             $fingerprint = session('browser_fingerprint') ?? request()->header('X-Fingerprint') ?? null;
-            
+
             // Process view revenue (with bot protection)
             $monetizationService->processView(
                 $note,
@@ -552,25 +561,34 @@ class MarketplaceController extends Controller
         $relatedNotesCacheKey = 'related_notes_' . $note->id;
         $relatedNotes = Cache::remember($relatedNotesCacheKey, 1800, function () use ($note) {
             return Note::publicOnly()
-            ->where('id', '!=', $note->id)
-            ->where('status', 'active')
-            ->where(function($query) use ($note) {
-                // Same ecosystem category
-                if ($note->ecosystem_category) {
-                    $query->where('ecosystem_category', $note->ecosystem_category);
-                }
-                // OR same tags
-                if ($note->tags->count() > 0) {
-                    $tagIds = $note->tags->pluck('id');
-                    $query->orWhereHas('tags', function($q) use ($tagIds) {
-                        $q->whereIn('tags.id', $tagIds);
-                    });
-                }
-            })
+                ->where('id', '!=', $note->id)
+                ->where('status', 'active')
+                ->where(function ($query) use ($note) {
+                    // Same ecosystem category
+                    if ($note->ecosystem_category) {
+                        $query->where('ecosystem_category', $note->ecosystem_category);
+                    }
+                    // OR same tags
+                    if ($note->tags->count() > 0) {
+                        $tagIds = $note->tags->pluck('id');
+                        $query->orWhereHas('tags', function ($q) use ($tagIds) {
+                            $q->whereIn('tags.id', $tagIds);
+                        });
+                    }
+                })
                 ->select([
-                    'id', 'user_id', 'title', 'summary', 'price', 'discount_price', 
-                    'thumbnails', 'ecosystem_category', 'language', 'status', 
-                    'is_public', 'created_at'
+                    'id',
+                    'user_id',
+                    'title',
+                    'summary',
+                    'price',
+                    'discount_price',
+                    'thumbnails',
+                    'ecosystem_category',
+                    'language',
+                    'status',
+                    'is_public',
+                    'created_at'
                 ])
                 ->selectSub(function ($q) {
                     $q->selectRaw('COALESCE(AVG(rating), 0)')
@@ -607,10 +625,10 @@ class MarketplaceController extends Controller
 
         if (auth()->check()) {
             $user = auth()->user();
-            
+
             // Check if user owns this note (current owner - only current owner can access)
             $isNoteOwner = $user->id === $note->user_id;
-            
+
             // Check if user has ever purchased this note (for checking if they can buy again)
             // Note: Once sold, buyer loses access - only current owner has access
             $existingTransaction = Transaction::where('buyer_id', auth()->id())
@@ -618,7 +636,7 @@ class MarketplaceController extends Controller
                 ->where('status', 'success')
                 ->first();
             $alreadyPurchased = $existingTransaction !== null;
-            
+
             // IMPORTANT: Only current owner can access full content
             // Buyer who sold the note loses access - it's a one-time sale
             $canBuy = false;
@@ -628,7 +646,7 @@ class MarketplaceController extends Controller
                 $canBuy = !$alreadyPurchased && $note->price > 0;
                 // Only show full content if they are current owner (not if they purchased before but sold it)
                 $showFullContent = false; // Buyer who doesn't own can't see full content
-                
+
                 // Check if can review (only if they are current owner)
                 if ($isNoteOwner) {
                     $userReview = $note->reviews()->where('user_id', auth()->id())->first();
@@ -637,7 +655,7 @@ class MarketplaceController extends Controller
             } elseif ($isNoteOwner) {
                 // Current owner (seller, buyer, or admin who owns it) can see full content
                 $showFullContent = true;
-                
+
                 // Check if can review (if buyer/admin owns it)
                 if ($user->role === 'buyer' || $user->hasRole('admin')) {
                     $userReview = $note->reviews()->where('user_id', auth()->id())->first();
@@ -659,15 +677,15 @@ class MarketplaceController extends Controller
         // Pass additional info for view
         $isNoteOwner = auth()->check() && auth()->id() === $note->user_id;
         $hasPurchasedBefore = $alreadyPurchased ?? false;
-        
+
         // Calculate base price (with note discount if any)
         $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
-        
+
         // Calculate subscription discount if user has active subscription
         $subscriptionDiscount = 0;
         $subscriptionDiscountPrice = $basePrice;
         $activeSubscription = null;
-        
+
         if (auth()->check() && $note->price > 0) {
             $activeSubscription = auth()->user()->activeBuyerSubscription();
             if ($activeSubscription) {
@@ -677,13 +695,13 @@ class MarketplaceController extends Controller
                 }
             }
         }
-        
+
         // Check repurchase info for scarcity mode
         $canRepurchase = false;
         $repurchasePrice = null;
         $gracePeriodEndsAt = null;
         $isWithinGracePeriod = false;
-        
+
         if (auth()->check() && $note->isScarcityMode() && $hasPurchasedBefore && !$isNoteOwner) {
             $canRepurchase = $note->canRepurchase(auth()->id());
             if ($canRepurchase) {
@@ -698,7 +716,7 @@ class MarketplaceController extends Controller
                 }
             }
         }
-        
+
         $conversation = null;
         if (auth()->check()) {
             $conversation = NoteConversation::with(['buyer', 'seller', 'latestMessage.sender'])
@@ -788,15 +806,15 @@ class MarketplaceController extends Controller
         // Use DB transaction with lock to prevent race conditions
         try {
             DB::beginTransaction();
-            
+
             // Lock the note row to prevent concurrent purchases (especially for scarcity mode)
             $note = Note::lockForUpdate()->find($note->id);
-            
+
             if (!$note) {
                 DB::rollBack();
                 return redirect()->route('marketplace.index')->with('error', 'Catatan tidak ditemukan.');
             }
-            
+
             // Re-check status after lock (might have been sold during request)
             if (!$note->is_public || $note->status !== 'active' || !$note->is_for_sale) {
                 DB::rollBack();
@@ -825,7 +843,7 @@ class MarketplaceController extends Controller
                     DB::rollBack();
                     return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini sudah terjual. Setiap note scarcity hanya bisa dibeli 1x.');
                 }
-                
+
                 $existingTransaction = Transaction::where('buyer_id', $buyer->id)
                     ->where('note_id', $note->id)
                     ->where('status', 'success')
@@ -856,23 +874,23 @@ class MarketplaceController extends Controller
                 }
             }
 
-        // Get final price (use discount_price if available, otherwise use regular price)
-        // If repurchasing, basePrice already set above in scarcity mode check
-        if (!isset($basePrice)) {
-            $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
-        }
-
-        // Apply subscription discount if user has active subscription
-        $finalPrice = $basePrice;
-        $subscriptionDiscount = 0;
-        $activeSubscription = $buyer->activeBuyerSubscription();
-        
-        if ($activeSubscription && $basePrice > 0) {
-            $subscriptionDiscount = $buyer->getSubscriptionDiscount();
-            if ($subscriptionDiscount > 0) {
-                $finalPrice = $basePrice * (1 - ($subscriptionDiscount / 100));
+            // Get final price (use discount_price if available, otherwise use regular price)
+            // If repurchasing, basePrice already set above in scarcity mode check
+            if (!isset($basePrice)) {
+                $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
             }
-        }
+
+            // Apply subscription discount if user has active subscription
+            $finalPrice = $basePrice;
+            $subscriptionDiscount = 0;
+            $activeSubscription = $buyer->activeBuyerSubscription();
+
+            if ($activeSubscription && $basePrice > 0) {
+                $subscriptionDiscount = $buyer->getSubscriptionDiscount();
+                if ($subscriptionDiscount > 0) {
+                    $finalPrice = $basePrice * (1 - ($subscriptionDiscount / 100));
+                }
+            }
 
             if ($finalPrice <= 0) {
                 DB::rollBack();
@@ -932,13 +950,13 @@ class MarketplaceController extends Controller
             $commissionTier = $commissionService->resolveTierForSeller($seller);
 
             $amount = $buyerPaysAmount;
-            
+
             // Handle commission based on sale mode
             $platformFee = 0;
             $creatorCommission = 0;
             $originalCreator = null;
             $sellerAmount = $priceExcludingTax;
-            
+
             if ($note->isStandardMode()) {
                 // Standard mode: No commission, seller gets full amount (minus tax)
                 // No original creator commission
@@ -946,17 +964,17 @@ class MarketplaceController extends Controller
                 // Scarcity mode: Apply commission as usual
                 // Get commission rates based on seller tier (fallback to settings)
                 $basePlatformCommissionPercent = $commissionTier?->platform_fee_percent ?? Setting::getSetting('platform_commission_percent', 'marketplace', 20);
-                
+
                 // Apply level discount to platform commission
                 $levelService = app(\App\Services\LevelService::class);
                 $levelDiscount = $levelService->getCommissionDiscount($seller);
                 $platformCommissionPercent = max(0, $basePlatformCommissionPercent - $levelDiscount);
-                
+
                 $creatorCommissionPercent = $commissionTier?->creator_commission_percent ?? Setting::getSetting('creator_commission_percent', 'marketplace', 0);
-                
+
                 // Platform fee (always deducted from every transaction)
                 $platformFee = $priceExcludingTax * ($platformCommissionPercent / 100);
-                
+
                 // Original creator commission (always for original creator in every transaction)
                 // Original creator gets commission every time the note is sold, regardless of seller
                 // If note doesn't have original_creator_id set, use the first seller (from first transaction)
@@ -969,7 +987,7 @@ class MarketplaceController extends Controller
                         ->where('status', 'success')
                         ->orderBy('created_at', 'asc')
                         ->first();
-                    
+
                     if ($firstTransaction && $firstTransaction->original_creator_id) {
                         $originalCreator = User::find($firstTransaction->original_creator_id);
                     } else {
@@ -983,35 +1001,35 @@ class MarketplaceController extends Controller
                                 ->where('note_id', $note->id)
                                 ->where('status', 'success')
                                 ->first();
-                            
+
                             if ($buyerPurchase && $buyerPurchase->original_creator_id) {
                                 $originalCreator = User::find($buyerPurchase->original_creator_id);
                             }
                         }
                     }
                 }
-                
+
                 // If still no original creator found, use current seller (shouldn't happen, but fallback)
                 if (!$originalCreator) {
                     $originalCreator = $seller;
                 }
-                
+
                 // Set original_creator_id on note if not set (for future resells)
                 if (!$note->original_creator_id) {
                     $note->original_creator_id = $originalCreator->id;
                 }
-                
+
                 if ($originalCreator && $creatorCommissionPercent > 0) {
                     // Original creator always gets commission (if setting is > 0)
                     // Even if seller is the original creator, they still get commission separately
                     $creatorCommission = $priceExcludingTax * ($creatorCommissionPercent / 100);
                 }
-                
+
                 // Seller gets: amount - platform_fee - creator_commission
                 // If seller is original creator, they get seller amount + creator commission (total = amount - platform fee)
                 $sellerAmount = $priceExcludingTax - $platformFee - $creatorCommission;
             }
-            
+
             $taxAmount = $taxBreakdown['tax_amount'];
 
             // Deduct from buyer
@@ -1043,13 +1061,13 @@ class MarketplaceController extends Controller
                     $seller->save();
                 } else {
                     // Seller is different: original creator gets separate commission
-                $creatorWallet = Wallet::firstOrCreate(
-                    ['user_id' => $originalCreator->id],
-                    ['balance' => 0, 'currency' => $baseCurrency]
-                );
-                if ($creatorWallet->currency !== $baseCurrency) {
-                    $creatorWallet->currency = $baseCurrency;
-                }
+                    $creatorWallet = Wallet::firstOrCreate(
+                        ['user_id' => $originalCreator->id],
+                        ['balance' => 0, 'currency' => $baseCurrency]
+                    );
+                    if ($creatorWallet->currency !== $baseCurrency) {
+                        $creatorWallet->currency = $baseCurrency;
+                    }
                     $creatorWallet->balance += $creatorCommission;
                     $creatorWallet->save();
                     $originalCreator->wallet_balance = $creatorWallet->balance;
@@ -1060,13 +1078,13 @@ class MarketplaceController extends Controller
             // Get or create admin wallet (platform wallet)
             $admin = User::where('role', 'admin')->first();
             if ($admin) {
-            $adminWallet = Wallet::firstOrCreate(
-                ['user_id' => $admin->id],
-                ['balance' => 0, 'currency' => $baseCurrency]
-            );
-            if ($adminWallet->currency !== $baseCurrency) {
-                $adminWallet->currency = $baseCurrency;
-            }
+                $adminWallet = Wallet::firstOrCreate(
+                    ['user_id' => $admin->id],
+                    ['balance' => 0, 'currency' => $baseCurrency]
+                );
+                if ($adminWallet->currency !== $baseCurrency) {
+                    $adminWallet->currency = $baseCurrency;
+                }
                 $adminWallet->balance += $platformFee + $taxAmount;
                 $adminWallet->save();
                 $admin->wallet_balance = $adminWallet->balance;
@@ -1107,7 +1125,7 @@ class MarketplaceController extends Controller
             }
 
             // Get share referral token from request or session
-            $shareReferralToken = $request->input('share_ref') 
+            $shareReferralToken = $request->input('share_ref')
                 ?? $request->session()->get('share_referral_token')
                 ?? null;
 
@@ -1144,7 +1162,7 @@ class MarketplaceController extends Controller
                 'notes' => !empty($transactionNotesData) ? json_encode($transactionNotesData) : $transactionNotes,
                 'grace_period_ends_at' => $gracePeriodEndsAt,
             ]);
-            
+
             // Create note history record for sale
             \App\Models\NoteHistory::create([
                 'note_id' => $note->id,
@@ -1336,8 +1354,8 @@ class MarketplaceController extends Controller
                 $note->checkAndAutoApproveMonetization();
             }
 
-            if ($notificationData['purchase']) {
-                $buyerForNotification = User::find($notificationData['purchase']['buyer_id']);
+            if (isset($notificationData['purchase']) && is_array($notificationData['purchase'])) {
+                $buyerForNotification = User::find($notificationData['purchase']['buyer_id'] ?? null);
                 if ($buyerForNotification) {
                     $this->notificationService->notifyPurchase(
                         $buyerForNotification,
@@ -1349,8 +1367,8 @@ class MarketplaceController extends Controller
                 }
             }
 
-            if ($notificationData['sale']) {
-                $sellerForNotification = User::find($notificationData['sale']['seller_id']);
+            if (isset($notificationData['sale']) && is_array($notificationData['sale'])) {
+                $sellerForNotification = User::find($notificationData['sale']['seller_id'] ?? null);
                 if ($sellerForNotification) {
                     $this->notificationService->notifySale(
                         $sellerForNotification,
@@ -1362,7 +1380,7 @@ class MarketplaceController extends Controller
                 }
             }
 
-            if (!empty($notificationData['commission'])) {
+            if (isset($notificationData['commission']) && is_array($notificationData['commission']) && !empty($notificationData['commission'])) {
                 foreach ($notificationData['commission'] as $commissionData) {
                     $creator = User::find($commissionData['creator_id']);
                     $commissionSeller = User::find($commissionData['seller_id']);
@@ -1399,7 +1417,7 @@ class MarketplaceController extends Controller
                 ->where('start_date', '<=', now())
                 ->where('end_date', '>=', now())
                 ->first();
-            
+
             if ($featuredNote) {
                 $featuredNote->incrementClicks();
             }
@@ -1408,7 +1426,7 @@ class MarketplaceController extends Controller
                 ->with('success', 'Catatan berhasil dibeli! Anda dapat melihat detail lengkapnya.');
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             \Log::error('Note purchase failed', [
                 'note_id' => $note->id ?? null,
                 'buyer_id' => $buyer->id ?? null,
@@ -1416,7 +1434,7 @@ class MarketplaceController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return redirect()->route('marketplace.show', $note)
                 ->with('error', 'Terjadi kesalahan saat memproses pembelian. Silakan coba lagi.');
         }
@@ -1429,19 +1447,19 @@ class MarketplaceController extends Controller
     {
         // Check if query contains boolean operators
         $hasBooleanOperators = preg_match('/\b(AND|OR|NOT)\b/i', $searchQuery);
-        
+
         if ($hasBooleanOperators) {
             // Parse boolean query
             $terms = $this->parseBooleanQuery($searchQuery);
-            return $query->where(function($q) use ($terms) {
+            return $query->where(function ($q) use ($terms) {
                 $this->buildBooleanQuery($q, $terms);
             });
         } else {
             // Simple search (full-text search in title, summary, content)
-            return $query->where(function($q) use ($searchQuery) {
+            return $query->where(function ($q) use ($searchQuery) {
                 $q->where('title', 'like', '%' . $searchQuery . '%')
-                  ->orWhere('summary', 'like', '%' . $searchQuery . '%')
-                  ->orWhere('content', 'like', '%' . $searchQuery . '%');
+                    ->orWhere('summary', 'like', '%' . $searchQuery . '%')
+                    ->orWhere('content', 'like', '%' . $searchQuery . '%');
             });
         }
     }
@@ -1454,14 +1472,14 @@ class MarketplaceController extends Controller
         // Normalize query: convert to uppercase for operators, preserve case for terms
         $query = preg_replace('/\b(AND|OR|NOT)\b/i', '|$1|', $query);
         $parts = explode('|', $query);
-        
+
         $terms = [];
         $currentOperator = 'OR'; // Default operator
-        
+
         foreach ($parts as $part) {
             $part = trim($part);
             if (empty($part)) continue;
-            
+
             $upperPart = strtoupper($part);
             if (in_array($upperPart, ['AND', 'OR', 'NOT'])) {
                 $currentOperator = $upperPart;
@@ -1473,7 +1491,7 @@ class MarketplaceController extends Controller
                 $currentOperator = 'OR'; // Reset to default after term
             }
         }
-        
+
         return $terms;
     }
 
@@ -1483,44 +1501,44 @@ class MarketplaceController extends Controller
     private function buildBooleanQuery($query, array $terms)
     {
         if (empty($terms)) return;
-        
+
         $firstTerm = true;
-        
+
         foreach ($terms as $termData) {
             $term = trim($termData['term']);
             $operator = $termData['operator'];
-            
+
             if (empty($term)) continue;
-            
+
             if ($firstTerm) {
                 // First term - always use where
-                $query->where(function($q) use ($term) {
+                $query->where(function ($q) use ($term) {
                     $q->where('title', 'like', '%' . $term . '%')
-                      ->orWhere('summary', 'like', '%' . $term . '%')
-                      ->orWhere('content', 'like', '%' . $term . '%');
+                        ->orWhere('summary', 'like', '%' . $term . '%')
+                        ->orWhere('content', 'like', '%' . $term . '%');
                 });
                 $firstTerm = false;
             } else {
                 switch ($operator) {
                     case 'AND':
-                        $query->where(function($q) use ($term) {
+                        $query->where(function ($q) use ($term) {
                             $q->where('title', 'like', '%' . $term . '%')
-                              ->orWhere('summary', 'like', '%' . $term . '%')
-                              ->orWhere('content', 'like', '%' . $term . '%');
+                                ->orWhere('summary', 'like', '%' . $term . '%')
+                                ->orWhere('content', 'like', '%' . $term . '%');
                         });
                         break;
                     case 'OR':
-                        $query->orWhere(function($q) use ($term) {
+                        $query->orWhere(function ($q) use ($term) {
                             $q->where('title', 'like', '%' . $term . '%')
-                              ->orWhere('summary', 'like', '%' . $term . '%')
-                              ->orWhere('content', 'like', '%' . $term . '%');
+                                ->orWhere('summary', 'like', '%' . $term . '%')
+                                ->orWhere('content', 'like', '%' . $term . '%');
                         });
                         break;
                     case 'NOT':
-                        $query->where(function($q) use ($term) {
+                        $query->where(function ($q) use ($term) {
                             $q->where('title', 'not like', '%' . $term . '%')
-                              ->where('summary', 'not like', '%' . $term . '%')
-                              ->where('content', 'not like', '%' . $term . '%');
+                                ->where('summary', 'not like', '%' . $term . '%')
+                                ->where('content', 'not like', '%' . $term . '%');
                         });
                         break;
                 }
@@ -1535,16 +1553,27 @@ class MarketplaceController extends Controller
     {
         try {
             $filters = $request->only([
-                'search', 'author', 'date_from', 'date_to', 'min_rating', 
-                'seller_verified', 'seller_type', 'file_type', 'tags', 
-                'languages', 'ecosystem', 'min_price', 'max_price', 'sort'
+                'search',
+                'author',
+                'date_from',
+                'date_to',
+                'min_rating',
+                'seller_verified',
+                'seller_type',
+                'file_type',
+                'tags',
+                'languages',
+                'ecosystem',
+                'min_price',
+                'max_price',
+                'sort'
             ]);
-            
+
             // Remove empty filters
-            $filters = array_filter($filters, function($value) {
+            $filters = array_filter($filters, function ($value) {
                 return !empty($value);
             });
-            
+
             SearchHistory::create([
                 'user_id' => auth()->id(),
                 'ip_address' => $request->ip(),
@@ -1573,12 +1602,23 @@ class MarketplaceController extends Controller
         ]);
 
         $filters = $request->only([
-            'search', 'author', 'date_from', 'date_to', 'min_rating', 
-            'seller_verified', 'seller_type', 'file_type', 'tags', 
-            'languages', 'ecosystem', 'min_price', 'max_price', 'sort'
+            'search',
+            'author',
+            'date_from',
+            'date_to',
+            'min_rating',
+            'seller_verified',
+            'seller_type',
+            'file_type',
+            'tags',
+            'languages',
+            'ecosystem',
+            'min_price',
+            'max_price',
+            'sort'
         ]);
 
-        $filters = array_filter($filters, function($value) {
+        $filters = array_filter($filters, function ($value) {
             return !empty($value);
         });
 
@@ -1616,5 +1656,4 @@ class MarketplaceController extends Controller
             'message' => 'Saved search deleted successfully',
         ]);
     }
-
 }

@@ -1,23 +1,22 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', __('messages.marketplace_page_title', ['title' => $note->title])); ?>
 
-@section('title', __('messages.marketplace_page_title', ['title' => $note->title]))
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="py-8 sm:py-12">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Breadcrumb -->
             <div class="mb-6">
-                <a href="{{ route('marketplace.index') }}"
+                <a href="<?php echo e(route('marketplace.index')); ?>"
                     class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors duration-200">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
-                    {{ __('messages.back_to_marketplace') }}
+                    <?php echo e(__('messages.back_to_marketplace')); ?>
+
                 </a>
             </div>
 
             <!-- Flash Messages -->
-            @if (session('error'))
+            <?php if(session('error')): ?>
                 <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
                     <div class="flex">
                         <div class="flex-shrink-0">
@@ -28,13 +27,13 @@
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+                            <p class="text-sm font-medium text-red-800"><?php echo e(session('error')); ?></p>
                         </div>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            @if (session('success'))
+            <?php if(session('success')): ?>
                 <div class="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
                     <div class="flex">
                         <div class="flex-shrink-0">
@@ -45,48 +44,51 @@
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                            <p class="text-sm font-medium text-green-800"><?php echo e(session('success')); ?></p>
                         </div>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            @if ($conversation)
-                @php
+            <?php if($conversation): ?>
+                <?php
                     $otherUser =
                         $conversation->buyer_id === auth()->id() ? $conversation->seller : $conversation->buyer;
                     $lastMessage = $conversation->latestMessage;
-                @endphp
+                ?>
                 <div
                     class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h3 class="text-sm font-semibold text-blue-900 uppercase tracking-wide mb-1">
-                            {{ __('messages.product_conversation_title') }}</h3>
+                            <?php echo e(__('messages.product_conversation_title')); ?></h3>
                         <p class="text-sm text-blue-800">
-                            {!! __('messages.product_conversation_description', ['name' => '<strong>' . e($otherUser->name) . '</strong>']) !!}
-                            @if ($lastMessage)
+                            <?php echo __('messages.product_conversation_description', ['name' => '<strong>' . e($otherUser->name) . '</strong>']); ?>
+
+                            <?php if($lastMessage): ?>
                                 <span class="block mt-1 text-xs text-blue-700">
-                                    {{ $lastMessage->sender_id === auth()->id()
+                                    <?php echo e($lastMessage->sender_id === auth()->id()
                                         ? __('messages.product_conversation_last_message_you')
-                                        : __('messages.product_conversation_last_message_other', ['name' => $lastMessage->sender->name]) }}
-                                    “{{ \Illuminate\Support\Str::limit($lastMessage->message, 80) }}”
+                                        : __('messages.product_conversation_last_message_other', ['name' => $lastMessage->sender->name])); ?>
+
+                                    “<?php echo e(\Illuminate\Support\Str::limit($lastMessage->message, 80)); ?>”
                                 </span>
-                            @endif
+                            <?php endif; ?>
                         </p>
                     </div>
-                    <a href="{{ route('note-conversations.show', $conversation) }}"
+                    <a href="<?php echo e(route('note-conversations.show', $conversation)); ?>"
                         class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
-                        {{ __('messages.product_conversation_open_chat') }}
+                        <?php echo e(__('messages.product_conversation_open_chat')); ?>
+
                     </a>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <!-- Note Details Card -->
             <div class="bg-white overflow-hidden shadow-lg rounded-xl border border-gray-200 mb-8">
                 <div class="p-6 sm:p-8">
                     <!-- Badges and Rating -->
                     <div class="flex flex-wrap items-center gap-2 mb-5">
-                        @if ($note->is_public)
+                        <?php if($note->is_public): ?>
                             <span
                                 class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
                                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -95,32 +97,35 @@
                                         d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
                                         clip-rule="evenodd" />
                                 </svg>
-                                {{ __('messages.public') }}
+                                <?php echo e(__('messages.public')); ?>
+
                             </span>
-                        @endif
+                        <?php endif; ?>
                         <span
                             class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-                            {{ ucfirst($note->status) }}
+                            <?php echo e(ucfirst($note->status)); ?>
+
                         </span>
-                        @if ($note->average_rating > 0)
+                        <?php if($note->average_rating > 0): ?>
                             <div
                                 class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-50 border border-yellow-200">
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <svg class="w-3.5 h-3.5 {{ $i <= $note->average_rating ? 'text-yellow-400' : 'text-gray-300' }}"
+                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                    <svg class="w-3.5 h-3.5 <?php echo e($i <= $note->average_rating ? 'text-yellow-400' : 'text-gray-300'); ?>"
                                         fill="currentColor" viewBox="0 0 20 20">
                                         <path
                                             d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                     </svg>
-                                @endfor
-                                <span class="text-sm font-semibold text-gray-800 ml-0.5">{{ $note->average_rating }}</span>
-                                <span class="text-xs text-gray-600">({{ $note->total_reviews }}
-                                    {{ $note->total_reviews == 1 ? __('messages.review') : __('messages.reviews_count') }})</span>
+                                <?php endfor; ?>
+                                <span class="text-sm font-semibold text-gray-800 ml-0.5"><?php echo e($note->average_rating); ?></span>
+                                <span class="text-xs text-gray-600">(<?php echo e($note->total_reviews); ?>
+
+                                    <?php echo e($note->total_reviews == 1 ? __('messages.review') : __('messages.reviews_count')); ?>)</span>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- Sale Mode Badge -->
-                        @if ($note->sale_mode)
-                            @if ($note->isScarcityMode())
+                        <?php if($note->sale_mode): ?>
+                            <?php if($note->isScarcityMode()): ?>
                                 <div class="relative inline-block group">
                                     <span
                                         class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200 cursor-help">
@@ -139,17 +144,17 @@
                                             <li>• Buyer hanya bisa beli 1x per user</li>
                                             <li>• Buyer bisa resell dengan harga custom</li>
                                             <li>• Original creator dapat komisi di setiap penjualan</li>
-                                            <li>• Grace period {{ $note->grace_period_days }} hari untuk pembelian ulang
+                                            <li>• Grace period <?php echo e($note->grace_period_days); ?> hari untuk pembelian ulang
                                             </li>
                                             <li>• Setelah grace period, harga = original ×
-                                                {{ $note->relist_price_multiplier }}x</li>
+                                                <?php echo e($note->relist_price_multiplier); ?>x</li>
                                         </ul>
                                         <div
                                             class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900">
                                         </div>
                                     </div>
                                 </div>
-                            @elseif($note->isStandardMode())
+                            <?php elseif($note->isStandardMode()): ?>
                                 <div class="relative inline-block group">
                                     <span
                                         class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200 cursor-help">
@@ -176,13 +181,13 @@
                                         </div>
                                     </div>
                                 </div>
-                            @endif
-                        @endif
+                            <?php endif; ?>
+                        <?php endif; ?>
 
                         <!-- Viral/Hot Badge -->
-                        @if ($note->isViral() || $note->isHot())
+                        <?php if($note->isViral() || $note->isHot()): ?>
                             <div class="mt-2">
-                                @if ($note->isViral())
+                                <?php if($note->isViral()): ?>
                                     <div class="relative inline-block group">
                                         <span
                                             class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg animate-pulse">
@@ -197,13 +202,13 @@
                                             class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
                                             <div class="font-semibold mb-2">🔥 Viral Note</div>
                                             <p class="text-gray-300">This note is trending! It has
-                                                {{ number_format($note->views_24_hours) }} views in the last 24 hours.</p>
+                                                <?php echo e(number_format($note->views_24_hours)); ?> views in the last 24 hours.</p>
                                             <div
                                                 class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900">
                                             </div>
                                         </div>
                                     </div>
-                                @elseif($note->isHot())
+                                <?php elseif($note->isHot()): ?>
                                     <div class="relative inline-block group">
                                         <span
                                             class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
@@ -219,54 +224,54 @@
                                             class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
                                             <div class="font-semibold mb-2">🔥 Hot Note</div>
                                             <p class="text-gray-300">This note is getting popular! It has
-                                                {{ number_format($note->views_24_hours) }} views in the last 24 hours.</p>
+                                                <?php echo e(number_format($note->views_24_hours)); ?> views in the last 24 hours.</p>
                                             <div
                                                 class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900">
                                             </div>
                                         </div>
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
                     <!-- Pricing Section -->
                     <div class="mb-6 pb-6 border-b border-gray-200">
-                        @if ($note->price > 0)
+                        <?php if($note->price > 0): ?>
                             <div class="flex flex-wrap items-center gap-3">
-                                @php
+                                <?php
                                     $basePrice = $note->hasDiscount() ? $note->discount_price : $note->price;
                                     // Apply subscription discount if available
                                     $displayPrice =
                                         isset($subscriptionDiscountPrice) && $subscriptionDiscountPrice < $basePrice
                                             ? $subscriptionDiscountPrice
                                             : $basePrice;
-                                @endphp
+                                ?>
 
                                 <div class="flex items-baseline gap-3">
-                                    @if ($note->hasDiscount())
+                                    <?php if($note->hasDiscount()): ?>
                                         <div class="flex flex-col">
                                             <span
-                                                class="text-xs text-gray-500 line-through mb-0.5">{{ currency($note->price) }}</span>
+                                                class="text-xs text-gray-500 line-through mb-0.5"><?php echo e(currency($note->price)); ?></span>
                                             <span
-                                                class="text-2xl font-bold text-green-600">{{ currency($note->discount_price) }}</span>
+                                                class="text-2xl font-bold text-green-600"><?php echo e(currency($note->discount_price)); ?></span>
                                         </div>
                                         <span
                                             class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-red-500 text-white shadow-sm">
-                                            -{{ $note->discount_percent }}%
+                                            -<?php echo e($note->discount_percent); ?>%
                                         </span>
-                                    @else
-                                        <span class="text-2xl font-bold text-gray-900">{{ currency($basePrice) }}</span>
-                                    @endif
+                                    <?php else: ?>
+                                        <span class="text-2xl font-bold text-gray-900"><?php echo e(currency($basePrice)); ?></span>
+                                    <?php endif; ?>
 
-                                    @if (isset($subscriptionDiscount) && $subscriptionDiscount > 0 && $displayPrice < $basePrice)
+                                    <?php if(isset($subscriptionDiscount) && $subscriptionDiscount > 0 && $displayPrice < $basePrice): ?>
                                         <div class="flex flex-col">
-                                            @if (!$note->hasDiscount())
+                                            <?php if(!$note->hasDiscount()): ?>
                                                 <span
-                                                    class="text-xs text-gray-500 line-through mb-0.5">{{ currency($basePrice) }}</span>
-                                            @endif
+                                                    class="text-xs text-gray-500 line-through mb-0.5"><?php echo e(currency($basePrice)); ?></span>
+                                            <?php endif; ?>
                                             <span
-                                                class="text-2xl font-bold text-green-600">{{ currency($displayPrice) }}</span>
+                                                class="text-2xl font-bold text-green-600"><?php echo e(currency($displayPrice)); ?></span>
                                         </div>
                                         <span
                                             class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md">
@@ -274,12 +279,13 @@
                                                 <path
                                                     d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                             </svg>
-                                            -{{ $subscriptionDiscount }}% {{ $activeSubscription->plan->name }}
+                                            -<?php echo e($subscriptionDiscount); ?>% <?php echo e($activeSubscription->plan->name); ?>
+
                                         </span>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
-                        @else
+                        <?php else: ?>
                             <div
                                 class="inline-flex items-center px-4 py-2 rounded-lg bg-gray-100 text-gray-800 border border-gray-200">
                                 <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor"
@@ -287,143 +293,176 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span class="text-lg font-semibold">{{ __('messages.free') }}</span>
+                                <span class="text-lg font-semibold"><?php echo e(__('messages.free')); ?></span>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
-                        @if ($taxPreview)
+                        <?php if($taxPreview): ?>
                             <div
                                 class="w-full mt-4 bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-xl p-4 shadow-sm">
                                 <div class="space-y-2.5">
                                     <div class="flex justify-between items-center">
-                                        <span class="text-sm text-gray-700">{{ __('messages.tax_subtotal_label') }}</span>
+                                        <span class="text-sm text-gray-700"><?php echo e(__('messages.tax_subtotal_label')); ?></span>
                                         <span
-                                            class="text-sm font-semibold text-gray-900">{{ currency($taxPreview['price_excluding_tax']) }}</span>
+                                            class="text-sm font-semibold text-gray-900"><?php echo e(currency($taxPreview['price_excluding_tax'])); ?></span>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <span class="text-sm text-gray-700">
-                                            {{ __('messages.tax_label') }} ({{ $taxPreview['tax_percent'] }}%)
-                                            {!! $taxPreview['tax_inclusive']
+                                            <?php echo e(__('messages.tax_label')); ?> (<?php echo e($taxPreview['tax_percent']); ?>%)
+                                            <?php echo $taxPreview['tax_inclusive']
                                                 ? '<span class="text-xs text-emerald-600 font-semibold ml-1.5 px-1.5 py-0.5 bg-emerald-50 rounded">' .
                                                     __('messages.tax_inclusive_badge') .
                                                     '</span>'
-                                                : '' !!}
+                                                : ''; ?>
+
                                         </span>
                                         <span
-                                            class="text-sm font-semibold text-gray-900">{{ currency($taxPreview['tax_amount']) }}</span>
+                                            class="text-sm font-semibold text-gray-900"><?php echo e(currency($taxPreview['tax_amount'])); ?></span>
                                     </div>
                                     <div class="flex justify-between items-center pt-2.5 border-t border-slate-300">
                                         <span
-                                            class="text-base font-bold text-gray-900">{{ __('messages.tax_total_label') }}</span>
+                                            class="text-base font-bold text-gray-900"><?php echo e(__('messages.tax_total_label')); ?></span>
                                         <span
-                                            class="text-base font-bold text-gray-900">{{ currency($taxPreview['total_amount']) }}</span>
+                                            class="text-base font-bold text-gray-900"><?php echo e(currency($taxPreview['total_amount'])); ?></span>
                                     </div>
                                 </div>
                                 <p class="mt-3 text-xs text-gray-600 leading-relaxed">
-                                    {{ $taxPreview['tax_inclusive'] ? __('messages.tax_inclusive_help') : __('messages.tax_exclusive_help') }}
-                                    @if (!empty($taxPreview['country_code']))
+                                    <?php echo e($taxPreview['tax_inclusive'] ? __('messages.tax_inclusive_help') : __('messages.tax_exclusive_help')); ?>
+
+                                    <?php if(!empty($taxPreview['country_code'])): ?>
                                         <span
-                                            class="font-semibold text-gray-700">({{ strtoupper($taxPreview['country_code']) }})</span>
-                                    @endif
+                                            class="font-semibold text-gray-700">(<?php echo e(strtoupper($taxPreview['country_code'])); ?>)</span>
+                                    <?php endif; ?>
                                 </p>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- Subscription Benefits -->
-                        @if (auth()->check() && $note->price > 0)
-                            @if ($activeSubscription)
+                        <?php if(auth()->check() && $note->price > 0): ?>
+                            <?php if($activeSubscription): ?>
                                 <div class="mt-4">
-                                    <x-subscription-benefits :plan="$activeSubscription->plan" />
+                                    <?php if (isset($component)) { $__componentOriginal7b53e06f2a62d0c042e35093d03494f9 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal7b53e06f2a62d0c042e35093d03494f9 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.subscription-benefits','data' => ['plan' => $activeSubscription->plan]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('subscription-benefits'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['plan' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($activeSubscription->plan)]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal7b53e06f2a62d0c042e35093d03494f9)): ?>
+<?php $attributes = $__attributesOriginal7b53e06f2a62d0c042e35093d03494f9; ?>
+<?php unset($__attributesOriginal7b53e06f2a62d0c042e35093d03494f9); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal7b53e06f2a62d0c042e35093d03494f9)): ?>
+<?php $component = $__componentOriginal7b53e06f2a62d0c042e35093d03494f9; ?>
+<?php unset($__componentOriginal7b53e06f2a62d0c042e35093d03494f9); ?>
+<?php endif; ?>
                                 </div>
-                            @else
+                            <?php else: ?>
                                 <div class="mt-4">
-                                    <x-subscription-benefits />
+                                    <?php if (isset($component)) { $__componentOriginal7b53e06f2a62d0c042e35093d03494f9 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal7b53e06f2a62d0c042e35093d03494f9 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.subscription-benefits','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('subscription-benefits'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal7b53e06f2a62d0c042e35093d03494f9)): ?>
+<?php $attributes = $__attributesOriginal7b53e06f2a62d0c042e35093d03494f9; ?>
+<?php unset($__attributesOriginal7b53e06f2a62d0c042e35093d03494f9); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal7b53e06f2a62d0c042e35093d03494f9)): ?>
+<?php $component = $__componentOriginal7b53e06f2a62d0c042e35093d03494f9; ?>
+<?php unset($__componentOriginal7b53e06f2a62d0c042e35093d03494f9); ?>
+<?php endif; ?>
                                 </div>
-                            @endif
-                        @endif
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Title -->
-                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-5 leading-tight">{{ $note->title }}</h1>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-5 leading-tight"><?php echo e($note->title); ?></h1>
 
                     <!-- Tags -->
-                    @if ($note->tags->count() > 0)
+                    <?php if($note->tags->count() > 0): ?>
                         <div class="mb-6 flex flex-wrap gap-2">
-                            @foreach ($note->tags as $tag)
+                            <?php $__currentLoopData = $note->tags; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tag): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <span
                                     class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors">
-                                    {{ $tag->name }}
+                                    <?php echo e($tag->name); ?>
+
                                 </span>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
-                    @endif
+                    <?php endif; ?>
 
                     <!-- Author, Meta Info, and Share Buttons -->
                     <div class="mb-6 text-sm text-gray-600 border-b border-gray-200 pb-6">
                         <div class="flex items-center justify-between flex-wrap gap-4">
                             <div class="flex items-center gap-4 flex-wrap">
-                                <a href="{{ route('public.profile.show', $note->user->username) }}"
+                                <a href="<?php echo e(route('public.profile.show', $note->user->username)); ?>"
                                     class="flex items-center text-gray-900 hover:text-blue-600 transition-colors duration-200 group"
-                                    title="{{ __('messages.view_all_notes_from', ['name' => $note->user->name]) }}">
+                                    title="<?php echo e(__('messages.view_all_notes_from', ['name' => $note->user->name])); ?>">
                                     <div
                                         class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200">
-                                        @if ($note->user->avatar)
-                                            @if (str_starts_with($note->user->avatar, 'http'))
-                                                <img src="{{ $note->user->avatar }}" alt="{{ $note->user->name }}"
+                                        <?php if($note->user->avatar): ?>
+                                            <?php if(str_starts_with($note->user->avatar, 'http')): ?>
+                                                <img src="<?php echo e($note->user->avatar); ?>" alt="<?php echo e($note->user->name); ?>"
                                                     loading="lazy" class="w-10 h-10 rounded-full object-cover"
                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                            @else
-                                                @php
+                                            <?php else: ?>
+                                                <?php
                                                     $avatarPath = $note->user->avatar;
                                                     // Remove leading slash if exists
                                                     $avatarPath = ltrim($avatarPath, '/');
                                                     // Remove marketplace/ prefix if exists (legacy fix)
                                                     $avatarPath = preg_replace('#^marketplace/#', '', $avatarPath);
-                                                @endphp
-                                                <img src="{{ asset('storage/' . $avatarPath) }}"
-                                                    alt="{{ $note->user->name }}" loading="lazy"
+                                                ?>
+                                                <img src="<?php echo e(asset('storage/' . $avatarPath)); ?>"
+                                                    alt="<?php echo e($note->user->name); ?>" loading="lazy"
                                                     class="w-10 h-10 rounded-full object-cover"
                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                            @endif
-                                        @else
+                                            <?php endif; ?>
+                                        <?php else: ?>
                                             <span
-                                                class="text-sm font-semibold text-gray-600">{{ substr($note->user->name, 0, 1) }}</span>
-                                        @endif
+                                                class="text-sm font-semibold text-gray-600"><?php echo e(substr($note->user->name, 0, 1)); ?></span>
+                                        <?php endif; ?>
                                     </div>
                                     <div>
                                         <div class="flex items-center gap-2 flex-wrap">
                                             <span
-                                                class="font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-200">{{ $note->user->name }}</span>
-                                            @if ($note->user->badges && $note->user->badges->count() > 0)
-                                                @foreach ($note->user->badges->take(5) as $badge)
+                                                class="font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-200"><?php echo e($note->user->name); ?></span>
+                                            <?php if($note->user->badges && $note->user->badges->count() > 0): ?>
+                                                <?php $__currentLoopData = $note->user->badges->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $badge): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                     <span
                                                         class="inline-flex items-center text-xs font-medium 
-                                                        @if ($badge->color === 'gold') text-amber-600
-                                                        @elseif($badge->color === 'green') text-green-600
-                                                        @elseif($badge->color === 'blue') text-blue-600
-                                                        @elseif($badge->color === 'purple') text-purple-600
-                                                        @elseif($badge->color === 'yellow') text-yellow-500
-                                                        @elseif($badge->color === 'orange') text-orange-600
-                                                        @else text-slate-600 @endif"
-                                                        title="{{ $badge->name }}">
-                                                        @if ($badge->icon)
-                                                            {{ $badge->icon }}
-                                                        @endif
+                                                        <?php if($badge->color === 'gold'): ?> text-amber-600
+                                                        <?php elseif($badge->color === 'green'): ?> text-green-600
+                                                        <?php elseif($badge->color === 'blue'): ?> text-blue-600
+                                                        <?php elseif($badge->color === 'purple'): ?> text-purple-600
+                                                        <?php elseif($badge->color === 'yellow'): ?> text-yellow-500
+                                                        <?php elseif($badge->color === 'orange'): ?> text-orange-600
+                                                        <?php else: ?> text-slate-600 <?php endif; ?>"
+                                                        title="<?php echo e($badge->name); ?>">
+                                                        <?php if($badge->icon): ?>
+                                                            <?php echo e($badge->icon); ?>
+
+                                                        <?php endif; ?>
                                                     </span>
-                                                @endforeach
-                                            @endif
-                                            {{-- Premium Buyer badge removed - all users now have free access to all features --}}
-                                            {{-- @if ($note->user->hasPremium() && $note->user->role === 'buyer')
-                                                <span
-                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
-                                                    title="{{ __('messages.premium_buyer_badge') }}">
-                                                    <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                    </svg>
-                                                    {{ __('messages.premium_badge_label') }}
-                                                </span>
-                                            @endif --}}
-                                            @if ($note->user->role === 'seller')
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            <?php endif; ?>
+                                            
+                                            
+                                            <?php if($note->user->role === 'seller'): ?>
                                                 <span
                                                     class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                                                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor"
@@ -432,40 +471,43 @@
                                                             stroke-width="2"
                                                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                     </svg>
-                                                    {{ __('messages.seller') }}
+                                                    <?php echo e(__('messages.seller')); ?>
+
                                                 </span>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
-                                        @if ($note->user->location)
-                                            <span class="text-xs text-gray-500">• {{ $note->user->location }}</span>
-                                        @endif
+                                        <?php if($note->user->location): ?>
+                                            <span class="text-xs text-gray-500">• <?php echo e($note->user->location); ?></span>
+                                        <?php endif; ?>
                                         <div
                                             class="text-xs text-gray-900 group-hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                                            {{ __('messages.view_all_notes_arrow') }}
+                                            <?php echo e(__('messages.view_all_notes_arrow')); ?>
+
                                         </div>
                                         <div class="mt-2 flex items-center gap-2">
-                                            @if (($sellerReviewStats['count'] ?? 0) > 0)
+                                            <?php if(($sellerReviewStats['count'] ?? 0) > 0): ?>
                                                 <div class="flex items-center gap-1">
                                                     <div class="flex items-center">
-                                                        @for ($i = 1; $i <= 5; $i++)
-                                                            <svg class="w-4 h-4 {{ $i <= round($sellerReviewStats['average']) ? 'text-yellow-400' : 'text-gray-300' }}"
+                                                        <?php for($i = 1; $i <= 5; $i++): ?>
+                                                            <svg class="w-4 h-4 <?php echo e($i <= round($sellerReviewStats['average']) ? 'text-yellow-400' : 'text-gray-300'); ?>"
                                                                 fill="currentColor" viewBox="0 0 20 20">
                                                                 <path
                                                                     d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                             </svg>
-                                                        @endfor
+                                                        <?php endfor; ?>
                                                     </div>
                                                     <span class="text-sm font-medium text-gray-800">
-                                                        {{ number_format($sellerReviewStats['average'], 1) }}
+                                                        <?php echo e(number_format($sellerReviewStats['average'], 1)); ?>
+
                                                     </span>
                                                     <span class="text-xs text-gray-500">
-                                                        ({{ trans_choice('messages.rating_count', $sellerReviewStats['count'], ['count' => $sellerReviewStats['count']]) }})
+                                                        (<?php echo e(trans_choice('messages.rating_count', $sellerReviewStats['count'], ['count' => $sellerReviewStats['count']])); ?>)
                                                     </span>
                                                 </div>
-                                            @else
+                                            <?php else: ?>
                                                 <span
-                                                    class="text-xs text-gray-500">{{ __('messages.seller_no_ratings_yet') }}</span>
-                                            @endif
+                                                    class="text-xs text-gray-500"><?php echo e(__('messages.seller_no_ratings_yet')); ?></span>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </a>
@@ -475,24 +517,25 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    {{ __('messages.published') }} {{ localized_time($note->created_at, 'date') }}
+                                    <?php echo e(__('messages.published')); ?> <?php echo e(localized_time($note->created_at, 'date')); ?>
+
                                 </div>
                             </div>
 
                             <!-- Share Buttons -->
                             <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-500 mr-2">{{ __('messages.share_label') }}</span>
-                                @php
+                                <span class="text-xs text-gray-500 mr-2"><?php echo e(__('messages.share_label')); ?></span>
+                                <?php
                                     $shareUrl = route('marketplace.show', $note);
                                     $shareTitle = urlencode($note->title);
                                     $shareText = urlencode(Str::limit(strip_tags($note->content), 100));
-                                @endphp
+                                ?>
 
-                                @auth
-                                    @if (isset($shareUrl) && $shareUrl)
+                                <?php if(auth()->guard()->check()): ?>
+                                    <?php if(isset($shareUrl) && $shareUrl): ?>
                                         <!-- Share with Referral Link (Earn Commission) -->
                                         <div class="relative group">
-                                            <button type="button" onclick="copyShareReferralLink('{{ $shareUrl }}')"
+                                            <button type="button" onclick="copyShareReferralLink('<?php echo e($shareUrl); ?>')"
                                                 class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-md hover:shadow-lg"
                                                 title="Copy share link with referral (Earn commission when someone purchases)">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -514,7 +557,7 @@
                                         </div>
 
                                         <!-- Share Statistics (if user has shared this note) -->
-                                        @php
+                                        <?php
                                             $userShareStats = null;
                                             if (auth()->check()) {
                                                 $shareService = app(\App\Services\NoteShareService::class);
@@ -523,8 +566,8 @@
                                                     ->where('note_id', $note->id)
                                                     ->first();
                                             }
-                                        @endphp
-                                        @if (isset($currentNoteShare) && $currentNoteShare)
+                                        ?>
+                                        <?php if(isset($currentNoteShare) && $currentNoteShare): ?>
                                             <div class="relative group">
                                                 <button type="button" onclick="showShareStatsModal()"
                                                     class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-md"
@@ -537,15 +580,15 @@
                                                     Stats
                                                 </button>
                                             </div>
-                                        @endif
-                                    @endif
-                                @endauth
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                <?php endif; ?>
 
                                 <!-- Facebook -->
-                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl) }}"
+                                <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo e(urlencode($shareUrl)); ?>"
                                     target="_blank" rel="noopener noreferrer"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
-                                    title="{{ __('messages.share_on_facebook') }}">
+                                    title="<?php echo e(__('messages.share_on_facebook')); ?>">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path
                                             d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -553,10 +596,10 @@
                                 </a>
 
                                 <!-- Twitter -->
-                                <a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}&text={{ $shareTitle }}"
+                                <a href="https://twitter.com/intent/tweet?url=<?php echo e(urlencode($shareUrl)); ?>&text=<?php echo e($shareTitle); ?>"
                                     target="_blank" rel="noopener noreferrer"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-500 text-white hover:bg-sky-600 transition-colors duration-200"
-                                    title="{{ __('messages.share_on_twitter') }}">
+                                    title="<?php echo e(__('messages.share_on_twitter')); ?>">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path
                                             d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
@@ -564,10 +607,10 @@
                                 </a>
 
                                 <!-- WhatsApp -->
-                                <a href="https://wa.me/?text={{ $shareTitle }}%20{{ urlencode($shareUrl) }}"
+                                <a href="https://wa.me/?text=<?php echo e($shareTitle); ?>%20<?php echo e(urlencode($shareUrl)); ?>"
                                     target="_blank" rel="noopener noreferrer"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white hover:bg-green-600 transition-colors duration-200"
-                                    title="{{ __('messages.share_on_whatsapp') }}">
+                                    title="<?php echo e(__('messages.share_on_whatsapp')); ?>">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path
                                             d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
@@ -575,10 +618,10 @@
                                 </a>
 
                                 <!-- LinkedIn -->
-                                <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode($shareUrl) }}"
+                                <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?php echo e(urlencode($shareUrl)); ?>"
                                     target="_blank" rel="noopener noreferrer"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-700 text-white hover:bg-blue-800 transition-colors duration-200"
-                                    title="{{ __('messages.share_on_linkedin') }}">
+                                    title="<?php echo e(__('messages.share_on_linkedin')); ?>">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path
                                             d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
@@ -586,64 +629,67 @@
                                 </a>
 
                                 <!-- Copy Link -->
-                                <button onclick="copyToClipboard('{{ $shareUrl }}')"
+                                <button onclick="copyToClipboard('<?php echo e($shareUrl); ?>')"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-600 text-white hover:bg-gray-700 transition-colors duration-200"
-                                    title="{{ __('messages.copy_link') }}">
+                                    title="<?php echo e(__('messages.copy_link')); ?>">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                     </svg>
                                 </button>
-                                @auth
+                                <?php if(auth()->guard()->check()): ?>
                                     <button type="button" onclick="showNoteReportModal()"
                                         class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
-                                        title="{{ __('messages.report_note_tooltip') }}">
-                                        {{ __('messages.report_note') }}
+                                        title="<?php echo e(__('messages.report_note_tooltip')); ?>">
+                                        <?php echo e(__('messages.report_note')); ?>
+
                                     </button>
-                                @else
-                                    <a href="{{ route('login') }}"
+                                <?php else: ?>
+                                    <a href="<?php echo e(route('login')); ?>"
                                         class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
-                                        title="{{ __('messages.report_note_login_tooltip') }}">
-                                        {{ __('messages.report_note') }}
+                                        title="<?php echo e(__('messages.report_note_login_tooltip')); ?>">
+                                        <?php echo e(__('messages.report_note')); ?>
+
                                     </a>
-                                @endauth
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
 
                     <!-- Video Preview -->
-                    @if ($note->hasVideoPreview())
+                    <?php if($note->hasVideoPreview()): ?>
                         <div class="mb-6" x-data="{ isPlaying: false }"
                             @mouseenter="if (!isPlaying) { $refs.videoPlayer.play(); isPlaying = true; }"
                             @mouseleave="if (isPlaying) { $refs.videoPlayer.pause(); isPlaying = false; }">
                             <div class="relative bg-gray-900 rounded-lg overflow-hidden shadow-lg">
                                 <video x-ref="videoPlayer" class="w-full h-auto" controls preload="metadata"
-                                    poster="{{ $note->video_preview_thumbnail_url }}">
-                                    <source src="{{ $note->video_preview_url }}" type="video/mp4">
+                                    poster="<?php echo e($note->video_preview_thumbnail_url); ?>">
+                                    <source src="<?php echo e($note->video_preview_url); ?>" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
-                                @if ($note->video_preview_duration)
+                                <?php if($note->video_preview_duration): ?>
                                     <div
                                         class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                                        {{ gmdate('i:s', $note->video_preview_duration) }}
+                                        <?php echo e(gmdate('i:s', $note->video_preview_duration)); ?>
+
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                             <p class="mt-2 text-xs text-gray-500 text-center">
                                 🎬 Video Preview - Hover untuk auto-play
                             </p>
                         </div>
-                    @endif
+                    <?php endif; ?>
 
                     <!-- Note Content (Protected for paid notes) -->
-                    @if ($showFullContent ?? false)
-                        @auth
-                            @if (auth()->user()->hasPremium() && auth()->user()->role === 'buyer' && ($alreadyPurchased ?? false))
+                    <?php if($showFullContent ?? false): ?>
+                        <?php if(auth()->guard()->check()): ?>
+                            <?php if(auth()->user()->hasPremium() && auth()->user()->role === 'buyer' && ($alreadyPurchased ?? false)): ?>
                                 <!-- Reading Progress Bar -->
                                 <div id="reading-progress-container" class="mb-4">
                                     <div class="flex items-center justify-between mb-2">
                                         <span
-                                            class="text-sm font-medium text-gray-700">{{ __('messages.reading_progress') }}</span>
+                                            class="text-sm font-medium text-gray-700"><?php echo e(__('messages.reading_progress')); ?></span>
                                         <span id="progress-percentage" class="text-sm font-semibold text-blue-600">0%</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-2.5">
@@ -664,35 +710,39 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                             </svg>
-                                            {{ __('messages.add_bookmark') }}
+                                            <?php echo e(__('messages.add_bookmark')); ?>
+
                                         </button>
                                         <div class="flex items-center space-x-2">
-                                            <a href="{{ route('export.pdf', $note) }}"
+                                            <a href="<?php echo e(route('export.pdf', $note)); ?>"
                                                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
                                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
-                                                {{ __('messages.export_pdf') }}
+                                                <?php echo e(__('messages.export_pdf')); ?>
+
                                             </a>
-                                            <a href="{{ route('export.docx', $note) }}"
+                                            <a href="<?php echo e(route('export.docx', $note)); ?>"
                                                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
                                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
-                                                {{ __('messages.export_docx') }}
+                                                <?php echo e(__('messages.export_docx')); ?>
+
                                             </a>
-                                            <a href="{{ route('export.markdown', $note) }}"
+                                            <a href="<?php echo e(route('export.markdown', $note)); ?>"
                                                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
                                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                                 </svg>
-                                                {{ __('messages.export_md') }}
+                                                <?php echo e(__('messages.export_md')); ?>
+
                                             </a>
                                         </div>
                                     </div>
@@ -708,12 +758,13 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                                 </svg>
-                                                {{ __('messages.bookmarks') }}
+                                                <?php echo e(__('messages.bookmarks')); ?>
+
                                             </h4>
                                             <button type="button" onclick="toggleBookmarks()"
                                                 class="text-sm text-purple-700 hover:text-purple-900">
                                                 <span
-                                                    id="bookmarks-toggle-text">{{ __('messages.bookmarks_toggle_show') }}</span>
+                                                    id="bookmarks-toggle-text"><?php echo e(__('messages.bookmarks_toggle_show')); ?></span>
                                             </button>
                                         </div>
                                         <div id="bookmarks-list" class="space-y-2">
@@ -721,12 +772,12 @@
                                         </div>
                                     </div>
                                 </div>
-                            @endif
-                        @endauth
+                            <?php endif; ?>
+                        <?php endif; ?>
 
                         <!-- Rich Media Previews -->
-                        @if ($note->ecosystem_category === 'audio')
-                            @php
+                        <?php if($note->ecosystem_category === 'audio'): ?>
+                            <?php
                                 $audioUrl = $note->audio_link;
                                 // Check if there's an audio file in attachments
 if (!$audioUrl) {
@@ -745,18 +796,18 @@ if (!$audioUrl) {
                                         ]);
                                     }
                                 }
-                            @endphp
-                            @if ($audioUrl)
-                                @include('components.rich-media.audio-preview', [
+                            ?>
+                            <?php if($audioUrl): ?>
+                                <?php echo $__env->make('components.rich-media.audio-preview', [
                                     'audioUrl' => $audioUrl,
                                     'title' => $note->title,
                                     'duration' => $note->audio_duration,
-                                ])
-                            @endif
-                        @endif
+                                ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                            <?php endif; ?>
+                        <?php endif; ?>
 
-                        @if ($note->ecosystem_category === 'code')
-                            @php
+                        <?php if($note->ecosystem_category === 'code'): ?>
+                            <?php
                                 $codeContent = null;
                                 $codeAttachment = collect($note->attachments ?? [])->first(function ($att) {
                                     $filename = is_array($att) ? $att['filename'] ?? '' : basename($att);
@@ -778,8 +829,8 @@ if (!$audioUrl) {
                                         'jsx',
                                     ]);
                                 });
-                            @endphp
-                            @include('components.rich-media.code-preview', [
+                            ?>
+                            <?php echo $__env->make('components.rich-media.code-preview', [
                                 'code' => $codeContent,
                                 'language' => $note->code_language ?? 'javascript',
                                 'codeUrl' => $codeAttachment
@@ -791,11 +842,11 @@ if (!$audioUrl) {
                                     ])
                                     : null,
                                 'demoLink' => $note->code_demo_link ?? $note->demo_link,
-                            ])
-                        @endif
+                            ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                        <?php endif; ?>
 
-                        @if ($note->ecosystem_category === '3d')
-                            @php
+                        <?php if($note->ecosystem_category === '3d'): ?>
+                            <?php
                                 $modelUrl = $note->three_d_preview_link;
                                 // Check if there's a 3D model file in attachments
 if (!$modelUrl) {
@@ -814,24 +865,24 @@ if (!$modelUrl) {
                                         ]);
                                     }
                                 }
-                            @endphp
-                            @if ($modelUrl)
-                                @include('components.rich-media.3d-viewer', [
+                            ?>
+                            <?php if($modelUrl): ?>
+                                <?php echo $__env->make('components.rich-media.3d-viewer', [
                                     'modelUrl' => $modelUrl,
                                     'format' => $note->three_d_format ?? 'obj',
                                     'title' => $note->title,
-                                ])
-                            @endif
-                        @endif
+                                ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                            <?php endif; ?>
+                        <?php endif; ?>
 
                         <div class="prose prose-lg max-w-none mb-6" id="note-content">
                             <div
                                 class="ql-editor text-gray-900 leading-relaxed prose-headings:font-bold prose-p:mb-4 prose-ul:mb-4 prose-ol:mb-4 prose-li:mb-2 prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-800 prose-strong:font-semibold prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded prose-code:text-sm prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-img:rounded-lg prose-img:shadow-md prose-img:my-4 prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-700">
-                                {!! $note->content !!}</div>
+                                <?php echo $note->content; ?></div>
                         </div>
 
                         <!-- Demo Link (Prominent Display) -->
-                        @if ($note->demo_link)
+                        <?php if($note->demo_link): ?>
                             <div class="mb-6">
                                 <div
                                     class="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 rounded-xl border-2 border-green-300 p-5 shadow-lg hover:shadow-xl transition-all duration-300">
@@ -855,10 +906,10 @@ if (!$modelUrl) {
                                                 </div>
                                                 <p class="text-sm text-gray-700 mb-1">Lihat dan coba produk ini secara
                                                     langsung sebelum membeli</p>
-                                                <p class="text-xs text-gray-500 truncate">{{ $note->demo_link }}</p>
+                                                <p class="text-xs text-gray-500 truncate"><?php echo e($note->demo_link); ?></p>
                                             </div>
                                         </div>
-                                        <a href="{{ $note->demo_link }}" target="_blank" rel="noopener noreferrer"
+                                        <a href="<?php echo e($note->demo_link); ?>" target="_blank" rel="noopener noreferrer"
                                             class="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg shadow-md hover:from-green-700 hover:to-emerald-700 hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-sm">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -870,17 +921,17 @@ if (!$modelUrl) {
                                     </div>
                                 </div>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- PDF Preview (if PDF attachment exists) -->
-                        @php
+                        <?php
                             $pdfAttachment = collect($note->attachments ?? [])->first(function ($att) {
                                 $filename = is_array($att) ? $att['filename'] ?? '' : basename($att);
                                 return strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'pdf';
                             });
-                        @endphp
-                        @if ($pdfAttachment)
-                            @php
+                        ?>
+                        <?php if($pdfAttachment): ?>
+                            <?php
                                 $pdfFilename = is_array($pdfAttachment)
                                     ? $pdfAttachment['filename'] ?? ''
                                     : basename($pdfAttachment);
@@ -888,15 +939,15 @@ if (!$modelUrl) {
                                     'note' => $note->id,
                                     'filename' => $pdfFilename,
                                 ]);
-                            @endphp
-                            @include('components.rich-media.pdf-preview', [
+                            ?>
+                            <?php echo $__env->make('components.rich-media.pdf-preview', [
                                 'pdfUrl' => $pdfUrl,
                                 'filename' => $pdfFilename,
-                            ])
-                        @endif
+                            ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                        <?php endif; ?>
 
                         <!-- Attachments (if purchased or free) -->
-                        @if ($note->hasAttachments())
+                        <?php if($note->hasAttachments()): ?>
                             <div class="mt-6 pt-6 border-t border-gray-200">
                                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                                     <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor"
@@ -904,11 +955,11 @@ if (!$modelUrl) {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                     </svg>
-                                    {{ __('messages.attachments') }} ({{ $note->file_count }})
+                                    <?php echo e(__('messages.attachments')); ?> (<?php echo e($note->file_count); ?>)
                                 </h3>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    @foreach ($note->attachments as $attachment)
-                                        @php
+                                    <?php $__currentLoopData = $note->attachments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attachment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php
                                             $filename = is_array($attachment)
                                                 ? $attachment['filename'] ?? __('messages.unknown_file_name')
                                                 : basename($attachment);
@@ -927,9 +978,9 @@ if (!$modelUrl) {
                                                     ]);
                                             $target = $isExternal ? '_blank' : '_self';
                                             $rel = $isExternal ? 'noopener noreferrer' : '';
-                                        @endphp
-                                        <a href="{{ $href }}" target="{{ $target }}"
-                                            rel="{{ $rel }}"
+                                        ?>
+                                        <a href="<?php echo e($href); ?>" target="<?php echo e($target); ?>"
+                                            rel="<?php echo e($rel); ?>"
                                             class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:border-blue-300 transition-all duration-200">
                                             <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -938,15 +989,16 @@ if (!$modelUrl) {
                                             </svg>
                                             <div class="flex-1 min-w-0">
                                                 <p class="text-sm font-medium text-gray-900 truncate">
-                                                    {{ $filename }}
-                                                    @if ($isExternal)
+                                                    <?php echo e($filename); ?>
+
+                                                    <?php if($isExternal): ?>
                                                         <span class="ml-1 text-xs text-blue-600">(External Link)</span>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </p>
-                                                @if (is_array($attachment) && isset($attachment['size']))
+                                                <?php if(is_array($attachment) && isset($attachment['size'])): ?>
                                                     <p class="text-xs text-gray-500">
-                                                        {{ number_format($attachment['size'] / 1024, 2) }} KB</p>
-                                                @endif
+                                                        <?php echo e(number_format($attachment['size'] / 1024, 2)); ?> KB</p>
+                                                <?php endif; ?>
                                             </div>
                                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -954,23 +1006,23 @@ if (!$modelUrl) {
                                                     d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                             </svg>
                                         </a>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>
-                        @endif
-                    @endif
+                        <?php endif; ?>
+                    <?php endif; ?>
 
-                    @if ($note->hasThumbnails())
-                        @include('components.media-gallery', [
+                    <?php if($note->hasThumbnails()): ?>
+                        <?php echo $__env->make('components.media-gallery', [
                             'images' => $note->thumbnails,
                             'title' => __('messages.media_gallery'),
-                        ])
-                    @endif
+                        ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                    <?php endif; ?>
 
-                    @if (!($showFullContent ?? false))
+                    <?php if(!($showFullContent ?? false)): ?>
                         <!-- Preview Content (for paid notes, before purchase) -->
                         <div class="prose max-w-none mb-6 relative">
-                            @php
+                            <?php
                                 $previewMode = 'custom';
                                 $previewContent = null;
                                 $showBlur = false;
@@ -992,38 +1044,41 @@ if (!$modelUrl) {
                                         $previewContent = null;
                                     }
                                 }
-                            @endphp
+                            ?>
 
-                            @if ($previewMode === 'percentage' && !empty($previewContent))
+                            <?php if($previewMode === 'percentage' && !empty($previewContent)): ?>
                                 <div class="prose max-w-none">
                                     <div class="ql-editor text-gray-900 leading-relaxed whitespace-pre-wrap">
-                                        {!! $previewContent !!}
-                                        @if ($note->preview_percentage < 100)
+                                        <?php echo $previewContent; ?>
+
+                                        <?php if($note->preview_percentage < 100): ?>
                                             <span class="text-gray-500 italic">...</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                 </div>
 
-                                @if ($showBlur)
+                                <?php if($showBlur): ?>
                                     <div
                                         class="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white backdrop-blur-sm pointer-events-none flex items-end justify-center pb-8">
                                         <div class="text-center px-4">
                                             <p class="text-sm font-semibold text-gray-700 mb-2">
-                                                {{ __('messages.full_content_available_after_purchase') }}</p>
-                                            <p class="text-xs text-gray-600">{{ __('messages.buy_note_to_unlock') }}</p>
-                                            @if (isset($visibleLines, $totalLines))
+                                                <?php echo e(__('messages.full_content_available_after_purchase')); ?></p>
+                                            <p class="text-xs text-gray-600"><?php echo e(__('messages.buy_note_to_unlock')); ?></p>
+                                            <?php if(isset($visibleLines, $totalLines)): ?>
                                                 <p class="text-xs text-gray-500 mt-1">
-                                                    {{ __('messages.preview_lines_detail', ['visible' => $visibleLines, 'total' => $totalLines, 'percentage' => $note->preview_percentage]) }}
+                                                    <?php echo e(__('messages.preview_lines_detail', ['visible' => $visibleLines, 'total' => $totalLines, 'percentage' => $note->preview_percentage])); ?>
+
                                                 </p>
-                                            @else
+                                            <?php else: ?>
                                                 <p class="text-xs text-gray-500 mt-1">
-                                                    {{ __('messages.preview_percentage_detail', ['percentage' => $note->preview_percentage]) }}
+                                                    <?php echo e(__('messages.preview_percentage_detail', ['percentage' => $note->preview_percentage])); ?>
+
                                                 </p>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </div>
-                                @endif
-                            @else
+                                <?php endif; ?>
+                            <?php else: ?>
                                 <div class="relative rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6">
                                     <div class="flex flex-col items-center text-center space-y-3">
                                         <div
@@ -1036,33 +1091,37 @@ if (!$modelUrl) {
                                         </div>
                                         <div>
                                             <p class="text-sm font-semibold text-gray-800">
-                                                {{ __('messages.preview_locked_title') }}
+                                                <?php echo e(__('messages.preview_locked_title')); ?>
+
                                             </p>
                                             <p class="text-xs text-gray-600">
-                                                {{ __('messages.preview_locked_description') }}
+                                                <?php echo e(__('messages.preview_locked_description')); ?>
+
                                             </p>
                                         </div>
-                                        @if (!empty($previewContent))
-                                            @php
+                                        <?php if(!empty($previewContent)): ?>
+                                            <?php
                                                 $previewContainsHtml =
                                                     is_string($previewContent) &&
                                                     $previewContent !== strip_tags($previewContent);
-                                            @endphp
+                                            ?>
                                             <div class="max-w-2xl text-xs text-gray-500 leading-relaxed">
-                                                {!! $previewContainsHtml ? $previewContent : nl2br(e($previewContent)) !!}
+                                                <?php echo $previewContainsHtml ? $previewContent : nl2br(e($previewContent)); ?>
+
                                             </div>
-                                        @else
+                                        <?php else: ?>
                                             <p class="text-xs text-gray-500">
-                                                {{ __('messages.preview_locked_no_excerpt') }}
+                                                <?php echo e(__('messages.preview_locked_no_excerpt')); ?>
+
                                             </p>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
 
                         <!-- What You'll Get Section -->
-                        @if ($note->price > 0)
+                        <?php if($note->price > 0): ?>
                             <div class="mt-6 pt-6 border-t border-gray-200 bg-blue-50 rounded-lg p-6">
                                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                                     <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor"
@@ -1070,7 +1129,8 @@ if (!$modelUrl) {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    {{ __('messages.what_youll_get') }}
+                                    <?php echo e(__('messages.what_youll_get')); ?>
+
                                 </h3>
                                 <ul class="space-y-2 text-sm text-gray-700">
                                     <li class="flex items-start">
@@ -1080,9 +1140,9 @@ if (!$modelUrl) {
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                 clip-rule="evenodd" />
                                         </svg>
-                                        <span>{{ __('messages.full_note_content') }}</span>
+                                        <span><?php echo e(__('messages.full_note_content')); ?></span>
                                     </li>
-                                    @if ($note->hasAttachments())
+                                    <?php if($note->hasAttachments()): ?>
                                         <li class="flex items-start">
                                             <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5 flex-shrink-0"
                                                 fill="currentColor" viewBox="0 0 20 20">
@@ -1090,11 +1150,12 @@ if (!$modelUrl) {
                                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                     clip-rule="evenodd" />
                                             </svg>
-                                            <span>{{ $note->file_count }} {{ __('messages.downloadable_files') }}
+                                            <span><?php echo e($note->file_count); ?> <?php echo e(__('messages.downloadable_files')); ?>
+
                                                 <span
-                                                    class="text-xs text-gray-600">({{ __('messages.locked_until_purchase') }})</span></span>
+                                                    class="text-xs text-gray-600">(<?php echo e(__('messages.locked_until_purchase')); ?>)</span></span>
                                         </li>
-                                    @endif
+                                    <?php endif; ?>
                                     <li class="flex items-start">
                                         <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor"
                                             viewBox="0 0 20 20">
@@ -1102,14 +1163,14 @@ if (!$modelUrl) {
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                 clip-rule="evenodd" />
                                         </svg>
-                                        <span>{{ __('messages.lifetime_access') }}</span>
+                                        <span><?php echo e(__('messages.lifetime_access')); ?></span>
                                     </li>
                                 </ul>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- Trust Indicators -->
-                        @if ($note->purchase_count > 0)
+                        <?php if($note->purchase_count > 0): ?>
                             <div class="mt-6 pt-6 border-t border-gray-200">
                                 <div class="flex flex-wrap items-center gap-4 text-sm">
                                     <div class="flex items-center text-gray-700">
@@ -1118,27 +1179,27 @@ if (!$modelUrl) {
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <span class="font-semibold">{{ $note->purchase_count }}</span>
+                                        <span class="font-semibold"><?php echo e($note->purchase_count); ?></span>
                                         <span
-                                            class="ml-1">{{ $note->purchase_count == 1 ? __('messages.purchase') : __('messages.purchases') }}</span>
+                                            class="ml-1"><?php echo e($note->purchase_count == 1 ? __('messages.purchase') : __('messages.purchases')); ?></span>
                                     </div>
-                                    @if ($note->purchase_count >= 10)
+                                    <?php if($note->purchase_count >= 10): ?>
                                         <div class="flex items-center text-yellow-600">
                                             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                                 <path
                                                     d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                             </svg>
-                                            <span class="font-semibold">{{ __('messages.popular') }}</span>
+                                            <span class="font-semibold"><?php echo e(__('messages.popular')); ?></span>
                                         </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
-                        @endif
-                    @endif
+                        <?php endif; ?>
+                    <?php endif; ?>
 
                     <!-- Purchase/Action Buttons -->
-                    @auth
-                        @if ($alreadyPurchased ?? false)
+                    <?php if(auth()->guard()->check()): ?>
+                        <?php if($alreadyPurchased ?? false): ?>
                             <div class="mt-6 pt-6 border-t border-gray-200">
                                 <div class="flex items-center justify-between flex-wrap gap-4">
                                     <div class="flex items-center">
@@ -1148,31 +1209,33 @@ if (!$modelUrl) {
                                                 clip-rule="evenodd" />
                                         </svg>
                                         <span
-                                            class="text-green-600 font-semibold">{{ __('messages.you_have_purchased') }}</span>
+                                            class="text-green-600 font-semibold"><?php echo e(__('messages.you_have_purchased')); ?></span>
                                     </div>
-                                    <a href="{{ route('notes.show', $note) }}"
+                                    <a href="<?php echo e(route('notes.show', $note)); ?>"
                                         class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200">
-                                        {{ __('messages.view_full_note_arrow') }}
+                                        <?php echo e(__('messages.view_full_note_arrow')); ?>
+
                                     </a>
                                 </div>
 
-                                @if (auth()->user()->hasPremium() && auth()->user()->role === 'buyer')
+                                <?php if(auth()->user()->hasPremium() && auth()->user()->role === 'buyer'): ?>
                                     <div class="mt-4 pt-4 border-t border-gray-200">
-                                        <button type="button" onclick="showCollectionModal('{{ $note->id }}')"
+                                        <button type="button" onclick="showCollectionModal('<?php echo e($note->id); ?>')"
                                             class="inline-flex items-center text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors duration-200">
                                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                             </svg>
-                                            {{ __('messages.add_to_collection') }}
+                                            <?php echo e(__('messages.add_to_collection')); ?>
+
                                         </button>
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
-                        @elseif($canBuy && $note->price > 0)
+                        <?php elseif($canBuy && $note->price > 0): ?>
                             <div class="mt-6 pt-6 border-t border-gray-200">
-                                @if ($note->isStandardMode())
+                                <?php if($note->isStandardMode()): ?>
                                     <!-- Standard Mode Info for Buyer -->
                                     <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
                                         <div class="flex items-start">
@@ -1194,40 +1257,43 @@ if (!$modelUrl) {
                                             </div>
                                         </div>
                                     </div>
-                                @endif
-                                <form action="{{ route('marketplace.purchase', $note) }}" method="POST">
-                                    @csrf
+                                <?php endif; ?>
+                                <form action="<?php echo e(route('marketplace.purchase', $note)); ?>" method="POST">
+                                    <?php echo csrf_field(); ?>
                                     <button type="submit"
                                         class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm hover:shadow-md transition-all duration-200">
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
-                                        @php
+                                        <?php
                                             $displayPrice =
                                                 $premiumDiscountPrice ??
                                                 ($note->hasDiscount() ? $note->discount_price : $note->price);
                                             $formattedDisplayPrice = currency($displayPrice);
-                                        @endphp
-                                        {{ __('messages.buy_note_price', ['price' => $formattedDisplayPrice]) }}
-                                        @if (isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
+                                        ?>
+                                        <?php echo e(__('messages.buy_note_price', ['price' => $formattedDisplayPrice])); ?>
+
+                                        <?php if(isset($premiumDiscountPercent) && $premiumDiscountPercent > 0): ?>
                                             <span
                                                 class="ml-2 text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full">
-                                                -{{ $premiumDiscountPercent }}% {{ __('messages.premium_badge_label') }}
+                                                -<?php echo e($premiumDiscountPercent); ?>% <?php echo e(__('messages.premium_badge_label')); ?>
+
                                             </span>
-                                        @endif
+                                        <?php endif; ?>
                                     </button>
                                 </form>
                                 <p class="text-sm text-gray-600 mt-3">
-                                    {{ __('messages.wallet_balance_label') }}
+                                    <?php echo e(__('messages.wallet_balance_label')); ?>
+
                                     <strong
-                                        class="font-semibold text-gray-900">{{ currency((float) auth()->user()->wallet_balance, auth()->user()->currency) }}</strong>
-                                    @php
+                                        class="font-semibold text-gray-900"><?php echo e(currency((float) auth()->user()->wallet_balance, auth()->user()->currency)); ?></strong>
+                                    <?php
                                         $finalPrice =
                                             $premiumDiscountPrice ??
                                             ($note->hasDiscount() ? $note->discount_price : $note->price);
-                                    @endphp
-                                    @if (isset($premiumDiscountPercent) && $premiumDiscountPercent > 0)
+                                    ?>
+                                    <?php if(isset($premiumDiscountPercent) && $premiumDiscountPercent > 0): ?>
                                         <div class="mt-2 text-xs text-gray-500">
                                             <span
                                                 class="inline-flex items-center px-2 py-0.5 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
@@ -1235,18 +1301,20 @@ if (!$modelUrl) {
                                                     <path
                                                         d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                 </svg>
-                                                {{ __('messages.premium_discount_badge', ['amount' => currency($basePrice - $finalPrice), 'percent' => $premiumDiscountPercent]) }}
+                                                <?php echo e(__('messages.premium_discount_badge', ['amount' => currency($basePrice - $finalPrice), 'percent' => $premiumDiscountPercent])); ?>
+
                                             </span>
                                         </div>
-                                    @endif
-                                    @if (auth()->user()->wallet_balance < $finalPrice)
+                                    <?php endif; ?>
+                                    <?php if(auth()->user()->wallet_balance < $finalPrice): ?>
                                         <span class="text-red-600 font-medium">
-                                            {{ __('messages.wallet_insufficient_amount', ['amount' => currency($finalPrice - auth()->user()->wallet_balance, auth()->user()->currency)]) }}
+                                            <?php echo e(__('messages.wallet_insufficient_amount', ['amount' => currency($finalPrice - auth()->user()->wallet_balance, auth()->user()->currency)])); ?>
+
                                         </span>
-                                    @endif
+                                    <?php endif; ?>
                                 </p>
                             </div>
-                        @elseif(auth()->user()->role === 'seller' && $note->price > 0 && !$alreadyPurchased)
+                        <?php elseif(auth()->user()->role === 'seller' && $note->price > 0 && !$alreadyPurchased): ?>
                             <div class="mt-6 pt-6 border-t border-gray-200">
                                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                                     <div class="flex items-start">
@@ -1258,22 +1326,23 @@ if (!$modelUrl) {
                                         </svg>
                                         <div>
                                             <p class="text-sm font-medium text-yellow-800 mb-1">
-                                                {{ __('messages.seller_cannot_purchase_title') }}</p>
+                                                <?php echo e(__('messages.seller_cannot_purchase_title')); ?></p>
                                             <p class="text-xs text-yellow-700">
-                                                {{ __('messages.seller_cannot_purchase_description') }}</p>
+                                                <?php echo e(__('messages.seller_cannot_purchase_description')); ?></p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        @elseif($note->user_id === auth()->id())
+                        <?php elseif($note->user_id === auth()->id()): ?>
                             <div class="mt-6 pt-6 border-t border-gray-200">
-                                @if (auth()->user()->role === 'seller')
-                                    <p class="text-gray-600 mb-3">{{ __('messages.note_owner_message') }}</p>
-                                    <a href="{{ route('notes.edit', $note) }}"
+                                <?php if(auth()->user()->role === 'seller'): ?>
+                                    <p class="text-gray-600 mb-3"><?php echo e(__('messages.note_owner_message')); ?></p>
+                                    <a href="<?php echo e(route('notes.edit', $note)); ?>"
                                         class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200">
-                                        {{ __('messages.edit_note_arrow') }}
+                                        <?php echo e(__('messages.edit_note_arrow')); ?>
+
                                     </a>
-                                @elseif(auth()->user()->role === 'buyer')
+                                <?php elseif(auth()->user()->role === 'buyer'): ?>
                                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                         <div class="flex items-start">
                                             <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="currentColor"
@@ -1284,36 +1353,42 @@ if (!$modelUrl) {
                                             </svg>
                                             <div>
                                                 <p class="text-sm font-medium text-blue-800 mb-1">
-                                                    {{ __('messages.buyer_owns_note_title') }}</p>
+                                                    <?php echo e(__('messages.buyer_owns_note_title')); ?></p>
                                                 <p class="text-xs text-blue-700 mb-2">
-                                                    {{ __('messages.buyer_owns_note_description') }}
+                                                    <?php echo e(__('messages.buyer_owns_note_description')); ?>
+
                                                 </p>
                                                 <div class="bg-yellow-100 border border-yellow-300 rounded p-2 mt-2">
                                                     <p class="text-xs font-semibold text-yellow-800 mb-1">
-                                                        {{ __('messages.buyer_resale_warning_title') }}
+                                                        <?php echo e(__('messages.buyer_resale_warning_title')); ?>
+
                                                     </p>
                                                     <p class="text-xs text-yellow-700">
-                                                        {!! __('messages.buyer_resale_warning_description') !!}
+                                                        <?php echo __('messages.buyer_resale_warning_description'); ?>
+
                                                     </p>
                                                 </div>
-                                                @if ($note->originalCreator)
+                                                <?php if($note->originalCreator): ?>
                                                     <p class="text-xs text-blue-600 mt-2">
-                                                        {!! __('messages.original_creator_notice', [
+                                                        <?php echo __('messages.original_creator_notice', [
                                                             'name' => '<strong>' . e($note->originalCreator->name) . '</strong>',
-                                                        ]) !!}
-                                                        @if ($note->originalCreator->id !== auth()->id())
-                                                            {{ __('messages.original_creator_commission_note') }}
-                                                        @endif
+                                                        ]); ?>
+
+                                                        <?php if($note->originalCreator->id !== auth()->id()): ?>
+                                                            <?php echo e(__('messages.original_creator_commission_note')); ?>
+
+                                                        <?php endif; ?>
                                                     </p>
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
                                     <p class="text-sm text-gray-600 mt-3">
-                                        {!! __('messages.buyer_resale_notice') !!}
+                                        <?php echo __('messages.buyer_resale_notice'); ?>
+
                                     </p>
                                     <div class="mt-4">
-                                        <a href="{{ route('notes.resale.form', $note) }}"
+                                        <a href="<?php echo e(route('notes.resale.form', $note)); ?>"
                                             class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -1323,11 +1398,11 @@ if (!$modelUrl) {
                                             Set Harga & Jual Kembali
                                         </a>
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
-                        @elseif($hasPurchasedBefore && !$isNoteOwner)
+                        <?php elseif($hasPurchasedBefore && !$isNoteOwner): ?>
                             <div class="mt-6 pt-6 border-t border-gray-200">
-                                @if ($canRepurchase && $note->isScarcityMode())
+                                <?php if($canRepurchase && $note->isScarcityMode()): ?>
                                     <!-- Can Repurchase (Scarcity Mode) -->
                                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                                         <div class="flex items-start">
@@ -1343,7 +1418,7 @@ if (!$modelUrl) {
                                                     Anda sudah pernah membeli dan menjual catatan ini. Anda bisa membeli kembali
                                                     sekarang.
                                                 </p>
-                                                @if ($isWithinGracePeriod && $gracePeriodEndsAt)
+                                                <?php if($isWithinGracePeriod && $gracePeriodEndsAt): ?>
                                                     <div class="bg-green-100 border border-green-300 rounded p-2 mb-3">
                                                         <p class="text-xs font-semibold text-green-800 mb-1">
                                                             ⏰ Grace Period Aktif
@@ -1353,31 +1428,31 @@ if (!$modelUrl) {
                                                         </p>
                                                         <div id="grace-period-countdown"
                                                             class="text-xs font-bold text-green-900"
-                                                            data-end-time="{{ $gracePeriodEndsAt->timestamp }}">
+                                                            data-end-time="<?php echo e($gracePeriodEndsAt->timestamp); ?>">
                                                             Menghitung...
                                                         </div>
                                                     </div>
-                                                @elseif($gracePeriodEndsAt && !$isWithinGracePeriod)
+                                                <?php elseif($gracePeriodEndsAt && !$isWithinGracePeriod): ?>
                                                     <div class="bg-yellow-100 border border-yellow-300 rounded p-2 mb-3">
                                                         <p class="text-xs font-semibold text-yellow-800 mb-1">
                                                             ⚠️ Grace Period Berakhir
                                                         </p>
                                                         <p class="text-xs text-yellow-700">
                                                             Grace period berakhir pada
-                                                            {{ $gracePeriodEndsAt->format('d M Y H:i') }}. Harga pembelian
+                                                            <?php echo e($gracePeriodEndsAt->format('d M Y H:i')); ?>. Harga pembelian
                                                             ulang sekarang lebih tinggi.
                                                         </p>
                                                     </div>
-                                                @endif
+                                                <?php endif; ?>
                                                 <div class="flex items-center gap-3">
                                                     <div>
                                                         <p class="text-xs text-gray-600">Harga Pembelian Ulang:</p>
                                                         <p class="text-lg font-bold text-blue-900">
-                                                            {{ currency($repurchasePrice) }}</p>
+                                                            <?php echo e(currency($repurchasePrice)); ?></p>
                                                     </div>
-                                                    <form action="{{ route('marketplace.purchase', $note) }}" method="POST"
+                                                    <form action="<?php echo e(route('marketplace.purchase', $note)); ?>" method="POST"
                                                         class="ml-auto">
-                                                        @csrf
+                                                        <?php echo csrf_field(); ?>
                                                         <button type="submit"
                                                             class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
                                                             Beli Kembali
@@ -1387,7 +1462,7 @@ if (!$modelUrl) {
                                             </div>
                                         </div>
                                     </div>
-                                @endif
+                                <?php endif; ?>
 
                                 <!-- Access Revoked Message -->
                                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -1400,15 +1475,16 @@ if (!$modelUrl) {
                                         </svg>
                                         <div>
                                             <p class="text-sm font-medium text-yellow-800 mb-1">
-                                                {{ __('messages.access_revoked_title') }}</p>
+                                                <?php echo e(__('messages.access_revoked_title')); ?></p>
                                             <p class="text-xs text-yellow-700">
-                                                {!! __('messages.access_revoked_description') !!}
+                                                <?php echo __('messages.access_revoked_description'); ?>
+
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        @elseif($note->price == 0)
+                        <?php elseif($note->price == 0): ?>
                             <div class="mt-6 pt-6 border-t border-gray-200">
                                 <div class="flex items-center bg-green-50 border border-green-200 rounded-lg p-4">
                                     <svg class="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor"
@@ -1416,82 +1492,99 @@ if (!$modelUrl) {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <span class="text-green-800 font-semibold">{{ __('messages.note_free_enjoy') }}</span>
+                                    <span class="text-green-800 font-semibold"><?php echo e(__('messages.note_free_enjoy')); ?></span>
                                 </div>
                             </div>
-                        @endif
-                    @else
+                        <?php endif; ?>
+                    <?php else: ?>
                         <div class="mt-6 pt-6 border-t border-gray-200">
-                            <p class="text-gray-600 mb-3">{{ __('messages.to_purchase_please_login') }}</p>
-                            <a href="{{ route('login') }}"
+                            <p class="text-gray-600 mb-3"><?php echo e(__('messages.to_purchase_please_login')); ?></p>
+                            <a href="<?php echo e(route('login')); ?>"
                                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
                                 Login to Continue
                             </a>
                         </div>
-                    @endauth
+                    <?php endif; ?>
                 </div>
             </div>
 
             <!-- Reviews Section -->
-            @if ($note->total_reviews > 0 || (auth()->check() && isset($canReview) && $canReview))
+            <?php if($note->total_reviews > 0 || (auth()->check() && isset($canReview) && $canReview)): ?>
                 <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
                     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.reviews') }}
-                            ({{ $note->total_reviews }})</h2>
+                        <h2 class="text-lg font-semibold text-gray-900"><?php echo e(__('messages.reviews')); ?>
+
+                            (<?php echo e($note->total_reviews); ?>)</h2>
                     </div>
                     <div class="p-6">
                         <!-- Review Form (if user can review) -->
-                        @if (auth()->check() && isset($canReview) && $canReview)
+                        <?php if(auth()->check() && isset($canReview) && $canReview): ?>
                             <div class="mb-6 pb-6 border-b border-gray-200">
-                                <h3 class="text-base font-semibold text-gray-900 mb-4">{{ __('messages.write_review') }}
+                                <h3 class="text-base font-semibold text-gray-900 mb-4"><?php echo e(__('messages.write_review')); ?>
+
                                 </h3>
-                                <form action="{{ route('reviews.store', $note) }}" method="POST">
-                                    @csrf
+                                <form action="<?php echo e(route('reviews.store', $note)); ?>" method="POST">
+                                    <?php echo csrf_field(); ?>
                                     <div class="mb-4">
                                         <label for="rating"
-                                            class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.rating') }}</label>
+                                            class="block text-sm font-medium text-gray-700 mb-2"><?php echo e(__('messages.rating')); ?></label>
                                         <div class="flex gap-1" id="rating-container">
-                                            @for ($i = 1; $i <= 5; $i++)
+                                            <?php for($i = 1; $i <= 5; $i++): ?>
                                                 <button type="button"
                                                     class="star-rating text-gray-300 hover:text-yellow-400 transition-colors duration-200"
-                                                    data-rating="{{ $i }}">
+                                                    data-rating="<?php echo e($i); ?>">
                                                     <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                                                         <path
                                                             d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                     </svg>
                                                 </button>
-                                            @endfor
+                                            <?php endfor; ?>
                                         </div>
                                         <input type="hidden" name="rating" id="rating-input" required>
-                                        @error('rating')
-                                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
+                                        <?php $__errorArgs = ['rating'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                            <p class="mt-2 text-sm text-red-600"><?php echo e($message); ?></p>
+                                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                     </div>
 
                                     <div class="mb-4">
                                         <label for="comment"
-                                            class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.comment_optional') }}</label>
+                                            class="block text-sm font-medium text-gray-700 mb-2"><?php echo e(__('messages.comment_optional')); ?></label>
                                         <textarea name="comment" id="comment" rows="4"
-                                            placeholder="{{ __('messages.share_thoughts_about_note') }}"
-                                            class="w-full rounded-lg border shadow-sm focus:ring-2 focus:ring-opacity-50 transition-all duration-200 {{ $errors->has('comment') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500' }}"></textarea>
-                                        @error('comment')
-                                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
+                                            placeholder="<?php echo e(__('messages.share_thoughts_about_note')); ?>"
+                                            class="w-full rounded-lg border shadow-sm focus:ring-2 focus:ring-opacity-50 transition-all duration-200 <?php echo e($errors->has('comment') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'); ?>"></textarea>
+                                        <?php $__errorArgs = ['comment'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                            <p class="mt-2 text-sm text-red-600"><?php echo e($message); ?></p>
+                                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                     </div>
 
                                     <button type="submit"
                                         class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
-                                        {{ __('messages.submit_review') }}
+                                        <?php echo e(__('messages.submit_review')); ?>
+
                                     </button>
                                 </form>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- Reviews List -->
-                        @if ($note->total_reviews > 0)
+                        <?php if($note->total_reviews > 0): ?>
                             <div class="space-y-6">
-                                @foreach ($reviews as $review)
-                                    @php
+                                <?php $__currentLoopData = $reviews; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $review): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         $currentUser = auth()->user();
                                         $canReplyToReview =
                                             $currentUser &&
@@ -1501,21 +1594,21 @@ if (!$modelUrl) {
                                         $canDeleteReview =
                                             $currentUser &&
                                             ($currentUser->id === $review->user_id || $currentUser->hasRole('admin'));
-                                    @endphp
-                                    <div id="review-{{ $review->id }}"
-                                        class="pb-6 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
+                                    ?>
+                                    <div id="review-<?php echo e($review->id); ?>"
+                                        class="pb-6 <?php echo e(!$loop->last ? 'border-b border-gray-200' : ''); ?>">
                                         <div class="flex gap-4" x-data="{ replyOpen: false }">
                                             <div class="flex-shrink-0">
                                                 <div
                                                     class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                                    @if ($review->user->avatar)
-                                                        @if (str_starts_with($review->user->avatar, 'http'))
-                                                            <img src="{{ $review->user->avatar }}"
-                                                                alt="{{ $review->user->name }}" loading="lazy"
+                                                    <?php if($review->user->avatar): ?>
+                                                        <?php if(str_starts_with($review->user->avatar, 'http')): ?>
+                                                            <img src="<?php echo e($review->user->avatar); ?>"
+                                                                alt="<?php echo e($review->user->name); ?>" loading="lazy"
                                                                 class="w-10 h-10 rounded-full object-cover"
                                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                                        @else
-                                                            @php
+                                                        <?php else: ?>
+                                                            <?php
                                                                 $avatarPath = $review->user->avatar;
                                                                 $avatarPath = ltrim($avatarPath, '/');
                                                                 $avatarPath = preg_replace(
@@ -1523,16 +1616,16 @@ if (!$modelUrl) {
                                                                     '',
                                                                     $avatarPath,
                                                                 );
-                                                            @endphp
-                                                            <img src="{{ asset('storage/' . $avatarPath) }}"
-                                                                alt="{{ $review->user->name }}" loading="lazy"
+                                                            ?>
+                                                            <img src="<?php echo e(asset('storage/' . $avatarPath)); ?>"
+                                                                alt="<?php echo e($review->user->name); ?>" loading="lazy"
                                                                 class="w-10 h-10 rounded-full object-cover"
                                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                                        @endif
-                                                    @else
+                                                        <?php endif; ?>
+                                                    <?php else: ?>
                                                         <span
-                                                            class="text-sm font-semibold text-gray-600">{{ substr($review->user->name, 0, 1) }}</span>
-                                                    @endif
+                                                            class="text-sm font-semibold text-gray-600"><?php echo e(substr($review->user->name, 0, 1)); ?></span>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
 
@@ -1540,206 +1633,210 @@ if (!$modelUrl) {
                                                 <div class="flex items-start justify-between mb-2">
                                                     <div>
                                                         <p class="text-sm font-semibold text-gray-900">
-                                                            {{ $review->user->name }}</p>
+                                                            <?php echo e($review->user->name); ?></p>
                                                         <p class="text-xs text-gray-500">
-                                                            {{ localized_diff_for_humans($review->created_at) }}</p>
+                                                            <?php echo e(localized_diff_for_humans($review->created_at)); ?></p>
                                                     </div>
                                                     <div class="flex items-center gap-3">
-                                                        @if ($canReplyToReview)
+                                                        <?php if($canReplyToReview): ?>
                                                             <button type="button" @click="replyOpen = !replyOpen"
                                                                 class="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors">
-                                                                {{ __('messages.reply') }}
+                                                                <?php echo e(__('messages.reply')); ?>
+
                                                             </button>
-                                                        @endif
-                                                        @if ($canDeleteReview)
-                                                            <form action="{{ route('reviews.destroy', $review) }}"
+                                                        <?php endif; ?>
+                                                        <?php if($canDeleteReview): ?>
+                                                            <form action="<?php echo e(route('reviews.destroy', $review)); ?>"
                                                                 method="POST" class="delete-review-form"
-                                                                onsubmit="return confirm('{{ __('messages.review_delete_confirmation') }}');">
-                                                                @csrf
-                                                                @method('DELETE')
+                                                                onsubmit="return confirm('<?php echo e(__('messages.review_delete_confirmation')); ?>');">
+                                                                <?php echo csrf_field(); ?>
+                                                                <?php echo method_field('DELETE'); ?>
                                                                 <button type="submit"
-                                                                    class="text-xs text-red-600 hover:text-red-700 transition-colors duration-200">{{ __('messages.delete') }}</button>
+                                                                    class="text-xs text-red-600 hover:text-red-700 transition-colors duration-200"><?php echo e(__('messages.delete')); ?></button>
                                                             </form>
-                                                        @endif
+                                                        <?php endif; ?>
                                                     </div>
                                                 </div>
 
                                                 <div class="flex gap-0.5 mb-2">
-                                                    @for ($i = 1; $i <= 5; $i++)
-                                                        <svg class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}"
+                                                    <?php for($i = 1; $i <= 5; $i++): ?>
+                                                        <svg class="w-4 h-4 <?php echo e($i <= $review->rating ? 'text-yellow-400' : 'text-gray-300'); ?>"
                                                             fill="currentColor" viewBox="0 0 20 20">
                                                             <path
                                                                 d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                         </svg>
-                                                    @endfor
+                                                    <?php endfor; ?>
                                                 </div>
 
-                                                @if ($review->comment)
+                                                <?php if($review->comment): ?>
                                                     <p class="text-sm text-gray-700 whitespace-pre-wrap">
-                                                        {{ $review->comment }}</p>
-                                                @endif
+                                                        <?php echo e($review->comment); ?></p>
+                                                <?php endif; ?>
 
-                                                @if ($canReplyToReview)
+                                                <?php if($canReplyToReview): ?>
                                                     <form x-show="replyOpen" x-cloak
-                                                        action="{{ route('reviews.replies.store', $review) }}"
+                                                        action="<?php echo e(route('reviews.replies.store', $review)); ?>"
                                                         method="POST" class="mt-4 space-y-2">
-                                                        @csrf
+                                                        <?php echo csrf_field(); ?>
                                                         <textarea name="message" rows="3" required maxlength="2000"
                                                             class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm"
-                                                            placeholder="{{ __('messages.review_reply_placeholder') }}"></textarea>
+                                                            placeholder="<?php echo e(__('messages.review_reply_placeholder')); ?>"></textarea>
                                                         <div class="flex justify-end">
                                                             <button type="submit"
                                                                 class="inline-flex items-center px-4 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-                                                                {{ __('messages.review_reply_submit') }}
+                                                                <?php echo e(__('messages.review_reply_submit')); ?>
+
                                                             </button>
                                                         </div>
                                                     </form>
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
                                         </div>
 
-                                        @if ($review->replies && $review->replies->count() > 0)
+                                        <?php if($review->replies && $review->replies->count() > 0): ?>
                                             <div class="mt-4 space-y-4">
-                                                @foreach ($review->replies as $reply)
-                                                    @include('marketplace.partials.review-reply', [
+                                                <?php $__currentLoopData = $review->replies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $reply): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <?php echo $__env->make('marketplace.partials.review-reply', [
                                                         'reply' => $reply,
                                                         'review' => $review,
-                                                    ])
-                                                @endforeach
+                                                    ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                                 <div class="pt-4">
-                                    {{ $reviews->links() }}
+                                    <?php echo e($reviews->links()); ?>
+
                                 </div>
                             </div>
-                        @else
-                            <p class="text-center text-gray-500 py-8">{{ __('messages.no_reviews_yet_be_first') }}</p>
-                        @endif
+                        <?php else: ?>
+                            <p class="text-center text-gray-500 py-8"><?php echo e(__('messages.no_reviews_yet_be_first')); ?></p>
+                        <?php endif; ?>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <!-- Reactions Section -->
             <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Reactions') }}</h2>
+                    <h2 class="text-lg font-semibold text-gray-900"><?php echo e(__('Reactions')); ?></h2>
                 </div>
                 <div class="p-6">
-                    @auth
+                    <?php if(auth()->guard()->check()): ?>
                         <div class="mb-4">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <button onclick="toggleReaction('like')"
-                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'like' ? 'bg-blue-50 border-blue-300' : '' }}"
+                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors <?php echo e($userReaction && $userReaction->reaction_type === 'like' ? 'bg-blue-50 border-blue-300' : ''); ?>"
                                     data-reaction="like">
                                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                         <path
                                             d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.834a1 1 0 001.364.97l5-.833a1 1 0 00.636-.97v-5.834a1 1 0 00-.636-.97l-5-.833a1 1 0 00-1.364.97zM15.5 2a1.5 1.5 0 011.5 1.5v7a1.5 1.5 0 01-1.5 1.5h-4a1.5 1.5 0 01-1.5-1.5v-7A1.5 1.5 0 0111.5 2h4z" />
                                     </svg>
-                                    <span>{{ __('Like') }}</span>
+                                    <span><?php echo e(__('Like')); ?></span>
                                     <span class="ml-2 text-sm text-gray-600"
-                                        id="reaction-count-like">{{ $reactionsSummary['like'] ?? 0 }}</span>
+                                        id="reaction-count-like"><?php echo e($reactionsSummary['like'] ?? 0); ?></span>
                                 </button>
                                 <button onclick="toggleReaction('love')"
-                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'love' ? 'bg-red-50 border-red-300' : '' }}"
+                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors <?php echo e($userReaction && $userReaction->reaction_type === 'love' ? 'bg-red-50 border-red-300' : ''); ?>"
                                     data-reaction="love">
                                     <svg class="w-5 h-5 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
                                             clip-rule="evenodd" />
                                     </svg>
-                                    <span>{{ __('Love') }}</span>
+                                    <span><?php echo e(__('Love')); ?></span>
                                     <span class="ml-2 text-sm text-gray-600"
-                                        id="reaction-count-love">{{ $reactionsSummary['love'] ?? 0 }}</span>
+                                        id="reaction-count-love"><?php echo e($reactionsSummary['love'] ?? 0); ?></span>
                                 </button>
                                 <button onclick="toggleReaction('helpful')"
-                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'helpful' ? 'bg-green-50 border-green-300' : '' }}"
+                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors <?php echo e($userReaction && $userReaction->reaction_type === 'helpful' ? 'bg-green-50 border-green-300' : ''); ?>"
                                     data-reaction="helpful">
                                     <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                             clip-rule="evenodd" />
                                     </svg>
-                                    <span>{{ __('Helpful') }}</span>
+                                    <span><?php echo e(__('Helpful')); ?></span>
                                     <span class="ml-2 text-sm text-gray-600"
-                                        id="reaction-count-helpful">{{ $reactionsSummary['helpful'] ?? 0 }}</span>
+                                        id="reaction-count-helpful"><?php echo e($reactionsSummary['helpful'] ?? 0); ?></span>
                                 </button>
                                 <button onclick="toggleReaction('insightful')"
-                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'insightful' ? 'bg-purple-50 border-purple-300' : '' }}"
+                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors <?php echo e($userReaction && $userReaction->reaction_type === 'insightful' ? 'bg-purple-50 border-purple-300' : ''); ?>"
                                     data-reaction="insightful">
                                     <svg class="w-5 h-5 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
                                         <path
                                             d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                     </svg>
-                                    <span>{{ __('Insightful') }}</span>
+                                    <span><?php echo e(__('Insightful')); ?></span>
                                     <span class="ml-2 text-sm text-gray-600"
-                                        id="reaction-count-insightful">{{ $reactionsSummary['insightful'] ?? 0 }}</span>
+                                        id="reaction-count-insightful"><?php echo e($reactionsSummary['insightful'] ?? 0); ?></span>
                                 </button>
                                 <button onclick="toggleReaction('thanks')"
-                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors {{ $userReaction && $userReaction->reaction_type === 'thanks' ? 'bg-yellow-50 border-yellow-300' : '' }}"
+                                    class="reaction-btn inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors <?php echo e($userReaction && $userReaction->reaction_type === 'thanks' ? 'bg-yellow-50 border-yellow-300' : ''); ?>"
                                     data-reaction="thanks">
                                     <svg class="w-5 h-5 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.986 1.164l-1 7A1 1 0 0115 17H4a1 1 0 01-.986-1.164l1-7A1 1 0 015 8h4V2a1 1 0 011.3-.954z"
                                             clip-rule="evenodd" />
                                     </svg>
-                                    <span>{{ __('Thanks') }}</span>
+                                    <span><?php echo e(__('Thanks')); ?></span>
                                     <span class="ml-2 text-sm text-gray-600"
-                                        id="reaction-count-thanks">{{ $reactionsSummary['thanks'] ?? 0 }}</span>
+                                        id="reaction-count-thanks"><?php echo e($reactionsSummary['thanks'] ?? 0); ?></span>
                                 </button>
                             </div>
                         </div>
-                    @else
-                        <p class="text-sm text-gray-500">{{ __('Log in to react to this note') }}</p>
-                    @endauth
+                    <?php else: ?>
+                        <p class="text-sm text-gray-500"><?php echo e(__('Log in to react to this note')); ?></p>
+                    <?php endif; ?>
                 </div>
             </div>
 
             <!-- Comments Section -->
             <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Comments') }} ({{ $comments->total() }})
+                    <h2 class="text-lg font-semibold text-gray-900"><?php echo e(__('Comments')); ?> (<?php echo e($comments->total()); ?>)
                     </h2>
                 </div>
                 <div class="p-6">
-                    @auth
+                    <?php if(auth()->guard()->check()): ?>
                         <!-- Comment Form -->
-                        <form action="{{ route('notes.comments.store', $note) }}" method="POST"
+                        <form action="<?php echo e(route('notes.comments.store', $note)); ?>" method="POST"
                             class="mb-6 pb-6 border-b border-gray-200">
-                            @csrf
+                            <?php echo csrf_field(); ?>
                             <div class="mb-4">
-                                <textarea name="content" rows="3" required placeholder="{{ __('Write a comment...') }}"
+                                <textarea name="content" rows="3" required placeholder="<?php echo e(__('Write a comment...')); ?>"
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
                             </div>
                             <button type="submit"
                                 class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
-                                {{ __('Post Comment') }}
+                                <?php echo e(__('Post Comment')); ?>
+
                             </button>
                         </form>
-                    @else
-                        <p class="text-sm text-gray-500 mb-4">{{ __('Log in to comment') }}</p>
-                    @endauth
+                    <?php else: ?>
+                        <p class="text-sm text-gray-500 mb-4"><?php echo e(__('Log in to comment')); ?></p>
+                    <?php endif; ?>
 
                     <!-- Comments List -->
-                    @if ($comments->count() > 0)
+                    <?php if($comments->count() > 0): ?>
                         <div class="space-y-6">
-                            @foreach ($comments as $comment)
-                                <div id="comment-{{ $comment->id }}"
-                                    class="pb-6 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
+                            <?php $__currentLoopData = $comments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $comment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div id="comment-<?php echo e($comment->id); ?>"
+                                    class="pb-6 <?php echo e(!$loop->last ? 'border-b border-gray-200' : ''); ?>">
                                     <div class="flex gap-4">
                                         <div class="flex-shrink-0">
                                             <div
                                                 class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                                @if ($comment->user->avatar)
-                                                    @if (str_starts_with($comment->user->avatar, 'http'))
-                                                        <img src="{{ $comment->user->avatar }}"
-                                                            alt="{{ $comment->user->name }}" loading="lazy"
+                                                <?php if($comment->user->avatar): ?>
+                                                    <?php if(str_starts_with($comment->user->avatar, 'http')): ?>
+                                                        <img src="<?php echo e($comment->user->avatar); ?>"
+                                                            alt="<?php echo e($comment->user->name); ?>" loading="lazy"
                                                             class="w-10 h-10 rounded-full object-cover"
                                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                                    @else
-                                                        @php
+                                                    <?php else: ?>
+                                                        <?php
                                                             $avatarPath = $comment->user->avatar;
                                                             $avatarPath = ltrim($avatarPath, '/');
                                                             $avatarPath = preg_replace(
@@ -1747,85 +1844,89 @@ if (!$modelUrl) {
                                                                 '',
                                                                 $avatarPath,
                                                             );
-                                                        @endphp
-                                                        <img src="{{ asset('storage/' . $avatarPath) }}"
-                                                            alt="{{ $comment->user->name }}" loading="lazy"
+                                                        ?>
+                                                        <img src="<?php echo e(asset('storage/' . $avatarPath)); ?>"
+                                                            alt="<?php echo e($comment->user->name); ?>" loading="lazy"
                                                             class="w-10 h-10 rounded-full object-cover"
                                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                                    @endif
-                                                @else
+                                                    <?php endif; ?>
+                                                <?php else: ?>
                                                     <span
-                                                        class="text-sm font-semibold text-gray-600">{{ substr($comment->user->name, 0, 1) }}</span>
-                                                @endif
+                                                        class="text-sm font-semibold text-gray-600"><?php echo e(substr($comment->user->name, 0, 1)); ?></span>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                         <div class="flex-1">
                                             <div class="flex items-start justify-between mb-2">
                                                 <div>
                                                     <p class="text-sm font-semibold text-gray-900">
-                                                        {{ $comment->user->name }}</p>
+                                                        <?php echo e($comment->user->name); ?></p>
                                                     <p class="text-xs text-gray-500">
-                                                        {{ $comment->created_at->diffForHumans() }}</p>
+                                                        <?php echo e($comment->created_at->diffForHumans()); ?></p>
                                                 </div>
-                                                @auth
-                                                    @if ($comment->user_id === auth()->id() || auth()->user()->hasRole('admin'))
-                                                        <form action="{{ route('comments.destroy', $comment) }}"
+                                                <?php if(auth()->guard()->check()): ?>
+                                                    <?php if($comment->user_id === auth()->id() || auth()->user()->hasRole('admin')): ?>
+                                                        <form action="<?php echo e(route('comments.destroy', $comment)); ?>"
                                                             method="POST" class="inline">
-                                                            @csrf
-                                                            @method('DELETE')
+                                                            <?php echo csrf_field(); ?>
+                                                            <?php echo method_field('DELETE'); ?>
                                                             <button type="submit"
-                                                                onclick="return confirm('{{ __('Delete this comment?') }}')"
-                                                                class="text-xs text-red-600 hover:text-red-800">{{ __('Delete') }}</button>
+                                                                onclick="return confirm('<?php echo e(__('Delete this comment?')); ?>')"
+                                                                class="text-xs text-red-600 hover:text-red-800"><?php echo e(__('Delete')); ?></button>
                                                         </form>
-                                                    @endif
-                                                @endauth
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
                                             </div>
-                                            <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $comment->content }}
+                                            <p class="text-sm text-gray-700 whitespace-pre-wrap"><?php echo e($comment->content); ?>
+
                                             </p>
 
-                                            @auth
-                                                <button onclick="showReplyForm({{ $comment->id }})"
+                                            <?php if(auth()->guard()->check()): ?>
+                                                <button onclick="showReplyForm(<?php echo e($comment->id); ?>)"
                                                     class="mt-2 text-xs text-blue-600 hover:text-blue-800">
-                                                    {{ __('Reply') }}
+                                                    <?php echo e(__('Reply')); ?>
+
                                                 </button>
 
                                                 <!-- Reply Form -->
-                                                <form id="reply-form-{{ $comment->id }}"
-                                                    action="{{ route('comments.reply', $comment) }}" method="POST"
+                                                <form id="reply-form-<?php echo e($comment->id); ?>"
+                                                    action="<?php echo e(route('comments.reply', $comment)); ?>" method="POST"
                                                     class="mt-2 hidden">
-                                                    @csrf
+                                                    <?php echo csrf_field(); ?>
                                                     <textarea name="content" rows="2" required
                                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"></textarea>
                                                     <div class="mt-2 flex gap-2">
                                                         <button type="submit"
                                                             class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
-                                                            {{ __('Reply') }}
+                                                            <?php echo e(__('Reply')); ?>
+
                                                         </button>
-                                                        <button type="button" onclick="hideReplyForm({{ $comment->id }})"
+                                                        <button type="button" onclick="hideReplyForm(<?php echo e($comment->id); ?>)"
                                                             class="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
-                                                            {{ __('Cancel') }}
+                                                            <?php echo e(__('Cancel')); ?>
+
                                                         </button>
                                                     </div>
                                                 </form>
-                                            @endauth
+                                            <?php endif; ?>
 
                                             <!-- Replies -->
-                                            @if ($comment->replies->count() > 0)
+                                            <?php if($comment->replies->count() > 0): ?>
                                                 <div class="mt-4 ml-6 space-y-4 border-l-2 border-gray-200 pl-4">
-                                                    @foreach ($comment->replies as $reply)
+                                                    <?php $__currentLoopData = $comment->replies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $reply): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                         <div class="flex gap-3">
                                                             <div class="flex-shrink-0">
                                                                 <div
                                                                     class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                                                                    @if ($reply->user->avatar)
-                                                                        @if (str_starts_with($reply->user->avatar, 'http'))
-                                                                            <img src="{{ $reply->user->avatar }}"
-                                                                                alt="{{ $reply->user->name }}"
+                                                                    <?php if($reply->user->avatar): ?>
+                                                                        <?php if(str_starts_with($reply->user->avatar, 'http')): ?>
+                                                                            <img src="<?php echo e($reply->user->avatar); ?>"
+                                                                                alt="<?php echo e($reply->user->name); ?>"
                                                                                 loading="lazy"
                                                                                 class="w-8 h-8 rounded-full object-cover"
                                                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                                                        @else
-                                                                            @php
+                                                                        <?php else: ?>
+                                                                            <?php
                                                                                 $avatarPath = $reply->user->avatar;
                                                                                 $avatarPath = ltrim($avatarPath, '/');
                                                                                 $avatarPath = preg_replace(
@@ -1833,140 +1934,148 @@ if (!$modelUrl) {
                                                                                     '',
                                                                                     $avatarPath,
                                                                                 );
-                                                                            @endphp
-                                                                            <img src="{{ asset('storage/' . $avatarPath) }}"
-                                                                                alt="{{ $reply->user->name }}"
+                                                                            ?>
+                                                                            <img src="<?php echo e(asset('storage/' . $avatarPath)); ?>"
+                                                                                alt="<?php echo e($reply->user->name); ?>"
                                                                                 loading="lazy"
                                                                                 class="w-8 h-8 rounded-full object-cover"
                                                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                                                        @endif
-                                                                    @else
+                                                                        <?php endif; ?>
+                                                                    <?php else: ?>
                                                                         <span
-                                                                            class="text-xs font-semibold text-gray-600">{{ substr($reply->user->name, 0, 1) }}</span>
-                                                                    @endif
+                                                                            class="text-xs font-semibold text-gray-600"><?php echo e(substr($reply->user->name, 0, 1)); ?></span>
+                                                                    <?php endif; ?>
                                                                 </div>
                                                             </div>
                                                             <div class="flex-1">
                                                                 <p class="text-xs font-semibold text-gray-900">
-                                                                    {{ $reply->user->name }}</p>
+                                                                    <?php echo e($reply->user->name); ?></p>
                                                                 <p class="text-xs text-gray-700 mt-1">
-                                                                    {{ $reply->content }}</p>
+                                                                    <?php echo e($reply->content); ?></p>
                                                                 <p class="text-xs text-gray-500 mt-1">
-                                                                    {{ $reply->created_at->diffForHumans() }}</p>
+                                                                    <?php echo e($reply->created_at->diffForHumans()); ?></p>
                                                             </div>
                                                         </div>
-                                                    @endforeach
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                 </div>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                         <div class="mt-6">
-                            {{ $comments->links() }}
+                            <?php echo e($comments->links()); ?>
+
                         </div>
-                    @else
-                        <p class="text-center text-gray-500 py-8">{{ __('No comments yet. Be the first to comment!') }}
+                    <?php else: ?>
+                        <p class="text-center text-gray-500 py-8"><?php echo e(__('No comments yet. Be the first to comment!')); ?>
+
                         </p>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
             <!-- Q&A Section -->
             <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Questions & Answers') }}
-                        ({{ $questions->total() }})</h2>
+                    <h2 class="text-lg font-semibold text-gray-900"><?php echo e(__('Questions & Answers')); ?>
+
+                        (<?php echo e($questions->total()); ?>)</h2>
                 </div>
                 <div class="p-6">
-                    @auth
+                    <?php if(auth()->guard()->check()): ?>
                         <!-- Ask Question Form -->
-                        <form action="{{ route('notes.questions.store', $note) }}" method="POST"
+                        <form action="<?php echo e(route('notes.questions.store', $note)); ?>" method="POST"
                             class="mb-6 pb-6 border-b border-gray-200">
-                            @csrf
+                            <?php echo csrf_field(); ?>
                             <div class="mb-4">
-                                <textarea name="question" rows="3" required placeholder="{{ __('Ask a question about this note...') }}"
+                                <textarea name="question" rows="3" required placeholder="<?php echo e(__('Ask a question about this note...')); ?>"
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
                             </div>
                             <button type="submit"
                                 class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
-                                {{ __('Ask Question') }}
+                                <?php echo e(__('Ask Question')); ?>
+
                             </button>
                         </form>
-                    @else
-                        <p class="text-sm text-gray-500 mb-4">{{ __('Log in to ask questions') }}</p>
-                    @endauth
+                    <?php else: ?>
+                        <p class="text-sm text-gray-500 mb-4"><?php echo e(__('Log in to ask questions')); ?></p>
+                    <?php endif; ?>
 
                     <!-- Questions List -->
-                    @if ($questions->count() > 0)
+                    <?php if($questions->count() > 0): ?>
                         <div class="space-y-6">
-                            @foreach ($questions as $question)
-                                <div id="question-{{ $question->id }}"
-                                    class="pb-6 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
+                            <?php $__currentLoopData = $questions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $question): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div id="question-<?php echo e($question->id); ?>"
+                                    class="pb-6 <?php echo e(!$loop->last ? 'border-b border-gray-200' : ''); ?>">
                                     <div class="mb-3">
                                         <div class="flex items-start justify-between mb-2">
                                             <div class="flex-1">
                                                 <p class="text-sm font-semibold text-gray-900 mb-1">
-                                                    {{ $question->user->name }}</p>
-                                                <p class="text-sm text-gray-700">{{ $question->question }}</p>
+                                                    <?php echo e($question->user->name); ?></p>
+                                                <p class="text-sm text-gray-700"><?php echo e($question->question); ?></p>
                                                 <p class="text-xs text-gray-500 mt-1">
-                                                    {{ $question->created_at->diffForHumans() }}</p>
+                                                    <?php echo e($question->created_at->diffForHumans()); ?></p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    @if ($question->isAnswered())
+                                    <?php if($question->isAnswered()): ?>
                                         <div class="ml-6 pl-4 border-l-2 border-green-200 bg-green-50 rounded p-4">
                                             <div class="flex items-start justify-between mb-2">
                                                 <div class="flex-1">
                                                     <p class="text-xs font-semibold text-green-800 mb-1">
-                                                        {{ __('Answered by') }} {{ $question->answeredBy->name }}
+                                                        <?php echo e(__('Answered by')); ?> <?php echo e($question->answeredBy->name); ?>
+
                                                     </p>
-                                                    <p class="text-sm text-gray-700">{{ $question->answer }}</p>
+                                                    <p class="text-sm text-gray-700"><?php echo e($question->answer); ?></p>
                                                     <p class="text-xs text-gray-500 mt-1">
-                                                        {{ $question->answered_at->diffForHumans() }}</p>
+                                                        <?php echo e($question->answered_at->diffForHumans()); ?></p>
                                                 </div>
                                             </div>
-                                            @auth
-                                                <button onclick="markHelpful({{ $question->id }}, this)"
+                                            <?php if(auth()->guard()->check()): ?>
+                                                <button onclick="markHelpful(<?php echo e($question->id); ?>, this)"
                                                     class="mt-2 text-xs text-green-600 hover:text-green-800">
-                                                    {{ __('Helpful') }} ({{ $question->helpful_count }})
+                                                    <?php echo e(__('Helpful')); ?> (<?php echo e($question->helpful_count); ?>)
                                                 </button>
-                                            @endauth
+                                            <?php endif; ?>
                                         </div>
-                                    @elseif(auth()->check() && auth()->id() === $note->user_id)
+                                    <?php elseif(auth()->check() && auth()->id() === $note->user_id): ?>
                                         <!-- Answer Form (for seller) -->
-                                        <form action="{{ route('questions.answer', $question) }}" method="POST"
+                                        <form action="<?php echo e(route('questions.answer', $question)); ?>" method="POST"
                                             class="ml-6 mt-3">
-                                            @csrf
-                                            <textarea name="answer" rows="3" required placeholder="{{ __('Write your answer...') }}"
+                                            <?php echo csrf_field(); ?>
+                                            <textarea name="answer" rows="3" required placeholder="<?php echo e(__('Write your answer...')); ?>"
                                                 class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"></textarea>
                                             <button type="submit"
                                                 class="mt-2 px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">
-                                                {{ __('Answer') }}
+                                                <?php echo e(__('Answer')); ?>
+
                                             </button>
                                         </form>
-                                    @else
-                                        <p class="text-xs text-gray-500 ml-6">{{ __('Waiting for seller to answer...') }}
+                                    <?php else: ?>
+                                        <p class="text-xs text-gray-500 ml-6"><?php echo e(__('Waiting for seller to answer...')); ?>
+
                                         </p>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                         <div class="mt-6">
-                            {{ $questions->links() }}
+                            <?php echo e($questions->links()); ?>
+
                         </div>
-                    @else
-                        <p class="text-center text-gray-500 py-8">{{ __('No questions yet. Be the first to ask!') }}</p>
-                    @endif
+                    <?php else: ?>
+                        <p class="text-center text-gray-500 py-8"><?php echo e(__('No questions yet. Be the first to ask!')); ?></p>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
     </div>
 
-    @push('styles')
+    <?php $__env->startPush('styles'); ?>
         <!-- Prism.js for code syntax highlighting -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
         <style>
@@ -1974,9 +2083,9 @@ if (!$modelUrl) {
                 display: none !important;
             }
         </style>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
         <!-- Media Gallery Script -->
         <script>
             window.mediaGallery = function() {
@@ -1987,8 +2096,8 @@ if (!$modelUrl) {
                     translateX: 0,
                     translateY: 0,
                     imageLoaded: false,
-                    imageCount: {{ $note->hasThumbnails() ? count($note->thumbnails) : 0 }},
-                    images: @js($note->hasThumbnails() ? $note->thumbnails : []),
+                    imageCount: <?php echo e($note->hasThumbnails() ? count($note->thumbnails) : 0); ?>,
+                    images: <?php echo \Illuminate\Support\Js::from($note->hasThumbnails() ? $note->thumbnails : [])->toHtml() ?>,
 
                     // Touch/swipe handling
                     touchStartX: 0,
@@ -2032,9 +2141,9 @@ if (!$modelUrl) {
                         if (this.currentIndex < 0 || this.currentIndex >= this.images.length) return '';
                         const image = this.images[this.currentIndex];
                         if (typeof image === 'string') {
-                            return '{{ asset('storage/') }}/' + image;
+                            return '<?php echo e(asset('storage/')); ?>/' + image;
                         } else if (typeof image === 'object' && image !== null) {
-                            return image.url || ('{{ asset('storage/') }}/' + (image.path || ''));
+                            return image.url || ('<?php echo e(asset('storage/')); ?>/' + (image.path || ''));
                         }
                         return image;
                     },
@@ -2185,7 +2294,7 @@ if (!$modelUrl) {
             }
 
             // Set fingerprint in header for free notes
-            @if ($note->price == 0)
+            <?php if($note->price == 0): ?>
                 document.addEventListener('DOMContentLoaded', function() {
                     const fingerprint = generateFingerprint();
                     // Store in sessionStorage to reuse
@@ -2193,17 +2302,17 @@ if (!$modelUrl) {
                         sessionStorage.setItem('browser_fingerprint', fingerprint);
                     }
                 });
-            @endif
+            <?php endif; ?>
         </script>
         <script>
-            const copyTranslations = @js([
+            const copyTranslations = <?php echo \Illuminate\Support\Js::from([
     'success_title' => __('messages.copy_link_success_title'),
     'success_message' => __('messages.copy_link_success_message'),
     'error_message' => __('messages.copy_link_error_message'),
     'error_title' => __('messages.error'),
-]);
+])->toHtml() ?>;
 
-            const reportTranslations = @js([
+            const reportTranslations = <?php echo \Illuminate\Support\Js::from([
     'title' => __('messages.report_modal_title'),
     'reason_label' => __('messages.report_reason_label'),
     'reason_placeholder' => __('messages.report_reason_placeholder'),
@@ -2225,7 +2334,7 @@ if (!$modelUrl) {
     'error_message' => __('messages.report_error_message'),
     'prompt_reason' => __('messages.report_prompt_reason'),
     'prompt_description' => __('messages.report_prompt_description'),
-]);
+])->toHtml() ?>;
 
             // Copy to clipboard function
             function copyToClipboard(text) {
@@ -2256,7 +2365,7 @@ if (!$modelUrl) {
             async function copyShareReferralLink(baseUrl) {
                 try {
                     // Get referral token from server
-                    const response = await fetch(`/api/notes/{{ $note->id }}/share-link`, {
+                    const response = await fetch(`/api/notes/<?php echo e($note->id); ?>/share-link`, {
                         method: 'GET',
                         headers: {
                             'Accept': 'application/json',
@@ -2299,12 +2408,13 @@ if (!$modelUrl) {
 
             // Show share statistics modal
             function showShareStatsModal() {
-                @if (isset($currentNoteShare) && $currentNoteShare)
+                <?php if(isset($currentNoteShare) && $currentNoteShare): ?>
                     const stats = {
-                        clicks: {{ $currentNoteShare->click_count }},
-                        purchases: {{ $currentNoteShare->purchase_count }},
-                        commission: {{ $currentNoteShare->total_commission_earned }},
-                        revenue: {{ $currentNoteShare->total_revenue_generated }}
+                        clicks: <?php echo e($currentNoteShare->click_count); ?>,
+                        purchases: <?php echo e($currentNoteShare->purchase_count); ?>,
+                        commission: <?php echo e($currentNoteShare->total_commission_earned); ?>,
+                        revenue: <?php echo e($currentNoteShare->total_revenue_generated); ?>
+
                     };
 
                     if (typeof Swal !== 'undefined') {
@@ -2336,7 +2446,7 @@ if (!$modelUrl) {
                             cancelButtonText: 'Close'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                window.location.href = '{{ route('share.analytics') }}';
+                                window.location.href = '<?php echo e(route('share.analytics')); ?>';
                             }
                         });
                     } else {
@@ -2344,7 +2454,7 @@ if (!$modelUrl) {
                             `Clicks: ${stats.clicks}\nPurchases: ${stats.purchases}\nCommission: Rp ${stats.commission}\nRevenue: Rp ${stats.revenue}`
                         );
                     }
-                @endif
+                <?php endif; ?>
             }
 
             function fallbackCopyToClipboard(text) {
@@ -2380,7 +2490,7 @@ if (!$modelUrl) {
                 document.body.removeChild(textArea);
             }
 
-            const noteReportEndpoint = "{{ route('notes.report', $note) }}";
+            const noteReportEndpoint = "<?php echo e(route('notes.report', $note)); ?>";
 
             function showNoteReportModal() {
                 if (typeof Swal !== 'undefined') {
@@ -2551,21 +2661,21 @@ if (!$modelUrl) {
 
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({
-                                title: '{{ __('messages.are_you_sure') }}',
-                                text: '{{ __('messages.delete_confirmation') }}',
+                                title: '<?php echo e(__('messages.are_you_sure')); ?>',
+                                text: '<?php echo e(__('messages.delete_confirmation')); ?>',
                                 icon: 'warning',
                                 showCancelButton: true,
                                 confirmButtonColor: '#dc2626',
                                 cancelButtonColor: '#6b7280',
-                                confirmButtonText: '{{ __('messages.yes_delete') }}',
-                                cancelButtonText: '{{ __('messages.no_cancel') }}'
+                                confirmButtonText: '<?php echo e(__('messages.yes_delete')); ?>',
+                                cancelButtonText: '<?php echo e(__('messages.no_cancel')); ?>'
                             }).then((result) => {
                                 if (result.isConfirmed) {
                                     formElement.submit();
                                 }
                             });
                         } else {
-                            if (confirm('{{ __('messages.delete_confirmation') }}')) {
+                            if (confirm('<?php echo e(__('messages.delete_confirmation')); ?>')) {
                                 formElement.submit();
                             }
                         }
@@ -2648,37 +2758,37 @@ if (!$modelUrl) {
                 initGracePeriodCountdown();
             }
 
-            @if (auth()->check() && auth()->user()->hasPremium() && auth()->user()->role === 'buyer')
+            <?php if(auth()->check() && auth()->user()->hasPremium() && auth()->user()->role === 'buyer'): ?>
                 function showCollectionModal(noteId) {
-                    const collections = @json(auth()->user()->collections()->get(['id', 'name']));
+                    const collections = <?php echo json_encode(auth()->user()->collections()->get(['id', 'name']), 512) ?>;
 
                     if (collections.length === 0) {
                         Swal.fire({
                             icon: 'info',
-                            title: '{{ __('messages.no_collections_title') }}',
-                            text: '{{ __('messages.no_collections_message') }}',
+                            title: '<?php echo e(__('messages.no_collections_title')); ?>',
+                            text: '<?php echo e(__('messages.no_collections_message')); ?>',
                             showCancelButton: true,
-                            confirmButtonText: '{{ __('messages.create_collection_button') }}',
-                            cancelButtonText: '{{ __('messages.cancel') }}'
+                            confirmButtonText: '<?php echo e(__('messages.create_collection_button')); ?>',
+                            cancelButtonText: '<?php echo e(__('messages.cancel')); ?>'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                window.location.href = '{{ route('collections.create') }}';
+                                window.location.href = '<?php echo e(route('collections.create')); ?>';
                             }
                         });
                         return;
                     }
 
                     Swal.fire({
-                        title: '{{ __('messages.collection_modal_title') }}',
+                        title: '<?php echo e(__('messages.collection_modal_title')); ?>',
                         input: 'select',
                         inputOptions: Object.fromEntries(collections.map(c => [c.id, c.name])),
-                        inputPlaceholder: '{{ __('messages.collection_modal_placeholder') }}',
+                        inputPlaceholder: '<?php echo e(__('messages.collection_modal_placeholder')); ?>',
                         showCancelButton: true,
-                        confirmButtonText: '{{ __('messages.collection_modal_confirm') }}',
-                        cancelButtonText: '{{ __('messages.cancel') }}',
+                        confirmButtonText: '<?php echo e(__('messages.collection_modal_confirm')); ?>',
+                        cancelButtonText: '<?php echo e(__('messages.cancel')); ?>',
                         inputValidator: (value) => {
                             if (!value) {
-                                return '{{ __('messages.collection_modal_validation') }}';
+                                return '<?php echo e(__('messages.collection_modal_validation')); ?>';
                             }
                         }
                     }).then((result) => {
@@ -2697,13 +2807,13 @@ if (!$modelUrl) {
                         }
                     });
                 }
-            @endif
+            <?php endif; ?>
         </script>
-        @auth
-            @if (auth()->user()->hasPremium() && auth()->user()->role === 'buyer' && ($alreadyPurchased ?? false))
+        <?php if(auth()->guard()->check()): ?>
+            <?php if(auth()->user()->hasPremium() && auth()->user()->role === 'buyer' && ($alreadyPurchased ?? false)): ?>
                 <script>
                     // Reading Progress Tracking
-                    const noteId = '{{ $note->id }}';
+                    const noteId = '<?php echo e($note->id); ?>';
                     let progressUpdateTimeout;
                     let currentProgress = 0;
 
@@ -2776,7 +2886,7 @@ if (!$modelUrl) {
                             .catch(error => console.error('Error saving progress:', error));
                     }
 
-                    const bookmarkTranslations = @js([
+                    const bookmarkTranslations = <?php echo \Illuminate\Support\Js::from([
     'empty' => __('messages.bookmarks_empty', ['action' => __('messages.add_bookmark')]),
     'default_title' => __('messages.bookmark_default_title'),
     'go_to' => __('messages.bookmark_go_to'),
@@ -2798,7 +2908,7 @@ if (!$modelUrl) {
     'delete_error_message' => __('messages.bookmark_delete_error_message'),
     'show' => __('messages.bookmarks_toggle_show'),
     'hide' => __('messages.bookmarks_toggle_hide'),
-]);
+])->toHtml() ?>;
 
                     // Bookmarks functionality
                     let bookmarks = [];
@@ -2997,8 +3107,8 @@ if (!$modelUrl) {
                     // Load bookmarks on page load
                     loadBookmarks();
                 </script>
-            @endif
-        @endauth
+            <?php endif; ?>
+        <?php endif; ?>
         <script>
             // Reactions functionality
             function toggleReaction(type) {
@@ -3010,7 +3120,7 @@ if (!$modelUrl) {
                 btn.disabled = true;
                 btn.style.opacity = '0.6';
 
-                fetch(`/notes/{{ $note->id }}/reactions/toggle`, {
+                fetch(`/notes/<?php echo e($note->id); ?>/reactions/toggle`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -3140,7 +3250,7 @@ if (!$modelUrl) {
                     })
                     .then(data => {
                         if (data.success) {
-                            btn.textContent = `{{ __('Helpful') }} (${data.helpful_count || 0})`;
+                            btn.textContent = `<?php echo e(__('Helpful')); ?> (${data.helpful_count || 0})`;
                             btn.disabled = true;
                             btn.classList.add('opacity-50');
                             btn.style.opacity = '0.5';
@@ -3209,5 +3319,7 @@ if (!$modelUrl) {
                 }
             });
         </script>
-    @endpush
-@endsection
+    <?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\PROJECT\LARAVEL\noteds\resources\views/marketplace/show.blade.php ENDPATH**/ ?>

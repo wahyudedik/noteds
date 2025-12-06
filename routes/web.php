@@ -52,6 +52,7 @@ use App\Http\Controllers\ShareLeaderboardController;
 use App\Http\Controllers\PointsController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\Api\NoteShareController;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
@@ -743,9 +744,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // AI Detection API (for logging detected AI bots - no auth required)
-Route::post('/api/ai-detection', function (\Illuminate\Http\Request $request) {
+Route::post('/api/ai-detection', function (Request $request) {
     // Log AI detection event (optional - can be stored in database or logs)
-    \Log::info('AI Detection Event', [
+    Log::info('AI Detection Event', [
         'user_agent' => $request->input('userAgent'),
         'detected' => $request->input('detected'),
         'reason' => $request->input('reason'),

@@ -224,7 +224,7 @@ class Note extends Model
         }
 
         // Check if seller has at least 1 successful sale (any note)
-        $sellerHasSale = \App\Models\Transaction::where('seller_id', $this->user_id)
+        $sellerHasSale = Transaction::where('seller_id', $this->user_id)
             ->where('status', 'success')
             ->exists();
 
