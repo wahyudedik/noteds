@@ -161,7 +161,7 @@ Route::post('/payment/callback', ...)->withoutMiddleware([\Illuminate\Foundation
 **Laravel Password Rules:**
 - Minimum 8 characters (configurable)
 - Password confirmation required
-- Current password required for changes
+- Current password required for changes 
 
 **Configuration:**
 ```php

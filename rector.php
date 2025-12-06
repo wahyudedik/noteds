@@ -3,24 +3,20 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
-use Rector\Set\ValueObject\LevelSetList;
-use Rector\Set\ValueObject\SetList;
 
-return static function (RectorConfig $rectorConfig): void {
-    $rectorConfig->paths([
+return RectorConfig::configure()
+    ->withPhpVersion(\Rector\ValueObject\PhpVersion::PHP_82)
+    ->withPaths([
         __DIR__ . '/app',
         __DIR__ . '/database',
         __DIR__ . '/routes',
         __DIR__ . '/tests',
+    ])
+    ->withRules([
+        \Rector\Php81\Rector\Property\ReadOnlyPropertyRector::class,
+    ])
+    ->withSets([
+        \Rector\Set\ValueObject\SetList::CODE_QUALITY,
+        \Rector\Set\ValueObject\SetList::TYPE_DECLARATION,
+        \Rector\Set\ValueObject\SetList::EARLY_RETURN,
     ]);
-
-    $rectorConfig->sets([
-        LevelSetList::UP_TO_PHP_82,
-        SetList::CODE_QUALITY,
-        SetList::TYPE_DECLARATION,
-        SetList::EARLY_RETURN,
-    ]);
-
-    $rectorConfig->rule(ReadOnlyPropertyRector::class);
-};

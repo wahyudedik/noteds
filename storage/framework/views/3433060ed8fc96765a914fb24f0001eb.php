@@ -444,14 +444,8 @@
                                             <?php if($note->user->badges && $note->user->badges->count() > 0): ?>
                                                 <?php $__currentLoopData = $note->user->badges->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $badge): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                     <span
-                                                        class="inline-flex items-center text-xs font-medium 
-                                                        <?php if($badge->color === 'gold'): ?> text-amber-600
-                                                        <?php elseif($badge->color === 'green'): ?> text-green-600
-                                                        <?php elseif($badge->color === 'blue'): ?> text-blue-600
-                                                        <?php elseif($badge->color === 'purple'): ?> text-purple-600
-                                                        <?php elseif($badge->color === 'yellow'): ?> text-yellow-500
-                                                        <?php elseif($badge->color === 'orange'): ?> text-orange-600
-                                                        <?php else: ?> text-slate-600 <?php endif; ?>"
+                                                        class="inline-flex items-center text-xs font-medium"
+                                                        style="color: <?php echo e($badge->color_hex); ?>;"
                                                         title="<?php echo e($badge->name); ?>">
                                                         <?php if($badge->icon): ?>
                                                             <?php echo e($badge->icon); ?>

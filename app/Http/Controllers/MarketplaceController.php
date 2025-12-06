@@ -1360,8 +1360,8 @@ class MarketplaceController extends Controller
                     $this->notificationService->notifyPurchase(
                         $buyerForNotification,
                         $note,
-                        $notificationData['purchase']['amount'],
-                        $notificationData['purchase']['transaction_id'],
+                        $notificationData['purchase']['amount'] ?? 0,
+                        $notificationData['purchase']['transaction_id'] ?? null,
                         $notificationData['purchase']['breakdown'] ?? []
                     );
                 }
@@ -1373,8 +1373,8 @@ class MarketplaceController extends Controller
                     $this->notificationService->notifySale(
                         $sellerForNotification,
                         $note,
-                        $notificationData['sale']['amount'],
-                        $notificationData['sale']['buyer_name'],
+                        $notificationData['sale']['amount'] ?? 0,
+                        $notificationData['sale']['buyer_name'] ?? 'Unknown',
                         $notificationData['sale']['breakdown'] ?? []
                     );
                 }

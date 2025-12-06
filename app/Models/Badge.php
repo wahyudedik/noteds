@@ -28,6 +28,19 @@ class Badge extends Model
         'custom_criteria',
     ];
 
+    /**
+     * Mapping warna badge ke hex color codes
+     */
+    protected $colorMap = [
+        'gold' => '#b45309',    // amber-600
+        'green' => '#16a34a',   // green-600
+        'blue' => '#2563eb',    // blue-600
+        'purple' => '#9333ea',  // purple-600
+        'yellow' => '#eab308',  // yellow-500
+        'orange' => '#ea580c',  // orange-600
+        'default' => '#4b5563', // slate-600
+    ];
+
     protected function casts(): array
     {
         return [
@@ -66,6 +79,14 @@ class Badge extends Model
     public function creator(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get hex color for badge
+     */
+    public function getColorHexAttribute(): string
+    {
+        return $this->colorMap[$this->color] ?? $this->colorMap['default'];
     }
 
     /**

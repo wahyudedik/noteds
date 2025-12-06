@@ -397,14 +397,8 @@
                                             @if ($note->user->badges && $note->user->badges->count() > 0)
                                                 @foreach ($note->user->badges->take(5) as $badge)
                                                     <span
-                                                        class="inline-flex items-center text-xs font-medium 
-                                                        @if ($badge->color === 'gold') text-amber-600
-                                                        @elseif($badge->color === 'green') text-green-600
-                                                        @elseif($badge->color === 'blue') text-blue-600
-                                                        @elseif($badge->color === 'purple') text-purple-600
-                                                        @elseif($badge->color === 'yellow') text-yellow-500
-                                                        @elseif($badge->color === 'orange') text-orange-600
-                                                        @else text-slate-600 @endif"
+                                                        class="inline-flex items-center text-xs font-medium"
+                                                        style="color: {{ $badge->color_hex }};"
                                                         title="{{ $badge->name }}">
                                                         @if ($badge->icon)
                                                             {{ $badge->icon }}
