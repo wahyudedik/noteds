@@ -16,7 +16,7 @@ Platform di mana pengguna bisa:
 - ✅ Menulis dan menyimpan catatan pribadi
 - ✅ Menjual template atau ide digital mereka 
 - ✅ Membeli catatan/ide/template milik orang lain 
-- ✅ Menghasilkan uang dari setiap catatan yang dibeli orang
+- ✅ Menghasilkan uang dari setiap catatan yang dibeli orang 
 
 ### 💰 Monetisasi
 

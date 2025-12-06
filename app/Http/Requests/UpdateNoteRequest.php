@@ -27,7 +27,7 @@ class UpdateNoteRequest extends FormRequest
         
         return [
             'title' => ['required', 'string', 'max:255'],
-            'content' => ['required', 'string'],
+            'content' => ['required', 'string', 'max:1000000'], // Max 1MB to prevent database truncation errors
             'summary' => ['nullable', 'string', 'max:500'],
             'preview_content' => ['nullable', 'string', 'max:300'],
             'ecosystem_category' => ['nullable', 'in:design,code,photo,audio,video,theme,3d,elements'],
@@ -86,6 +86,7 @@ class UpdateNoteRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'content.max' => 'Note content is too large. Maximum size is 1MB. Please reduce the content size or split into multiple notes.',
             'attachments.max' => 'Maximum 10 files allowed per note.',
             'attachments.*.max' => 'File size exceeds 10MB limit.',
             'attachments.*.mimes' => 'File type not allowed. Allowed: PDF, DOC, DOCX, TXT, ZIP, RAR, JPG, PNG, GIF, XLS, XLSX, PPT, PPTX',
