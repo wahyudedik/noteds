@@ -14,7 +14,7 @@
                 window.location.href = window.location.href.replace('https://', 'http://');
             }
         </script>
-    @endif
+    @endif 
 
     <title>@yield('title', config('app.name', 'Laravel'))</title>
 

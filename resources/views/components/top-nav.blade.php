@@ -22,7 +22,7 @@
             </div>
 
             <!-- Right side actions -->
-            <div class="flex items-center gap-3 sm:gap-4">
+            <div class="flex items-center gap-3 sm:gap-4"> 
                 <!-- Locale Switcher -->
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open"

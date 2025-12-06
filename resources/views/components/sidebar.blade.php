@@ -20,7 +20,7 @@
                 'active' => request()->routeIs('welcome'),
             ],
         ],
-    ];
+    ]; 
 
     if ($user) {
         if ($user->role === 'user_workspaces') {
@@ -333,30 +333,38 @@
 @endphp
 
 <div x-data="{ 
-    sidebarOpen: window.innerWidth >= 1024 ? (localStorage.getItem('sidebarOpen') !== 'false') : false,
-    isExpanded: window.innerWidth >= 1024 ? (localStorage.getItem('sidebarOpen') !== 'false') : true,
+    sidebarOpen: false,
+    isExpanded: localStorage.getItem('sidebarExpanded') !== 'false',
+    isMobile: window.innerWidth < 1024,
     init() {
         const self = this;
-        // Sync with localStorage
+        
+        // Initialize on load
+        if (window.innerWidth >= 1024) {
+            self.sidebarOpen = true;
+            self.isExpanded = localStorage.getItem('sidebarExpanded') !== 'false';
+        }
+        
+        // Sync isExpanded with localStorage
         this.$watch('isExpanded', value => {
-            if (window.innerWidth >= 1024) {
-                localStorage.setItem('sidebarOpen', value);
-            }
+            localStorage.setItem('sidebarExpanded', value);
         });
+        
         // Handle window resize
         const handleResize = () => {
+            self.isMobile = window.innerWidth < 1024;
             if (window.innerWidth >= 1024) {
                 self.sidebarOpen = true;
-                self.isExpanded = localStorage.getItem('sidebarOpen') !== 'false';
             } else {
                 self.sidebarOpen = false;
-                self.isExpanded = true;
             }
         };
+        
         window.addEventListener('resize', handleResize);
-        // Listen for toggle event from top-nav
+        
+        // Listen for toggle event from top-nav (mobile)
         document.addEventListener('toggle-sidebar', () => {
-            if (window.innerWidth < 1024) {
+            if (self.isMobile) {
                 self.sidebarOpen = !self.sidebarOpen;
             }
         });
@@ -367,11 +375,10 @@
     <aside 
         :class="[
             isExpanded ? 'w-64' : 'w-20',
-            { 'translate-x-0': sidebarOpen || window.innerWidth >= 1024, '-translate-x-full': !sidebarOpen && window.innerWidth < 1024 }
+            'transition-all duration-300 ease-in-out'
         ]"
-        class="fixed lg:static inset-y-0 left-0 z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out overflow-hidden flex flex-col flex-shrink-0 h-full"
-        x-transition
-        @click.away="if (window.innerWidth < 1024) sidebarOpen = false">
+        class="hidden lg:flex lg:flex-col fixed lg:static inset-y-0 left-0 z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-hidden flex-col flex-shrink-0 h-full"
+        x-cloak>
         <!-- Logo -->
         <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
             <a href="/" class="flex items-center gap-2 min-w-0">
@@ -382,19 +389,12 @@
             </a>
             <button 
                 @click="isExpanded = !isExpanded"
-                class="hidden lg:block p-1.5 rounded-md text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                class="p-1.5 rounded-md text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <svg x-show="isExpanded" x-transition class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                 </svg>
                 <svg x-show="!isExpanded" x-transition class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                </svg>
-            </button>
-            <button 
-                @click="sidebarOpen = false"
-                class="lg:hidden p-1.5 rounded-md text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         </div>
@@ -474,16 +474,115 @@
 
     <!-- Mobile Overlay -->
     <div 
-        x-show="sidebarOpen && window.innerWidth < 1024"
+        x-show="sidebarOpen"
         @click="sidebarOpen = false"
+        class="fixed inset-0 bg-gray-600 bg-opacity-75 lg:hidden z-20"
         x-transition:enter="transition-opacity ease-linear duration-300"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
         x-transition:leave="transition-opacity ease-linear duration-300"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-gray-600 bg-opacity-75 z-20 lg:hidden"
         x-cloak>
     </div>
+
+    <!-- Mobile Sidebar -->
+    <aside 
+        x-show="sidebarOpen"
+        x-transition:enter="transition ease-in-out duration-300 transform"
+        x-transition:enter-start="-translate-x-full"
+        x-transition:enter-end="translate-x-0"
+        x-transition:leave="transition ease-in-out duration-300 transform"
+        x-transition:leave-start="translate-x-0"
+        x-transition:leave-end="-translate-x-full"
+        class="fixed lg:hidden inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col flex-shrink-0 h-full"
+        x-cloak>
+        <!-- Mobile Sidebar Header -->
+        <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
+            <a href="/" class="flex items-center gap-2 min-w-0">
+                <img src="{{ asset('logo.png') }}" alt="{{ config('app.name', 'Noteds') }}" class="h-8 w-8 flex-shrink-0">
+                <span class="text-xl font-bold text-gray-900 dark:text-white whitespace-nowrap overflow-hidden">
+                    {{ config('app.name', 'Noteds') }}
+                </span>
+            </a>
+            <button 
+                @click="sidebarOpen = false"
+                class="p-1.5 rounded-md text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4 px-2">
+            @foreach ($menuGroups as $group)
+                @if ($group['title'])
+                    <div class="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        {{ $group['title'] }}
+                    </div>
+                @endif
+                <div class="space-y-1">
+                    @foreach ($group['items'] as $item)
+                        @if (isset($item['submenu']) && count($item['submenu']) > 0)
+                            <div x-data="{ open: {{ $item['active'] ? 'true' : 'false' }} }" class="space-y-1">
+                                <button @click="open = !open"
+                                    class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ $item['active'] ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors duration-150">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <span class="flex-shrink-0">{!! $item['icon'] !!}</span>
+                                        <span class="truncate">{{ $item['label'] }}</span>
+                                    </div>
+                                    <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                    </svg>
+                                </button>
+                                <div x-show="open" class="pl-3 space-y-1">
+                                    @foreach ($item['submenu'] as $subitem)
+                                        <a href="{{ $subitem['href'] }}"
+                                            class="block px-3 py-2 text-sm rounded-md {{ $subitem['active'] ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors duration-150">
+                                            {{ $subitem['label'] }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <a href="{{ $item['href'] }}"
+                                class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md {{ $item['active'] ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors duration-150">
+                                <span class="flex-shrink-0">{!! $item['icon'] !!}</span>
+                                <span class="truncate">{{ $item['label'] }}</span>
+                            </a>
+                        @endif
+                    @endforeach
+                </div>
+            @endforeach
+        </nav>
+
+        <!-- Mobile User Section (if authenticated) -->
+        @auth
+        <div class="border-t border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    @if (auth()->user()->avatar)
+                        <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}" class="w-10 h-10 rounded-full object-cover">
+                    @else
+                        <span class="text-sm font-semibold text-white">
+                            {{ substr(auth()->user()->name, 0, 2) }}
+                        </span>
+                    @endif
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {{ auth()->user()->name }}
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        @foreach (auth()->user()->roles as $role)
+                            {{ $role->name }}{{ !$loop->last ? ', ' : '' }}
+                        @endforeach
+                    </p>
+                </div>
+            </div>
+        </div>
+        @endauth
+    </aside>
 </div>
 
