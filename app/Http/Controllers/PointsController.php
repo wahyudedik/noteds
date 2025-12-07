@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Point;
 use App\Models\PointRedemption;
+use App\Models\PointsPricingConfig;
 use App\Models\Setting;
 use App\Services\PointsService;
 use Illuminate\Http\Request;
@@ -43,9 +44,38 @@ class PointsController extends Controller
                 ->sum('points'),
         ];
 
-        // Redemption options
+        // Get redemption options from database instead of hardcoded settings
+        $discountConfigs = PointsPricingConfig::where('type', 'discount')
+            ->where('is_active', true)
+            ->orderBy('points_required')
+            ->get()
+            ->map(function ($config) {
+                return [
+                    'points' => $config->points_required,
+                    'discount_amount' => $config->value,
+                    'label' => $config->name,
+                    'config_id' => $config->id,
+                ];
+            })
+            ->toArray();
+
+        $premiumConfigs = PointsPricingConfig::where('type', 'premium_feature')
+            ->where('is_active', true)
+            ->orderBy('points_required')
+            ->get()
+            ->map(function ($config) {
+                return [
+                    'points' => $config->points_required,
+                    'premium_days' => $config->value,
+                    'label' => $config->name,
+                    'config_id' => $config->id,
+                ];
+            })
+            ->toArray();
+
+        // Fallback to hardcoded values if no configs in database
         $redemptionOptions = [
-            'discounts' => [
+            'discounts' => $discountConfigs ?: [
                 [
                     'points' => Setting::getSetting('points_redemption_discount_1000', 'points', 1000),
                     'discount_amount' => 1000,
@@ -62,7 +92,7 @@ class PointsController extends Controller
                     'label' => 'Rp 10,000 Discount',
                 ],
             ],
-            'premium' => [
+            'premium' => $premiumConfigs ?: [
                 [
                     'points' => Setting::getSetting('points_redemption_premium_7days', 'points', 5000),
                     'premium_days' => 7,

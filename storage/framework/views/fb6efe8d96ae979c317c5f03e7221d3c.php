@@ -1,4 +1,4 @@
-<?php if (! $__env->hasRenderedOnce('13b93bae-9716-415d-9b01-b884c9f5d274')): $__env->markAsRenderedOnce('13b93bae-9716-415d-9b01-b884c9f5d274'); ?>
+<?php if (! $__env->hasRenderedOnce('f72f6d25-c96d-4bc4-add2-f59f9b713efe')): $__env->markAsRenderedOnce('f72f6d25-c96d-4bc4-add2-f59f9b713efe'); ?>
     <?php $__env->startPush('styles'); ?>
         <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.6/quill.snow.css">
         <style>
