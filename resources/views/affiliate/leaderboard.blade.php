@@ -10,7 +10,7 @@
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ __('affiliate.leaderboard_title') }}</h1>
             <p class="mt-2 text-base text-gray-600 dark:text-gray-400">{{ __('affiliate.leaderboard_description') }}</p>
         </div>
-
+ 
         <!-- Filters -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
             <form method="GET" action="{{ route('affiliate.leaderboard') }}" class="flex flex-wrap gap-4">

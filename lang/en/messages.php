@@ -879,6 +879,7 @@ return [
     'cms_highlight_default_button' => 'View All Pages',
     'landing_page' => 'Landing Page',
     'social_media' => 'Social Media',
+    'leaderboard' => 'Leaderboard Settings',
     'wallet_analytics' => 'Wallet Analytics',
     'total_balance' => 'Total Balance',
     'avg_balance' => 'Avg Balance',

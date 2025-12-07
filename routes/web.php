@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\TransactionController as AdminTransactionControll
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawController as AdminWithdrawController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\LeaderboardSettingsController as AdminLeaderboardSettingsController;
 use App\Http\Controllers\Admin\AffiliateController as AdminAffiliateController;
 use App\Http\Controllers\Admin\CommissionTierController as AdminCommissionTierController;
 use App\Http\Controllers\Admin\PostModerationController;
@@ -647,6 +648,11 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
     Route::post('/settings/test-s3', [AdminSettingsController::class, 'testS3'])->name('settings.test-s3');
+
+    // Leaderboard Settings
+    Route::get('/settings/leaderboard', [AdminLeaderboardSettingsController::class, 'index'])->name('leaderboard-settings.index');
+    Route::post('/settings/leaderboard', [AdminLeaderboardSettingsController::class, 'update'])->name('leaderboard-settings.update');
+
     Route::get('/system-health', [\App\Http\Controllers\Admin\SystemHealthController::class, 'index'])->name('system-health.index');
     Route::post('/system-health/test-broadcaster', [\App\Http\Controllers\Admin\SystemHealthController::class, 'testBroadcaster'])->name('system-health.test-broadcaster');
     Route::post('/tax-rules', [AdminTaxRuleController::class, 'store'])->name('tax-rules.store');

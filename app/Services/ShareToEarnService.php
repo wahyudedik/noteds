@@ -9,41 +9,79 @@ use App\Models\SharePoint;
 use App\Models\User;
 use App\Models\MonthlyShareReward;
 use App\Models\Wallet;
+use App\Models\LeaderboardSetting;
 use Illuminate\Support\Facades\DB;
 
 class ShareToEarnService
 {
     /**
-     * Get points per share action.
+     * Get points per share action from configurable settings.
      */
     protected function getPointsPerShare(): int
     {
-        return (int) Setting::getSetting('share_points_per_share', 'marketplace', 10);
+        return LeaderboardSetting::get('share_points_per_share', 10);
     }
 
     /**
-     * Get points per click.
+     * Get points per click from configurable settings.
      */
     protected function getPointsPerClick(): int
     {
-        return (int) Setting::getSetting('share_points_per_click', 'marketplace', 5);
+        return LeaderboardSetting::get('share_points_per_click', 5);
     }
 
     /**
-     * Get points per purchase.
+     * Get points per purchase from configurable settings.
      */
     protected function getPointsPerPurchase(): int
     {
-        return (int) Setting::getSetting('share_points_per_purchase', 'marketplace', 50);
+        return LeaderboardSetting::get('share_points_per_purchase', 50);
+    }
+
+    /**
+     * Check if duplicate share prevention is enabled.
+     */
+    protected function isDuplicateSharePreventionEnabled(): bool
+    {
+        return LeaderboardSetting::get('duplicate_share_prevention', true);
+    }
+
+    /**
+     * Get monthly point cap.
+     */
+    protected function getMonthlyPointCap(): int
+    {
+        return LeaderboardSetting::get('leaderboard_monthly_point_cap', 10000);
     }
 
     /**
      * Award points for sharing a note.
      */
-    public function awardSharePoints(User $user, Note $note, ?NoteShareReferral $shareReferral = null): SharePoint
+    public function awardSharePoints(User $user, Note $note, ?NoteShareReferral $shareReferral = null): ?SharePoint
     {
+        // Check duplicate share prevention
+        if ($this->isDuplicateSharePreventionEnabled()) {
+            $existing = SharePoint::where('user_id', $user->id)
+                ->where('note_id', $note->id)
+                ->where('action', 'share')
+                ->exists();
+
+            if ($existing) {
+                return null; // User has already shared this note
+            }
+        }
+
+        // Check monthly point cap
+        $monthPoints = SharePoint::where('user_id', $user->id)
+            ->whereYear('earned_date', now()->year)
+            ->whereMonth('earned_date', now()->month)
+            ->sum('points');
+
         $points = $this->getPointsPerShare();
-        
+        if ($monthPoints + $points > $this->getMonthlyPointCap()) {
+            return null; // Would exceed monthly cap
+        }
+
         return SharePoint::create([
             'user_id' => $user->id,
             'note_id' => $note->id,
@@ -60,7 +98,7 @@ class ShareToEarnService
     public function awardClickPoints(NoteShareReferral $shareReferral): ?SharePoint
     {
         $points = $this->getPointsPerClick();
-        
+
         // Prevent duplicate points for same click (check last hour)
         $oneHourAgo = now()->subHour();
         $existing = SharePoint::where('share_referral_id', $shareReferral->id)
@@ -70,6 +108,16 @@ class ShareToEarnService
 
         if ($existing) {
             return null;
+        }
+
+        // Check monthly point cap
+        $monthPoints = SharePoint::where('user_id', $shareReferral->sharer_id)
+            ->whereYear('earned_date', now()->year)
+            ->whereMonth('earned_date', now()->month)
+            ->sum('points');
+
+        if ($monthPoints + $points > $this->getMonthlyPointCap()) {
+            return null; // Would exceed monthly cap
         }
 
         return SharePoint::create([
@@ -85,10 +133,20 @@ class ShareToEarnService
     /**
      * Award points for purchase through share link.
      */
-    public function awardPurchasePoints(NoteShareReferral $shareReferral): SharePoint
+    public function awardPurchasePoints(NoteShareReferral $shareReferral): ?SharePoint
     {
         $points = $this->getPointsPerPurchase();
-        
+
+        // Check monthly point cap
+        $monthPoints = SharePoint::where('user_id', $shareReferral->sharer_id)
+            ->whereYear('earned_date', now()->year)
+            ->whereMonth('earned_date', now()->month)
+            ->sum('points');
+
+        if ($monthPoints + $points > $this->getMonthlyPointCap()) {
+            return null; // Would exceed monthly cap
+        }
+
         return SharePoint::create([
             'user_id' => $shareReferral->sharer_id,
             'note_id' => $shareReferral->note_id,
@@ -105,24 +163,32 @@ class ShareToEarnService
     public function getLeaderboard(?string $month = null, int $limit = 100): array
     {
         $month = $month ?? now()->format('Y-m');
-        
+
+        // Get user IDs with their total points for the month
         $leaderboard = SharePoint::select('user_id', DB::raw('SUM(points) as total_points'))
             ->whereYear('earned_date', substr($month, 0, 4))
             ->whereMonth('earned_date', substr($month, 5, 2))
             ->groupBy('user_id')
             ->orderByDesc('total_points')
             ->limit($limit)
-            ->with('user:id,name,username,avatar')
-            ->get()
-            ->map(function ($item, $index) {
-                return [
-                    'rank' => $index + 1,
-                    'user' => $item->user,
-                    'total_points' => $item->total_points,
-                ];
-            });
+            ->get();
 
-        return $leaderboard->toArray();
+        // Fetch all users in one query for efficiency
+        $users = User::whereIn('id', $leaderboard->pluck('user_id'))
+            ->select('id', 'name', 'username', 'avatar')
+            ->get()
+            ->keyBy('id');
+
+        // Map leaderboard data with user information
+        $result = $leaderboard->map(function ($item, $index) use ($users) {
+            return [
+                'rank' => $index + 1,
+                'user' => $users->get($item->user_id),
+                'total_points' => (int) $item->total_points,
+            ];
+        });
+
+        return $result->toArray();
     }
 
     /**
@@ -156,14 +222,14 @@ class ShareToEarnService
     public function calculateMonthlyRewards(string $month): void
     {
         $leaderboard = $this->getLeaderboard($month, 100);
-        
+
         // Get reward settings
         $topRewards = [
             1 => Setting::getSetting('monthly_reward_rank_1', 'marketplace', 100000),
             2 => Setting::getSetting('monthly_reward_rank_2', 'marketplace', 50000),
             3 => Setting::getSetting('monthly_reward_rank_3', 'marketplace', 25000),
         ];
-        
+
         $top10Reward = Setting::getSetting('monthly_reward_top_10', 'marketplace', 10000);
         $top50Reward = Setting::getSetting('monthly_reward_top_50', 'marketplace', 5000);
 
@@ -172,7 +238,7 @@ class ShareToEarnService
             foreach ($leaderboard as $entry) {
                 $rank = $entry['rank'];
                 $user = User::find($entry['user']['id']);
-                
+
                 if (!$user) {
                     continue;
                 }
@@ -233,4 +299,3 @@ class ShareToEarnService
         }
     }
 }
-

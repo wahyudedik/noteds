@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LeaderboardSetting;
 use App\Services\ShareToEarnService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ShareLeaderboardController extends Controller
 {
-    public function __construct(private ShareToEarnService $shareToEarnService)
-    {
-    }
+    public function __construct(private ShareToEarnService $shareToEarnService) {}
 
     /**
      * Display share leaderboard.
@@ -48,6 +47,21 @@ class ShareLeaderboardController extends Controller
             }
         }
 
+        // Get leaderboard settings
+        $settings = [
+            'share_points_per_share' => LeaderboardSetting::get('share_points_per_share', 10),
+            'share_points_per_click' => LeaderboardSetting::get('share_points_per_click', 5),
+            'share_points_per_purchase' => LeaderboardSetting::get('share_points_per_purchase', 50),
+            'monthly_reward_rank_1' => LeaderboardSetting::get('monthly_reward_rank_1', 100000),
+            'monthly_reward_rank_2' => LeaderboardSetting::get('monthly_reward_rank_2', 50000),
+            'monthly_reward_rank_3' => LeaderboardSetting::get('monthly_reward_rank_3', 25000),
+            'monthly_reward_top_10' => LeaderboardSetting::get('monthly_reward_top_10', 10000),
+            'monthly_reward_top_50' => LeaderboardSetting::get('monthly_reward_top_50', 5000),
+            'leaderboard_monthly_point_cap' => LeaderboardSetting::get('leaderboard_monthly_point_cap', 1000),
+            'leaderboard_enabled' => LeaderboardSetting::get('leaderboard_enabled', true),
+            'duplicate_share_prevention' => LeaderboardSetting::get('duplicate_share_prevention', true),
+        ];
+
         return view('share.leaderboard', [
             'leaderboard' => $leaderboard,
             'title' => $title,
@@ -55,6 +69,7 @@ class ShareLeaderboardController extends Controller
             'type' => $type,
             'userRank' => $userRank,
             'userPoints' => $userPoints,
+            'settings' => $settings,
         ]);
     }
 }

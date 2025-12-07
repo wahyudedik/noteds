@@ -145,3 +145,9 @@ Schedule::command('notifications:send-weekly-digest')
     ->at('09:00')
     ->timezone('UTC')
     ->description('Send weekly email digests to users who have enabled it.');
+
+// Distribute leaderboard rewards (run on 5th of each month at 10:00)
+Schedule::job(new \App\Jobs\DistributeLeaderboardRewardsJob())
+    ->monthly()
+    ->timezone('Asia/Jakarta')
+    ->description('Distribute monthly leaderboard rewards to top performers');
