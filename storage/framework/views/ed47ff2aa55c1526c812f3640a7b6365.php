@@ -1,0 +1,111 @@
+<?php $__env->startSection('title', 'Badges Management'); ?>
+
+<?php $__env->startSection('content'); ?>
+<div class="py-12">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Badges Management</h2>
+            <div class="flex gap-4">
+                <a href="<?php echo e(route('admin.dashboard')); ?>" class="text-blue-600 hover:text-blue-800">← Back to Dashboard</a>
+                <a href="<?php echo e(route('admin.badges.create')); ?>" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">
+                    Create Custom Badge
+                </a>
+            </div>
+        </div>
+
+        <?php if(session('success')): ?>
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                <?php echo e(session('success')); ?>
+
+            </div>
+        <?php endif; ?>
+
+        <?php if(session('error')): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <?php echo e(session('error')); ?>
+
+            </div>
+        <?php endif; ?>
+
+        <?php $__currentLoopData = $badges; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category => $categoryBadges): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-lg font-semibold text-gray-900 capitalize"><?php echo e($category); ?> Badges</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Badge</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criteria</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Users</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <?php $__currentLoopData = $categoryBadges; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $badge): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <?php if($badge->icon): ?>
+                                                <span class="text-2xl mr-2"><?php echo e($badge->icon); ?></span>
+                                            <?php endif; ?>
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900"><?php echo e($badge->name); ?></div>
+                                                <div class="text-sm text-gray-500"><?php echo e($badge->description); ?></div>
+                                                <?php if($badge->is_custom): ?>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mt-1">
+                                                        Custom
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <?php if($badge->criteria_type && $badge->criteria_value): ?>
+                                            <?php echo e(ucfirst(str_replace('_', ' ', $badge->criteria_type))); ?>: <?php echo e($badge->criteria_value); ?>
+
+                                        <?php elseif($badge->is_custom && $badge->custom_criteria): ?>
+                                            Custom criteria
+                                        <?php else: ?>
+                                            Manual
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <a href="<?php echo e(route('admin.badges.users', $badge)); ?>" class="text-blue-600 hover:text-blue-900">
+                                            <?php echo e($badge->users()->count()); ?> users
+                                        </a>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <?php if($badge->is_active): ?>
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
+                                        <?php else: ?>
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">Inactive</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex gap-2">
+                                            <a href="<?php echo e(route('admin.badges.edit', $badge)); ?>" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                            <?php if($badge->is_custom): ?>
+                                                <form action="<?php echo e(route('admin.badges.destroy', $badge)); ?>" method="POST" onsubmit="return confirm('Are you sure?')">
+                                                    <?php echo csrf_field(); ?>
+                                                    <?php echo method_field('DELETE'); ?>
+                                                    <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                                                </form>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    </div>
+</div>
+<?php $__env->stopSection(); ?>
+
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\PROJECT\LARAVEL\noteds\resources\views\admin\badges\index.blade.php ENDPATH**/ ?>

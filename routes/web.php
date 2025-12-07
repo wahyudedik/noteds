@@ -707,7 +707,6 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
 
     // Points Pricing & Redemption Management
     Route::resource('points-pricing', \App\Http\Controllers\Admin\PointsPricingController::class);
-    Route::get('/points-pricing/{pointsPricingConfig}/show', [\App\Http\Controllers\Admin\PointsPricingController::class, 'show'])->name('points-pricing.show');
     Route::get('/points-monitoring', [\App\Http\Controllers\Admin\PointsPricingController::class, 'monitoring'])->name('points.monitoring');
     Route::get('/points-redemption/export', [\App\Http\Controllers\Admin\PointsPricingController::class, 'exportReport'])->name('points.export');
 });
