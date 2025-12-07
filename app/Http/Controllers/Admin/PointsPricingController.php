@@ -70,27 +70,27 @@ class PointsPricingController extends Controller
     /**
      * Display the specified resource
      */
-    public function show(PointsPricingConfig $pointsPricingConfig)
+    public function show(PointsPricingConfig $points_pricing)
     {
         $redemptions = PointRedemption::latest()
             ->limit(10)
             ->get();
 
-        return view('admin.points-pricing.show', compact('pointsPricingConfig', 'redemptions'));
+        return view('admin.points-pricing.show', ['pointsPricingConfig' => $points_pricing, 'redemptions' => $redemptions]);
     }
 
     /**
      * Show the form for editing the specified resource
      */
-    public function edit(PointsPricingConfig $pointsPricingConfig)
+    public function edit(PointsPricingConfig $points_pricing)
     {
-        return view('admin.points-pricing.edit', compact('pointsPricingConfig'));
+        return view('admin.points-pricing.edit', ['pointsPricingConfig' => $points_pricing]);
     }
 
     /**
      * Update the specified resource in storage
      */
-    public function update(Request $request, PointsPricingConfig $pointsPricingConfig)
+    public function update(Request $request, PointsPricingConfig $points_pricing)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -107,7 +107,7 @@ class PointsPricingController extends Controller
         ]);
 
         try {
-            $pointsPricingConfig->update($validated);
+            $points_pricing->update($validated);
 
             return redirect()
                 ->route('admin.points-pricing.index')
@@ -122,10 +122,10 @@ class PointsPricingController extends Controller
     /**
      * Delete the specified resource
      */
-    public function destroy(PointsPricingConfig $pointsPricingConfig)
+    public function destroy(PointsPricingConfig $points_pricing)
     {
         try {
-            $pointsPricingConfig->delete();
+            $points_pricing->delete();
 
             return redirect()
                 ->route('admin.points-pricing.index')
