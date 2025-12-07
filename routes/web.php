@@ -367,10 +367,12 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     // Wallet routes
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
 
-    // Points routes
-    Route::get('/points', [PointsController::class, 'index'])->name('points.index');
-    Route::post('/points/redeem-discount', [PointsController::class, 'redeemDiscount'])->name('points.redeem-discount');
-    Route::post('/points/redeem-premium', [PointsController::class, 'redeemPremium'])->name('points.redeem-premium');
+    // Points routes (Only for buyers - points are used to redeem discounts when purchasing)
+    Route::middleware('buyer')->group(function () {
+        Route::get('/points', [PointsController::class, 'index'])->name('points.index');
+        Route::post('/points/redeem-discount', [PointsController::class, 'redeemDiscount'])->name('points.redeem-discount');
+        Route::post('/points/redeem-premium', [PointsController::class, 'redeemPremium'])->name('points.redeem-premium');
+    });
     Route::post('/wallet/topup', [WalletController::class, 'topup'])->middleware('rate.limit:10,1')->name('wallet.topup');
     Route::get('/wallet/topup-checkout', [WalletController::class, 'topupCheckout'])->name('wallet.topup-checkout');
 
