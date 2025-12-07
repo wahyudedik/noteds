@@ -50,7 +50,7 @@ class PointsController extends Controller
             ->map(function ($config) {
                 return [
                     'points' => (int) $config->points_required,
-                    'discount_amount' => (float) $config->value,
+                    'discount_amount' => (float) $config->discount_amount,
                     'label' => $config->name,
                     'config_id' => $config->id,
                 ];
@@ -64,7 +64,7 @@ class PointsController extends Controller
             ->map(function ($config) {
                 return [
                     'points' => (int) $config->points_required,
-                    'premium_days' => (int) $config->value,
+                    'premium_days' => (int) $config->premium_days,
                     'label' => $config->name,
                     'config_id' => $config->id,
                 ];
