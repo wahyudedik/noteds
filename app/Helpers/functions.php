@@ -45,7 +45,7 @@ if (!function_exists('responsive_image')) {
         $extension = $pathInfo['extension'] ?? 'jpg';
         $dirname = $pathInfo['dirname'] ?? '';
         $filename = $pathInfo['filename'] ?? '';
-        
+
         // Generate srcset
         $srcset = [];
         foreach ($sizes as $size) {
@@ -53,7 +53,7 @@ if (!function_exists('responsive_image')) {
             // For now, we'll use the same image with size parameter (if your image service supports it)
             $srcset[] = $baseUrl . "?w={$size} {$size}w";
         }
-        
+
         return [
             'src' => $baseUrl,
             'srcset' => implode(', ', $srcset),
@@ -86,4 +86,3 @@ if (!function_exists('asset_cdn')) {
         return asset($path);
     }
 }
-
