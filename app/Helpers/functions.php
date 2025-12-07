@@ -7,9 +7,9 @@ if (!function_exists('currency')) {
     /**
      * Format currency helper
      */
-    function currency(float $amount, ?string $currency = null, ?string $fromCurrency = null): string
+    function currency(float $amount = 0, ?string $currency = null, ?string $fromCurrency = null): string
     {
-        return CurrencyHelper::format($amount, $currency, $fromCurrency);
+        return CurrencyHelper::format((float) $amount, $currency, $fromCurrency);
     }
 }
 
