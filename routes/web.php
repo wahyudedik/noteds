@@ -40,6 +40,7 @@ use App\Http\Controllers\Admin\LandingPageController as AdminLandingPageControll
 use App\Http\Controllers\Admin\SocialMediaController as AdminSocialMediaController;
 use App\Http\Controllers\Admin\TaxRuleController as AdminTaxRuleController;
 use App\Http\Controllers\Admin\PriceRuleController as AdminPriceRuleController;
+use App\Http\Controllers\Admin\PointsPricingController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\NoteAttachmentController;
 use App\Http\Controllers\WelcomeController;
@@ -703,6 +704,12 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
         Route::get('/commissions', [AdminAffiliateController::class, 'commissions'])->name('commissions');
         Route::post('/commissions/approve', [AdminAffiliateController::class, 'approveCommissions'])->name('commissions.approve');
     });
+
+    // Points Pricing & Redemption Management
+    Route::resource('points-pricing', \App\Http\Controllers\Admin\PointsPricingController::class);
+    Route::get('/points-pricing/{pointsPricingConfig}/show', [\App\Http\Controllers\Admin\PointsPricingController::class, 'show'])->name('points-pricing.show');
+    Route::get('/points-monitoring', [\App\Http\Controllers\Admin\PointsPricingController::class, 'monitoring'])->name('points.monitoring');
+    Route::get('/points-redemption/export', [\App\Http\Controllers\Admin\PointsPricingController::class, 'exportReport'])->name('points.export');
 });
 
 // Public Documentation routes
