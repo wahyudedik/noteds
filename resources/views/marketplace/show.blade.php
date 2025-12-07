@@ -396,8 +396,7 @@
                                                 class="font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-200">{{ $note->user->name }}</span>
                                             @if ($note->user->badges && $note->user->badges->count() > 0)
                                                 @foreach ($note->user->badges->take(5) as $badge)
-                                                    <span
-                                                        class="inline-flex items-center text-xs font-medium"
+                                                    <span class="inline-flex items-center text-xs font-medium"
                                                         style="color: {{ $badge->color_hex }};"
                                                         title="{{ $badge->name }}">
                                                         @if ($badge->icon)
@@ -2831,7 +2830,7 @@ if (!$modelUrl) {
                     <div class="flex-1">
                         <h5 class="text-sm font-medium text-gray-900">${bookmark.title || bookmarkTranslations.default_title}</h5>
                         ${bookmark.section_text ? `<p class="text-xs text-gray-600 mt-1 line-clamp-2">
-                                                                                                                                                                                                                                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
+                                                                                                                                                                                                                                                                            ${bookmark.section_text.substring(0, 100)}...</p>` : ''}
                         ${bookmark.note_text ? `<p class="text-xs text-purple-700 mt-1">${bookmark.note_text}</p>` : ''}
                     </div>
                     <div class="flex items-center space-x-2 ml-3">

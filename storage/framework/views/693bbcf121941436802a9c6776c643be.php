@@ -1,20 +1,19 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', __('messages.settings_admin')); ?>
 
-@section('title', __('messages.settings_admin'))
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-6">
-                <a href="{{ route('admin.dashboard') }}"
+                <a href="<?php echo e(route('admin.dashboard')); ?>"
                     class="text-blue-600 hover:text-blue-800 inline-flex items-center mb-4">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
-                    {{ __('messages.back_to_dashboard') }}
+                    <?php echo e(__('messages.back_to_dashboard')); ?>
+
                 </a>
-                <h2 class="text-2xl font-bold text-gray-900">{{ __('messages.system_settings') }}</h2>
-                <p class="text-gray-600 mt-1">{{ __('messages.configure_system_wide_settings') }}</p>
+                <h2 class="text-2xl font-bold text-gray-900"><?php echo e(__('messages.system_settings')); ?></h2>
+                <p class="text-gray-600 mt-1"><?php echo e(__('messages.configure_system_wide_settings')); ?></p>
             </div>
 
             <!-- Studio Platform Fee Configuration -->
@@ -27,45 +26,63 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 14l2-2 4 4m6 2V7a2 2 0 00-2-2h-3.28a2 2 0 01-1.788-1.106l-.894-1.788A2 2 0 0011.45 2H8a2 2 0 00-2 2v3M7 10h10M7 14h6M7 18h3" />
                                 </svg>
-                                {{ __('messages.studio_platform_fee') }}
+                                <?php echo e(__('messages.studio_platform_fee')); ?>
+
                             </h3>
                             <p class="text-sm text-gray-600 mt-1">
-                                {{ __('messages.studio_platform_fee_description') }}
+                                <?php echo e(__('messages.studio_platform_fee_description')); ?>
+
                             </p>
                         </div>
                     </div>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
-                        @csrf
+                    <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" class="space-y-6">
+                        <?php echo csrf_field(); ?>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label for="studio_platform_fee_percent"
                                     class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('messages.studio_platform_fee') }} (%) <span class="text-red-500">*</span>
+                                    <?php echo e(__('messages.studio_platform_fee')); ?> (%) <span class="text-red-500">*</span>
                                 </label>
                                 <div class="relative">
                                     <input type="number" name="studio_platform_fee_percent"
                                         id="studio_platform_fee_percent"
-                                        value="{{ old('studio_platform_fee_percent', $studioPlatformFeePercent ?? 10) }}"
+                                        value="<?php echo e(old('studio_platform_fee_percent', $studioPlatformFeePercent ?? 10)); ?>"
                                         min="0" max="100" step="0.1" required placeholder="10"
-                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500 @error('studio_platform_fee_percent') border-red-500 @enderror">
+                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500 <?php $__errorArgs = ['studio_platform_fee_percent'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                         <span class="text-gray-500 text-sm">%</span>
                                     </div>
                                 </div>
-                                @error('studio_platform_fee_percent')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['studio_platform_fee_percent'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <p class="mt-2 text-xs text-gray-500">
-                                    {{ __('messages.studio_platform_fee_note') }}
+                                    <?php echo e(__('messages.studio_platform_fee_note')); ?>
+
                                 </p>
                             </div>
                         </div>
                         <div class="flex items-center justify-end pt-4 border-t border-gray-200">
                             <button type="submit"
                                 class="px-6 py-2 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-lg transition-colors">
-                                {{ __('messages.save_studio_settings') }}
+                                <?php echo e(__('messages.save_studio_settings')); ?>
+
                             </button>
                         </div>
                     </form>
@@ -82,17 +99,18 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
-                                {{ __('messages.studio_email_notifications') }}
+                                <?php echo e(__('messages.studio_email_notifications')); ?>
+
                             </h3>
                             <p class="text-sm text-gray-600 mt-1">
-                                {{ __('messages.studio_email_notifications_description') }}</p>
+                                <?php echo e(__('messages.studio_email_notifications_description')); ?></p>
                         </div>
                     </div>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-4">
-                        @csrf
-                        @php
+                    <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" class="space-y-4">
+                        <?php echo csrf_field(); ?>
+                        <?php
                             $toggles = [
                                 'studio_email_quote_created' => __('messages.studio_email_quote_created'),
                                 'studio_email_quote_accepted' => __('messages.studio_email_quote_accepted'),
@@ -102,40 +120,41 @@
                                 'studio_email_escrow_refunded' => __('messages.studio_email_escrow_refunded'),
                                 'studio_email_vendor_assigned' => __('messages.studio_email_vendor_assigned'),
                             ];
-                        @endphp
+                        ?>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            @foreach ($toggles as $key => $label)
+                            <?php $__currentLoopData = $toggles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="flex items-center justify-between border rounded-lg p-3">
                                     <div>
-                                        <div class="text-sm font-medium text-gray-800">{{ $label }}</div>
-                                        <div class="text-xs text-gray-500">{{ __('messages.send_email_on_event') }}</div>
+                                        <div class="text-sm font-medium text-gray-800"><?php echo e($label); ?></div>
+                                        <div class="text-xs text-gray-500"><?php echo e(__('messages.send_email_on_event')); ?></div>
                                     </div>
                                     <div>
-                                        <input type="hidden" name="{{ $key }}" value="0">
+                                        <input type="hidden" name="<?php echo e($key); ?>" value="0">
                                         <label class="inline-flex relative items-center cursor-pointer">
-                                            <input type="checkbox" class="sr-only peer" name="{{ $key }}"
+                                            <input type="checkbox" class="sr-only peer" name="<?php echo e($key); ?>"
                                                 value="1"
-                                                {{ old($key, $studioEmailToggles[$key] ?? true) ? 'checked' : '' }}>
+                                                <?php echo e(old($key, $studioEmailToggles[$key] ?? true) ? 'checked' : ''); ?>>
                                             <div
                                                 class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600">
                                             </div>
                                         </label>
                                     </div>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                         <div class="mt-6 border-t pt-4">
                             <label
-                                class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.sla_funding_reminder_days') }}</label>
+                                class="block text-sm font-medium text-gray-700 mb-2"><?php echo e(__('messages.sla_funding_reminder_days')); ?></label>
                             <input type="number" min="1" max="30" name="studio_sla_funding_reminder_days"
-                                value="{{ old('studio_sla_funding_reminder_days', $studioSlaFundingReminderDays ?? 3) }}"
+                                value="<?php echo e(old('studio_sla_funding_reminder_days', $studioSlaFundingReminderDays ?? 3)); ?>"
                                 class="w-32 rounded-lg border-gray-300">
-                            <p class="text-xs text-gray-500 mt-1">{{ __('messages.sla_funding_reminder_description') }}</p>
+                            <p class="text-xs text-gray-500 mt-1"><?php echo e(__('messages.sla_funding_reminder_description')); ?></p>
                         </div>
                         <div class="flex items-center justify-end pt-4 border-t border-gray-200">
                             <button type="submit"
                                 class="px-6 py-2 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors">
-                                {{ __('messages.save_studio_email_settings') }}
+                                <?php echo e(__('messages.save_studio_email_settings')); ?>
+
                             </button>
                         </div>
                     </form>
@@ -152,76 +171,83 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M3 10h11M9 21V3m5 18v-7m4 7v-4" />
                                 </svg>
-                                {{ __('messages.pricing_guidance_settings') }}
+                                <?php echo e(__('messages.pricing_guidance_settings')); ?>
+
                             </h3>
                             <p class="text-sm text-gray-600 mt-1">
-                                {{ __('messages.pricing_guidance_description') }}
+                                <?php echo e(__('messages.pricing_guidance_description')); ?>
+
                             </p>
                         </div>
                     </div>
                 </div>
                 <div class="p-6 space-y-8">
-                    <form action="{{ route('admin.settings.update') }}" method="POST"
+                    <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST"
                         class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        @csrf
+                        <?php echo csrf_field(); ?>
                         <div>
                             <label for="min_price_default" class="block text-sm font-medium text-gray-700 mb-2">
-                                {{ __('messages.default_minimum_price') }}
+                                <?php echo e(__('messages.default_minimum_price')); ?>
+
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <span class="text-gray-500 sm:text-sm">Rp</span>
                                 </div>
                                 <input type="number" name="min_price_default" id="min_price_default"
-                                    value="{{ old('min_price_default', $minPriceDefault) }}" min="0"
+                                    value="<?php echo e(old('min_price_default', $minPriceDefault)); ?>" min="0"
                                     step="1000"
                                     class="mt-1 block w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
                             </div>
                             <p class="mt-2 text-xs text-gray-500">
-                                {{ __('messages.default_minimum_price_note') }}
+                                <?php echo e(__('messages.default_minimum_price_note')); ?>
+
                             </p>
                         </div>
                         <div>
                             <label for="recommended_price_multiplier"
                                 class="block text-sm font-medium text-gray-700 mb-2">
-                                {{ __('messages.recommended_price_multiplier') }}
+                                <?php echo e(__('messages.recommended_price_multiplier')); ?>
+
                             </label>
                             <input type="number" name="recommended_price_multiplier" id="recommended_price_multiplier"
-                                value="{{ old('recommended_price_multiplier', $recommendedPriceMultiplier) }}"
+                                value="<?php echo e(old('recommended_price_multiplier', $recommendedPriceMultiplier)); ?>"
                                 min="0" max="10" step="0.1"
                                 class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200">
                             <p class="mt-2 text-xs text-gray-500">
-                                {{ __('messages.recommended_price_multiplier_note') }}
+                                <?php echo e(__('messages.recommended_price_multiplier_note')); ?>
+
                             </p>
                         </div>
                         <div class="flex items-end">
                             <button type="submit"
                                 class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition">
-                                {{ __('messages.save_settings') }}
+                                <?php echo e(__('messages.save_settings')); ?>
+
                             </button>
                         </div>
                     </form>
 
                     <div class="border-t border-gray-200 pt-6">
                         <h4 class="text-sm font-semibold text-gray-800 mb-3">
-                            {{ __('messages.categories_with_custom_min_price') }}</h4>
-                        <form action="{{ route('admin.price-rules.store') }}" method="POST"
+                            <?php echo e(__('messages.categories_with_custom_min_price')); ?></h4>
+                        <form action="<?php echo e(route('admin.price-rules.store')); ?>" method="POST"
                             class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end mb-4">
-                            @csrf
+                            <?php echo csrf_field(); ?>
                             <div class="md:col-span-2">
                                 <label
-                                    class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.tag_category') }}</label>
+                                    class="block text-xs font-medium text-gray-600 mb-1"><?php echo e(__('messages.tag_category')); ?></label>
                                 <select name="tag_id" required
                                     class="block w-full py-2 px-3 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
-                                    <option value="">{{ __('messages.select_tag') }}</option>
-                                    @foreach ($availableTags as $tag)
-                                        <option value="{{ $tag->id }}">{{ $tag->name }}</option>
-                                    @endforeach
+                                    <option value=""><?php echo e(__('messages.select_tag')); ?></option>
+                                    <?php $__currentLoopData = $availableTags; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tag): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($tag->id); ?>"><?php echo e($tag->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </div>
                             <div>
                                 <label
-                                    class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.minimum_price_rp') }}</label>
+                                    class="block text-xs font-medium text-gray-600 mb-1"><?php echo e(__('messages.minimum_price_rp')); ?></label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <span class="text-gray-500 sm:text-sm">Rp</span>
@@ -234,7 +260,8 @@
                             <div class="flex items-center gap-3">
                                 <button type="submit"
                                     class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition">
-                                    {{ __('messages.add_rule') }}
+                                    <?php echo e(__('messages.add_rule')); ?>
+
                                 </button>
                             </div>
                         </form>
@@ -244,34 +271,34 @@
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
-                                            {{ __('messages.category') }}</th>
+                                            <?php echo e(__('messages.category')); ?></th>
                                         <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase tracking-wider">
-                                            {{ __('messages.minimum_price') }}</th>
+                                            <?php echo e(__('messages.minimum_price')); ?></th>
                                         <th
                                             class="px-4 py-2 text-right font-medium text-gray-600 uppercase tracking-wider">
-                                            {{ __('messages.action') }}</th>
+                                            <?php echo e(__('messages.action')); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @forelse ($categoryMinPriceRules as $rule)
+                                    <?php $__empty_1 = true; $__currentLoopData = $categoryMinPriceRules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rule): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                         <tr>
                                             <td class="px-4 py-2">
                                                 <div class="font-semibold text-gray-900">
-                                                    {{ $rule['tag_name'] ?? $rule['tag_slug'] }}</div>
-                                                <div class="text-xs text-gray-500 uppercase">{{ $rule['tag_slug'] }}</div>
+                                                    <?php echo e($rule['tag_name'] ?? $rule['tag_slug']); ?></div>
+                                                <div class="text-xs text-gray-500 uppercase"><?php echo e($rule['tag_slug']); ?></div>
                                             </td>
                                             <td class="px-4 py-2">
-                                                <form action="{{ route('admin.price-rules.update', $rule['tag_slug']) }}"
+                                                <form action="<?php echo e(route('admin.price-rules.update', $rule['tag_slug'])); ?>"
                                                     method="POST" class="inline-flex items-center gap-2">
-                                                    @csrf
-                                                    @method('PUT')
+                                                    <?php echo csrf_field(); ?>
+                                                    <?php echo method_field('PUT'); ?>
                                                     <div class="relative">
                                                         <div
                                                             class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                             <span class="text-gray-500 sm:text-xs">Rp</span>
                                                         </div>
                                                         <input type="number" name="min_price"
-                                                            value="{{ old('min_price_' . $rule['tag_slug'], $rule['min_price']) }}"
+                                                            value="<?php echo e(old('min_price_' . $rule['tag_slug'], $rule['min_price'])); ?>"
                                                             min="0" step="1000"
                                                             class="w-32 pl-8 py-1 border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500 text-sm">
                                                     </div>
@@ -282,12 +309,12 @@
                                                 </form>
                                             </td>
                                             <td class="px-4 py-2 text-right">
-                                                <form action="{{ route('admin.price-rules.destroy', $rule['tag_slug']) }}"
+                                                <form action="<?php echo e(route('admin.price-rules.destroy', $rule['tag_slug'])); ?>"
                                                     method="POST"
                                                     onsubmit="return confirm('Hapus aturan harga kategori ini?')"
                                                     class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
+                                                    <?php echo csrf_field(); ?>
+                                                    <?php echo method_field('DELETE'); ?>
                                                     <button type="submit"
                                                         class="inline-flex items-center px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-600 text-xs font-medium rounded-md transition">
                                                         Hapus
@@ -295,13 +322,13 @@
                                                 </form>
                                             </td>
                                         </tr>
-                                    @empty
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                         <tr>
                                             <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">
                                                 Belum ada aturan harga kategori yang ditambahkan.
                                             </td>
                                         </tr>
-                                    @endforelse
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -309,7 +336,7 @@
                 </div>
             </div>
 
-            @if (session('success'))
+            <?php if(session('success')): ?>
                 <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg mb-6">
                     <div class="flex">
                         <div class="flex-shrink-0">
@@ -320,13 +347,13 @@
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                            <p class="text-sm font-medium text-green-800"><?php echo e(session('success')); ?></p>
                         </div>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            @if (session('error'))
+            <?php if(session('error')): ?>
                 <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg mb-6">
                     <div class="flex">
                         <div class="flex-shrink-0">
@@ -337,11 +364,11 @@
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+                            <p class="text-sm font-medium text-red-800"><?php echo e(session('error')); ?></p>
                         </div>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <!-- S3 Backup Configuration -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-6">
@@ -354,47 +381,51 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                 </svg>
-                                {{ __('messages.s3_cloud_backup_configuration') }}
+                                <?php echo e(__('messages.s3_cloud_backup_configuration')); ?>
+
                             </h3>
-                            <p class="text-sm text-gray-600 mt-1">{{ __('messages.configure_s3_backups') }}</p>
+                            <p class="text-sm text-gray-600 mt-1"><?php echo e(__('messages.configure_s3_backups')); ?></p>
                         </div>
                     </div>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
-                        @csrf
+                    <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" class="space-y-6">
+                        <?php echo csrf_field(); ?>
 
                         <!-- Enable S3 -->
                         <div class="flex items-center">
                             <input type="checkbox" name="s3_enabled" id="s3_enabled" value="1"
-                                {{ $s3Settings->get('s3_enabled')?->value ?? false ? 'checked' : '' }}
+                                <?php echo e($s3Settings->get('s3_enabled')?->value ?? false ? 'checked' : ''); ?>
+
                                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                             <label for="s3_enabled" class="ml-3 text-sm font-medium text-gray-700">
-                                {{ __('messages.enable_s3_cloud_backup') }}
+                                <?php echo e(__('messages.enable_s3_cloud_backup')); ?>
+
                             </label>
                         </div>
-                        <p class="text-xs text-gray-500 ml-7">{{ __('messages.when_enabled_backups_uploaded') }}</p>
+                        <p class="text-xs text-gray-500 ml-7"><?php echo e(__('messages.when_enabled_backups_uploaded')); ?></p>
 
                         <div id="s3-config"
-                            class="space-y-4 {{ $s3Settings->get('s3_enabled')?->value ?? false ? '' : 'hidden' }}">
+                            class="space-y-4 <?php echo e($s3Settings->get('s3_enabled')?->value ?? false ? '' : 'hidden'); ?>">
                             <!-- S3 Provider -->
                             <div>
                                 <label for="s3_provider" class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('messages.s3_provider') }}
+                                    <?php echo e(__('messages.s3_provider')); ?>
+
                                 </label>
                                 <select name="s3_provider" id="s3_provider"
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                                     <option value="aws"
-                                        {{ ($s3Settings->get('s3_provider')?->value ?? 'aws') === 'aws' ? 'selected' : '' }}>
+                                        <?php echo e(($s3Settings->get('s3_provider')?->value ?? 'aws') === 'aws' ? 'selected' : ''); ?>>
                                         Amazon S3 (AWS)</option>
                                     <option value="digitalocean"
-                                        {{ $s3Settings->get('s3_provider')?->value === 'digitalocean' ? 'selected' : '' }}>
+                                        <?php echo e($s3Settings->get('s3_provider')?->value === 'digitalocean' ? 'selected' : ''); ?>>
                                         DigitalOcean Spaces</option>
                                     <option value="wasabi"
-                                        {{ $s3Settings->get('s3_provider')?->value === 'wasabi' ? 'selected' : '' }}>
+                                        <?php echo e($s3Settings->get('s3_provider')?->value === 'wasabi' ? 'selected' : ''); ?>>
                                         Wasabi</option>
                                     <option value="other"
-                                        {{ $s3Settings->get('s3_provider')?->value === 'other' ? 'selected' : '' }}>Other
+                                        <?php echo e($s3Settings->get('s3_provider')?->value === 'other' ? 'selected' : ''); ?>>Other
                                         S3-Compatible</option>
                                 </select>
                             </div>
@@ -402,10 +433,10 @@
                             <!-- S3 Access Key -->
                             <div>
                                 <label for="s3_key" class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('messages.s3_key') }} <span class="text-red-500">*</span>
+                                    <?php echo e(__('messages.s3_key')); ?> <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="s3_key" id="s3_key"
-                                    value="{{ old('s3_key', $s3Settings->get('s3_key')?->value) }}"
+                                    value="<?php echo e(old('s3_key', $s3Settings->get('s3_key')?->value)); ?>"
                                     placeholder="AKIAIOSFODNN7EXAMPLE"
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                                 <p class="mt-1 text-xs text-gray-500">Your S3 access key ID</p>
@@ -414,10 +445,10 @@
                             <!-- S3 Secret Key -->
                             <div>
                                 <label for="s3_secret" class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('messages.s3_secret') }} <span class="text-red-500">*</span>
+                                    <?php echo e(__('messages.s3_secret')); ?> <span class="text-red-500">*</span>
                                 </label>
                                 <input type="password" name="s3_secret" id="s3_secret"
-                                    value="{{ old('s3_secret', $s3Settings->get('s3_secret')?->value) }}"
+                                    value="<?php echo e(old('s3_secret', $s3Settings->get('s3_secret')?->value)); ?>"
                                     placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                                 <p class="mt-1 text-xs text-gray-500">Your S3 secret access key (hidden for security)</p>
@@ -426,10 +457,10 @@
                             <!-- S3 Region -->
                             <div>
                                 <label for="s3_region" class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('messages.s3_region') }} <span class="text-red-500">*</span>
+                                    <?php echo e(__('messages.s3_region')); ?> <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="s3_region" id="s3_region"
-                                    value="{{ old('s3_region', $s3Settings->get('s3_region')?->value ?? 'us-east-1') }}"
+                                    value="<?php echo e(old('s3_region', $s3Settings->get('s3_region')?->value ?? 'us-east-1')); ?>"
                                     placeholder="us-east-1"
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                                 <p class="mt-1 text-xs text-gray-500">S3 region (e.g., us-east-1, ap-southeast-1)</p>
@@ -438,10 +469,10 @@
                             <!-- S3 Bucket -->
                             <div>
                                 <label for="s3_bucket" class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('messages.s3_bucket') }} <span class="text-red-500">*</span>
+                                    <?php echo e(__('messages.s3_bucket')); ?> <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="s3_bucket" id="s3_bucket"
-                                    value="{{ old('s3_bucket', $s3Settings->get('s3_bucket')?->value) }}"
+                                    value="<?php echo e(old('s3_bucket', $s3Settings->get('s3_bucket')?->value)); ?>"
                                     placeholder="my-backup-bucket"
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                                 <p class="mt-1 text-xs text-gray-500">S3 bucket name (must already exist)</p>
@@ -450,10 +481,10 @@
                             <!-- S3 Endpoint (for non-AWS providers) -->
                             <div id="s3-endpoint-group">
                                 <label for="s3_endpoint" class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('messages.s3_endpoint') }} ({{ __('messages.optional') }})
+                                    <?php echo e(__('messages.s3_endpoint')); ?> (<?php echo e(__('messages.optional')); ?>)
                                 </label>
                                 <input type="url" name="s3_endpoint" id="s3_endpoint"
-                                    value="{{ old('s3_endpoint', $s3Settings->get('s3_endpoint')?->value) }}"
+                                    value="<?php echo e(old('s3_endpoint', $s3Settings->get('s3_endpoint')?->value)); ?>"
                                     placeholder="https://sgp1.digitaloceanspaces.com"
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                                 <p class="mt-1 text-xs text-gray-500">Required for DigitalOcean Spaces, Wasabi, etc.</p>
@@ -462,10 +493,10 @@
                             <!-- S3 Path Prefix -->
                             <div>
                                 <label for="s3_path_prefix" class="block text-sm font-medium text-gray-700 mb-2">
-                                    {{ __('messages.s3_path_prefix') }} ({{ __('messages.optional') }})
+                                    <?php echo e(__('messages.s3_path_prefix')); ?> (<?php echo e(__('messages.optional')); ?>)
                                 </label>
                                 <input type="text" name="s3_path_prefix" id="s3_path_prefix"
-                                    value="{{ old('s3_path_prefix', $s3Settings->get('s3_path_prefix')?->value ?? 'backups') }}"
+                                    value="<?php echo e(old('s3_path_prefix', $s3Settings->get('s3_path_prefix')?->value ?? 'backups')); ?>"
                                     placeholder="backups"
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                                 <p class="mt-1 text-xs text-gray-500">Folder prefix in bucket (default: backups)</p>
@@ -475,9 +506,10 @@
                             <div class="flex items-center justify-between pt-4 border-t border-gray-200">
                                 <button type="submit"
                                     class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                                    {{ __('messages.save_settings') }}
+                                    <?php echo e(__('messages.save_settings')); ?>
+
                                 </button>
-                                <a href="{{ route('admin.settings.test-s3') }}"
+                                <a href="<?php echo e(route('admin.settings.test-s3')); ?>"
                                     onclick="event.preventDefault(); document.getElementById('test-s3-form').submit();"
                                     class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors">
                                     Test Connection
@@ -487,9 +519,9 @@
                     </form>
 
                     <!-- Test S3 Form -->
-                    <form id="test-s3-form" action="{{ route('admin.settings.test-s3') }}" method="POST"
+                    <form id="test-s3-form" action="<?php echo e(route('admin.settings.test-s3')); ?>" method="POST"
                         class="hidden">
-                        @csrf
+                        <?php echo csrf_field(); ?>
                     </form>
                 </div>
             </div>
@@ -512,8 +544,8 @@
                     </div>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
-                        @csrf
+                    <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" class="space-y-6">
+                        <?php echo csrf_field(); ?>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -525,26 +557,41 @@
                                         <span class="text-gray-500 text-sm">Rp</span>
                                     </div>
                                     <input type="number" name="premium_price_monthly" id="premium_price_monthly"
-                                        value="{{ old('premium_price_monthly', $premiumPrice) }}" min="0"
+                                        value="<?php echo e(old('premium_price_monthly', $premiumPrice)); ?>" min="0"
                                         step="1000" required placeholder="25000"
-                                        class="block w-full pl-10 pr-3 py-3 border-gray-300 rounded-lg shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 @error('premium_price_monthly') border-red-500 @enderror">
+                                        class="block w-full pl-10 pr-3 py-3 border-gray-300 rounded-lg shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 <?php $__errorArgs = ['premium_price_monthly'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                 </div>
-                                @error('premium_price_monthly')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['premium_price_monthly'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <p class="mt-2 text-xs text-gray-500">
-                                    Current price: <strong>{{ \App\Models\Setting::formatPremiumPrice(false) }}</strong>
+                                    Current price: <strong><?php echo e(\App\Models\Setting::formatPremiumPrice(false)); ?></strong>
                                 </p>
                             </div>
 
                             <div class="flex items-end">
                                 <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 w-full">
-                                    <p class="text-xs text-purple-700 font-medium mb-1">{{ __('messages.preview') }}</p>
+                                    <p class="text-xs text-purple-700 font-medium mb-1"><?php echo e(__('messages.preview')); ?></p>
                                     <p class="text-lg font-bold text-purple-900" id="price-preview">
-                                        {{ \App\Models\Setting::formatPremiumPrice(true) }}
+                                        <?php echo e(\App\Models\Setting::formatPremiumPrice(true)); ?>
+
                                     </p>
                                     <p class="text-xs text-purple-600 mt-1">
-                                        {{ __('messages.this_is_how_it_will_appear') }}</p>
+                                        <?php echo e(__('messages.this_is_how_it_will_appear')); ?></p>
                                 </div>
                             </div>
                         </div>
@@ -579,8 +626,8 @@
                     </div>
                 </div>
                 <div class="p-6 space-y-6">
-                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
-                        @csrf
+                    <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" class="space-y-6">
+                        <?php echo csrf_field(); ?>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -588,7 +635,7 @@
                                     Batas Gratis Harian (per pengguna)
                                 </label>
                                 <input type="number" name="ai_free_usage_limit" id="ai_free_usage_limit"
-                                    value="{{ old('ai_free_usage_limit', $aiFreeUsageLimit) }}" min="-1"
+                                    value="<?php echo e(old('ai_free_usage_limit', $aiFreeUsageLimit)); ?>" min="-1"
                                     max="100"
                                     class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500">
                                 <p class="mt-2 text-xs text-gray-500">
@@ -603,45 +650,60 @@
                                     tarif di bawah.
                                 </p>
                                 <p class="text-xs text-indigo-700 mt-2">
-                                    Mata uang dasar: <strong>{{ $baseCurrency }}</strong> ({{ $currencySymbol }}).
+                                    Mata uang dasar: <strong><?php echo e($baseCurrency); ?></strong> (<?php echo e($currencySymbol); ?>).
                                 </p>
                             </div>
                         </div>
 
-                        @php
+                        <?php
                             $aiFeatureLabels = [
                                 'image_search' => 'Cari Gambar Referensi (Unsplash)',
                                 'image_generate' => 'Generate Gambar dengan AI',
                                 'video_generate' => 'Generate Video dengan AI',
                             ];
-                        @endphp
+                        ?>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            @foreach ($aiFeaturePrices as $feature => $price)
+                            <?php $__currentLoopData = $aiFeaturePrices; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feature => $price): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="border border-gray-200 rounded-lg p-4">
-                                    <label for="ai_price_{{ $feature }}"
+                                    <label for="ai_price_<?php echo e($feature); ?>"
                                         class="block text-sm font-medium text-gray-700 mb-2">
-                                        {{ $aiFeatureLabels[$feature] ?? ucwords(str_replace('_', ' ', $feature)) }}
+                                        <?php echo e($aiFeatureLabels[$feature] ?? ucwords(str_replace('_', ' ', $feature))); ?>
+
                                     </label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span class="text-gray-500 text-sm">{{ $currencySymbol }}</span>
+                                            <span class="text-gray-500 text-sm"><?php echo e($currencySymbol); ?></span>
                                         </div>
-                                        <input type="number" name="ai_price_{{ $feature }}"
-                                            id="ai_price_{{ $feature }}"
-                                            value="{{ old('ai_price_' . $feature, $price) }}" min="0"
+                                        <input type="number" name="ai_price_<?php echo e($feature); ?>"
+                                            id="ai_price_<?php echo e($feature); ?>"
+                                            value="<?php echo e(old('ai_price_' . $feature, $price)); ?>" min="0"
                                             step="1000"
-                                            class="block w-full pl-10 pr-3 py-2 border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 @error('ai_price_' . $feature) border-red-500 @enderror">
+                                            class="block w-full pl-10 pr-3 py-2 border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 <?php $__errorArgs = ['ai_price_' . $feature];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                     </div>
                                     <p class="mt-2 text-xs text-gray-500">
                                         Tarif per penggunaan setelah melewati kuota gratis. Kosongkan atau isi 0 untuk
                                         gratis.
                                     </p>
-                                    @error('ai_price_' . $feature)
-                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                    @enderror
+                                    <?php $__errorArgs = ['ai_price_' . $feature];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <p class="mt-1 text-xs text-red-600"><?php echo e($message); ?></p>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
 
                         <div class="flex items-center justify-end pt-4 border-t border-gray-200">
@@ -673,8 +735,8 @@
                     </div>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
-                        @csrf
+                    <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" class="space-y-6">
+                        <?php echo csrf_field(); ?>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Platform Commission -->
@@ -686,16 +748,30 @@
                                 <div class="relative">
                                     <input type="number" name="platform_commission_percent"
                                         id="platform_commission_percent"
-                                        value="{{ old('platform_commission_percent', $platformCommissionPercent) }}"
+                                        value="<?php echo e(old('platform_commission_percent', $platformCommissionPercent)); ?>"
                                         min="0" max="100" step="0.1" required placeholder="20"
-                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('platform_commission_percent') border-red-500 @enderror">
+                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 <?php $__errorArgs = ['platform_commission_percent'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                         <span class="text-gray-500 text-sm">%</span>
                                     </div>
                                 </div>
-                                @error('platform_commission_percent')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['platform_commission_percent'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <p class="mt-2 text-xs text-gray-500">
                                     Platform fee yang di-deduct dari <strong>setiap transaksi</strong> (meskipun 20x
                                     terjual)
@@ -711,16 +787,30 @@
                                 <div class="relative">
                                     <input type="number" name="creator_commission_percent"
                                         id="creator_commission_percent"
-                                        value="{{ old('creator_commission_percent', $creatorCommissionPercent) }}"
+                                        value="<?php echo e(old('creator_commission_percent', $creatorCommissionPercent)); ?>"
                                         min="0" max="100" step="0.1" required placeholder="0"
-                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('creator_commission_percent') border-red-500 @enderror">
+                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 <?php $__errorArgs = ['creator_commission_percent'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                         <span class="text-gray-500 text-sm">%</span>
                                     </div>
                                 </div>
-                                @error('creator_commission_percent')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['creator_commission_percent'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <p class="mt-2 text-xs text-gray-500">
                                     Komisi untuk <strong>original creator</strong> di setiap penjualan (penjual kedua dan
                                     seterusnya tidak dapat komisi)
@@ -737,9 +827,16 @@
                                 <div class="relative">
                                     <input type="number" name="premium_buyer_discount_percent"
                                         id="premium_buyer_discount_percent"
-                                        value="{{ old('premium_buyer_discount_percent', $premiumBuyerDiscountPercent ?? 10) }}"
+                                        value="<?php echo e(old('premium_buyer_discount_percent', $premiumBuyerDiscountPercent ?? 10)); ?>"
                                         min="0" max="50" step="0.1" required placeholder="10"
-                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('premium_buyer_discount_percent') border-red-500 @enderror">
+                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 <?php $__errorArgs = ['premium_buyer_discount_percent'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                         <span class="text-gray-500 text-sm">%</span>
                                     </div>
@@ -748,9 +845,16 @@
                                     Diskon eksklusif untuk <strong>premium buyers</strong> pada semua pembelian note
                                     (default: 10%)
                                 </p>
-                                @error('premium_buyer_discount_percent')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['premium_buyer_discount_percent'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
 
                             <!-- Default Tax Percent -->
@@ -760,9 +864,16 @@
                                 </label>
                                 <div class="relative">
                                     <input type="number" name="tax_default_percent" id="tax_default_percent"
-                                        value="{{ old('tax_default_percent', $defaultTaxPercent ?? 0) }}" min="0"
+                                        value="<?php echo e(old('tax_default_percent', $defaultTaxPercent ?? 0)); ?>" min="0"
                                         max="100" step="0.1" required placeholder="11"
-                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('tax_default_percent') border-red-500 @enderror">
+                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 <?php $__errorArgs = ['tax_default_percent'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                         <span class="text-gray-500 text-sm">%</span>
                                     </div>
@@ -770,9 +881,16 @@
                                 <p class="mt-2 text-xs text-gray-500">
                                     Digunakan jika tidak ada aturan pajak khusus negara yang cocok.
                                 </p>
-                                @error('tax_default_percent')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['tax_default_percent'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
 
                             <!-- Tax Inclusion Toggle -->
@@ -786,7 +904,7 @@
                                     <span class="relative">
                                         <input type="checkbox" id="tax_inclusive_default_toggle"
                                             name="tax_inclusive_default" value="1" class="sr-only peer"
-                                            {{ old('tax_inclusive_default', $taxInclusiveDefault) ? 'checked' : '' }}>
+                                            <?php echo e(old('tax_inclusive_default', $taxInclusiveDefault) ? 'checked' : ''); ?>>
                                         <div
                                             class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-orange-500 peer-checked:bg-orange-600 transition-colors">
                                         </div>
@@ -794,22 +912,30 @@
                                             class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-5">
                                         </div>
                                     </span>
-                                    @php
+                                    <?php
                                         $taxStateKey = old('tax_inclusive_default', $taxInclusiveDefault)
                                             ? 'on'
                                             : 'off';
-                                    @endphp
+                                    ?>
                                     <span class="text-sm text-gray-700">
-                                        {{ __('messages.tax_inclusive_label', ['value' => __('messages.tax_inclusive_state_' . $taxStateKey)]) }}
+                                        <?php echo e(__('messages.tax_inclusive_label', ['value' => __('messages.tax_inclusive_state_' . $taxStateKey)])); ?>
+
                                     </span>
                                 </label>
                                 <p class="mt-2 text-xs text-gray-500">
                                     Jika aktif, harga yang ditampilkan dianggap sudah termasuk pajak dan sistem akan
                                     menghitung komponen pajak secara otomatis.
                                 </p>
-                                @error('tax_inclusive_default')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['tax_inclusive_default'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
 
@@ -875,9 +1001,9 @@
                 <div class="p-6 space-y-8">
                     <div>
                         <h4 class="text-sm font-semibold text-gray-800 mb-3">Tambah Aturan Pajak</h4>
-                        <form action="{{ route('admin.tax-rules.store') }}" method="POST"
+                        <form action="<?php echo e(route('admin.tax-rules.store')); ?>" method="POST"
                             class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
-                            @csrf
+                            <?php echo csrf_field(); ?>
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-1">Country Code</label>
                                 <input type="text" name="country_code" maxlength="3" required placeholder="ID"
@@ -941,37 +1067,39 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @forelse ($taxRules as $rule)
+                                    <?php $__empty_1 = true; $__currentLoopData = $taxRules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rule): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                         <tr>
                                             <td class="px-4 py-2">
-                                                <div class="font-semibold text-gray-900">{{ $rule->country_name }}</div>
-                                                <div class="text-xs text-gray-500 uppercase">{{ $rule->country_code }}
+                                                <div class="font-semibold text-gray-900"><?php echo e($rule->country_name); ?></div>
+                                                <div class="text-xs text-gray-500 uppercase"><?php echo e($rule->country_code); ?>
+
                                                 </div>
                                             </td>
                                             <td class="px-4 py-2 text-gray-700">
-                                                {{ $rule->note_category ?? __('messages.all_categories') }}
+                                                <?php echo e($rule->note_category ?? __('messages.all_categories')); ?>
+
                                             </td>
                                             <td class="px-4 py-2">
-                                                <form action="{{ route('admin.tax-rules.update', $rule) }}"
+                                                <form action="<?php echo e(route('admin.tax-rules.update', $rule)); ?>"
                                                     method="POST" class="inline-flex items-center gap-2">
-                                                    @csrf
-                                                    @method('PUT')
+                                                    <?php echo csrf_field(); ?>
+                                                    <?php echo method_field('PUT'); ?>
                                                     <input type="number" name="tax_percent"
-                                                        value="{{ old("tax_percent_{$rule->id}", $rule->tax_percent) }}"
+                                                        value="<?php echo e(old("tax_percent_{$rule->id}", $rule->tax_percent)); ?>"
                                                         min="0" max="100" step="0.1"
                                                         class="w-24 py-1 px-2 border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 text-sm">
                                                     <input type="hidden" name="note_category"
-                                                        value="{{ $rule->note_category }}">
+                                                        value="<?php echo e($rule->note_category); ?>">
                                                     <input type="hidden" name="country_name"
-                                                        value="{{ $rule->country_name }}">
+                                                        value="<?php echo e($rule->country_name); ?>">
                                                     <input type="hidden" name="is_inclusive" value="0">
                                                     <input type="checkbox" name="is_inclusive" value="1"
                                                         class="h-4 w-4 text-emerald-600 border-gray-300 rounded"
-                                                        {{ $rule->is_inclusive ? 'checked' : '' }}>
+                                                        <?php echo e($rule->is_inclusive ? 'checked' : ''); ?>>
                                                     <input type="hidden" name="is_active" value="0">
                                                     <input type="checkbox" name="is_active" value="1"
                                                         class="h-4 w-4 text-emerald-600 border-gray-300 rounded"
-                                                        {{ $rule->is_active ? 'checked' : '' }}>
+                                                        <?php echo e($rule->is_active ? 'checked' : ''); ?>>
                                                     <button type="submit"
                                                         class="ml-2 inline-flex items-center px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-md transition">
                                                         Update
@@ -979,20 +1107,22 @@
                                                 </form>
                                             </td>
                                             <td class="px-4 py-2 text-gray-700">
-                                                {{ $rule->is_inclusive ? 'Inclusive' : 'Exclusive' }}
+                                                <?php echo e($rule->is_inclusive ? 'Inclusive' : 'Exclusive'); ?>
+
                                             </td>
                                             <td class="px-4 py-2">
                                                 <span
-                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $rule->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600' }}">
-                                                    {{ $rule->is_active ? 'Active' : 'Inactive' }}
+                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo e($rule->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600'); ?>">
+                                                    <?php echo e($rule->is_active ? 'Active' : 'Inactive'); ?>
+
                                                 </span>
                                             </td>
                                             <td class="px-4 py-2 text-right">
-                                                <form action="{{ route('admin.tax-rules.destroy', $rule) }}"
+                                                <form action="<?php echo e(route('admin.tax-rules.destroy', $rule)); ?>"
                                                     method="POST" onsubmit="return confirm('Hapus aturan pajak ini?')"
                                                     class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
+                                                    <?php echo csrf_field(); ?>
+                                                    <?php echo method_field('DELETE'); ?>
                                                     <button type="submit"
                                                         class="inline-flex items-center px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-600 text-xs font-medium rounded-md transition">
                                                         Hapus
@@ -1000,13 +1130,13 @@
                                                 </form>
                                             </td>
                                         </tr>
-                                    @empty
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                         <tr>
                                             <td colspan="6" class="px-4 py-4 text-center text-sm text-gray-500">
                                                 Belum ada aturan pajak yang terdaftar.
                                             </td>
                                         </tr>
-                                    @endforelse
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -1033,8 +1163,8 @@
                     </div>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
-                        @csrf
+                    <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" class="space-y-6">
+                        <?php echo csrf_field(); ?>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Signup Reward -->
@@ -1047,13 +1177,27 @@
                                         <span class="text-gray-500 text-sm">Rp</span>
                                     </div>
                                     <input type="number" name="referral_reward_signup" id="referral_reward_signup"
-                                        value="{{ old('referral_reward_signup', $referralSignupReward) }}"
+                                        value="<?php echo e(old('referral_reward_signup', $referralSignupReward)); ?>"
                                         min="0" step="1000" required placeholder="5000"
-                                        class="block w-full pl-10 pr-3 py-3 border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_reward_signup') border-red-500 @enderror">
+                                        class="block w-full pl-10 pr-3 py-3 border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 <?php $__errorArgs = ['referral_reward_signup'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                 </div>
-                                @error('referral_reward_signup')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['referral_reward_signup'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <p class="mt-2 text-xs text-gray-500">
                                     Reward diberikan kepada referrer ketika referral mendaftar
                                 </p>
@@ -1068,16 +1212,30 @@
                                 <div class="relative">
                                     <input type="number" name="referral_reward_commission_percent"
                                         id="referral_reward_commission_percent"
-                                        value="{{ old('referral_reward_commission_percent', $referralCommissionPercent) }}"
+                                        value="<?php echo e(old('referral_reward_commission_percent', $referralCommissionPercent)); ?>"
                                         min="0" max="100" step="0.1" required placeholder="5"
-                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_reward_commission_percent') border-red-500 @enderror">
+                                        class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 <?php $__errorArgs = ['referral_reward_commission_percent'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                         <span class="text-gray-500 text-sm">%</span>
                                     </div>
                                 </div>
-                                @error('referral_reward_commission_percent')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['referral_reward_commission_percent'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <p class="mt-2 text-xs text-gray-500">
                                     Persentase commission dari setiap transaksi yang dilakukan referral
                                 </p>
@@ -1097,8 +1255,8 @@
                                 <div class="ml-3 flex-1">
                                     <p class="text-sm font-medium text-green-800 mb-1">Current Settings</p>
                                     <ul class="text-xs text-green-700 space-y-1">
-                                        <li>• Signup Reward: <strong>{{ currency($referralSignupReward) }}</strong></li>
-                                        <li>• Transaction Commission: <strong>{{ $referralCommissionPercent }}%</strong>
+                                        <li>• Signup Reward: <strong><?php echo e(currency($referralSignupReward)); ?></strong></li>
+                                        <li>• Transaction Commission: <strong><?php echo e($referralCommissionPercent); ?>%</strong>
                                         </li>
                                         <li>• Perubahan akan berlaku untuk referral baru dan transaksi baru</li>
                                     </ul>
@@ -1127,7 +1285,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                 </svg>
-                                {{ __('messages.featured_notes') }} Pricing Settings
+                                <?php echo e(__('messages.featured_notes')); ?> Pricing Settings
                             </h3>
                             <p class="text-sm text-gray-600 mt-1">Configure pricing for featured notes advertising per
                                 location and duration</p>
@@ -1135,19 +1293,19 @@
                     </div>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
-                        @csrf
+                    <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" class="space-y-6">
+                        <?php echo csrf_field(); ?>
 
                         <div class="space-y-6">
-                            @foreach ($featuredLocationLabels as $location => $label)
+                            <?php $__currentLoopData = $featuredLocationLabels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $location => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="border border-gray-200 rounded-lg p-4">
-                                    <h4 class="text-md font-semibold text-gray-900 mb-4">{{ $label }}</h4>
+                                    <h4 class="text-md font-semibold text-gray-900 mb-4"><?php echo e($label); ?></h4>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        @foreach ($featuredDurations as $duration)
+                                        <?php $__currentLoopData = $featuredDurations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $duration): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <div>
-                                                <label for="featured_price_{{ $location }}_{{ $duration }}"
+                                                <label for="featured_price_<?php echo e($location); ?>_<?php echo e($duration); ?>"
                                                     class="block text-sm font-medium text-gray-700 mb-2">
-                                                    {{ $duration }} Hari <span class="text-red-500">*</span>
+                                                    <?php echo e($duration); ?> Hari <span class="text-red-500">*</span>
                                                 </label>
                                                 <div class="relative">
                                                     <div
@@ -1155,20 +1313,34 @@
                                                         <span class="text-gray-500 text-sm">Rp</span>
                                                     </div>
                                                     <input type="number"
-                                                        name="featured_price[{{ $location }}][{{ $duration }}]"
-                                                        id="featured_price_{{ $location }}_{{ $duration }}"
-                                                        value="{{ old("featured_price.{$location}.{$duration}", $featuredPricing[$location][$duration] ?? 0) }}"
+                                                        name="featured_price[<?php echo e($location); ?>][<?php echo e($duration); ?>]"
+                                                        id="featured_price_<?php echo e($location); ?>_<?php echo e($duration); ?>"
+                                                        value="<?php echo e(old("featured_price.{$location}.{$duration}", $featuredPricing[$location][$duration] ?? 0)); ?>"
                                                         min="0" step="1000" required
-                                                        class="block w-full pl-10 pr-3 py-2 border-gray-300 rounded-lg shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 @error("featured_price.{$location}.{$duration}") border-red-500 @enderror">
+                                                        class="block w-full pl-10 pr-3 py-2 border-gray-300 rounded-lg shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 <?php $__errorArgs = ["featured_price.{$location}.{$duration}"];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                                 </div>
-                                                @error("featured_price.{$location}.{$duration}")
-                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                                @enderror
+                                                <?php $__errorArgs = ["featured_price.{$location}.{$duration}"];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                    <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                             </div>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </div>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
 
                         <!-- Info Box -->
@@ -1223,10 +1395,10 @@
                     </div>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
-                        @csrf
+                    <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" class="space-y-6">
+                        <?php echo csrf_field(); ?>
                         <input type="hidden" name="redirect_to"
-                            value="{{ route('admin.settings.index') }}#content-protection">
+                            value="<?php echo e(route('admin.settings.index')); ?>#content-protection">
 
                         <div class="space-y-6">
                             <!-- Text Selection Protection -->
@@ -1246,7 +1418,8 @@
                                         <input type="hidden" name="protection_disable_text_selection" value="0">
                                         <input type="checkbox" name="protection_disable_text_selection"
                                             id="protection_disable_text_selection" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_text_selection', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_text_selection', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1270,7 +1443,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_right_click"
                                             id="protection_disable_right_click" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_right_click', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_right_click', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1295,7 +1469,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_keyboard_shortcuts"
                                             id="protection_disable_keyboard_shortcuts" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_keyboard_shortcuts', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_keyboard_shortcuts', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1318,7 +1493,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_copy_paste"
                                             id="protection_disable_copy_paste" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_copy_paste', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_copy_paste', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1342,7 +1518,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_drag_drop"
                                             id="protection_disable_drag_drop" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_drag_drop', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_drag_drop', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1366,7 +1543,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_print"
                                             id="protection_disable_print" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_print', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_print', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1390,7 +1568,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_view_source"
                                             id="protection_disable_view_source" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_view_source', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_view_source', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1414,7 +1593,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_devtools"
                                             id="protection_detect_devtools" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_detect_devtools', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_detect_devtools', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1439,7 +1619,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_screenshot"
                                             id="protection_disable_screenshot" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_screenshot', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_screenshot', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1463,7 +1644,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_image_saving"
                                             id="protection_disable_image_saving" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_image_saving', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_image_saving', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1487,7 +1669,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_console"
                                             id="protection_disable_console" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_console', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_console', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1511,7 +1694,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_monitor_clipboard"
                                             id="protection_monitor_clipboard" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_monitor_clipboard', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_monitor_clipboard', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1535,7 +1719,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_print_screen"
                                             id="protection_disable_print_screen" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_print_screen', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_print_screen', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1560,7 +1745,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_snipping_tool"
                                             id="protection_disable_snipping_tool" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_snipping_tool', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_snipping_tool', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1584,7 +1770,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_window_blur"
                                             id="protection_detect_window_blur" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_detect_window_blur', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_detect_window_blur', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1610,7 +1797,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_visibility_change"
                                             id="protection_detect_visibility_change" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_detect_visibility_change', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_detect_visibility_change', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1637,7 +1825,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_clear_clipboard_periodic"
                                             id="protection_clear_clipboard_periodic" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_clear_clipboard_periodic', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_clear_clipboard_periodic', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1662,7 +1851,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_blur_overlay"
                                             id="protection_blur_overlay" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_blur_overlay', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_blur_overlay', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1687,7 +1877,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_f12"
                                             id="protection_disable_f12" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_f12', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_f12', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1714,7 +1905,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_disable_devtools_shortcuts"
                                             id="protection_disable_devtools_shortcuts" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_disable_devtools_shortcuts', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_disable_devtools_shortcuts', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1739,7 +1931,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_ai_bots"
                                             id="protection_detect_ai_bots" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_detect_ai_bots', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_detect_ai_bots', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1765,7 +1958,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_headless"
                                             id="protection_detect_headless" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_detect_headless', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_detect_headless', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1791,7 +1985,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_mouse_movement"
                                             id="protection_detect_mouse_movement" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_detect_mouse_movement', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_detect_mouse_movement', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1817,7 +2012,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_click_pattern"
                                             id="protection_detect_click_pattern" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_detect_click_pattern', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_detect_click_pattern', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1844,7 +2040,8 @@
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" name="protection_detect_screen_recording"
                                             id="protection_detect_screen_recording" value="1"
-                                            {{ \App\Models\Setting::getSetting('protection_detect_screen_recording', 'content_protection', false) ? 'checked' : '' }}
+                                            <?php echo e(\App\Models\Setting::getSetting('protection_detect_screen_recording', 'content_protection', false) ? 'checked' : ''); ?>
+
                                             class="sr-only peer">
                                         <div
                                             class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
@@ -1905,23 +2102,24 @@
                 </div>
             </div>
             <div class="p-6">
-                <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
-                    @csrf
+                <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" class="space-y-6">
+                    <?php echo csrf_field(); ?>
 
                     <!-- Enable Google Translate Toggle -->
                     <div class="flex items-center justify-between border rounded-lg p-3">
                         <div>
                             <div class="text-sm font-medium text-gray-800">
-                                {{ __('messages.enable_google_translate_api') ?? 'Enable Google Translate API' }}</div>
+                                <?php echo e(__('messages.enable_google_translate_api') ?? 'Enable Google Translate API'); ?></div>
                             <div class="text-xs text-gray-500">
-                                {{ __('messages.send_email_on_event') ?? 'Automatically translate chat messages' }}</div>
+                                <?php echo e(__('messages.send_email_on_event') ?? 'Automatically translate chat messages'); ?></div>
                         </div>
                         <div>
                             <input type="hidden" name="google_translate_enabled" value="0">
                             <label class="inline-flex relative items-center cursor-pointer">
                                 <input type="checkbox" class="sr-only peer" name="google_translate_enabled"
                                     value="1" id="google_translate_enabled"
-                                    {{ old('google_translate_enabled', $googleTranslateEnabled ?? false) ? 'checked' : '' }}
+                                    <?php echo e(old('google_translate_enabled', $googleTranslateEnabled ?? false) ? 'checked' : ''); ?>
+
                                     onchange="document.getElementById('google-translate-config').classList.toggle('hidden')">
                                 <div
                                     class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600">
@@ -1931,16 +2129,17 @@
                     </div>
 
                     <div id="google-translate-config"
-                        class="space-y-4 border-t pt-4 {{ old('google_translate_enabled', $googleTranslateEnabled ?? false) ? '' : 'hidden' }}">
+                        class="space-y-4 border-t pt-4 <?php echo e(old('google_translate_enabled', $googleTranslateEnabled ?? false) ? '' : 'hidden'); ?>">
                         <!-- API Key -->
                         <div>
                             <label for="google_translate_api_key" class="block text-sm font-medium text-gray-700 mb-2">
-                                {{ __('messages.api_key') ?? 'API Key' }}
-                                @if (!$googleTranslateApiKey)
+                                <?php echo e(__('messages.api_key') ?? 'API Key'); ?>
+
+                                <?php if(!$googleTranslateApiKey): ?>
                                     <span class="text-red-500">*</span>
-                                @endif
+                                <?php endif; ?>
                             </label>
-                            @if ($googleTranslateApiKey)
+                            <?php if($googleTranslateApiKey): ?>
                                 <div
                                     class="mb-3 bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
                                     <svg class="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" fill="none"
@@ -1951,13 +2150,21 @@
                                     <span class="text-sm text-green-800">API key is configured. Enter a new key below to
                                         update it.</span>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                             <div class="relative">
                                 <input type="password" name="google_translate_api_key" id="google_translate_api_key"
-                                    value="{{ old('google_translate_api_key', '') }}"
-                                    placeholder="{{ $googleTranslateApiKey ? 'Enter new API key to update' : 'AIzaSy...' }}"
-                                    {{ !$googleTranslateApiKey ? 'required' : '' }}
-                                    class="block w-full py-3 px-4 border rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('google_translate_api_key') border-red-500 @else border-gray-300 @enderror">
+                                    value="<?php echo e(old('google_translate_api_key', '')); ?>"
+                                    placeholder="<?php echo e($googleTranslateApiKey ? 'Enter new API key to update' : 'AIzaSy...'); ?>"
+                                    <?php echo e(!$googleTranslateApiKey ? 'required' : ''); ?>
+
+                                    class="block w-full py-3 px-4 border rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 <?php $__errorArgs = ['google_translate_api_key'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php else: ?> border-gray-300 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                 <button type="button" onclick="toggleApiKeyVisibility()"
                                     class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-700">
                                     <svg id="eye-icon" class="h-5 w-5" fill="none" stroke="currentColor"
@@ -1969,11 +2176,19 @@
                                     </svg>
                                 </button>
                             </div>
-                            @error('google_translate_api_key')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php $__errorArgs = ['google_translate_api_key'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-2 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             <p class="mt-2 text-xs text-gray-500">
-                                {{ __('messages.get_google_translate_api_key') ?? 'Your Google Translate API key. Get one from' }}
+                                <?php echo e(__('messages.get_google_translate_api_key') ?? 'Your Google Translate API key. Get one from'); ?>
+
                                 <a href="https://console.cloud.google.com/apis/credentials" target="_blank"
                                     class="text-green-600 hover:underline">Google Cloud Console</a>
                             </p>
@@ -1989,7 +2204,7 @@
                                         clip-rule="evenodd" />
                                 </svg>
                                 <p class="text-sm text-blue-800">
-                                    <strong>{{ __('messages.note') ?? 'Note' }}:</strong> API key will be encrypted and
+                                    <strong><?php echo e(__('messages.note') ?? 'Note'); ?>:</strong> API key will be encrypted and
                                     stored securely. If you're updating an existing key, enter the full new key.
                                 </p>
                             </div>
@@ -1999,7 +2214,8 @@
                         <div class="flex items-center justify-end pt-4 border-t border-gray-200">
                             <button type="submit"
                                 class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-sm transition-colors">
-                                {{ __('messages.save_settings') }}
+                                <?php echo e(__('messages.save_settings')); ?>
+
                             </button>
                         </div>
                     </div>
@@ -2008,7 +2224,7 @@
         </div>
     </div>
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
         <script>
             // Show/hide Google Translate config based on enabled checkbox
             document.addEventListener('DOMContentLoaded', function() {
@@ -2107,5 +2323,7 @@
                 }
             });
         </script>
-    @endpush
-@endsection
+    <?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\PROJECT\LARAVEL\noteds\resources\views/admin/settings/index.blade.php ENDPATH**/ ?>
