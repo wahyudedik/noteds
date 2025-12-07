@@ -1761,7 +1761,8 @@ unset($__errorArgs, $__bag); ?>
                                     <label for="protection_detect_window_blur" class="flex items-center cursor-pointer">
                                         <div class="flex-1">
                                             <h4 class="text-sm font-semibold text-gray-900">Detect Window Blur</h4>
-                                            <p class="text-xs text-gray-600 mt-1">Mendeteksi ketika window kehilangan focus
+                                            <p class="text-xs text-gray-600 mt-1">Mendeteksi ketika window kehilangan
+                                                focus
                                                 (mungkin screenshot)</p>
                                         </div>
                                     </label>
@@ -2301,22 +2302,23 @@ unset($__errorArgs, $__bag); ?>
             // Fix for content protection checkboxes
             // Add hidden inputs before each protection checkbox to handle unchecked state
             const protectionCheckboxes = document.querySelectorAll('input[name^="protection_"]');
-            
+
             protectionCheckboxes.forEach(checkbox => {
                 // Only process actual checkboxes, not hidden inputs
                 if (checkbox.type === 'checkbox') {
                     const fieldName = checkbox.getAttribute('name');
-                    
+
                     // Check if hidden input already exists
-                    const existingHidden = checkbox.parentElement.querySelector(`input[type="hidden"][name="${fieldName}"]`);
-                    
+                    const existingHidden = checkbox.parentElement.querySelector(
+                        `input[type="hidden"][name="${fieldName}"]`);
+
                     if (!existingHidden) {
                         // Create hidden input for unchecked value
                         const hiddenInput = document.createElement('input');
                         hiddenInput.type = 'hidden';
                         hiddenInput.name = fieldName;
                         hiddenInput.value = '0';
-                        
+
                         // Insert before the checkbox
                         checkbox.parentElement.insertBefore(hiddenInput, checkbox);
                     }
