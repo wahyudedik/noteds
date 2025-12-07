@@ -12,6 +12,14 @@ class PointsPricingConfig extends Model
 
     protected $table = 'points_pricing_config';
 
+    /**
+     * Get the route key for model binding.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
+
     protected $fillable = [
         'name',
         'type',
