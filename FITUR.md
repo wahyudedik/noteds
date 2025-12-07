@@ -14,7 +14,7 @@
 6. [Admin & Management](#6-admin--management)
 7. [Advanced Features](#7-advanced-features)
 8. [Localization & UX](#8-localization--ux)
-
+ 
 ---
 
 ## 1. Core Marketplace Features

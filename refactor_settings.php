@@ -32,7 +32,7 @@ foreach ($sections as $tab => $markers) {
     $startPos = strpos($content, $markers['start_comment']);
     // Find section end
     $endPos = strpos($content, $markers['end_marker']);
-    
+
     if ($startPos !== false && $endPos !== false) {
         echo "  Found section: position $startPos to $endPos\n";
     } else {

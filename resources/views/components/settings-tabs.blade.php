@@ -23,10 +23,10 @@
                     @foreach ($tabs as $key => $tab)
                         <button
                             @click="activeTab = '{{ $key }}'; localStorage.setItem('settingsActiveTab', '{{ $key }}')"
-                            :class="activeTab === '{{ $key }}' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600 hover:text-gray-900'"
+                            :class="activeTab === '{{ $key }}' ? 'border-b-2 border-blue-600 text-blue-600' :
+                                'text-gray-600 hover:text-gray-900'"
                             class="px-6 py-4 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap border-b-2 border-transparent"
-                            role="tab"
-                            :aria-selected="activeTab === '{{ $key }}'"
+                            role="tab" :aria-selected="activeTab === '{{ $key }}'"
                             :tabindex="activeTab === '{{ $key }}' ? '0' : '-1'">
                             @if (isset($tab['icon']))
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,15 +42,10 @@
             <!-- Tab Content Panels -->
             <div class="bg-white rounded-b-lg shadow-sm">
                 @foreach ($tabs as $key => $tab)
-                    <div
-                        x-show="activeTab === '{{ $key }}'"
-                        x-transition:enter="transition ease-in duration-200"
-                        x-transition:enter-start="opacity-0"
-                        x-transition:enter-end="opacity-100"
-                        id="panel-{{ $key }}"
-                        role="tabpanel"
-                        :aria-labelledby="'tab-{{ $key }}'"
-                        class="p-6">
+                    <div x-show="activeTab === '{{ $key }}'"
+                        x-transition:enter="transition ease-in duration-200" x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100" id="panel-{{ $key }}" role="tabpanel"
+                        :aria-labelledby="'tab-{{ $key }}'" class="p-6">
                         {!! $tab['content'] !!}
                     </div>
                 @endforeach
