@@ -13,9 +13,7 @@ use Illuminate\Http\RedirectResponse;
 
 class PointsController extends Controller
 {
-    public function __construct(private PointsService $pointsService)
-    {
-    }
+    public function __construct(private PointsService $pointsService) {}
 
     /**
      * Display points dashboard.
@@ -23,7 +21,7 @@ class PointsController extends Controller
     public function index(Request $request): View
     {
         $user = auth()->user();
-        
+
         $points = $user->points()
             ->orderBy('created_at', 'desc')
             ->paginate(20);
