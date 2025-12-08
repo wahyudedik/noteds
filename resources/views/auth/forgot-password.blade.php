@@ -3,7 +3,8 @@
 @section('content')
     <div class="space-y-6">
         <div class="text-center">
-            <h2 class="text-3xl font-semibold text-slate-900">{{ __('messages.forgot_password_title') ?? 'Lupa kata sandi?' }}</h2>
+            <h2 class="text-3xl font-semibold text-slate-900">
+                {{ __('messages.forgot_password_title') ?? 'Lupa kata sandi?' }}</h2>
             <p class="mt-2 text-sm text-slate-600">
                 {{ __('messages.forgot_password_message') ?? 'Masukkan alamat email Anda dan kami akan mengirim tautan untuk mengatur ulang kata sandi.' }}
             </p>
@@ -16,7 +17,8 @@
 
             <div class="space-y-2">
                 <x-input-label for="email" :value="__('messages.email')" />
-                <x-text-input id="email" type="email" name="email" :value="old('email')" required autofocus placeholder="name@example.com" />
+                <x-text-input id="email" type="email" name="email" :value="old('email')" required autofocus
+                    placeholder="name@example.com" />
             </div>
             <x-input-error :messages="$errors->get('email')" />
 

@@ -3,7 +3,8 @@
 @section('content')
     <div class="space-y-6">
         <div class="text-center">
-            <h2 class="text-3xl font-semibold text-slate-900">{{ __('messages.verify_email_title') ?? 'Verifikasi email Anda' }}</h2>
+            <h2 class="text-3xl font-semibold text-slate-900">
+                {{ __('messages.verify_email_title') ?? 'Verifikasi email Anda' }}</h2>
             <p class="mt-2 text-sm text-slate-600">
                 {{ __('messages.verify_email_message') ?? 'Kami telah mengirimkan tautan verifikasi ke email Anda. Jika belum menerima, kirim ulang menggunakan tombol di bawah.' }}
             </p>
