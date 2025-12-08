@@ -710,7 +710,7 @@
                         document.getElementById('landing-page-preview').innerHTML = data.landing_page_content || '';
 
                         const form = document.getElementById('landing-page-form');
-                        form.action = `{{ route('affiliate.links.landing.update', '') }}/${linkId}`;
+                        form.action = `/affiliate/links/${linkId}/landing`;
 
                         document.getElementById('landing-page-modal').classList.remove('hidden');
                     })
@@ -729,8 +729,7 @@
             function managPromotionalMaterials(linkId) {
                 // Load promotional materials for this link
                 document.getElementById('promo-link-id').value = linkId;
-                document.getElementById('promo-materials-form').action =
-                    `{{ route('affiliate.promotional-materials.store', '') }}/${linkId}`;
+                document.getElementById('promo-materials-form').action = `/affiliate/links/${linkId}/promotional-materials`;
 
                 // Load existing materials
                 fetch(`/affiliate/links/${linkId}/promotional-materials`)
