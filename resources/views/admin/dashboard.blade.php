@@ -257,27 +257,33 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
                     <div class="bg-cyan-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-cyan-600 uppercase">Total Shares</div>
-                        <div class="text-xl font-bold text-cyan-900">{{ number_format($shareStats['total_shares']) }}</div>
+                        <div class="text-xl font-bold text-cyan-900">{{ number_format($shareStats['total_shares']) }}
+                        </div>
                     </div>
                     <div class="bg-sky-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-sky-600 uppercase">Share Clicks</div>
-                        <div class="text-xl font-bold text-sky-900">{{ number_format($shareStats['total_share_clicks']) }}</div>
+                        <div class="text-xl font-bold text-sky-900">{{ number_format($shareStats['total_share_clicks']) }}
+                        </div>
                     </div>
                     <div class="bg-blue-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-blue-600 uppercase">Purchases</div>
-                        <div class="text-xl font-bold text-blue-900">{{ number_format($shareStats['total_share_purchases']) }}</div>
+                        <div class="text-xl font-bold text-blue-900">
+                            {{ number_format($shareStats['total_share_purchases']) }}</div>
                     </div>
                     <div class="bg-emerald-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-emerald-600 uppercase">Commission Earned</div>
-                        <div class="text-xl font-bold text-emerald-900">{{ currency($shareStats['total_share_commission_earned']) }}</div>
+                        <div class="text-xl font-bold text-emerald-900">
+                            {{ currency($shareStats['total_share_commission_earned']) }}</div>
                     </div>
                     <div class="bg-teal-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-teal-600 uppercase">Revenue Generated</div>
-                        <div class="text-xl font-bold text-teal-900">{{ currency($shareStats['total_share_revenue_generated']) }}</div>
+                        <div class="text-xl font-bold text-teal-900">
+                            {{ currency($shareStats['total_share_revenue_generated']) }}</div>
                     </div>
                     <div class="bg-indigo-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-indigo-600 uppercase">Referrals</div>
-                        <div class="text-xl font-bold text-indigo-900">{{ number_format($shareStats['total_share_referrals']) }}</div>
+                        <div class="text-xl font-bold text-indigo-900">
+                            {{ number_format($shareStats['total_share_referrals']) }}</div>
                     </div>
                 </div>
 
@@ -287,11 +293,15 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <div class="text-xs font-medium text-yellow-600 uppercase">Pending Commissions</div>
-                                <div class="text-2xl font-bold text-yellow-900">{{ $shareCommissionStats['pending_commissions'] }}</div>
-                                <div class="text-sm text-yellow-700 mt-1">{{ currency($shareCommissionStats['pending_amount']) }}</div>
+                                <div class="text-2xl font-bold text-yellow-900">
+                                    {{ $shareCommissionStats['pending_commissions'] }}</div>
+                                <div class="text-sm text-yellow-700 mt-1">
+                                    {{ currency($shareCommissionStats['pending_amount']) }}</div>
                             </div>
-                            <svg class="w-8 h-8 text-yellow-500 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg class="w-8 h-8 text-yellow-500 opacity-50" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                     </div>
@@ -299,11 +309,15 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <div class="text-xs font-medium text-green-600 uppercase">Paid Commissions</div>
-                                <div class="text-2xl font-bold text-green-900">{{ $shareCommissionStats['paid_commissions'] }}</div>
-                                <div class="text-sm text-green-700 mt-1">{{ currency($shareCommissionStats['paid_amount']) }}</div>
+                                <div class="text-2xl font-bold text-green-900">
+                                    {{ $shareCommissionStats['paid_commissions'] }}</div>
+                                <div class="text-sm text-green-700 mt-1">
+                                    {{ currency($shareCommissionStats['paid_amount']) }}</div>
                             </div>
-                            <svg class="w-8 h-8 text-green-500 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg class="w-8 h-8 text-green-500 opacity-50" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                     </div>
@@ -311,11 +325,15 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <div class="text-xs font-medium text-purple-600 uppercase">Total Commissions</div>
-                                <div class="text-2xl font-bold text-purple-900">{{ $shareCommissionStats['total_commissions'] }}</div>
-                                <div class="text-sm text-purple-700 mt-1">{{ currency($shareCommissionStats['total_commission_amount']) }}</div>
+                                <div class="text-2xl font-bold text-purple-900">
+                                    {{ $shareCommissionStats['total_commissions'] }}</div>
+                                <div class="text-sm text-purple-700 mt-1">
+                                    {{ currency($shareCommissionStats['total_commission_amount']) }}</div>
                             </div>
-                            <svg class="w-8 h-8 text-purple-500 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            <svg class="w-8 h-8 text-purple-500 opacity-50" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
                     </div>
@@ -331,23 +349,27 @@
                                     <tr>
                                         <th class="px-3 py-2 text-left font-medium text-gray-500 uppercase">Note</th>
                                         <th class="px-3 py-2 text-right font-medium text-gray-500 uppercase">Shares</th>
-                                        <th class="px-3 py-2 text-right font-medium text-gray-500 uppercase">Commission</th>
+                                        <th class="px-3 py-2 text-right font-medium text-gray-500 uppercase">Commission
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @forelse($topSharedNotes as $index => $item)
                                         <tr>
                                             <td class="px-3 py-2 text-gray-900 truncate">
-                                                <a href="{{ route('admin.notes.show', $item->note) }}" class="text-blue-600 hover:underline">
+                                                <a href="{{ route('admin.notes.show', $item->note) }}"
+                                                    class="text-blue-600 hover:underline">
                                                     {{ Str::limit($item->note->title, 20) }}
                                                 </a>
                                             </td>
                                             <td class="px-3 py-2 text-right text-gray-600">{{ $item->share_count }}</td>
-                                            <td class="px-3 py-2 text-right text-emerald-600 font-medium">{{ currency($item->total_commission) }}</td>
+                                            <td class="px-3 py-2 text-right text-emerald-600 font-medium">
+                                                {{ currency($item->total_commission) }}</td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="3" class="px-3 py-2 text-center text-gray-500">No share data</td>
+                                            <td colspan="3" class="px-3 py-2 text-center text-gray-500">No share data
+                                            </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -371,16 +393,19 @@
                                     @forelse($topShareEarners as $index => $item)
                                         <tr>
                                             <td class="px-3 py-2 text-gray-900 truncate">
-                                                <a href="{{ route('admin.users.show', $item->sharer) }}" class="text-blue-600 hover:underline">
+                                                <a href="{{ route('admin.users.show', $item->sharer) }}"
+                                                    class="text-blue-600 hover:underline">
                                                     {{ $item->sharer->name }}
                                                 </a>
                                             </td>
                                             <td class="px-3 py-2 text-right text-gray-600">{{ $item->share_count }}</td>
-                                            <td class="px-3 py-2 text-right text-emerald-600 font-medium">{{ currency($item->total_commission) }}</td>
+                                            <td class="px-3 py-2 text-right text-emerald-600 font-medium">
+                                                {{ currency($item->total_commission) }}</td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="3" class="px-3 py-2 text-center text-gray-500">No earner data</td>
+                                            <td colspan="3" class="px-3 py-2 text-center text-gray-500">No earner data
+                                            </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -488,7 +513,8 @@
                         <div class="text-xl font-bold text-purple-900">{{ $referralStats['total_referrals'] }}</div>
                     </div>
                     <div class="bg-blue-50 rounded-lg p-4">
-                        <div class="text-xs font-medium text-blue-600 uppercase">{{ __('messages.signup_rewards') }}</div>
+                        <div class="text-xs font-medium text-blue-600 uppercase">{{ __('messages.signup_rewards') }}
+                        </div>
                         <div class="text-xl font-bold text-blue-900">
                             {{ currency($referralStats['total_signup_rewards']) }}</div>
                     </div>
@@ -499,7 +525,8 @@
                             {{ currency($referralStats['total_transaction_commission']) }}</div>
                     </div>
                     <div class="bg-yellow-50 rounded-lg p-4">
-                        <div class="text-xs font-medium text-yellow-600 uppercase">{{ __('messages.total_payout') }}</div>
+                        <div class="text-xs font-medium text-yellow-600 uppercase">{{ __('messages.total_payout') }}
+                        </div>
                         <div class="text-xl font-bold text-yellow-900">
                             {{ currency($referralStats['total_referral_payout']) }}</div>
                     </div>

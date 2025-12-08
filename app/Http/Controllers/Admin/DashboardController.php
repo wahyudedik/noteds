@@ -26,13 +26,13 @@ class DashboardController extends Controller
         // Try to get cached stats first, otherwise calculate
         $cacheKey = 'dashboard_stats';
         $cachedStats = Cache::get($cacheKey);
-        
+
         // Dispatch job to refresh stats in background if cache is old or missing
         if (!$cachedStats || Cache::get("{$cacheKey}_last_updated", 0) < now()->subMinutes(5)->timestamp) {
             CalculateStatisticsJob::dispatch('dashboard')
                 ->onQueue('statistics');
         }
-        
+
         // Use cached stats if available, otherwise calculate synchronously
         if ($cachedStats) {
             $stats = $cachedStats;
@@ -82,16 +82,16 @@ class DashboardController extends Controller
             ->get(['id', 'name', 'email', 'wallet_balance']);
 
         // Referral Leaderboard (Top 10) - Calculate per user
-        $referralLeaderboard = User::with(['referralsMade' => function($query) {
-                $query->where('status', 'paid');
-            }, 'referredUsers'])
+        $referralLeaderboard = User::with(['referralsMade' => function ($query) {
+            $query->where('status', 'paid');
+        }, 'referredUsers'])
             ->has('referralsMade')
             ->get()
-            ->map(function($user) {
+            ->map(function ($user) {
                 $paidReferrals = $user->referralsMade->where('status', 'paid');
                 $signupRewards = $paidReferrals->where('reward_type', 'signup');
                 $transactionRewards = $paidReferrals->where('reward_type', 'transaction');
-                
+
                 return [
                     'user' => $user,
                     'total_referrals' => $paidReferrals->count(),
@@ -106,23 +106,23 @@ class DashboardController extends Controller
             ->take(10);
 
         // Per-user referral details (Detailed breakdown)
-        $userReferralDetails = User::with(['referralsMade' => function($query) {
-                $query->where('status', 'paid');
-            }, 'referredUsers'])
+        $userReferralDetails = User::with(['referralsMade' => function ($query) {
+            $query->where('status', 'paid');
+        }, 'referredUsers'])
             ->has('referralsMade')
             ->get()
-            ->map(function($user) {
+            ->map(function ($user) {
                 $paidReferrals = $user->referralsMade->where('status', 'paid');
                 $signupRewards = $paidReferrals->where('reward_type', 'signup');
                 $transactionRewards = $paidReferrals->where('reward_type', 'transaction');
-                
+
                 // Count unique referred users who made purchases
                 $referredBuyers = User::where('referred_by', $user->id)
-                    ->whereHas('transactionsAsBuyer', function($q) {
+                    ->whereHas('transactionsAsBuyer', function ($q) {
                         $q->where('status', 'success');
                     })
                     ->count();
-                
+
                 return [
                     'user' => $user,
                     'total_signups' => $user->referredUsers->count(),
@@ -139,10 +139,10 @@ class DashboardController extends Controller
 
         // Daily Note Creation (Last 30 days)
         $dailyNotes = Note::select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as count'),
-                DB::raw('COUNT(DISTINCT user_id) as unique_users')
-            )
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('COUNT(*) as count'),
+            DB::raw('COUNT(DISTINCT user_id) as unique_users')
+        )
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date', 'desc')
@@ -157,10 +157,10 @@ class DashboardController extends Controller
 
         // Daily notes per user (detailed)
         $userNoteActivity = Note::select(
-                'user_id',
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as note_count')
-            )
+            'user_id',
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('COUNT(*) as note_count')
+        )
             ->where('created_at', '>=', now()->subDays(7))
             ->groupBy('user_id', 'date')
             ->with('user:id,name,email')
@@ -183,12 +183,12 @@ class DashboardController extends Controller
             ->get();
 
         // Top Sellers (by revenue)
-        $topSellers = User::with(['transactionsAsSeller' => function($query) {
-                $query->where('status', 'success');
-            }])
+        $topSellers = User::with(['transactionsAsSeller' => function ($query) {
+            $query->where('status', 'success');
+        }])
             ->has('transactionsAsSeller')
             ->get()
-            ->map(function($user) {
+            ->map(function ($user) {
                 $successfulSales = $user->transactionsAsSeller->where('status', 'success');
                 return [
                     'user' => $user,
@@ -201,12 +201,12 @@ class DashboardController extends Controller
             ->values();
 
         // Top Buyers (by spending)
-        $topBuyers = User::with(['transactionsAsBuyer' => function($query) {
-                $query->where('status', 'success');
-            }])
+        $topBuyers = User::with(['transactionsAsBuyer' => function ($query) {
+            $query->where('status', 'success');
+        }])
             ->has('transactionsAsBuyer')
             ->get()
-            ->map(function($user) {
+            ->map(function ($user) {
                 $successfulPurchases = $user->transactionsAsBuyer->where('status', 'success');
                 return [
                     'user' => $user,
@@ -220,9 +220,9 @@ class DashboardController extends Controller
 
         // User Growth (Last 30 days)
         $userGrowth = User::select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as count')
-            )
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('COUNT(*) as count')
+        )
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date', 'desc')
@@ -318,71 +318,71 @@ class DashboardController extends Controller
             'scarcity_notes' => Note::where('sale_mode', 'scarcity')->count(),
             'standard_notes' => Note::where('sale_mode', 'standard')->count(),
             'total_with_sale_mode' => Note::whereNotNull('sale_mode')->count(),
-            
+
             // Transactions by sale mode (via notes)
             'scarcity_transactions' => Transaction::where('status', 'success')
-                ->whereHas('note', function($q) {
+                ->whereHas('note', function ($q) {
                     $q->where('sale_mode', 'scarcity');
                 })
                 ->count(),
             'standard_transactions' => Transaction::where('status', 'success')
-                ->whereHas('note', function($q) {
+                ->whereHas('note', function ($q) {
                     $q->where('sale_mode', 'standard');
                 })
                 ->count(),
-            
+
             // Revenue by sale mode
             'scarcity_revenue' => Transaction::where('status', 'success')
-                ->whereHas('note', function($q) {
+                ->whereHas('note', function ($q) {
                     $q->where('sale_mode', 'scarcity');
                 })
                 ->sum('platform_fee'),
             'standard_revenue' => Transaction::where('status', 'success')
-                ->whereHas('note', function($q) {
+                ->whereHas('note', function ($q) {
                     $q->where('sale_mode', 'standard');
                 })
                 ->sum('platform_fee'),
-            
+
             // Total amount by sale mode
             'scarcity_total_amount' => Transaction::where('status', 'success')
-                ->whereHas('note', function($q) {
+                ->whereHas('note', function ($q) {
                     $q->where('sale_mode', 'scarcity');
                 })
                 ->sum('amount'),
             'standard_total_amount' => Transaction::where('status', 'success')
-                ->whereHas('note', function($q) {
+                ->whereHas('note', function ($q) {
                     $q->where('sale_mode', 'standard');
                 })
                 ->sum('amount'),
-            
+
             // Creator commission (only scarcity mode)
             'scarcity_creator_commission' => Transaction::where('status', 'success')
-                ->whereHas('note', function($q) {
+                ->whereHas('note', function ($q) {
                     $q->where('sale_mode', 'scarcity');
                 })
                 ->sum('creator_commission'),
-            
+
             // Resale statistics (scarcity mode only)
             'resale_count' => Transaction::where('status', 'success')
                 ->whereNotNull('resale_price')
-                ->whereHas('note', function($q) {
+                ->whereHas('note', function ($q) {
                     $q->where('sale_mode', 'scarcity');
                 })
                 ->count(),
             'resale_revenue' => Transaction::where('status', 'success')
                 ->whereNotNull('resale_price')
-                ->whereHas('note', function($q) {
+                ->whereHas('note', function ($q) {
                     $q->where('sale_mode', 'scarcity');
                 })
                 ->sum('platform_fee'),
-            
+
             // Repurchase statistics (simplified - count transactions with grace_period_ends_at where buyer has previous transaction)
             'repurchase_count' => DB::table('transactions as t1')
                 ->join('notes', 't1.note_id', '=', 'notes.id')
                 ->where('t1.status', 'success')
                 ->where('notes.sale_mode', 'scarcity')
                 ->whereNotNull('t1.grace_period_ends_at')
-                ->whereExists(function($query) {
+                ->whereExists(function ($query) {
                     $query->select(DB::raw(1))
                         ->from('transactions as t2')
                         ->whereColumn('t2.note_id', 't1.note_id')
@@ -394,11 +394,11 @@ class DashboardController extends Controller
         ];
 
         // Calculate averages
-        $saleModeStats['scarcity_avg_price'] = $saleModeStats['scarcity_transactions'] > 0 
-            ? $saleModeStats['scarcity_total_amount'] / $saleModeStats['scarcity_transactions'] 
+        $saleModeStats['scarcity_avg_price'] = $saleModeStats['scarcity_transactions'] > 0
+            ? $saleModeStats['scarcity_total_amount'] / $saleModeStats['scarcity_transactions']
             : 0;
-        $saleModeStats['standard_avg_price'] = $saleModeStats['standard_transactions'] > 0 
-            ? $saleModeStats['standard_total_amount'] / $saleModeStats['standard_transactions'] 
+        $saleModeStats['standard_avg_price'] = $saleModeStats['standard_transactions'] > 0
+            ? $saleModeStats['standard_total_amount'] / $saleModeStats['standard_transactions']
             : 0;
 
         // Share Analytics
@@ -423,10 +423,13 @@ class DashboardController extends Controller
 
         // Top Shared Notes
         $topSharedNotes = NoteShareReferral::with('note')
-            ->select('note_id', DB::raw('COUNT(*) as share_count'), 
-                     DB::raw('SUM(click_count) as total_clicks'),
-                     DB::raw('SUM(purchase_count) as total_purchases'),
-                     DB::raw('SUM(total_commission_earned) as total_commission'))
+            ->select(
+                'note_id',
+                DB::raw('COUNT(*) as share_count'),
+                DB::raw('SUM(click_count) as total_clicks'),
+                DB::raw('SUM(purchase_count) as total_purchases'),
+                DB::raw('SUM(total_commission_earned) as total_commission')
+            )
             ->groupBy('note_id')
             ->orderByDesc('share_count')
             ->limit(10)
@@ -434,9 +437,12 @@ class DashboardController extends Controller
 
         // Top Share Earners
         $topShareEarners = NoteShareReferral::with('sharer')
-            ->select('sharer_id', DB::raw('COUNT(*) as share_count'),
-                     DB::raw('SUM(total_commission_earned) as total_commission'),
-                     DB::raw('SUM(purchase_count) as total_purchases'))
+            ->select(
+                'sharer_id',
+                DB::raw('COUNT(*) as share_count'),
+                DB::raw('SUM(total_commission_earned) as total_commission'),
+                DB::raw('SUM(purchase_count) as total_purchases')
+            )
             ->groupBy('sharer_id')
             ->orderByDesc('total_commission')
             ->limit(10)
@@ -444,11 +450,11 @@ class DashboardController extends Controller
 
         // Share Activity (Last 30 days)
         $dailyShareActivity = NoteShareReferral::select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as share_count'),
-                DB::raw('SUM(purchase_count) as purchase_count'),
-                DB::raw('SUM(total_commission_earned) as commission')
-            )
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('COUNT(*) as share_count'),
+            DB::raw('SUM(purchase_count) as purchase_count'),
+            DB::raw('SUM(total_commission_earned) as commission')
+        )
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date', 'desc')
@@ -493,12 +499,12 @@ class DashboardController extends Controller
         // Get all repurchase transactions (transactions where buyer has previous transaction for same note)
         $repurchaseTransactions = Transaction::with(['buyer', 'seller', 'note', 'originalCreator'])
             ->where('status', 'success')
-            ->whereHas('note', function($q) {
+            ->whereHas('note', function ($q) {
                 $q->where('sale_mode', 'scarcity');
             })
             ->whereNotNull('grace_period_ends_at')
             ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-            ->whereExists(function($query) {
+            ->whereExists(function ($query) {
                 $query->select(DB::raw(1))
                     ->from('transactions as t2')
                     ->whereColumn('t2.note_id', 'transactions.note_id')
@@ -524,7 +530,7 @@ class DashboardController extends Controller
                 ->where('id', '<', $repurchase->id)
                 ->orderBy('created_at', 'asc')
                 ->first();
-            
+
             if ($firstPurchase) {
                 $daysDiff = $repurchase->created_at->diffInDays($firstPurchase->created_at);
                 $repurchaseTimes[] = $daysDiff;
@@ -534,18 +540,18 @@ class DashboardController extends Controller
 
         // Get total scarcity transactions for repurchase rate calculation
         $totalScarcityTransactions = Transaction::where('status', 'success')
-            ->whereHas('note', function($q) {
+            ->whereHas('note', function ($q) {
                 $q->where('sale_mode', 'scarcity');
             })
             ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->count();
-        
-        $repurchaseRate = $totalScarcityTransactions > 0 
-            ? ($totalRepurchases / $totalScarcityTransactions * 100) 
+
+        $repurchaseRate = $totalScarcityTransactions > 0
+            ? ($totalRepurchases / $totalScarcityTransactions * 100)
             : 0;
 
         // Group by note
-        $repurchasesByNote = $repurchaseTransactions->groupBy('note_id')->map(function($transactions) {
+        $repurchasesByNote = $repurchaseTransactions->groupBy('note_id')->map(function ($transactions) {
             return [
                 'note' => $transactions->first()->note,
                 'count' => $transactions->count(),
@@ -555,7 +561,7 @@ class DashboardController extends Controller
         })->sortByDesc('count')->take(10);
 
         // Group by buyer
-        $repurchasesByBuyer = $repurchaseTransactions->groupBy('buyer_id')->map(function($transactions) {
+        $repurchasesByBuyer = $repurchaseTransactions->groupBy('buyer_id')->map(function ($transactions) {
             return [
                 'buyer' => $transactions->first()->buyer,
                 'count' => $transactions->count(),
@@ -564,7 +570,7 @@ class DashboardController extends Controller
         })->sortByDesc('count')->take(10);
 
         // Repurchases within grace period vs after grace period
-        $withinGracePeriod = $repurchaseTransactions->filter(function($transaction) {
+        $withinGracePeriod = $repurchaseTransactions->filter(function ($transaction) {
             if (!$transaction->grace_period_ends_at) return false;
             $firstPurchase = Transaction::where('note_id', $transaction->note_id)
                 ->where('buyer_id', $transaction->buyer_id)
@@ -572,12 +578,12 @@ class DashboardController extends Controller
                 ->where('id', '<', $transaction->id)
                 ->orderBy('created_at', 'asc')
                 ->first();
-            
+
             if (!$firstPurchase || !$firstPurchase->grace_period_ends_at) return false;
             return $transaction->created_at->lte($firstPurchase->grace_period_ends_at);
         });
 
-        $afterGracePeriod = $repurchaseTransactions->filter(function($transaction) {
+        $afterGracePeriod = $repurchaseTransactions->filter(function ($transaction) {
             if (!$transaction->grace_period_ends_at) return false;
             $firstPurchase = Transaction::where('note_id', $transaction->note_id)
                 ->where('buyer_id', $transaction->buyer_id)
@@ -585,7 +591,7 @@ class DashboardController extends Controller
                 ->where('id', '<', $transaction->id)
                 ->orderBy('created_at', 'asc')
                 ->first();
-            
+
             if (!$firstPurchase || !$firstPurchase->grace_period_ends_at) return true;
             return $transaction->created_at->gt($firstPurchase->grace_period_ends_at);
         });
