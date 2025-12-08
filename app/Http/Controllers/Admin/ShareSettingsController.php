@@ -41,11 +41,11 @@ class ShareSettingsController extends Controller
             'share_commission_payment_mode' => 'required|in:monthly,immediate',
         ]);
 
-        // Save settings
-        Setting::setSetting('share_commission_percent', (float) $validated['share_commission_percent'], 'marketplace');
-        Setting::setSetting('share_monthly_payout_day', (int) $validated['share_monthly_payout_day'], 'marketplace');
-        Setting::setSetting('share_max_shares_per_user_per_link', (int) $validated['share_max_shares_per_user_per_link'], 'marketplace');
-        Setting::setSetting('share_commission_payment_mode', $validated['share_commission_payment_mode'], 'marketplace');
+        // Save settings with correct parameter order: key, value, type, group, description
+        Setting::setSetting('share_commission_percent', (float) $validated['share_commission_percent'], 'number', 'marketplace', 'Commission percentage for share analytics');
+        Setting::setSetting('share_monthly_payout_day', (int) $validated['share_monthly_payout_day'], 'number', 'marketplace', 'Day of month to process share commissions');
+        Setting::setSetting('share_max_shares_per_user_per_link', (int) $validated['share_max_shares_per_user_per_link'], 'number', 'marketplace', 'Maximum shares per user per link');
+        Setting::setSetting('share_commission_payment_mode', $validated['share_commission_payment_mode'], 'string', 'marketplace', 'Payment mode: monthly or immediate');
 
         return redirect()->route('admin.share-settings.index')
             ->with('success', 'Share settings updated successfully.');
