@@ -108,5 +108,41 @@ return [
     'payout_reference_hint' => 'Transaction ID or reference number for payout tracking',
     'payout_details' => 'Payout Details',
     'no_payouts' => 'No payouts yet',
+    
+    // Settings
+    'settings_title' => 'Affiliate Settings',
+    'settings_description' => 'Configure affiliate program commission tiers, thresholds, and payout settings',
+    'commission_tiers' => 'Commission Tiers',
+    'commission_tiers_description' => 'Set commission percentages for each tier based on conversion count',
+    'conversion_thresholds' => 'Conversion Thresholds',
+    'conversion_thresholds_description' => 'Define the conversion count required to reach each tier',
+    'threshold' => 'Threshold',
+    'payout_settings' => 'Payout Settings',
+    'payout_settings_description' => 'Configure minimum payout amounts and automatic transfer schedules',
+    'min_payout_amount' => 'Minimum Payout Amount',
+    'min_payout_amount_hint' => 'Minimum amount in your currency that affiliates can request for payout',
+    'payout_day' => 'Monthly Payout Day',
+    'payout_day_hint' => 'Day of the month (1-31) when automatic payouts will be processed',
+    'settings_info_title' => 'Settings Information',
+    'settings_info_1' => 'Commission tiers are applied based on total conversions',
+    'settings_info_2' => 'Payouts are automatically processed on the configured day',
+    'settings_info_3' => 'Funds are transferred from admin wallet to affiliate wallets',
+    'settings_updated' => 'Affiliate settings updated successfully',
+    'save_settings' => 'Save Settings',
+    
+    // Edit & Landing Page
+    'edit_link' => 'Edit Link',
+    'edit_landing_page' => 'Edit Landing Page',
+    'promotional_materials' => 'Promotional Materials',
+    'cancel' => 'Cancel',
+    'update' => 'Update',
+    'landing_page_url' => 'Landing Page URL',
+    'error_loading_link' => 'Error loading affiliate link details',
+    
+    // Leaderboard
+    'leaderboard_title' => 'Affiliate Leaderboard',
+    'leaderboard_description' => 'See top-performing affiliates and their rankings',
+    'view_leaderboard' => 'View Leaderboard',
 ];
+
 

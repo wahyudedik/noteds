@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\WithdrawController as AdminWithdrawController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\LeaderboardSettingsController as AdminLeaderboardSettingsController;
 use App\Http\Controllers\Admin\ShareSettingsController as AdminShareSettingsController;
+use App\Http\Controllers\Admin\AffiliateSettingsController as AdminAffiliateSettingsController;
 use App\Http\Controllers\Admin\AffiliateController as AdminAffiliateController;
 use App\Http\Controllers\Admin\CommissionTierController as AdminCommissionTierController;
 use App\Http\Controllers\Admin\PostModerationController;
@@ -414,6 +415,9 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
         Route::post('/payouts', [AffiliateController::class, 'requestPayout'])->name('payouts.request');
     });
 
+    // API routes for affiliate
+    Route::get('/api/affiliate-links/{affiliateLink}', [AffiliateController::class, 'getLinkDetails']);
+
     // Public affiliate landing pages
     Route::get('/a/{slug}', [AffiliateController::class, 'showLanding'])->name('affiliate.landing');
 
@@ -657,6 +661,10 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     // Share Settings
     Route::get('/settings/share', [AdminShareSettingsController::class, 'index'])->name('share-settings.index');
     Route::post('/settings/share', [AdminShareSettingsController::class, 'update'])->name('share-settings.update');
+
+    // Affiliate Settings
+    Route::get('/settings/affiliate', [\App\Http\Controllers\Admin\AffiliateSettingsController::class, 'index'])->name('affiliate-settings.index');
+    Route::put('/settings/affiliate', [\App\Http\Controllers\Admin\AffiliateSettingsController::class, 'update'])->name('affiliate-settings.update');
 
     Route::get('/system-health', [\App\Http\Controllers\Admin\SystemHealthController::class, 'index'])->name('system-health.index');
     Route::post('/system-health/test-broadcaster', [\App\Http\Controllers\Admin\SystemHealthController::class, 'testBroadcaster'])->name('system-health.test-broadcaster');

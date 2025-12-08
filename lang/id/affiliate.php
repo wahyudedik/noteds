@@ -155,5 +155,33 @@ return [
     'apply_filters' => 'Terapkan Filter',
     'no_affiliates' => 'Belum ada afiliasi',
     'view_leaderboard' => 'Lihat Papan Peringkat',
+    
+    // Settings
+    'settings_title' => 'Pengaturan Afiliasi',
+    'settings_description' => 'Konfigurasi tingkat komisi afiliasi, ambang batas, dan pengaturan payout',
+    'commission_tiers' => 'Tingkat Komisi',
+    'commission_tiers_description' => 'Tetapkan persentase komisi untuk setiap tingkat berdasarkan jumlah konversi',
+    'conversion_thresholds' => 'Ambang Batas Konversi',
+    'conversion_thresholds_description' => 'Tentukan jumlah konversi yang diperlukan untuk mencapai setiap tingkat',
+    'threshold' => 'Ambang Batas',
+    'payout_settings' => 'Pengaturan Payout',
+    'payout_settings_description' => 'Konfigurasi jumlah payout minimum dan jadwal transfer otomatis',
+    'min_payout_amount' => 'Jumlah Payout Minimum',
+    'min_payout_amount_hint' => 'Jumlah minimum dalam mata uang Anda yang dapat diminta afiliasi untuk payout',
+    'payout_day' => 'Hari Payout Bulanan',
+    'payout_day_hint' => 'Hari dalam sebulan (1-31) ketika payout otomatis akan diproses',
+    'settings_info_title' => 'Informasi Pengaturan',
+    'settings_info_1' => 'Tingkat komisi diterapkan berdasarkan total konversi',
+    'settings_info_2' => 'Payout diproses secara otomatis pada hari yang dikonfigurasi',
+    'settings_info_3' => 'Dana ditransfer dari dompet admin ke dompet afiliasi',
+    'settings_updated' => 'Pengaturan afiliasi berhasil diperbarui',
+    'save_settings' => 'Simpan Pengaturan',
+    
+    // Edit
+    'edit_link' => 'Edit Link',
+    'cancel' => 'Batal',
+    'update' => 'Perbarui',
+    'error_loading_link' => 'Kesalahan memuat detail link afiliasi',
 ];
+
 

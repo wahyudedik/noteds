@@ -536,6 +536,49 @@
     </div>
 </div>
 
+<!-- Edit Link Modal -->
+<div id="edit-link-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('affiliate.edit_link') }}</h3>
+            <form id="edit-link-form" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="space-y-4">
+                    <div>
+                        <label for="edit-name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.link_name') }}</label>
+                        <input type="text" name="name" id="edit-name" class="w-full rounded-lg border-gray-300 shadow-sm">
+                    </div>
+                    <div>
+                        <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.description') }}</label>
+                        <textarea name="description" id="edit-description" rows="3" class="w-full rounded-lg border-gray-300 shadow-sm"></textarea>
+                    </div>
+                    <div>
+                        <label for="edit-destination_url" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.destination_url') }} ({{ __('affiliate.optional') }})</label>
+                        <input type="url" name="destination_url" id="edit-destination_url" class="w-full rounded-lg border-gray-300 shadow-sm">
+                        <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.destination_url_hint') }}</p>
+                    </div>
+                    <div>
+                        <label for="edit-is_active" class="flex items-center gap-2">
+                            <input type="checkbox" name="is_active" id="edit-is_active" value="1" class="rounded">
+                            <span class="text-sm font-medium text-gray-700">{{ __('affiliate.active') }}</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-3 mt-6">
+                    <button type="button" onclick="document.getElementById('edit-link-modal').classList.add('hidden')" 
+                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
+                        {{ __('affiliate.cancel') }}
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        {{ __('affiliate.update') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 function copyLink(url) {
@@ -556,8 +599,23 @@ function copyLink(url) {
 }
 
 function editLink(linkId) {
-    // TODO: Implement edit modal
-    alert('Edit functionality coming soon');
+    fetch(`/api/affiliate-links/${linkId}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('edit-name').value = data.name || '';
+            document.getElementById('edit-description').value = data.description || '';
+            document.getElementById('edit-destination_url').value = data.destination_url || '';
+            document.getElementById('edit-is_active').checked = data.is_active;
+            
+            const form = document.getElementById('edit-link-form');
+            form.action = `/affiliate/links/${linkId}`;
+            
+            document.getElementById('edit-link-modal').classList.remove('hidden');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('{{ __('affiliate.error_loading_link') }}');
+        });
 }
 
 function editLandingPage(linkId) {

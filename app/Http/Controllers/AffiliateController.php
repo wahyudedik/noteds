@@ -300,4 +300,23 @@ class AffiliateController extends Controller
         return redirect()->route('affiliate.index')
             ->with('success', __('affiliate.promotional_material_deleted'));
     }
+
+    /**
+     * Get affiliate link details for API.
+     */
+    public function getLinkDetails(AffiliateLink $affiliateLink)
+    {
+        $this->authorize('view', $affiliateLink);
+
+        return response()->json([
+            'id' => $affiliateLink->id,
+            'name' => $affiliateLink->name,
+            'description' => $affiliateLink->description,
+            'destination_url' => $affiliateLink->destination_url,
+            'is_active' => $affiliateLink->is_active,
+            'code' => $affiliateLink->code,
+            'clicks' => $affiliateLink->clicks,
+            'conversions' => $affiliateLink->conversions,
+        ]);
+    }
 }

@@ -242,6 +242,24 @@
                         </svg>
                         <span class="text-sm font-medium text-blue-900">Share Analytics Settings</span>
                     </a>
+                    <a href="{{ route('admin.affiliate.index') }}"
+                        class="flex items-center p-4 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors">
+                        <svg class="w-5 h-5 mr-2 text-amber-600" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 6a3 3 0 11-6 0 3 3 0 016 0zM16 12a4 4 0 11-8 0 4 4 0 018 0zM9 20H5v-2a3 3 0 015.856-1.487" />
+                        </svg>
+                        <span class="text-sm font-medium text-amber-900">Affiliate Management</span>
+                    </a>
+                    <a href="{{ route('admin.affiliate-settings.index') }}"
+                        class="flex items-center p-4 bg-rose-50 rounded-lg hover:bg-rose-100 transition-colors">
+                        <svg class="w-5 h-5 mr-2 text-rose-600" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
+                        <span class="text-sm font-medium text-rose-900">Affiliate Settings</span>
+                    </a>
                 </div>
             </div>
 
