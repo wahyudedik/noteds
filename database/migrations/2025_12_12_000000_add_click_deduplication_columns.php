@@ -63,7 +63,7 @@ return new class extends Migration
         if (!Schema::hasTable('affiliate_click_sessions')) {
             Schema::create('affiliate_click_sessions', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('affiliate_id')->constrained('users')->onDelete('cascade');
+                $table->uuid('affiliate_id');
                 $table->uuid('click_id');
                 $table->string('session_id')->index();
                 $table->string('device_fingerprint')->index();
@@ -77,6 +77,12 @@ return new class extends Migration
                 $table->index(['affiliate_id', 'session_id']);
                 $table->index(['affiliate_id', 'device_fingerprint']);
                 $table->index('created_at');
+
+                // Add foreign key constraint after table creation
+                $table->foreign('affiliate_id')
+                    ->references('id')
+                    ->on('users')
+                    ->onDelete('cascade');
             });
         }
     }
