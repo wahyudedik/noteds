@@ -10,14 +10,24 @@ class ShareAnalyticsController extends Controller
 {
     public function __construct(private NoteShareService $noteShareService)
     {
+        // Only sellers can access share analytics
+        $this->middleware('auth');
+        $this->middleware(function ($request, $next) {
+            $user = $request->user();
+            if (!$user || $user->role !== 'seller') {
+                abort(403, 'Only sellers can access share analytics.');
+            }
+            return $next($request);
+        });
     }
 
     /**
      * Display share analytics dashboard.
+     * Only accessible to sellers
      */
     public function index(Request $request): View
     {
-        $user = auth()->user();
+        $user = $request->user();
         $stats = $this->noteShareService->getUserShareStats($user);
 
         // Get detailed stats for each share referral with eager loading

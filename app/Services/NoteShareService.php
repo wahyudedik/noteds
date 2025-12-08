@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Note;
 use App\Models\NoteShareReferral;
 use App\Models\NoteSharePurchase;
+use App\Models\NoteShareUserTracking;
 use App\Models\Setting;
 use App\Models\Transaction;
 use App\Models\User;
@@ -16,8 +17,7 @@ class NoteShareService
     public function __construct(
         private NotificationService $notificationService,
         private ShareToEarnService $shareToEarnService
-    ) {
-    }
+    ) {}
 
     /**
      * Get share commission percentage from settings.
@@ -49,10 +49,13 @@ class NoteShareService
     public function generateShareUrl(Note $note, User $sharer): string
     {
         $shareReferral = $this->getOrCreateShareReferral($note, $sharer);
-        
+
+        // Check share limit per user per link
+        $this->trackAndValidateShareCount($shareReferral, $sharer);
+
         // Award share-to-earn points (for leaderboard)
         $this->shareToEarnService->awardSharePoints($sharer, $note, $shareReferral);
-        
+
         // Award regular points (for redemption system)
         try {
             $pointsService = app(\App\Services\PointsService::class);
@@ -64,8 +67,40 @@ class NoteShareService
                 'error' => $e->getMessage(),
             ]);
         }
-        
+
         return $shareReferral->share_url;
+    }
+
+    /**
+     * Track and validate share count per user per link.
+     * Throws exception if limit exceeded.
+     *
+     * @throws \Exception
+     */
+    private function trackAndValidateShareCount(NoteShareReferral $shareReferral, User $sharer): void
+    {
+        $maxSharesPerLink = (int) Setting::getSetting('share_max_shares_per_user_per_link', 'marketplace', 1);
+
+        // Get or create tracking record
+        $tracking = NoteShareUserTracking::firstOrCreate(
+            [
+                'share_referral_id' => $shareReferral->id,
+                'user_id' => $sharer->id,
+            ],
+            [
+                'share_count' => 0,
+            ]
+        );
+
+        // Check if user has exceeded share limit
+        if ($tracking->share_count >= $maxSharesPerLink) {
+            throw new \Exception(
+                "You can only share this link {$maxSharesPerLink} time(s). Create a new share link if you want to share again."
+            );
+        }
+
+        // Increment share count
+        $tracking->increment('share_count');
     }
 
     /**
@@ -74,13 +109,13 @@ class NoteShareService
     public function trackClick(string $referralToken): ?NoteShareReferral
     {
         $shareReferral = NoteShareReferral::where('referral_token', $referralToken)->first();
-        
+
         if ($shareReferral) {
             $shareReferral->trackClick();
-            
+
             // Award points for click
             $this->shareToEarnService->awardClickPoints($shareReferral);
-            
+
             return $shareReferral;
         }
 
@@ -89,6 +124,7 @@ class NoteShareService
 
     /**
      * Process commission for a purchase made through a share referral.
+     * Commission akan pending atau immediate tergantung setting payment mode
      */
     public function processShareCommission(Transaction $transaction, ?string $referralToken = null): ?NoteSharePurchase
     {
@@ -115,8 +151,10 @@ class NoteShareService
         }
 
         // Don't give commission if sharer is the buyer or seller
-        if ($shareReferral->sharer_id === $transaction->buyer_id || 
-            $shareReferral->sharer_id === $transaction->seller_id) {
+        if (
+            $shareReferral->sharer_id === $transaction->buyer_id ||
+            $shareReferral->sharer_id === $transaction->seller_id
+        ) {
             return null;
         }
 
@@ -133,45 +171,48 @@ class NoteShareService
 
             // Record the purchase
             $sharePurchase = $shareReferral->recordPurchase(
-                $transaction->amount,
+                (float)$transaction->amount,
                 $commissionAmount,
                 $transaction->id
             );
 
-            // Add commission to sharer's wallet
-            $sharer = $shareReferral->sharer;
-            $baseCurrency = config('currency.base_currency', 'IDR');
-            
-            $sharer->increment('wallet_balance', $commissionAmount);
+            // Get payment mode setting
+            $paymentMode = Setting::getSetting('share_commission_payment_mode', 'marketplace', 'monthly');
 
-            // Sync Wallet model
-            $sharerWallet = Wallet::firstOrCreate(
-                ['user_id' => $sharer->id],
-                ['balance' => 0, 'currency' => $baseCurrency]
-            );
-            if ($sharerWallet->currency !== $baseCurrency) {
-                $sharerWallet->currency = $baseCurrency;
+            if ($paymentMode === 'immediate') {
+                // Immediate payment mode - transfer to wallet immediately
+                $this->transferCommissionToWallet($shareReferral->sharer, $commissionAmount);
+            } else {
+                // Monthly payment mode - create pending commission record
+                $month = now()->format('Y-m');
+                \App\Models\NoteShareCommission::create([
+                    'share_referral_id' => $shareReferral->id,
+                    'seller_id' => $shareReferral->sharer_id,
+                    'transaction_id' => $transaction->id,
+                    'commission_amount' => $commissionAmount,
+                    'commission_percent' => $commissionPercent,
+                    'status' => 'pending',
+                    'month' => $month,
+                ]);
             }
-            $sharerWallet->balance = $sharer->wallet_balance;
-            $sharerWallet->save();
 
-                // Mark commission as paid
-                $sharePurchase->markAsPaid();
+            // Mark commission as paid
+            $sharePurchase->markAsPaid();
 
-                // Award points for purchase
-                $this->shareToEarnService->awardPurchasePoints($shareReferral);
+            // Award points for purchase
+            $this->shareToEarnService->awardPurchasePoints($shareReferral);
 
-                DB::commit();
+            DB::commit();
 
-                // Send notification
-                $this->notificationService->notifyShareCommission(
-                    $sharer,
-                    $shareReferral->note,
-                    $commissionAmount,
-                    $commissionPercent
-                );
+            // Send notification
+            $this->notificationService->notifyShareCommission(
+                $shareReferral->sharer,
+                $shareReferral->note,
+                $commissionAmount,
+                $commissionPercent
+            );
 
-                return $sharePurchase;
+            return $sharePurchase;
         } catch (\Exception $e) {
             DB::rollBack();
             logger()->error('Share commission processing failed', [
@@ -182,6 +223,27 @@ class NoteShareService
 
             return null;
         }
+    }
+
+    /**
+     * Transfer commission amount to user's wallet.
+     */
+    private function transferCommissionToWallet(User $user, float $commissionAmount): void
+    {
+        $baseCurrency = config('currency.base_currency', 'IDR');
+
+        $user->increment('wallet_balance', $commissionAmount);
+
+        // Sync Wallet model
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => $user->id],
+            ['balance' => 0, 'currency' => $baseCurrency]
+        );
+        if ($wallet->currency !== $baseCurrency) {
+            $wallet->currency = $baseCurrency;
+        }
+        $wallet->balance = $user->wallet_balance;
+        $wallet->save();
     }
 
     /**
@@ -221,4 +283,3 @@ class NoteShareService
         ];
     }
 }
-

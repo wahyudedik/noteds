@@ -151,3 +151,11 @@ Schedule::job(new \App\Jobs\DistributeLeaderboardRewardsJob())
     ->monthly()
     ->timezone('Asia/Jakarta')
     ->description('Distribute monthly leaderboard rewards to top performers');
+
+// Process monthly share commissions
+// Run on the configured day each month at 11:00
+$payoutDay = \App\Models\Setting::getSetting('share_monthly_payout_day', 'marketplace', 1);
+Schedule::job(new \App\Jobs\ProcessMonthlyShareCommissionJob())
+    ->monthlyOn($payoutDay, '11:00')
+    ->timezone('Asia/Jakarta')
+    ->description('Transfer accumulated share commissions from admin wallet to seller wallets');

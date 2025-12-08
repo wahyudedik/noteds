@@ -102,14 +102,20 @@
                                         <?php if($entry['user']): ?>
                                             <div class="flex items-center">
                                                 <?php if($entry['user']->avatar): ?>
-                                                    <img class="h-10 w-10 rounded-full mr-3"
+                                                    <img class="h-10 w-10 rounded-full mr-3 object-cover"
                                                         src="<?php echo e(Storage::url($entry['user']->avatar)); ?>"
-                                                        alt="<?php echo e($entry['user']->name); ?>">
+                                                        alt="<?php echo e($entry['user']->name); ?>"
+                                                        onerror="this.style.display='none'; this.nextElementSibling && (this.nextElementSibling.style.display='flex')">
+                                                    <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 mr-3 flex items-center justify-center"
+                                                        style="display:none">
+                                                        <span
+                                                            class="text-white font-semibold text-sm"><?php echo e(strtoupper(substr($entry['user']->name, 0, 1))); ?></span>
+                                                    </div>
                                                 <?php else: ?>
                                                     <div
-                                                        class="h-10 w-10 rounded-full bg-gray-300 mr-3 flex items-center justify-center">
+                                                        class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 mr-3 flex items-center justify-center">
                                                         <span
-                                                            class="text-gray-600 font-medium"><?php echo e(substr($entry['user']->name, 0, 1)); ?></span>
+                                                            class="text-white font-semibold text-sm"><?php echo e(strtoupper(substr($entry['user']->name, 0, 1))); ?></span>
                                                     </div>
                                                 <?php endif; ?>
                                                 <div>
