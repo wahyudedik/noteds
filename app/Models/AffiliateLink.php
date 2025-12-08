@@ -82,7 +82,10 @@ class AffiliateLink extends Model
         return $this->hasMany(AffiliateConversion::class);
     }
 
-    public function commissions(): HasMany
+    /**
+     * Get all commissions for this affiliate link (through conversions)
+     */
+    public function commissions()
     {
         return $this->hasManyThrough(AffiliateCommission::class, AffiliateConversion::class);
     }

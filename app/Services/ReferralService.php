@@ -148,6 +148,7 @@ class ReferralService
             $referrer->increment('wallet_balance', $rewardAmount);
             
             // Sync Wallet model with user wallet_balance
+            $baseCurrency = config('app.currency', 'USD');
             $referrerWallet = \App\Models\Wallet::firstOrCreate(
                 ['user_id' => $referrer->id],
                 ['balance' => 0, 'currency' => $baseCurrency]
