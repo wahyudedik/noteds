@@ -11,7 +11,10 @@
                     <h1 class="text-4xl md:text-5xl font-black text-white mb-3">{{ __('affiliate.title') }}</h1>
                     <p class="text-lg text-blue-100 max-w-2xl">{{ __('affiliate.description') }}</p>
                     <div class="mt-4 flex items-center gap-2 text-blue-200 text-sm">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                        </svg>
                         <span>Track your affiliate performance in real-time</span>
                     </div>
                 </div>
@@ -19,11 +22,14 @@
 
             <!-- Alert Messages with better styling -->
             @if (session('success'))
-                <div class="mb-6 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-l-4 border-emerald-500 rounded-lg p-4 backdrop-blur-sm">
+                <div
+                    class="mb-6 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-l-4 border-emerald-500 rounded-lg p-4 backdrop-blur-sm">
                     <div class="flex items-start">
                         <div class="flex-shrink-0">
                             <svg class="h-6 w-6 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd" />
                             </svg>
                         </div>
                         <div class="ml-4">
@@ -34,11 +40,14 @@
             @endif
 
             @if (session('error'))
-                <div class="mb-6 bg-gradient-to-r from-red-500/20 to-rose-500/20 border-l-4 border-red-500 rounded-lg p-4 backdrop-blur-sm">
+                <div
+                    class="mb-6 bg-gradient-to-r from-red-500/20 to-rose-500/20 border-l-4 border-red-500 rounded-lg p-4 backdrop-blur-sm">
                     <div class="flex items-start">
                         <div class="flex-shrink-0">
                             <svg class="h-6 w-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd" />
                             </svg>
                         </div>
                         <div class="ml-4">
@@ -51,13 +60,17 @@
             <!-- Stats Cards - Modern Design -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 <!-- Total Links -->
-                <div class="group relative bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl p-6 border border-slate-600 hover:border-blue-500 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div
+                    class="group relative bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl p-6 border border-slate-600 hover:border-blue-500 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
                     <div class="relative">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 shadow-lg">
                                 <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                 </svg>
                             </div>
                             <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Links</span>
@@ -68,13 +81,18 @@
                 </div>
 
                 <!-- Total Clicks -->
-                <div class="group relative bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl p-6 border border-slate-600 hover:border-purple-500 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div
+                    class="group relative bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl p-6 border border-slate-600 hover:border-purple-500 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
                     <div class="relative">
                         <div class="flex items-center justify-between mb-4">
-                            <div class="flex-shrink-0 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-3 shadow-lg">
+                            <div
+                                class="flex-shrink-0 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-3 shadow-lg">
                                 <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                                 </svg>
                             </div>
                             <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Clicks</span>
@@ -85,13 +103,18 @@
                 </div>
 
                 <!-- Total Conversions -->
-                <div class="group relative bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl p-6 border border-slate-600 hover:border-emerald-500 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div
+                    class="group relative bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl p-6 border border-slate-600 hover:border-emerald-500 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
                     <div class="relative">
                         <div class="flex items-center justify-between mb-4">
-                            <div class="flex-shrink-0 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-3 shadow-lg">
+                            <div
+                                class="flex-shrink-0 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-3 shadow-lg">
                                 <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
                             <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Conversions</span>
@@ -99,26 +122,33 @@
                         <p class="text-slate-400 text-sm font-medium mb-1">{{ __('affiliate.total_conversions') }}</p>
                         <p class="text-4xl font-black text-white">{{ number_format($stats['total_conversions']) }}</p>
                         @if ($stats['total_clicks'] > 0)
-                            <p class="text-xs text-emerald-300 mt-2 font-semibold">{{ __('affiliate.conversion_rate') }}: {{ number_format($stats['conversion_rate'], 2) }}%</p>
+                            <p class="text-xs text-emerald-300 mt-2 font-semibold">{{ __('affiliate.conversion_rate') }}:
+                                {{ number_format($stats['conversion_rate'], 2) }}%</p>
                         @endif
                     </div>
                 </div>
 
                 <!-- Total Commissions -->
-                <div class="group relative bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl p-6 border border-slate-600 hover:border-amber-500 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-amber-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div
+                    class="group relative bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl p-6 border border-slate-600 hover:border-amber-500 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-amber-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
                     <div class="relative">
                         <div class="flex items-center justify-between mb-4">
-                            <div class="flex-shrink-0 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-3 shadow-lg">
+                            <div
+                                class="flex-shrink-0 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-3 shadow-lg">
                                 <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
                             <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Earnings</span>
                         </div>
                         <p class="text-slate-400 text-sm font-medium mb-1">{{ __('affiliate.total_commissions') }}</p>
                         <p class="text-4xl font-black text-white">{{ currency($stats['total_commissions']) }}</p>
-                        <p class="text-xs text-amber-300 mt-2 font-semibold">⏳ {{ __('affiliate.pending') }}: {{ currency($stats['pending_commissions']) }}</p>
+                        <p class="text-xs text-amber-300 mt-2 font-semibold">⏳ {{ __('affiliate.pending') }}:
+                            {{ currency($stats['pending_commissions']) }}</p>
                     </div>
                 </div>
             </div>
@@ -126,12 +156,19 @@
             <!-- Earnings & Payouts Section - Modern Design -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 <!-- Available Balance -->
-                <div class="group relative bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
-                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
+                <div
+                    class="group relative bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                    <div
+                        class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl">
+                    </div>
                     <div class="relative">
                         <div class="flex items-center justify-between mb-4">
-                            <span class="text-xs font-bold text-emerald-200 uppercase tracking-widest">Available Balance</span>
-                            <svg class="h-8 w-8 text-emerald-300 opacity-50" fill="currentColor" viewBox="0 0 20 20"><path d="M8.16 2.75a.75.75 0 00-1.32 0l-3.816 9.5A.75.75 0 003.5 13h13a.75.75 0 00.684-1.25L13.16 2.75z"/></svg>
+                            <span class="text-xs font-bold text-emerald-200 uppercase tracking-widest">Available
+                                Balance</span>
+                            <svg class="h-8 w-8 text-emerald-300 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M8.16 2.75a.75.75 0 00-1.32 0l-3.816 9.5A.75.75 0 003.5 13h13a.75.75 0 00.684-1.25L13.16 2.75z" />
+                            </svg>
                         </div>
                         <p class="text-4xl font-black text-white">{{ currency($stats['available_balance']) }}</p>
                         <p class="text-emerald-100 text-sm mt-2">Ready for withdrawal</p>
@@ -139,12 +176,20 @@
                 </div>
 
                 <!-- Approved Commissions -->
-                <div class="group relative bg-gradient-to-br from-blue-600 to-cyan-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
-                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
+                <div
+                    class="group relative bg-gradient-to-br from-blue-600 to-cyan-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                    <div
+                        class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl">
+                    </div>
                     <div class="relative">
                         <div class="flex items-center justify-between mb-4">
-                            <span class="text-xs font-bold text-blue-200 uppercase tracking-widest">Approved Commissions</span>
-                            <svg class="h-8 w-8 text-blue-300 opacity-50" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span class="text-xs font-bold text-blue-200 uppercase tracking-widest">Approved
+                                Commissions</span>
+                            <svg class="h-8 w-8 text-blue-300 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd" />
+                            </svg>
                         </div>
                         <p class="text-4xl font-black text-white">{{ currency($stats['approved_commissions']) }}</p>
                         <p class="text-blue-100 text-sm mt-2">Verified earnings</p>
@@ -152,16 +197,23 @@
                 </div>
 
                 <!-- Total Payouts -->
-                <div class="group relative bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
-                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
+                <div
+                    class="group relative bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                    <div
+                        class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl">
+                    </div>
                     <div class="relative">
                         <div class="flex items-center justify-between mb-4">
                             <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest">Total Payouts</span>
-                            <svg class="h-8 w-8 text-indigo-300 opacity-50" fill="currentColor" viewBox="0 0 20 20"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>
+                            <svg class="h-8 w-8 text-indigo-300 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                            </svg>
                         </div>
                         <p class="text-4xl font-black text-white">{{ currency($stats['total_payouts']) }}</p>
                         @if ($stats['pending_payouts'] > 0)
-                            <p class="text-indigo-100 text-sm mt-2">⏳ Pending: {{ currency($stats['pending_payouts']) }}</p>
+                            <p class="text-indigo-100 text-sm mt-2">⏳ Pending: {{ currency($stats['pending_payouts']) }}
+                            </p>
                         @else
                             <p class="text-indigo-100 text-sm mt-2">All payouts completed</p>
                         @endif
@@ -171,11 +223,13 @@
 
             <!-- Affiliate Links Section - Modern Header -->
             <div class="mb-12">
-                <div class="bg-gradient-to-r from-slate-700 to-slate-800 rounded-t-2xl p-6 border border-slate-600 flex items-center justify-between">
+                <div
+                    class="bg-gradient-to-r from-slate-700 to-slate-800 rounded-t-2xl p-6 border border-slate-600 flex items-center justify-between">
                     <div>
                         <h3 class="text-2xl font-bold text-white flex items-center gap-3">
                             <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                             </svg>
                             {{ __('affiliate.affiliate_links') }}
                         </h3>
@@ -189,86 +243,113 @@
                         {{ __('affiliate.create_link') }}
                     </button>
                 </div>
-                
+
                 <!-- Links Container -->
                 <div class="bg-slate-800 rounded-b-2xl p-6 border border-t-0 border-slate-600">
                     @if ($affiliateLinks->count() > 0)
                         <div class="space-y-4">
                             @foreach ($affiliateLinks as $link)
                                 <!-- Link Card - Modern Design -->
-                                <div class="group relative bg-gradient-to-r from-slate-700 to-slate-750 rounded-xl p-6 border border-slate-600 hover:border-blue-500 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                                    <div class="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
-                                    
+                                <div
+                                    class="group relative bg-gradient-to-r from-slate-700 to-slate-750 rounded-xl p-6 border border-slate-600 hover:border-blue-500 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">
+                                    </div>
+
                                     <div class="relative">
                                         <div class="flex items-start justify-between mb-4">
                                             <div class="flex-1">
                                                 <div class="flex items-center gap-3 mb-2">
                                                     <h4 class="text-lg font-bold text-white">
-                                                        {{ $link->name ?: __('affiliate.link') }} <code class="text-sm bg-slate-600 px-2 py-1 rounded ml-2 text-blue-300">#{{ $link->code }}</code>
+                                                        {{ $link->name ?: __('affiliate.link') }} <code
+                                                            class="text-sm bg-slate-600 px-2 py-1 rounded ml-2 text-blue-300">#{{ $link->code }}</code>
                                                     </h4>
                                                 </div>
                                                 @if ($link->description)
                                                     <p class="text-slate-300 text-sm mb-3">{{ $link->description }}</p>
                                                 @endif
-                                                
+
                                                 <!-- Link URL with copy button -->
-                                                <div class="bg-slate-900/50 rounded-lg p-3 mb-4 flex items-center justify-between group/url">
-                                                    <code class="text-xs text-slate-300 break-all font-mono">{{ $link->full_url }}</code>
-                                                    <button onclick="copyLink('{{ $link->full_url }}')" class="ml-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap transition-colors">
+                                                <div
+                                                    class="bg-slate-900/50 rounded-lg p-3 mb-4 flex items-center justify-between group/url">
+                                                    <code
+                                                        class="text-xs text-slate-300 break-all font-mono">{{ $link->full_url }}</code>
+                                                    <button onclick="copyLink('{{ $link->full_url }}')"
+                                                        class="ml-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap transition-colors">
                                                         {{ __('affiliate.copy') }}
                                                     </button>
                                                 </div>
 
                                                 @if ($link->landing_page_slug)
                                                     <p class="text-xs text-slate-400 mb-3">
-                                                        <span class="font-semibold text-slate-300">{{ __('affiliate.landing_page_url') }}:</span>
-                                                        <a href="{{ $link->landing_page_url }}" target="_blank" class="text-blue-400 hover:text-blue-300 ml-2">{{ $link->landing_page_url }}</a>
+                                                        <span
+                                                            class="font-semibold text-slate-300">{{ __('affiliate.landing_page_url') }}:</span>
+                                                        <a href="{{ $link->landing_page_url }}" target="_blank"
+                                                            class="text-blue-400 hover:text-blue-300 ml-2">{{ $link->landing_page_url }}</a>
                                                     </p>
                                                 @endif
 
                                                 <!-- Stats Grid -->
                                                 <div class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-slate-600">
                                                     <div class="text-center">
-                                                        <p class="text-2xl font-bold text-blue-400">{{ number_format($link->clicks) }}</p>
-                                                        <p class="text-xs text-slate-400 mt-1">{{ __('affiliate.clicks') }}</p>
+                                                        <p class="text-2xl font-bold text-blue-400">
+                                                            {{ number_format($link->clicks) }}</p>
+                                                        <p class="text-xs text-slate-400 mt-1">
+                                                            {{ __('affiliate.clicks') }}</p>
                                                     </div>
                                                     <div class="text-center">
-                                                        <p class="text-2xl font-bold text-emerald-400">{{ number_format($link->conversions) }}</p>
-                                                        <p class="text-xs text-slate-400 mt-1">{{ __('affiliate.conversions') }}</p>
+                                                        <p class="text-2xl font-bold text-emerald-400">
+                                                            {{ number_format($link->conversions) }}</p>
+                                                        <p class="text-xs text-slate-400 mt-1">
+                                                            {{ __('affiliate.conversions') }}</p>
                                                         @if ($link->clicks > 0)
-                                                            <p class="text-xs text-slate-500 mt-1">{{ number_format(($link->conversions / max($link->clicks, 1)) * 100, 1) }}%</p>
+                                                            <p class="text-xs text-slate-500 mt-1">
+                                                                {{ number_format(($link->conversions / max($link->clicks, 1)) * 100, 1) }}%
+                                                            </p>
                                                         @endif
                                                     </div>
                                                     <div class="text-center">
-                                                        <p class="text-2xl font-bold text-amber-400">{{ currency($link->total_commission) }}</p>
-                                                        <p class="text-xs text-slate-400 mt-1">{{ __('affiliate.commissions') }}</p>
+                                                        <p class="text-2xl font-bold text-amber-400">
+                                                            {{ currency($link->total_commission) }}</p>
+                                                        <p class="text-xs text-slate-400 mt-1">
+                                                            {{ __('affiliate.commissions') }}</p>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <!-- Status Badge -->
                                             @if ($link->is_active)
-                                                <span class="inline-block bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/50">✓ {{ __('affiliate.active') }}</span>
+                                                <span
+                                                    class="inline-block bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/50">✓
+                                                    {{ __('affiliate.active') }}</span>
                                             @else
-                                                <span class="inline-block bg-slate-600/50 text-slate-300 px-3 py-1 rounded-full text-xs font-bold border border-slate-500/50">✕ {{ __('affiliate.inactive') }}</span>
+                                                <span
+                                                    class="inline-block bg-slate-600/50 text-slate-300 px-3 py-1 rounded-full text-xs font-bold border border-slate-500/50">✕
+                                                    {{ __('affiliate.inactive') }}</span>
                                             @endif
                                         </div>
 
                                         <!-- Action Buttons -->
                                         <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-600">
-                                            <button onclick="editLink('{{ $link->id }}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                            <button onclick="editLink('{{ $link->id }}')"
+                                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                                                 ✎ {{ __('affiliate.edit') }}
                                             </button>
-                                            <button onclick="editLandingPage('{{ $link->id }}')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                            <button onclick="editLandingPage('{{ $link->id }}')"
+                                                class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                                                 🎨 {{ __('affiliate.edit_landing_page') }}
                                             </button>
-                                            <button onclick="managePromotionalMaterials('{{ $link->id }}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                            <button onclick="managePromotionalMaterials('{{ $link->id }}')"
+                                                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                                                 📋 {{ __('affiliate.promotional_materials') }}
                                             </button>
-                                            <form action="{{ route('affiliate.links.delete', $link) }}" method="POST" onsubmit="return confirm('{{ __('affiliate.delete_confirm') }}')" class="inline">
+                                            <form action="{{ route('affiliate.links.delete', $link) }}" method="POST"
+                                                onsubmit="return confirm('{{ __('affiliate.delete_confirm') }}')"
+                                                class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-red-500/50">
+                                                <button type="submit"
+                                                    class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-red-500/50">
                                                     🗑️ {{ __('affiliate.delete') }}
                                                 </button>
                                             </form>
@@ -281,12 +362,15 @@
                         <!-- Empty State -->
                         <div class="text-center py-16">
                             <div class="mb-4">
-                                <svg class="mx-auto h-16 w-16 text-slate-500 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                <svg class="mx-auto h-16 w-16 text-slate-500 opacity-50" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                 </svg>
                             </div>
                             <p class="text-slate-300 text-lg font-medium mb-4">{{ __('affiliate.no_links') }}</p>
-                            <button onclick="document.getElementById('create-link-modal').classList.remove('hidden')" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl">
+                            <button onclick="document.getElementById('create-link-modal').classList.remove('hidden')"
+                                class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl">
                                 {{ __('affiliate.create_first_link') }}
                             </button>
                         </div>

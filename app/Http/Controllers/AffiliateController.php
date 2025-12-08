@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AffiliateLink;
-use App\Models\AffiliateConversion;
-use App\Models\AffiliateCommission;
-use App\Models\AffiliatePayout;
-use App\Models\AffiliatePromotionalMaterial;
-use App\Services\AffiliateService;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Models\AffiliateLink;
+use App\Models\AffiliatePayout;
+use App\Services\AffiliateService;
+use Illuminate\Support\Facades\DB;
+use App\Models\AffiliateCommission;
+use App\Models\AffiliateConversion;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
+use App\Models\AffiliatePromotionalMaterial;
 
 class AffiliateController extends Controller
 {
@@ -272,7 +273,7 @@ class AffiliateController extends Controller
         if ($request->hasFile('image')) {
             // Delete old image
             if ($promotionalMaterial->image_path) {
-                \Storage::disk('public')->delete($promotionalMaterial->image_path);
+                Storage::disk('public')->delete($promotionalMaterial->image_path);
             }
             $validated['image_path'] = $request->file('image')->store('affiliate/banners', 'public');
         }
@@ -292,7 +293,7 @@ class AffiliateController extends Controller
 
         // Delete image if exists
         if ($promotionalMaterial->image_path) {
-            \Storage::disk('public')->delete($promotionalMaterial->image_path);
+            Storage::disk('public')->delete($promotionalMaterial->image_path);
         }
 
         $promotionalMaterial->delete();

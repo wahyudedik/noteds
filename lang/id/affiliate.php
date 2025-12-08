@@ -157,6 +157,25 @@ return [
     'no_affiliates' => 'Belum ada afiliasi',
     'view_leaderboard' => 'Lihat Papan Peringkat',
 
+    // Landing Page
+    'landing_page_label' => 'Penawaran Terbatas',
+    'landing_page_title' => '🎉 Penawaran Eksklusif Khusus Untuk Anda!',
+    'landing_page_subtitle' => 'Dapatkan akses instan ke fitur premium dengan harga yang luar biasa',
+    'landing_page_offer_title' => 'Mengapa Memilih Kami?',
+    'landing_page_price' => '50% DISKON',
+    'landing_page_price_subtext' => 'Hanya untuk beberapa jam ke depan',
+    'feature_1' => 'Akses tak terbatas ke semua fitur premium',
+    'feature_2' => 'Dukungan pelanggan prioritas 24/7',
+    'feature_3' => 'Jaminan uang kembali',
+    'feature_4' => 'Perpustakaan konten eksklusif gratis',
+    'feature_5' => 'Pembaruan seumur hidup termasuk',
+    'countdown_label' => 'Penawaran berakhir dalam:',
+    'button_text' => 'Klaim Penawaran Anda Sekarang',
+    'secure_payment' => 'Pembayaran Aman',
+    'fast_access' => 'Akses Instan',
+    'confidential' => '100% Rahasia',
+    'stats_text' => 'orang mengklaim penawaran ini hari ini',
+
     // Settings
     'settings_title' => 'Pengaturan Afiliasi',
     'settings_description' => 'Konfigurasi tingkat komisi afiliasi, ambang batas, dan pengaturan payout',
@@ -184,3 +203,4 @@ return [
     'update' => 'Perbarui',
     'error_loading_link' => 'Kesalahan memuat detail link afiliasi',
 ];
+

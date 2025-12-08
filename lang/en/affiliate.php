@@ -145,4 +145,23 @@ return [
     'leaderboard_title' => 'Affiliate Leaderboard',
     'leaderboard_description' => 'See top-performing affiliates and their rankings',
     'view_leaderboard' => 'View Leaderboard',
+
+    // Landing Page
+    'landing_page_label' => 'Limited Time Offer',
+    'landing_page_title' => '🎉 Exclusive Offer Just For You!',
+    'landing_page_subtitle' => 'Get instant access to premium features at an incredible price',
+    'landing_page_offer_title' => 'Why Choose Us?',
+    'landing_page_price' => '50% OFF',
+    'landing_page_price_subtext' => 'Only for the next few hours',
+    'feature_1' => 'Unlimited access to all premium features',
+    'feature_2' => '24/7 priority customer support',
+    'feature_3' => 'Money-back guarantee',
+    'feature_4' => 'Free exclusive content library',
+    'feature_5' => 'Lifetime updates included',
+    'countdown_label' => 'Offer expires in:',
+    'button_text' => 'Claim Your Offer Now',
+    'secure_payment' => 'Secure Payment',
+    'fast_access' => 'Instant Access',
+    'confidential' => '100% Confidential',
+    'stats_text' => 'people claimed this offer today',
 ];

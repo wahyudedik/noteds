@@ -20,10 +20,11 @@ class ProcessMonthlyAffiliatePayoutJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $timeout = 600; // 10 minutes
+
     public function __construct()
     {
         $this->queue = 'default';
-        $this->timeout = 600; // 10 minutes
     }
 
     public function handle(): void
