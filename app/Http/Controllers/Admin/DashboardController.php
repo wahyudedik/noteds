@@ -482,7 +482,7 @@ class DashboardController extends Controller
             ->map(function ($user) {
                 $totalCommissions = $user->affiliateCommissions()->sum('commission_amount');
                 $totalConversions = $user->affiliateConversions()->count();
-                $pendingPayouts = $user->payouts()->where('status', 'pending')->sum('amount');
+                $pendingPayouts = $user->affiliatePayouts()->where('status', 'pending')->sum('amount');
 
                 return [
                     'user' => $user,
