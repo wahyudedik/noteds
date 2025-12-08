@@ -375,10 +375,7 @@
                                     @forelse($topSharedNotes as $index => $item)
                                         <tr>
                                             <td class="px-3 py-2 text-gray-900 truncate">
-                                                <a href="{{ route('admin.notes.show', $item->note) }}"
-                                                    class="text-blue-600 hover:underline">
-                                                    {{ Str::limit($item->note->title, 20) }}
-                                                </a>
+                                                {{ Str::limit($item->note->title, 20) }}
                                             </td>
                                             <td class="px-3 py-2 text-right text-gray-600">{{ $item->share_count }}</td>
                                             <td class="px-3 py-2 text-right text-emerald-600 font-medium">
