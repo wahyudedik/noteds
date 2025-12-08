@@ -139,6 +139,7 @@ return [
     'update' => 'Update',
     'landing_page_url' => 'Landing Page URL',
     'error_loading_link' => 'Error loading affiliate link details',
+    'visit_marketplace' => 'Visit Marketplace',
 
     // Leaderboard
     'leaderboard_title' => 'Affiliate Leaderboard',

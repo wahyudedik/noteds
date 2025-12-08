@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Affiliate;
 use App\Services\FraudDetectionService;
+use App\Services\ClickDeduplicationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,10 +15,11 @@ class AffiliateClickController extends Controller
 {
     public function __construct(
         private FraudDetectionService $fraudDetectionService,
+        private ClickDeduplicationService $dedupService,
     ) {}
 
     /**
-     * Track affiliate click dengan fraud detection
+     * Track affiliate click dengan fraud detection + deduplication
      */
     public function trackClick(Request $request, string $affiliateCode): JsonResponse
     {
@@ -30,8 +32,38 @@ class AffiliateClickController extends Controller
 
             $ipAddress = $request->ip();
             $userAgent = $request->userAgent();
+            $sessionId = $request->cookie('XSRF-TOKEN') ?? $request->session()->getId();
+            $referrer = $request->header('referer') ?? '';
 
-            // Log dan deteksi fraud
+            // ========== STEP 1: Check untuk duplicate clicks ==========
+            $dedupResult = $this->dedupService->detectDuplicateClick(
+                affiliate: $affiliate,
+                ipAddress: $ipAddress,
+                userAgent: $userAgent,
+                sessionId: $sessionId,
+                referrer: $referrer,
+            );
+
+            // Jika ini duplicate click
+            if ($dedupResult['is_duplicate']) {
+                Log::warning('Duplicate affiliate click rejected', [
+                    'affiliate_id' => $affiliate->user_id,
+                    'reason' => $dedupResult['reason'],
+                    'click_id' => $dedupResult['click_id'],
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Duplicate click detected',
+                    'reason' => $dedupResult['reason'],
+                    'click_id' => $dedupResult['click_id'], // Return original click ID if duplicate
+                    'fraud_indicators' => $dedupResult['fraud_indicators'],
+                ], 400);
+            }
+
+            $clickId = $dedupResult['click_id'];
+
+            // ========== STEP 2: Log dan deteksi fraud ==========
             $fraudLog = $this->fraudDetectionService->logAndDetectFraud(
                 affiliate: $affiliate->user,
                 converter: null,
@@ -40,41 +72,60 @@ class AffiliateClickController extends Controller
                 userAgent: $userAgent,
                 metadata: [
                     'affiliate_code' => $affiliateCode,
-                    'referrer' => $request->header('referer'),
-                    'user_agent' => $userAgent,
+                    'referrer' => $referrer,
+                    'click_id' => $clickId,
+                    'dedup_indicators' => $dedupResult['fraud_indicators'],
                 ]
             );
 
+            // Combine risk scores
+            $totalRiskScore = $fraudLog->risk_score + $dedupResult['risk_score_increase'];
+
             // Check jika affiliate is flagged for fraud
-            if ($fraudLog->is_flagged && $fraudLog->risk_score >= 60) {
+            if ($fraudLog->is_flagged && $totalRiskScore >= 60) {
                 // Log ke monitoring system
                 Log::warning('Potential affiliate fraud detected', [
                     'affiliate_id' => $affiliate->user_id,
-                    'risk_score' => $fraudLog->risk_score,
+                    'risk_score' => $totalRiskScore,
                     'indicators' => $fraudLog->fraud_indicators,
+                    'dedup_indicators' => $dedupResult['fraud_indicators'],
                 ]);
 
-                // Optionally suspend affiliate temporarily
-                if ($fraudLog->risk_score >= 80) {
+                // Suspend affiliate jika risk score very high
+                if ($totalRiskScore >= 80) {
                     $affiliate->user->update(['is_fraud_suspected' => true]);
-                    return response()->json(['error' => 'Account under review'], 403);
+                    return response()->json([
+                        'error' => 'Account suspended due to fraud detection',
+                        'risk_score' => $totalRiskScore
+                    ], 403);
                 }
             }
 
-            // Create click record in database (untuk tracking conversions nanti)
-            $clickId = Str::uuid();
+            // ========== STEP 3: Create click record ==========
+            // Store click data dalam cache untuk conversion tracking
             cache()->put("click_{$clickId}", [
                 'affiliate_id' => $affiliate->user_id,
                 'ip_address' => $ipAddress,
                 'user_agent' => $userAgent,
                 'timestamp' => now(),
+                'fraud_log_id' => $fraudLog->id,
             ], 86400); // 24 hours
+
+            // Update affiliate fraud log dengan dedup info
+            $fraudLog->update([
+                'click_id' => $clickId,
+                'device_fingerprint' => $this->dedupService->generateDeviceFingerprint($ipAddress, $userAgent),
+                'session_id' => $sessionId,
+                'dedup_status' => 'valid',
+                'dedup_reason' => null,
+            ]);
 
             return response()->json([
                 'success' => true,
                 'click_id' => $clickId,
                 'affiliate_id' => $affiliate->user_id,
-                'fraud_risk' => $fraudLog->risk_score,
+                'fraud_risk' => $totalRiskScore,
+                'fraud_indicators' => $fraudLog->fraud_indicators,
             ]);
         } catch (\Exception $e) {
             Log::error('Error tracking affiliate click', ['error' => $e->getMessage()]);
@@ -101,7 +152,7 @@ class AffiliateClickController extends Controller
             }
 
             // Get converter user
-            $converter = auth()->user();
+            $converter = Auth::user();
             if (!$converter) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
