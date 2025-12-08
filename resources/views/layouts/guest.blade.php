@@ -82,7 +82,7 @@
             <div class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
                 <div class="w-full max-w-md">
                     <div class="rounded-3xl border border-slate-200 bg-white shadow-xl shadow-blue-100/50 p-8 sm:p-10">
-                        {{ $slot }}
+                        @yield('content')
                     </div>
                 </div>
             </div>
