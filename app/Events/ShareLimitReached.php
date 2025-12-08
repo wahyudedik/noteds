@@ -15,6 +15,5 @@ class ShareLimitReached
         public User $user,
         public Note $note,
         public int $maxLimit
-    ) {
-    }
+    ) {}
 }

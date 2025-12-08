@@ -18,8 +18,7 @@ class ShareCommissionPaid implements ShouldBroadcast
         public float $amount,
         public string $month,
         public int $shareCount
-    ) {
-    }
+    ) {}
 
     public function broadcastOn(): array
     {

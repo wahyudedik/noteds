@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Note;
+use App\Models\NoteShareReferral;
+use App\Models\NoteShareCommission;
 use App\Models\Referral;
 use App\Models\Subscription;
 use App\Models\Transaction;
@@ -399,6 +401,59 @@ class DashboardController extends Controller
             ? $saleModeStats['standard_total_amount'] / $saleModeStats['standard_transactions'] 
             : 0;
 
+        // Share Analytics
+        $shareStats = [
+            'total_share_referrals' => NoteShareReferral::count(),
+            'total_shares' => NoteShareReferral::sum('share_count'),
+            'total_share_clicks' => NoteShareReferral::sum('click_count'),
+            'total_share_purchases' => NoteShareReferral::sum('purchase_count'),
+            'total_share_commission_earned' => NoteShareReferral::sum('total_commission_earned'),
+            'total_share_revenue_generated' => NoteShareReferral::sum('total_revenue_generated'),
+        ];
+
+        // Share Commission Status
+        $shareCommissionStats = [
+            'pending_commissions' => NoteShareCommission::where('status', 'pending')->count(),
+            'pending_amount' => NoteShareCommission::where('status', 'pending')->sum('commission_amount'),
+            'paid_commissions' => NoteShareCommission::where('status', 'paid')->count(),
+            'paid_amount' => NoteShareCommission::where('status', 'paid')->sum('commission_amount'),
+            'total_commissions' => NoteShareCommission::count(),
+            'total_commission_amount' => NoteShareCommission::sum('commission_amount'),
+        ];
+
+        // Top Shared Notes
+        $topSharedNotes = NoteShareReferral::with('note')
+            ->select('note_id', DB::raw('COUNT(*) as share_count'), 
+                     DB::raw('SUM(click_count) as total_clicks'),
+                     DB::raw('SUM(purchase_count) as total_purchases'),
+                     DB::raw('SUM(total_commission_earned) as total_commission'))
+            ->groupBy('note_id')
+            ->orderByDesc('share_count')
+            ->limit(10)
+            ->get();
+
+        // Top Share Earners
+        $topShareEarners = NoteShareReferral::with('sharer')
+            ->select('sharer_id', DB::raw('COUNT(*) as share_count'),
+                     DB::raw('SUM(total_commission_earned) as total_commission'),
+                     DB::raw('SUM(purchase_count) as total_purchases'))
+            ->groupBy('sharer_id')
+            ->orderByDesc('total_commission')
+            ->limit(10)
+            ->get();
+
+        // Share Activity (Last 30 days)
+        $dailyShareActivity = NoteShareReferral::select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('COUNT(*) as share_count'),
+                DB::raw('SUM(purchase_count) as purchase_count'),
+                DB::raw('SUM(total_commission_earned) as commission')
+            )
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->get();
+
         return view('admin.dashboard', compact(
             'stats',
             'platformBalance',
@@ -420,7 +475,12 @@ class DashboardController extends Controller
             'topupStats',
             'midtransStats',
             'topupByType',
-            'saleModeStats'
+            'saleModeStats',
+            'shareStats',
+            'shareCommissionStats',
+            'topSharedNotes',
+            'topShareEarners',
+            'dailyShareActivity'
         ));
     }
 
