@@ -774,7 +774,7 @@
             function deletePromoMaterial(materialId) {
                 if (!confirm('{{ __('affiliate.delete_confirm') }}')) return;
 
-                fetch(`{{ route('affiliate.promotional-materials.delete', '') }}/${materialId}`, {
+                fetch(`/affiliate/promotional-materials/${materialId}`, {
                         method: 'DELETE',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
