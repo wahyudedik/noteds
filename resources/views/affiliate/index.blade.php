@@ -38,7 +38,8 @@
                     <p class="text-gray-600 text-sm font-medium">{{ __('affiliate.total_conversions') }}</p>
                     <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($stats['total_conversions']) }}</p>
                     @if ($stats['total_clicks'] > 0)
-                        <p class="text-xs text-gray-500 mt-2">{{ __('affiliate.conversion_rate') }}: {{ number_format($stats['conversion_rate'], 2) }}%</p>
+                        <p class="text-xs text-gray-500 mt-2">{{ __('affiliate.conversion_rate') }}:
+                            {{ number_format($stats['conversion_rate'], 2) }}%</p>
                     @endif
                 </div>
                 <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
@@ -81,22 +82,26 @@
                                 <div class="p-6">
                                     <div class="flex items-start justify-between mb-4">
                                         <div class="flex-1">
-                                            <h4 class="text-lg font-bold text-gray-900">{{ $link->name ?: __('affiliate.link') }}</h4>
+                                            <h4 class="text-lg font-bold text-gray-900">
+                                                {{ $link->name ?: __('affiliate.link') }}</h4>
                                             @if ($link->description)
                                                 <p class="text-sm text-gray-600 mt-1">{{ $link->description }}</p>
                                             @endif
                                         </div>
                                         @if ($link->is_active)
-                                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ __('affiliate.active') }}</span>
+                                            <span
+                                                class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ __('affiliate.active') }}</span>
                                         @else
-                                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ __('affiliate.inactive') }}</span>
+                                            <span
+                                                class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ __('affiliate.inactive') }}</span>
                                         @endif
                                     </div>
 
                                     <!-- Link URL -->
                                     <div class="bg-gray-50 rounded-lg p-3 mb-4 flex items-center justify-between">
                                         <code class="text-xs text-gray-600 break-all">{{ $link->full_url }}</code>
-                                        <button onclick="copyLink('{{ $link->full_url }}')" class="ml-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap transition-colors">
+                                        <button onclick="copyLink('{{ $link->full_url }}')"
+                                            class="ml-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap transition-colors">
                                             {{ __('affiliate.copy') }}
                                         </button>
                                     </div>
@@ -104,31 +109,39 @@
                                     <!-- Stats -->
                                     <div class="grid grid-cols-3 gap-4 mb-4">
                                         <div>
-                                            <p class="text-2xl font-bold text-gray-900">{{ number_format($link->clicks) }}</p>
+                                            <p class="text-2xl font-bold text-gray-900">{{ number_format($link->clicks) }}
+                                            </p>
                                             <p class="text-xs text-gray-500">{{ __('affiliate.clicks') }}</p>
                                         </div>
                                         <div>
-                                            <p class="text-2xl font-bold text-gray-900">{{ number_format($link->conversions) }}</p>
+                                            <p class="text-2xl font-bold text-gray-900">
+                                                {{ number_format($link->conversions) }}</p>
                                             <p class="text-xs text-gray-500">{{ __('affiliate.conversions') }}</p>
                                         </div>
                                         <div>
-                                            <p class="text-2xl font-bold text-gray-900">{{ currency($link->total_commission) }}</p>
+                                            <p class="text-2xl font-bold text-gray-900">
+                                                {{ currency($link->total_commission) }}</p>
                                             <p class="text-xs text-gray-500">{{ __('affiliate.commissions') }}</p>
                                         </div>
                                     </div>
 
                                     <!-- Actions -->
                                     <div class="flex gap-2">
-                                        <button onclick="editLink('{{ $link->id }}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                        <button onclick="editLink('{{ $link->id }}')"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                                             {{ __('affiliate.edit') }}
                                         </button>
-                                        <button onclick="editLandingPage('{{ $link->id }}')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                        <button onclick="editLandingPage('{{ $link->id }}')"
+                                            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                                             {{ __('affiliate.edit_landing_page') }}
                                         </button>
-                                        <form action="{{ route('affiliate.links.delete', $link) }}" method="POST" onsubmit="return confirm('{{ __('affiliate.delete_confirm') }}')" class="inline">
+                                        <form action="{{ route('affiliate.links.delete', $link) }}" method="POST"
+                                            onsubmit="return confirm('{{ __('affiliate.delete_confirm') }}')"
+                                            class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                            <button type="submit"
+                                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                                                 {{ __('affiliate.delete') }}
                                             </button>
                                         </form>
@@ -139,494 +152,560 @@
                     @else
                         <div class="text-center py-16">
                             <p class="text-gray-600 mb-4">{{ __('affiliate.no_links') }}</p>
-                            <button onclick="document.getElementById('create-link-modal').classList.remove('hidden')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition-colors font-medium">
+                            <button onclick="document.getElementById('create-link-modal').classList.remove('hidden')"
+                                class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition-colors font-medium">
                                 {{ __('affiliate.create_first_link') }}
                             </button>
                         </div>
                     @endif
                 </div>
-                                                    <p class="text-xs text-slate-400 mb-3">
-                                                        <span
-            </div>
+                <p class="text-xs text-slate-400 mb-3">
+                    <span </div>
 
-            <!-- Commission Breakdown -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-                <!-- Commission by Tier -->
-                <div class="bg-white rounded-lg shadow border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.commission_by_tier') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        @if ($commissionByTier->count() > 0)
-                            <div class="space-y-4">
-                                @foreach ([1, 2, 3] as $tier)
-                                    @php
-                                        $tierData = $commissionByTier->get($tier);
-                                        $amount = $tierData ? $tierData->total : 0;
-                                        $count = $tierData ? $tierData->count : 0;
-                                    @endphp
-                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                        <div>
-                                            <p class="font-medium text-gray-900">{{ __('affiliate.tier') }} {{ $tier }}</p>
-                                            <p class="text-sm text-gray-500">{{ $count }} {{ __('affiliate.commissions') }}</p>
+                        <!-- Commission Breakdown -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+                            <!-- Commission by Tier -->
+                            <div class="bg-white rounded-lg shadow border border-gray-200">
+                                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                                    <h3 class="text-lg font-semibold text-gray-900">
+                                        {{ __('affiliate.commission_by_tier') }}</h3>
+                                </div>
+                                <div class="p-6">
+                                    @if ($commissionByTier->count() > 0)
+                                        <div class="space-y-4">
+                                            @foreach ([1, 2, 3] as $tier)
+                                                @php
+                                                    $tierData = $commissionByTier->get($tier);
+                                                    $amount = $tierData ? $tierData->total : 0;
+                                                    $count = $tierData ? $tierData->count : 0;
+                                                @endphp
+                                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                    <div>
+                                                        <p class="font-medium text-gray-900">{{ __('affiliate.tier') }}
+                                                            {{ $tier }}</p>
+                                                        <p class="text-sm text-gray-500">{{ $count }}
+                                                            {{ __('affiliate.commissions') }}</p>
+                                                    </div>
+                                                    <p class="text-lg font-bold text-gray-900">{{ currency($amount) }}</p>
+                                                </div>
+                                            @endforeach
                                         </div>
-                                        <p class="text-lg font-bold text-gray-900">{{ currency($amount) }}</p>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <p class="text-sm text-gray-500 text-center py-8">{{ __('affiliate.no_commissions') }}</p>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Commission by Status -->
-                <div class="bg-white rounded-lg shadow border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.commission_by_status') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        @if ($commissionByStatus->count() > 0)
-                            <div class="space-y-4">
-                                @foreach (['pending', 'approved', 'paid'] as $status)
-                                    @php
-                                        $statusData = $commissionByStatus->get($status);
-                                        $amount = $statusData ? $statusData->total : 0;
-                                        $count = $statusData ? $statusData->count : 0;
-                                    @endphp
-                                    @if ($amount > 0 || $count > 0)
-                                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                            <div>
-                                                <span class="px-2 py-1 rounded text-xs font-medium 
-                                                {{ $status === 'paid' ? 'bg-green-100 text-green-800' : ($status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                                    {{ __('affiliate.statuses.' . $status) }}
-                                                </span>
-                                                <p class="text-sm text-gray-500 mt-1">{{ $count }} {{ __('affiliate.commissions') }}</p>
-                                            </div>
-                                            <p class="text-lg font-bold text-gray-900">{{ currency($amount) }}</p>
-                                        </div>
+                                    @else
+                                        <p class="text-sm text-gray-500 text-center py-8">
+                                            {{ __('affiliate.no_commissions') }}</p>
                                     @endif
-                                @endforeach
+                                </div>
                             </div>
-                        @else
-                            <p class="text-sm text-gray-500 text-center py-8">{{ __('affiliate.no_commissions') }}</p>
-                        @endif
-                    </div>
-                </div>
-            </div>
 
-            <!-- Recent Conversions & Commissions -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-                <!-- Recent Conversions -->
-                <div class="bg-white rounded-lg shadow border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.recent_conversions') }}</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.user') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.type') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.amount') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.date') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($recentConversions as $conversion)
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $conversion->converter->name ?? '-' }}</td>
-                                        <td class="px-4 py-3 text-sm">
-                                            <span class="px-2 py-1 rounded text-xs font-medium 
+                            <!-- Commission by Status -->
+                            <div class="bg-white rounded-lg shadow border border-gray-200">
+                                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                                    <h3 class="text-lg font-semibold text-gray-900">
+                                        {{ __('affiliate.commission_by_status') }}</h3>
+                                </div>
+                                <div class="p-6">
+                                    @if ($commissionByStatus->count() > 0)
+                                        <div class="space-y-4">
+                                            @foreach (['pending', 'approved', 'paid'] as $status)
+                                                @php
+                                                    $statusData = $commissionByStatus->get($status);
+                                                    $amount = $statusData ? $statusData->total : 0;
+                                                    $count = $statusData ? $statusData->count : 0;
+                                                @endphp
+                                                @if ($amount > 0 || $count > 0)
+                                                    <div
+                                                        class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                        <div>
+                                                            <span
+                                                                class="px-2 py-1 rounded text-xs font-medium 
+                                                {{ $status === 'paid' ? 'bg-green-100 text-green-800' : ($status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                                                {{ __('affiliate.statuses.' . $status) }}
+                                                            </span>
+                                                            <p class="text-sm text-gray-500 mt-1">{{ $count }}
+                                                                {{ __('affiliate.commissions') }}</p>
+                                                        </div>
+                                                        <p class="text-lg font-bold text-gray-900">{{ currency($amount) }}
+                                                        </p>
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <p class="text-sm text-gray-500 text-center py-8">
+                                            {{ __('affiliate.no_commissions') }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Conversions & Commissions -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+                            <!-- Recent Conversions -->
+                            <div class="bg-white rounded-lg shadow border border-gray-200">
+                                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                                    <h3 class="text-lg font-semibold text-gray-900">
+                                        {{ __('affiliate.recent_conversions') }}</h3>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th
+                                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                    {{ __('affiliate.user') }}</th>
+                                                <th
+                                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                    {{ __('affiliate.type') }}</th>
+                                                <th
+                                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                    {{ __('affiliate.amount') }}</th>
+                                                <th
+                                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                    {{ __('affiliate.date') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            @forelse($recentConversions as $conversion)
+                                                <tr>
+                                                    <td class="px-4 py-3 text-sm text-gray-900">
+                                                        {{ $conversion->converter->name ?? '-' }}</td>
+                                                    <td class="px-4 py-3 text-sm">
+                                                        <span
+                                                            class="px-2 py-1 rounded text-xs font-medium 
                                             {{ $conversion->conversion_type === 'purchase' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
-                                                {{ __('affiliate.conversion_type.' . ($conversion->conversion_type ?? 'signup')) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ currency($conversion->transaction_amount ?? 0) }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-500">{{ ($conversion->converted_at ?? $conversion->created_at)->format('M d, Y') }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">{{ __('affiliate.no_conversions') }}</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                                            {{ __('affiliate.conversion_type.' . ($conversion->conversion_type ?? 'signup')) }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                                        {{ currency($conversion->transaction_amount ?? 0) }}</td>
+                                                    <td class="px-4 py-3 text-sm text-gray-500">
+                                                        {{ ($conversion->converted_at ?? $conversion->created_at)->format('M d, Y') }}
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="4"
+                                                        class="px-4 py-8 text-center text-sm text-gray-500">
+                                                        {{ __('affiliate.no_conversions') }}</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
 
-                <!-- Recent Commissions -->
-                <div class="bg-white rounded-lg shadow border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.recent_commissions') }}</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.tier') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.rate') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.amount') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.status') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($recentCommissions as $commission)
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ __('affiliate.tier') }} {{ $commission->tier }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-500">{{ $commission->commission_rate }}%</td>
-                                        <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ currency($commission->commission_amount) }}</td>
-                                        <td class="px-4 py-3 text-sm">
-                                            <span class="px-2 py-1 rounded text-xs font-medium 
+                            <!-- Recent Commissions -->
+                            <div class="bg-white rounded-lg shadow border border-gray-200">
+                                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                                    <h3 class="text-lg font-semibold text-gray-900">
+                                        {{ __('affiliate.recent_commissions') }}</h3>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th
+                                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                    {{ __('affiliate.tier') }}</th>
+                                                <th
+                                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                    {{ __('affiliate.rate') }}</th>
+                                                <th
+                                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                    {{ __('affiliate.amount') }}</th>
+                                                <th
+                                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                    {{ __('affiliate.status') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            @forelse($recentCommissions as $commission)
+                                                <tr>
+                                                    <td class="px-4 py-3 text-sm text-gray-900">{{ __('affiliate.tier') }}
+                                                        {{ $commission->tier }}</td>
+                                                    <td class="px-4 py-3 text-sm text-gray-500">
+                                                        {{ $commission->commission_rate }}%</td>
+                                                    <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                                        {{ currency($commission->commission_amount) }}</td>
+                                                    <td class="px-4 py-3 text-sm">
+                                                        <span
+                                                            class="px-2 py-1 rounded text-xs font-medium 
                                             {{ $commission->status === 'paid' ? 'bg-green-100 text-green-800' : ($commission->status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                                {{ __('affiliate.statuses.' . $commission->status) }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">{{ __('affiliate.no_commissions') }}</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Request Payout -->
-            @if ($stats['available_balance'] > 0)
-                <div class="bg-white rounded-lg shadow border border-gray-200 mb-8">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.request_payout') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        <form action="{{ route('affiliate.payouts.request') }}" method="POST" id="payout-form">
-                            @csrf
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.amount') }} *</label>
-                                    <div class="relative">
-                                        <input type="number" name="amount" id="amount" step="0.01" required
-                                            class="w-full rounded-lg border-gray-300 shadow-sm">
-                                        <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.available') }}: {{ currency($stats['available_balance']) }}</p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="payout_method" class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.payout_method') }} *</label>
-                                    <select name="payout_method" id="payout_method" required class="w-full rounded-lg border-gray-300 shadow-sm">
-                                        <option value="">Select Method</option>
-                                        <option value="wallet">{{ __('affiliate.payout_methods.wallet') }}</option>
-                                        <option value="bank_transfer">{{ __('affiliate.payout_methods.bank_transfer') }}</option>
-                                        <option value="paypal">{{ __('affiliate.payout_methods.paypal') }}</option>
-                                    </select>
+                                                            {{ __('affiliate.statuses.' . $commission->status) }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="4"
+                                                        class="px-4 py-8 text-center text-sm text-gray-500">
+                                                        {{ __('affiliate.no_commissions') }}</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                            <div class="mt-6 flex items-center justify-end">
-                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors font-medium">
-                                    {{ __('affiliate.submit_payout_request') }}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            @endif
+                        </div>
 
-            <!-- Recent Payouts -->
-            @if ($recentPayouts->count() > 0)
-                <div class="bg-white rounded-lg shadow border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.recent_payouts') }}</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.amount') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.method') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.status') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.date') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach ($recentPayouts as $payout)
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ currency($payout->amount) }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-500">{{ __('affiliate.payout_methods.' . $payout->payout_method) }}</td>
-                                        <td class="px-4 py-3 text-sm">
-                                            <span class="px-2 py-1 rounded text-xs font-medium 
+                        <!-- Request Payout -->
+                        @if ($stats['available_balance'] > 0)
+                            <div class="bg-white rounded-lg shadow border border-gray-200 mb-8">
+                                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                                    <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.request_payout') }}
+                                    </h3>
+                                </div>
+                                <div class="p-6">
+                                    <form action="{{ route('affiliate.payouts.request') }}" method="POST"
+                                        id="payout-form">
+                                        @csrf
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label for="amount"
+                                                    class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.amount') }}
+                                                    *</label>
+                                                <div class="relative">
+                                                    <input type="number" name="amount" id="amount" step="0.01"
+                                                        required class="w-full rounded-lg border-gray-300 shadow-sm">
+                                                    <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.available') }}:
+                                                        {{ currency($stats['available_balance']) }}</p>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label for="payout_method"
+                                                    class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.payout_method') }}
+                                                    *</label>
+                                                <select name="payout_method" id="payout_method" required
+                                                    class="w-full rounded-lg border-gray-300 shadow-sm">
+                                                    <option value="">Select Method</option>
+                                                    <option value="wallet">{{ __('affiliate.payout_methods.wallet') }}
+                                                    </option>
+                                                    <option value="bank_transfer">
+                                                        {{ __('affiliate.payout_methods.bank_transfer') }}</option>
+                                                    <option value="paypal">{{ __('affiliate.payout_methods.paypal') }}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="mt-6 flex items-center justify-end">
+                                            <button type="submit"
+                                                class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors font-medium">
+                                                {{ __('affiliate.submit_payout_request') }}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Recent Payouts -->
+                        @if ($recentPayouts->count() > 0)
+                            <div class="bg-white rounded-lg shadow border border-gray-200">
+                                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                                    <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.recent_payouts') }}
+                                    </h3>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th
+                                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                    {{ __('affiliate.amount') }}</th>
+                                                <th
+                                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                    {{ __('affiliate.method') }}</th>
+                                                <th
+                                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                    {{ __('affiliate.status') }}</th>
+                                                <th
+                                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                    {{ __('affiliate.date') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            @foreach ($recentPayouts as $payout)
+                                                <tr>
+                                                    <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                                        {{ currency($payout->amount) }}</td>
+                                                    <td class="px-4 py-3 text-sm text-gray-500">
+                                                        {{ __('affiliate.payout_methods.' . $payout->payout_method) }}</td>
+                                                    <td class="px-4 py-3 text-sm">
+                                                        <span
+                                                            class="px-2 py-1 rounded text-xs font-medium 
                                             {{ $payout->payout_status === 'completed' ? 'bg-green-100 text-green-800' : ($payout->payout_status === 'processing' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                                {{ __('affiliate.payout_status.' . $payout->payout_status) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-gray-500">{{ $payout->created_at->format('M d, Y') }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                                            {{ __('affiliate.payout_status.' . $payout->payout_status) }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-sm text-gray-500">
+                                                        {{ $payout->created_at->format('M d, Y') }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @endif
+            </div>
+        </div>
+        <!-- Commission by Tier -->
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.commission_by_tier') }}</h3>
+            </div>
+            <div class="p-6">
+                @if ($commissionByTier->count() > 0)
+                    <div class="space-y-4">
+                        @foreach ([1, 2, 3] as $tier)
+                            @php
+                                $tierData = $commissionByTier->get($tier);
+                                $amount = $tierData ? $tierData->total : 0;
+                                $count = $tierData ? $tierData->count : 0;
+                            @endphp
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="font-medium text-gray-900">{{ __('affiliate.tier') }}
+                                        {{ $tier }}</p>
+                                    <p class="text-sm text-gray-500">{{ $count }}
+                                        {{ __('affiliate.commissions') }}</p>
+                                </div>
+                                <p class="text-lg font-bold text-gray-900">{{ currency($amount) }}</p>
+                            </div>
+                        @endforeach
                     </div>
-                </div>
-            @endif
+                @else
+                    <p class="text-sm text-gray-500 text-center py-8">{{ __('affiliate.no_commissions') }}</p>
+                @endif
+            </div>
+        </div>
+
+        <!-- Commission by Status -->
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.commission_by_status') }}</h3>
+            </div>
+            <div class="p-6">
+                @if ($commissionByStatus->count() > 0)
+                    <div class="space-y-4">
+                        @foreach (['pending', 'approved', 'paid'] as $status)
+                            @php
+                                $statusData = $commissionByStatus->get($status);
+                                $amount = $statusData ? $statusData->total : 0;
+                                $count = $statusData ? $statusData->count : 0;
+                            @endphp
+                            @if ($amount > 0 || $count > 0)
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <span
+                                            class="px-2 py-1 rounded text-xs font-medium 
+                                                {{ $status === 'paid' ? 'bg-green-100 text-green-800' : ($status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                            {{ __('affiliate.statuses.' . $status) }}
+                                        </span>
+                                        <p class="text-sm text-gray-500 mt-1">{{ $count }}
+                                            {{ __('affiliate.commissions') }}</p>
+                                    </div>
+                                    <p class="text-lg font-bold text-gray-900">{{ currency($amount) }}</p>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-sm text-gray-500 text-center py-8">{{ __('affiliate.no_commissions') }}</p>
+                @endif
+            </div>
         </div>
     </div>
-                <!-- Commission by Tier -->
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.commission_by_tier') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        @if ($commissionByTier->count() > 0)
-                            <div class="space-y-4">
-                                @foreach ([1, 2, 3] as $tier)
-                                    @php
-                                        $tierData = $commissionByTier->get($tier);
-                                        $amount = $tierData ? $tierData->total : 0;
-                                        $count = $tierData ? $tierData->count : 0;
-                                    @endphp
-                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                        <div>
-                                            <p class="font-medium text-gray-900">{{ __('affiliate.tier') }}
-                                                {{ $tier }}</p>
-                                            <p class="text-sm text-gray-500">{{ $count }}
-                                                {{ __('affiliate.commissions') }}</p>
-                                        </div>
-                                        <p class="text-lg font-bold text-gray-900">{{ currency($amount) }}</p>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <p class="text-sm text-gray-500 text-center py-8">{{ __('affiliate.no_commissions') }}</p>
-                        @endif
-                    </div>
-                </div>
 
-                <!-- Commission by Status -->
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.commission_by_status') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        @if ($commissionByStatus->count() > 0)
-                            <div class="space-y-4">
-                                @foreach (['pending', 'approved', 'paid'] as $status)
-                                    @php
-                                        $statusData = $commissionByStatus->get($status);
-                                        $amount = $statusData ? $statusData->total : 0;
-                                        $count = $statusData ? $statusData->count : 0;
-                                    @endphp
-                                    @if ($amount > 0 || $count > 0)
-                                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                            <div>
-                                                <span
-                                                    class="px-2 py-1 rounded text-xs font-medium 
-                                                {{ $status === 'paid' ? 'bg-green-100 text-green-800' : ($status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                                    {{ __('affiliate.statuses.' . $status) }}
-                                                </span>
-                                                <p class="text-sm text-gray-500 mt-1">{{ $count }}
-                                                    {{ __('affiliate.commissions') }}</p>
-                                            </div>
-                                            <p class="text-lg font-bold text-gray-900">{{ currency($amount) }}</p>
-                                        </div>
-                                    @endif
-                                @endforeach
-                            </div>
-                        @else
-                            <p class="text-sm text-gray-500 text-center py-8">{{ __('affiliate.no_commissions') }}</p>
-                        @endif
-                    </div>
-                </div>
+    <!-- Recent Conversions & Commissions -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Recent Conversions -->
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.recent_conversions') }}</h3>
             </div>
-
-            <!-- Recent Conversions & Commissions -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Recent Conversions -->
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.recent_conversions') }}</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        {{ __('affiliate.user') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        {{ __('affiliate.type') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        {{ __('affiliate.amount') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        {{ __('affiliate.date') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($recentConversions as $conversion)
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm text-gray-900">
-                                            {{ $conversion->converter->name ?? '-' }}</td>
-                                        <td class="px-4 py-3 text-sm">
-                                            <span
-                                                class="px-2 py-1 rounded text-xs font-medium 
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __('affiliate.user') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __('affiliate.type') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __('affiliate.amount') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __('affiliate.date') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($recentConversions as $conversion)
+                            <tr>
+                                <td class="px-4 py-3 text-sm text-gray-900">
+                                    {{ $conversion->converter->name ?? '-' }}</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <span
+                                        class="px-2 py-1 rounded text-xs font-medium 
                                             {{ $conversion->conversion_type === 'purchase' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
-                                                {{ __('affiliate.conversion_type.' . ($conversion->conversion_type ?? 'signup')) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                                            {{ currency($conversion->transaction_amount ?? 0) }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-500">
-                                            {{ ($conversion->converted_at ?? $conversion->created_at)->format('M d, Y') }}
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">
-                                            {{ __('affiliate.no_conversions') }}</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Recent Commissions -->
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.recent_commissions') }}</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        {{ __('affiliate.tier') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        {{ __('affiliate.rate') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        {{ __('affiliate.amount') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        {{ __('affiliate.status') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($recentCommissions as $commission)
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ __('affiliate.tier') }}
-                                            {{ $commission->tier }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-500">{{ $commission->commission_rate }}%
-                                        </td>
-                                        <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                                            {{ currency($commission->commission_amount) }}</td>
-                                        <td class="px-4 py-3 text-sm">
-                                            <span
-                                                class="px-2 py-1 rounded text-xs font-medium 
-                                            {{ $commission->status === 'paid' ? 'bg-green-100 text-green-800' : ($commission->status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                                {{ __('affiliate.statuses.' . $commission->status) }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">
-                                            {{ __('affiliate.no_commissions') }}</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                        {{ __('affiliate.conversion_type.' . ($conversion->conversion_type ?? 'signup')) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                    {{ currency($conversion->transaction_amount ?? 0) }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">
+                                    {{ ($conversion->converted_at ?? $conversion->created_at)->format('M d, Y') }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">
+                                    {{ __('affiliate.no_conversions') }}</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
-
-            <!-- Request Payout -->
-            @if ($stats['available_balance'] > 0)
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.request_payout') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        <form action="{{ route('affiliate.payouts.request') }}" method="POST" id="payout-form">
-                            @csrf
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
-                                        {{ __('affiliate.amount') }} <span class="text-red-500">*</span>
-                                    </label>
-                                    <div class="relative">
-                                        <input type="number" name="amount" id="amount" step="0.01"
-                                            min="0.01" max="{{ $stats['available_balance'] }}"
-                                            value="{{ old('amount', $stats['available_balance']) }}" required
-                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                                        <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.available') }}:
-                                            {{ currency($stats['available_balance']) }}</p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="payout_method" class="block text-sm font-medium text-gray-700 mb-2">
-                                        {{ __('affiliate.payout_method') }} <span class="text-red-500">*</span>
-                                    </label>
-                                    <select name="payout_method" id="payout_method" required
-                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                                        <option value="wallet">{{ __('affiliate.payout_methods.wallet') }}</option>
-                                        <option value="bank_transfer">{{ __('affiliate.payout_methods.bank_transfer') }}
-                                        </option>
-                                        <option value="paypal">{{ __('affiliate.payout_methods.paypal') }}</option>
-                                        <option value="other">{{ __('affiliate.payout_methods.other') }}</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mt-6 flex items-center justify-end">
-                                <button type="submit"
-                                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors">
-                                    {{ __('affiliate.submit_payout_request') }}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            @endif
-
-            <!-- Recent Payouts -->
-            @if ($recentPayouts->count() > 0)
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.recent_payouts') }}</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        {{ __('affiliate.amount') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        {{ __('affiliate.method') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        {{ __('affiliate.status') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        {{ __('affiliate.date') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach ($recentPayouts as $payout)
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                                            {{ currency($payout->amount) }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-500">
-                                            {{ __('affiliate.payout_methods.' . $payout->payout_method) }}</td>
-                                        <td class="px-4 py-3 text-sm">
-                                            <span
-                                                class="px-2 py-1 rounded text-xs font-medium 
-                                            {{ $payout->status === 'completed' ? 'bg-green-100 text-green-800' : ($payout->status === 'processing' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                                {{ __('affiliate.payout_status.' . $payout->status) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-gray-500">
-                                            {{ $payout->created_at->format('M d, Y H:i') }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            @endif
         </div>
+
+        <!-- Recent Commissions -->
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.recent_commissions') }}</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __('affiliate.tier') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __('affiliate.rate') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __('affiliate.amount') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __('affiliate.status') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($recentCommissions as $commission)
+                            <tr>
+                                <td class="px-4 py-3 text-sm text-gray-900">{{ __('affiliate.tier') }}
+                                    {{ $commission->tier }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">{{ $commission->commission_rate }}%
+                                </td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                    {{ currency($commission->commission_amount) }}</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <span
+                                        class="px-2 py-1 rounded text-xs font-medium 
+                                            {{ $commission->status === 'paid' ? 'bg-green-100 text-green-800' : ($commission->status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                        {{ __('affiliate.statuses.' . $commission->status) }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">
+                                    {{ __('affiliate.no_commissions') }}</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Payout -->
+    @if ($stats['available_balance'] > 0)
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.request_payout') }}</h3>
+            </div>
+            <div class="p-6">
+                <form action="{{ route('affiliate.payouts.request') }}" method="POST" id="payout-form">
+                    @csrf
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ __('affiliate.amount') }} <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="number" name="amount" id="amount" step="0.01" min="0.01"
+                                    max="{{ $stats['available_balance'] }}"
+                                    value="{{ old('amount', $stats['available_balance']) }}" required
+                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.available') }}:
+                                    {{ currency($stats['available_balance']) }}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="payout_method" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ __('affiliate.payout_method') }} <span class="text-red-500">*</span>
+                            </label>
+                            <select name="payout_method" id="payout_method" required
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                <option value="wallet">{{ __('affiliate.payout_methods.wallet') }}</option>
+                                <option value="bank_transfer">{{ __('affiliate.payout_methods.bank_transfer') }}
+                                </option>
+                                <option value="paypal">{{ __('affiliate.payout_methods.paypal') }}</option>
+                                <option value="other">{{ __('affiliate.payout_methods.other') }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex items-center justify-end">
+                        <button type="submit"
+                            class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors">
+                            {{ __('affiliate.submit_payout_request') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    <!-- Recent Payouts -->
+    @if ($recentPayouts->count() > 0)
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 class="text-lg font-semibold text-gray-900">{{ __('affiliate.recent_payouts') }}</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __('affiliate.amount') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __('affiliate.method') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __('affiliate.status') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __('affiliate.date') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach ($recentPayouts as $payout)
+                            <tr>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                    {{ currency($payout->amount) }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">
+                                    {{ __('affiliate.payout_methods.' . $payout->payout_method) }}</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <span
+                                        class="px-2 py-1 rounded text-xs font-medium 
+                                            {{ $payout->status === 'completed' ? 'bg-green-100 text-green-800' : ($payout->status === 'processing' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                        {{ __('affiliate.payout_status.' . $payout->status) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-500">
+                                    {{ $payout->created_at->format('M d, Y H:i') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
+    </div>
     </div>
 
     <!-- Create Link Modal -->

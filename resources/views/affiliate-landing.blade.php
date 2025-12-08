@@ -69,8 +69,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(30px, -30px); }
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(30px, -30px);
+            }
         }
 
         .container {
@@ -99,11 +106,18 @@
         }
 
         @keyframes gradientShift {
-            0%, 100% { background-position: 0% 0%; }
-            50% { background-position: 100% 0%; }
+
+            0%,
+            100% {
+                background-position: 0% 0%;
+            }
+
+            50% {
+                background-position: 100% 0%;
+            }
         }
 
-        .container > * {
+        .container>* {
             position: relative;
             z-index: 1;
         }
@@ -127,6 +141,7 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -366,6 +381,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -377,6 +393,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -501,13 +518,14 @@
         <div class="badge">⏰ {{ $landingPageLabel ?? 'Limited Time Offer' }}</div>
 
         <h1>{{ $landingPageTitle ?? '🎉 Exclusive Offer Just For You!' }}</h1>
-        <p class="subtitle">{{ $landingPageSubtitle ?? 'Get instant access to premium features at an incredible price' }}</p>
+        <p class="subtitle">
+            {{ $landingPageSubtitle ?? 'Get instant access to premium features at an incredible price' }}</p>
 
-        @if($landingPageDescription ?? false)
-        <div class="offer-section">
-            <h2>{{ $landingPageOfferTitle ?? 'Why Choose Us?' }}</h2>
-            <p>{{ $landingPageDescription }}</p>
-        </div>
+        @if ($landingPageDescription ?? false)
+            <div class="offer-section">
+                <h2>{{ $landingPageOfferTitle ?? 'Why Choose Us?' }}</h2>
+                <p>{{ $landingPageDescription }}</p>
+            </div>
         @endif
 
         <div class="price-section">
