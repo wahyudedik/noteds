@@ -124,5 +124,84 @@ class CurrencyService
 
         return round($amount, $precision);
     }
-}
 
+    /**
+     * Format amount dengan currency symbol
+     */
+    public function format(float $amount, string $currency, ?string $locale = null): string
+    {
+        $symbol = $this->getCurrencySymbol($currency);
+        $precision = match ($currency) {
+            'IDR' => 0,
+            default => 2,
+        };
+
+        if (in_array($currency, ['IDR', 'VND', 'JPY', 'PHP', 'THB'])) {
+            return $symbol . ' ' . number_format($amount, $precision, ',', '.');
+        }
+
+        return $symbol . number_format($amount, $precision, '.', ',');
+    }
+
+    /**
+     * Set user's preferred currency
+     */
+    public function setUserCurrency(\App\Models\User $user, string $currency): bool
+    {
+        if (!in_array($currency, $this->getSupportedCurrencies())) {
+            throw new \InvalidArgumentException("Unsupported currency: {$currency}");
+        }
+
+        $user->update(['currency' => $currency]);
+        Cache::forget("user_currency_{$user->id}");
+
+        return true;
+    }
+
+    /**
+     * Format untuk API response
+     */
+    public function formatForApi(float $amount, string $currency): array
+    {
+        return [
+            'amount' => $this->round($amount, $currency),
+            'currency' => $currency,
+            'symbol' => $this->getCurrencySymbol($currency),
+            'formatted' => $this->format($amount, $currency),
+        ];
+    }
+
+    /**
+     * Validate currency code
+     */
+    public function isValidCurrency(string $currency): bool
+    {
+        return in_array($currency, $this->getSupportedCurrencies());
+    }
+
+    /**
+     * Get default currency untuk country
+     */
+    public function getDefaultCurrencyForCountry(string $countryCode): string
+    {
+        $currencyMap = [
+            'US' => 'USD',
+            'GB' => 'GBP',
+            'DE' => 'EUR',
+            'FR' => 'EUR',
+            'ID' => 'IDR',
+            'JP' => 'JPY',
+            'AU' => 'AUD',
+            'CA' => 'CAD',
+            'SG' => 'SGD',
+            'MY' => 'MYR',
+            'TH' => 'THB',
+            'PH' => 'PHP',
+            'VN' => 'VND',
+            'SA' => 'SAR',
+            'AE' => 'AED',
+        ];
+
+        return $currencyMap[strtoupper($countryCode)] ?? $this->baseCurrency;
+    }
+}

@@ -275,7 +275,8 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
                     <div class="bg-cyan-50 rounded-lg p-4">
                         <div class="text-xs font-medium text-cyan-600 uppercase">Total Shares</div>
-                        <div class="text-xl font-bold text-cyan-900">{{ number_format($shareStats['total_share_referrals']) }}
+                        <div class="text-xl font-bold text-cyan-900">
+                            {{ number_format($shareStats['total_share_referrals']) }}
                         </div>
                     </div>
                     <div class="bg-sky-50 rounded-lg p-4">
