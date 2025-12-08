@@ -23,12 +23,12 @@ class AffiliatePromotionalMaterialsTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public');
-        
+
         $this->seed([RoleSeeder::class, AffiliatePermissionSeeder::class]);
-        
+
         $this->affiliate = User::factory()->create();
         $this->affiliate->givePermissionTo('create affiliate links');
-        
+
         $this->link = AffiliateLink::factory()->create(['user_id' => $this->affiliate->id]);
     }
 
@@ -36,7 +36,7 @@ class AffiliatePromotionalMaterialsTest extends TestCase
     public function user_can_create_promotional_material()
     {
         $file = UploadedFile::fake()->image('banner.jpg', 728, 90);
-        
+
         $response = $this->actingAs($this->affiliate)->post(
             route('affiliate.promotional-materials.store', $this->link),
             [
@@ -83,7 +83,7 @@ class AffiliatePromotionalMaterialsTest extends TestCase
         $material = AffiliatePromotionalMaterial::factory()->create([
             'affiliate_link_id' => $this->link->id,
         ]);
-        
+
         $response = $this->actingAs($this->affiliate)->put(
             route('affiliate.promotional-materials.update', $material),
             [
@@ -107,7 +107,7 @@ class AffiliatePromotionalMaterialsTest extends TestCase
         $material = AffiliatePromotionalMaterial::factory()->create([
             'affiliate_link_id' => $this->link->id,
         ]);
-        
+
         $response = $this->actingAs($this->affiliate)->delete(
             route('affiliate.promotional-materials.delete', $material)
         );
@@ -126,7 +126,7 @@ class AffiliatePromotionalMaterialsTest extends TestCase
         $material = AffiliatePromotionalMaterial::factory()->create([
             'affiliate_link_id' => $otherLink->id,
         ]);
-        
+
         $response = $this->actingAs($this->affiliate)->put(
             route('affiliate.promotional-materials.update', $material),
             [
@@ -146,7 +146,7 @@ class AffiliatePromotionalMaterialsTest extends TestCase
     public function image_file_size_cannot_exceed_2mb()
     {
         $file = UploadedFile::fake()->create('banner.jpg', 2100); // 2.1 MB
-        
+
         $response = $this->actingAs($this->affiliate)->post(
             route('affiliate.promotional-materials.store', $this->link),
             [

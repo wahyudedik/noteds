@@ -19,12 +19,12 @@ class AffiliateLandingPageTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->seed([RoleSeeder::class, AffiliatePermissionSeeder::class]);
-        
+
         $this->affiliate = User::factory()->create();
         $this->affiliate->givePermissionTo('create affiliate links');
-        
+
         $this->link = AffiliateLink::factory()->create(['user_id' => $this->affiliate->id]);
     }
 
@@ -32,7 +32,7 @@ class AffiliateLandingPageTest extends TestCase
     public function user_can_update_landing_page()
     {
         $content = '<h1>Welcome to My Affiliate Link</h1><p>Special offer inside!</p>';
-        
+
         $response = $this->actingAs($this->affiliate)->put(
             route('affiliate.links.landing.update', $this->link),
             [
@@ -53,7 +53,7 @@ class AffiliateLandingPageTest extends TestCase
     public function landing_page_slug_is_auto_generated_from_content()
     {
         $content = '<h1>My Special Landing Page</h1>';
-        
+
         $response = $this->actingAs($this->affiliate)->put(
             route('affiliate.links.landing.update', $this->link),
             [
@@ -63,7 +63,7 @@ class AffiliateLandingPageTest extends TestCase
         );
 
         $response->assertRedirect();
-        
+
         $this->link->refresh();
         $this->assertNotNull($this->link->landing_page_slug);
         // Slug should be generated from content
@@ -75,7 +75,7 @@ class AffiliateLandingPageTest extends TestCase
     {
         $otherUser = User::factory()->create();
         $otherLink = AffiliateLink::factory()->create(['user_id' => $otherUser->id]);
-        
+
         $response = $this->actingAs($this->affiliate)->put(
             route('affiliate.links.landing.update', $otherLink),
             [
@@ -101,7 +101,7 @@ class AffiliateLandingPageTest extends TestCase
             <button onclick="window.location.href='https://example.com'">Get Access</button>
         </div>
         HTML;
-        
+
         $response = $this->actingAs($this->affiliate)->put(
             route('affiliate.links.landing.update', $this->link),
             [
@@ -119,9 +119,9 @@ class AffiliateLandingPageTest extends TestCase
     public function landing_page_slug_must_be_unique_per_user()
     {
         $this->link->update(['landing_page_slug' => 'my-offer']);
-        
+
         $newLink = AffiliateLink::factory()->create(['user_id' => $this->affiliate->id]);
-        
+
         $response = $this->actingAs($this->affiliate)->put(
             route('affiliate.links.landing.update', $newLink),
             [
@@ -140,7 +140,7 @@ class AffiliateLandingPageTest extends TestCase
             'landing_page_content' => '<h1>Old Content</h1>',
             'landing_page_slug' => 'old-slug',
         ]);
-        
+
         $response = $this->actingAs($this->affiliate)->put(
             route('affiliate.links.landing.update', $this->link),
             [

@@ -13,7 +13,7 @@ beforeEach(function () {
 
 test('user can create affiliate link', function () {
     $link = AffiliateLink::factory()->make();
-    
+
     $response = $this->actingAs($this->affiliate)->post(route('affiliate.links.store'), [
         'name' => $link->name,
         'url' => 'https://example.com/product?ref=test',
@@ -25,7 +25,7 @@ test('user can create affiliate link', function () {
 
 test('user can update affiliate link', function () {
     $link = AffiliateLink::factory()->create(['user_id' => $this->affiliate->id]);
-    
+
     $response = $this->actingAs($this->affiliate)->put(
         route('affiliate.links.update', $link),
         ['name' => 'Updated Link Name']
@@ -38,7 +38,7 @@ test('user can update affiliate link', function () {
 test('user can delete affiliate link', function () {
     $link = AffiliateLink::factory()->create(['user_id' => $this->affiliate->id]);
     $id = $link->id;
-    
+
     $response = $this->actingAs($this->affiliate)->delete(
         route('affiliate.links.delete', $link)
     );
@@ -50,7 +50,7 @@ test('user can delete affiliate link', function () {
 test('user can only manage own links', function () {
     $otherUser = User::factory()->create();
     $otherLink = AffiliateLink::factory()->create(['user_id' => $otherUser->id]);
-    
+
     $response = $this->actingAs($this->affiliate)->put(
         route('affiliate.links.update', $otherLink),
         ['name' => 'Hacked Name']
@@ -62,6 +62,6 @@ test('user can only manage own links', function () {
 
 test('affiliate link slug is auto generated', function () {
     $link = AffiliateLink::factory()->create(['user_id' => $this->affiliate->id]);
-    
+
     expect($link->unique_slug)->not()->toBeNull();
 });
