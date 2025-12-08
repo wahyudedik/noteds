@@ -37,9 +37,9 @@ class AffiliateController extends Controller
             ->get();
 
         // Get recent conversions
-        $recentConversions = AffiliateConversion::whereHas('affiliateLink', function($q) use ($user) {
-                $q->where('affiliate_id', $user->id);
-            })
+        $recentConversions = AffiliateConversion::whereHas('affiliateLink', function ($q) use ($user) {
+            $q->where('affiliate_id', $user->id);
+        })
             ->with(['converter', 'transaction', 'purchase.note', 'affiliateLink'])
             ->orderBy('converted_at', 'desc')
             ->orderBy('created_at', 'desc')

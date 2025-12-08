@@ -3,7 +3,7 @@
 return [
     'title' => 'Dashboard Afiliasi',
     'description' => 'Dapatkan komisi dengan mempromosikan platform kami menggunakan link afiliasi unik Anda',
-    
+
     // Stats
     'total_links' => 'Total Link',
     'total_clicks' => 'Total Klik',
@@ -15,7 +15,7 @@ return [
     'available_balance' => 'Saldo Tersedia',
     'total_payouts' => 'Total Payout',
     'pending_payouts' => 'Payout Pending',
-    
+
     // Links
     'affiliate_links' => 'Link Afiliasi',
     'manage_links_description' => 'Buat dan kelola link afiliasi Anda',
@@ -39,7 +39,7 @@ return [
     'link_updated' => 'Link afiliasi berhasil diperbarui',
     'link_deleted' => 'Link afiliasi berhasil dihapus',
     'link_copied' => 'Link berhasil disalin ke clipboard',
-    
+
     // Conversions
     'recent_conversions' => 'Konversi Terbaru',
     'conversion_type' => [
@@ -48,7 +48,7 @@ return [
         'subscription' => 'Berlangganan',
     ],
     'no_conversions' => 'Belum ada konversi',
-    
+
     // Commissions
     'recent_commissions' => 'Komisi Terbaru',
     'commission_by_tier' => 'Komisi per Tier',
@@ -63,7 +63,7 @@ return [
         'paid' => 'Dibayar',
         'cancelled' => 'Dibatalkan',
     ],
-    
+
     // Payouts
     'request_payout' => 'Request Payout',
     'amount' => 'Jumlah',
@@ -90,16 +90,17 @@ return [
     'payout_updated' => 'Payout berhasil diperbarui',
     'payout_completion_failed' => 'Gagal menyelesaikan payout',
     'commissions_approved' => ':count komisi berhasil disetujui',
-    
+
     // General
     'optional' => 'Opsional',
     'description' => 'Deskripsi',
     'user' => 'Pengguna',
     'type' => 'Tipe',
     'date' => 'Tanggal',
-    
+
     // Admin
     'admin_title' => 'Manajemen Afiliasi',
+    'affiliate_settings' => 'Pengaturan Afiliasi',
     'affiliate_stats' => 'Statistik Afiliasi',
     'total_affiliates' => 'Total Afiliasi',
     'top_affiliates' => 'Afiliasi Teratas',
@@ -108,7 +109,7 @@ return [
     'payout_reference_hint' => 'ID Transaksi atau nomor referensi untuk tracking payout',
     'payout_details' => 'Detail Payout',
     'no_payouts' => 'Belum ada payout',
-    
+
     // Landing Pages
     'landing_page' => 'Landing Page',
     'landing_page_content' => 'Konten Landing Page',
@@ -121,7 +122,7 @@ return [
     'visit_marketplace' => 'Kunjungi Marketplace',
     'welcome' => 'Selamat Datang',
     'landing_page_default_message' => 'Terima kasih telah mengunjungi halaman afiliasi kami. Klik tombol di bawah untuk melanjutkan ke marketplace.',
-    
+
     // Promotional Materials
     'promotional_materials' => 'Materi Promosi',
     'create_promotional_material' => 'Buat Materi Promosi',
@@ -136,7 +137,7 @@ return [
     'banner_image' => 'Gambar Banner',
     'download_html' => 'Unduh HTML',
     'copy_html' => 'Salin HTML',
-    
+
     // Leaderboard
     'leaderboard_title' => 'Papan Peringkat Afiliasi',
     'leaderboard_description' => 'Lihat afiliasi teratas berdasarkan performa mereka',
@@ -155,7 +156,7 @@ return [
     'apply_filters' => 'Terapkan Filter',
     'no_affiliates' => 'Belum ada afiliasi',
     'view_leaderboard' => 'Lihat Papan Peringkat',
-    
+
     // Settings
     'settings_title' => 'Pengaturan Afiliasi',
     'settings_description' => 'Konfigurasi tingkat komisi afiliasi, ambang batas, dan pengaturan payout',
@@ -176,12 +177,10 @@ return [
     'settings_info_3' => 'Dana ditransfer dari dompet admin ke dompet afiliasi',
     'settings_updated' => 'Pengaturan afiliasi berhasil diperbarui',
     'save_settings' => 'Simpan Pengaturan',
-    
+
     // Edit
     'edit_link' => 'Edit Link',
     'cancel' => 'Batal',
     'update' => 'Perbarui',
     'error_loading_link' => 'Kesalahan memuat detail link afiliasi',
 ];
-
-

@@ -11,8 +11,13 @@ use App\Models\Transaction;
 use App\Models\PurchasedNote;
 use App\Models\User;
 use App\Models\Setting;
+use App\Events\AffiliateConversionCompleted;
+use App\Events\AffiliatePayoutRequested;
+use App\Mail\AffiliateConversionMail;
+use App\Mail\AffiliatePayoutRequestMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class AffiliateService
@@ -175,6 +180,16 @@ class AffiliateService
             $this->createCommissions($conversion, $link->affiliate, $transaction ?? $purchase, 1);
 
             DB::commit();
+
+            // Get tier 1 commission for notification
+            $tier1Commission = $conversion->commissions()->where('tier', 1)->first();
+            $commissionAmount = $tier1Commission?->commission_amount ?? 0;
+
+            // Dispatch conversion event for broadcasting
+            broadcast(new AffiliateConversionCompleted($conversion, $commissionAmount, 1));
+
+            // Queue notification email to affiliate
+            Mail::queue(new AffiliateConversionMail($conversion, $commissionAmount, 1));
 
             return $conversion;
         } catch (\Exception $e) {
@@ -357,6 +372,15 @@ class AffiliateService
             }
 
             DB::commit();
+
+            // Dispatch payout requested event to notify admins
+            broadcast(new AffiliatePayoutRequested($payout, $affiliate->username, $affiliate->email));
+
+            // Queue notification email to admin
+            $admins = User::role('admin')->get();
+            foreach ($admins as $admin) {
+                Mail::queue(new AffiliatePayoutRequestMail($payout, $affiliate));
+            }
 
             return $payout;
         } catch (\Exception $e) {

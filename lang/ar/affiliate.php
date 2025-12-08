@@ -3,7 +3,7 @@
 return [
     'title' => 'لوحة تحكم المنتسبين',
     'description' => 'اكسب عمولات من خلال الترويج لمنصتنا باستخدام روابط المنتسبين الفريدة الخاصة بك',
-    
+
     // Stats
     'total_links' => 'إجمالي الروابط',
     'total_clicks' => 'إجمالي النقرات',
@@ -15,7 +15,7 @@ return [
     'available_balance' => 'الرصيد المتاح',
     'total_payouts' => 'إجمالي المدفوعات',
     'pending_payouts' => 'المدفوعات المعلقة',
-    
+
     // Links
     'affiliate_links' => 'روابط المنتسبين',
     'manage_links_description' => 'إنشاء وإدارة روابط المنتسبين الخاصة بك',
@@ -39,7 +39,7 @@ return [
     'link_updated' => 'تم تحديث رابط المنتسب بنجاح',
     'link_deleted' => 'تم حذف رابط المنتسب بنجاح',
     'link_copied' => 'تم نسخ الرابط إلى الحافظة',
-    
+
     // Conversions
     'recent_conversions' => 'التحويلات الأخيرة',
     'conversion_type' => [
@@ -48,7 +48,7 @@ return [
         'subscription' => 'الاشتراك',
     ],
     'no_conversions' => 'لا توجد تحويلات بعد',
-    
+
     // Commissions
     'recent_commissions' => 'العمولات الأخيرة',
     'commission_by_tier' => 'العمولات حسب المستوى',
@@ -63,7 +63,7 @@ return [
         'paid' => 'مدفوع',
         'cancelled' => 'ملغي',
     ],
-    
+
     // Payouts
     'request_payout' => 'طلب السداد',
     'amount' => 'المبلغ',
@@ -90,16 +90,17 @@ return [
     'payout_updated' => 'تم تحديث السداد بنجاح',
     'payout_completion_failed' => 'فشل في إتمام السداد',
     'commissions_approved' => 'تم اعتماد :count عمولات بنجاح',
-    
+
     // General
     'optional' => 'اختياري',
     'description' => 'الوصف',
     'user' => 'المستخدم',
     'type' => 'النوع',
     'date' => 'التاريخ',
-    
+
     // Admin
     'admin_title' => 'إدارة المنتسبين',
+    'affiliate_settings' => 'إعدادات البرنامج التابع',
     'affiliate_stats' => 'إحصائيات المنتسبين',
     'total_affiliates' => 'إجمالي المنتسبين',
     'top_affiliates' => 'أفضل المنتسبين',
@@ -108,7 +109,7 @@ return [
     'payout_reference_hint' => 'معرف المعاملة أو رقم المرجع لتتبع السداد',
     'payout_details' => 'تفاصيل السداد',
     'no_payouts' => 'لا توجد مدفوعات بعد',
-    
+
     // Settings
     'settings_title' => 'إعدادات المنتسبين',
     'settings_description' => 'قم بتكوين مستويات العمولات والحدود الدنيا وإعدادات السداد',
@@ -129,12 +130,10 @@ return [
     'settings_info_3' => 'يتم تحويل الأموال من محفظة المسؤول إلى محافظ المنتسبين',
     'settings_updated' => 'تم تحديث إعدادات المنتسبين بنجاح',
     'save_settings' => 'حفظ الإعدادات',
-    
+
     // Edit
     'edit_link' => 'تعديل الرابط',
     'cancel' => 'إلغاء',
     'update' => 'تحديث',
     'error_loading_link' => 'خطأ في تحميل تفاصيل رابط المنتسب',
 ];
-
-

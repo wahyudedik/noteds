@@ -3,7 +3,7 @@
 return [
     'title' => 'Affiliate Dashboard',
     'description' => 'Earn commissions by promoting our platform with your unique affiliate links',
-    
+
     // Stats
     'total_links' => 'Total Links',
     'total_clicks' => 'Total Clicks',
@@ -15,7 +15,7 @@ return [
     'available_balance' => 'Available Balance',
     'total_payouts' => 'Total Payouts',
     'pending_payouts' => 'Pending Payouts',
-    
+
     // Links
     'affiliate_links' => 'Affiliate Links',
     'manage_links_description' => 'Create and manage your affiliate links',
@@ -39,7 +39,7 @@ return [
     'link_updated' => 'Affiliate link updated successfully',
     'link_deleted' => 'Affiliate link deleted successfully',
     'link_copied' => 'Link copied to clipboard',
-    
+
     // Conversions
     'recent_conversions' => 'Recent Conversions',
     'conversion_type' => [
@@ -48,7 +48,7 @@ return [
         'subscription' => 'Subscription',
     ],
     'no_conversions' => 'No conversions yet',
-    
+
     // Commissions
     'recent_commissions' => 'Recent Commissions',
     'commission_by_tier' => 'Commission by Tier',
@@ -63,7 +63,7 @@ return [
         'paid' => 'Paid',
         'cancelled' => 'Cancelled',
     ],
-    
+
     // Payouts
     'request_payout' => 'Request Payout',
     'amount' => 'Amount',
@@ -90,16 +90,17 @@ return [
     'payout_updated' => 'Payout updated successfully',
     'payout_completion_failed' => 'Failed to complete payout',
     'commissions_approved' => ':count commissions approved successfully',
-    
+
     // General
     'optional' => 'Optional',
     'description' => 'Description',
     'user' => 'User',
     'type' => 'Type',
     'date' => 'Date',
-    
+
     // Admin
     'admin_title' => 'Affiliate Management',
+    'affiliate_settings' => 'Affiliate Settings',
     'affiliate_stats' => 'Affiliate Statistics',
     'total_affiliates' => 'Total Affiliates',
     'top_affiliates' => 'Top Affiliates',
@@ -108,7 +109,7 @@ return [
     'payout_reference_hint' => 'Transaction ID or reference number for payout tracking',
     'payout_details' => 'Payout Details',
     'no_payouts' => 'No payouts yet',
-    
+
     // Settings
     'settings_title' => 'Affiliate Settings',
     'settings_description' => 'Configure affiliate program commission tiers, thresholds, and payout settings',
@@ -129,7 +130,7 @@ return [
     'settings_info_3' => 'Funds are transferred from admin wallet to affiliate wallets',
     'settings_updated' => 'Affiliate settings updated successfully',
     'save_settings' => 'Save Settings',
-    
+
     // Edit & Landing Page
     'edit_link' => 'Edit Link',
     'edit_landing_page' => 'Edit Landing Page',
@@ -138,11 +139,9 @@ return [
     'update' => 'Update',
     'landing_page_url' => 'Landing Page URL',
     'error_loading_link' => 'Error loading affiliate link details',
-    
+
     // Leaderboard
     'leaderboard_title' => 'Affiliate Leaderboard',
     'leaderboard_description' => 'See top-performing affiliates and their rankings',
     'view_leaderboard' => 'View Leaderboard',
 ];
-
-

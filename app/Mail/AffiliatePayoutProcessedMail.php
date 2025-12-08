@@ -21,7 +21,7 @@ class AffiliatePayoutProcessedMail extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        $statusText = match($this->status) {
+        $statusText = match ($this->status) {
             'completed' => 'Completed',
             'failed' => 'Failed',
             'rejected' => 'Rejected',

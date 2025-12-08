@@ -12,6 +12,10 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\Withdraw;
+use App\Models\AffiliateLink;
+use App\Models\AffiliateConversion;
+use App\Models\AffiliateCommission;
+use App\Models\AffiliatePayout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -460,6 +464,55 @@ class DashboardController extends Controller
             ->orderBy('date', 'desc')
             ->get();
 
+        // Affiliate Stats
+        $affiliateStats = [
+            'total_affiliates' => User::has('affiliateLinks')->count(),
+            'active_links' => AffiliateLink::where('is_active', true)->count(),
+            'total_conversions' => AffiliateConversion::count(),
+            'total_commissions' => AffiliateCommission::sum('commission_amount'),
+            'pending_payouts' => AffiliatePayout::where('status', 'pending')->sum('amount'),
+            'completed_payouts' => AffiliatePayout::where('status', 'completed')->sum('amount'),
+        ];
+
+        // Top Affiliates (by commission earned)
+        $topAffiliates = User::with(['affiliateLinks' => function ($query) {
+            $query->select('affiliate_id', DB::raw('COUNT(*) as link_count'));
+        }])
+            ->has('affiliateLinks')
+            ->get()
+            ->map(function ($user) {
+                $totalCommissions = $user->affiliateCommissions()->sum('commission_amount');
+                $totalConversions = $user->affiliateConversions()->count();
+                $pendingPayouts = $user->payouts()->where('status', 'pending')->sum('amount');
+
+                return [
+                    'user' => $user,
+                    'commission' => $totalCommissions,
+                    'conversions' => $totalConversions,
+                    'pending_payout' => $pendingPayouts,
+                    'links' => $user->affiliateLinks->count(),
+                ];
+            })
+            ->sortByDesc('commission')
+            ->take(10)
+            ->values();
+
+        // Pending Payout Requests
+        $pendingPayouts = AffiliatePayout::where('status', 'pending')
+            ->with('affiliate')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($payout) {
+                return [
+                    'id' => $payout->id,
+                    'affiliate_name' => $payout->affiliate->username,
+                    'amount' => $payout->amount,
+                    'method' => $payout->payout_method,
+                    'requested_at' => $payout->created_at,
+                ];
+            });
+
         return view('admin.dashboard', compact(
             'stats',
             'platformBalance',
@@ -486,7 +539,10 @@ class DashboardController extends Controller
             'shareCommissionStats',
             'topSharedNotes',
             'topShareEarners',
-            'dailyShareActivity'
+            'dailyShareActivity',
+            'affiliateStats',
+            'topAffiliates',
+            'pendingPayouts'
         ));
     }
 

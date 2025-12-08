@@ -433,6 +433,110 @@
                 </div>
             </div>
 
+            <!-- Affiliate Analytics -->
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {{ __('affiliate.affiliate_stats') }}
+                </h3>
+                
+                <!-- Affiliate Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <div class="text-xs font-medium text-purple-600 uppercase">{{ __('affiliate.total_affiliates') }}</div>
+                        <div class="text-2xl font-bold text-purple-900">{{ $affiliateStats['total_affiliates'] }}</div>
+                    </div>
+                    <div class="bg-indigo-50 rounded-lg p-4">
+                        <div class="text-xs font-medium text-indigo-600 uppercase">{{ __('messages.active') }} {{ __('affiliate.link') }}</div>
+                        <div class="text-2xl font-bold text-indigo-900">{{ $affiliateStats['active_links'] }}</div>
+                    </div>
+                    <div class="bg-pink-50 rounded-lg p-4">
+                        <div class="text-xs font-medium text-pink-600 uppercase">{{ __('affiliate.total_conversions') }}</div>
+                        <div class="text-2xl font-bold text-pink-900">{{ $affiliateStats['total_conversions'] }}</div>
+                    </div>
+                    <div class="bg-rose-50 rounded-lg p-4">
+                        <div class="text-xs font-medium text-rose-600 uppercase">{{ __('affiliate.commissions') }}</div>
+                        <div class="text-2xl font-bold text-rose-900">{{ currency($affiliateStats['total_commissions']) }}</div>
+                    </div>
+                    <div class="bg-orange-50 rounded-lg p-4">
+                        <div class="text-xs font-medium text-orange-600 uppercase">{{ __('affiliate.pending') }}</div>
+                        <div class="text-2xl font-bold text-orange-900">{{ currency($affiliateStats['pending_payouts']) }}</div>
+                    </div>
+                    <div class="bg-emerald-50 rounded-lg p-4">
+                        <div class="text-xs font-medium text-emerald-600 uppercase">{{ __('affiliate.payout_completed') }}</div>
+                        <div class="text-2xl font-bold text-emerald-900">{{ currency($affiliateStats['completed_payouts']) }}</div>
+                    </div>
+                </div>
+
+                <!-- Top Affiliates & Pending Payouts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Top Affiliates -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">{{ __('affiliate.top_affiliates') }}</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left font-medium text-gray-500 uppercase">{{ __('affiliate.user') }}</th>
+                                        <th class="px-3 py-2 text-right font-medium text-gray-500 uppercase">{{ __('affiliate.total_conversions') }}</th>
+                                        <th class="px-3 py-2 text-right font-medium text-gray-500 uppercase">{{ __('affiliate.commissions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @forelse($topAffiliates as $item)
+                                        <tr>
+                                            <td class="px-3 py-2 text-gray-900 truncate">
+                                                <a href="{{ route('admin.users.show', $item['user']) }}" class="text-blue-600 hover:underline">
+                                                    {{ $item['user']->username }}
+                                                </a>
+                                            </td>
+                                            <td class="px-3 py-2 text-right text-gray-600">{{ $item['conversions'] }}</td>
+                                            <td class="px-3 py-2 text-right text-purple-600 font-medium">
+                                                {{ currency($item['commission']) }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="px-3 py-2 text-center text-gray-500">{{ __('affiliate.no_links') }}</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pending Payouts -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">{{ __('affiliate.recent_payouts') }} ({{ __('affiliate.pending') }})</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left font-medium text-gray-500 uppercase">{{ __('affiliate.user') }}</th>
+                                        <th class="px-3 py-2 text-right font-medium text-gray-500 uppercase">{{ __('affiliate.amount') }}</th>
+                                        <th class="px-3 py-2 text-right font-medium text-gray-500 uppercase">{{ __('affiliate.method') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @forelse($pendingPayouts as $payout)
+                                        <tr>
+                                            <td class="px-3 py-2 text-gray-900 truncate">{{ $payout['affiliate_name'] }}</td>
+                                            <td class="px-3 py-2 text-right text-emerald-600 font-medium">{{ currency($payout['amount']) }}</td>
+                                            <td class="px-3 py-2 text-right text-gray-600 capitalize">{{ $payout['method'] }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="px-3 py-2 text-center text-gray-500">{{ __('affiliate.no_payouts') }}</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Wallet Analytics -->
             <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">

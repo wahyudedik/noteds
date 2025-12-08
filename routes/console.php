@@ -159,3 +159,11 @@ Schedule::job(new \App\Jobs\ProcessMonthlyShareCommissionJob())
     ->monthlyOn($payoutDay, '11:00')
     ->timezone('Asia/Jakarta')
     ->description('Transfer accumulated share commissions from admin wallet to seller wallets');
+
+// Process monthly affiliate payouts
+// Run on the configured day each month at 12:00
+$affiliatePayoutDay = \App\Models\Setting::getSetting('affiliate_payout_day', 'affiliate', 1);
+Schedule::job(new \App\Jobs\ProcessMonthlyAffiliatePayoutJob())
+    ->monthlyOn($affiliatePayoutDay, '12:00')
+    ->timezone('Asia/Jakarta')
+    ->description('Transfer pending affiliate payouts from admin wallet to affiliate wallets');

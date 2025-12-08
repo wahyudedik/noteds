@@ -104,7 +104,7 @@
 - ✅ **Contests** - Create contests dengan voting system
 
 ### Creative Ecosystem (Envato-Style)
-- ✅ **8 Content Categories** - Elements, AudioJungle, Code, GraphicRiver, PhotoDune, Themeforest, VideoHive, 3DOcean
+- ✅ **8 Content Categories** - Elements, Audio, Code, Graphic, Photo, Theme, Video, 3D
 - ✅ **Ecosystem Filtering** - Marketplace filtering by content type
 - ✅ **Studio Services** - Service marketplace dengan brief, quotes, escrow, milestones
 
