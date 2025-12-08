@@ -1,4 +1,6 @@
-<x-guest-layout>
+@extends('layouts.guest')
+
+@section('content')
     <div class="space-y-6">
         <div class="text-center">
             <h2 class="text-3xl font-semibold text-slate-900">{{ __('messages.verify_email_title') ?? 'Verifikasi email Anda' }}</h2>
@@ -31,4 +33,4 @@
             </form>
         </div>
     </div>
-</x-guest-layout>
+@endsection

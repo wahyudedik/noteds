@@ -1,4 +1,6 @@
-<x-guest-layout>
+@extends('layouts.guest')
+
+@section('content')
     <div class="space-y-6">
         <div class="text-center">
             <h2 class="text-3xl font-semibold text-slate-900">{{ __('messages.confirm_password_title') ?? 'Konfirmasi kata sandi' }}</h2>
@@ -21,4 +23,4 @@
             </x-primary-button>
         </form>
     </div>
-</x-guest-layout>
+@endsection

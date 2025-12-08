@@ -1,4 +1,6 @@
-<x-guest-layout>
+@extends('layouts.guest')
+
+@section('content')
     <div class="space-y-6">
         <div class="text-center">
             <h2 class="text-3xl font-semibold text-slate-900">
@@ -180,4 +182,4 @@
             @endif
         </div>
     </div>
-</x-guest-layout>
+@endsection
