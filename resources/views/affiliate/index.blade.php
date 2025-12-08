@@ -28,35 +28,47 @@
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.total_links') }}</p>
+                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">
+                            {{ __('affiliate.total_links') }}</p>
                         <p class="text-4xl font-bold text-gray-900 mt-3">{{ $stats['total_links'] ?? 0 }}</p>
                     </div>
                     <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.total_clicks') }}</p>
-                        <p class="text-4xl font-bold text-gray-900 mt-3">{{ number_format($stats['total_clicks'] ?? 0) }}</p>
+                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">
+                            {{ __('affiliate.total_clicks') }}</p>
+                        <p class="text-4xl font-bold text-gray-900 mt-3">{{ number_format($stats['total_clicks'] ?? 0) }}
+                        </p>
                     </div>
                     <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.total_conversions') }}</p>
-                        <p class="text-4xl font-bold text-gray-900 mt-3">{{ number_format($stats['total_conversions'] ?? 0) }}</p>
+                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">
+                            {{ __('affiliate.total_conversions') }}</p>
+                        <p class="text-4xl font-bold text-gray-900 mt-3">
+                            {{ number_format($stats['total_conversions'] ?? 0) }}</p>
                     </div>
                     <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.total_commissions') }}</p>
-                        <p class="text-4xl font-bold text-indigo-600 mt-3">{{ currency($stats['total_commissions'] ?? 0) }}</p>
+                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">
+                            {{ __('affiliate.total_commissions') }}</p>
+                        <p class="text-4xl font-bold text-indigo-600 mt-3">{{ currency($stats['total_commissions'] ?? 0) }}
+                        </p>
                     </div>
                 </div>
 
                 <!-- Earnings Summary -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.available_balance') }}</p>
-                        <p class="text-4xl font-bold text-green-600 mt-3">{{ currency($stats['available_balance'] ?? 0) }}</p>
+                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">
+                            {{ __('affiliate.available_balance') }}</p>
+                        <p class="text-4xl font-bold text-green-600 mt-3">{{ currency($stats['available_balance'] ?? 0) }}
+                        </p>
                     </div>
                     <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.approved_commissions') }}</p>
-                        <p class="text-4xl font-bold text-blue-600 mt-3">{{ currency($stats['approved_commissions'] ?? 0) }}</p>
+                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">
+                            {{ __('affiliate.approved_commissions') }}</p>
+                        <p class="text-4xl font-bold text-blue-600 mt-3">
+                            {{ currency($stats['approved_commissions'] ?? 0) }}</p>
                     </div>
                     <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.total_payouts') }}</p>
+                        <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">
+                            {{ __('affiliate.total_payouts') }}</p>
                         <p class="text-4xl font-bold text-purple-600 mt-3">{{ currency($stats['total_payouts'] ?? 0) }}</p>
                     </div>
                 </div>
@@ -79,15 +91,18 @@
                                     <div class="p-6">
                                         <div class="flex items-start justify-between mb-4">
                                             <div class="flex-1">
-                                                <h4 class="text-lg font-bold text-gray-900">{{ $link->name ?: __('affiliate.link') }}</h4>
+                                                <h4 class="text-lg font-bold text-gray-900">
+                                                    {{ $link->name ?: __('affiliate.link') }}</h4>
                                                 @if ($link->description)
                                                     <p class="text-sm text-gray-600 mt-1">{{ $link->description }}</p>
                                                 @endif
                                             </div>
                                             @if ($link->is_active)
-                                                <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ __('affiliate.active') }}</span>
+                                                <span
+                                                    class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ __('affiliate.active') }}</span>
                                             @else
-                                                <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ __('affiliate.inactive') }}</span>
+                                                <span
+                                                    class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ __('affiliate.inactive') }}</span>
                                             @endif
                                         </div>
 
@@ -104,34 +119,42 @@
                                         <div class="grid grid-cols-3 gap-4 mb-4">
                                             <div class="bg-blue-50 rounded p-3">
                                                 <p class="text-xs text-gray-600">{{ __('affiliate.clicks') }}</p>
-                                                <p class="text-lg font-bold text-blue-600 mt-1">{{ number_format($link->clicks ?? 0) }}</p>
+                                                <p class="text-lg font-bold text-blue-600 mt-1">
+                                                    {{ number_format($link->clicks ?? 0) }}</p>
                                             </div>
                                             <div class="bg-green-50 rounded p-3">
                                                 <p class="text-xs text-gray-600">{{ __('affiliate.conversions') }}</p>
-                                                <p class="text-lg font-bold text-green-600 mt-1">{{ number_format($link->conversions ?? 0) }}</p>
+                                                <p class="text-lg font-bold text-green-600 mt-1">
+                                                    {{ number_format($link->conversions ?? 0) }}</p>
                                             </div>
                                             <div class="bg-purple-50 rounded p-3">
                                                 <p class="text-xs text-gray-600">{{ __('affiliate.commission') }}</p>
-                                                <p class="text-lg font-bold text-purple-600 mt-1">{{ currency($link->total_commission ?? 0) }}</p>
+                                                <p class="text-lg font-bold text-purple-600 mt-1">
+                                                    {{ currency($link->total_commission ?? 0) }}</p>
                                             </div>
                                         </div>
 
                                         <!-- Actions -->
                                         <div class="flex gap-2">
-                                            <button onclick="editLink('{{ $link->id }}')" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+                                            <button onclick="editLink('{{ $link->id }}')"
+                                                class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
                                                 ✏️ {{ __('affiliate.edit') }}
                                             </button>
-                                            <button onclick="editLandingPage('{{ $link->id }}')" class="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700">
+                                            <button onclick="editLandingPage('{{ $link->id }}')"
+                                                class="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700">
                                                 🌐 {{ __('affiliate.landing_page') }}
                                             </button>
-                                            <button onclick="managPromotionalMaterials('{{ $link->id }}')" class="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700">
+                                            <button onclick="managPromotionalMaterials('{{ $link->id }}')"
+                                                class="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700">
                                                 📦 {{ __('affiliate.materials') }}
                                             </button>
-                                            <form action="{{ route('affiliate.links.delete', $link) }}" method="POST" class="inline"
+                                            <form action="{{ route('affiliate.links.delete', $link) }}" method="POST"
+                                                class="inline"
                                                 onsubmit="return confirm('{{ __('affiliate.delete_confirm') }}');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700">
+                                                <button type="submit"
+                                                    class="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700">
                                                     🗑️ {{ __('affiliate.delete') }}
                                                 </button>
                                             </form>
@@ -170,8 +193,10 @@
                                         @if ($amount > 0 || $count > 0)
                                             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                                 <div>
-                                                    <p class="font-medium text-gray-900">{{ __('affiliate.tier') }} {{ $tier }}</p>
-                                                    <p class="text-sm text-gray-500">{{ $count }} {{ __('affiliate.conversions') }}</p>
+                                                    <p class="font-medium text-gray-900">{{ __('affiliate.tier') }}
+                                                        {{ $tier }}</p>
+                                                    <p class="text-sm text-gray-500">{{ $count }}
+                                                        {{ __('affiliate.conversions') }}</p>
                                                 </div>
                                                 <p class="text-lg font-bold text-gray-900">{{ currency($amount) }}</p>
                                             </div>
@@ -199,12 +224,15 @@
                                             $count = $statusData ? $statusData->count : 0;
                                         @endphp
                                         @if ($amount > 0 || $count > 0)
-                                            <div class="flex items-center justify-between p-3 bg-{{ $color }}-50 rounded-lg border border-{{ $color }}-200">
+                                            <div
+                                                class="flex items-center justify-between p-3 bg-{{ $color }}-50 rounded-lg border border-{{ $color }}-200">
                                                 <div>
                                                     <p class="font-medium text-gray-900">{{ ucfirst($status) }}</p>
-                                                    <p class="text-sm text-gray-500">{{ $count }} {{ __('affiliate.commissions') }}</p>
+                                                    <p class="text-sm text-gray-500">{{ $count }}
+                                                        {{ __('affiliate.commissions') }}</p>
                                                 </div>
-                                                <p class="text-lg font-bold text-{{ $color }}-600">{{ currency($amount) }}</p>
+                                                <p class="text-lg font-bold text-{{ $color }}-600">
+                                                    {{ currency($amount) }}</p>
                                             </div>
                                         @endif
                                     @endforeach
@@ -227,27 +255,37 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.user') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.type') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.amount') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.date') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            {{ __('affiliate.user') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            {{ __('affiliate.type') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            {{ __('affiliate.amount') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            {{ __('affiliate.date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @forelse($recentConversions as $conversion)
                                         <tr class="hover:bg-gray-50">
-                                            <td class="px-4 py-3 text-sm text-gray-900">{{ $conversion->converter->name ?? '-' }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-900">
+                                                {{ $conversion->converter->name ?? '-' }}</td>
                                             <td class="px-4 py-3 text-sm">
-                                                <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $conversion->conversion_type === 'purchase' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                                <span
+                                                    class="px-2 py-1 rounded-full text-xs font-semibold {{ $conversion->conversion_type === 'purchase' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
                                                     {{ ucfirst($conversion->conversion_type ?? 'signup') }}
                                                 </span>
                                             </td>
-                                            <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ currency($conversion->transaction_amount ?? 0) }}</td>
-                                            <td class="px-4 py-3 text-sm text-gray-500">{{ ($conversion->converted_at ?? $conversion->created_at)->format('M d, Y') }}</td>
+                                            <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                                {{ currency($conversion->transaction_amount ?? 0) }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">
+                                                {{ ($conversion->converted_at ?? $conversion->created_at)->format('M d, Y') }}
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">{{ __('affiliate.no_conversions') }}</td>
+                                            <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">
+                                                {{ __('affiliate.no_conversions') }}</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -264,27 +302,36 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.tier') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.rate') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.amount') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.status') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            {{ __('affiliate.tier') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            {{ __('affiliate.rate') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            {{ __('affiliate.amount') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            {{ __('affiliate.status') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @forelse($recentCommissions as $commission)
                                         <tr class="hover:bg-gray-50">
-                                            <td class="px-4 py-3 text-sm text-gray-900">{{ __('affiliate.tier') }} {{ $commission->tier }}</td>
-                                            <td class="px-4 py-3 text-sm text-gray-500">{{ $commission->commission_rate }}%</td>
-                                            <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ currency($commission->commission_amount) }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-900">{{ __('affiliate.tier') }}
+                                                {{ $commission->tier }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">
+                                                {{ $commission->commission_rate }}%</td>
+                                            <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                                {{ currency($commission->commission_amount) }}</td>
                                             <td class="px-4 py-3 text-sm">
-                                                <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $commission->status === 'paid' ? 'bg-green-100 text-green-800' : ($commission->status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                                <span
+                                                    class="px-2 py-1 rounded-full text-xs font-semibold {{ $commission->status === 'paid' ? 'bg-green-100 text-green-800' : ($commission->status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
                                                     {{ ucfirst($commission->status) }}
                                                 </span>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">{{ __('affiliate.no_commissions') }}</td>
+                                            <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">
+                                                {{ __('affiliate.no_commissions') }}</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -304,23 +351,34 @@
                                 @csrf
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.amount') }} <span class="text-red-500">*</span></label>
+                                        <label for="amount"
+                                            class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.amount') }}
+                                            <span class="text-red-500">*</span></label>
                                         <div class="relative">
-                                            <input type="number" name="amount" id="amount" step="0.01" min="0.01" max="{{ $stats['available_balance'] }}" value="{{ old('amount', $stats['available_balance']) }}" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-                                            <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.available') }}: {{ currency($stats['available_balance']) }}</p>
+                                            <input type="number" name="amount" id="amount" step="0.01"
+                                                min="0.01" max="{{ $stats['available_balance'] }}"
+                                                value="{{ old('amount', $stats['available_balance']) }}" required
+                                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                            <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.available') }}:
+                                                {{ currency($stats['available_balance']) }}</p>
                                         </div>
                                     </div>
                                     <div>
-                                        <label for="payout_method" class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.payout_method') }} <span class="text-red-500">*</span></label>
-                                        <select name="payout_method" id="payout_method" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                                        <label for="payout_method"
+                                            class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.payout_method') }}
+                                            <span class="text-red-500">*</span></label>
+                                        <select name="payout_method" id="payout_method" required
+                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
                                             <option value="wallet">{{ __('affiliate.payout_methods.wallet') }}</option>
-                                            <option value="bank_transfer">{{ __('affiliate.payout_methods.bank_transfer') }}</option>
+                                            <option value="bank_transfer">
+                                                {{ __('affiliate.payout_methods.bank_transfer') }}</option>
                                             <option value="paypal">{{ __('affiliate.payout_methods.paypal') }}</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="mt-6 flex items-center justify-end">
-                                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors font-medium">
+                                    <button type="submit"
+                                        class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors font-medium">
                                         {{ __('affiliate.submit_payout_request') }}
                                     </button>
                                 </div>
@@ -339,23 +397,31 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.amount') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.method') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.status') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('affiliate.date') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            {{ __('affiliate.amount') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            {{ __('affiliate.method') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            {{ __('affiliate.status') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            {{ __('affiliate.date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach ($recentPayouts as $payout)
                                         <tr class="hover:bg-gray-50">
-                                            <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ currency($payout->amount) }}</td>
-                                            <td class="px-4 py-3 text-sm text-gray-500">{{ __('affiliate.payout_methods.' . $payout->payout_method) }}</td>
+                                            <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                                {{ currency($payout->amount) }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">
+                                                {{ __('affiliate.payout_methods.' . $payout->payout_method) }}</td>
                                             <td class="px-4 py-3 text-sm">
-                                                <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $payout->status === 'completed' ? 'bg-green-100 text-green-800' : ($payout->status === 'processing' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                                <span
+                                                    class="px-2 py-1 rounded-full text-xs font-semibold {{ $payout->status === 'completed' ? 'bg-green-100 text-green-800' : ($payout->status === 'processing' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
                                                     {{ ucfirst($payout->status ?? 'pending') }}
                                                 </span>
                                             </td>
-                                            <td class="px-4 py-3 text-sm text-gray-500">{{ $payout->created_at->format('M d, Y H:i') }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">
+                                                {{ $payout->created_at->format('M d, Y H:i') }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -374,20 +440,27 @@
             <form action="{{ route('affiliate.links.store') }}" method="POST" class="space-y-4">
                 @csrf
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.link_name') }}</label>
-                    <input type="text" name="name" id="name" class="w-full rounded-lg border-gray-300 shadow-sm">
+                    <label for="name"
+                        class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.link_name') }}</label>
+                    <input type="text" name="name" id="name"
+                        class="w-full rounded-lg border-gray-300 shadow-sm">
                 </div>
                 <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.description') }}</label>
+                    <label for="description"
+                        class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.description') }}</label>
                     <textarea name="description" id="description" rows="3" class="w-full rounded-lg border-gray-300 shadow-sm"></textarea>
                 </div>
                 <div>
-                    <label for="destination_url" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.destination_url') }} ({{ __('affiliate.optional') }})</label>
-                    <input type="url" name="destination_url" id="destination_url" class="w-full rounded-lg border-gray-300 shadow-sm">
+                    <label for="destination_url"
+                        class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.destination_url') }}
+                        ({{ __('affiliate.optional') }})</label>
+                    <input type="url" name="destination_url" id="destination_url"
+                        class="w-full rounded-lg border-gray-300 shadow-sm">
                     <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.destination_url_hint') }}</p>
                 </div>
                 <div class="flex items-center justify-end gap-3 mt-6">
-                    <button type="button" onclick="document.getElementById('create-link-modal').classList.add('hidden')" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
+                    <button type="button" onclick="document.getElementById('create-link-modal').classList.add('hidden')"
+                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
                         {{ __('affiliate.cancel') }}
                     </button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
@@ -406,16 +479,23 @@
                 @csrf
                 @method('PUT')
                 <div>
-                    <label for="edit-name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.link_name') }}</label>
-                    <input type="text" name="name" id="edit-name" class="w-full rounded-lg border-gray-300 shadow-sm">
+                    <label for="edit-name"
+                        class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.link_name') }}</label>
+                    <input type="text" name="name" id="edit-name"
+                        class="w-full rounded-lg border-gray-300 shadow-sm">
                 </div>
                 <div>
-                    <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.description') }}</label>
-                    <textarea name="description" id="edit-description" rows="3" class="w-full rounded-lg border-gray-300 shadow-sm"></textarea>
+                    <label for="edit-description"
+                        class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.description') }}</label>
+                    <textarea name="description" id="edit-description" rows="3"
+                        class="w-full rounded-lg border-gray-300 shadow-sm"></textarea>
                 </div>
                 <div>
-                    <label for="edit-destination_url" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.destination_url') }} ({{ __('affiliate.optional') }})</label>
-                    <input type="url" name="destination_url" id="edit-destination_url" class="w-full rounded-lg border-gray-300 shadow-sm">
+                    <label for="edit-destination_url"
+                        class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.destination_url') }}
+                        ({{ __('affiliate.optional') }})</label>
+                    <input type="url" name="destination_url" id="edit-destination_url"
+                        class="w-full rounded-lg border-gray-300 shadow-sm">
                     <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.destination_url_hint') }}</p>
                 </div>
                 <div>
@@ -425,7 +505,8 @@
                     </label>
                 </div>
                 <div class="flex items-center justify-end gap-3 mt-6">
-                    <button type="button" onclick="document.getElementById('edit-link-modal').classList.add('hidden')" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
+                    <button type="button" onclick="document.getElementById('edit-link-modal').classList.add('hidden')"
+                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
                         {{ __('affiliate.cancel') }}
                     </button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
@@ -437,7 +518,8 @@
     </div>
 
     <!-- Landing Page Builder Modal -->
-    <div id="landing-page-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div id="landing-page-modal"
+        class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
             <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('affiliate.edit_landing_page') }}</h3>
             <form id="landing-page-form" method="POST" class="space-y-6">
@@ -467,7 +549,8 @@
                 </div>
 
                 <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
-                    <button type="button" onclick="document.getElementById('landing-page-modal').classList.add('hidden')" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
+                    <button type="button" onclick="document.getElementById('landing-page-modal').classList.add('hidden')"
+                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
                         {{ __('affiliate.cancel') }}
                     </button>
                     <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
@@ -479,25 +562,35 @@
     </div>
 
     <!-- Promotional Materials Modal -->
-    <div id="promotional-materials-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+    <div id="promotional-materials-modal"
+        class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div
+            class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
             <h3 class="text-lg font-medium text-gray-900 mb-6">{{ __('affiliate.promotional_materials') }}</h3>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                    <h4 class="text-sm font-semibold text-gray-700 mb-4">{{ __('affiliate.create_promotional_material') }}</h4>
+                    <h4 class="text-sm font-semibold text-gray-700 mb-4">
+                        {{ __('affiliate.create_promotional_material') }}</h4>
                     <form id="promo-materials-form" method="POST" enctype="multipart/form-data" class="space-y-4">
                         @csrf
                         <input type="hidden" id="promo-link-id" name="link_id" value="">
 
                         <div>
-                            <label for="promo-material-name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.material_name') }} *</label>
-                            <input type="text" id="promo-material-name" name="name" required class="w-full rounded-lg border-gray-300 shadow-sm">
+                            <label for="promo-material-name"
+                                class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.material_name') }}
+                                *</label>
+                            <input type="text" id="promo-material-name" name="name" required
+                                class="w-full rounded-lg border-gray-300 shadow-sm">
                         </div>
 
                         <div>
-                            <label for="promo-material-type" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.material_type') }} *</label>
-                            <select id="promo-material-type" name="type" required onchange="updatePromoMaterialFields()" class="w-full rounded-lg border-gray-300 shadow-sm">
+                            <label for="promo-material-type"
+                                class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.material_type') }}
+                                *</label>
+                            <select id="promo-material-type" name="type" required
+                                onchange="updatePromoMaterialFields()"
+                                class="w-full rounded-lg border-gray-300 shadow-sm">
                                 <option value="">Select Type</option>
                                 <option value="banner">{{ __('affiliate.banner_image') }}</option>
                                 <option value="link">{{ __('affiliate.link_code') }}</option>
@@ -506,8 +599,10 @@
                         </div>
 
                         <div id="promo-size-field" class="hidden">
-                            <label for="promo-material-size" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.material_size') }}</label>
-                            <select id="promo-material-size" name="size" class="w-full rounded-lg border-gray-300 shadow-sm">
+                            <label for="promo-material-size"
+                                class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.material_size') }}</label>
+                            <select id="promo-material-size" name="size"
+                                class="w-full rounded-lg border-gray-300 shadow-sm">
                                 <option value="">Select Size</option>
                                 <option value="728x90">Leaderboard (728x90)</option>
                                 <option value="300x250">Medium Rectangle (300x250)</option>
@@ -517,17 +612,22 @@
                         </div>
 
                         <div id="promo-image-field" class="hidden">
-                            <label for="promo-material-image" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.banner_image') }}</label>
-                            <input type="file" id="promo-material-image" name="image" accept="image/*" class="w-full">
+                            <label for="promo-material-image"
+                                class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.banner_image') }}</label>
+                            <input type="file" id="promo-material-image" name="image" accept="image/*"
+                                class="w-full">
                             <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.max_2mb') }}</p>
                         </div>
 
                         <div id="promo-code-field" class="hidden">
-                            <label for="promo-material-code" class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.html_code') }}</label>
-                            <textarea id="promo-material-code" name="html_code" rows="4" placeholder="<a href='...'>Click here</a>" class="w-full rounded-lg border-gray-300 shadow-sm font-mono text-sm"></textarea>
+                            <label for="promo-material-code"
+                                class="block text-sm font-medium text-gray-700 mb-1">{{ __('affiliate.html_code') }}</label>
+                            <textarea id="promo-material-code" name="html_code" rows="4" placeholder="<a href='...'>Click here</a>"
+                                class="w-full rounded-lg border-gray-300 shadow-sm font-mono text-sm"></textarea>
                         </div>
 
-                        <button type="submit" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{{ __('affiliate.create') }}</button>
+                        <button type="submit"
+                            class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{{ __('affiliate.create') }}</button>
                     </form>
                 </div>
 
@@ -540,7 +640,9 @@
             </div>
 
             <div class="flex items-center justify-end gap-4 mt-6 pt-6 border-t border-gray-200">
-                <button type="button" onclick="document.getElementById('promotional-materials-modal').classList.add('hidden')" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
+                <button type="button"
+                    onclick="document.getElementById('promotional-materials-modal').classList.add('hidden')"
+                    class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
                     {{ __('affiliate.close') }}
                 </button>
             </div>
@@ -552,7 +654,14 @@
             function copyLink(url) {
                 navigator.clipboard.writeText(url).then(() => {
                     if (typeof Swal !== 'undefined') {
-                        Swal.fire({icon: 'success', title: '{{ __('affiliate.link_copied') }}', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000});
+                        Swal.fire({
+                            icon: 'success',
+                            title: '{{ __('affiliate.link_copied') }}',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
                     } else {
                         alert('{{ __('affiliate.link_copied') }}');
                     }
@@ -567,7 +676,10 @@
                     document.getElementById('edit-is_active').checked = data.is_active;
                     document.getElementById('edit-link-form').action = `/affiliate/links/${linkId}`;
                     document.getElementById('edit-link-modal').classList.remove('hidden');
-                }).catch(e => {console.error(e); alert('Error loading link');});
+                }).catch(e => {
+                    console.error(e);
+                    alert('Error loading link');
+                });
             }
 
             function editLandingPage(linkId) {
@@ -578,7 +690,10 @@
                     document.getElementById('landing-page-preview').innerHTML = data.landing_page_content || '';
                     document.getElementById('landing-page-form').action = `/affiliate/links/${linkId}/landing`;
                     document.getElementById('landing-page-modal').classList.remove('hidden');
-                }).catch(e => {console.error(e); alert('Error loading link');});
+                }).catch(e => {
+                    console.error(e);
+                    alert('Error loading link');
+                });
             }
 
             function updateLandingPagePreview() {
@@ -615,8 +730,16 @@
 
             function deletePromoMaterial(materialId) {
                 if (!confirm('Are you sure?')) return;
-                fetch(`/affiliate/promotional-materials/${materialId}`, {method: 'DELETE', headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Content-Type': 'application/json'}})
-                    .then(r => {if (r.ok) location.reload();}).catch(e => console.error(e));
+                fetch(`/affiliate/promotional-materials/${materialId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(r => {
+                        if (r.ok) location.reload();
+                    }).catch(e => console.error(e));
             }
 
             function updatePromoMaterialFields() {

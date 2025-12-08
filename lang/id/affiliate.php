@@ -110,19 +110,6 @@ return [
     'payout_details' => 'Detail Payout',
     'no_payouts' => 'Belum ada payout',
 
-    // Landing Pages
-    'landing_page' => 'Landing Page',
-    'landing_page_content' => 'Konten Landing Page',
-    'landing_page_slug' => 'Slug Landing Page',
-    'landing_page_url' => 'URL Landing Page',
-    'create_landing_page' => 'Buat Landing Page',
-    'edit_landing_page' => 'Edit Landing Page',
-    'landing_page_updated' => 'Landing page berhasil diperbarui',
-    'affiliate_landing_page' => 'Halaman Afiliasi',
-    'visit_marketplace' => 'Kunjungi Marketplace',
-    'welcome' => 'Selamat Datang',
-    'landing_page_default_message' => 'Terima kasih telah mengunjungi halaman afiliasi kami. Klik tombol di bawah untuk melanjutkan ke marketplace.',
-
     // Promotional Materials
     'promotional_materials' => 'Materi Promosi',
     'create_promotional_material' => 'Buat Materi Promosi',
@@ -130,13 +117,10 @@ return [
     'promotional_material_created' => 'Materi promosi berhasil dibuat',
     'promotional_material_updated' => 'Materi promosi berhasil diperbarui',
     'promotional_material_deleted' => 'Materi promosi berhasil dihapus',
-    'material_name' => 'Nama Materi',
-    'material_type' => 'Tipe',
-    'material_size' => 'Ukuran',
-    'html_code' => 'Kode HTML',
     'banner_image' => 'Gambar Banner',
     'download_html' => 'Unduh HTML',
     'copy_html' => 'Salin HTML',
+    'visit_marketplace' => 'Kunjungi Marketplace',
 
     // Leaderboard
     'leaderboard_title' => 'Papan Peringkat Afiliasi',
@@ -224,12 +208,5 @@ return [
     'existing_materials' => 'Material Existing',
     'no_materials' => 'Belum ada material promosi',
     'html_code_copied' => 'Kode HTML berhasil disalin ke clipboard',
-    'create_promotional_material' => 'Buat Material Baru',
-    'edit_promotional_material' => 'Edit Material',
-    'promotional_material_created' => 'Material promosi berhasil dibuat',
-    'promotional_material_updated' => 'Material promosi berhasil diperbarui',
-    'promotional_material_deleted' => 'Material promosi berhasil dihapus',
-    'banner_image' => 'Gambar Banner',
-    'download_html' => 'Unduh HTML',
-    'copy_html' => 'Salin HTML',
 ];
+

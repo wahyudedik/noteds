@@ -172,11 +172,13 @@ return [
     'cancel' => 'إلغاء',
     'update' => 'تحديث',
     'error_loading_link' => 'خطأ في تحميل تفاصيل رابط المنتسب',
+    'visit_marketplace' => 'زيارة السوق',
     'create' => 'إنشاء',
     'save' => 'حفظ',
     'close' => 'إغلاق',
     'slug_hint' => 'الشرطة المائلة التي ستظهر في الرابط (مثال: noteds.com/a/my-slug)',
     'landing_page_content' => 'محتوى صفحة الهبوط',
+    'landing_page_slug' => 'شرطة صفحة الهبوط',
     'landing_page_html_hint' => 'أدخل محتوى HTML لصفحة الهبوط المخصصة الخاصة بك',
     'html_content_allowed' => 'محتوى HTML مسموح به',
     'landing_page_info' => 'معلومات صفحة الهبوط',
@@ -202,4 +204,7 @@ return [
     'banner_image' => 'صورة البانر',
     'download_html' => 'تحميل HTML',
     'copy_html' => 'نسخ HTML',
+    'affiliate_landing_page' => 'صفحة الهبوط للمنتسب',
+    'affiliate_name' => 'اسم المنتسب',
 ];
+
