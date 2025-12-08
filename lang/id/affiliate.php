@@ -183,6 +183,7 @@ return [
 
     // Edit & Landing Page
     'edit_link' => 'Edit Link',
+    'edit_landing_page' => 'Edit Landing Page',
     'cancel' => 'Batal',
     'update' => 'Perbarui',
     'error_loading_link' => 'Kesalahan memuat detail link afiliasi',
@@ -209,4 +210,3 @@ return [
     'no_materials' => 'Belum ada material promosi',
     'html_code_copied' => 'Kode HTML berhasil disalin ke clipboard',
 ];
-

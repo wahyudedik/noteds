@@ -142,7 +142,7 @@
                                             </button>
                                             <button onclick="editLandingPage('{{ $link->id }}')"
                                                 class="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700">
-                                                🌐 {{ __('affiliate.landing_page') }}
+                                                🌐 {{ __('affiliate.edit_landing_page') }}
                                             </button>
                                             <button onclick="managPromotionalMaterials('{{ $link->id }}')"
                                                 class="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700">
@@ -528,21 +528,29 @@
                 <input type="hidden" id="landing-link-id">
 
                 <div>
-                    <label for="landing-page-slug" class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.landing_page_slug') }}</label>
+                    <label for="landing-page-slug"
+                        class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.landing_page_slug') }}</label>
                     <div class="flex items-center gap-2">
                         <span class="text-sm text-gray-600">{{ url('/a') }}/</span>
-                        <input type="text" id="landing-page-slug" name="landing_page_slug" placeholder="my-affiliate-link" class="flex-1 rounded-lg border-gray-300 shadow-sm">
+                        <input type="text" id="landing-page-slug" name="landing_page_slug"
+                            placeholder="my-affiliate-link" class="flex-1 rounded-lg border-gray-300 shadow-sm">
                     </div>
                     <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.slug_hint') }}</p>
                 </div>
 
                 <div>
-                    <label for="landing-page-content" class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.landing_page_content') }}</label>
+                    <label for="landing-page-content"
+                        class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.landing_page_content') }}</label>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <textarea id="landing-page-content" name="landing_page_content" rows="10" onchange="updateLandingPagePreview()" oninput="updateLandingPagePreview()" placeholder="{{ __('affiliate.landing_page_html_hint') }}" class="w-full rounded-lg border-gray-300 shadow-sm font-mono text-sm"></textarea>
+                        <textarea id="landing-page-content" name="landing_page_content" rows="10" onchange="updateLandingPagePreview()"
+                            oninput="updateLandingPagePreview()" placeholder="{{ __('affiliate.landing_page_html_hint') }}"
+                            class="w-full rounded-lg border-gray-300 shadow-sm font-mono text-sm"></textarea>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.preview') }}</label>
-                            <div id="landing-page-preview" class="border border-gray-300 rounded-lg p-4 bg-gray-50 overflow-auto h-64 prose prose-sm"></div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.preview') }}</label>
+                            <div id="landing-page-preview"
+                                class="border border-gray-300 rounded-lg p-4 bg-gray-50 overflow-auto h-64 prose prose-sm">
+                            </div>
                         </div>
                     </div>
                     <p class="mt-2 text-xs text-gray-500">{{ __('affiliate.html_content_allowed') }}</p>
@@ -652,20 +660,45 @@
     @push('scripts')
         <script>
             function copyLink(url) {
-                navigator.clipboard.writeText(url).then(() => {
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '{{ __('affiliate.link_copied') }}',
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 3000
-                        });
-                    } else {
-                        alert('{{ __('affiliate.link_copied') }}');
-                    }
-                });
+                // Use modern Clipboard API if available, fallback to older method
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(url).then(() => {
+                        showCopySuccess();
+                    }).catch(() => {
+                        fallbackCopyToClipboard(url);
+                    });
+                } else {
+                    fallbackCopyToClipboard(url);
+                }
+            }
+
+            function fallbackCopyToClipboard(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showCopySuccess();
+                } catch (err) {
+                    alert('Failed to copy');
+                }
+                document.body.removeChild(textarea);
+            }
+
+            function showCopySuccess() {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '{{ __('affiliate.link_copied') }}',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                } else {
+                    alert('{{ __('affiliate.link_copied') }}');
+                }
             }
 
             function editLink(linkId) {

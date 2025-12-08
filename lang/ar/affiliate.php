@@ -169,6 +169,7 @@ return [
 
     // Edit & Landing Page
     'edit_link' => 'تعديل الرابط',
+    'edit_landing_page' => 'تعديل صفحة الهبوط',
     'cancel' => 'إلغاء',
     'update' => 'تحديث',
     'error_loading_link' => 'خطأ في تحميل تفاصيل رابط المنتسب',
@@ -207,4 +208,3 @@ return [
     'affiliate_landing_page' => 'صفحة الهبوط للمنتسب',
     'affiliate_name' => 'اسم المنتسب',
 ];
-
