@@ -73,6 +73,52 @@
                     </div>
                 </div>
 
+                <!-- Quick Navigation -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <a href="{{ route('affiliate.leaderboard') }}" class="bg-white rounded-lg shadow border border-gray-200 p-6 hover:shadow-lg transition-shadow hover:border-blue-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-600">{{ __('affiliate.leaderboard_title') }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ __('affiliate.leaderboard_description') }}</p>
+                            </div>
+                            <span class="text-2xl">🏆</span>
+                        </div>
+                    </a>
+                    <a href="#" onclick="showComingSoon()" class="bg-white rounded-lg shadow border border-gray-200 p-6 hover:shadow-lg transition-shadow hover:border-gray-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-600">{{ __('affiliate.settings_title') }}</p>
+                                <p class="text-xs text-gray-500 mt-1">Manage preferences</p>
+                            </div>
+                            <span class="text-2xl">⚙️</span>
+                        </div>
+                    </a>
+                    <div class="bg-white rounded-lg shadow border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-600">{{ __('affiliate.conversion_rate') }}</p>
+                                <p class="text-xl font-bold text-indigo-600 mt-1">
+                                    @if (isset($stats['total_clicks']) && $stats['total_clicks'] > 0)
+                                        {{ number_format(($stats['total_conversions'] ?? 0) / ($stats['total_clicks'] ?? 1) * 100, 2) }}%
+                                    @else
+                                        --
+                                    @endif
+                                </p>
+                            </div>
+                            <span class="text-2xl">📊</span>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-600">{{ __('affiliate.pending_commissions') }}</p>
+                                <p class="text-xl font-bold text-yellow-600 mt-1">{{ currency($stats['pending_commissions'] ?? 0) }}</p>
+                            </div>
+                            <span class="text-2xl">⏳</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Affiliate Links Section -->
                 <div class="mb-8">
                     <div class="flex items-center justify-between mb-4">
@@ -659,6 +705,22 @@
 
     @push('scripts')
         <script>
+            function showComingSoon() {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Coming Soon',
+                        text: 'This feature will be available soon',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                } else {
+                    alert('Coming Soon');
+                }
+            }
+
             function copyLink(url) {
                 // Use modern Clipboard API if available, fallback to older method
                 if (navigator.clipboard && navigator.clipboard.writeText) {
