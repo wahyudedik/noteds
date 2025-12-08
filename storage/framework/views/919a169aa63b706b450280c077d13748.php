@@ -1,2 +1,0 @@
-<img src="<?php echo e(asset('logo.png')); ?>" alt="Application Logo" <?php echo e($attributes); ?> />
-<?php /**PATH D:\PROJECT\LARAVEL\noteds\resources\views/components/application-logo.blade.php ENDPATH**/ ?>

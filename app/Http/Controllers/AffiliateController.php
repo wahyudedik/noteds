@@ -303,6 +303,20 @@ class AffiliateController extends Controller
     }
 
     /**
+     * Get promotional materials for an affiliate link.
+     */
+    public function getPromotionalMaterials(AffiliateLink $affiliateLink)
+    {
+        $this->authorize('view', $affiliateLink);
+
+        return response()->json(
+            $affiliateLink->promotionalMaterials()
+                ->where('is_active', true)
+                ->get(['id', 'name', 'type', 'size', 'is_active', 'image_path', 'html_code'])
+        );
+    }
+
+    /**
      * Get affiliate link details for API.
      */
     public function getLinkDetails(AffiliateLink $affiliateLink)

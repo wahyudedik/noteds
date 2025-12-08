@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class ReferralService
 {
-    public function __construct(private NotificationService $notificationService)
-    {
-    }
+    public function __construct(private NotificationService $notificationService) {}
 
     /**
      * Get signup reward amount (dynamic from settings).
@@ -65,7 +63,7 @@ class ReferralService
 
             // Add reward to referrer's wallet immediately
             $referrer->increment('wallet_balance', $signupReward);
-            
+
             // Sync Wallet model with user wallet_balance
             $referrerWallet = \App\Models\Wallet::firstOrCreate(
                 ['user_id' => $referrer->id],
@@ -76,7 +74,7 @@ class ReferralService
             }
             $referrerWallet->balance = $referrer->wallet_balance;
             $referrerWallet->save();
-            
+
             // Update referral status to paid
             $referral->update(['status' => 'paid']);
 
@@ -146,7 +144,7 @@ class ReferralService
 
             // Add reward to referrer's wallet immediately
             $referrer->increment('wallet_balance', $rewardAmount);
-            
+
             // Sync Wallet model with user wallet_balance
             $baseCurrency = config('app.currency', 'USD');
             $referrerWallet = \App\Models\Wallet::firstOrCreate(
@@ -158,7 +156,7 @@ class ReferralService
             }
             $referrerWallet->balance = $referrer->wallet_balance;
             $referrerWallet->save();
-            
+
             // Update referral status to paid
             $referral->update(['status' => 'paid']);
 
