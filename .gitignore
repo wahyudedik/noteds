@@ -18,7 +18,11 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/logs
+/storage/framework
 /vendor
 Homestead.json
 Homestead.yaml
 Thumbs.db
+truncate()
+'D:\PROJECT\LARAVEL\noteds\storage\logs'
