@@ -475,7 +475,7 @@ class DashboardController extends Controller
 
         // Top Affiliates (by commission earned)
         $topAffiliates = User::with(['affiliateLinks' => function ($query) {
-            $query->select('affiliate_id', DB::raw('COUNT(*) as link_count'));
+            $query->select('affiliate_id', DB::raw('COUNT(*) as link_count'))->groupBy('affiliate_id');
         }])
             ->has('affiliateLinks')
             ->get()
