@@ -700,14 +700,290 @@
             }
 
             function editLandingPage(linkId) {
-                // TODO: Implement landing page editor modal
-                alert('Landing page editor coming soon');
+                fetch(`/api/affiliate-links/${linkId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Load landing page data
+                        document.getElementById('landing-link-id').value = linkId;
+                        document.getElementById('landing-page-slug').value = data.landing_page_slug || '';
+                        document.getElementById('landing-page-content').value = data.landing_page_content || '';
+                        document.getElementById('landing-page-preview').innerHTML = data.landing_page_content || '';
+                        
+                        const form = document.getElementById('landing-page-form');
+                        form.action = `{{ route('affiliate.links.landing.update', '') }}/${linkId}`;
+                        
+                        document.getElementById('landing-page-modal').classList.remove('hidden');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('{{ __('affiliate.error_loading_link') }}');
+                    });
             }
 
-            function managePromotionalMaterials(linkId) {
-                // TODO: Implement promotional materials modal
-                alert('Promotional materials manager coming soon');
+            function updateLandingPagePreview() {
+                const content = document.getElementById('landing-page-content').value;
+                document.getElementById('landing-page-preview').innerHTML = content || '<p class="text-gray-400">{{ __('messages.preview') }}</p>';
+            }
+
+            function managPromotionalMaterials(linkId) {
+                // Load promotional materials for this link
+                document.getElementById('promo-link-id').value = linkId;
+                document.getElementById('promo-materials-form').action = `{{ route('affiliate.promotional-materials.store', '') }}/${linkId}`;
+                
+                // Load existing materials
+                fetch(`/affiliate/links/${linkId}/promotional-materials`)
+                    .then(response => response.json())
+                    .then(materials => {
+                        const container = document.getElementById('existing-materials-list');
+                        if (materials.length > 0) {
+                            container.innerHTML = materials.map(material => `
+                                <div class="border border-gray-200 rounded-lg p-4 flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-medium text-gray-900">${material.name}</h4>
+                                        <p class="text-sm text-gray-600 mt-1">${material.type.charAt(0).toUpperCase() + material.type.slice(1)}</p>
+                                        ${material.size ? `<p class="text-xs text-gray-500 mt-1">${material.size}</p>` : ''}
+                                        <div class="flex gap-2 mt-3">
+                                            <button onclick="editPromoMaterial(${material.id})" class="text-blue-600 text-sm hover:underline">Edit</button>
+                                            <button onclick="deletePromoMaterial(${material.id})" class="text-red-600 text-sm hover:underline">Delete</button>
+                                            ${material.type === 'banner' && material.image_path ? `<a href="/storage/${material.image_path}" target="_blank" class="text-green-600 text-sm hover:underline">View Image</a>` : ''}
+                                            ${material.html_code ? `<button onclick="copyPromoCode('${material.html_code}')" class="text-purple-600 text-sm hover:underline">Copy Code</button>` : ''}
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-1 rounded text-xs font-medium ${material.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                        ${material.is_active ? '{{ __('affiliate.active') }}' : '{{ __('affiliate.inactive') }}'}
+                                    </span>
+                                </div>
+                            `).join('');
+                        } else {
+                            container.innerHTML = '<p class="text-gray-500 text-center py-8">{{ __('affiliate.no_materials') }}</p>';
+                        }
+                    })
+                    .catch(error => console.error('Error loading materials:', error));
+                
+                document.getElementById('promotional-materials-modal').classList.remove('hidden');
+            }
+
+            function copyPromoCode(code) {
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('{{ __('affiliate.html_code_copied') }}');
+                }).catch(err => console.error('Copy failed:', err));
+            }
+
+            function deletePromoMaterial(materialId) {
+                if (!confirm('{{ __('affiliate.delete_confirm') }}')) return;
+                
+                fetch(`{{ route('affiliate.promotional-materials.delete', '') }}/${materialId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Reload materials list
+                        managPromotionalMaterials(document.getElementById('promo-link-id').value);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
             }
         </script>
     @endpush
+
+    <!-- Landing Page Builder Modal -->
+    <div id="landing-page-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('affiliate.edit_landing_page') }}</h3>
+                
+                <form id="landing-page-form" method="POST" class="space-y-6">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" id="landing-link-id">
+
+                    <!-- Landing Page Slug -->
+                    <div>
+                        <label for="landing-page-slug" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ __('affiliate.landing_page_slug') }}
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-600">{{ url('/a') }}/</span>
+                            <input type="text" id="landing-page-slug" name="landing_page_slug"
+                                placeholder="my-affiliate-link"
+                                class="flex-1 rounded-lg border-gray-300 shadow-sm">
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.slug_hint') }}</p>
+                    </div>
+
+                    <!-- Landing Page Content Editor -->
+                    <div>
+                        <label for="landing-page-content" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ __('affiliate.landing_page_content') }}
+                        </label>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <!-- Content Editor -->
+                            <div>
+                                <textarea id="landing-page-content" name="landing_page_content"
+                                    rows="10" onchange="updateLandingPagePreview()" oninput="updateLandingPagePreview()"
+                                    placeholder="{{ __('affiliate.landing_page_html_hint') }}"
+                                    class="w-full rounded-lg border-gray-300 shadow-sm font-mono text-sm"></textarea>
+                            </div>
+                            
+                            <!-- Preview -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ __('messages.preview') }}
+                                </label>
+                                <div id="landing-page-preview" class="border border-gray-300 rounded-lg p-4 bg-gray-50 overflow-auto h-64 prose prose-sm"></div>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-xs text-gray-500">{{ __('affiliate.html_content_allowed') }}</p>
+                    </div>
+
+                    <!-- Info Box -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex">
+                            <svg class="h-5 w-5 text-blue-400 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div class="text-sm text-blue-800">
+                                <p class="font-medium">{{ __('affiliate.landing_page_info') }}</p>
+                                <ul class="mt-2 list-disc list-inside text-xs space-y-1">
+                                    <li>{{ __('affiliate.landing_page_info_1') }}</li>
+                                    <li>{{ __('affiliate.landing_page_info_2') }}</li>
+                                    <li>{{ __('affiliate.landing_page_info_3') }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
+                        <button type="button" onclick="document.getElementById('landing-page-modal').classList.add('hidden')"
+                            class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
+                            {{ __('affiliate.cancel') }}
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                            {{ __('affiliate.save') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promotional Materials Manager Modal -->
+    <div id="promotional-materials-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-6">{{ __('affiliate.promotional_materials') }}</h3>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Create New Material -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-4">{{ __('affiliate.create_promotional_material') }}</h4>
+                        <form id="promo-materials-form" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            @csrf
+
+                            <div>
+                                <label for="promo-material-name" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ __('affiliate.material_name') }} *
+                                </label>
+                                <input type="text" id="promo-material-name" name="name" required
+                                    class="w-full rounded-lg border-gray-300 shadow-sm">
+                            </div>
+
+                            <div>
+                                <label for="promo-material-type" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ __('affiliate.material_type') }} *
+                                </label>
+                                <select id="promo-material-type" name="type" required onchange="updatePromoMaterialFields()"
+                                    class="w-full rounded-lg border-gray-300 shadow-sm">
+                                    <option value="">Select Type</option>
+                                    <option value="banner">{{ __('affiliate.banner_image') }}</option>
+                                    <option value="link">{{ __('affiliate.link_code') }}</option>
+                                    <option value="text">{{ __('affiliate.text_ad') }}</option>
+                                </select>
+                            </div>
+
+                            <div id="promo-size-field" class="hidden">
+                                <label for="promo-material-size" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ __('affiliate.material_size') }}
+                                </label>
+                                <select id="promo-material-size" name="size"
+                                    class="w-full rounded-lg border-gray-300 shadow-sm">
+                                    <option value="">Select Size</option>
+                                    <option value="728x90">Leaderboard (728x90)</option>
+                                    <option value="300x250">Medium Rectangle (300x250)</option>
+                                    <option value="468x60">Banner (468x60)</option>
+                                    <option value="custom">{{ __('affiliate.custom_size') }}</option>
+                                </select>
+                            </div>
+
+                            <div id="promo-image-field" class="hidden">
+                                <label for="promo-material-image" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ __('affiliate.banner_image') }}
+                                </label>
+                                <input type="file" id="promo-material-image" name="image" accept="image/*"
+                                    class="w-full">
+                                <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.max_2mb') }}</p>
+                            </div>
+
+                            <div id="promo-code-field" class="hidden">
+                                <label for="promo-material-code" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ __('affiliate.html_code') }}
+                                </label>
+                                <textarea id="promo-material-code" name="html_code" rows="4"
+                                    placeholder="<a href='...'>Click here</a>"
+                                    class="w-full rounded-lg border-gray-300 shadow-sm font-mono text-sm"></textarea>
+                            </div>
+
+                            <div>
+                                <label for="promo-material-description" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ __('affiliate.description') }}
+                                </label>
+                                <textarea id="promo-material-description" name="description" rows="2"
+                                    class="w-full rounded-lg border-gray-300 shadow-sm"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                                {{ __('affiliate.create') }}
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Existing Materials -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-4">{{ __('affiliate.existing_materials') }}</h4>
+                        <div id="existing-materials-list" class="space-y-3 max-h-96 overflow-y-auto">
+                            <p class="text-gray-500 text-center py-8">{{ __('affiliate.no_materials') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Close Button -->
+                <div class="flex items-center justify-end gap-4 mt-6 pt-6 border-t border-gray-200">
+                    <button type="button" onclick="document.getElementById('promotional-materials-modal').classList.add('hidden')"
+                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
+                        {{ __('affiliate.close') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updatePromoMaterialFields() {
+            const type = document.getElementById('promo-material-type').value;
+            document.getElementById('promo-size-field').classList.toggle('hidden', type !== 'banner');
+            document.getElementById('promo-image-field').classList.toggle('hidden', type !== 'banner');
+            document.getElementById('promo-code-field').classList.toggle('hidden', type !== 'link' && type !== 'text');
+        }
+
+        // Fix function name typo
+        function managePromotionalMaterials(linkId) {
+            managPromotionalMaterials(linkId);
+        }
+    </script>
+
 @endsection

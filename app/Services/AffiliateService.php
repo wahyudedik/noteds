@@ -31,7 +31,7 @@ class AffiliateService
         // Get affiliate's performance stats
         $conversions = $affiliate->affiliateConversions()->count();
         $revenue = $affiliate->affiliateConversions()->sum('transaction_amount');
-        
+
         // Find the best matching commission tier
         $commissionTier = AffiliateCommissionTier::active()
             ->ordered()
@@ -110,7 +110,7 @@ class AffiliateService
 
         // Store affiliate code in cookie for 30 days
         Cookie::queue('affiliate_code', $code, 60 * 24 * 30);
-        
+
         // Also store in session as backup
         session(['affiliate_code' => $code]);
 
@@ -130,7 +130,7 @@ class AffiliateService
     ): ?AffiliateConversion {
         // Get affiliate code from cookie or session
         $affiliateCode = request()->cookie('affiliate_code') ?? session('affiliate_code');
-        
+
         // Also check if converter was referred (for multi-tier)
         if (!$affiliateCode && $converter->referred_by) {
             // Find affiliate link from referrer
@@ -217,8 +217,8 @@ class AffiliateService
             return;
         }
 
-        $transactionAmount = $source instanceof Transaction 
-            ? $source->amount 
+        $transactionAmount = $source instanceof Transaction
+            ? $source->amount
             : ($source instanceof PurchasedNote ? $source->purchase_price : 0);
 
         if ($transactionAmount <= 0) {
@@ -273,7 +273,7 @@ class AffiliateService
         // For tier 3, we need the one who referred tier 2 affiliate
         $current = $affiliate;
         $steps = $targetTier - 1; // Steps to go up the referral chain
-        
+
         for ($i = 0; $i < $steps; $i++) {
             if (!$current->referred_by) {
                 return null;
@@ -395,4 +395,3 @@ class AffiliateService
         }
     }
 }
-
