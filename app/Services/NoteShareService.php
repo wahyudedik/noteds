@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\ShareReferralCreated;
+use App\Mail\ShareReferralCreatedMail;
 use App\Models\Note;
 use App\Models\NoteShareReferral;
 use App\Models\NoteSharePurchase;
@@ -11,6 +13,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class NoteShareService
 {
@@ -211,6 +214,27 @@ class NoteShareService
                 $commissionAmount,
                 $commissionPercent
             );
+
+            // Send email notification
+            if ($shareReferral->sharer->email) {
+                try {
+                    Mail::to($shareReferral->sharer->email)->queue(
+                        new ShareReferralCreatedMail(
+                            $shareReferral->sharer,
+                            $shareReferral,
+                            $commissionAmount
+                        )
+                    );
+                } catch (\Exception $e) {
+                    logger()->error('Failed to send share referral email', [
+                        'share_referral_id' => $shareReferral->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
+            // Dispatch event for broadcast notification
+            event(new ShareReferralCreated($shareReferral));
 
             return $sharePurchase;
         } catch (\Exception $e) {

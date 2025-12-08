@@ -2,6 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Events\ShareCommissionPaid;
+use App\Mail\ShareCommissionPaidMail;
 use App\Models\NoteShareCommission;
 use App\Models\Setting;
 use App\Models\Wallet;
@@ -12,6 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class ProcessMonthlyShareCommissionJob implements ShouldQueue
 {
@@ -50,6 +53,7 @@ class ProcessMonthlyShareCommissionJob implements ShouldQueue
 
             foreach ($commissionsBySeller as $sellerId => $sellerCommissions) {
                 $totalAmount = $sellerCommissions->sum('commission_amount');
+                $shareCount = $sellerCommissions->sum('share_count');
                 $seller = User::find($sellerId);
 
                 if (!$seller) {
@@ -82,6 +86,33 @@ class ProcessMonthlyShareCommissionJob implements ShouldQueue
                 foreach ($sellerCommissions as $commission) {
                     $commission->markAsPaid();
                 }
+
+                // Send email notification
+                if ($seller->email) {
+                    try {
+                        Mail::to($seller->email)->queue(
+                            new ShareCommissionPaidMail(
+                                $seller,
+                                $totalAmount,
+                                $month,
+                                $sellerCommissions->count()
+                            )
+                        );
+                    } catch (\Exception $e) {
+                        logger()->error('Failed to send commission payment email', [
+                            'seller_id' => $sellerId,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+
+                // Dispatch event for broadcast notification
+                event(new ShareCommissionPaid(
+                    $seller,
+                    $totalAmount,
+                    $month,
+                    $sellerCommissions->count()
+                ));
 
                 logger()->info('Transferred share commissions to seller', [
                     'seller_id' => $sellerId,
