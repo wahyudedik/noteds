@@ -3,64 +3,61 @@
 @section('title', __('affiliate.title'))
 
 @section('content')
+<div class="min-h-screen bg-gray-50">
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Header -->
             <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('affiliate.title') }}</h1>
-                <p class="mt-2 text-gray-600">{{ __('affiliate.description') }}</p>
+                <h1 class="text-4xl font-bold text-gray-900">{{ __('affiliate.title') }}</h1>
+                <p class="mt-3 text-lg text-gray-600">{{ __('affiliate.description') }}</p>
             </div>
 
             <!-- Alert Messages -->
             @if (session('success'))
-                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p class="text-green-800">{{ session('success') }}</p>
+                <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p class="text-green-800 font-medium">✓ {{ session('success') }}</p>
                 </div>
             @endif
 
             @if (session('error'))
-                <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p class="text-red-800">{{ session('error') }}</p>
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p class="text-red-800 font-medium">✕ {{ session('error') }}</p>
                 </div>
             @endif
 
-            <!-- Stats Cards - Simple Design -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-                    <p class="text-gray-600 text-sm font-medium">{{ __('affiliate.total_links') }}</p>
-                    <p class="text-3xl font-bold text-gray-900 mt-2">{{ $stats['total_links'] }}</p>
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+                    <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.total_links') }}</p>
+                    <p class="text-4xl font-bold text-gray-900 mt-3">{{ $stats['total_links'] ?? 0 }}</p>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-                    <p class="text-gray-600 text-sm font-medium">{{ __('affiliate.total_clicks') }}</p>
-                    <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($stats['total_clicks']) }}</p>
+                <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+                    <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.total_clicks') }}</p>
+                    <p class="text-4xl font-bold text-gray-900 mt-3">{{ number_format($stats['total_clicks'] ?? 0) }}</p>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-                    <p class="text-gray-600 text-sm font-medium">{{ __('affiliate.total_conversions') }}</p>
-                    <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($stats['total_conversions']) }}</p>
-                    @if ($stats['total_clicks'] > 0)
-                        <p class="text-xs text-gray-500 mt-2">{{ __('affiliate.conversion_rate') }}:
-                            {{ number_format($stats['conversion_rate'], 2) }}%</p>
-                    @endif
+                <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+                    <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.total_conversions') }}</p>
+                    <p class="text-4xl font-bold text-gray-900 mt-3">{{ number_format($stats['total_conversions'] ?? 0) }}</p>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-                    <p class="text-gray-600 text-sm font-medium">{{ __('affiliate.total_commissions') }}</p>
-                    <p class="text-3xl font-bold text-gray-900 mt-2">{{ currency($stats['total_commissions']) }}</p>
+                <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+                    <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.total_commissions') }}</p>
+                    <p class="text-4xl font-bold text-indigo-600 mt-3">{{ currency($stats['total_commissions'] ?? 0) }}</p>
                 </div>
             </div>
 
             <!-- Earnings Summary -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-                    <p class="text-gray-600 text-sm font-medium">{{ __('affiliate.available_balance') }}</p>
-                    <p class="text-3xl font-bold text-green-600 mt-2">{{ currency($stats['available_balance']) }}</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+                    <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.available_balance') }}</p>
+                    <p class="text-4xl font-bold text-green-600 mt-3">{{ currency($stats['available_balance'] ?? 0) }}</p>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-                    <p class="text-gray-600 text-sm font-medium">{{ __('affiliate.approved_commissions') }}</p>
-                    <p class="text-3xl font-bold text-blue-600 mt-2">{{ currency($stats['approved_commissions']) }}</p>
+                <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+                    <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.approved_commissions') }}</p>
+                    <p class="text-4xl font-bold text-blue-600 mt-3">{{ currency($stats['approved_commissions'] ?? 0) }}</p>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-                    <p class="text-gray-600 text-sm font-medium">{{ __('affiliate.total_payouts') }}</p>
-                    <p class="text-3xl font-bold text-indigo-600 mt-2">{{ currency($stats['total_payouts']) }}</p>
+                <div class="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+                    <p class="text-gray-600 text-sm font-semibold uppercase tracking-wide">{{ __('affiliate.total_payouts') }}</p>
+                    <p class="text-4xl font-bold text-purple-600 mt-3">{{ currency($stats['total_payouts'] ?? 0) }}</p>
                 </div>
             </div>
 
