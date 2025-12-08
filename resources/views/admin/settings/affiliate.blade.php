@@ -101,7 +101,7 @@
                                     {{ __('affiliate.min_payout_amount') }}
                                 </label>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-gray-600 font-medium">{{ config('app.currency', 'USD') }}</span>
+                                    <span class="text-gray-600 font-medium">{{ config('currency.base_currency', 'IDR') }}</span>
                                     <input type="number" name="affiliate_min_payout_amount"
                                         id="affiliate_min_payout_amount" step="0.01" min="0.01"
                                         value="{{ $settings['affiliate_min_payout_amount'] }}"
