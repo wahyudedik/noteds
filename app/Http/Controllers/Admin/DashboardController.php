@@ -408,7 +408,6 @@ class DashboardController extends Controller
         // Share Analytics
         $shareStats = [
             'total_share_referrals' => NoteShareReferral::count(),
-            'total_shares' => NoteShareReferral::sum('share_count'),
             'total_share_clicks' => NoteShareReferral::sum('click_count'),
             'total_share_purchases' => NoteShareReferral::sum('purchase_count'),
             'total_share_commission_earned' => NoteShareReferral::sum('total_commission_earned'),
