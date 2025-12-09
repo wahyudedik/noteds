@@ -1018,6 +1018,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get user's landing page.
+     */
+    public function userLandingPage()
+    {
+        return $this->hasOne(UserLandingPage::class);
+    }
+
+    /**
      * Get affiliate commissions.
      */
     public function affiliateCommissions(): HasMany

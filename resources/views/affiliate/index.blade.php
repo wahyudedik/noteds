@@ -73,53 +73,63 @@
                     </div>
                 </div>
 
-                <!-- Quick Navigation -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <a href="{{ route('affiliate.leaderboard') }}"
-                        class="bg-white rounded-lg shadow border border-gray-200 p-6 hover:shadow-lg transition-shadow hover:border-blue-300">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-semibold text-gray-600">{{ __('affiliate.leaderboard_title') }}</p>
-                                <p class="text-xs text-gray-500 mt-1">{{ __('affiliate.leaderboard_description') }}</p>
-                            </div>
-                            <span class="text-2xl">🏆</span>
-                        </div>
-                    </a>
-                    <a href="#" onclick="showComingSoon()"
-                        class="bg-white rounded-lg shadow border border-gray-200 p-6 hover:shadow-lg transition-shadow hover:border-gray-300">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-semibold text-gray-600">{{ __('affiliate.settings_title') }}</p>
-                                <p class="text-xs text-gray-500 mt-1">Manage preferences</p>
-                            </div>
-                            <span class="text-2xl">⚙️</span>
-                        </div>
-                    </a>
-                    <div class="bg-white rounded-lg shadow border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-semibold text-gray-600">{{ __('affiliate.conversion_rate') }}</p>
-                                <p class="text-xl font-bold text-indigo-600 mt-1">
-                                    @if (isset($stats['total_clicks']) && $stats['total_clicks'] > 0)
-                                        {{ number_format((($stats['total_conversions'] ?? 0) / ($stats['total_clicks'] ?? 1)) * 100, 2) }}%
-                                    @else
-                                        --
-                                    @endif
-                                </p>
-                            </div>
-                            <span class="text-2xl">📊</span>
-                        </div>
+                <!-- Landing Page Section -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl font-bold text-gray-900">{{ __('affiliate.landing_page') }}</h2>
+                        <button onclick="document.getElementById('edit-landing-global-modal').classList.remove('hidden')"
+                            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors font-medium text-sm">
+                            {{ __('affiliate.setup_landing_page') }}
+                        </button>
                     </div>
-                    <div class="bg-white rounded-lg shadow border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-semibold text-gray-600">{{ __('affiliate.pending_commissions') }}
-                                </p>
-                                <p class="text-xl font-bold text-yellow-600 mt-1">
-                                    {{ currency($stats['pending_commissions'] ?? 0) }}</p>
+
+                    <!-- Landing Page Display -->
+                    <div class="bg-white rounded-lg shadow border border-gray-200">
+                        @if ($userLandingPage)
+                            <div class="p-6">
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.landing_page_slug') }}</label>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg flex-1">{{ url('/a') }}/{{ $userLandingPage->slug }}</span>
+                                        <button type="button" onclick="copyLink('{{ url('/a') }}/{{ $userLandingPage->slug }}')"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium text-sm">
+                                            {{ __('affiliate.copy') }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-700 mb-3">{{ __('affiliate.assigned_links') }}</h4>
+                                        <div class="space-y-2 max-h-64 overflow-y-auto">
+                                            @forelse ($userLandingPage->affiliateLinks as $link)
+                                                <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                                                    <span class="text-gray-700 text-sm">{{ $link->name }}</span>
+                                                    <span class="text-gray-500 text-xs ml-auto">{{ url($link->slug) }}</span>
+                                                </div>
+                                            @empty
+                                                <p class="text-sm text-gray-500">{{ __('affiliate.no_links_assigned') }}</p>
+                                            @endforelse
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-700 mb-3">{{ __('affiliate.preview') }}</h4>
+                                        <div id="landing-page-preview-display" class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto bg-white">
+                                            {!! $userLandingPage->content ?? '<p class="text-gray-400">No content yet</p>' !!}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <span class="text-2xl">⏳</span>
-                        </div>
+                        @else
+                            <div class="text-center py-12">
+                                <p class="text-gray-500 mb-4">{{ __('affiliate.no_landing_page') }}</p>
+                                <button onclick="document.getElementById('edit-landing-global-modal').classList.remove('hidden')"
+                                    class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors font-medium">
+                                    {{ __('affiliate.create_landing_page') }}
+                                </button>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -189,10 +199,6 @@
                                             <button onclick="editLink('{{ $link->id }}')"
                                                 class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
                                                 ✏️ {{ __('affiliate.edit') }}
-                                            </button>
-                                            <button onclick="editLandingPage('{{ $link->id }}')"
-                                                class="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700">
-                                                🌐 {{ __('affiliate.edit_landing_page') }}
                                             </button>
                                             <button onclick="managPromotionalMaterials('{{ $link->id }}')"
                                                 class="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700">
@@ -568,47 +574,64 @@
         </div>
     </div>
 
-    <!-- Landing Page Builder Modal -->
-    <div id="landing-page-modal"
+    <!-- Global Landing Page Editor Modal -->
+    <div id="edit-landing-global-modal"
         class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('affiliate.edit_landing_page') }}</h3>
-            <form id="landing-page-form" method="POST" class="space-y-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('affiliate.landing_page') }}</h3>
+            <form id="landing-global-form" method="POST" action="{{ route('affiliate.landing-page.update') }}" class="space-y-6">
                 @csrf
                 @method('PUT')
-                <input type="hidden" id="landing-link-id">
 
                 <div>
-                    <label for="landing-page-slug"
+                    <label for="global-landing-page-slug"
                         class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.landing_page_slug') }}</label>
                     <div class="flex items-center gap-2">
                         <span class="text-sm text-gray-600">{{ url('/a') }}/</span>
-                        <input type="text" id="landing-page-slug" name="landing_page_slug"
-                            placeholder="my-affiliate-link" class="flex-1 rounded-lg border-gray-300 shadow-sm">
+                        <input type="text" id="global-landing-page-slug" name="slug"
+                            placeholder="my-landing-page" value="{{ $userLandingPage?->slug ?? '' }}" class="flex-1 rounded-lg border-gray-300 shadow-sm">
                     </div>
                     <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.slug_hint') }}</p>
                 </div>
 
                 <div>
-                    <label for="landing-page-content"
+                    <label for="global-landing-page-content"
                         class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.landing_page_content') }}</label>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <textarea id="landing-page-content" name="landing_page_content" rows="10" onchange="updateLandingPagePreview()"
-                            oninput="updateLandingPagePreview()" placeholder="{{ __('affiliate.landing_page_html_hint') }}"
-                            class="w-full rounded-lg border-gray-300 shadow-sm font-mono text-sm"></textarea>
+                        <textarea id="global-landing-page-content" name="content" rows="10" onchange="updateGlobalLandingPagePreview()"
+                            oninput="updateGlobalLandingPagePreview()" placeholder="{{ __('affiliate.landing_page_html_hint') }}"
+                            class="w-full rounded-lg border-gray-300 shadow-sm font-mono text-sm">{{ $userLandingPage?->content ?? '' }}</textarea>
                         <div>
                             <label
                                 class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.preview') }}</label>
-                            <div id="landing-page-preview"
+                            <div id="global-landing-page-preview"
                                 class="border border-gray-300 rounded-lg p-4 bg-gray-50 overflow-auto h-64 prose prose-sm">
+                                {!! $userLandingPage?->content ?? '<p class="text-gray-400">Preview</p>' !!}
                             </div>
                         </div>
                     </div>
                     <p class="mt-2 text-xs text-gray-500">{{ __('affiliate.html_content_allowed') }}</p>
                 </div>
 
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.assign_links') }}</label>
+                    <div class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto space-y-2">
+                        @forelse ($affiliateLinks as $link)
+                            <label class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
+                                <input type="checkbox" name="affiliate_links[]" value="{{ $link->id }}" 
+                                    class="rounded" 
+                                    @if($userLandingPage && $userLandingPage->affiliateLinks->contains($link->id)) checked @endif>
+                                <span class="text-sm text-gray-700">{{ $link->name }}</span>
+                                <span class="text-xs text-gray-500 ml-auto">{{ url($link->slug) }}</span>
+                            </label>
+                        @empty
+                            <p class="text-sm text-gray-500">{{ __('affiliate.no_links_available') }}</p>
+                        @endforelse
+                    </div>
+                </div>
+
                 <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
-                    <button type="button" onclick="document.getElementById('landing-page-modal').classList.add('hidden')"
+                    <button type="button" onclick="document.getElementById('edit-landing-global-modal').classList.add('hidden')"
                         class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
                         {{ __('affiliate.cancel') }}
                     </button>
@@ -782,23 +805,9 @@
                 });
             }
 
-            function editLandingPage(linkId) {
-                fetch(`/api/affiliate-links/${linkId}`).then(r => r.json()).then(data => {
-                    document.getElementById('landing-link-id').value = linkId;
-                    document.getElementById('landing-page-slug').value = data.landing_page_slug || '';
-                    document.getElementById('landing-page-content').value = data.landing_page_content || '';
-                    document.getElementById('landing-page-preview').innerHTML = data.landing_page_content || '';
-                    document.getElementById('landing-page-form').action = `/affiliate/links/${linkId}/landing`;
-                    document.getElementById('landing-page-modal').classList.remove('hidden');
-                }).catch(e => {
-                    console.error(e);
-                    alert('Error loading link');
-                });
-            }
-
-            function updateLandingPagePreview() {
-                const content = document.getElementById('landing-page-content').value;
-                document.getElementById('landing-page-preview').innerHTML = content || '<p class="text-gray-400">Preview</p>';
+            function updateGlobalLandingPagePreview() {
+                const content = document.getElementById('global-landing-page-content').value;
+                document.getElementById('global-landing-page-preview').innerHTML = content || '<p class="text-gray-400">Preview</p>';
             }
 
             function managPromotionalMaterials(linkId) {

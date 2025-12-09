@@ -413,6 +413,7 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
         Route::post('/links/{affiliateLink}/promotional-materials', [AffiliateController::class, 'storePromotionalMaterial'])->name('promotional-materials.store');
         Route::put('/promotional-materials/{promotionalMaterial}', [AffiliateController::class, 'updatePromotionalMaterial'])->name('promotional-materials.update');
         Route::delete('/promotional-materials/{promotionalMaterial}', [AffiliateController::class, 'deletePromotionalMaterial'])->name('promotional-materials.delete');
+        Route::put('/landing-page', [AffiliateController::class, 'updateGlobalLandingPage'])->name('landing-page.update');
         Route::post('/payouts', [AffiliateController::class, 'requestPayout'])->name('payouts.request');
     });
 

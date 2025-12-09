@@ -96,6 +96,19 @@ class AffiliateLink extends Model
     }
 
     /**
+     * Get the landing page assigned to this link.
+     */
+    public function landingPage()
+    {
+        return $this->belongsToMany(
+            UserLandingPage::class,
+            'affiliate_link_user_landing_page',
+            'affiliate_link_id',
+            'user_landing_page_id'
+        )->first();
+    }
+
+    /**
      * Get landing page URL.
      */
     public function getLandingPageUrlAttribute(): ?string

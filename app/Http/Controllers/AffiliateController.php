@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\AffiliateLink;
 use App\Models\AffiliatePayout;
+use App\Models\UserLandingPage;
 use App\Services\AffiliateService;
 use Illuminate\Support\Facades\DB;
 use App\Models\AffiliateCommission;
@@ -83,6 +84,11 @@ class AffiliateController extends Controller
             ->limit(10)
             ->get();
 
+        // Get user's landing page
+        $userLandingPage = $user->userLandingPage()
+            ->with('affiliateLinks')
+            ->first();
+
         return view('affiliate.index', compact(
             'stats',
             'affiliateLinks',
@@ -91,7 +97,8 @@ class AffiliateController extends Controller
             'commissionByTier',
             'commissionByStatus',
             'monthlyEarnings',
-            'recentPayouts'
+            'recentPayouts',
+            'userLandingPage'
         ));
     }
 
@@ -329,9 +336,45 @@ class AffiliateController extends Controller
             'description' => $affiliateLink->description,
             'destination_url' => $affiliateLink->destination_url,
             'is_active' => $affiliateLink->is_active,
-            'code' => $affiliateLink->code,
-            'clicks' => $affiliateLink->clicks,
-            'conversions' => $affiliateLink->conversions,
         ]);
+    }
+
+    /**
+     * Update user's global landing page.
+     */
+    public function updateGlobalLandingPage(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9-]+$/'],
+            'content' => ['nullable', 'string'],
+            'affiliate_links' => ['nullable', 'array'],
+            'affiliate_links.*' => ['uuid', 'exists:affiliate_links,id'],
+        ]);
+
+        $user = auth()->user();
+
+        // Create or update landing page
+        $landingPage = $user->userLandingPage() ?? new UserLandingPage();
+        $landingPage->fill([
+            'slug' => $validated['slug'],
+            'content' => $validated['content'] ?? '',
+        ]);
+
+        if (!$landingPage->user_id) {
+            $landingPage->user_id = $user->id;
+        }
+
+        $landingPage->save();
+
+        // Sync affiliate links - only links belonging to this user
+        $linkIds = collect($validated['affiliate_links'] ?? [])
+            ->filter(fn($id) => $user->affiliateLinks()->where('id', $id)->exists())
+            ->values()
+            ->all();
+
+        $landingPage->affiliateLinks()->sync($linkIds);
+
+        return redirect()->route('affiliate.index')
+            ->with('success', __('affiliate.landing_page_updated'));
     }
 }
