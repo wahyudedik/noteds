@@ -8,12 +8,16 @@ use App\Models\EscrowLedger;
 use App\Models\ServiceOrder;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Notifications\OrderVerifiedNotification;
+use App\Notifications\PaymentReleasedNotification;
+use App\Notifications\OrderRejectedNotification;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class OrderVerificationController extends Controller
 {
@@ -191,9 +195,15 @@ class OrderVerificationController extends Controller
                 ],
             ]);
 
-            // TODO: Send notifications
-            // Notification::send($order->assignedVendor, new PaymentReleasedNotification($order, $vendorNet));
-            // Notification::send(auth()->user(), new OrderVerifiedNotification($order));
+            // Send notification to vendor about payment release
+            if ($order->assignedVendor) {
+                Notification::send($order->assignedVendor, new PaymentReleasedNotification($order, $vendorNet));
+            }
+
+            // Send notification to admin
+            if (auth()->check()) {
+                Notification::send(auth()->user(), new OrderVerifiedNotification($order));
+            }
 
             DB::commit();
 
@@ -276,9 +286,15 @@ class OrderVerificationController extends Controller
                 ],
             ]);
 
-            // TODO: Send notifications
-            // Notification::send($order->user, new OrderRejectedNotification($order, $validated['notes']));
-            // Notification::send($order->assignedVendor, new OrderRejectedNotification($order, $validated['notes']));
+            // Send notification to buyer about rejection and refund
+            if ($order->user) {
+                Notification::send($order->user, new OrderRejectedNotification($order, $validated['notes']));
+            }
+
+            // Send notification to vendor about rejection
+            if ($order->assignedVendor) {
+                Notification::send($order->assignedVendor, new OrderRejectedNotification($order, $validated['notes']));
+            }
 
             DB::commit();
 
@@ -293,12 +309,18 @@ class OrderVerificationController extends Controller
     }
 
     /**
-     * Get admin wallet user ID (configuration or hardcoded)
+     * Get admin wallet user ID (configurable via settings)
      */
     private function getAdminWalletUserId()
     {
-        // TODO: This should be configurable
-        // For now, assume first admin user or use a system account
+        // Try to get from settings first
+        $adminWalletUserId = settings('admin_wallet_user_id');
+        
+        if ($adminWalletUserId) {
+            return $adminWalletUserId;
+        }
+
+        // Fallback: Get first admin user
         return User::whereHas('roles', fn($q) => $q->where('name', 'admin'))
             ->first()?->id;
     }
