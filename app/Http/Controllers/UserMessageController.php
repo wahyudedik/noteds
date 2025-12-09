@@ -16,15 +16,43 @@ class UserMessageController extends Controller
      */
     public function index()
     {
+        /** @var User $user */
         $user = Auth::user();
-        
-        // Get unique conversations (latest message from each sender)
-        $conversations = $user->receivedMessages()
-            ->selectRaw('DISTINCT sender_id, MAX(created_at) as latest_message_time')
-            ->with('sender')
-            ->latest('latest_message_time')
-            ->groupBy('sender_id')
-            ->paginate(15);
+
+        // Get distinct conversations from received messages
+        $senderIds = $user->receivedMessages()
+            ->distinct()
+            ->pluck('sender_id')
+            ->toArray();
+
+        // Get latest message from each sender for conversation list
+        $conversations = [];
+        foreach ($senderIds as $senderId) {
+            $sender = User::find($senderId);
+            $latestMessage = $user->receivedMessages()
+                ->where('sender_id', $senderId)
+                ->latest()
+                ->first();
+            
+            if ($latestMessage && $sender) {
+                $conversations[] = (object)[
+                    'sender_id' => $senderId,
+                    'sender' => $sender,
+                    'latest_message_time' => $latestMessage->created_at,
+                ];
+            }
+        }
+
+        // Sort by latest message time
+        usort($conversations, function($a, $b) {
+            return $b->latest_message_time <=> $a->latest_message_time;
+        });
+
+        // Paginate manually
+        $page = request()->get('page', 1);
+        $perPage = 15;
+        $total = count($conversations);
+        $conversations = array_slice($conversations, ($page - 1) * $perPage, $perPage);
 
         $unreadCount = $user->getUnreadMessageCount();
 
@@ -37,14 +65,43 @@ class UserMessageController extends Controller
      */
     public function sent()
     {
+        /** @var User $user */
         $user = Auth::user();
-        
-        $conversations = $user->sentMessages()
-            ->selectRaw('DISTINCT recipient_id, MAX(created_at) as latest_message_time')
-            ->with('recipient')
-            ->latest('latest_message_time')
-            ->groupBy('recipient_id')
-            ->paginate(15);
+
+        // Get distinct conversations from sent messages
+        $recipientIds = $user->sentMessages()
+            ->distinct()
+            ->pluck('recipient_id')
+            ->toArray();
+
+        // Get latest message to each recipient for conversation list
+        $conversations = [];
+        foreach ($recipientIds as $recipientId) {
+            $recipient = User::find($recipientId);
+            $latestMessage = $user->sentMessages()
+                ->where('recipient_id', $recipientId)
+                ->latest()
+                ->first();
+            
+            if ($latestMessage && $recipient) {
+                $conversations[] = (object)[
+                    'recipient_id' => $recipientId,
+                    'recipient' => $recipient,
+                    'latest_message_time' => $latestMessage->created_at,
+                ];
+            }
+        }
+
+        // Sort by latest message time
+        usort($conversations, function($a, $b) {
+            return $b->latest_message_time <=> $a->latest_message_time;
+        });
+
+        // Paginate manually
+        $page = request()->get('page', 1);
+        $perPage = 15;
+        $total = count($conversations);
+        $conversations = array_slice($conversations, ($page - 1) * $perPage, $perPage);
 
         return view('messages.sent', compact('conversations'));
     }
@@ -55,6 +112,7 @@ class UserMessageController extends Controller
      */
     public function show(User $user)
     {
+        /** @var User $currentUser */
         $currentUser = Auth::user();
 
         // Authorization
@@ -72,7 +130,8 @@ class UserMessageController extends Controller
             ->unread($currentUser->id)
             ->update(['read_at' => now()]);
 
-        $currentUser->decrement('unread_messages_count', 
+        $currentUser->decrement(
+            'unread_messages_count',
             $currentUser->receivedMessages()->where('sender_id', $user->id)->count()
         );
 
@@ -90,6 +149,7 @@ class UserMessageController extends Controller
             'message' => 'required|string|max:2000',
         ]);
 
+        /** @var User $currentUser */
         $currentUser = Auth::user();
         $recipient = User::findOrFail($validated['recipient_id']);
 
