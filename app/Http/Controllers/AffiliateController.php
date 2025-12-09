@@ -354,11 +354,9 @@ class AffiliateController extends Controller
         $user = auth()->user();
 
         // Create or update landing page
-        $landingPage = $user->userLandingPage() ?? new UserLandingPage();
-        $landingPage->fill([
-            'slug' => $validated['slug'],
-            'content' => $validated['content'] ?? '',
-        ]);
+        $landingPage = $user->userLandingPage()->first() ?? new UserLandingPage(['user_id' => $user->id]);
+        $landingPage->slug = $validated['slug'];
+        $landingPage->content = $validated['content'] ?? '';
 
         if (!$landingPage->user_id) {
             $landingPage->user_id = $user->id;
