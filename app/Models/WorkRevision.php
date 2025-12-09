@@ -103,7 +103,7 @@ class WorkRevision extends Model
      */
     public function getStatusLabel(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'pending' => 'Menunggu Revisi',
             'submitted' => 'Revisi Dikirim',
             'accepted' => 'Diterima',

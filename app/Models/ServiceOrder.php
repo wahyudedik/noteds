@@ -177,7 +177,7 @@ class ServiceOrder extends Model
     public function canBuyerRequestRevision(?User $user = null): bool
     {
         $currentUser = $user;
-        
+
         return $currentUser && $currentUser->id === $this->user_id
             && $this->work_status === 'approved'
             && $this->buyer_approval_status === 'approved'
@@ -191,7 +191,7 @@ class ServiceOrder extends Model
     public function canVendorSubmitRevision(?User $user = null): bool
     {
         $currentUser = $user;
-        
+
         return $currentUser && $currentUser->id === $this->assigned_user_id
             && $this->revision_status === 'requested';
     }
@@ -231,7 +231,7 @@ class ServiceOrder extends Model
      */
     public function hasActiveDispute(): bool
     {
-        return $this->activeDispute !== null 
+        return $this->activeDispute !== null
             && !$this->activeDispute->isResolved();
     }
 

@@ -99,7 +99,7 @@ class ServiceOrderDispute extends Model
      */
     public function getStatusLabel(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'open' => 'Terbuka',
             'under_review' => 'Sedang Ditinjau',
             'resolved' => 'Terselesaikan',
@@ -113,7 +113,7 @@ class ServiceOrderDispute extends Model
      */
     public function getResolutionTypeLabel(): string
     {
-        return match($this->resolution_type) {
+        return match ($this->resolution_type) {
             'refund_buyer' => 'Refund ke Buyer',
             'payment_vendor' => 'Bayar Vendor',
             'partial_refund' => 'Refund Partial',

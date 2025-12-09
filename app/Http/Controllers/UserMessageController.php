@@ -33,7 +33,7 @@ class UserMessageController extends Controller
                 ->where('sender_id', $senderId)
                 ->latest()
                 ->first();
-            
+
             if ($latestMessage && $sender) {
                 $conversations[] = (object)[
                     'sender_id' => $senderId,
@@ -44,7 +44,7 @@ class UserMessageController extends Controller
         }
 
         // Sort by latest message time
-        usort($conversations, function($a, $b) {
+        usort($conversations, function ($a, $b) {
             return $b->latest_message_time <=> $a->latest_message_time;
         });
 
@@ -82,7 +82,7 @@ class UserMessageController extends Controller
                 ->where('recipient_id', $recipientId)
                 ->latest()
                 ->first();
-            
+
             if ($latestMessage && $recipient) {
                 $conversations[] = (object)[
                     'recipient_id' => $recipientId,
@@ -93,7 +93,7 @@ class UserMessageController extends Controller
         }
 
         // Sort by latest message time
-        usort($conversations, function($a, $b) {
+        usort($conversations, function ($a, $b) {
             return $b->latest_message_time <=> $a->latest_message_time;
         });
 

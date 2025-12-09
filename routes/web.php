@@ -1,63 +1,64 @@
 <?php
 
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\FaqController as AdminFaqController;
-use App\Http\Controllers\Admin\CmsPageController as AdminCmsPageController;
-use App\Http\Controllers\Admin\NoteController as AdminNoteController;
-use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
-use App\Http\Controllers\Admin\TicketController as AdminTicketController;
-use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\WithdrawController as AdminWithdrawController;
-use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
-use App\Http\Controllers\Admin\LeaderboardSettingsController as AdminLeaderboardSettingsController;
-use App\Http\Controllers\Admin\ShareSettingsController as AdminShareSettingsController;
-use App\Http\Controllers\Admin\AffiliateSettingsController as AdminAffiliateSettingsController;
-use App\Http\Controllers\Admin\AffiliateController as AdminAffiliateController;
-use App\Http\Controllers\Admin\CommissionTierController as AdminCommissionTierController;
-use App\Http\Controllers\Admin\PostModerationController;
-use App\Http\Controllers\Admin\NoteModerationController;
-use App\Http\Controllers\Admin\AccountModerationController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\PublicCmsPageController;
-use App\Http\Controllers\MarketplaceController;
 use Illuminate\Http\Request;
-use App\Http\Controllers\NoteReportController;
-use App\Http\Controllers\NoteController;
-use App\Http\Controllers\UserReportController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PublicProfileController;
-use App\Http\Controllers\ReferralController;
-use App\Http\Controllers\AffiliateController;
-use App\Http\Controllers\AffiliateLeaderboardController;
-use App\Http\Controllers\ReviewController;
-use App\Http\Controllers\SimulatorController;
-use App\Http\Controllers\SupportTicketController;
-use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\WalletController;
-use App\Http\Controllers\WithdrawController;
-use App\Http\Controllers\LocaleController;
-use App\Http\Controllers\Admin\ExchangeRateController;
-use App\Http\Controllers\Admin\DocumentationController as AdminDocumentationController;
-use App\Http\Controllers\Admin\LandingPageController as AdminLandingPageController;
-use App\Http\Controllers\Admin\SocialMediaController as AdminSocialMediaController;
-use App\Http\Controllers\Admin\TaxRuleController as AdminTaxRuleController;
-use App\Http\Controllers\Admin\PriceRuleController as AdminPriceRuleController;
-use App\Http\Controllers\Admin\PointsPricingController;
-use App\Http\Controllers\DocumentationController;
-use App\Http\Controllers\NoteAttachmentController;
-use App\Http\Controllers\WelcomeController;
-use App\Http\Controllers\PostAnalyticsController;
-use App\Http\Controllers\ForumPreferenceController;
-use App\Http\Controllers\NoteConversationController;
-use App\Http\Controllers\NoteReviewReplyController;
-use App\Http\Controllers\ShareAnalyticsController;
-use App\Http\Controllers\ShareLeaderboardController;
-use App\Http\Controllers\PointsController;
-use App\Http\Controllers\LeaderboardController;
-use App\Http\Controllers\Api\NoteShareController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\NoteController;
+use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\PointsController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\WalletController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\WithdrawController;
+use App\Http\Controllers\AffiliateController;
+use App\Http\Controllers\SimulatorController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\NoteReportController;
+use App\Http\Controllers\UserReportController;
+use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\Api\NoteShareController;
+use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\PostAnalyticsController;
+use App\Http\Controllers\PublicCmsPageController;
+use App\Http\Controllers\PublicProfileController;
+use App\Http\Controllers\SupportTicketController;
+use App\Http\Controllers\NoteAttachmentController;
+use App\Http\Controllers\ShareAnalyticsController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\ForumPreferenceController;
+use App\Http\Controllers\NoteReviewReplyController;
+use App\Http\Controllers\NoteConversationController;
+use App\Http\Controllers\ShareLeaderboardController;
+use App\Http\Controllers\Admin\ExchangeRateController;
+use App\Http\Controllers\Admin\PointsPricingController;
+use App\Http\Controllers\Admin\NoteModerationController;
+use App\Http\Controllers\Admin\PostModerationController;
+use App\Http\Controllers\AffiliateLeaderboardController;
+use App\Http\Controllers\Admin\AccountModerationController;
+use App\Http\Controllers\Admin\AffiliateSettingsController;
+use App\Http\Controllers\Admin\FaqController as AdminFaqController;
+use App\Http\Controllers\Admin\NoteController as AdminNoteController;
+use App\Http\Controllers\Admin\TicketController as AdminTicketController;
+use App\Http\Controllers\Admin\CmsPageController as AdminCmsPageController;
+use App\Http\Controllers\Admin\TaxRuleController as AdminTaxRuleController;
+use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\WithdrawController as AdminWithdrawController;
+use App\Http\Controllers\Admin\AffiliateController as AdminAffiliateController;
+use App\Http\Controllers\Admin\PriceRuleController as AdminPriceRuleController;
+use App\Http\Controllers\Admin\LandingPageController as AdminLandingPageController;
+use App\Http\Controllers\Admin\SocialMediaController as AdminSocialMediaController;
+use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
+use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
+use App\Http\Controllers\Admin\DocumentationController as AdminDocumentationController;
+use App\Http\Controllers\Admin\ShareSettingsController as AdminShareSettingsController;
+use App\Http\Controllers\Admin\CommissionTierController as AdminCommissionTierController;
+use App\Http\Controllers\Admin\AffiliateSettingsController as AdminAffiliateSettingsController;
+use App\Http\Controllers\Admin\LeaderboardSettingsController as AdminLeaderboardSettingsController;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
@@ -707,8 +708,8 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::post('/settings/share', [AdminShareSettingsController::class, 'update'])->name('share-settings.update');
 
     // Affiliate Settings
-    Route::get('/settings/affiliate', [\App\Http\Controllers\Admin\AffiliateSettingsController::class, 'index'])->name('affiliate-settings.index');
-    Route::put('/settings/affiliate', [\App\Http\Controllers\Admin\AffiliateSettingsController::class, 'update'])->name('affiliate-settings.update');
+    Route::get('/settings/affiliate', [AffiliateSettingsController::class, 'index'])->name('affiliate-settings.index');
+    Route::put('/settings/affiliate', [AffiliateSettingsController::class, 'update'])->name('affiliate-settings.update');
 
     Route::get('/system-health', [\App\Http\Controllers\Admin\SystemHealthController::class, 'index'])->name('system-health.index');
     Route::post('/system-health/test-broadcaster', [\App\Http\Controllers\Admin\SystemHealthController::class, 'testBroadcaster'])->name('system-health.test-broadcaster');
@@ -776,9 +777,9 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     });
 
     // Points Pricing & Redemption Management
-    Route::resource('points-pricing', \App\Http\Controllers\Admin\PointsPricingController::class);
-    Route::get('/points-monitoring', [\App\Http\Controllers\Admin\PointsPricingController::class, 'monitoring'])->name('points.monitoring');
-    Route::get('/points-redemption/export', [\App\Http\Controllers\Admin\PointsPricingController::class, 'exportReport'])->name('points.export');
+    Route::resource('points-pricing', PointsPricingController::class);
+    Route::get('/points-monitoring', [PointsPricingController::class, 'monitoring'])->name('points.monitoring');
+    Route::get('/points-redemption/export', [PointsPricingController::class, 'exportReport'])->name('points.export');
 
     // Studio Order Verification routes (admin verify work & release payment)
     Route::get('/order-verification', [\App\Http\Controllers\Admin\OrderVerificationController::class, 'pendingVerifications'])->name('order-verification.index');

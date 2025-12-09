@@ -146,7 +146,7 @@ class ServiceOrderController extends Controller
         // Increase escrow
         $newEscrowAmount = $order->escrow_amount + $amount;
         $order->update(['escrow_amount' => $newEscrowAmount]);
-        
+
         if ($order->status === 'quoted') {
             $order->update(['status' => 'in_progress']);
         }
@@ -296,7 +296,7 @@ class ServiceOrderController extends Controller
         // Decrease escrow
         $newEscrowAmount = $order->escrow_amount - $amount;
         $order->update(['escrow_amount' => $newEscrowAmount]);
-        
+
         if ($order->escrow_amount <= 0 && $order->status === 'in_progress') {
             $order->update(['status' => 'completed']);
         }
@@ -409,7 +409,7 @@ class ServiceOrderController extends Controller
         // Decrease escrow
         $newEscrowAmount = $order->escrow_amount - $amount;
         $order->update(['escrow_amount' => $newEscrowAmount]);
-        
+
         if ($newEscrowAmount <= 0 && in_array($order->status, ['submitted', 'quoted', 'in_progress'])) {
             $order->update(['status' => 'cancelled']);
         }

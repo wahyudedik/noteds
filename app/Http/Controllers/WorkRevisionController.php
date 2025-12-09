@@ -226,7 +226,7 @@ class WorkRevisionController extends Controller
         }
 
         $revisions = $order->workRevisions()->latest('created_at')->get();
-        
+
         return view('studio.orders.revision-history', compact('order', 'revisions'));
     }
 }
