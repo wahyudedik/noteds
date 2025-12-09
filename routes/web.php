@@ -405,8 +405,8 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     Route::get('/referral', [ReferralController::class, 'index'])->name('referral.index');
     Route::get('/referral/statistics', [ReferralController::class, 'statistics'])->name('referral.statistics');
 
-    // Affiliate routes
-    Route::prefix('affiliate')->name('affiliate.')->group(function () {
+    // Affiliate routes - Only accessible to sellers and buyers (not admin)
+    Route::prefix('affiliate')->name('affiliate.')->middleware('not_admin_affiliate')->group(function () {
         Route::get('/', [AffiliateController::class, 'index'])->name('index');
         Route::post('/links', [AffiliateController::class, 'storeLink'])->name('links.store');
         Route::put('/links/{affiliateLink}', [AffiliateController::class, 'updateLink'])->name('links.update');
