@@ -86,3 +86,21 @@ if (!function_exists('asset_cdn')) {
         return asset($path);
     }
 }
+
+if (!function_exists('settings')) {
+    /**
+     * Get application setting value
+     * @param string $key Setting key
+     * @param mixed $default Default value if setting not found
+     * @return mixed Setting value
+     */
+    function settings(string $key, $default = null)
+    {
+        try {
+            $setting = \App\Models\Setting::where('key', $key)->first();
+            return $setting ? $setting->value : $default;
+        } catch (\Exception $e) {
+            return $default;
+        }
+    }
+}

@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\ApprovalLog;
 use App\Models\EscrowLedger;
 use App\Models\ServiceOrder;
+use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderVerificationController extends Controller
 {
@@ -104,7 +107,7 @@ class OrderVerificationController extends Controller
 
         try {
             // Begin transaction
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             // Calculate fee breakdown
             $escrowAmount = (float) $order->escrow_amount;
@@ -192,13 +195,13 @@ class OrderVerificationController extends Controller
             // Notification::send($order->assignedVendor, new PaymentReleasedNotification($order, $vendorNet));
             // Notification::send(auth()->user(), new OrderVerifiedNotification($order));
 
-            \DB::commit();
+            DB::commit();
 
             return redirect()->route('admin.order-verification.index')
                 ->with('success', "Payment released! Vendor received Rp " . number_format($vendorNet, 0, ',', '.'));
         } catch (\Exception $e) {
-            \DB::rollBack();
-            \Log::error('Order verification failed: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Order verification failed: ' . $e->getMessage());
 
             return back()->withErrors(['error' => 'Failed to verify order: ' . $e->getMessage()]);
         }
@@ -219,7 +222,7 @@ class OrderVerificationController extends Controller
         ]);
 
         try {
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             // Get buyer wallet
             $buyerWallet = Wallet::where('user_id', $order->user_id)->firstOrFail();
@@ -277,13 +280,13 @@ class OrderVerificationController extends Controller
             // Notification::send($order->user, new OrderRejectedNotification($order, $validated['notes']));
             // Notification::send($order->assignedVendor, new OrderRejectedNotification($order, $validated['notes']));
 
-            \DB::commit();
+            DB::commit();
 
             return redirect()->route('admin.order-verification.index')
                 ->with('warning', "Work rejected! Refund of Rp " . number_format($refundAmount, 0, ',', '.') . " issued to buyer.");
         } catch (\Exception $e) {
-            \DB::rollBack();
-            \Log::error('Order rejection failed: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Order rejection failed: ' . $e->getMessage());
 
             return back()->withErrors(['error' => 'Failed to reject order: ' . $e->getMessage()]);
         }
@@ -296,7 +299,7 @@ class OrderVerificationController extends Controller
     {
         // TODO: This should be configurable
         // For now, assume first admin user or use a system account
-        return \App\Models\User::whereHas('roles', fn($q) => $q->where('name', 'admin'))
+        return User::whereHas('roles', fn($q) => $q->where('name', 'admin'))
             ->first()?->id;
     }
 }
