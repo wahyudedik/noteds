@@ -426,9 +426,9 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     // Affiliate leaderboard
     Route::get('/affiliate-leaderboard', [AffiliateLeaderboardController::class, 'index'])->name('affiliate.leaderboard');
 
-    // Share Analytics routes
-    Route::get('/share/analytics', [ShareAnalyticsController::class, 'index'])->name('share.analytics');
-    Route::get('/share/leaderboard', [ShareLeaderboardController::class, 'index'])->name('share.leaderboard');
+    // Share Analytics routes (seller only, not admin)
+    Route::get('/share/analytics', [ShareAnalyticsController::class, 'index'])->middleware('seller_only')->name('share.analytics');
+    Route::get('/share/leaderboard', [ShareLeaderboardController::class, 'index'])->middleware('seller_only')->name('share.leaderboard');
 
     // Support Ticket routes
     Route::resource('support-tickets', SupportTicketController::class);
