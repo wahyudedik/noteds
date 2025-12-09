@@ -195,7 +195,7 @@ return [
     'fast_access' => 'Instant Access',
     'confidential' => '100% Confidential',
     'stats_text' => 'people claimed this offer today',
-    
+
     // Global Landing Page
     'setup_landing_page' => 'Setup Landing Page',
     'create_landing_page' => 'Create Landing Page',

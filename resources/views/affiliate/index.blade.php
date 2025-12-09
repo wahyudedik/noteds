@@ -88,10 +88,13 @@
                         @if ($userLandingPage)
                             <div class="p-6">
                                 <div class="mb-6">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.landing_page_slug') }}</label>
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.landing_page_slug') }}</label>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg flex-1">{{ url('/a') }}/{{ $userLandingPage->slug }}</span>
-                                        <button type="button" onclick="copyLink('{{ url('/a') }}/{{ $userLandingPage->slug }}')"
+                                        <span
+                                            class="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg flex-1">{{ url('/a') }}/{{ $userLandingPage->slug }}</span>
+                                        <button type="button"
+                                            onclick="copyLink('{{ url('/a') }}/{{ $userLandingPage->slug }}')"
                                             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium text-sm">
                                             {{ __('affiliate.copy') }}
                                         </button>
@@ -100,22 +103,27 @@
 
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     <div>
-                                        <h4 class="text-sm font-semibold text-gray-700 mb-3">{{ __('affiliate.assigned_links') }}</h4>
+                                        <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                                            {{ __('affiliate.assigned_links') }}</h4>
                                         <div class="space-y-2 max-h-64 overflow-y-auto">
                                             @forelse ($userLandingPage->affiliateLinks as $link)
                                                 <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                                                     <span class="text-gray-700 text-sm">{{ $link->name }}</span>
-                                                    <span class="text-gray-500 text-xs ml-auto">{{ url($link->slug) }}</span>
+                                                    <span
+                                                        class="text-gray-500 text-xs ml-auto">{{ url('/') }}{{ $link->slug }}</span>
                                                 </div>
                                             @empty
-                                                <p class="text-sm text-gray-500">{{ __('affiliate.no_links_assigned') }}</p>
+                                                <p class="text-sm text-gray-500">{{ __('affiliate.no_links_assigned') }}
+                                                </p>
                                             @endforelse
                                         </div>
                                     </div>
 
                                     <div>
-                                        <h4 class="text-sm font-semibold text-gray-700 mb-3">{{ __('affiliate.preview') }}</h4>
-                                        <div id="landing-page-preview-display" class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto bg-white">
+                                        <h4 class="text-sm font-semibold text-gray-700 mb-3">{{ __('affiliate.preview') }}
+                                        </h4>
+                                        <div id="landing-page-preview-display"
+                                            class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto bg-white">
                                             {!! $userLandingPage->content ?? '<p class="text-gray-400">No content yet</p>' !!}
                                         </div>
                                     </div>
@@ -124,7 +132,8 @@
                         @else
                             <div class="text-center py-12">
                                 <p class="text-gray-500 mb-4">{{ __('affiliate.no_landing_page') }}</p>
-                                <button onclick="document.getElementById('edit-landing-global-modal').classList.remove('hidden')"
+                                <button
+                                    onclick="document.getElementById('edit-landing-global-modal').classList.remove('hidden')"
                                     class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors font-medium">
                                     {{ __('affiliate.create_landing_page') }}
                                 </button>
@@ -579,7 +588,8 @@
         class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
             <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('affiliate.landing_page') }}</h3>
-            <form id="landing-global-form" method="POST" action="{{ route('affiliate.landing-page.update') }}" class="space-y-6">
+            <form id="landing-global-form" method="POST" action="{{ route('affiliate.landing-page.update') }}"
+                class="space-y-6">
                 @csrf
                 @method('PUT')
 
@@ -588,8 +598,9 @@
                         class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.landing_page_slug') }}</label>
                     <div class="flex items-center gap-2">
                         <span class="text-sm text-gray-600">{{ url('/a') }}/</span>
-                        <input type="text" id="global-landing-page-slug" name="slug"
-                            placeholder="my-landing-page" value="{{ $userLandingPage?->slug ?? '' }}" class="flex-1 rounded-lg border-gray-300 shadow-sm">
+                        <input type="text" id="global-landing-page-slug" name="slug" placeholder="my-landing-page"
+                            value="{{ $userLandingPage?->slug ?? '' }}"
+                            class="flex-1 rounded-lg border-gray-300 shadow-sm">
                     </div>
                     <p class="mt-1 text-xs text-gray-500">{{ __('affiliate.slug_hint') }}</p>
                 </div>
@@ -614,15 +625,15 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.assign_links') }}</label>
+                    <label
+                        class="block text-sm font-medium text-gray-700 mb-2">{{ __('affiliate.assign_links') }}</label>
                     <div class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto space-y-2">
                         @forelse ($affiliateLinks as $link)
                             <label class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
-                                <input type="checkbox" name="affiliate_links[]" value="{{ $link->id }}" 
-                                    class="rounded" 
-                                    @if($userLandingPage && $userLandingPage->affiliateLinks->contains($link->id)) checked @endif>
+                                <input type="checkbox" name="affiliate_links[]" value="{{ $link->id }}"
+                                    class="rounded" @if ($userLandingPage && $userLandingPage->affiliateLinks->contains($link->id)) checked @endif>
                                 <span class="text-sm text-gray-700">{{ $link->name }}</span>
-                                <span class="text-xs text-gray-500 ml-auto">{{ url($link->slug) }}</span>
+                                <span class="text-xs text-gray-500 ml-auto">{{ url('/') }}{{ $link->slug }}</span>
                             </label>
                         @empty
                             <p class="text-sm text-gray-500">{{ __('affiliate.no_links_available') }}</p>
@@ -631,7 +642,8 @@
                 </div>
 
                 <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
-                    <button type="button" onclick="document.getElementById('edit-landing-global-modal').classList.add('hidden')"
+                    <button type="button"
+                        onclick="document.getElementById('edit-landing-global-modal').classList.add('hidden')"
                         class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
                         {{ __('affiliate.cancel') }}
                     </button>
@@ -807,7 +819,8 @@
 
             function updateGlobalLandingPagePreview() {
                 const content = document.getElementById('global-landing-page-content').value;
-                document.getElementById('global-landing-page-preview').innerHTML = content || '<p class="text-gray-400">Preview</p>';
+                document.getElementById('global-landing-page-preview').innerHTML = content ||
+                    '<p class="text-gray-400">Preview</p>';
             }
 
             function managPromotionalMaterials(linkId) {

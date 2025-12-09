@@ -210,7 +210,7 @@ return [
     'existing_materials' => 'Material Existing',
     'no_materials' => 'Belum ada material promosi',
     'html_code_copied' => 'Kode HTML berhasil disalin ke clipboard',
-    
+
     // Global Landing Page
     'setup_landing_page' => 'Setup Landing Page',
     'create_landing_page' => 'Buat Landing Page',

@@ -208,7 +208,7 @@ return [
     'copy_html' => 'نسخ HTML',
     'affiliate_landing_page' => 'صفحة الهبوط للمنتسب',
     'affiliate_name' => 'اسم المنتسب',
-    
+
     // Global Landing Page
     'setup_landing_page' => 'إعداد صفحة الهبوط',
     'create_landing_page' => 'إنشاء صفحة هبوط',
