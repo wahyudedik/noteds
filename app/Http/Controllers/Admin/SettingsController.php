@@ -30,6 +30,11 @@ class SettingsController extends Controller
         // Get referral reward settings
         $referralSignupReward = Setting::getReferralSignupReward();
         $referralCommissionPercent = Setting::getReferralCommissionPercent();
+        $referralAutoSendEnabled = (bool) Setting::getSetting('referral_auto_send_enabled', 'referral', false);
+        $referralSchedule = Setting::getSetting('referral_schedule', 'referral', 'daily');
+        $referralMinAmountToSend = Setting::getSetting('referral_min_amount_to_send', 'referral', 10000);
+        $referralMaxBatchSize = Setting::getSetting('referral_max_batch_size', 'referral', 100);
+        $referralLastBatchSent = Setting::getSetting('referral_last_batch_sent', 'referral', null);
 
         // Get marketplace commission settings
         $platformCommissionPercent = Setting::getPlatformCommissionPercent();
@@ -81,6 +86,11 @@ class SettingsController extends Controller
             'premiumPrice',
             'referralSignupReward',
             'referralCommissionPercent',
+            'referralAutoSendEnabled',
+            'referralSchedule',
+            'referralMinAmountToSend',
+            'referralMaxBatchSize',
+            'referralLastBatchSent',
             'platformCommissionPercent',
             'creatorCommissionPercent',
             'studioPlatformFeePercent',
@@ -123,6 +133,10 @@ class SettingsController extends Controller
             'premium_price_monthly' => 'nullable|numeric|min:0|max:10000000',
             'referral_reward_signup' => 'nullable|numeric|min:0|max:10000000',
             'referral_reward_commission_percent' => 'nullable|numeric|min:0|max:100',
+            'referral_auto_send_enabled' => 'nullable|boolean',
+            'referral_schedule' => 'nullable|in:daily,weekly,monthly',
+            'referral_min_amount_to_send' => 'nullable|numeric|min:0|max:10000000',
+            'referral_max_batch_size' => 'nullable|integer|min:1|max:10000',
             'platform_commission_percent' => 'nullable|numeric|min:0|max:100',
             'creator_commission_percent' => 'nullable|numeric|min:0|max:100',
             'studio_platform_fee_percent' => 'nullable|numeric|min:0|max:100',
@@ -226,6 +240,47 @@ class SettingsController extends Controller
                 'number',
                 'referral',
                 'Referral transaction commission percentage'
+            );
+        }
+
+        // Update referral automation settings
+        if ($request->has('referral_auto_send_enabled')) {
+            Setting::setSetting(
+                'referral_auto_send_enabled',
+                $request->boolean('referral_auto_send_enabled'),
+                'boolean',
+                'referral',
+                'Enable automatic commission sending'
+            );
+        }
+
+        if ($request->has('referral_schedule')) {
+            Setting::setSetting(
+                'referral_schedule',
+                $request->input('referral_schedule', 'daily'),
+                'string',
+                'referral',
+                'Schedule for automatic commission sending (daily/weekly/monthly)'
+            );
+        }
+
+        if ($request->has('referral_min_amount_to_send')) {
+            Setting::setSetting(
+                'referral_min_amount_to_send',
+                $request->input('referral_min_amount_to_send', 10000),
+                'number',
+                'referral',
+                'Minimum amount to send per commission'
+            );
+        }
+
+        if ($request->has('referral_max_batch_size')) {
+            Setting::setSetting(
+                'referral_max_batch_size',
+                $request->input('referral_max_batch_size', 100),
+                'number',
+                'referral',
+                'Maximum number of commissions to send per batch'
             );
         }
 
@@ -387,6 +442,23 @@ class SettingsController extends Controller
             $updates[] = 'Referral commission updated to ' . $request->input('referral_reward_commission_percent') . '%';
         }
 
+        if ($request->has('referral_auto_send_enabled')) {
+            $status = $request->boolean('referral_auto_send_enabled') ? 'enabled' : 'disabled';
+            $updates[] = 'Automatic commission sending ' . $status;
+        }
+
+        if ($request->has('referral_schedule')) {
+            $updates[] = 'Commission sending schedule updated to ' . ucfirst($request->input('referral_schedule'));
+        }
+
+        if ($request->has('referral_min_amount_to_send')) {
+            $updates[] = 'Minimum amount to send updated to Rp ' . number_format($request->input('referral_min_amount_to_send'), 0, ',', '.');
+        }
+
+        if ($request->has('referral_max_batch_size')) {
+            $updates[] = 'Maximum batch size updated to ' . $request->input('referral_max_batch_size') . ' commissions';
+        }
+
         if ($request->has('platform_commission_percent')) {
             $updates[] = 'Platform commission updated to ' . $request->input('platform_commission_percent') . '%';
         }
@@ -517,7 +589,7 @@ class SettingsController extends Controller
         // Update Google Translate API settings
         $isEnablingGoogleTranslate = $request->has('google_translate_enabled') && $request->boolean('google_translate_enabled');
         $hasExistingApiKey = (bool) Setting::getGoogleTranslateApiKey();
-        
+
         // Validate API key is required when enabling for the first time
         if ($isEnablingGoogleTranslate && !$hasExistingApiKey) {
             $request->validate([
@@ -597,5 +669,4 @@ class SettingsController extends Controller
             return back()->with('error', 'S3 connection test failed: ' . $e->getMessage());
         }
     }
-
 }

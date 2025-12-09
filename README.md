@@ -89,6 +89,12 @@
 - ✅ **Seller Dashboard** - Revenue tracking, buyer history, best performers
 - ✅ **Share Analytics** - Share referrals, commission tracking, leaderboard (NEW)
 - ✅ **Affiliate System** - Affiliate links, commissions, leaderboard, promotional materials, quick navigation cards, conversion rate tracking, landing page builder (NEW: Enhanced dashboard with all features complete)
+- ✅ **Referral System with Automation** - Referral links, commissions, automated sending from admin wallet, configurable schedules, transaction tracking (NEW: Complete automation system)
+  - 🔄 Scheduled commission sending (daily/weekly/monthly)
+  - 💾 Transaction history with filtering and export
+  - 📧 Automated notifications (admin batch + user individual)
+  - ⚙️ Admin settings panel (enable/disable, schedule, thresholds, batch size)
+  - 🛡️ Restricted access (seller/buyer only, not admin)
 - ✅ **Featured Ads** - Promote notes dengan analytics (impressions, clicks, CTR, ROI)
 - ✅ **Wallet System** - Balance tracking, transaction history
 - ✅ **Refund System** - Buyer request → Admin approval workflow
@@ -304,8 +310,8 @@ See [SECURITY.md](SECURITY.md) untuk security hardening guide lengkap.
 - ✅ Featured Notes Advertising with analytics
 - ✅ Affiliate System with commissions
 - ✅ Share Analytics with commission tracking & monthly payouts (NEW)
+- ✅ Referral Program with Automated Commission Sending (NEW: Scheduled automation, admin settings, transaction tracking)
 - ✅ Buyer & Seller Analytics
-- ✅ Referral Program
 - ✅ Points & Gamification (Badges, Levels)
 
 **Advanced Features:**

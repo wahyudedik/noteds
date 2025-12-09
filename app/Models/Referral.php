@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Referral extends Model
 {
@@ -36,6 +37,14 @@ class Referral extends Model
     public function referred(): BelongsTo
     {
         return $this->belongsTo(User::class, 'referred_id');
+    }
+
+    /**
+     * Get all transactions associated with this referral
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(ReferralTransaction::class);
     }
 
     public function scopePending($query)

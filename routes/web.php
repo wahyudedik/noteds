@@ -401,9 +401,12 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
         });
     });
 
-    // Referral routes
-    Route::get('/referral', [ReferralController::class, 'index'])->name('referral.index');
-    Route::get('/referral/statistics', [ReferralController::class, 'statistics'])->name('referral.statistics');
+    // Referral routes - Only accessible to sellers and buyers (not admin)
+    Route::middleware('not_admin_referral')->group(function () {
+        Route::get('/referral', [ReferralController::class, 'index'])->name('referral.index');
+        Route::get('/referral/statistics', [ReferralController::class, 'statistics'])->name('referral.statistics');
+        Route::get('/referral/transactions', [ReferralController::class, 'transactions'])->name('referral.transactions');
+    });
 
     // Affiliate routes - Only accessible to sellers and buyers (not admin)
     Route::prefix('affiliate')->name('affiliate.')->middleware('not_admin_affiliate')->group(function () {
@@ -724,6 +727,13 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
         Route::patch('/payouts/{payout}', [AdminAffiliateController::class, 'updatePayout'])->name('payouts.update');
         Route::get('/commissions', [AdminAffiliateController::class, 'commissions'])->name('commissions');
         Route::post('/commissions/approve', [AdminAffiliateController::class, 'approveCommissions'])->name('commissions.approve');
+    });
+
+    // Referral Commission Management
+    Route::prefix('referral-transactions')->name('referral-transactions.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\ReferralTransactionController::class, 'index'])->name('index');
+        Route::get('/{referralTransaction}', [\App\Http\Controllers\Admin\ReferralTransactionController::class, 'show'])->name('show');
+        Route::get('/export/csv', [\App\Http\Controllers\Admin\ReferralTransactionController::class, 'export'])->name('export');
     });
 
     // Points Pricing & Redemption Management

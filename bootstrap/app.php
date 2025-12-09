@@ -44,6 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'rate.limit' => \App\Http\Middleware\RateLimitSensitive::class,
             'not_admin_affiliate' => \App\Http\Middleware\EnsureNotAdminAffiliate::class,
+            'not_admin_referral' => \App\Http\Middleware\EnsureNotAdminReferral::class,
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\ContentSecurityPolicy::class,

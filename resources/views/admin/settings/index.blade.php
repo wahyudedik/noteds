@@ -1225,7 +1225,8 @@
                                             <p class="text-sm font-medium text-green-800 mb-1">Current Settings</p>
                                             <ul class="text-xs text-green-700 space-y-1">
                                                 <li>• Signup Reward:
-                                                    <strong>{{ currency($referralSignupReward) }}</strong></li>
+                                                    <strong>{{ currency($referralSignupReward) }}</strong>
+                                                </li>
                                                 <li>• Transaction Commission:
                                                     <strong>{{ $referralCommissionPercent }}%</strong>
                                                 </li>
@@ -1233,6 +1234,118 @@
                                             </ul>
                                         </div>
                                     </div>
+                                </div>
+
+                                <!-- Automation Settings -->
+                                <div class="border-t border-gray-200 pt-6">
+                                    <h4 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Automatic Commission Sending
+                                    </h4>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Enable Automatic Sending -->
+                                        <div>
+                                            <label for="referral_auto_send_enabled"
+                                                class="flex items-center gap-3 cursor-pointer">
+                                                <input type="hidden" name="referral_auto_send_enabled" value="0">
+                                                <input type="checkbox" name="referral_auto_send_enabled"
+                                                    id="referral_auto_send_enabled" value="1"
+                                                    @if ($referralAutoSendEnabled ?? false) checked @endif
+                                                    class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500">
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-700">
+                                                        Enable Automatic Commission Sending
+                                                    </span>
+                                                    <p class="text-xs text-gray-500 mt-0.5">
+                                                        When enabled, pending commissions will be automatically sent on
+                                                        schedule
+                                                    </p>
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        <!-- Schedule -->
+                                        <div>
+                                            <label for="referral_schedule"
+                                                class="block text-sm font-medium text-gray-700 mb-2">
+                                                Sending Schedule <span class="text-red-500">*</span>
+                                            </label>
+                                            <select name="referral_schedule" id="referral_schedule"
+                                                class="block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_schedule') border-red-500 @enderror">
+                                                <option value="daily" @if (($referralSchedule ?? 'daily') === 'daily') selected @endif>
+                                                    Daily (2:00 AM)
+                                                </option>
+                                                <option value="weekly" @if (($referralSchedule ?? 'weekly') === 'weekly') selected @endif>
+                                                    Weekly (Monday 2:00 AM)
+                                                </option>
+                                                <option value="monthly" @if (($referralSchedule ?? 'monthly') === 'monthly') selected @endif>
+                                                    Monthly (1st day, 2:00 AM)
+                                                </option>
+                                            </select>
+                                            @error('referral_schedule')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+
+                                        <!-- Minimum Amount to Send -->
+                                        <div>
+                                            <label for="referral_min_amount_to_send"
+                                                class="block text-sm font-medium text-gray-700 mb-2">
+                                                Minimum Amount to Send (Rp) <span class="text-red-500">*</span>
+                                            </label>
+                                            <div class="relative">
+                                                <div
+                                                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <span class="text-gray-500 text-sm">Rp</span>
+                                                </div>
+                                                <input type="number" name="referral_min_amount_to_send"
+                                                    id="referral_min_amount_to_send"
+                                                    value="{{ old('referral_min_amount_to_send', $referralMinAmountToSend ?? 10000) }}"
+                                                    min="0" step="1000" required placeholder="10000"
+                                                    class="block w-full pl-10 pr-3 py-3 border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_min_amount_to_send') border-red-500 @enderror">
+                                            </div>
+                                            @error('referral_min_amount_to_send')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                            <p class="mt-2 text-xs text-gray-500">
+                                                Only referrals with pending commission >= this amount will be sent
+                                            </p>
+                                        </div>
+
+                                        <!-- Maximum Batch Size -->
+                                        <div>
+                                            <label for="referral_max_batch_size"
+                                                class="block text-sm font-medium text-gray-700 mb-2">
+                                                Maximum Batch Size <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="number" name="referral_max_batch_size"
+                                                id="referral_max_batch_size"
+                                                value="{{ old('referral_max_batch_size', $referralMaxBatchSize ?? 100) }}"
+                                                min="1" max="10000" step="1" required placeholder="100"
+                                                class="block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_max_batch_size') border-red-500 @enderror">
+                                            @error('referral_max_batch_size')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                            <p class="mt-2 text-xs text-gray-500">
+                                                Maximum number of commissions to send per batch (prevent overload)
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Last Batch Sent Info -->
+                                    @if ($referralLastBatchSent ?? null)
+                                        <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                            <p class="text-sm text-blue-800">
+                                                <strong>Last batch sent:</strong>
+                                                {{ Carbon\Carbon::parse($referralLastBatchSent)->format('Y-m-d H:i:s') }}
+                                            </p>
+                                        </div>
+                                    @endif
                                 </div>
 
                                 <div class="flex items-center justify-end pt-4 border-t border-gray-200">

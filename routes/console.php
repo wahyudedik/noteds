@@ -167,3 +167,21 @@ Schedule::job(new \App\Jobs\ProcessMonthlyAffiliatePayoutJob())
     ->monthlyOn($affiliatePayoutDay, '12:00')
     ->timezone('Asia/Jakarta')
     ->description('Transfer pending affiliate payouts from admin wallet to affiliate wallets');
+
+// Process referral commissions based on configured schedule
+// The schedule is controlled by admin settings and can be daily, weekly, or monthly
+$referralSchedule = \App\Models\Setting::getSetting('referral_schedule', 'referral', 'daily');
+$schedule = match ($referralSchedule) {
+    'weekly' => Schedule::job(new \App\Jobs\ProcessReferralCommissions())
+        ->weekly()
+        ->mondays()
+        ->at('02:00'),
+    'monthly' => Schedule::job(new \App\Jobs\ProcessReferralCommissions())
+        ->monthly()
+        ->at('02:00'),
+    default => Schedule::job(new \App\Jobs\ProcessReferralCommissions())
+        ->daily()
+        ->at('02:00'),
+};
+$schedule->timezone('Asia/Jakarta')
+    ->description('Process pending referral commissions and send to users');

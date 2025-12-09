@@ -241,6 +241,16 @@ Lengkapi pengalaman berbelanja dengan analytics dan personalization.
   - Referral ROI tracking
   - Commission structure
   - Referral history
+  - **Automatic Commission Sending** - Scheduled automated commission payouts from admin wallet
+    - Enable/disable automatic sending
+    - Configurable schedule (daily, weekly, monthly)
+    - Minimum amount threshold for sending
+    - Batch size limits to prevent overload
+    - Transaction history tracking
+    - Email notifications for both admin and users
+    - Status tracking (pending, sent, failed)
+    - Admin dashboard for monitoring all transactions
+    - CSV export for reporting
 
 - 🎯 **Subscriptions & Membership**
   - Buyer subscription plans
@@ -712,6 +722,22 @@ Platform untuk berbagai tipe konten kreatif.
 ---
 
 ### 6.2 Feature Configuration
+
+**Referral Commission Management** (NEW - Automated Sending):
+- ✅ Enable/disable automatic commission sending
+- ✅ Schedule configuration (daily, weekly, monthly)
+- ✅ Minimum amount threshold per commission
+- ✅ Maximum batch size configuration (prevent server overload)
+- ✅ Real-time commission transaction monitoring
+- ✅ Detailed transaction history with filtering
+  - Filter by status (pending, sent, failed)
+  - Filter by type (signup bonus, transaction commission)
+  - Filter by user and date range
+  - CSV export for accounting/reporting
+- ✅ Transaction detail view with user information
+- ✅ Admin activity logging for all commission actions
+- ✅ Automated email notifications (admin gets batch summary, users get individual notifications)
+- ✅ Error handling and retry logic for failed commissions
 
 **Share Analytics Configuration** (NEW):
 - ✅ Commission percentage setting (default: 5%)
