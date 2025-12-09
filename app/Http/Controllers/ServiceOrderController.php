@@ -230,6 +230,24 @@ class ServiceOrderController extends Controller
     public function releaseEscrow(Request $request, ServiceOrder $order): RedirectResponse
     {
         abort_unless($order->user_id === auth()->id() || auth()->user()->hasRole('admin'), 403);
+
+        // ===== NEW: Enforce Work Verification Workflow =====
+        // Check 1: work_status must be 'approved' (vendor submitted + buyer approved)
+        if ($order->work_status !== 'approved') {
+            return back()->with('error', 'Pekerjaan belum disetujui oleh buyer. Verifikasi pekerjaan terlebih dahulu.');
+        }
+
+        // Check 2: admin_verified_at must not be null (admin must have verified)
+        if (!$order->admin_verified_at) {
+            return back()->with('error', 'Pembayaran menunggu verifikasi admin. Hubungi tim admin untuk melanjutkan.');
+        }
+
+        // Check 3: admin must have approved (buyer_approval_status must be 'approved' AND admin verified)
+        if ($order->buyer_approval_status !== 'approved') {
+            return back()->with('error', 'Pekerjaan belum disetujui oleh buyer.');
+        }
+        // ===== END: Work Verification Workflow Check =====
+
         $request->validate([
             'amount' => ['required', 'numeric', 'min:1'],
             'milestone_index' => ['nullable', 'integer', 'min:0'],

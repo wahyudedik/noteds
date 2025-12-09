@@ -45,6 +45,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'rate.limit' => \App\Http\Middleware\RateLimitSensitive::class,
             'not_admin_affiliate' => \App\Http\Middleware\EnsureNotAdminAffiliate::class,
             'not_admin_referral' => \App\Http\Middleware\EnsureNotAdminReferral::class,
+            'ensure_vendor_can_submit' => \App\Http\Middleware\EnsureVendorCanSubmitWork::class,
+            'ensure_buyer_can_approve' => \App\Http\Middleware\EnsureBuyerCanApprove::class,
+            'ensure_admin_can_verify' => \App\Http\Middleware\EnsureAdminCanVerify::class,
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\ContentSecurityPolicy::class,

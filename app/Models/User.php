@@ -668,6 +668,58 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(NoteMessage::class, 'sender_id');
     }
 
+    // ============ Direct Messaging ============
+
+    public function sentMessages(): HasMany
+    {
+        return $this->hasMany(UserMessage::class, 'sender_id');
+    }
+
+    public function receivedMessages(): HasMany
+    {
+        return $this->hasMany(UserMessage::class, 'recipient_id');
+    }
+
+    public function getUnreadMessageCount(): int
+    {
+        return $this->unread_messages_count ?? 0;
+    }
+
+    /**
+     * Get conversation thread with another user
+     */
+    public function getConversationWith(User $otherUser)
+    {
+        return UserMessage::conversationBetween($this->id, $otherUser->id)->get();
+    }
+
+    /**
+     * Send message to another user
+     */
+    public function sendMessage(string $message, User $recipient): UserMessage
+    {
+        $msg = $this->sentMessages()->create([
+            'recipient_id' => $recipient->id,
+            'message' => $message,
+        ]);
+
+        $recipient->increment('unread_messages_count');
+        $this->increment('sent_messages_count');
+        $recipient->increment('received_messages_count');
+
+        return $msg;
+    }
+
+    /**
+     * Get unread messages
+     */
+    public function getUnreadMessages()
+    {
+        return $this->receivedMessages()->unread($this->id)->get();
+    }
+
+    // ============ Service Order / Studio ============
+
     public function noteReviewReplies(): HasMany
     {
         return $this->hasMany(NoteReviewReply::class, 'user_id');

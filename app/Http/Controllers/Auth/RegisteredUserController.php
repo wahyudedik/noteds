@@ -53,7 +53,7 @@ class RegisteredUserController extends Controller
         if ($inviteToken) {
             $invitation = \App\Models\WorkspaceInvitation::where('token', $inviteToken)
                 ->whereNull('accepted_at')
-                ->where('expires_at', '>', now())
+                ->where('expires_at', '>', now()) 
                 ->first();
 
             if (!$invitation) {

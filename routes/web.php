@@ -105,6 +105,15 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('studio
     Route::post('/orders/{order}/quotes', [\App\Http\Controllers\ServiceQuoteController::class, 'store'])->middleware('throttle:5,1')->name('orders.quotes.store');
     Route::post('/quotes/{quote}/accept', [\App\Http\Controllers\ServiceQuoteController::class, 'accept'])->middleware('throttle:8,1')->name('quotes.accept');
     Route::post('/quotes/{quote}/reject', [\App\Http\Controllers\ServiceQuoteController::class, 'reject'])->middleware('throttle:8,1')->name('quotes.reject');
+
+    // Work submission routes (vendor submit work)
+    Route::get('/orders/{order}/submit-work', [\App\Http\Controllers\WorkSubmissionController::class, 'create'])->middleware('ensure_vendor_can_submit')->name('orders.submit-work.create');
+    Route::post('/orders/{order}/submit-work', [\App\Http\Controllers\WorkSubmissionController::class, 'store'])->middleware('throttle:5,1', 'ensure_vendor_can_submit')->name('orders.submit-work.store');
+    Route::get('/orders/{order}/work-detail', [\App\Http\Controllers\WorkSubmissionController::class, 'show'])->name('orders.work-detail');
+
+    // Buyer approval routes
+    Route::post('/orders/{order}/approve-work', [\App\Http\Controllers\BuyerApprovalController::class, 'approve'])->middleware('throttle:5,1', 'ensure_buyer_can_approve')->name('orders.approve-work');
+    Route::post('/orders/{order}/reject-work', [\App\Http\Controllers\BuyerApprovalController::class, 'reject'])->middleware('throttle:5,1', 'ensure_buyer_can_approve')->name('orders.reject-work');
 });
 
 // Contact (public)
@@ -639,6 +648,14 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::resource('disputes', \App\Http\Controllers\Admin\DisputeController::class)->only(['index', 'show']);
     Route::post('/disputes/{dispute}/resolve', [\App\Http\Controllers\Admin\DisputeController::class, 'resolve'])->name('disputes.resolve');
     Route::resource('quality-checks', \App\Http\Controllers\Admin\QualityCheckController::class)->only(['index', 'show']);
+
+    // Studio Payment Verification Routes
+    Route::prefix('order-verification')->name('order-verification.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\OrderVerificationController::class, 'pendingVerifications'])->name('index');
+        Route::get('/{order}', [\App\Http\Controllers\Admin\OrderVerificationController::class, 'show'])->middleware('ensure_admin_can_verify')->name('show');
+        Route::post('/{order}/verify', [\App\Http\Controllers\Admin\OrderVerificationController::class, 'verify'])->middleware('throttle:5,1', 'ensure_admin_can_verify')->name('verify');
+        Route::post('/{order}/reject', [\App\Http\Controllers\Admin\OrderVerificationController::class, 'reject'])->middleware('throttle:5,1', 'ensure_admin_can_verify')->name('reject');
+    });
     Route::post('/quality-checks/check-note/{note}', [\App\Http\Controllers\Admin\QualityCheckController::class, 'checkNote'])->name('quality-checks.check-note');
     Route::resource('escrows', \App\Http\Controllers\Admin\EscrowController::class)->only(['index', 'show']);
     Route::post('/escrows/{escrow}/release', [\App\Http\Controllers\Admin\EscrowController::class, 'release'])->name('escrows.release');
@@ -740,6 +757,12 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::resource('points-pricing', \App\Http\Controllers\Admin\PointsPricingController::class);
     Route::get('/points-monitoring', [\App\Http\Controllers\Admin\PointsPricingController::class, 'monitoring'])->name('points.monitoring');
     Route::get('/points-redemption/export', [\App\Http\Controllers\Admin\PointsPricingController::class, 'exportReport'])->name('points.export');
+
+    // Studio Order Verification routes (admin verify work & release payment)
+    Route::get('/order-verification', [\App\Http\Controllers\Admin\OrderVerificationController::class, 'pendingVerifications'])->name('order-verification.index');
+    Route::get('/order-verification/{order}', [\App\Http\Controllers\Admin\OrderVerificationController::class, 'show'])->name('order-verification.show');
+    Route::post('/order-verification/{order}/verify', [\App\Http\Controllers\Admin\OrderVerificationController::class, 'verify'])->middleware('throttle:5,1')->name('order-verification.verify');
+    Route::post('/order-verification/{order}/reject', [\App\Http\Controllers\Admin\OrderVerificationController::class, 'reject'])->middleware('throttle:5,1')->name('order-verification.reject');
 });
 
 // Public Documentation routes
