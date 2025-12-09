@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class OrderVerificationController extends Controller
 {
@@ -100,8 +101,11 @@ class OrderVerificationController extends Controller
      */
     public function verify(ServiceOrder $order, Request $request): RedirectResponse
     {
+        /** @var ServiceOrder $order */
+        /** @var User $currentUser */
+        $currentUser = Auth::user();
         // Verify admin can verify
-        abort_unless(auth()->user()->hasRole('admin'), 403);
+        abort_unless($currentUser && $currentUser->hasRole('admin'), 403);
         abort_unless($order->isAwaitingAdminVerification(), 403);
 
         // Validate request
@@ -142,7 +146,7 @@ class OrderVerificationController extends Controller
                     'fee_percent' => $platformFeePercent,
                 ],
                 'verified_at' => now(),
-                'verified_by' => auth()->id(),
+                'verified_by' => $currentUser->id,
             ]);
 
             // Credit admin wallet with fee
@@ -160,13 +164,13 @@ class OrderVerificationController extends Controller
                     'original_amount' => $escrowAmount,
                 ],
                 'verified_at' => now(),
-                'verified_by' => auth()->id(),
+                'verified_by' => $currentUser->id,
             ]);
 
             // Update order status
             $order->update([
                 'work_status' => 'verified', // Add this to enum migration if needed
-                'admin_verified_by' => auth()->id(),
+                'admin_verified_by' => $currentUser->id,
                 'admin_verified_at' => now(),
                 'admin_verification_notes' => $validated['notes'],
                 'release_request_status' => 'approved',
@@ -176,7 +180,7 @@ class OrderVerificationController extends Controller
             // Create approval log
             ApprovalLog::create([
                 'service_order_id' => $order->id,
-                'approver_id' => auth()->id(),
+                'approver_id' => $currentUser->id,
                 'approver_type' => 'admin',
                 'action' => 'payment_released',
                 'notes' => $validated['notes'],
@@ -185,7 +189,7 @@ class OrderVerificationController extends Controller
 
             // Create activity log
             $order->activities()->create([
-                'user_id' => auth()->id(),
+                'user_id' => $currentUser->id,
                 'action' => 'payment_released',
                 'description' => 'Admin verified work and released payment to vendor',
                 'meta' => [
@@ -201,9 +205,7 @@ class OrderVerificationController extends Controller
             }
 
             // Send notification to admin
-            if (auth()->check()) {
-                Notification::send(auth()->user(), new OrderVerifiedNotification($order));
-            }
+            Notification::send($currentUser, new OrderVerifiedNotification($order));
 
             DB::commit();
 
@@ -222,8 +224,11 @@ class OrderVerificationController extends Controller
      */
     public function reject(ServiceOrder $order, Request $request): RedirectResponse
     {
+        /** @var ServiceOrder $order */
+        /** @var User $currentUser */
+        $currentUser = Auth::user();
         // Verify admin can reject
-        abort_unless(auth()->user()->hasRole('admin'), 403);
+        abort_unless($currentUser && $currentUser->hasRole('admin'), 403);
         abort_unless($order->isAwaitingAdminVerification(), 403);
 
         // Validate request
@@ -252,13 +257,13 @@ class OrderVerificationController extends Controller
                     'reason' => 'Admin rejected work quality',
                 ],
                 'verified_at' => now(),
-                'verified_by' => auth()->id(),
+                'verified_by' => $currentUser->id,
             ]);
 
             // Update order status
             $order->update([
                 'work_status' => 'rejected',
-                'admin_verified_by' => auth()->id(),
+                'admin_verified_by' => $currentUser->id,
                 'admin_verified_at' => now(),
                 'admin_verification_notes' => $validated['notes'],
                 'release_request_status' => 'rejected',
@@ -268,7 +273,7 @@ class OrderVerificationController extends Controller
             // Create approval log
             ApprovalLog::create([
                 'service_order_id' => $order->id,
-                'approver_id' => auth()->id(),
+                'approver_id' => $currentUser->id,
                 'approver_type' => 'admin',
                 'action' => 'payment_rejected',
                 'notes' => $validated['notes'],
@@ -277,7 +282,7 @@ class OrderVerificationController extends Controller
 
             // Create activity log
             $order->activities()->create([
-                'user_id' => auth()->id(),
+                'user_id' => $currentUser->id,
                 'action' => 'payment_rejected',
                 'description' => 'Admin rejected work and refunded escrow to buyer',
                 'meta' => [
@@ -315,7 +320,7 @@ class OrderVerificationController extends Controller
     {
         // Try to get from settings first
         $adminWalletUserId = settings('admin_wallet_user_id');
-        
+
         if ($adminWalletUserId) {
             return $adminWalletUserId;
         }
