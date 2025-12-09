@@ -210,4 +210,13 @@ return [
     'existing_materials' => 'Material Existing',
     'no_materials' => 'Belum ada material promosi',
     'html_code_copied' => 'Kode HTML berhasil disalin ke clipboard',
+    
+    // Global Landing Page
+    'setup_landing_page' => 'Setup Landing Page',
+    'create_landing_page' => 'Buat Landing Page',
+    'assigned_links' => 'Link Afiliasi yang Ditugaskan',
+    'no_links_assigned' => 'Belum ada link afiliasi yang ditugaskan',
+    'no_landing_page' => 'Anda belum membuat landing page',
+    'assign_links' => 'Tugaskan Link Afiliasi ke Landing Page Ini',
+    'no_links_available' => 'Buat link afiliasi terlebih dahulu untuk menetapkannya ke landing page',
 ];

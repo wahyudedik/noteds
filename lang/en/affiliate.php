@@ -195,4 +195,13 @@ return [
     'fast_access' => 'Instant Access',
     'confidential' => '100% Confidential',
     'stats_text' => 'people claimed this offer today',
+    
+    // Global Landing Page
+    'setup_landing_page' => 'Setup Landing Page',
+    'create_landing_page' => 'Create Landing Page',
+    'assigned_links' => 'Assigned Affiliate Links',
+    'no_links_assigned' => 'No affiliate links assigned yet',
+    'no_landing_page' => 'You haven\'t created a landing page yet',
+    'assign_links' => 'Assign Affiliate Links to This Landing Page',
+    'no_links_available' => 'Create an affiliate link first to assign it to a landing page',
 ];

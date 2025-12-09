@@ -208,4 +208,13 @@ return [
     'copy_html' => 'نسخ HTML',
     'affiliate_landing_page' => 'صفحة الهبوط للمنتسب',
     'affiliate_name' => 'اسم المنتسب',
+    
+    // Global Landing Page
+    'setup_landing_page' => 'إعداد صفحة الهبوط',
+    'create_landing_page' => 'إنشاء صفحة هبوط',
+    'assigned_links' => 'روابط تابعة معينة',
+    'no_links_assigned' => 'لم يتم تعيين أي روابط تابعة حتى الآن',
+    'no_landing_page' => 'لم تقم بإنشاء صفحة هبوط حتى الآن',
+    'assign_links' => 'تعيين روابط تابعة لصفحة الهبوط هذه',
+    'no_links_available' => 'قم بإنشاء رابط تابع أولاً لتعيينه إلى صفحة الهبوط',
 ];
