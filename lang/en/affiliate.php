@@ -93,7 +93,6 @@ return [
 
     // General
     'optional' => 'Optional',
-    'description' => 'Description',
     'user' => 'User',
     'type' => 'Type',
     'date' => 'Date',

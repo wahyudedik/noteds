@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\ServiceOrder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class ServiceOrderController extends Controller
 {
     public function index(): View
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         if ($user->hasRole('admin')) {
             $orders = ServiceOrder::latest()->paginate(12);
         } elseif ($user->hasRole('vendor')) {
@@ -36,7 +38,7 @@ class ServiceOrderController extends Controller
         ]);
 
         $order = ServiceOrder::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'title' => $request->input('title'),
             'description' => $request->input('description'),
             'budget' => (float) $request->input('budget', 0),
@@ -50,10 +52,12 @@ class ServiceOrderController extends Controller
 
     public function show(ServiceOrder $order): View
     {
-        abort_unless($order->user_id === auth()->id() || auth()->user()->hasRole('admin') || auth()->user()->id === $order->assigned_user_id, 403);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        abort_unless($order->user_id === Auth::id() || $user->hasRole('admin') || $user->id === $order->assigned_user_id, 403);
 
         $vendors = [];
-        if (auth()->user()->hasRole('admin')) {
+        if ($user->hasRole('admin')) {
             // Get vendors list for manual assignment
             $vendors = \App\Models\User::role('vendor')->orderBy('name')->get(['id', 'name']);
         }
@@ -76,7 +80,9 @@ class ServiceOrderController extends Controller
 
     public function assignVendor(Request $request, ServiceOrder $order): RedirectResponse
     {
-        abort_unless(auth()->user()->hasRole('admin'), 403);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        abort_unless($user->hasRole('admin'), 403);
         $request->validate([
             'vendor_id' => ['required', 'uuid', 'exists:users,id'],
         ]);
@@ -114,7 +120,7 @@ class ServiceOrderController extends Controller
 
         \App\Models\OrderActivity::create([
             'service_order_id' => $order->id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'vendor_assigned',
             'description' => 'Admin menetapkan vendor ke order',
             'meta' => ['vendor_id' => $vendor->id],
@@ -125,13 +131,14 @@ class ServiceOrderController extends Controller
 
     public function fundEscrow(Request $request, ServiceOrder $order): RedirectResponse
     {
-        abort_unless($order->user_id === auth()->id(), 403);
+        abort_unless($order->user_id === Auth::id(), 403);
         $request->validate([
             'amount' => ['required', 'numeric', 'min:1'],
         ]);
 
         $amount = (float) $request->input('amount');
-        $buyer = auth()->user();
+        /** @var \App\Models\User $buyer */
+        $buyer = Auth::user();
         $buyerWallet = \App\Models\Wallet::firstOrCreate(['user_id' => $buyer->id], ['balance' => 0, 'currency' => config('currency.base_currency', 'IDR')]);
         if ($buyerWallet->balance < $amount) {
             return back()->with('error', 'Saldo wallet tidak cukup untuk funding escrow.');
@@ -232,7 +239,7 @@ class ServiceOrderController extends Controller
     public function releaseEscrow(Request $request, ServiceOrder $order): RedirectResponse
     {
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
         abort_unless($order->user_id === $user->id || $user->hasRole('admin'), 403);
 
         // ===== NEW: Enforce Work Verification Workflow =====
@@ -332,7 +339,7 @@ class ServiceOrderController extends Controller
         // Release ledger
         \App\Models\EscrowLedger::create([
             'service_order_id' => $order->id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'type' => 'release',
             'amount' => $amount,
             'milestone_index' => $milestoneIndex,
@@ -340,7 +347,7 @@ class ServiceOrderController extends Controller
         ]);
         \App\Models\OrderActivity::create([
             'service_order_id' => $order->id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'escrow_released',
             'description' => 'Buyer merilis escrow',
             'meta' => ['amount' => $amount, 'milestone_index' => $milestoneIndex, 'vendor_net' => $vendorNet, 'platform_fee' => $platformFee],
@@ -396,7 +403,7 @@ class ServiceOrderController extends Controller
     public function refundEscrow(Request $request, ServiceOrder $order): RedirectResponse
     {
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
         abort_unless($order->user_id === $user->id || $user->hasRole('admin'), 403);
         $request->validate([
             'amount' => ['required', 'numeric', 'min:1'],
@@ -425,7 +432,7 @@ class ServiceOrderController extends Controller
         // Ledger
         \App\Models\EscrowLedger::create([
             'service_order_id' => $order->id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'type' => 'refund',
             'amount' => $amount,
             'milestone_index' => null,
@@ -433,7 +440,7 @@ class ServiceOrderController extends Controller
         ]);
         \App\Models\OrderActivity::create([
             'service_order_id' => $order->id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'action' => 'escrow_refunded',
             'description' => 'Buyer menerima refund escrow',
             'meta' => ['amount' => $amount],

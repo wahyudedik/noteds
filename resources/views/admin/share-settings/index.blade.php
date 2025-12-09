@@ -84,7 +84,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="number"
-                                        class="w-full pr-9 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('share_commission_percent') border-red-500 @enderror"
+                                        class="w-full pr-9 pl-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('share_commission_percent') border-red-500 @enderror"
                                         id="share_commission_percent" name="share_commission_percent"
                                         value="{{ $shareCommissionPercent }}" required min="0" max="100"
                                         step="0.01">
@@ -105,7 +105,7 @@
                                     Payment Mode
                                 </label>
                                 <select
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('share_commission_payment_mode') border-red-500 @enderror"
+                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('share_commission_payment_mode') border-red-500 @enderror"
                                     id="share_commission_payment_mode" name="share_commission_payment_mode" required>
                                     <option value="monthly"
                                         {{ $shareCommissionPaymentMode === 'monthly' ? 'selected' : '' }}>Monthly Payout
@@ -146,7 +146,7 @@
                                 Monthly Payout Day
                             </label>
                             <select
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent @error('share_monthly_payout_day') border-red-500 @enderror"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent @error('share_monthly_payout_day') border-red-500 @enderror"
                                 id="share_monthly_payout_day" name="share_monthly_payout_day" required>
                                 @for ($day = 1; $day <= 31; $day++)
                                     <option value="{{ $day }}"
@@ -191,7 +191,7 @@
                             </label>
                             <div class="relative">
                                 <input type="number"
-                                    class="w-full pr-9 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent @error('share_max_shares_per_user_per_link') border-red-500 @enderror"
+                                    class="w-full pr-9 pl-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent @error('share_max_shares_per_user_per_link') border-red-500 @enderror"
                                     id="share_max_shares_per_user_per_link" name="share_max_shares_per_user_per_link"
                                     value="{{ $shareMaxSharesPerUserPerLink }}" required min="1" max="1000">
                                 <span

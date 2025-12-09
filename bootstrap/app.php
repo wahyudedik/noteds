@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -64,7 +65,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     'file' => $e->getFile(),
                     'line' => $e->getLine(),
                     'path' => $request->path(),
-                    'user_id' => auth()->id(),
+                    'user_id' => Auth::id(),
                 ]);
 
                 return response()->json([

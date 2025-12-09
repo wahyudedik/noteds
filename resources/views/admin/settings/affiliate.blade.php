@@ -52,7 +52,7 @@
                                             id="affiliate_commission_tier_{{ $i }}" step="0.01"
                                             min="0" max="100"
                                             value="{{ $settings['affiliate_commission_tier_' . $i] }}"
-                                            class="flex-1 rounded-lg border-gray-300 shadow-sm @error('affiliate_commission_tier_' . $i) border-red-500 @enderror">
+                                            class="flex-1 rounded-lg border shadow-sm @error('affiliate_commission_tier_' . $i) border-red-500 @enderror">
                                         <span class="text-gray-600 font-medium">%</span>
                                     </div>
                                     @error('affiliate_commission_tier_' . $i)
@@ -80,7 +80,7 @@
                                     <input type="number" name="affiliate_conversion_threshold_{{ $i }}"
                                         id="affiliate_conversion_threshold_{{ $i }}" min="1"
                                         value="{{ $settings['affiliate_conversion_threshold_' . $i] }}"
-                                        class="w-full rounded-lg border-gray-300 shadow-sm @error('affiliate_conversion_threshold_' . $i) border-red-500 @enderror">
+                                        class="w-full rounded-lg border shadow-sm @error('affiliate_conversion_threshold_' . $i) border-red-500 @enderror">
                                     @error('affiliate_conversion_threshold_' . $i)
                                         <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                                     @enderror
@@ -106,7 +106,7 @@
                                     <input type="number" name="affiliate_min_payout_amount"
                                         id="affiliate_min_payout_amount" step="0.01" min="0.01"
                                         value="{{ $settings['affiliate_min_payout_amount'] }}"
-                                        class="flex-1 rounded-lg border-gray-300 shadow-sm @error('affiliate_min_payout_amount') border-red-500 @enderror">
+                                        class="flex-1 rounded-lg border shadow-sm @error('affiliate_min_payout_amount') border-red-500 @enderror">
                                 </div>
                                 @error('affiliate_min_payout_amount')
                                     <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
@@ -120,7 +120,7 @@
                                 </label>
                                 <input type="number" name="affiliate_payout_day" id="affiliate_payout_day" min="1"
                                     max="31" value="{{ $settings['affiliate_payout_day'] }}"
-                                    class="w-full rounded-lg border-gray-300 shadow-sm @error('affiliate_payout_day') border-red-500 @enderror">
+                                    class="w-full rounded-lg border shadow-sm @error('affiliate_payout_day') border-red-500 @enderror">
                                 @error('affiliate_payout_day')
                                     <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                                 @enderror

@@ -93,7 +93,6 @@ return [
 
     // General
     'optional' => 'اختياري',
-    'description' => 'الوصف',
     'user' => 'المستخدم',
     'type' => 'النوع',
     'date' => 'التاريخ',

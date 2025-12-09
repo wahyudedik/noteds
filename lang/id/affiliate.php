@@ -93,7 +93,6 @@ return [
 
     // General
     'optional' => 'Opsional',
-    'description' => 'Deskripsi',
     'user' => 'Pengguna',
     'type' => 'Tipe',
     'date' => 'Tanggal',
