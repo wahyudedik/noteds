@@ -100,7 +100,7 @@
                                                 id="studio_platform_fee_percent"
                                                 value="{{ old('studio_platform_fee_percent', $studioPlatformFeePercent ?? 10) }}"
                                                 min="0" max="100" step="0.1" required placeholder="10"
-                                                class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500 @error('studio_platform_fee_percent') border-red-500 @enderror">
+                                                class="block w-full pr-10 py-3 border rounded-lg shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500 @error('studio_platform_fee_percent') border-red-500 @enderror">
                                             <div
                                                 class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                                 <span class="text-gray-500 text-sm">%</span>
@@ -617,7 +617,7 @@
                                             <input type="number" name="premium_price_monthly" id="premium_price_monthly"
                                                 value="{{ old('premium_price_monthly', $premiumPrice) }}" min="0"
                                                 step="1000" required placeholder="25000"
-                                                class="block w-full pl-10 pr-3 py-3 border-gray-300 rounded-lg shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 @error('premium_price_monthly') border-red-500 @enderror">
+                                                class="block w-full pl-10 pr-3 py-3 border rounded-lg shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 @error('premium_price_monthly') border-red-500 @enderror">
                                         </div>
                                         @error('premium_price_monthly')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -728,7 +728,7 @@
                                                     id="ai_price_{{ $feature }}"
                                                     value="{{ old('ai_price_' . $feature, $price) }}" min="0"
                                                     step="1000"
-                                                    class="block w-full pl-10 pr-3 py-2 border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 @error('ai_price_' . $feature) border-red-500 @enderror">
+                                                    class="block w-full pl-10 pr-3 py-2 border rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 @error('ai_price_' . $feature) border-red-500 @enderror">
                                             </div>
                                             <p class="mt-2 text-xs text-gray-500">
                                                 Tarif per penggunaan setelah melewati kuota gratis. Kosongkan atau isi 0
@@ -787,7 +787,7 @@
                                                 id="platform_commission_percent"
                                                 value="{{ old('platform_commission_percent', $platformCommissionPercent) }}"
                                                 min="0" max="100" step="0.1" required placeholder="20"
-                                                class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('platform_commission_percent') border-red-500 @enderror">
+                                                class="block w-full pr-10 py-3 border rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('platform_commission_percent') border-red-500 @enderror">
                                             <div
                                                 class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                                 <span class="text-gray-500 text-sm">%</span>
@@ -813,7 +813,7 @@
                                                 id="creator_commission_percent"
                                                 value="{{ old('creator_commission_percent', $creatorCommissionPercent) }}"
                                                 min="0" max="100" step="0.1" required placeholder="0"
-                                                class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('creator_commission_percent') border-red-500 @enderror">
+                                                class="block w-full pr-10 py-3 border rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('creator_commission_percent') border-red-500 @enderror">
                                             <div
                                                 class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                                 <span class="text-gray-500 text-sm">%</span>
@@ -842,7 +842,7 @@
                                                 id="premium_buyer_discount_percent"
                                                 value="{{ old('premium_buyer_discount_percent', $premiumBuyerDiscountPercent ?? 10) }}"
                                                 min="0" max="50" step="0.1" required placeholder="10"
-                                                class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('premium_buyer_discount_percent') border-red-500 @enderror">
+                                                class="block w-full pr-10 py-3 border rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('premium_buyer_discount_percent') border-red-500 @enderror">
                                             <div
                                                 class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                                 <span class="text-gray-500 text-sm">%</span>
@@ -867,7 +867,7 @@
                                             <input type="number" name="tax_default_percent" id="tax_default_percent"
                                                 value="{{ old('tax_default_percent', $defaultTaxPercent ?? 0) }}"
                                                 min="0" max="100" step="0.1" required placeholder="11"
-                                                class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('tax_default_percent') border-red-500 @enderror">
+                                                class="block w-full pr-10 py-3 border rounded-lg shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 @error('tax_default_percent') border-red-500 @enderror">
                                             <div
                                                 class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                                 <span class="text-gray-500 text-sm">%</span>
@@ -1175,7 +1175,7 @@
                                                 id="referral_reward_signup"
                                                 value="{{ old('referral_reward_signup', $referralSignupReward) }}"
                                                 min="0" step="1000" required placeholder="5000"
-                                                class="block w-full pl-10 pr-3 py-3 border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_reward_signup') border-red-500 @enderror">
+                                                class="block w-full pl-10 pr-3 py-3 border rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_reward_signup') border-red-500 @enderror">
                                         </div>
                                         @error('referral_reward_signup')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -1196,7 +1196,7 @@
                                                 id="referral_reward_commission_percent"
                                                 value="{{ old('referral_reward_commission_percent', $referralCommissionPercent) }}"
                                                 min="0" max="100" step="0.1" required placeholder="5"
-                                                class="block w-full pr-10 py-3 border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_reward_commission_percent') border-red-500 @enderror">
+                                                class="block w-full pr-10 py-3 border rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_reward_commission_percent') border-red-500 @enderror">
                                             <div
                                                 class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                                 <span class="text-gray-500 text-sm">%</span>
@@ -1276,7 +1276,7 @@
                                                 Sending Schedule <span class="text-red-500">*</span>
                                             </label>
                                             <select name="referral_schedule" id="referral_schedule"
-                                                class="block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_schedule') border-red-500 @enderror">
+                                                class="block w-full px-3 py-3 border rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_schedule') border-red-500 @enderror">
                                                 <option value="daily" @if (($referralSchedule ?? 'daily') === 'daily') selected @endif>
                                                     Daily (2:00 AM)
                                                 </option>
@@ -1307,7 +1307,7 @@
                                                     id="referral_min_amount_to_send"
                                                     value="{{ old('referral_min_amount_to_send', $referralMinAmountToSend ?? 10000) }}"
                                                     min="0" step="1000" required placeholder="10000"
-                                                    class="block w-full pl-10 pr-3 py-3 border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_min_amount_to_send') border-red-500 @enderror">
+                                                    class="block w-full pl-10 pr-3 py-3 border rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_min_amount_to_send') border-red-500 @enderror">
                                             </div>
                                             @error('referral_min_amount_to_send')
                                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -1327,7 +1327,7 @@
                                                 id="referral_max_batch_size"
                                                 value="{{ old('referral_max_batch_size', $referralMaxBatchSize ?? 100) }}"
                                                 min="1" max="10000" step="1" required placeholder="100"
-                                                class="block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_max_batch_size') border-red-500 @enderror">
+                                                class="block w-full px-3 py-3 border rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('referral_max_batch_size') border-red-500 @enderror">
                                             @error('referral_max_batch_size')
                                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                             @enderror
@@ -1403,7 +1403,7 @@
                                                                 id="featured_price_{{ $location }}_{{ $duration }}"
                                                                 value="{{ old("featured_price.{$location}.{$duration}", $featuredPricing[$location][$duration] ?? 0) }}"
                                                                 min="0" step="1000" required
-                                                                class="block w-full pl-10 pr-3 py-2 border-gray-300 rounded-lg shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 @error("featured_price.{$location}.{$duration}") border-red-500 @enderror">
+                                                                class="block w-full pl-10 pr-3 py-2 border rounded-lg shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 @error("featured_price.{$location}.{$duration}") border-red-500 @enderror">
                                                         </div>
                                                         @error("featured_price.{$location}.{$duration}")
                                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -2288,7 +2288,7 @@
                                             value="{{ old('google_translate_api_key', '') }}"
                                             placeholder="{{ $googleTranslateApiKey ? 'Enter new API key to update' : 'AIzaSy...' }}"
                                             {{ !$googleTranslateApiKey ? 'required' : '' }}
-                                            class="block w-full py-3 px-4 border rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('google_translate_api_key') border-red-500 @else border-gray-300 @enderror">
+                                            class="block w-full py-3 px-4 border rounded-lg shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-500 @error('google_translate_api_key') border-red-500 @enderror">
                                         <button type="button" onclick="toggleApiKeyVisibility()"
                                             class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-700">
                                             <svg id="eye-icon" class="h-5 w-5" fill="none" stroke="currentColor"

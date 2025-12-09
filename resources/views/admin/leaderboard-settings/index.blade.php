@@ -83,7 +83,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="number"
-                                        class="w-full pr-9 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('share_points_per_share') border-red-500 @enderror"
+                                        class="w-full pr-9 pl-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('share_points_per_share') border-red-500 @enderror"
                                         id="share_points_per_share" name="share_points_per_share"
                                         value="{{ $settingsData['share_points_per_share'] }}" required min="0">
                                     <span
@@ -101,7 +101,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="number"
-                                        class="w-full pr-9 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('share_points_per_click') border-red-500 @enderror"
+                                        class="w-full pr-9 pl-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('share_points_per_click') border-red-500 @enderror"
                                         id="share_points_per_click" name="share_points_per_click"
                                         value="{{ $settingsData['share_points_per_click'] }}" required min="0">
                                     <span
@@ -119,7 +119,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="number"
-                                        class="w-full pr-9 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('share_points_per_purchase') border-red-500 @enderror"
+                                        class="w-full pr-9 pl-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('share_points_per_purchase') border-red-500 @enderror"
                                         id="share_points_per_purchase" name="share_points_per_purchase"
                                         value="{{ $settingsData['share_points_per_purchase'] }}" required min="0">
                                     <span
@@ -154,7 +154,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="number"
-                                        class="w-full pr-9 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('leaderboard_monthly_point_cap') border-red-500 @enderror"
+                                        class="w-full pr-9 pl-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('leaderboard_monthly_point_cap') border-red-500 @enderror"
                                         id="leaderboard_monthly_point_cap" name="leaderboard_monthly_point_cap"
                                         value="{{ $settingsData['leaderboard_monthly_point_cap'] }}" required
                                         min="0">
@@ -174,7 +174,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="number"
-                                        class="w-full pr-9 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('leaderboard_monthly_target') border-red-500 @enderror"
+                                        class="w-full pr-9 pl-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('leaderboard_monthly_target') border-red-500 @enderror"
                                         id="leaderboard_monthly_target" name="leaderboard_monthly_target"
                                         value="{{ $settingsData['leaderboard_monthly_target'] }}" required
                                         min="0">
@@ -193,7 +193,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="number"
-                                        class="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('leaderboard_reset_day') border-red-500 @enderror"
+                                        class="w-full pr-10 pl-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent @error('leaderboard_reset_day') border-red-500 @enderror"
                                         id="leaderboard_reset_day" name="leaderboard_reset_day"
                                         value="{{ $settingsData['leaderboard_reset_day'] }}" required min="1"
                                         max="31">
@@ -245,7 +245,7 @@
                                     <span
                                         class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">Rp</span>
                                     <input type="number"
-                                        class="w-full pl-11 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_rank_1') border-red-500 @enderror"
+                                        class="w-full pl-11 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_rank_1') border-red-500 @enderror"
                                         id="monthly_reward_rank_1" name="monthly_reward_rank_1"
                                         value="{{ $settingsData['monthly_reward_rank_1'] }}" required min="0">
                                 </div>
@@ -263,7 +263,7 @@
                                     <span
                                         class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">Rp</span>
                                     <input type="number"
-                                        class="w-full pl-11 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_rank_2') border-red-500 @enderror"
+                                        class="w-full pl-11 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_rank_2') border-red-500 @enderror"
                                         id="monthly_reward_rank_2" name="monthly_reward_rank_2"
                                         value="{{ $settingsData['monthly_reward_rank_2'] }}" required min="0">
                                 </div>
@@ -281,7 +281,7 @@
                                     <span
                                         class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">Rp</span>
                                     <input type="number"
-                                        class="w-full pl-11 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_rank_3') border-red-500 @enderror"
+                                        class="w-full pl-11 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_rank_3') border-red-500 @enderror"
                                         id="monthly_reward_rank_3" name="monthly_reward_rank_3"
                                         value="{{ $settingsData['monthly_reward_rank_3'] }}" required min="0">
                                 </div>
@@ -299,7 +299,7 @@
                                     <span
                                         class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">Rp</span>
                                     <input type="number"
-                                        class="w-full pl-11 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_top_10') border-red-500 @enderror"
+                                        class="w-full pl-11 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_top_10') border-red-500 @enderror"
                                         id="monthly_reward_top_10" name="monthly_reward_top_10"
                                         value="{{ $settingsData['monthly_reward_top_10'] }}" required min="0">
                                 </div>
@@ -317,7 +317,7 @@
                                     <span
                                         class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">Rp</span>
                                     <input type="number"
-                                        class="w-full pl-11 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_top_50') border-red-500 @enderror"
+                                        class="w-full pl-11 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_top_50') border-red-500 @enderror"
                                         id="monthly_reward_top_50" name="monthly_reward_top_50"
                                         value="{{ $settingsData['monthly_reward_top_50'] }}" required min="0">
                                 </div>
@@ -347,7 +347,7 @@
                             </label>
                             <div class="relative max-w-xs">
                                 <input type="number"
-                                    class="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('reward_transfer_day') border-red-500 @enderror"
+                                    class="w-full pr-10 pl-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('reward_transfer_day') border-red-500 @enderror"
                                     id="reward_transfer_day" name="reward_transfer_day"
                                     value="{{ $settingsData['reward_transfer_day'] }}" required min="1"
                                     max="31">

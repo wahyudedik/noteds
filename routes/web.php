@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NoteController;
@@ -237,7 +238,8 @@ Route::post('/reviews/{review}/replies', [NoteReviewReplyController::class, 'sto
 Route::delete('/review-replies/{reply}', [NoteReviewReplyController::class, 'destroy'])->middleware(['auth', 'verified', 'username.setup', 'kyc'])->name('reviews.replies.destroy');
 
 Route::get('/dashboard', function () {
-    $user = auth()->user();
+    /** @var \App\Models\User $user */
+    $user = Auth::user();
 
     // Check if user needs to complete profile (KTP and selfie) - redirect once after register
     // Check session to see if this is first time after register (admin tidak perlu verifikasi)
