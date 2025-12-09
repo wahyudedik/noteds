@@ -138,6 +138,9 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
 // Public profile routes
 Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('public.profile.show');
 
+// Public affiliate landing pages
+Route::get('/a/{slug}', [AffiliateController::class, 'showLanding'])->name('affiliate.landing');
+
 // Leaderboard routes
 Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
 
@@ -419,9 +422,6 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
 
     // API routes for affiliate
     Route::get('/api/affiliate-links/{affiliateLink}', [AffiliateController::class, 'getLinkDetails']);
-
-    // Public affiliate landing pages
-    Route::get('/a/{slug}', [AffiliateController::class, 'showLanding'])->name('affiliate.landing');
 
     // Affiliate leaderboard
     Route::get('/affiliate-leaderboard', [AffiliateLeaderboardController::class, 'index'])->name('affiliate.leaderboard');

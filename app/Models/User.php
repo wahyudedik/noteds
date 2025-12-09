@@ -150,6 +150,20 @@ class User extends Authenticatable implements MustVerifyEmail
         return (bool) $this->suspended_at;
     }
 
+    /**
+     * Get the user's profile photo URL.
+     * Returns avatar if available, otherwise a gravatar URL.
+     */
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        if ($this->avatar) {
+            return asset('storage/' . $this->avatar);
+        }
+
+        // Fallback to Gravatar
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=0D8ABC&color=fff';
+    }
+
     public function isDeactivated(): bool
     {
         return ! $this->is_active;

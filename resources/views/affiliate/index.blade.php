@@ -633,7 +633,8 @@
                                 <input type="checkbox" name="affiliate_links[]" value="{{ $link->id }}"
                                     class="rounded" @if ($userLandingPage && $userLandingPage->affiliateLinks->contains($link->id)) checked @endif>
                                 <span class="text-sm text-gray-700">{{ $link->name }}</span>
-                                <span class="text-xs text-gray-500 ml-auto">{{ url('/') }}{{ $link->slug }}</span>
+                                <span
+                                    class="text-xs text-gray-500 ml-auto">{{ url('/') }}{{ $link->slug }}</span>
                             </label>
                         @empty
                             <p class="text-sm text-gray-500">{{ __('affiliate.no_links_available') }}</p>

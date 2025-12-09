@@ -189,15 +189,28 @@ class AffiliateController extends Controller
      */
     public function showLanding(string $slug): View
     {
-        $link = AffiliateLink::where('landing_page_slug', $slug)
-            ->where('is_active', true)
-            ->with('affiliate')
+        $landingPage = UserLandingPage::where('slug', $slug)
+            ->with([
+                'affiliateLinks' => function ($query) {
+                    $query->with([
+                        'promotionalMaterials' => function ($query) {
+                            $query->where('is_active', true);
+                        }
+                    ]);
+                }
+            ])
             ->firstOrFail();
 
-        // Track click
-        $this->affiliateService->trackClick($link->code);
+        // Get unique active promotional materials from all assigned links
+        $promotionalMaterials = collect();
+        foreach ($landingPage->affiliateLinks as $link) {
+            $promotionalMaterials = $promotionalMaterials->merge($link->promotionalMaterials);
+        }
 
-        return view('affiliate.landing', compact('link'));
+        // Remove duplicates and reset keys
+        $promotionalMaterials = $promotionalMaterials->unique('id')->values();
+
+        return view('affiliate.landing', compact('landingPage', 'promotionalMaterials'));
     }
 
     /**
