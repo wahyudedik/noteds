@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\ApprovalLog;
 use App\Models\ServiceOrder;
+use App\Models\User;
 use App\Models\WorkSubmission;
+use App\Notifications\WorkApprovedNotification;
+use App\Notifications\WorkRejectedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Notification;
 
 class BuyerApprovalController extends Controller
 {
@@ -64,9 +68,16 @@ class BuyerApprovalController extends Controller
             ],
         ]);
 
-        // TODO: Send notification to vendor and admin
-        // Notification::send($order->assignedVendor, new WorkApprovedNotification($order));
-        // Notification::send(Admin::all(), new WorkApprovedNotification($order));
+        // Send notification to vendor
+        if ($order->assignedVendor) {
+            Notification::send($order->assignedVendor, new WorkApprovedNotification($order));
+        }
+
+        // Send notification to admins
+        $admins = User::whereHas('roles', fn($q) => $q->where('name', 'admin'))->get();
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new WorkApprovedNotification($order));
+        }
 
         return redirect()->route('studio.orders.show', $order)
             ->with('success', 'Work approved! Waiting for admin verification and payment release.');
@@ -123,8 +134,10 @@ class BuyerApprovalController extends Controller
             ],
         ]);
 
-        // TODO: Send notification to vendor
-        // Notification::send($order->assignedVendor, new WorkRejectedNotification($order, $validated['notes']));
+        // Send notification to vendor
+        if ($order->assignedVendor) {
+            Notification::send($order->assignedVendor, new WorkRejectedNotification($order, $validated['notes']));
+        }
 
         return redirect()->route('studio.orders.show', $order)
             ->with('warning', 'Work rejected. Vendor will be notified to revise.');
