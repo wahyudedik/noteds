@@ -205,8 +205,8 @@ class FraudDetectionService
 
         // Log activity
         $log = AffiliateFraudLog::logActivity(
-            affiliate_id: $affiliate?->id,
-            converter_id: $converter?->id,
+            affiliateId: $affiliate?->id,
+            converterId: $converter?->id,
             activityType: $activityType,
             ipAddress: $ipAddress,
             userAgent: $userAgent,
