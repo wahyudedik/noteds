@@ -184,6 +184,7 @@ return [
     // Edit & Landing Page
     'edit_link' => 'Edit Link',
     'edit_landing_page' => 'Edit Landing Page',
+    'materials' => 'Materi Promosi',
     'cancel' => 'Batal',
     'update' => 'Perbarui',
     'error_loading_link' => 'Kesalahan memuat detail link afiliasi',

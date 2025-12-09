@@ -134,6 +134,7 @@ return [
     // Edit & Landing Page
     'edit_link' => 'Edit Link',
     'edit_landing_page' => 'Edit Landing Page',
+    'materials' => 'Promotional Materials',
     'promotional_materials' => 'Promotional Materials',
     'cancel' => 'Cancel',
     'update' => 'Update',

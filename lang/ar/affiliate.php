@@ -170,6 +170,7 @@ return [
     // Edit & Landing Page
     'edit_link' => 'تعديل الرابط',
     'edit_landing_page' => 'تعديل صفحة الهبوط',
+    'materials' => 'المواد الترويجية',
     'cancel' => 'إلغاء',
     'update' => 'تحديث',
     'error_loading_link' => 'خطأ في تحميل تفاصيل رابط المنتسب',
