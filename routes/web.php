@@ -114,6 +114,19 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('studio
     // Buyer approval routes
     Route::post('/orders/{order}/approve-work', [\App\Http\Controllers\BuyerApprovalController::class, 'approve'])->middleware('throttle:5,1', 'ensure_buyer_can_approve')->name('orders.approve-work');
     Route::post('/orders/{order}/reject-work', [\App\Http\Controllers\BuyerApprovalController::class, 'reject'])->middleware('throttle:5,1', 'ensure_buyer_can_approve')->name('orders.reject-work');
+
+    // Revision routes
+    Route::post('/orders/{order}/request-revision', [\App\Http\Controllers\WorkRevisionController::class, 'requestRevision'])->middleware('throttle:5,1')->name('orders.request-revision');
+    Route::post('/revisions/{revision}/submit', [\App\Http\Controllers\WorkRevisionController::class, 'submitRevision'])->middleware('throttle:5,1')->name('revisions.submit');
+    Route::post('/revisions/{revision}/approve', [\App\Http\Controllers\WorkRevisionController::class, 'approveRevision'])->middleware('throttle:5,1')->name('revisions.approve');
+    Route::post('/revisions/{revision}/reject', [\App\Http\Controllers\WorkRevisionController::class, 'rejectRevision'])->middleware('throttle:5,1')->name('revisions.reject');
+    Route::get('/orders/{order}/revision-history', [\App\Http\Controllers\WorkRevisionController::class, 'viewHistory'])->name('orders.revision-history');
+
+    // Dispute routes
+    Route::get('/orders/{order}/dispute/create', [\App\Http\Controllers\DisputeController::class, 'create'])->name('orders.dispute.create');
+    Route::post('/orders/{order}/dispute', [\App\Http\Controllers\DisputeController::class, 'store'])->middleware('throttle:5,1')->name('orders.dispute.store');
+    Route::get('/disputes/{dispute}', [\App\Http\Controllers\DisputeController::class, 'show'])->name('disputes.show');
+    Route::post('/disputes/{dispute}/evidence', [\App\Http\Controllers\DisputeController::class, 'addEvidence'])->middleware('throttle:5,1')->name('disputes.add-evidence');
 });
 
 // Contact (public)
@@ -181,6 +194,15 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     Route::get('/note-conversations/{conversation}', [NoteConversationController::class, 'show'])->name('note-conversations.show');
     Route::post('/note-conversations/{conversation}', [NoteConversationController::class, 'store'])->name('note-conversations.store');
     Route::post('/note-conversations/messages/{message}/translate', [NoteConversationController::class, 'translate'])->name('note-conversations.translate');
+
+    // Direct Messaging Routes
+    Route::get('/messages', [\App\Http\Controllers\UserMessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/sent', [\App\Http\Controllers\UserMessageController::class, 'sent'])->name('messages.sent');
+    Route::get('/messages/compose', [\App\Http\Controllers\UserMessageController::class, 'compose'])->name('messages.compose');
+    Route::get('/messages/{user}', [\App\Http\Controllers\UserMessageController::class, 'show'])->name('messages.show');
+    Route::post('/messages', [\App\Http\Controllers\UserMessageController::class, 'store'])->middleware('throttle:30,1')->name('messages.store');
+    Route::post('/messages/{message}/read', [\App\Http\Controllers\UserMessageController::class, 'markAsRead'])->name('messages.mark-read');
+    Route::delete('/messages/{message}', [\App\Http\Controllers\UserMessageController::class, 'destroy'])->name('messages.destroy');
 
     // Chat Quick Replies
     Route::get('/chat-quick-replies', [\App\Http\Controllers\ChatQuickReplyController::class, 'index'])->name('chat-quick-replies.index');
@@ -763,6 +785,11 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::get('/order-verification/{order}', [\App\Http\Controllers\Admin\OrderVerificationController::class, 'show'])->name('order-verification.show');
     Route::post('/order-verification/{order}/verify', [\App\Http\Controllers\Admin\OrderVerificationController::class, 'verify'])->middleware('throttle:5,1')->name('order-verification.verify');
     Route::post('/order-verification/{order}/reject', [\App\Http\Controllers\Admin\OrderVerificationController::class, 'reject'])->middleware('throttle:5,1')->name('order-verification.reject');
+
+    // Dispute Resolution routes (admin)
+    Route::get('/disputes', [\App\Http\Controllers\DisputeController::class, 'adminIndex'])->name('disputes.index');
+    Route::get('/disputes/{dispute}', [\App\Http\Controllers\DisputeController::class, 'adminShow'])->name('disputes.admin-show');
+    Route::post('/disputes/{dispute}/resolve', [\App\Http\Controllers\DisputeController::class, 'resolve'])->middleware('throttle:5,1')->name('disputes.resolve');
 });
 
 // Public Documentation routes
