@@ -144,9 +144,11 @@ class ServiceOrderController extends Controller
         $buyer->save();
 
         // Increase escrow
-        $order->escrow_amount += $amount;
+        $newEscrowAmount = $order->escrow_amount + $amount;
+        $order->update(['escrow_amount' => $newEscrowAmount]);
+        
         if ($order->status === 'quoted') {
-            $order->status = 'in_progress';
+            $order->update(['status' => 'in_progress']);
         }
         // Auto-assign vendor to first admin if not set (placeholder)
         if (!$order->assigned_user_id) {
@@ -229,7 +231,9 @@ class ServiceOrderController extends Controller
 
     public function releaseEscrow(Request $request, ServiceOrder $order): RedirectResponse
     {
-        abort_unless($order->user_id === auth()->id() || auth()->user()->hasRole('admin'), 403);
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        abort_unless($order->user_id === $user->id || $user->hasRole('admin'), 403);
 
         // ===== NEW: Enforce Work Verification Workflow =====
         // Check 1: work_status must be 'approved' (vendor submitted + buyer approved)
@@ -290,11 +294,12 @@ class ServiceOrderController extends Controller
         }
 
         // Decrease escrow
-        $order->escrow_amount -= $amount;
+        $newEscrowAmount = $order->escrow_amount - $amount;
+        $order->update(['escrow_amount' => $newEscrowAmount]);
+        
         if ($order->escrow_amount <= 0 && $order->status === 'in_progress') {
-            $order->status = 'completed';
+            $order->update(['status' => 'completed']);
         }
-        $order->save();
 
         // Credit vendor wallet (net)
         $vendorWallet = \App\Models\Wallet::firstOrCreate(['user_id' => $vendor->id], ['balance' => 0, 'currency' => config('currency.base_currency', 'IDR')]);
@@ -390,7 +395,9 @@ class ServiceOrderController extends Controller
 
     public function refundEscrow(Request $request, ServiceOrder $order): RedirectResponse
     {
-        abort_unless($order->user_id === auth()->id() || auth()->user()->hasRole('admin'), 403);
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        abort_unless($order->user_id === $user->id || $user->hasRole('admin'), 403);
         $request->validate([
             'amount' => ['required', 'numeric', 'min:1'],
         ]);
@@ -400,11 +407,12 @@ class ServiceOrderController extends Controller
         }
 
         // Decrease escrow
-        $order->escrow_amount -= $amount;
-        if ($order->escrow_amount <= 0 && in_array($order->status, ['submitted', 'quoted', 'in_progress'])) {
-            $order->status = 'cancelled';
+        $newEscrowAmount = $order->escrow_amount - $amount;
+        $order->update(['escrow_amount' => $newEscrowAmount]);
+        
+        if ($newEscrowAmount <= 0 && in_array($order->status, ['submitted', 'quoted', 'in_progress'])) {
+            $order->update(['status' => 'cancelled']);
         }
-        $order->save();
 
         // Credit back to buyer wallet
         $buyer = $order->user;
