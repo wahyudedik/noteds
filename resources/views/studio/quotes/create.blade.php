@@ -12,14 +12,18 @@
                     @php $user = auth()->user(); @endphp
                     @if ($user->hasRole('admin'))
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.vendor') }} <span class="text-red-600">*</span></label>
-                            <select name="vendor_id" id="vendor_select" class="w-full rounded-lg border-gray-300 seller-search" required data-placeholder="Search seller by name or email...">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.vendor') }} <span
+                                    class="text-red-600">*</span></label>
+                            <select name="vendor_id" id="vendor_select"
+                                class="w-full rounded-lg border-gray-300 seller-search" required
+                                data-placeholder="Search seller by name or email...">
                                 <option></option>
                                 @php
                                     $sellers = \App\Models\User::role('seller')->orderBy('name')->get();
                                 @endphp
                                 @foreach ($sellers as $seller)
-                                    <option value="{{ $seller->id }}" data-name="{{ $seller->name }}" data-email="{{ $seller->email }}">
+                                    <option value="{{ $seller->id }}" data-name="{{ $seller->name }}"
+                                        data-email="{{ $seller->email }}">
                                         {{ $seller->name }} ({{ $seller->email }})
                                     </option>
                                 @endforeach
@@ -81,68 +85,68 @@
     </div>
 
     @if (auth()->user()?->hasRole('admin'))
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
-    <script>
-        $(document).ready(function() {
-            $('#vendor_select').select2({
-                allowClear: true,
-                placeholder: "Search seller by name or email...",
-                width: '100%',
-                matcher: function(params, data) {
-                    if ($.trim(params.term) === '') {
-                        return data;
+        <script>
+            $(document).ready(function() {
+                $('#vendor_select').select2({
+                    allowClear: true,
+                    placeholder: "Search seller by name or email...",
+                    width: '100%',
+                    matcher: function(params, data) {
+                        if ($.trim(params.term) === '') {
+                            return data;
+                        }
+
+                        var term = params.term.toLowerCase();
+                        var text = data.text.toLowerCase();
+
+                        if (text.indexOf(term) > -1) {
+                            return data;
+                        }
+
+                        return null;
                     }
-
-                    var term = params.term.toLowerCase();
-                    var text = data.text.toLowerCase();
-
-                    if (text.indexOf(term) > -1) {
-                        return data;
-                    }
-
-                    return null;
-                }
+                });
             });
-        });
-    </script>
+        </script>
 
-    <style>
-        .select2-container--default .select2-selection--single {
-            border-color: #d1d5db;
-            border-radius: 0.5rem;
-            height: 42px;
-            display: flex;
-            align-items: center;
-        }
+        <style>
+            .select2-container--default .select2-selection--single {
+                border-color: #d1d5db;
+                border-radius: 0.5rem;
+                height: 42px;
+                display: flex;
+                align-items: center;
+            }
 
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            color: #374151;
-            padding: 0 12px;
-        }
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                color: #374151;
+                padding: 0 12px;
+            }
 
-        .select2-container--default.select2-container--open .select2-selection--single {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
+            .select2-container--default.select2-container--open .select2-selection--single {
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
 
-        .select2-dropdown {
-            border-color: #d1d5db;
-            border-radius: 0.5rem;
-            margin-top: 0.25rem;
-        }
+            .select2-dropdown {
+                border-color: #d1d5db;
+                border-radius: 0.5rem;
+                margin-top: 0.25rem;
+            }
 
-        .select2-results__option {
-            padding: 12px;
-            color: #374151;
-        }
+            .select2-results__option {
+                padding: 12px;
+                color: #374151;
+            }
 
-        .select2-results__option--highlighted {
-            background-color: #3b82f6 !important;
-            color: white;
-        }
-    </style>
+            .select2-results__option--highlighted {
+                background-color: #3b82f6 !important;
+                color: white;
+            }
+        </style>
     @endif
 @endsection

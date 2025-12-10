@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('responded_at')->nullable();
             $table->string('response_reason')->nullable();
             $table->timestamps();
-            
+
             // Unique constraint: One bid per vendor per order
             $table->unique(['service_order_id', 'vendor_id']);
         });
