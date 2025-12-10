@@ -658,7 +658,8 @@
             </div>
 
             <!-- Commission Structure Visualizer -->
-            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300 mb-16">
+            <div
+                class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300 mb-16">
                 <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-6">
                     <div class="flex items-center justify-between">
                         <div>
@@ -666,7 +667,8 @@
                             <p class="text-amber-100 text-sm">{{ __('messages.see_fee_breakdown') }}</p>
                         </div>
                         <svg class="w-12 h-12 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </div>
                 </div>
@@ -675,7 +677,8 @@
                         <!-- Input Section -->
                         <div class="space-y-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.note_sale_price') }}</label>
+                                <label
+                                    class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.note_sale_price') }}</label>
                                 <div class="flex items-center">
                                     <span class="text-2xl font-bold text-gray-900" id="csv-currency-symbol">Rp</span>
                                     <input type="number" id="csv-price" value="100000" min="10000" step="5000"
@@ -685,8 +688,10 @@
 
                             <!-- Price Range Slider -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-3">{{ __('messages.or_adjust_slider') }}</label>
-                                <input type="range" id="csv-slider" value="100000" min="10000" max="500000" step="5000"
+                                <label
+                                    class="block text-sm font-medium text-gray-700 mb-3">{{ __('messages.or_adjust_slider') }}</label>
+                                <input type="range" id="csv-slider" value="100000" min="10000" max="500000"
+                                    step="5000"
                                     class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
                                 <div class="flex justify-between text-xs text-gray-500 mt-2">
                                     <span>Rp 10,000</span>
@@ -703,7 +708,8 @@
                         <!-- Visualization Section -->
                         <div id="csv-results" class="hidden md:block">
                             <!-- Pie Chart Canvas -->
-                            <div class="bg-gray-50 rounded-lg p-6 flex items-center justify-center" style="height: 300px;">
+                            <div class="bg-gray-50 rounded-lg p-6 flex items-center justify-center"
+                                style="height: 300px;">
                                 <canvas id="csv-chart" width="300" height="300"></canvas>
                             </div>
                         </div>
@@ -739,19 +745,25 @@
                             <table class="w-full text-sm">
                                 <thead class="bg-gray-100 border-b border-gray-200">
                                     <tr>
-                                        <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ __('messages.item') }}</th>
-                                        <th class="px-4 py-3 text-right font-semibold text-gray-700">{{ __('messages.amount') }}</th>
-                                        <th class="px-4 py-3 text-right font-semibold text-gray-700">{{ __('messages.percentage') }}</th>
+                                        <th class="px-4 py-3 text-left font-semibold text-gray-700">
+                                            {{ __('messages.item') }}</th>
+                                        <th class="px-4 py-3 text-right font-semibold text-gray-700">
+                                            {{ __('messages.amount') }}</th>
+                                        <th class="px-4 py-3 text-right font-semibold text-gray-700">
+                                            {{ __('messages.percentage') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
                                     <tr class="bg-white hover:bg-blue-50 transition-colors">
-                                        <td class="px-4 py-3 font-medium text-gray-900">{{ __('messages.sale_price') }}</td>
-                                        <td class="px-4 py-3 text-right font-semibold text-blue-700" id="csv-row-gross"></td>
+                                        <td class="px-4 py-3 font-medium text-gray-900">{{ __('messages.sale_price') }}
+                                        </td>
+                                        <td class="px-4 py-3 text-right font-semibold text-blue-700" id="csv-row-gross">
+                                        </td>
                                         <td class="px-4 py-3 text-right text-gray-700">100%</td>
                                     </tr>
                                     <tr class="bg-red-50 hover:bg-red-100 transition-colors">
-                                        <td class="px-4 py-3 font-medium text-gray-900">{{ __('messages.platform_fee_charge') }}</td>
+                                        <td class="px-4 py-3 font-medium text-gray-900">
+                                            {{ __('messages.platform_fee_charge') }}</td>
                                         <td class="px-4 py-3 text-right font-semibold text-red-700" id="csv-row-fee"></td>
                                         <td class="px-4 py-3 text-right text-red-700">20%</td>
                                     </tr>
@@ -775,7 +787,8 @@
             </div>
 
             <!-- Recurring Revenue Calculator -->
-            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300 mb-16">
+            <div
+                class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300 mb-16">
                 <div class="bg-gradient-to-r from-rose-500 to-rose-600 p-6">
                     <div class="flex items-center justify-between">
                         <div>
@@ -783,7 +796,8 @@
                             <p class="text-rose-100 text-sm">{{ __('messages.passive_income_simulator') }}</p>
                         </div>
                         <svg class="w-12 h-12 text-rose-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                 </div>
@@ -792,7 +806,8 @@
                         <!-- Input Section -->
                         <div class="space-y-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.notes_to_create') }}</label>
+                                <label
+                                    class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.notes_to_create') }}</label>
                                 <div class="space-y-2">
                                     <input type="range" id="rrc-notes" value="5" min="1" max="20"
                                         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
@@ -804,7 +819,8 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.target_monthly_income') }}</label>
+                                <label
+                                    class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.target_monthly_income') }}</label>
                                 <div class="flex items-center">
                                     <span class="text-2xl font-bold text-gray-900" id="rrc-currency-symbol">Rp</span>
                                     <input type="number" id="rrc-target" value="5000000" min="100000" step="100000"
@@ -813,7 +829,8 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.average_note_price') }}</label>
+                                <label
+                                    class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.average_note_price') }}</label>
                                 <div class="flex items-center">
                                     <span class="text-2xl font-bold text-gray-900" id="rrc-price-symbol">Rp</span>
                                     <input type="number" id="rrc-price" value="50000" min="10000" step="5000"
@@ -965,7 +982,7 @@
 
                     document.getElementById('referral-signup').textContent = formatCurrency(signupReward);
                     document.getElementById('referral-commission').textContent = formatCurrency(
-                    totalCommission);
+                        totalCommission);
                     document.getElementById('referral-total').textContent = formatCurrency(totalRewards);
                     document.getElementById('referral-result').classList.remove('hidden');
                 });
@@ -1102,12 +1119,12 @@
                 // Commission Structure Visualizer
                 const csvPriceInput = document.getElementById('csv-price');
                 const csvSlider = document.getElementById('csv-slider');
-                
+
                 // Sync price input and slider
                 csvPriceInput.addEventListener('input', function() {
                     csvSlider.value = this.value;
                 });
-                
+
                 csvSlider.addEventListener('input', function() {
                     csvPriceInput.value = this.value;
                 });
@@ -1115,40 +1132,40 @@
                 document.getElementById('csv-calculate').addEventListener('click', function() {
                     const salePrice = parseFloat(csvPriceInput.value) || 0;
                     const platformFeePercentage = 0.20; // 20% commission
-                    
+
                     const platformFee = salePrice * platformFeePercentage;
                     const netIncome = salePrice - platformFee;
-                    
+
                     // Update cards
                     document.getElementById('csv-gross').textContent = formatCurrency(salePrice);
                     document.getElementById('csv-fee').textContent = formatCurrency(platformFee);
                     document.getElementById('csv-net').textContent = formatCurrency(netIncome);
-                    
+
                     // Update table rows
                     document.getElementById('csv-row-gross').textContent = formatCurrency(salePrice);
                     document.getElementById('csv-row-fee').textContent = formatCurrency(platformFee);
                     document.getElementById('csv-row-net').textContent = formatCurrency(netIncome);
-                    
+
                     // Update insight
                     const multiplier = Math.round((netIncome / 10000) * 10) / 10;
                     const monthlyAt10Sales = netIncome * 10;
-                    const monthlyText = currencySettings.currency === 'IDR' ? 
-                        multiplier + ' × Rp10,000' : 
+                    const monthlyText = currencySettings.currency === 'IDR' ?
+                        multiplier + ' × Rp10,000' :
                         multiplier + ' × $10';
-                    
-                    document.getElementById('csv-insight').textContent = 
+
+                    document.getElementById('csv-insight').textContent =
                         `If you sell this note 10 times per month, you'll earn ${formatCurrency(monthlyAt10Sales)}/month (${monthlyText})`;
-                    
+
                     // Draw pie chart
                     const chartCanvas = document.getElementById('csv-chart');
                     const ctx = chartCanvas.getContext('2d');
                     drawCommissionChart(ctx, salePrice, platformFee, netIncome, chartCanvas);
-                    
+
                     // Show results
                     document.getElementById('csv-breakdown').classList.remove('hidden');
                     document.getElementById('csv-results').classList.remove('hidden');
                 });
-                
+
                 // Draw pie chart for commission breakdown
                 function drawCommissionChart(ctx, gross, fee, net, canvas) {
                     const width = canvas.width;
@@ -1156,16 +1173,16 @@
                     const centerX = width / 2;
                     const centerY = height / 2;
                     const radius = Math.min(width, height) / 2 - 20;
-                    
+
                     // Clear canvas
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(0, 0, width, height);
-                    
+
                     // Draw pie chart
                     const total = gross;
                     const feePercent = fee / total;
                     const netPercent = net / total;
-                    
+
                     // Net Income slice (80%, green)
                     ctx.fillStyle = '#10b981';
                     ctx.beginPath();
@@ -1173,7 +1190,7 @@
                     ctx.arc(centerX, centerY, radius, 0, netPercent * Math.PI * 2);
                     ctx.lineTo(centerX, centerY);
                     ctx.fill();
-                    
+
                     // Fee slice (20%, red)
                     ctx.fillStyle = '#ef4444';
                     ctx.beginPath();
@@ -1181,24 +1198,24 @@
                     ctx.arc(centerX, centerY, radius, netPercent * Math.PI * 2, Math.PI * 2);
                     ctx.lineTo(centerX, centerY);
                     ctx.fill();
-                    
+
                     // Draw legend
                     ctx.fillStyle = '#374151';
                     ctx.font = 'bold 14px sans-serif';
                     ctx.textAlign = 'left';
-                    
+
                     // Legend background
                     const legendX = 20;
                     const legendY = height - 80;
                     const legendWidth = 240;
                     const legendHeight = 70;
-                    
+
                     ctx.fillStyle = '#f9fafb';
                     ctx.fillRect(legendX, legendY, legendWidth, legendHeight);
                     ctx.strokeStyle = '#d1d5db';
                     ctx.lineWidth = 1;
                     ctx.strokeRect(legendX, legendY, legendWidth, legendHeight);
-                    
+
                     // Legend items
                     ctx.font = 'bold 12px sans-serif';
                     ctx.fillStyle = '#10b981';
@@ -1206,12 +1223,12 @@
                     ctx.fillStyle = '#374151';
                     ctx.textAlign = 'left';
                     ctx.fillText('You earn (80%)', legendX + 28, legendY + 19);
-                    
+
                     ctx.fillStyle = '#ef4444';
                     ctx.fillRect(legendX + 10, legendY + 28, 12, 12);
                     ctx.fillStyle = '#374151';
                     ctx.fillText('Platform fee (20%)', legendX + 28, legendY + 37);
-                    
+
                     ctx.fillStyle = '#6b7280';
                     ctx.font = '11px sans-serif';
                     ctx.fillText('Fair commission for platform', legendX + 10, legendY + 55);
@@ -1282,7 +1299,8 @@
                     const annualIncome = monthlyIncome * 12;
 
                     // Display results
-                    document.getElementById('rrc-sales-needed').textContent = requiredSalesPerNotePerMonth.toFixed(1);
+                    document.getElementById('rrc-sales-needed').textContent = requiredSalesPerNotePerMonth
+                        .toFixed(1);
                     document.getElementById('rrc-monthly').textContent = formatCurrency(monthlyIncome);
                     document.getElementById('rrc-annual').textContent = formatCurrency(annualIncome);
 
@@ -1311,16 +1329,19 @@
 
                     document.getElementById('rrc-achievability').textContent = achievability;
                     document.getElementById('rrc-achievability-desc').textContent = achievabilityDesc;
-                    document.getElementById('rrc-achievability').className = 'text-lg font-bold ' + achievabilityColor;
+                    document.getElementById('rrc-achievability').className = 'text-lg font-bold ' +
+                        achievabilityColor;
 
                     // Insight text
-                    const insightText = `Create ${notes} quality notes and aim for ${requiredSalesPerNotePerMonth.toFixed(1)} sales per note monthly to earn ${formatCurrency(targetMonthly)} in passive income!`;
+                    const insightText =
+                        `Create ${notes} quality notes and aim for ${requiredSalesPerNotePerMonth.toFixed(1)} sales per note monthly to earn ${formatCurrency(targetMonthly)} in passive income!`;
                     document.getElementById('rrc-insight-text').textContent = insightText;
 
                     // Draw comparison chart
                     const chartCanvas = document.getElementById('rrc-chart');
                     const ctx = chartCanvas.getContext('2d');
-                    drawRecurringRevenueChart(ctx, notes, requiredSalesPerNotePerMonth, monthlyIncome, annualIncome, chartCanvas);
+                    drawRecurringRevenueChart(ctx, notes, requiredSalesPerNotePerMonth, monthlyIncome,
+                        annualIncome, chartCanvas);
 
                     // Show results
                     document.getElementById('rrc-results').classList.remove('hidden');
@@ -1339,10 +1360,21 @@
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                     // Data for scenarios
-                    const scenarios = [
-                        { label: 'Month 1', value: monthly, color: '#fbbf24' },
-                        { label: 'Month 6', value: monthly * 1.3, color: '#60a5fa' },
-                        { label: 'Month 12', value: monthly * 1.6, color: '#34d399' }
+                    const scenarios = [{
+                            label: 'Month 1',
+                            value: monthly,
+                            color: '#fbbf24'
+                        },
+                        {
+                            label: 'Month 6',
+                            value: monthly * 1.3,
+                            color: '#60a5fa'
+                        },
+                        {
+                            label: 'Month 12',
+                            value: monthly * 1.6,
+                            color: '#34d399'
+                        }
                     ];
 
                     const maxValue = scenarios[scenarios.length - 1].value;
