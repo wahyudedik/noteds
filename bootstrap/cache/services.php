@@ -36,7 +36,6 @@
     32 => 'Pest\\Laravel\\PestServiceProvider',
     33 => 'Spatie\\Permission\\PermissionServiceProvider',
     34 => 'App\\Providers\\AppServiceProvider',
-    35 => 'Barryvdh\\Debugbar\\ServiceProvider',
   ),
   'eager' => 
   array (
@@ -58,7 +57,6 @@
     15 => 'Pest\\Laravel\\PestServiceProvider',
     16 => 'Spatie\\Permission\\PermissionServiceProvider',
     17 => 'App\\Providers\\AppServiceProvider',
-    18 => 'Barryvdh\\Debugbar\\ServiceProvider',
   ),
   'deferred' => 
   array (

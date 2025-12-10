@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
+use Illuminate\Support\Facades\Schema;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -154,7 +155,15 @@ Schedule::job(new \App\Jobs\DistributeLeaderboardRewardsJob())
 
 // Process monthly share commissions
 // Run on the configured day each month at 11:00
-$payoutDay = \App\Models\Setting::getSetting('share_monthly_payout_day', 'marketplace', 1);
+try {
+    if (Schema::hasTable('settings')) {
+        $payoutDay = \App\Models\Setting::getSetting('share_monthly_payout_day', 'marketplace', 1);
+    } else {
+        $payoutDay = 1;
+    }
+} catch (\Exception $e) {
+    $payoutDay = 1;
+}
 Schedule::job(new \App\Jobs\ProcessMonthlyShareCommissionJob())
     ->monthlyOn($payoutDay, '11:00')
     ->timezone('Asia/Jakarta')
@@ -162,7 +171,15 @@ Schedule::job(new \App\Jobs\ProcessMonthlyShareCommissionJob())
 
 // Process monthly affiliate payouts
 // Run on the configured day each month at 12:00
-$affiliatePayoutDay = \App\Models\Setting::getSetting('affiliate_payout_day', 'affiliate', 1);
+try {
+    if (Schema::hasTable('settings')) {
+        $affiliatePayoutDay = \App\Models\Setting::getSetting('affiliate_payout_day', 'affiliate', 1);
+    } else {
+        $affiliatePayoutDay = 1;
+    }
+} catch (\Exception $e) {
+    $affiliatePayoutDay = 1;
+}
 Schedule::job(new \App\Jobs\ProcessMonthlyAffiliatePayoutJob())
     ->monthlyOn($affiliatePayoutDay, '12:00')
     ->timezone('Asia/Jakarta')
@@ -170,7 +187,15 @@ Schedule::job(new \App\Jobs\ProcessMonthlyAffiliatePayoutJob())
 
 // Process referral commissions based on configured schedule
 // The schedule is controlled by admin settings and can be daily, weekly, or monthly
-$referralSchedule = \App\Models\Setting::getSetting('referral_schedule', 'referral', 'daily');
+try {
+    if (Schema::hasTable('settings')) {
+        $referralSchedule = \App\Models\Setting::getSetting('referral_schedule', 'referral', 'daily');
+    } else {
+        $referralSchedule = 'daily';
+    }
+} catch (\Exception $e) {
+    $referralSchedule = 'daily';
+}
 $schedule = match ($referralSchedule) {
     'weekly' => Schedule::job(new \App\Jobs\ProcessReferralCommissions())
         ->weekly()

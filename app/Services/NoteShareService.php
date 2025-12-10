@@ -48,18 +48,17 @@ class NoteShareService
 
     /**
      * Generate share URL for a note.
+     * This method only generates/returns the URL without tracking or counting shares.
+     * Share count tracking should be done when user actually performs a share action.
      */
     public function generateShareUrl(Note $note, User $sharer): string
     {
         $shareReferral = $this->getOrCreateShareReferral($note, $sharer);
 
-        // Check share limit per user per link
-        $this->trackAndValidateShareCount($shareReferral, $sharer);
-
-        // Award share-to-earn points (for leaderboard)
+        // Award share-to-earn points (for leaderboard) - only if not already awarded
         $this->shareToEarnService->awardSharePoints($sharer, $note, $shareReferral);
 
-        // Award regular points (for redemption system)
+        // Award regular points (for redemption system) - only if not already awarded
         try {
             $pointsService = app(\App\Services\PointsService::class);
             $pointsService->awardSharePoints($sharer, $note);
@@ -72,6 +71,17 @@ class NoteShareService
         }
 
         return $shareReferral->share_url;
+    }
+
+    /**
+     * Track a share action and validate share count limit.
+     * This should be called when user actually clicks a share button.
+     * 
+     * @throws \Exception
+     */
+    public function trackShareAction(NoteShareReferral $shareReferral, User $sharer): void
+    {
+        $this->trackAndValidateShareCount($shareReferral, $sharer);
     }
 
     /**
