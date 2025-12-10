@@ -17,22 +17,22 @@ return new class extends Migration
             ['name' => 'admin'],
             ['guard_name' => 'web']
         );
-        
+
         \Spatie\Permission\Models\Role::firstOrCreate(
             ['name' => 'seller'],
             ['guard_name' => 'web']
         );
-        
+
         \Spatie\Permission\Models\Role::firstOrCreate(
             ['name' => 'buyer'],
             ['guard_name' => 'web']
         );
-        
+
         \Spatie\Permission\Models\Role::firstOrCreate(
             ['name' => 'user_workspaces'],
             ['guard_name' => 'web']
         );
-        
+
         \Spatie\Permission\Models\Role::firstOrCreate(
             ['name' => 'vendor'],
             ['guard_name' => 'web']

@@ -21,7 +21,7 @@ class DashboardAccessTest extends TestCase
             'email_verified_at' => now(),
             'username' => 'admin_' . rand(1, 9999),
         ]);
-        
+
         // Assign admin role using spatie permission
         $admin->assignRole('admin');
 
@@ -134,5 +134,4 @@ class DashboardAccessTest extends TestCase
             "Admin response: {$response->status()}"
         );
     }
-
 }

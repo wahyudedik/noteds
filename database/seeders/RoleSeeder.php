@@ -17,6 +17,5 @@ class RoleSeeder extends Seeder
         Role::firstOrCreate(['name' => 'seller']);
         Role::firstOrCreate(['name' => 'buyer']);
         Role::firstOrCreate(['name' => 'user_workspaces']);
-        Role::firstOrCreate(['name' => 'vendor']);
     }
 }

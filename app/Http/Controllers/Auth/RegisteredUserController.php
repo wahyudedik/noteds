@@ -53,7 +53,7 @@ class RegisteredUserController extends Controller
         if ($inviteToken) {
             $invitation = \App\Models\WorkspaceInvitation::where('token', $inviteToken)
                 ->whereNull('accepted_at')
-                ->where('expires_at', '>', now()) 
+                ->where('expires_at', '>', now())
                 ->first();
 
             if (!$invitation) {
@@ -157,11 +157,27 @@ class RegisteredUserController extends Controller
             $user->generateReferralCode();
         }
 
-        event(new Registered($user));
+        // Trigger email verification notification (wrapped in try-catch for safety)
+        try {
+            event(new Registered($user));
+        } catch (\Exception $e) {
+            \Log::error("Failed to send verification email for user {$user->id}: " . $e->getMessage(), [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+            // Continue with registration even if email fails
+        }
 
         // Notify admins about new user registration
-        $notificationService = app(\App\Services\NotificationService::class);
-        $notificationService->notifyAdminNewUserRegistration($user);
+        try {
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->notifyAdminNewUserRegistration($user);
+        } catch (\Exception $e) {
+            \Log::error("Failed to notify admins about new user {$user->id}: " . $e->getMessage(), [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         // Process signup reward if referred (only for buyer/seller)
         if ($referrer && $request->role !== 'user_workspaces') {
