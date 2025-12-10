@@ -10,6 +10,8 @@ class NoteShareUserTracking extends Model
 {
     use HasUuids;
 
+    protected $table = 'note_share_user_tracking';
+
     protected $fillable = [
         'share_referral_id',
         'user_id',
