@@ -595,8 +595,11 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'buyer_only'])->
         Route::delete('/{webhook}', [\App\Http\Controllers\WebhookController::class, 'destroy'])->name('destroy');
         Route::post('/{webhook}/test', [\App\Http\Controllers\WebhookController::class, 'test'])->name('test');
     });
+});
 
-    // Notification routes
+// Routes that require KYC - Available for all authenticated users (admin, seller, buyer)
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function () {
+    // Notification routes - Available to all KYC'd users
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
