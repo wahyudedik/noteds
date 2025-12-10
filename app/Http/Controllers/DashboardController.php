@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Contracts\View\View as ViewContract;
 
 class DashboardController extends Controller
 {
@@ -12,7 +14,7 @@ class DashboardController extends Controller
      * Seller/Buyer Dashboard
      * This is for non-admin users only
      */
-    public function index(): View
+    public function index(): ViewContract|RedirectResponse
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
