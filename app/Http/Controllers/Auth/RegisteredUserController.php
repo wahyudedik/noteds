@@ -140,8 +140,17 @@ class RegisteredUserController extends Controller
             'verification_status' => 'pending',
         ]);
 
-        // Assign Spatie role
-        $user->assignRole($request->role);
+        // Assign Spatie role only if it exists
+        // This prevents RoleDoesNotExist exception during development/testing
+        try {
+            $user->assignRole($request->role);
+        } catch (\Spatie\Permission\Exceptions\RoleDoesNotExist $e) {
+            // Role doesn't exist yet - roles should be seeded via 'php artisan db:seed'
+            \Log::warning("Role '{$request->role}' not found for user {$user->id}. Run 'php artisan db:seed' to create roles.", [
+                'user_id' => $user->id,
+                'role' => $request->role,
+            ]);
+        }
 
         // Generate referral code for new user (only if not workspace user)
         if ($request->role !== 'user_workspaces') {
