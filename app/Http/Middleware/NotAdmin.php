@@ -17,7 +17,7 @@ class NotAdmin
     {
         // Block admin dari akses regular dashboard
         if (auth()->check() && auth()->user()->hasRole('admin')) {
-            return redirect('/admin/dashboard');
+            return redirect()->route('admin.dashboard');
         }
 
         return $next($request);

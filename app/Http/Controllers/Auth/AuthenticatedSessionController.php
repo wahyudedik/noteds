@@ -30,15 +30,12 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // Check if user needs to complete profile (KTP and selfie) - hanya sekali setelah register
-        // Jangan redirect setiap login, hanya jika memang belum lengkap dan baru register
-        // Untuk login biasa, tidak perlu redirect ke profile
-
-        // Admin langsung ke dashboard admin
+        // Redirect based on user role
         if ($user->hasRole('admin')) {
-            return redirect('/admin/dashboard');
+            return redirect()->intended(route('admin.dashboard'));
         }
 
+        // All other users go to regular dashboard (seller, buyer, etc)
         return redirect()->intended(route('dashboard'));
     }
 

@@ -15,6 +15,7 @@ use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\WithdrawController;
 use App\Http\Controllers\AffiliateController;
 use App\Http\Controllers\SimulatorController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\NoteReportController;
 use App\Http\Controllers\UserReportController;
@@ -30,7 +31,7 @@ use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\SupportTicketController;
 use App\Http\Controllers\NoteAttachmentController;
 use App\Http\Controllers\ShareAnalyticsController;
-use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\ForumPreferenceController;
 use App\Http\Controllers\NoteReviewReplyController;
 use App\Http\Controllers\NoteConversationController;
@@ -236,30 +237,6 @@ Route::patch('/reviews/{review}', [ReviewController::class, 'update'])->middlewa
 Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->middleware(['auth', 'verified', 'username.setup', 'kyc'])->name('reviews.destroy');
 Route::post('/reviews/{review}/replies', [NoteReviewReplyController::class, 'store'])->middleware(['auth', 'verified', 'username.setup', 'kyc'])->name('reviews.replies.store');
 Route::delete('/review-replies/{reply}', [NoteReviewReplyController::class, 'destroy'])->middleware(['auth', 'verified', 'username.setup', 'kyc'])->name('reviews.replies.destroy');
-
-Route::get('/dashboard', function () {
-    /** @var \App\Models\User $user */
-    $user = Auth::user();
-
-    // Check if user needs to complete profile (KTP and selfie) - redirect once after register
-    // Check session to see if this is first time after register (admin tidak perlu verifikasi)
-    if (!$user->hasRole('admin') && (!$user->ktp_path || !$user->selfie_path)) {
-        // Only redirect if coming from registration (check session or recent registration)
-        $justRegistered = session('just_registered', false);
-        if ($justRegistered || ($user->created_at->gt(now()->subMinutes(5)) && !$user->ktp_path && !$user->selfie_path)) {
-            session()->forget('just_registered');
-            return redirect()->route('profile.edit')
-                ->with('info', 'Silakan lengkapi profil Anda dengan mengupload KTP dan foto selfie untuk verifikasi identitas.');
-        }
-    }
-
-    // Workspace users should be redirected to workspaces
-    if ($user->role === 'user_workspaces') {
-        return redirect()->route('workspaces.index');
-    }
-
-    return view('dashboard');
-})->middleware(['auth', 'verified', 'username.setup'])->name('dashboard');
 
 // Setup username route (must be before username.setup middleware)
 Route::middleware('auth')->prefix('setup-username')->name('setup-username.')->group(function () {
@@ -639,8 +616,8 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 
 // Admin routes
 Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.setup'])->name('admin.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/repurchase-report', [DashboardController::class, 'repurchaseReport'])->name('repurchase-report');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/repurchase-report', [AdminDashboardController::class, 'repurchaseReport'])->name('repurchase-report');
 
     // User verification routes - MUST be before resource routes
     Route::get('/users/pending-verification', [UserController::class, 'pendingVerification'])->name('users.pending-verification');
