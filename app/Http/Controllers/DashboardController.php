@@ -11,8 +11,9 @@ use Illuminate\Contracts\View\View as ViewContract;
 class DashboardController extends Controller
 {
     /**
-     * Seller/Buyer Dashboard
-     * This is for non-admin users only
+     * Main Dashboard Router
+     * Routes users to appropriate dashboard based on their role
+     * Only accessible to non-admin users
      */
     public function index(): ViewContract|RedirectResponse
     {
@@ -24,10 +25,8 @@ class DashboardController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        // Check if user needs to complete profile (KTP and selfie) - redirect once after register
-        // Check session to see if this is first time after register
+        // Check if user needs to complete profile (KTP and selfie)
         if (!$user->ktp_path || !$user->selfie_path) {
-            // Only redirect if coming from registration (check session or recent registration)
             $justRegistered = session('just_registered', false);
             if ($justRegistered || ($user->created_at->gt(now()->subMinutes(5)) && !$user->ktp_path && !$user->selfie_path)) {
                 session()->forget('just_registered');
@@ -41,6 +40,16 @@ class DashboardController extends Controller
             return redirect()->route('workspaces.index');
         }
 
-        return view('dashboard');
+        // Route to role-specific dashboard
+        if ($user->hasRole('seller')) {
+            return app(SellerDashboardController::class)->index();
+        }
+
+        if ($user->hasRole('buyer')) {
+            return app(BuyerDashboardController::class)->index();
+        }
+
+        // Default fallback (shouldn't reach here with proper role assignment)
+        return app(BuyerDashboardController::class)->index();
     }
 }
