@@ -13,7 +13,7 @@ class VendorController extends Controller
 {
     public function index(Request $request): View
     {
-        $vendors = User::role('vendor')->orderBy('name')->paginate(20);
+        $vendors = User::role('seller')->orderBy('name')->paginate(20);
         $unassignedOrders = \App\Models\ServiceOrder::whereNull('assigned_user_id')->latest()->paginate(20, ['*'], 'orders_page');
         return view('admin.vendors.index', compact('vendors', 'unassignedOrders'));
     }
@@ -27,8 +27,8 @@ class VendorController extends Controller
 
         $order = ServiceOrder::findOrFail($data['order_id']);
         $vendor = User::findOrFail($data['vendor_id']);
-        if (!$vendor->hasRole('vendor')) {
-            return back()->with('error', 'User terpilih bukan vendor.');
+        if (!$vendor->hasRole('seller')) {
+            return back()->with('error', 'User terpilih bukan seller.');
         }
         $order->assigned_user_id = $vendor->id;
         if ($order->status === 'submitted') {
@@ -53,7 +53,8 @@ class VendorController extends Controller
                     route('studio.orders.show', $order)
                 )
             );
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         \App\Models\OrderActivity::create([
             'service_order_id' => $order->id,
@@ -75,8 +76,8 @@ class VendorController extends Controller
         ]);
 
         $vendor = User::findOrFail($data['vendor_id']);
-        if (!$vendor->hasRole('vendor')) {
-            return back()->with('error', 'User terpilih bukan vendor.');
+        if (!$vendor->hasRole('seller')) {
+            return back()->with('error', 'User terpilih bukan seller.');
         }
 
         $orders = \App\Models\ServiceOrder::whereIn('id', $data['order_ids'])->get();
@@ -109,5 +110,3 @@ class VendorController extends Controller
         return back()->with('success', 'Bulk assign berhasil: ' . count($orders) . ' orders ditetapkan ke ' . $vendor->name . '.');
     }
 }
-
-

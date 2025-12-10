@@ -95,7 +95,7 @@ Route::prefix('ecosystem')->name('ecosystem.')->group(function () {
 Route::get('/tuts', [\App\Http\Controllers\TutsController::class, 'index'])->name('tuts.index');
 Route::get('/tuts/{tutorial:slug}', [\App\Http\Controllers\TutsController::class, 'show'])->name('tuts.show');
 Route::get('/studio', [\App\Http\Controllers\StudioController::class, 'index'])->name('studio.index');
-Route::middleware(['auth', 'verified', 'role:vendor'])->get('/vendor', [\App\Http\Controllers\VendorController::class, 'index'])->name('vendor.index');
+Route::middleware(['auth', 'verified', 'role:seller'])->get('/vendor', [\App\Http\Controllers\VendorController::class, 'index'])->name('vendor.index');
 Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'not.admin'])->prefix('studio')->name('studio.')->group(function () {
     Route::get('/orders', [\App\Http\Controllers\ServiceOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/create', [\App\Http\Controllers\ServiceOrderController::class, 'create'])->name('orders.create');

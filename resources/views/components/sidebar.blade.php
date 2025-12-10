@@ -328,7 +328,7 @@
                 'active' => request()->routeIs('simulators.*'),
             ];
 
-            if ($user->hasRole('vendor') || $isAdmin) {
+            if ($user->hasRole('seller')) {
                 $moreItems[] = [
                     'label' => __('messages.vendor'),
                     'href' => route('vendor.index'),

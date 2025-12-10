@@ -20,7 +20,7 @@ class ServiceQuoteController extends Controller
             return redirect()->route('login');
         }
         $isAdmin = $user->hasRole('admin');
-        $isAssignedVendor = $user->hasRole('vendor') && $order->assigned_user_id === $user->id;
+        $isAssignedVendor = $user->hasRole('seller') && $order->assigned_user_id === $user->id;
         if (!$isAdmin && !$isAssignedVendor) {
             return redirect()->route('studio.orders.show', $order)->with('error', 'Tidak diizinkan membuat quote.');
         }
@@ -35,7 +35,7 @@ class ServiceQuoteController extends Controller
             return redirect()->route('login');
         }
         $isAdmin = $user->hasRole('admin');
-        $isAssignedVendor = $user->hasRole('vendor') && $order->assigned_user_id === $user->id;
+        $isAssignedVendor = $user->hasRole('seller') && $order->assigned_user_id === $user->id;
         if (!$isAdmin && !$isAssignedVendor) {
             return redirect()->route('studio.orders.show', $order)->with('error', 'Tidak diizinkan mengirim quote.');
         }

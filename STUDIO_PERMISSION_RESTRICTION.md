@@ -49,17 +49,18 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'not.admin'])
 - `kyc` - KYC must be completed
 - `not.admin` - **BLOCK ADMIN ACCESS** ✅
 
-#### Vendor Dashboard
+#### Seller Dashboard (Studio)
 ```php
-Route::middleware(['auth', 'verified', 'role:vendor'])
+Route::middleware(['auth', 'verified', 'role:seller'])
     ->get('/vendor', [\App\Http\Controllers\VendorController::class, 'index'])
     ->name('vendor.index');
 ```
 
-**Change**: Removed `|admin` from role middleware
+**Change**: Renamed role from `vendor` to `seller`
 - Before: `role:vendor|admin`
-- After: `role:vendor`
-- Result: Admin cannot access vendor dashboard ✅
+- After: `role:seller`
+- Reason: Sellers (not vendors) are freelancers in the Studio system
+- Result: Only sellers can access their vendor dashboard ✅
 
 #### Admin Studio Management
 ```php

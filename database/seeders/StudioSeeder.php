@@ -14,33 +14,33 @@ class StudioSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ensure vendor role exists (created by RoleSeeder)
-        $vendorRole = Role::firstOrCreate(['name' => 'vendor']);
+        // Ensure seller role exists (created by RoleSeeder)
+        $sellerRole = Role::firstOrCreate(['name' => 'seller']);
 
-        // Create sample vendor users
-        $vendors = [
+        // Create sample seller users (freelancers for Studio)
+        $sellers = [
             [
-                'name' => 'Vendor Creative',
+                'name' => 'Seller Creative',
                 'email' => 'vendor@noteds.com',
                 'password' => bcrypt('password'),
-                'role' => 'vendor',
+                'role' => 'seller',
                 'verification_status' => 'approved',
             ],
             [
-                'name' => 'Vendor Design',
+                'name' => 'Seller Design',
                 'email' => 'vendor2@noteds.com',
                 'password' => bcrypt('password'),
-                'role' => 'vendor',
+                'role' => 'seller',
                 'verification_status' => 'approved',
             ],
         ];
 
-        foreach ($vendors as $vendorData) {
-            $vendor = User::firstOrCreate(
-                ['email' => $vendorData['email']],
-                $vendorData
+        foreach ($sellers as $sellerData) {
+            $seller = User::firstOrCreate(
+                ['email' => $sellerData['email']],
+                $sellerData
             );
-            $vendor->assignRole('vendor');
+            $seller->assignRole('seller');
         }
 
         // Studio Settings
@@ -120,4 +120,3 @@ class StudioSeeder extends Seeder
         $this->command->info('Studio seeder completed: Vendor role, sample vendors, and settings created.');
     }
 }
-

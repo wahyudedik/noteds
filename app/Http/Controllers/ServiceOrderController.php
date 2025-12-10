@@ -16,7 +16,7 @@ class ServiceOrderController extends Controller
         $user = Auth::user();
         if ($user->hasRole('admin')) {
             $orders = ServiceOrder::latest()->paginate(12);
-        } elseif ($user->hasRole('vendor')) {
+        } elseif ($user->hasRole('seller')) {
             $orders = ServiceOrder::where('assigned_user_id', $user->id)->latest()->paginate(12);
         } else {
             $orders = ServiceOrder::where('user_id', $user->id)->latest()->paginate(12);
@@ -87,8 +87,8 @@ class ServiceOrderController extends Controller
             'vendor_id' => ['required', 'uuid', 'exists:users,id'],
         ]);
         $vendor = \App\Models\User::find($request->input('vendor_id'));
-        if (!$vendor || !$vendor->hasRole('vendor')) {
-            return back()->with('error', 'User terpilih bukan vendor.');
+        if (!$vendor || !$vendor->hasRole('seller')) {
+            return back()->with('error', 'User terpilih bukan seller.');
         }
         $order->assigned_user_id = $vendor->id;
         if ($order->status === 'submitted') {
