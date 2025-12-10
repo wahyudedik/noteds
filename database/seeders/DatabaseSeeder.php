@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             // 1. Core System - REQUIRED (Roles, Settings)
             RoleSeeder::class,
             AffiliatePermissionSeeder::class,
+            SellerNotesPermissionSeeder::class,
             SettingSeeder::class,
 
             // 2. Reference Data - REQUIRED (Master data)

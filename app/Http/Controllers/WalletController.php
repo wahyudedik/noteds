@@ -20,8 +20,7 @@ class WalletController extends Controller
     public function __construct(
         private NotificationService $notificationService,
         private CurrencyService $currencyService
-    )
-    {
+    ) {
         Config::$serverKey = config('services.midtrans.server_key');
         Config::$isProduction = config('services.midtrans.is_production', false);
         Config::$isSanitized = true;
@@ -31,7 +30,7 @@ class WalletController extends Controller
     public function index(): View
     {
         $user = auth()->user();
-        
+
         // Ensure wallet exists
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $user->id],
@@ -113,10 +112,10 @@ class WalletController extends Controller
             'note_id' => null,
             'amount' => $amount,
             'commission' => 0,
-             'currency' => $baseCurrency,
-             'original_amount' => $inputAmount,
-             'original_currency' => $userCurrency,
-             'exchange_rate' => $exchangeRate,
+            'currency' => $baseCurrency,
+            'original_amount' => $inputAmount,
+            'original_currency' => $userCurrency,
+            'exchange_rate' => $exchangeRate,
             'status' => 'pending',
             'payment_method' => 'topup',
             'notes' => 'Top-up saldo wallet',
@@ -127,13 +126,13 @@ class WalletController extends Controller
         // Using first 8 chars of UUID + timestamp for uniqueness
         $shortId = substr(str_replace('-', '', $transaction->id), 0, 8);
         $orderId = 'topup-' . time() . '-' . $shortId;
-        
+
         // Ensure order_id doesn't exceed 50 characters (Midtrans limit)
         if (strlen($orderId) > 50) {
             // Fallback: use hash if still too long
             $orderId = 'topup-' . time() . '-' . substr(md5($transaction->id), 0, 8);
         }
-        
+
         $transaction->midtrans_order_id = $orderId;
         $transaction->save();
 
@@ -185,7 +184,7 @@ class WalletController extends Controller
             ]);
 
             $snapToken = Snap::getSnapToken($params);
-            
+
             if (empty($snapToken)) {
                 Log::error('Snap Token is empty!');
                 return redirect()->route('wallet.index')
@@ -196,7 +195,7 @@ class WalletController extends Controller
                 'token_length' => strlen($snapToken),
                 'transaction_id' => $transaction->id,
             ]);
-            
+
             return redirect()->route('wallet.topup-checkout', ['token' => $snapToken, 'transaction' => $transaction->id]);
         } catch (\Exception $e) {
             Log::error('Midtrans Snap Token Error:', [
@@ -206,7 +205,7 @@ class WalletController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'params' => $params,
             ]);
-            
+
             return redirect()->route('wallet.index')
                 ->with('error', 'Gagal membuat transaksi top-up: ' . $e->getMessage() . '. Silakan coba lagi atau hubungi support.');
         }
@@ -216,9 +215,9 @@ class WalletController extends Controller
     {
         $transactionId = $request->transaction;
         $snapToken = $request->token;
-        
+
         $transaction = Transaction::findOrFail($transactionId);
-        
+
         if ($transaction->buyer_id !== auth()->id()) {
             abort(403);
         }
@@ -230,7 +229,7 @@ class WalletController extends Controller
     {
         try {
             $notification = json_decode($request->getContent(), true);
-            
+
             Log::info('Midtrans Webhook Received:', [
                 'order_id' => $notification['order_id'] ?? null,
                 'transaction_status' => $notification['transaction_status'] ?? null,
@@ -274,7 +273,7 @@ class WalletController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'notification' => $request->getContent(),
             ]);
-            
+
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
@@ -396,14 +395,14 @@ class WalletController extends Controller
     public function paymentFinish(Request $request): RedirectResponse
     {
         $orderId = $request->get('order_id');
-        
+
         if (!$orderId) {
             return redirect()->route('wallet.index')
                 ->with('warning', 'Order ID tidak ditemukan. Silakan cek status transaksi di halaman wallet.');
         }
 
         $transaction = \App\Models\Transaction::where('midtrans_order_id', $orderId)->first();
-        
+
         if (!$transaction) {
             Log::warning('Transaction not found for order_id in paymentFinish: ' . $orderId);
             return redirect()->route('wallet.index')
@@ -480,7 +479,7 @@ class WalletController extends Controller
                     });
 
                     if ($successContext) {
-                    $this->notificationService->notifyTopupSuccess(
+                        $this->notificationService->notifyTopupSuccess(
                             $successContext['user'],
                             $successContext['amount'],
                             $successContext['balance'],
@@ -496,7 +495,7 @@ class WalletController extends Controller
                 // but are actually successful. Check payment_type to determine if we should wait or process.
                 $paymentType = $midtransStatus->payment_type ?? null;
                 $isCreditCard = in_array($paymentType, ['credit_card', 'cstore']);
-                
+
                 // For Credit Card in sandbox, if status is pending but fraud_status is accept,
                 // it usually means the payment is successful but not yet settled
                 // In sandbox, Credit Card usually settles immediately, so we can process it
@@ -505,7 +504,7 @@ class WalletController extends Controller
                         'order_id' => $orderId,
                         'payment_type' => $paymentType,
                     ]);
-                    
+
                     // Process as success for sandbox Credit Card
                     if ($transaction->payment_method === 'topup') {
                         DB::transaction(function () use ($transaction, $grossAmount, &$successContext) {
@@ -517,14 +516,14 @@ class WalletController extends Controller
                             $transaction->status = 'success';
                             $transaction->save();
 
-                        $baseCurrency = $this->currencyService->getBaseCurrency();
-                        $wallet = Wallet::firstOrCreate(
-                            ['user_id' => $transaction->buyer_id],
-                            ['balance' => 0, 'currency' => $baseCurrency]
-                        );
-                        if ($wallet->currency !== $baseCurrency) {
-                            $wallet->currency = $baseCurrency;
-                        }
+                            $baseCurrency = $this->currencyService->getBaseCurrency();
+                            $wallet = Wallet::firstOrCreate(
+                                ['user_id' => $transaction->buyer_id],
+                                ['balance' => 0, 'currency' => $baseCurrency]
+                            );
+                            if ($wallet->currency !== $baseCurrency) {
+                                $wallet->currency = $baseCurrency;
+                            }
 
                             $wallet->balance += $grossAmount ?? $transaction->amount;
                             $wallet->save();
@@ -560,14 +559,14 @@ class WalletController extends Controller
                             ->with('success', 'Pembayaran berhasil! Saldo wallet telah diperbarui.');
                     }
                 }
-                
+
                 // Regular pending handling
                 // Payment is still pending
                 if ($transaction->status !== 'pending') {
                     $transaction->status = 'pending';
                     $transaction->save();
                 }
-                
+
                 return redirect()->route('wallet.index')
                     ->with('info', 'Pembayaran sedang diproses. Saldo akan diperbarui setelah pembayaran dikonfirmasi.');
             } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
@@ -582,7 +581,7 @@ class WalletController extends Controller
                         'status' => $transactionStatus,
                     ];
                 }
-                
+
                 if ($failureContext && $failureContext['user']) {
                     $this->notificationService->notifyTopupFailed(
                         $failureContext['user'],
@@ -600,7 +599,7 @@ class WalletController extends Controller
                     $transaction->status = 'pending';
                     $transaction->save();
                 }
-                
+
                 return redirect()->route('wallet.index')
                     ->with('info', 'Pembayaran sedang direview. Saldo akan diperbarui setelah pembayaran dikonfirmasi.');
             }
@@ -618,7 +617,7 @@ class WalletController extends Controller
                     ->with('success', 'Pembayaran berhasil! Saldo wallet telah diperbarui.');
             }
         }
-        
+
         return redirect()->route('wallet.index')
             ->with('info', 'Terima kasih! Pembayaran Anda sedang diproses.');
     }
@@ -629,16 +628,16 @@ class WalletController extends Controller
     public function paymentUnfinish(Request $request): RedirectResponse
     {
         $orderId = $request->get('order_id');
-        
+
         if ($orderId) {
             $transaction = Transaction::where('midtrans_order_id', $orderId)->first();
-            
+
             if ($transaction && $transaction->status === 'pending') {
                 return redirect()->route('wallet.index')
                     ->with('info', 'Pembayaran belum selesai. Silakan selesaikan pembayaran Anda untuk mengaktifkan saldo.');
             }
         }
-        
+
         return redirect()->route('wallet.index')
             ->with('warning', 'Pembayaran belum selesai. Silakan coba lagi atau hubungi support jika ada masalah.');
     }
@@ -650,10 +649,10 @@ class WalletController extends Controller
     {
         $orderId = $request->get('order_id');
         $transactionStatus = $request->get('transaction_status');
-        
+
         if ($orderId) {
             $transaction = Transaction::where('midtrans_order_id', $orderId)->first();
-            
+
             if ($transaction) {
                 // Update transaction status to failed if not already updated
                 if ($transaction->status === 'pending') {
@@ -671,7 +670,7 @@ class WalletController extends Controller
                 }
             }
         }
-        
+
         return redirect()->route('wallet.index')
             ->with('error', 'Pembayaran gagal. Silakan coba lagi atau gunakan metode pembayaran lain.');
     }
@@ -685,5 +684,183 @@ class WalletController extends Controller
         // This endpoint can handle additional payment notifications
         // For now, redirect to webhook handler
         return $this->webhook($request);
+    }
+
+    /**
+     * Admin transaction report - view all user transactions
+     */
+    public function adminReport(Request $request): View
+    {
+        // Only admin can access this
+        if (!auth()->user()->hasRole('admin')) {
+            abort(403);
+        }
+
+        // Get filter parameters
+        $userSearch = $request->input('user_search', '');
+        $type = $request->input('type', ''); // purchase, topup, withdraw, commission, etc
+        $status = $request->input('status', ''); // pending, completed, failed, etc
+        $dateFrom = $request->input('date_from', '');
+        $dateTo = $request->input('date_to', '');
+
+        // Build query
+        $query = Transaction::with(['buyer', 'seller', 'note']);
+
+        // Filter by user (buyer or seller name/email)
+        if ($userSearch) {
+            $query->whereHas('buyer', function ($q) use ($userSearch) {
+                $q->where('name', 'like', "%{$userSearch}%")
+                    ->orWhere('email', 'like', "%{$userSearch}%");
+            })->orWhereHas('seller', function ($q) use ($userSearch) {
+                $q->where('name', 'like', "%{$userSearch}%")
+                    ->orWhere('email', 'like', "%{$userSearch}%");
+            });
+        }
+
+        // Filter by transaction type
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        // Filter by status
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        // Filter by date range
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
+        // Get statistics
+        $totalTransactions = Transaction::count();
+        $totalAmount = Transaction::where('status', 'completed')->sum('amount');
+        $totalCommission = Transaction::where('status', 'completed')->sum('commission');
+        $pendingAmount = Transaction::where('status', 'pending')->sum('amount');
+
+        // Transaction status breakdown
+        $byStatus = Transaction::selectRaw('status, COUNT(*) as count, SUM(amount) as total')
+            ->groupBy('status')
+            ->get();
+
+        // Transaction breakdown by payment method (as type substitute)
+        $byType = Transaction::where('status', 'completed')
+            ->selectRaw('COALESCE(payment_method, "other") as payment_method, COUNT(*) as count, SUM(amount) as total')
+            ->groupBy('payment_method')
+            ->get();
+
+        // Get paginated transactions
+        $transactions = $query->latest()->paginate(50);
+
+        return view('wallet.admin-report', compact(
+            'transactions',
+            'totalTransactions',
+            'totalAmount',
+            'totalCommission',
+            'pendingAmount',
+            'byType',
+            'byStatus',
+            'userSearch',
+            'type',
+            'status',
+            'dateFrom',
+            'dateTo'
+        ));
+    }
+
+    /**
+     * Export admin transaction report to CSV
+     */
+    public function exportReport(Request $request)
+    {
+        // Only admin can access this
+        if (!auth()->user()->hasRole('admin')) {
+            abort(403);
+        }
+
+        // Get filter parameters
+        $userSearch = $request->input('user_search', '');
+        $type = $request->input('type', '');
+        $status = $request->input('status', '');
+        $dateFrom = $request->input('date_from', '');
+        $dateTo = $request->input('date_to', '');
+
+        // Build query
+        $query = Transaction::with(['buyer', 'seller', 'note']);
+
+        if ($userSearch) {
+            $query->whereHas('buyer', function ($q) use ($userSearch) {
+                $q->where('name', 'like', "%{$userSearch}%")
+                    ->orWhere('email', 'like', "%{$userSearch}%");
+            })->orWhereHas('seller', function ($q) use ($userSearch) {
+                $q->where('name', 'like', "%{$userSearch}%")
+                    ->orWhere('email', 'like', "%{$userSearch}%");
+            });
+        }
+
+        if ($type) {
+            $query->where('payment_method', $type);
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
+        $transactions = $query->latest()->get();
+
+        // Generate CSV
+        $filename = 'transaction-report-' . now()->format('Y-m-d-H-i-s') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($transactions) {
+            $file = fopen('php://output', 'w');
+
+            // Header row
+            fputcsv($file, [
+                'ID',
+                'Date',
+                'Payment Method',
+                'Buyer',
+                'Seller',
+                'Amount',
+                'Commission',
+                'Status',
+                'Note',
+                'Description'
+            ]);
+
+            // Data rows
+            foreach ($transactions as $transaction) {
+                fputcsv($file, [
+                    $transaction->id,
+                    $transaction->created_at->format('Y-m-d H:i:s'),
+                    $transaction->payment_method ?? 'other',
+                    $transaction->buyer?->name ?? '-',
+                    $transaction->seller?->name ?? '-',
+                    number_format($transaction->amount, 2),
+                    number_format($transaction->commission ?? 0, 2),
+                    $transaction->status,
+                    $transaction->note?->title ?? '-',
+                    $transaction->notes ?? '-',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

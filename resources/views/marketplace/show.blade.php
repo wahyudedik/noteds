@@ -973,8 +973,7 @@ if (!$modelUrl) {
                                 if ($note->preview_percentage > 0) {
                                     $previewMode = 'percentage';
                                     $previewContent = $note->getPreviewContentByPercentage();
-                                    // Only show blur for paid notes. Free notes should always show full content
-                                    $showBlur = $note->preview_percentage < 100 && $note->price > 0;
+                                    $showBlur = $note->preview_percentage < 100;
 
                                     if ($showBlur) {
                                         $totalLines = count(preg_split('/\r\n|\r|\n/', $note->content));

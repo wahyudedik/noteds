@@ -29,6 +29,9 @@ class Contest extends Model
         'rules',
         'banner_image',
         'created_by',
+        'total_prize_amount',
+        'frozen_amount',
+        'distributed_amount',
     ];
 
     protected function casts(): array
@@ -41,6 +44,9 @@ class Contest extends Model
             'voting_start_date' => 'datetime',
             'voting_end_date' => 'datetime',
             'max_entries_per_user' => 'integer',
+            'total_prize_amount' => 'decimal:2',
+            'frozen_amount' => 'decimal:2',
+            'distributed_amount' => 'decimal:2',
         ];
     }
 
@@ -134,4 +140,3 @@ class Contest extends Model
             ->get();
     }
 }
-

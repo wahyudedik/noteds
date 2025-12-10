@@ -41,6 +41,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'buyer' => \App\Http\Middleware\EnsureBuyerRole::class,
             'seller' => \App\Http\Middleware\EnsureSellerRole::class,
             'seller_only' => \App\Http\Middleware\EnsureSellerOnly::class,
+            'buyer_only' => \App\Http\Middleware\EnsureBuyerOnly::class,
+            'seller_and_buyer_only' => \App\Http\Middleware\EnsureSellerAndBuyerOnly::class,
             'workspace.user' => \App\Http\Middleware\EnsureWorkspaceUser::class,
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'rate.limit' => \App\Http\Middleware\RateLimitSensitive::class,
@@ -49,6 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure_vendor_can_submit' => \App\Http\Middleware\EnsureVendorCanSubmitWork::class,
             'ensure_buyer_can_approve' => \App\Http\Middleware\EnsureBuyerCanApprove::class,
             'ensure_admin_can_verify' => \App\Http\Middleware\EnsureAdminCanVerify::class,
+            'not.admin' => \App\Http\Middleware\NotAdmin::class,
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\ContentSecurityPolicy::class,

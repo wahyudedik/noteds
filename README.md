@@ -81,7 +81,7 @@
 - ✅ **Comments System** - Threaded comments dengan nested replies
 - ✅ **Reactions** - 5 types (Like, Love, Helpful, Insightful, Thanks)
 - ✅ **Q&A System** - Ask questions, seller answers, mark helpful
-- ✅ **Activity Feed** - Track user activities dengan polymorphic relationships 
+- ✅ **Activity Feed** - Track user activities dengan polymorphic relationships di
 - ✅ **Follow System** - Follow creators & get updates
 
 ### Financial Features

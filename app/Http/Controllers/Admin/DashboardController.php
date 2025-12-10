@@ -16,6 +16,7 @@ use App\Models\AffiliateLink;
 use App\Models\AffiliateConversion;
 use App\Models\AffiliateCommission;
 use App\Models\AffiliatePayout;
+use App\Services\LeaderboardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -512,6 +513,13 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Get top 5 leaderboard data
+        $leaderboardService = new LeaderboardService();
+        $topSellersByRevenue = $leaderboardService->getTopSellersByRevenue('all-time', 5);
+        $topSellersByRatings = $leaderboardService->getTopSellersByRatings('all-time', 5);
+        $topBuyersBySpending = $leaderboardService->getTopBuyersBySpending('all-time', 5);
+        $topContributorsByReviews = $leaderboardService->getTopContributorsByReviews('all-time', 5);
+
         return view('admin.dashboard', compact(
             'stats',
             'platformBalance',
@@ -541,7 +549,11 @@ class DashboardController extends Controller
             'dailyShareActivity',
             'affiliateStats',
             'topAffiliates',
-            'pendingPayouts'
+            'pendingPayouts',
+            'topSellersByRevenue',
+            'topSellersByRatings',
+            'topBuyersBySpending',
+            'topContributorsByReviews'
         ));
     }
 

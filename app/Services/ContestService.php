@@ -9,6 +9,8 @@ use App\Models\ContestWinner;
 use App\Models\User;
 use App\Models\Note;
 use App\Models\Badge;
+use App\Models\ContestSetting;
+use App\Models\WalletTransaction;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -17,8 +19,7 @@ class ContestService
 {
     public function __construct(
         private NotificationService $notificationService
-    ) {
-    }
+    ) {}
 
     /**
      * Submit entry to contest
@@ -354,5 +355,227 @@ class ContestService
             'reasons' => $reasons,
         ];
     }
-}
 
+    /**
+     * Freeze prize money from buyer's wallet
+     *
+     * @param Contest $contest
+     * @param User $buyer
+     * @param float $totalPrizeAmount
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public function freezePrizes(Contest $contest, User $buyer, float $totalPrizeAmount): array
+    {
+        try {
+            return DB::transaction(function () use ($contest, $buyer, $totalPrizeAmount) {
+                // Check if buyer has sufficient balance
+                if (!$buyer->wallet || $buyer->wallet->balance < $totalPrizeAmount) {
+                    return [
+                        'success' => false,
+                        'message' => "Insufficient wallet balance. You need " . number_format($totalPrizeAmount, 2) . " but have " . number_format($buyer->wallet->balance ?? 0, 2),
+                    ];
+                }
+
+                // Deduct from buyer's wallet
+                $buyer->wallet->decrement('balance', $totalPrizeAmount);
+
+                // Record transaction
+                WalletTransaction::create([
+                    'user_id' => $buyer->id,
+                    'type' => 'contest_freeze',
+                    'amount' => -$totalPrizeAmount,
+                    'description' => "Prize frozen for contest: {$contest->title}",
+                    'reference_id' => $contest->id,
+                    'reference_type' => Contest::class,
+                    'status' => 'completed',
+                ]);
+
+                // Update contest frozen amount
+                $contest->update([
+                    'frozen_amount' => $totalPrizeAmount,
+                    'total_prize_amount' => $totalPrizeAmount,
+                ]);
+
+                return [
+                    'success' => true,
+                    'message' => "Prize amount frozen successfully.",
+                ];
+            });
+        } catch (\Exception $e) {
+            Log::error('Contest prize freeze failed', [
+                'contest_id' => $contest->id,
+                'buyer_id' => $buyer->id,
+                'amount' => $totalPrizeAmount,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Failed to freeze prizes. Please try again.',
+            ];
+        }
+    }
+
+    /**
+     * Validate contest creation eligibility
+     *
+     * @param User $buyer
+     * @param float $totalPrizeAmount
+     * @return array ['valid' => bool, 'message' => string|null]
+     */
+    public function validateContestCreation(User $buyer, float $totalPrizeAmount): array
+    {
+        $setting = ContestSetting::first();
+
+        if (!$setting) {
+            return [
+                'valid' => false,
+                'message' => 'Contest feature is not configured.',
+            ];
+        }
+
+        // Check if contests are enabled
+        if (!$setting->enabled) {
+            return [
+                'valid' => false,
+                'message' => 'Contest feature is currently disabled.',
+            ];
+        }
+
+        // Check wallet balance
+        if (!$buyer->wallet || $buyer->wallet->balance < $totalPrizeAmount) {
+            return [
+                'valid' => false,
+                'message' => "Insufficient wallet balance. You need " . number_format($totalPrizeAmount, 2) . " but have " . number_format($buyer->wallet->balance ?? 0, 2) . ".",
+            ];
+        }
+
+        // Check max contest limit
+        $activeContests = Contest::where('created_by', $buyer->id)
+            ->whereIn('status', ['draft', 'open', 'voting'])
+            ->count();
+
+        if ($activeContests >= $setting->max_contests_per_buyer) {
+            return [
+                'valid' => false,
+                'message' => "You have reached the maximum number of active contests ({$setting->max_contests_per_buyer}).",
+            ];
+        }
+
+        // Check max prize amount
+        if ($setting->max_prize_amount && $totalPrizeAmount > $setting->max_prize_amount) {
+            return [
+                'valid' => false,
+                'message' => "Prize amount exceeds the maximum allowed (" . number_format($setting->max_prize_amount, 2) . ").",
+            ];
+        }
+
+        // Check KYC requirement
+        if ($setting->require_kyc && !$this->hasVerifiedKyc($buyer)) {
+            return [
+                'valid' => false,
+                'message' => 'KYC verification is required to create contests.',
+            ];
+        }
+
+        return ['valid' => true];
+    }
+
+    /**
+     * Check if user has verified KYC
+     *
+     * @param User $user
+     * @return bool
+     */
+    private function hasVerifiedKyc(User $user): bool
+    {
+        // Adjust based on your KYC implementation
+        // This is a placeholder - update based on your actual KYC model/field
+        return $user->kyc_verified_at !== null;
+    }
+
+    /**
+     * Distribute prizes to winners with wallet integration
+     *
+     * @param Contest $contest
+     * @return array
+     */
+    public function distributePrizesWithWallet(Contest $contest): array
+    {
+        try {
+            return DB::transaction(function () use ($contest) {
+                $setting = ContestSetting::first();
+                if (!$setting || !$setting->auto_distribute_prizes) {
+                    return [
+                        'success' => false,
+                        'message' => 'Automatic prize distribution is disabled.',
+                    ];
+                }
+
+                $winners = $contest->winners;
+                $prizes = $contest->prizes ?? [];
+                $totalDistributed = 0;
+
+                foreach ($winners as $winner) {
+                    $rank = $winner->position - 1; // 0-indexed
+                    $prizeAmount = $prizes[$rank] ?? null;
+
+                    if (!$prizeAmount || $prizeAmount <= 0) {
+                        continue;
+                    }
+
+                    // Add to winner's wallet
+                    $winnerWallet = $winner->user->wallet;
+                    if ($winnerWallet) {
+                        $winnerWallet->increment('balance', $prizeAmount);
+
+                        // Record transaction
+                        WalletTransaction::create([
+                            'user_id' => $winner->user_id,
+                            'type' => 'contest_prize',
+                            'amount' => $prizeAmount,
+                            'description' => "Prize won in contest: {$contest->title} (Rank #{$winner->position})",
+                            'reference_id' => $contest->id,
+                            'reference_type' => Contest::class,
+                            'status' => 'completed',
+                        ]);
+
+                        $totalDistributed += $prizeAmount;
+
+                        // Notify winner
+                        $this->notificationService->create(
+                            $winner->user,
+                            'contest_prize_distributed',
+                            '💰 Contest Prize Distributed',
+                            "Your prize of " . number_format($prizeAmount, 2) . " has been added to your wallet for winning position #{$winner->position} in '{$contest->title}' contest.",
+                            route('contests.show', $contest),
+                            ['contest_id' => $contest->id, 'prize_amount' => $prizeAmount]
+                        );
+                    }
+                }
+
+                // Update contest with distribution info
+                $contest->update([
+                    'distributed_amount' => $totalDistributed,
+                    'distributed_at' => now(),
+                ]);
+
+                return [
+                    'success' => true,
+                    'message' => "Prizes distributed successfully. Total: " . number_format($totalDistributed, 2),
+                    'total_distributed' => $totalDistributed,
+                ];
+            });
+        } catch (\Exception $e) {
+            Log::error('Contest prize distribution failed', [
+                'contest_id' => $contest->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Failed to distribute prizes. Please try again.',
+            ];
+        }
+    }
+}

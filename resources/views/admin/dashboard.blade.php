@@ -1,12 +1,20 @@
-@extends('admin.layouts.app')
+@extends('layouts.app')
 
-@section('title', 'Admin Dashboard')
-@section('header', 'Dashboard')
+@section('title', __('messages.admin_dashboard'))
 
 @section('content')
-<div class="space-y-6">
-    <!-- Key Metrics Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ __('messages.admin_dashboard') }}</h2>
+
+            @if (session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <div class="text-sm font-medium text-gray-500">{{ __('messages.total_users') }}</div>
                     <div class="text-2xl font-bold text-gray-900">{{ $stats['total_users'] }}</div>
@@ -1452,6 +1460,153 @@
                 @else
                     <p class="text-gray-600 text-center py-4">{{ __('messages.no_transactions') }}</p>
                 @endif
+            </div>
+
+            <!-- Top 5 Leaderboards -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Top Sellers by Revenue -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Top 5 Sellers (Revenue)</h3>
+                        <a href="{{ route('admin.leaderboard.index') }}"
+                            class="text-xs text-blue-600 hover:underline">View All →</a>
+                    </div>
+                    <div class="space-y-3">
+                        @forelse($topSellersByRevenue as $seller)
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                                <div class="flex items-center flex-1">
+                                    <span class="text-sm font-semibold text-gray-700 w-8">
+                                        @if ($seller['rank'] == 1)
+                                            🥇
+                                        @elseif($seller['rank'] == 2)
+                                            🥈
+                                        @elseif($seller['rank'] == 3)
+                                            🥉
+                                        @else
+                                            {{ $seller['rank'] }}
+                                        @endif
+                                    </span>
+                                    <div class="ml-3 flex-1">
+                                        <p class="text-sm font-medium text-gray-900">{{ $seller['user']->name }}</p>
+                                        <p class="text-xs text-gray-600">@{{ $seller['user'] - > username }}</p>
+                                    </div>
+                                </div>
+                                <span
+                                    class="text-sm font-semibold text-green-600">{{ currency($seller['total_revenue']) }}</span>
+                            </div>
+                        @empty
+                            <p class="text-gray-600 text-center py-4">No data</p>
+                        @endforelse
+                    </div>
+                </div>
+
+                <!-- Top Sellers by Rating -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Top 5 Sellers (Rating)</h3>
+                        <a href="{{ route('admin.leaderboard.index') }}"
+                            class="text-xs text-blue-600 hover:underline">View All →</a>
+                    </div>
+                    <div class="space-y-3">
+                        @forelse($topSellersByRatings as $seller)
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                                <div class="flex items-center flex-1">
+                                    <span class="text-sm font-semibold text-gray-700 w-8">
+                                        @if ($seller['rank'] == 1)
+                                            🥇
+                                        @elseif($seller['rank'] == 2)
+                                            🥈
+                                        @elseif($seller['rank'] == 3)
+                                            🥉
+                                        @else
+                                            {{ $seller['rank'] }}
+                                        @endif
+                                    </span>
+                                    <div class="ml-3 flex-1">
+                                        <p class="text-sm font-medium text-gray-900">{{ $seller['user']->name }}</p>
+                                        <p class="text-xs text-gray-600">@{{ $seller['user'] - > username }}</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-semibold text-yellow-600">⭐
+                                    {{ number_format($seller['average_rating'], 1) }}</span>
+                            </div>
+                        @empty
+                            <p class="text-gray-600 text-center py-4">No data</p>
+                        @endforelse
+                    </div>
+                </div>
+
+                <!-- Top Buyers by Spending -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Top 5 Buyers (Spending)</h3>
+                        <a href="{{ route('admin.leaderboard.index') }}"
+                            class="text-xs text-blue-600 hover:underline">View All →</a>
+                    </div>
+                    <div class="space-y-3">
+                        @forelse($topBuyersBySpending as $buyer)
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                                <div class="flex items-center flex-1">
+                                    <span class="text-sm font-semibold text-gray-700 w-8">
+                                        @if ($buyer['rank'] == 1)
+                                            🥇
+                                        @elseif($buyer['rank'] == 2)
+                                            🥈
+                                        @elseif($buyer['rank'] == 3)
+                                            🥉
+                                        @else
+                                            {{ $buyer['rank'] }}
+                                        @endif
+                                    </span>
+                                    <div class="ml-3 flex-1">
+                                        <p class="text-sm font-medium text-gray-900">{{ $buyer['user']->name }}</p>
+                                        <p class="text-xs text-gray-600">@{{ $buyer['user'] - > username }}</p>
+                                    </div>
+                                </div>
+                                <span
+                                    class="text-sm font-semibold text-blue-600">{{ currency($buyer['total_spending']) }}</span>
+                            </div>
+                        @empty
+                            <p class="text-gray-600 text-center py-4">No data</p>
+                        @endforelse
+                    </div>
+                </div>
+
+                <!-- Top Contributors by Reviews -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Top 5 Contributors</h3>
+                        <a href="{{ route('admin.leaderboard.index') }}"
+                            class="text-xs text-blue-600 hover:underline">View All →</a>
+                    </div>
+                    <div class="space-y-3">
+                        @forelse($topContributorsByReviews as $contributor)
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                                <div class="flex items-center flex-1">
+                                    <span class="text-sm font-semibold text-gray-700 w-8">
+                                        @if ($contributor['rank'] == 1)
+                                            🥇
+                                        @elseif($contributor['rank'] == 2)
+                                            🥈
+                                        @elseif($contributor['rank'] == 3)
+                                            🥉
+                                        @else
+                                            {{ $contributor['rank'] }}
+                                        @endif
+                                    </span>
+                                    <div class="ml-3 flex-1">
+                                        <p class="text-sm font-medium text-gray-900">{{ $contributor['user']->name }}</p>
+                                        <p class="text-xs text-gray-600">@{{ $contributor['user'] - > username }}</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-semibold text-purple-600">{{ $contributor['review_count'] }}
+                                    reviews</span>
+                            </div>
+                        @empty
+                            <p class="text-gray-600 text-center py-4">No data</p>
+                        @endforelse
+                    </div>
+                </div>
             </div>
 
             <!-- Recent Withdraws -->

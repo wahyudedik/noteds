@@ -60,6 +60,7 @@ use App\Http\Controllers\Admin\ShareSettingsController as AdminShareSettingsCont
 use App\Http\Controllers\Admin\CommissionTierController as AdminCommissionTierController;
 use App\Http\Controllers\Admin\AffiliateSettingsController as AdminAffiliateSettingsController;
 use App\Http\Controllers\Admin\LeaderboardSettingsController as AdminLeaderboardSettingsController;
+use App\Http\Controllers\Admin\AdminLeaderboardController;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
@@ -93,8 +94,8 @@ Route::prefix('ecosystem')->name('ecosystem.')->group(function () {
 Route::get('/tuts', [\App\Http\Controllers\TutsController::class, 'index'])->name('tuts.index');
 Route::get('/tuts/{tutorial:slug}', [\App\Http\Controllers\TutsController::class, 'show'])->name('tuts.show');
 Route::get('/studio', [\App\Http\Controllers\StudioController::class, 'index'])->name('studio.index');
-Route::middleware(['auth', 'verified', 'role:vendor|admin'])->get('/vendor', [\App\Http\Controllers\VendorController::class, 'index'])->name('vendor.index');
-Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('studio')->name('studio.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:vendor'])->get('/vendor', [\App\Http\Controllers\VendorController::class, 'index'])->name('vendor.index');
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'not.admin'])->prefix('studio')->name('studio.')->group(function () {
     Route::get('/orders', [\App\Http\Controllers\ServiceOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/create', [\App\Http\Controllers\ServiceOrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [\App\Http\Controllers\ServiceOrderController::class, 'store'])->name('orders.store');
@@ -102,7 +103,6 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('studio
     Route::post('/orders/{order}/fund-escrow', [\App\Http\Controllers\ServiceOrderController::class, 'fundEscrow'])->middleware('throttle:5,1')->name('orders.fund-escrow');
     Route::post('/orders/{order}/release-escrow', [\App\Http\Controllers\ServiceOrderController::class, 'releaseEscrow'])->middleware('throttle:5,1')->name('orders.release-escrow');
     Route::post('/orders/{order}/refund-escrow', [\App\Http\Controllers\ServiceOrderController::class, 'refundEscrow'])->middleware('throttle:5,1')->name('orders.refund-escrow');
-    Route::post('/orders/{order}/assign-vendor', [\App\Http\Controllers\ServiceOrderController::class, 'assignVendor'])->middleware('role:admin')->name('orders.assign-vendor');
     Route::get('/orders/{order}/quotes/create', [\App\Http\Controllers\ServiceQuoteController::class, 'create'])->name('orders.quotes.create');
     Route::post('/orders/{order}/quotes', [\App\Http\Controllers\ServiceQuoteController::class, 'store'])->middleware('throttle:5,1')->name('orders.quotes.store');
     Route::post('/quotes/{quote}/accept', [\App\Http\Controllers\ServiceQuoteController::class, 'accept'])->middleware('throttle:8,1')->name('quotes.accept');
@@ -165,8 +165,8 @@ Route::get('/u/{username}', [PublicProfileController::class, 'show'])->name('pub
 // Public affiliate landing pages
 Route::get('/a/{slug}', [AffiliateController::class, 'showLanding'])->name('affiliate.landing');
 
-// Leaderboard routes
-Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
+// Leaderboard routes (seller and buyer only, not admin)
+Route::get('/leaderboard', [LeaderboardController::class, 'index'])->middleware('seller_and_buyer_only')->name('leaderboard.index');
 
 // Forum routes - KYC required
 Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('forum')->name('forum.')->group(function () {
@@ -274,13 +274,29 @@ Route::middleware(['auth', 'verified', 'username.setup'])->prefix('certification
     Route::post('/{certification}/apply', [\App\Http\Controllers\CertificationController::class, 'apply'])->name('apply');
 });
 
-// Contests routes
+// Contests routes - Public view & buyer create, seller submit, buyer+seller vote
 Route::prefix('contests')->name('contests.')->group(function () {
     Route::get('/', [\App\Http\Controllers\ContestController::class, 'index'])->name('index');
     Route::get('/{contest}', [\App\Http\Controllers\ContestController::class, 'show'])->name('show');
-    Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
+
+    // Buyer can create/manage their own contests (not admin)
+    Route::middleware(['auth', 'verified', 'username.setup', 'buyer', 'not.admin'])->group(function () {
+        Route::get('/my-contests/create', [\App\Http\Controllers\ContestBuyerController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\ContestBuyerController::class, 'store'])->name('store');
+        Route::get('/my-contests', [\App\Http\Controllers\ContestBuyerController::class, 'myContests'])->name('my-contests');
+        Route::get('/{contest}/edit', [\App\Http\Controllers\ContestBuyerController::class, 'edit'])->name('edit');
+        Route::put('/{contest}', [\App\Http\Controllers\ContestBuyerController::class, 'update'])->name('update');
+        Route::delete('/{contest}', [\App\Http\Controllers\ContestBuyerController::class, 'destroy'])->name('destroy');
+    });
+
+    // Seller can submit entries (not admin)
+    Route::middleware(['auth', 'verified', 'username.setup', 'seller', 'not.admin'])->group(function () {
         Route::get('/{contest}/submit', [\App\Http\Controllers\ContestController::class, 'showSubmitForm'])->name('submit');
         Route::post('/{contest}/submit', [\App\Http\Controllers\ContestController::class, 'submitEntry'])->name('submit-entry');
+    });
+
+    // Buyer and Seller can vote (not admin)
+    Route::middleware(['auth', 'verified', 'username.setup', 'seller_and_buyer_only', 'not.admin'])->group(function () {
         Route::post('/{contest}/vote', [\App\Http\Controllers\ContestController::class, 'vote'])->name('vote');
     });
 });
@@ -325,25 +341,19 @@ Route::middleware(['auth', 'verified', 'username.setup'])->prefix('subscriptions
     Route::post('/callback', [\App\Http\Controllers\BuyerSubscriptionController::class, 'callback'])->name('callback');
 });
 
-Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'workspace.user'])->group(function () {
-    // Notes routes - for sellers and workspace users
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'workspace.user', 'seller_only'])->group(function () {
+    // Notes routes - HANYA untuk sellers
     // KYC required: KTP and selfie must be uploaded
     Route::resource('notes', NoteController::class);
     Route::post('/notes/upload-background', [NoteController::class, 'uploadBackground'])->name('notes.upload-background');
     Route::get('/notes/{note}/attachments/{filename}', [NoteAttachmentController::class, 'download'])->name('notes.attachments.download');
 
-    // Batch Download routes - Now available for all users
-    Route::prefix('batch-download')->name('batch-download.')->group(function () {
-        Route::get('/', [NoteAttachmentController::class, 'batchDownloadIndex'])->name('index');
-        Route::post('/', [NoteAttachmentController::class, 'batchDownload'])->name('download');
-    });
-
     // Folders - Now available for all users
     Route::resource('folders', \App\Http\Controllers\FolderController::class);
     Route::post('/folders/update-order', [\App\Http\Controllers\FolderController::class, 'updateOrder'])->name('folders.update-order');
 
-    // Workspaces - KYC required (nested group to avoid workspace.user middleware on other routes)
-    Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function () {
+    // Workspaces - HANYA untuk seller, KYC required
+    Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'seller_only'])->group(function () {
         Route::resource('workspaces', \App\Http\Controllers\WorkspaceController::class);
         Route::get('/workspaces/{workspace}/invite', [\App\Http\Controllers\WorkspaceController::class, 'invite'])->name('workspaces.invite');
         Route::post('/workspaces/{workspace}/invite', [\App\Http\Controllers\WorkspaceController::class, 'storeInvite'])->name('workspaces.invite.store');
@@ -355,27 +365,33 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'workspace.user'
     });
 });
 
-// Routes that require KYC but not workspace.user middleware
-Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function () {
-    // Collections (Wishlist) routes - KYC required
+// Routes that require KYC - ONLY FOR BUYERS
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'buyer_only'])->group(function () {
+    // Collections (Wishlist) routes - Only for Buyers
     Route::resource('collections', \App\Http\Controllers\CollectionController::class);
     Route::post('/collections/{collection}/add-note', [\App\Http\Controllers\CollectionController::class, 'addNote'])->name('collections.add-note');
     Route::delete('/collections/{collection}/remove-note/{note}', [\App\Http\Controllers\CollectionController::class, 'removeNote'])->name('collections.remove-note');
 
-    // Export routes - Now available for all users
+    // Batch Download routes - Only for Buyers
+    Route::prefix('batch-download')->name('batch-download.')->group(function () {
+        Route::get('/', [NoteAttachmentController::class, 'batchDownloadIndex'])->name('index');
+        Route::post('/', [NoteAttachmentController::class, 'batchDownload'])->name('download');
+    });
+
+    // Export routes - Only for Buyers
     Route::prefix('export')->name('export.')->group(function () {
         Route::get('/note/{note}/pdf', [\App\Http\Controllers\ExportController::class, 'exportPdf'])->name('pdf');
         Route::get('/note/{note}/docx', [\App\Http\Controllers\ExportController::class, 'exportDocx'])->name('docx');
         Route::get('/note/{note}/markdown', [\App\Http\Controllers\ExportController::class, 'exportMarkdown'])->name('markdown');
     });
 
-    // Reading Progress routes - Now available for all users
+    // Reading Progress routes - Only for Buyers
     Route::prefix('reading-progress')->name('reading-progress.')->group(function () {
         Route::post('/note/{note}', [\App\Http\Controllers\ReadingProgressController::class, 'update'])->name('update');
         Route::get('/note/{note}', [\App\Http\Controllers\ReadingProgressController::class, 'show'])->name('show');
     });
 
-    // Bookmarks routes - Now available for all users
+    // Bookmarks routes - Only for Buyers
     Route::prefix('bookmarks')->name('bookmarks.')->group(function () {
         Route::get('/note/{note}', [\App\Http\Controllers\BookmarkController::class, 'index'])->name('index');
         Route::post('/note/{note}', [\App\Http\Controllers\BookmarkController::class, 'store'])->name('store');
@@ -383,13 +399,13 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
         Route::delete('/{bookmark}', [\App\Http\Controllers\BookmarkController::class, 'destroy'])->name('destroy');
     });
 
-    // Buyer Analytics routes - Now available for all users
+    // Buyer Analytics routes - Only for Buyers
     Route::prefix('buyer-analytics')->name('buyer-analytics.')->group(function () {
         Route::get('/', [\App\Http\Controllers\BuyerAnalyticsController::class, 'index'])->name('index');
         Route::get('/purchase-history', [\App\Http\Controllers\BuyerAnalyticsController::class, 'purchaseHistory'])->name('purchase-history');
     });
 
-    // Reading History routes - Now available for all users
+    // Reading History routes - Only for Buyers
     Route::prefix('reading-history')->name('reading-history.')->group(function () {
         Route::get('/', [\App\Http\Controllers\ReadingHistoryController::class, 'index'])->name('index');
     });
@@ -408,6 +424,17 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     // Wallet routes
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
 
+    // Admin wallet report routes
+    Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin/wallet')->name('admin.wallet.')->group(function () {
+        Route::get('/report', [WalletController::class, 'adminReport'])->name('report');
+        Route::get('/report/export', [WalletController::class, 'exportReport'])->name('export');
+    });
+
+    // Admin leaderboard report routes
+    Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin/leaderboard')->name('admin.leaderboard.')->group(function () {
+        Route::get('/', [AdminLeaderboardController::class, 'index'])->name('index');
+    });
+
     // Points routes (Only for buyers - points are used to redeem discounts when purchasing)
     Route::middleware('buyer')->group(function () {
         Route::get('/points', [PointsController::class, 'index'])->name('points.index');
@@ -421,8 +448,8 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     Route::get('/wallet/withdraw', [WithdrawController::class, 'create'])->name('wallet.withdraw.create');
     Route::post('/wallet/withdraw', [WithdrawController::class, 'store'])->middleware('rate.limit:3,1')->name('wallet.withdraw.store');
 
-    // Featured Notes routes - only for sellers
-    Route::middleware('seller')->group(function () {
+    // Featured Notes routes - only for sellers (strictly block admin and buyer)
+    Route::middleware('seller_only')->group(function () {
         Route::get('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'index'])->name('featured-notes.index');
         Route::get('/featured-notes/create', [\App\Http\Controllers\FeaturedNoteController::class, 'create'])->name('featured-notes.create');
         Route::post('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'store'])->name('featured-notes.store');
@@ -605,6 +632,11 @@ Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Dashboard route - Block admin dari akses
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified', 'username.setup', 'not.admin'])
+    ->name('dashboard');
+
 // Admin routes
 Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.setup'])->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -649,9 +681,20 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::resource('badges', \App\Http\Controllers\Admin\BadgeController::class);
     Route::get('/badges/{badge}/users', [\App\Http\Controllers\Admin\BadgeController::class, 'showUsers'])->name('badges.users');
     Route::post('/badges/{badge}/award', [\App\Http\Controllers\Admin\BadgeController::class, 'awardToUser'])->name('badges.award');
-    Route::resource('contests', \App\Http\Controllers\Admin\ContestController::class);
-    Route::get('/contests/{contest}/entries', [\App\Http\Controllers\Admin\ContestController::class, 'entries'])->name('contests.entries');
-    Route::get('/contests/entries/{entry}', [\App\Http\Controllers\Admin\ContestController::class, 'showEntry'])->name('contests.entries.show');
+    // Admin moderation only - Approve/Reject entries and select winners
+    // No admin access to contest creation, viewing, or settings
+    // Admin cannot buy, sell, or vote in contests
+
+    // Contest Management - Admin only (moderator & configuration)
+    Route::prefix('contests')->name('contests.')->group(function () {
+        Route::get('/settings', [\App\Http\Controllers\AdminContestSettingController::class, 'index'])->name('settings');
+        Route::put('/settings', [\App\Http\Controllers\AdminContestSettingController::class, 'update'])->name('settings.update');
+        Route::post('/entries/{entry}/approve', [\App\Http\Controllers\Admin\ContestController::class, 'approveEntry'])->name('entries.approve');
+        Route::post('/entries/{entry}/reject', [\App\Http\Controllers\Admin\ContestController::class, 'rejectEntry'])->name('entries.reject');
+        Route::post('/{contest}/select-winners', [\App\Http\Controllers\Admin\ContestController::class, 'selectWinners'])->name('select-winners');
+        Route::post('/{contest}/distribute-prizes', [\App\Http\Controllers\Admin\ContestController::class, 'distributePrizes'])->name('distribute-prizes');
+    });
+
     Route::resource('virus-scans', \App\Http\Controllers\Admin\VirusScanController::class)->only(['index', 'show']);
     Route::post('/virus-scans/{virusScan}/quarantine', [\App\Http\Controllers\Admin\VirusScanController::class, 'quarantine'])->name('virus-scans.quarantine');
     Route::post('/virus-scans/{virusScan}/restore', [\App\Http\Controllers\Admin\VirusScanController::class, 'restore'])->name('virus-scans.restore');
@@ -664,10 +707,6 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::post('/notes/{note}/content-protection/license-keys', [\App\Http\Controllers\Admin\ContentProtectionController::class, 'generateLicenseKeys'])->name('content-protection.license-keys');
     Route::get('/notes/{note}/content-protection/access-logs', [\App\Http\Controllers\Admin\ContentProtectionController::class, 'accessLogs'])->name('content-protection.access-logs');
     Route::get('/notes/{note}/content-protection/license-keys', [\App\Http\Controllers\Admin\ContentProtectionController::class, 'licenseKeys'])->name('content-protection.license-keys-list');
-    Route::post('/contests/entries/{entry}/approve', [\App\Http\Controllers\Admin\ContestController::class, 'approveEntry'])->name('contests.entries.approve');
-    Route::post('/contests/entries/{entry}/reject', [\App\Http\Controllers\Admin\ContestController::class, 'rejectEntry'])->name('contests.entries.reject');
-    Route::post('/contests/{contest}/select-winners', [\App\Http\Controllers\Admin\ContestController::class, 'selectWinners'])->name('contests.select-winners');
-    Route::post('/contests/{contest}/distribute-prizes', [\App\Http\Controllers\Admin\ContestController::class, 'distributePrizes'])->name('contests.distribute-prizes');
     Route::get('/buyer-protection', [\App\Http\Controllers\Admin\BuyerProtectionController::class, 'index'])->name('buyer-protection.index');
     Route::put('/buyer-protection', [\App\Http\Controllers\Admin\BuyerProtectionController::class, 'update'])->name('buyer-protection.update');
     Route::resource('disputes', \App\Http\Controllers\Admin\DisputeController::class)->only(['index', 'show']);
@@ -726,6 +765,9 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.
     Route::get('/vendors', [\App\Http\Controllers\Admin\VendorController::class, 'index'])->name('vendors.index');
     Route::post('/vendors/assign', [\App\Http\Controllers\Admin\VendorController::class, 'assign'])->name('vendors.assign');
     Route::post('/vendors/bulk-assign', [\App\Http\Controllers\Admin\VendorController::class, 'bulkAssign'])->name('vendors.bulk-assign');
+
+    // Studio order management (admin only)
+    Route::post('/studio/orders/{order}/assign-vendor', [\App\Http\Controllers\ServiceOrderController::class, 'assignVendor'])->middleware('throttle:5,1')->name('studio.orders.assign-vendor');
 
     Route::get('/forum/moderation', [PostModerationController::class, 'index'])->name('forum.moderation.index');
     Route::get('/forum/moderation/{post}', [PostModerationController::class, 'show'])->name('forum.moderation.show');
