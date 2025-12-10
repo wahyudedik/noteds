@@ -401,17 +401,6 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'buyer_only'])->
     // Wallet routes
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
 
-    // Admin wallet report routes
-    Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin/wallet')->name('admin.wallet.')->group(function () {
-        Route::get('/report', [WalletController::class, 'adminReport'])->name('report');
-        Route::get('/report/export', [WalletController::class, 'exportReport'])->name('export');
-    });
-
-    // Admin leaderboard report routes
-    Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin/leaderboard')->name('admin.leaderboard.')->group(function () {
-        Route::get('/', [AdminLeaderboardController::class, 'index'])->name('index');
-    });
-
     // Points routes (Only for buyers - points are used to redeem discounts when purchasing)
     Route::middleware('buyer')->group(function () {
         Route::get('/points', [PointsController::class, 'index'])->name('points.index');
@@ -610,6 +599,17 @@ Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Admin wallet report routes
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin/wallet')->name('admin.wallet.')->group(function () {
+    Route::get('/report', [WalletController::class, 'adminReport'])->name('report');
+    Route::get('/report/export', [WalletController::class, 'exportReport'])->name('export');
+});
+
+// Admin leaderboard report routes
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin/leaderboard')->name('admin.leaderboard.')->group(function () {
+    Route::get('/', [AdminLeaderboardController::class, 'index'])->name('index');
 });
 
 // Dashboard route - Block admin dari akses
