@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::table('service_orders', function (Blueprint $table) {
             // Revision tracking fields
-            $table->integer('revision_count')->default(0)->after('admin_verification_notes'); // Total revisions requested
-            $table->integer('current_revision_number')->default(0)->after('revision_count'); // Current revision being worked on
-            $table->integer('max_revisions')->default(3)->after('current_revision_number'); // Max allowed revisions (set by vendor when creating order)
-            $table->enum('revision_status', ['none', 'requested', 'submitted', 'pending_approval'])->default('none')->after('max_revisions'); // Current revision status
+            $table->integer('revision_count')->default(0); // Total revisions requested
+            $table->integer('current_revision_number')->default(0); // Current revision being worked on
+            $table->integer('max_revisions')->default(3); // Max allowed revisions (set by vendor when creating order)
+            $table->enum('revision_status', ['none', 'requested', 'submitted', 'pending_approval'])->default('none'); // Current revision status
         });
     }
 
