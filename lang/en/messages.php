@@ -726,6 +726,23 @@ return [
     'you_earn' => 'You Earn',
     'insight_multiplier' => 'How much can you earn?',
 
+    // Recurring Revenue Calculator
+    'recurring_revenue' => 'Recurring Revenue Calculator',
+    'passive_income_simulator' => 'Calculate your passive income potential',
+    'notes_to_create' => 'How Many Notes to Create?',
+    'target_monthly_income' => 'Your Target Monthly Income',
+    'calculate_passive_income' => 'Calculate Passive Income',
+    'sales_needed_monthly' => 'Sales Needed Per Note/Month',
+    'achievability' => 'Achievability Level',
+    'monthly_passive_income' => 'Monthly Passive Income',
+    'annual_projection' => 'Annual Income Projection',
+    'without_growth' => 'Without additional growth',
+    'different_scenarios' => 'Income Growth Scenarios',
+    'very_achievable' => 'Very Achievable',
+    'achievable' => 'Achievable',
+    'challenging' => 'Challenging',
+    'very_challenging' => 'Very Challenging',
+
     // CMS Show
     'back' => 'Back',
 

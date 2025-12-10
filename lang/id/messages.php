@@ -726,6 +726,23 @@ return [
     'you_earn' => 'Anda Dapatkan',
     'insight_multiplier' => 'Berapa banyak yang bisa Anda hasilkan?',
 
+    // Recurring Revenue Calculator
+    'recurring_revenue' => 'Kalkulator Pendapatan Berulang',
+    'passive_income_simulator' => 'Hitung potensi pendapatan pasif Anda',
+    'notes_to_create' => 'Berapa Banyak Notes yang Akan Dibuat?',
+    'target_monthly_income' => 'Target Pendapatan Bulanan Anda',
+    'calculate_passive_income' => 'Hitung Pendapatan Pasif',
+    'sales_needed_monthly' => 'Penjualan Diperlukan Per Note/Bulan',
+    'achievability' => 'Tingkat Ketercapaian',
+    'monthly_passive_income' => 'Pendapatan Pasif Bulanan',
+    'annual_projection' => 'Proyeksi Pendapatan Tahunan',
+    'without_growth' => 'Tanpa pertumbuhan tambahan',
+    'different_scenarios' => 'Skenario Pertumbuhan Pendapatan',
+    'very_achievable' => 'Sangat Mudah Dicapai',
+    'achievable' => 'Mudah Dicapai',
+    'challenging' => 'Menantang',
+    'very_challenging' => 'Sangat Menantang',
+
     // CMS Show
     'back' => 'Kembali',
 

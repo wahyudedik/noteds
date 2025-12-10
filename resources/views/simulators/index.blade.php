@@ -774,6 +774,106 @@
                 </div>
             </div>
 
+            <!-- Recurring Revenue Calculator -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300 mb-16">
+                <div class="bg-gradient-to-r from-rose-500 to-rose-600 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.recurring_revenue') }}</h3>
+                            <p class="text-rose-100 text-sm">{{ __('messages.passive_income_simulator') }}</p>
+                        </div>
+                        <svg class="w-12 h-12 text-rose-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Input Section -->
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.notes_to_create') }}</label>
+                                <div class="space-y-2">
+                                    <input type="range" id="rrc-notes" value="5" min="1" max="20"
+                                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-2xl font-bold text-rose-600" id="rrc-notes-display">5</span>
+                                        <span class="text-sm text-gray-500">notes</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.target_monthly_income') }}</label>
+                                <div class="flex items-center">
+                                    <span class="text-2xl font-bold text-gray-900" id="rrc-currency-symbol">Rp</span>
+                                    <input type="number" id="rrc-target" value="5000000" min="100000" step="100000"
+                                        class="ml-2 flex-1 rounded-lg border-gray-300 shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.average_note_price') }}</label>
+                                <div class="flex items-center">
+                                    <span class="text-2xl font-bold text-gray-900" id="rrc-price-symbol">Rp</span>
+                                    <input type="number" id="rrc-price" value="50000" min="10000" step="5000"
+                                        class="ml-2 flex-1 rounded-lg border-gray-300 shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500">
+                                </div>
+                            </div>
+
+                            <button type="button" id="rrc-calculate"
+                                class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
+                                {{ __('messages.calculate_passive_income') }}
+                            </button>
+                        </div>
+
+                        <!-- Results Section -->
+                        <div id="rrc-results" class="hidden space-y-4">
+                            <!-- Required Sales -->
+                            <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+                                <p class="text-sm text-gray-600 mb-1">{{ __('messages.sales_needed_monthly') }}</p>
+                                <p class="text-2xl font-bold text-blue-700" id="rrc-sales-needed"></p>
+                                <p class="text-xs text-gray-500 mt-1" id="rrc-sales-breakdown">per note per month</p>
+                            </div>
+
+                            <!-- Achievability -->
+                            <div class="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+                                <p class="text-sm text-gray-600 mb-1">{{ __('messages.achievability') }}</p>
+                                <p class="text-lg font-bold text-purple-700" id="rrc-achievability"></p>
+                                <p class="text-xs text-gray-500 mt-1" id="rrc-achievability-desc"></p>
+                            </div>
+
+                            <!-- Monthly Passive Income -->
+                            <div class="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+                                <p class="text-sm text-gray-600 mb-1">{{ __('messages.monthly_passive_income') }}</p>
+                                <p class="text-2xl font-bold text-green-700" id="rrc-monthly"></p>
+                                <p class="text-xs text-gray-500 mt-1">{{ __('messages.after_commission') }}</p>
+                            </div>
+
+                            <!-- Annual Projection -->
+                            <div class="bg-amber-50 rounded-lg p-4 border-l-4 border-amber-500">
+                                <p class="text-sm text-gray-600 mb-1">{{ __('messages.annual_projection') }}</p>
+                                <p class="text-2xl font-bold text-amber-700" id="rrc-annual"></p>
+                                <p class="text-xs text-gray-500 mt-1">{{ __('messages.without_growth') }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Insight Box -->
+                    <div id="rrc-insight" class="hidden mt-6 bg-rose-50 border-l-4 border-rose-500 rounded-r-lg p-4">
+                        <p class="text-sm text-rose-800" id="rrc-insight-text"></p>
+                    </div>
+
+                    <!-- Scenario Comparison -->
+                    <div id="rrc-scenarios" class="hidden mt-8">
+                        <h4 class="text-lg font-bold text-gray-900 mb-4">{{ __('messages.different_scenarios') }}</h4>
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <canvas id="rrc-chart" height="100"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- CTA Section -->
             <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12 text-center text-white">
                 <h2 class="text-3xl font-bold mb-4">{{ __('messages.simulator_ready_to_start') }}</h2>
@@ -1154,6 +1254,163 @@
                     document.getElementById('benchmark-position').className = 'font-bold ' + positionClass;
                     document.getElementById('benchmark-result').classList.remove('hidden');
                 });
+
+                // Recurring Revenue Calculator
+                const rrcNotesInput = document.getElementById('rrc-notes');
+                const rrcTargetInput = document.getElementById('rrc-target');
+                const rrcPriceInput = document.getElementById('rrc-price');
+
+                rrcNotesInput.addEventListener('input', function() {
+                    document.getElementById('rrc-notes-display').textContent = this.value;
+                });
+
+                document.getElementById('rrc-calculate').addEventListener('click', function() {
+                    const notes = parseInt(rrcNotesInput.value) || 1;
+                    const targetMonthly = parseFloat(rrcTargetInput.value) || 1000000;
+                    const notePrice = parseFloat(rrcPriceInput.value) || 50000;
+                    const platformFeePercentage = 0.20;
+
+                    // Calculate net price per sale
+                    const netPerSale = notePrice * (1 - platformFeePercentage);
+
+                    // Calculate required sales to reach target
+                    const requiredSalesPerMonth = targetMonthly / netPerSale;
+                    const requiredSalesPerNotePerMonth = requiredSalesPerMonth / notes;
+
+                    // Calculate actual monthly and annual income
+                    const monthlyIncome = requiredSalesPerMonth * netPerSale;
+                    const annualIncome = monthlyIncome * 12;
+
+                    // Display results
+                    document.getElementById('rrc-sales-needed').textContent = requiredSalesPerNotePerMonth.toFixed(1);
+                    document.getElementById('rrc-monthly').textContent = formatCurrency(monthlyIncome);
+                    document.getElementById('rrc-annual').textContent = formatCurrency(annualIncome);
+
+                    // Determine achievability
+                    let achievability = '';
+                    let achievabilityDesc = '';
+                    let achievabilityColor = '';
+
+                    if (requiredSalesPerNotePerMonth < 1) {
+                        achievability = '✅ Very Achievable';
+                        achievabilityDesc = 'Less than 1 sale per note per month!';
+                        achievabilityColor = 'text-green-600';
+                    } else if (requiredSalesPerNotePerMonth < 3) {
+                        achievability = '✅ Achievable';
+                        achievabilityDesc = '3-5 sales per note monthly is realistic';
+                        achievabilityColor = 'text-blue-600';
+                    } else if (requiredSalesPerNotePerMonth < 10) {
+                        achievability = '⚠️ Challenging';
+                        achievabilityDesc = 'Will require consistent marketing effort';
+                        achievabilityColor = 'text-orange-600';
+                    } else {
+                        achievability = '❌ Very Challenging';
+                        achievabilityDesc = 'May require significant marketing investment';
+                        achievabilityColor = 'text-red-600';
+                    }
+
+                    document.getElementById('rrc-achievability').textContent = achievability;
+                    document.getElementById('rrc-achievability-desc').textContent = achievabilityDesc;
+                    document.getElementById('rrc-achievability').className = 'text-lg font-bold ' + achievabilityColor;
+
+                    // Insight text
+                    const insightText = `Create ${notes} quality notes and aim for ${requiredSalesPerNotePerMonth.toFixed(1)} sales per note monthly to earn ${formatCurrency(targetMonthly)} in passive income!`;
+                    document.getElementById('rrc-insight-text').textContent = insightText;
+
+                    // Draw comparison chart
+                    const chartCanvas = document.getElementById('rrc-chart');
+                    const ctx = chartCanvas.getContext('2d');
+                    drawRecurringRevenueChart(ctx, notes, requiredSalesPerNotePerMonth, monthlyIncome, annualIncome, chartCanvas);
+
+                    // Show results
+                    document.getElementById('rrc-results').classList.remove('hidden');
+                    document.getElementById('rrc-insight').classList.remove('hidden');
+                    document.getElementById('rrc-scenarios').classList.remove('hidden');
+                });
+
+                // Draw bar chart for recurring revenue scenarios
+                function drawRecurringRevenueChart(ctx, notes, salesPerNote, monthly, annual, canvas) {
+                    const padding = 60;
+                    const chartWidth = canvas.width - padding * 2;
+                    const chartHeight = canvas.height - padding * 2;
+
+                    // Clear canvas
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    // Data for scenarios
+                    const scenarios = [
+                        { label: 'Month 1', value: monthly, color: '#fbbf24' },
+                        { label: 'Month 6', value: monthly * 1.3, color: '#60a5fa' },
+                        { label: 'Month 12', value: monthly * 1.6, color: '#34d399' }
+                    ];
+
+                    const maxValue = scenarios[scenarios.length - 1].value;
+                    const barWidth = chartWidth / scenarios.length / 2;
+                    const barSpacing = chartWidth / scenarios.length;
+
+                    // Draw grid lines
+                    ctx.strokeStyle = '#e5e7eb';
+                    ctx.lineWidth = 1;
+                    for (let i = 0; i <= 4; i++) {
+                        const y = padding + (chartHeight / 4) * i;
+                        ctx.beginPath();
+                        ctx.moveTo(padding, y);
+                        ctx.lineTo(canvas.width - padding, y);
+                        ctx.stroke();
+                    }
+
+                    // Draw axes
+                    ctx.strokeStyle = '#374151';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(padding, canvas.height - padding);
+                    ctx.lineTo(canvas.width - padding, canvas.height - padding);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(padding, padding);
+                    ctx.lineTo(padding, canvas.height - padding);
+                    ctx.stroke();
+
+                    // Draw bars
+                    scenarios.forEach((scenario, idx) => {
+                        const barHeight = (scenario.value / maxValue) * chartHeight;
+                        const x = padding + (barSpacing * idx) + (barSpacing / 2) - (barWidth / 2);
+                        const y = canvas.height - padding - barHeight;
+
+                        // Bar
+                        ctx.fillStyle = scenario.color;
+                        ctx.fillRect(x, y, barWidth, barHeight);
+
+                        // Value label on bar
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 12px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(formatCurrency(scenario.value), x + barWidth / 2, y + 20);
+
+                        // X-axis label
+                        ctx.fillStyle = '#6b7280';
+                        ctx.font = '12px sans-serif';
+                        ctx.fillText(scenario.label, x + barWidth / 2, canvas.height - padding + 20);
+                    });
+
+                    // Y-axis labels
+                    ctx.fillStyle = '#6b7280';
+                    ctx.font = '11px sans-serif';
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'middle';
+                    for (let i = 0; i <= 4; i++) {
+                        const value = (maxValue / 4) * i;
+                        const y = canvas.height - padding - (chartHeight / 4) * i;
+                        ctx.fillText(formatCurrency(value), padding - 10, y);
+                    }
+
+                    // Title
+                    ctx.fillStyle = '#1f2937';
+                    ctx.font = 'bold 14px sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('Income Growth with Steady Sales', padding + 10, 30);
+                }
 
                 // Income Growth Projector
                 const igpNotesInput = document.getElementById('igp-notes');
