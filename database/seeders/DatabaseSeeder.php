@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
             // 3. CMS Content - REQUIRED (Static pages)
             CmsPageSeeder::class,
             FaqSeeder::class,
-            // LandingPageSectionSeeder::class, // Optional - uncomment if needed
+            LandingPageSectionSeeder::class, // Optional - uncomment if needed
             // SocialMediaLinkSeeder::class, // Optional - uncomment if needed
             // DocumentationSeeder::class, // Optional - uncomment if needed
 

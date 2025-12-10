@@ -687,6 +687,27 @@ return [
     'transaction_commissions' => 'Transaction commissions',
     'total_monthly' => 'Total monthly',
 
+    // Income Growth Projector
+    'income_growth_projector' => 'Income Growth Projector',
+    'project_12_month_income' => 'Project your 12-month income growth',
+    'number_of_notes' => 'Number of Notes to Create',
+    'notes_max' => 'notes maximum',
+    'avg_sales_per_month' => 'Average Sales per Month (per note)',
+    'sales_per_month' => 'sales/month',
+    'monthly_growth_rate' => 'Monthly Growth Rate',
+    'growth_per_month' => 'growth/month',
+    'average_note_price' => 'Average Note Price',
+    'project_income' => 'Project My Income',
+    'income_projection_chart' => 'Income Projection Chart',
+    'monthly_income_month_1' => 'Monthly Income (Month 1)',
+    'monthly_income_month_6' => 'Monthly Income (Month 6)',
+    'total_yearly_income' => 'Total Yearly Income (Net)',
+    'month' => 'Month',
+    'monthly_sales' => 'Monthly Sales',
+    'gross_income' => 'Gross Income',
+    'platform_fee' => 'Platform Fee (20%)',
+    'net_income' => 'Net Income',
+
     // CMS Show
     'back' => 'Back',
 

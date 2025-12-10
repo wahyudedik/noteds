@@ -52,6 +52,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure_buyer_can_approve' => \App\Http\Middleware\EnsureBuyerCanApprove::class,
             'ensure_admin_can_verify' => \App\Http\Middleware\EnsureAdminCanVerify::class,
             'not.admin' => \App\Http\Middleware\NotAdmin::class,
+            'seller_and_buyer_not_admin' => \App\Http\Middleware\EnsureSellerAndBuyerNotAdmin::class,
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\ContentSecurityPolicy::class,

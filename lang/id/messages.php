@@ -687,6 +687,27 @@ return [
     'transaction_commissions' => 'Komisi transaksi',
     'total_monthly' => 'Total bulanan',
 
+    // Income Growth Projector
+    'income_growth_projector' => 'Proyektor Pertumbuhan Pendapatan',
+    'project_12_month_income' => 'Proyeksikan pertumbuhan pendapatan 12 bulan Anda',
+    'number_of_notes' => 'Jumlah Notes yang Akan Dibuat',
+    'notes_max' => 'notes maksimal',
+    'avg_sales_per_month' => 'Rata-rata Penjualan per Bulan (per note)',
+    'sales_per_month' => 'penjualan/bulan',
+    'monthly_growth_rate' => 'Tingkat Pertumbuhan Bulanan',
+    'growth_per_month' => 'pertumbuhan/bulan',
+    'average_note_price' => 'Harga Rata-rata Note',
+    'project_income' => 'Proyeksikan Pendapatan Saya',
+    'income_projection_chart' => 'Grafik Proyeksi Pendapatan',
+    'monthly_income_month_1' => 'Pendapatan Bulanan (Bulan 1)',
+    'monthly_income_month_6' => 'Pendapatan Bulanan (Bulan 6)',
+    'total_yearly_income' => 'Total Pendapatan Tahunan (Bersih)',
+    'month' => 'Bulan',
+    'monthly_sales' => 'Penjualan Bulanan',
+    'gross_income' => 'Pendapatan Kotor',
+    'platform_fee' => 'Biaya Platform (20%)',
+    'net_income' => 'Pendapatan Bersih',
+
     // CMS Show
     'back' => 'Kembali',
 

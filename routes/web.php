@@ -192,7 +192,7 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->prefix('forum'
     Route::delete('/post/{post}', [\App\Http\Controllers\ForumController::class, 'destroy'])->name('destroy');
 });
 
-Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function () {
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'seller_and_buyer_not_admin'])->group(function () {
     Route::get('/note-conversations', [NoteConversationController::class, 'index'])->name('note-conversations.index');
     Route::get('/note-conversations/{conversation}', [NoteConversationController::class, 'show'])->name('note-conversations.show');
     Route::post('/note-conversations/{conversation}', [NoteConversationController::class, 'store'])->name('note-conversations.store');
