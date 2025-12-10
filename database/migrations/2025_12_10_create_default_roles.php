@@ -32,11 +32,6 @@ return new class extends Migration
             ['name' => 'user_workspaces'],
             ['guard_name' => 'web']
         );
-
-        \Spatie\Permission\Models\Role::firstOrCreate(
-            ['name' => 'vendor'],
-            ['guard_name' => 'web']
-        );
     }
 
     /**

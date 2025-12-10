@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
@@ -13,22 +14,23 @@ class SellerDashboardController extends Controller
      */
     public function index(): View
     {
+        /** @var User $user */
         $user = Auth::user();
 
         // Get seller-specific metrics
         $sellerTransactions = $user->transactionsAsSeller();
-        
+
         $metrics = [
             'total_revenue' => $sellerTransactions
                 ->sum('amount') ?? 0,
-            
+
             'notes_published' => $user->notes()
                 ->where('status', 'published')
                 ->count() ?? 0,
-            
+
             'total_sales' => $sellerTransactions
                 ->count() ?? 0,
-            
+
             'average_rating' => 0, // Can be calculated from ratings table if exists
         ];
 
@@ -37,7 +39,8 @@ class SellerDashboardController extends Controller
             ->where('status', 'published')
             ->with(['transactionsAsSeller' => fn($q) => $q->where('seller_id', $user->id)])
             ->get()
-            ->sortByDesc(fn($note) => 
+            ->sortByDesc(
+                fn($note) =>
                 $note->transactionsAsSeller->sum('amount')
             )
             ->take(5)
@@ -76,4 +79,3 @@ class SellerDashboardController extends Controller
         ]);
     }
 }
-

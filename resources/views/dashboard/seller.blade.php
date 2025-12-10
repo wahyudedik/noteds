@@ -85,8 +85,8 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
                 <h4 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h4>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <a href="{{ route('notes.create') }}" 
-                       class="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 hover:shadow-md transition">
+                    <a href="{{ route('notes.create') }}"
+                        class="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 hover:shadow-md transition">
                         <i class="fas fa-plus text-blue-600 text-xl"></i>
                         <div>
                             <p class="font-semibold text-gray-900">Create Note</p>
@@ -94,8 +94,8 @@
                         </div>
                     </a>
 
-                    <a href="{{ route('profile.edit') }}" 
-                       class="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-green-50 to-green-100 hover:shadow-md transition">
+                    <a href="{{ route('profile.edit') }}"
+                        class="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-green-50 to-green-100 hover:shadow-md transition">
                         <i class="fas fa-chart-bar text-green-600 text-xl"></i>
                         <div>
                             <p class="font-semibold text-gray-900">View Analytics</p>
@@ -103,8 +103,8 @@
                         </div>
                     </a>
 
-                    <a href="{{ route('profile.edit') }}" 
-                       class="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-purple-50 to-purple-100 hover:shadow-md transition">
+                    <a href="{{ route('profile.edit') }}"
+                        class="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-purple-50 to-purple-100 hover:shadow-md transition">
                         <i class="fas fa-link text-purple-600 text-xl"></i>
                         <div>
                             <p class="font-semibold text-gray-900">Affiliate Program</p>
@@ -115,97 +115,102 @@
             </div>
 
             <!-- Affiliate/Share Program Stats -->
-            @if($affiliateStats['affiliate_code'])
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
-                <h4 class="text-lg font-bold text-gray-900 mb-4">Your Affiliate Program</h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="border-l-4 border-green-500 pl-4">
-                        <p class="text-gray-600 text-sm">Your Affiliate Code</p>
-                        <p class="text-2xl font-bold text-gray-900 mt-1 font-mono">
-                            {{ $affiliateStats['affiliate_code'] }}
-                        </p>
-                    </div>
-                    <div class="border-l-4 border-blue-500 pl-4">
-                        <p class="text-gray-600 text-sm">Referrals</p>
-                        <p class="text-2xl font-bold text-gray-900 mt-1">
-                            {{ $affiliateStats['affiliate_referrals'] }}
-                        </p>
-                    </div>
-                    <div class="border-l-4 border-yellow-500 pl-4">
-                        <p class="text-gray-600 text-sm">Affiliate Earnings</p>
-                        <p class="text-2xl font-bold text-gray-900 mt-1">
-                            Rp {{ number_format($affiliateStats['affiliate_earnings'], 0, ',', '.') }}
-                        </p>
+            @if ($affiliateStats['affiliate_code'])
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+                    <h4 class="text-lg font-bold text-gray-900 mb-4">Your Affiliate Program</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="border-l-4 border-green-500 pl-4">
+                            <p class="text-gray-600 text-sm">Your Affiliate Code</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1 font-mono">
+                                {{ $affiliateStats['affiliate_code'] }}
+                            </p>
+                        </div>
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <p class="text-gray-600 text-sm">Referrals</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1">
+                                {{ $affiliateStats['affiliate_referrals'] }}
+                            </p>
+                        </div>
+                        <div class="border-l-4 border-yellow-500 pl-4">
+                            <p class="text-gray-600 text-sm">Affiliate Earnings</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1">
+                                Rp {{ number_format($affiliateStats['affiliate_earnings'], 0, ',', '.') }}
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
             @endif
 
             <!-- Best Performing Notes -->
-            @if($bestPerforming->count() > 0)
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
-                <h4 class="text-lg font-bold text-gray-900 mb-4">Best Performing Notes</h4>
-                <div class="space-y-3">
-                    @foreach($bestPerforming as $note)
-                    <div class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition">
-                        <div class="flex-1">
-                            <p class="font-semibold text-gray-900">{{ $note->title }}</p>
-                            <div class="flex gap-4 mt-1 text-sm text-gray-600">
-                                <span><i class="fas fa-shopping-cart mr-1"></i>{{ $note->sales->count() }} sales</span>
-                                <span><i class="fas fa-star mr-1"></i>{{ number_format($note->ratings->avg('rating') ?? 0, 1) }} rating</span>
+            @if ($bestPerforming->count() > 0)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+                    <h4 class="text-lg font-bold text-gray-900 mb-4">Best Performing Notes</h4>
+                    <div class="space-y-3">
+                        @foreach ($bestPerforming as $note)
+                            <div
+                                class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition">
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-900">{{ $note->title }}</p>
+                                    <div class="flex gap-4 mt-1 text-sm text-gray-600">
+                                        <span><i class="fas fa-shopping-cart mr-1"></i>{{ $note->sales->count() }}
+                                            sales</span>
+                                        <span><i
+                                                class="fas fa-star mr-1"></i>{{ number_format($note->ratings->avg('rating') ?? 0, 1) }}
+                                            rating</span>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-lg font-bold text-green-600">
+                                        Rp {{ number_format($note->sales->sum('amount'), 0, ',', '.') }}
+                                    </p>
+                                    <a href="{{ route('notes.edit', $note) }}"
+                                        class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                        Edit →
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-lg font-bold text-green-600">
-                                Rp {{ number_format($note->sales->sum('amount'), 0, ',', '.') }}
-                            </p>
-                            <a href="{{ route('notes.edit', $note) }}" 
-                               class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                Edit →
-                            </a>
-                        </div>
+                        @endforeach
                     </div>
-                    @endforeach
                 </div>
-            </div>
             @else
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6 text-center py-8">
-                <i class="fas fa-inbox text-gray-400 text-3xl mb-3"></i>
-                <p class="text-gray-600">No published notes yet. <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Create your first note →</a></p>
-            </div>
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6 text-center py-8">
+                    <i class="fas fa-inbox text-gray-400 text-3xl mb-3"></i>
+                    <p class="text-gray-600">No published notes yet. <a href="#"
+                            class="text-blue-600 hover:text-blue-800 font-medium">Create your first note →</a></p>
+                </div>
             @endif
 
             <!-- Recent Sales -->
-            @if($recentSales->count() > 0)
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h4 class="text-lg font-bold text-gray-900 mb-4">Recent Sales</h4>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-900">Note</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-900">Buyer</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-900">Amount</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-900">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            @foreach($recentSales as $sale)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-gray-900">{{ $sale->note->title }}</td>
-                                <td class="px-4 py-3 text-gray-600">{{ $sale->buyer->name }}</td>
-                                <td class="px-4 py-3 font-semibold text-green-600">
-                                    Rp {{ number_format($sale->amount, 0, ',', '.') }}
-                                </td>
-                                <td class="px-4 py-3 text-gray-600">
-                                    {{ $sale->created_at->format('d M Y') }}
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+            @if ($recentSales->count() > 0)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <h4 class="text-lg font-bold text-gray-900 mb-4">Recent Sales</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Note</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Buyer</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Amount</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                @foreach ($recentSales as $sale)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-gray-900">{{ $sale->note->title }}</td>
+                                        <td class="px-4 py-3 text-gray-600">{{ $sale->buyer->name }}</td>
+                                        <td class="px-4 py-3 font-semibold text-green-600">
+                                            Rp {{ number_format($sale->amount, 0, ',', '.') }}
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-600">
+                                            {{ $sale->created_at->format('d M Y') }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
             @endif
         </div>
     </div>

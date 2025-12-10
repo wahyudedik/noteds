@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Contracts\View\View;
 
@@ -12,19 +13,20 @@ class BuyerDashboardController extends Controller
      */
     public function index(): View
     {
+        /** @var User $user */
         $user = Auth::user();
 
         // Get buyer-specific metrics
         $metrics = [
             'total_spent' => $user->transactionsAsBuyer()
                 ->sum('amount') ?? 0,
-            
+
             'notes_purchased' => $user->purchasedNotes()
                 ->count() ?? 0,
-            
+
             'collections_count' => $user->collections()
                 ->count() ?? 0,
-            
+
             'total_ratings' => 0, // Can be calculated from ratings table if exists
         ];
 
@@ -57,5 +59,3 @@ class BuyerDashboardController extends Controller
         ]);
     }
 }
-
-

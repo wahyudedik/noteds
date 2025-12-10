@@ -50,9 +50,9 @@ test('buyer dashboard has required metrics', function () {
 
     $response->assertViewHas('metrics', function ($metrics) {
         return isset($metrics['total_spent']) &&
-               isset($metrics['notes_purchased']) &&
-               isset($metrics['collections_count']) &&
-               isset($metrics['total_ratings']);
+            isset($metrics['notes_purchased']) &&
+            isset($metrics['collections_count']) &&
+            isset($metrics['total_ratings']);
     });
 });
 
@@ -68,9 +68,9 @@ test('seller dashboard has required metrics', function () {
 
     $response->assertViewHas('metrics', function ($metrics) {
         return isset($metrics['total_revenue']) &&
-               isset($metrics['notes_published']) &&
-               isset($metrics['total_sales']) &&
-               isset($metrics['average_rating']);
+            isset($metrics['notes_published']) &&
+            isset($metrics['total_sales']) &&
+            isset($metrics['average_rating']);
     });
 });
 
@@ -133,4 +133,3 @@ test('incomplete profile redirects to profile edit', function () {
 
     $response->assertRedirect(route('profile.edit'));
 });
-
