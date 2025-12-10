@@ -40,7 +40,7 @@ class ForumController extends Controller
             ->published()
             ->visibleTo($user)
             ->withCount(['replies', 'allComments']);
-        
+
         // Order: pinned posts first, then by latest (may be overridden later)
         $query->orderBy('is_pinned', 'desc')
             ->orderBy(DB::raw('COALESCE(posts.published_at, posts.created_at)'), 'desc');
@@ -56,19 +56,19 @@ class ForumController extends Controller
             $query->orderByDesc('trending_score')
                 ->orderByDesc(DB::raw('COALESCE(posts.published_at, posts.created_at)'));
         }
-        
+
         // Apply search
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('content', 'like', "%{$search}%")
-                  ->orWhereHas('user', function($userQuery) use ($search) {
-                      $userQuery->where('name', 'like', "%{$search}%")
-                               ->orWhere('username', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('note', function($noteQuery) use ($search) {
-                      $noteQuery->where('title', 'like', "%{$search}%")
-                               ->orWhere('summary', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('username', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('note', function ($noteQuery) use ($search) {
+                        $noteQuery->where('title', 'like', "%{$search}%")
+                            ->orWhere('summary', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -86,11 +86,11 @@ class ForumController extends Controller
             // Timeline: Following + own posts + popular posts
             $followingIds = $user->following()->pluck('following_id')->toArray();
             $followingIds[] = $user->id;
-            
-            $query->where(function($q) use ($followingIds) {
+
+            $query->where(function ($q) use ($followingIds) {
                 $q->whereIn('user_id', $followingIds)
-                  ->orWhere('likes_count', '>=', 5) // Popular posts
-                  ->orWhere('comments_count', '>=', 3);
+                    ->orWhere('likes_count', '>=', 5) // Popular posts
+                    ->orWhere('comments_count', '>=', 3);
             });
         }
         // 'all' shows everything
@@ -136,7 +136,7 @@ class ForumController extends Controller
     public function show(Request $request, Post $post): View
     {
         $user = auth()->user();
-        
+
         $post->load(['user', 'note', 'parent', 'replies.user', 'allComments.user', 'likes', 'media', 'hashtags', 'mentions']);
         $post->loadCount(['replies', 'allComments']);
 
@@ -256,10 +256,16 @@ class ForumController extends Controller
             }
         }
 
-        // If sharing a note, verify user has access
+        // If sharing a note, verify user is a seller and has access
         if (!empty($validated['note_id'])) {
+            // Only sellers can share notes in forum
+            if (!auth()->user()->hasRole('seller')) {
+                return redirect()->back()
+                    ->with('error', 'Only sellers can share notes in forum.');
+            }
+
             $note = Note::findOrFail($validated['note_id']);
-            
+
             // Check if note is public or user owns it
             if (!$note->is_public && $note->user_id !== auth()->id()) {
                 return redirect()->back()
@@ -288,7 +294,7 @@ class ForumController extends Controller
             $order = 0;
             foreach ($request->file('media') as $file) {
                 $path = $file->store('forum/media', 'public');
-                
+
                 PostMedia::create([
                     'post_id' => $post->id,
                     'file_path' => $path,
@@ -335,7 +341,7 @@ class ForumController extends Controller
             // Unlike
             $post->likes()->detach($user->id);
             $post->decrement('likes_count');
-            
+
             return response()->json([
                 'success' => true,
                 'liked' => false,
@@ -345,7 +351,7 @@ class ForumController extends Controller
             // Like
             $post->likes()->attach($user->id, ['id' => (string) Str::uuid()]);
             $post->increment('likes_count');
-            
+
             // Notify post owner (if not the user themselves)
             if ($post->user_id !== $user->id) {
                 $notificationService = app(NotificationService::class);
@@ -356,7 +362,7 @@ class ForumController extends Controller
                     $post->content
                 );
             }
-            
+
             return response()->json([
                 'success' => true,
                 'liked' => true,
@@ -471,7 +477,7 @@ class ForumController extends Controller
         }
 
         $post = $comment->post;
-        
+
         // Decrement post comments count
         $post->decrement('comments_count');
 
@@ -504,7 +510,7 @@ class ForumController extends Controller
             // Unlike
             $comment->likes()->detach($user->id);
             $comment->decrement('likes_count');
-            
+
             return response()->json([
                 'success' => true,
                 'liked' => false,
@@ -514,7 +520,7 @@ class ForumController extends Controller
             // Like
             $comment->likes()->attach($user->id, ['id' => (string) Str::uuid()]);
             $comment->increment('likes_count');
-            
+
             // Notify comment owner (if not the user themselves)
             if ($comment->user_id !== $user->id) {
                 $notificationService = app(NotificationService::class);
@@ -524,7 +530,7 @@ class ForumController extends Controller
                     $user->name
                 );
             }
-            
+
             return response()->json([
                 'success' => true,
                 'liked' => true,
@@ -571,10 +577,16 @@ class ForumController extends Controller
             $visibility = $visibilityInput;
         }
 
-        // If sharing a note, verify user has access
+        // If sharing a note, verify user is a seller and has access
         if (!empty($validated['note_id'])) {
+            // Only sellers can share notes in forum
+            if (!auth()->user()->hasRole('seller')) {
+                return redirect()->back()
+                    ->with('error', 'Only sellers can share notes in forum.');
+            }
+
             $note = Note::findOrFail($validated['note_id']);
-            
+
             // Check if note is public or user owns it
             if (!$note->is_public && $note->user_id !== auth()->id()) {
                 return redirect()->back()
@@ -643,7 +655,7 @@ class ForumController extends Controller
     {
         $hashtag = Hashtag::where('slug', $slug)->firstOrFail();
         $user = auth()->user();
-        
+
         $posts = $hashtag->posts()
             ->whereNull('parent_id')
             ->where('posts.is_hidden', false)
@@ -653,7 +665,7 @@ class ForumController extends Controller
             ->orderBy('is_pinned', 'desc')
             ->latest()
             ->paginate(15);
-        
+
         // Mark if user has bookmarked each post
         if ($user) {
             $likedPostIds = $user->likedPosts()->pluck('posts.id')->toArray();
@@ -749,4 +761,3 @@ class ForumController extends Controller
         ]);
     }
 }
-
