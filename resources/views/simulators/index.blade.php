@@ -657,6 +657,123 @@
                 </div>
             </div>
 
+            <!-- Commission Structure Visualizer -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300 mb-16">
+                <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">{{ __('messages.commission_structure') }}</h3>
+                            <p class="text-amber-100 text-sm">{{ __('messages.see_fee_breakdown') }}</p>
+                        </div>
+                        <svg class="w-12 h-12 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Input Section -->
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.note_sale_price') }}</label>
+                                <div class="flex items-center">
+                                    <span class="text-2xl font-bold text-gray-900" id="csv-currency-symbol">Rp</span>
+                                    <input type="number" id="csv-price" value="100000" min="10000" step="5000"
+                                        class="ml-2 flex-1 rounded-lg border-gray-300 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500">
+                                </div>
+                            </div>
+
+                            <!-- Price Range Slider -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-3">{{ __('messages.or_adjust_slider') }}</label>
+                                <input type="range" id="csv-slider" value="100000" min="10000" max="500000" step="5000"
+                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                    <span>Rp 10,000</span>
+                                    <span>Rp 500,000</span>
+                                </div>
+                            </div>
+
+                            <button type="button" id="csv-calculate"
+                                class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-lg transition-all duration-200">
+                                {{ __('messages.calculate_breakdown') }}
+                            </button>
+                        </div>
+
+                        <!-- Visualization Section -->
+                        <div id="csv-results" class="hidden md:block">
+                            <!-- Pie Chart Canvas -->
+                            <div class="bg-gray-50 rounded-lg p-6 flex items-center justify-center" style="height: 300px;">
+                                <canvas id="csv-chart" width="300" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Cards -->
+                    <div id="csv-breakdown" class="hidden mt-8">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                            <!-- Gross Income -->
+                            <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+                                <p class="text-sm text-gray-600 mb-1">{{ __('messages.gross_income_total') }}</p>
+                                <p class="text-2xl font-bold text-blue-700" id="csv-gross"></p>
+                                <p class="text-xs text-gray-500 mt-1">{{ __('messages.before_fees') }}</p>
+                            </div>
+
+                            <!-- Platform Fee -->
+                            <div class="bg-red-50 rounded-lg p-4 border-l-4 border-red-500">
+                                <p class="text-sm text-gray-600 mb-1">{{ __('messages.platform_fee_20') }}</p>
+                                <p class="text-2xl font-bold text-red-700" id="csv-fee"></p>
+                                <p class="text-xs text-gray-500 mt-1" id="csv-fee-pct">-20%</p>
+                            </div>
+
+                            <!-- Net Income -->
+                            <div class="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+                                <p class="text-sm text-gray-600 mb-1">{{ __('messages.your_net_income') }}</p>
+                                <p class="text-2xl font-bold text-green-700" id="csv-net"></p>
+                                <p class="text-xs text-gray-500 mt-1" id="csv-net-pct">+80%</p>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Breakdown Table -->
+                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-100 border-b border-gray-200">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left font-semibold text-gray-700">{{ __('messages.item') }}</th>
+                                        <th class="px-4 py-3 text-right font-semibold text-gray-700">{{ __('messages.amount') }}</th>
+                                        <th class="px-4 py-3 text-right font-semibold text-gray-700">{{ __('messages.percentage') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr class="bg-white hover:bg-blue-50 transition-colors">
+                                        <td class="px-4 py-3 font-medium text-gray-900">{{ __('messages.sale_price') }}</td>
+                                        <td class="px-4 py-3 text-right font-semibold text-blue-700" id="csv-row-gross"></td>
+                                        <td class="px-4 py-3 text-right text-gray-700">100%</td>
+                                    </tr>
+                                    <tr class="bg-red-50 hover:bg-red-100 transition-colors">
+                                        <td class="px-4 py-3 font-medium text-gray-900">{{ __('messages.platform_fee_charge') }}</td>
+                                        <td class="px-4 py-3 text-right font-semibold text-red-700" id="csv-row-fee"></td>
+                                        <td class="px-4 py-3 text-right text-red-700">20%</td>
+                                    </tr>
+                                    <tr class="bg-green-50 hover:bg-green-100 transition-colors">
+                                        <td class="px-4 py-3 font-bold text-gray-900">{{ __('messages.you_earn') }}</td>
+                                        <td class="px-4 py-3 text-right font-bold text-green-700" id="csv-row-net"></td>
+                                        <td class="px-4 py-3 text-right font-bold text-green-700">80%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Example Insight -->
+                        <div class="mt-6 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg p-4">
+                            <p class="text-sm text-amber-800" id="csv-insight">
+                                {{ __('messages.insight_multiplier') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- CTA Section -->
             <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12 text-center text-white">
                 <h2 class="text-3xl font-bold mb-4">{{ __('messages.simulator_ready_to_start') }}</h2>
@@ -881,6 +998,125 @@
                     activateStep(0);
                     setTimeout(nextStep.bind(this), 1000);
                 });
+
+                // Commission Structure Visualizer
+                const csvPriceInput = document.getElementById('csv-price');
+                const csvSlider = document.getElementById('csv-slider');
+                
+                // Sync price input and slider
+                csvPriceInput.addEventListener('input', function() {
+                    csvSlider.value = this.value;
+                });
+                
+                csvSlider.addEventListener('input', function() {
+                    csvPriceInput.value = this.value;
+                });
+
+                document.getElementById('csv-calculate').addEventListener('click', function() {
+                    const salePrice = parseFloat(csvPriceInput.value) || 0;
+                    const platformFeePercentage = 0.20; // 20% commission
+                    
+                    const platformFee = salePrice * platformFeePercentage;
+                    const netIncome = salePrice - platformFee;
+                    
+                    // Update cards
+                    document.getElementById('csv-gross').textContent = formatCurrency(salePrice);
+                    document.getElementById('csv-fee').textContent = formatCurrency(platformFee);
+                    document.getElementById('csv-net').textContent = formatCurrency(netIncome);
+                    
+                    // Update table rows
+                    document.getElementById('csv-row-gross').textContent = formatCurrency(salePrice);
+                    document.getElementById('csv-row-fee').textContent = formatCurrency(platformFee);
+                    document.getElementById('csv-row-net').textContent = formatCurrency(netIncome);
+                    
+                    // Update insight
+                    const multiplier = Math.round((netIncome / 10000) * 10) / 10;
+                    const monthlyAt10Sales = netIncome * 10;
+                    const monthlyText = currencySettings.currency === 'IDR' ? 
+                        multiplier + ' × Rp10,000' : 
+                        multiplier + ' × $10';
+                    
+                    document.getElementById('csv-insight').textContent = 
+                        `If you sell this note 10 times per month, you'll earn ${formatCurrency(monthlyAt10Sales)}/month (${monthlyText})`;
+                    
+                    // Draw pie chart
+                    const chartCanvas = document.getElementById('csv-chart');
+                    const ctx = chartCanvas.getContext('2d');
+                    drawCommissionChart(ctx, salePrice, platformFee, netIncome, chartCanvas);
+                    
+                    // Show results
+                    document.getElementById('csv-breakdown').classList.remove('hidden');
+                    document.getElementById('csv-results').classList.remove('hidden');
+                });
+                
+                // Draw pie chart for commission breakdown
+                function drawCommissionChart(ctx, gross, fee, net, canvas) {
+                    const width = canvas.width;
+                    const height = canvas.height;
+                    const centerX = width / 2;
+                    const centerY = height / 2;
+                    const radius = Math.min(width, height) / 2 - 20;
+                    
+                    // Clear canvas
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, width, height);
+                    
+                    // Draw pie chart
+                    const total = gross;
+                    const feePercent = fee / total;
+                    const netPercent = net / total;
+                    
+                    // Net Income slice (80%, green)
+                    ctx.fillStyle = '#10b981';
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.arc(centerX, centerY, radius, 0, netPercent * Math.PI * 2);
+                    ctx.lineTo(centerX, centerY);
+                    ctx.fill();
+                    
+                    // Fee slice (20%, red)
+                    ctx.fillStyle = '#ef4444';
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.arc(centerX, centerY, radius, netPercent * Math.PI * 2, Math.PI * 2);
+                    ctx.lineTo(centerX, centerY);
+                    ctx.fill();
+                    
+                    // Draw legend
+                    ctx.fillStyle = '#374151';
+                    ctx.font = 'bold 14px sans-serif';
+                    ctx.textAlign = 'left';
+                    
+                    // Legend background
+                    const legendX = 20;
+                    const legendY = height - 80;
+                    const legendWidth = 240;
+                    const legendHeight = 70;
+                    
+                    ctx.fillStyle = '#f9fafb';
+                    ctx.fillRect(legendX, legendY, legendWidth, legendHeight);
+                    ctx.strokeStyle = '#d1d5db';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(legendX, legendY, legendWidth, legendHeight);
+                    
+                    // Legend items
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.fillStyle = '#10b981';
+                    ctx.fillRect(legendX + 10, legendY + 10, 12, 12);
+                    ctx.fillStyle = '#374151';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('You earn (80%)', legendX + 28, legendY + 19);
+                    
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillRect(legendX + 10, legendY + 28, 12, 12);
+                    ctx.fillStyle = '#374151';
+                    ctx.fillText('Platform fee (20%)', legendX + 28, legendY + 37);
+                    
+                    ctx.fillStyle = '#6b7280';
+                    ctx.font = '11px sans-serif';
+                    ctx.fillText('Fair commission for platform', legendX + 10, legendY + 55);
+                    ctx.fillText('services & payment processing', legendX + 10, legendY + 67);
+                }
 
                 // Price Benchmark Tool
                 document.getElementById('benchmark-calculate').addEventListener('click', function() {

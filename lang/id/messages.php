@@ -708,6 +708,24 @@ return [
     'platform_fee' => 'Biaya Platform (20%)',
     'net_income' => 'Pendapatan Bersih',
 
+    // Commission Structure Visualizer
+    'commission_structure' => 'Visualizer Struktur Komisi',
+    'see_fee_breakdown' => 'Lihat breakdown biaya platform yang tepat',
+    'note_sale_price' => 'Harga Penjualan Note',
+    'or_adjust_slider' => 'Atau sesuaikan slider di bawah',
+    'calculate_breakdown' => 'Hitung Breakdown',
+    'gross_income_total' => 'Pendapatan Kotor',
+    'before_fees' => 'Sebelum biaya',
+    'platform_fee_20' => 'Biaya Platform',
+    'your_net_income' => 'Pendapatan Bersih Anda',
+    'item' => 'Item',
+    'amount' => 'Jumlah',
+    'percentage' => 'Persentase',
+    'sale_price' => 'Harga Jual',
+    'platform_fee_charge' => 'Biaya Platform (20%)',
+    'you_earn' => 'Anda Dapatkan',
+    'insight_multiplier' => 'Berapa banyak yang bisa Anda hasilkan?',
+
     // CMS Show
     'back' => 'Kembali',
 

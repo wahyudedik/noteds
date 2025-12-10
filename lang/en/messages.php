@@ -708,6 +708,24 @@ return [
     'platform_fee' => 'Platform Fee (20%)',
     'net_income' => 'Net Income',
 
+    // Commission Structure Visualizer
+    'commission_structure' => 'Commission Structure Visualizer',
+    'see_fee_breakdown' => 'See exact breakdown of platform fees',
+    'note_sale_price' => 'Note Sale Price',
+    'or_adjust_slider' => 'Or adjust the slider below',
+    'calculate_breakdown' => 'Calculate Breakdown',
+    'gross_income_total' => 'Gross Income',
+    'before_fees' => 'Before fees',
+    'platform_fee_20' => 'Platform Fee',
+    'your_net_income' => 'Your Net Income',
+    'item' => 'Item',
+    'amount' => 'Amount',
+    'percentage' => 'Percentage',
+    'sale_price' => 'Sale Price',
+    'platform_fee_charge' => 'Platform Fee (20%)',
+    'you_earn' => 'You Earn',
+    'insight_multiplier' => 'How much can you earn?',
+
     // CMS Show
     'back' => 'Back',
 
