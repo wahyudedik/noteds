@@ -1,20 +1,12 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
-@section('title', __('messages.admin_dashboard'))
+@section('title', 'Admin Dashboard')
+@section('header', 'Dashboard')
 
 @section('content')
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ __('messages.admin_dashboard') }}</h2>
-
-            @if (session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+<div class="space-y-6">
+    <!-- Key Metrics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <div class="text-sm font-medium text-gray-500">{{ __('messages.total_users') }}</div>
                     <div class="text-2xl font-bold text-gray-900">{{ $stats['total_users'] }}</div>
