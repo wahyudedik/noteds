@@ -29,13 +29,13 @@ class ShareAnalyticsController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
-        
+
         // If admin, get all share stats; if seller, get only their own
         if ($user->hasRole('admin')) {
             // Get all share referrals for admin view
             $shareReferralsCollection = NoteShareReferral::with('note:id,title,price,user_id')
                 ->get();
-            
+
             $stats = [
                 'total_shares' => $shareReferralsCollection->count(),
                 'total_clicks' => $shareReferralsCollection->sum('click_count'),
