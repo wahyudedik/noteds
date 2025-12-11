@@ -94,7 +94,7 @@
                         </div>
                     </a>
 
-                    <a href="{{ route('profile.edit') }}"
+                    <a href="{{ route('seller-analytics.index') }}"
                         class="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-green-50 to-green-100 hover:shadow-md transition">
                         <i class="fas fa-chart-bar text-green-600 text-xl"></i>
                         <div>
@@ -103,7 +103,7 @@
                         </div>
                     </a>
 
-                    <a href="{{ route('profile.edit') }}"
+                    <a href="{{ route('affiliate.index') }}"
                         class="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-purple-50 to-purple-100 hover:shadow-md transition">
                         <i class="fas fa-link text-purple-600 text-xl"></i>
                         <div>

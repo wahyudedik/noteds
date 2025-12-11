@@ -43,6 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'seller_only' => \App\Http\Middleware\EnsureSellerOnly::class,
             'buyer_only' => \App\Http\Middleware\EnsureBuyerOnly::class,
             'seller_and_buyer_only' => \App\Http\Middleware\EnsureSellerAndBuyerOnly::class,
+            'seller_and_admin' => \App\Http\Middleware\SellerAndAdmin::class,
             'workspace.user' => \App\Http\Middleware\EnsureWorkspaceUser::class,
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'rate.limit' => \App\Http\Middleware\RateLimitSensitive::class,

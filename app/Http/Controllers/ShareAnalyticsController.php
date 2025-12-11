@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\NoteShareReferral;
 use App\Services\NoteShareService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -10,12 +11,12 @@ class ShareAnalyticsController extends Controller
 {
     public function __construct(private NoteShareService $noteShareService)
     {
-        // Only sellers can access share analytics
+        // Sellers and admin can access share analytics
         $this->middleware('auth');
         $this->middleware(function ($request, $next) {
             $user = $request->user();
-            if (!$user || $user->role !== 'seller') {
-                abort(403, 'Only sellers can access share analytics.');
+            if (!$user || ($user->role !== 'seller' && !$user->hasRole('admin'))) {
+                abort(403, 'Only sellers and admin can access share analytics.');
             }
             return $next($request);
         });
@@ -23,12 +24,31 @@ class ShareAnalyticsController extends Controller
 
     /**
      * Display share analytics dashboard.
-     * Only accessible to sellers
+     * Accessible to sellers (their own data) and admin (all data)
      */
     public function index(Request $request): View
     {
         $user = $request->user();
-        $stats = $this->noteShareService->getUserShareStats($user);
+        
+        // If admin, get all share stats; if seller, get only their own
+        if ($user->hasRole('admin')) {
+            // Get all share referrals for admin view
+            $shareReferralsCollection = NoteShareReferral::with('note:id,title,price,user_id')
+                ->get();
+            
+            $stats = [
+                'total_shares' => $shareReferralsCollection->count(),
+                'total_clicks' => $shareReferralsCollection->sum('click_count'),
+                'total_purchases' => $shareReferralsCollection->sum('purchase_count'),
+                'total_commission_earned' => $shareReferralsCollection->sum('total_commission_earned'),
+                'total_revenue_generated' => $shareReferralsCollection->sum('total_revenue_generated'),
+                'share_referrals' => $shareReferralsCollection,
+            ];
+            $isAdmin = true;
+        } else {
+            $stats = $this->noteShareService->getUserShareStats($user);
+            $isAdmin = false;
+        }
 
         // Get detailed stats for each share referral with eager loading
         $shareReferrals = $stats['share_referrals']->load([
@@ -54,6 +74,7 @@ class ShareAnalyticsController extends Controller
         return view('share.analytics', [
             'stats' => $stats,
             'shareReferrals' => $shareReferrals,
+            'isAdmin' => $isAdmin,
         ]);
     }
 }

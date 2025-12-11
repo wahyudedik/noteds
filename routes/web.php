@@ -98,6 +98,7 @@ Route::get('/studio', [\App\Http\Controllers\StudioController::class, 'index'])-
 Route::middleware(['auth', 'verified', 'role:seller'])->get('/vendor', [\App\Http\Controllers\VendorController::class, 'index'])->name('vendor.index');
 Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'not.admin'])->prefix('studio')->name('studio.')->group(function () {
     Route::get('/orders', [\App\Http\Controllers\ServiceOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/pending-approvals', [\App\Http\Controllers\ServiceOrderController::class, 'pendingApprovals'])->name('orders.pending-approvals');
     Route::get('/orders/create', [\App\Http\Controllers\ServiceOrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [\App\Http\Controllers\ServiceOrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/{order}', [\App\Http\Controllers\ServiceOrderController::class, 'show'])->name('orders.show');
@@ -387,78 +388,24 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'buyer_only'])->
         Route::get('/', [\App\Http\Controllers\ReadingHistoryController::class, 'index'])->name('index');
     });
 
-    // AI Features removed - Premium Note Features (Smart Search, Q&A, Insights) have been removed to reduce API costs
-
-    // AI Features removed - all features are now free and accessible
-
-
-    // Subscription routes - REMOVED: All users now have free access to all features
-    // Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
-    // Route::get('/subscription/create', [SubscriptionController::class, 'create'])->name('subscription.create');
-    // Route::post('/subscription', [SubscriptionController::class, 'store'])->name('subscription.store');
-    // Route::get('/subscription/{subscription}', [SubscriptionController::class, 'show'])->name('subscription.show');
-
-    // Wallet routes
-    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
-
     // Points routes (Only for buyers - points are used to redeem discounts when purchasing)
-    Route::middleware('buyer')->group(function () {
+    Route::middleware('buyer_only')->group(function () {
         Route::get('/points', [PointsController::class, 'index'])->name('points.index');
         Route::post('/points/redeem-discount', [PointsController::class, 'redeemDiscount'])->name('points.redeem-discount');
         Route::post('/points/redeem-premium', [PointsController::class, 'redeemPremium'])->name('points.redeem-premium');
     });
+});
+
+// Routes that require KYC - Available for all authenticated users (admin, seller, buyer)
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function () {
+    // Wallet routes
+    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::post('/wallet/topup', [WalletController::class, 'topup'])->middleware('rate.limit:10,1')->name('wallet.topup');
     Route::get('/wallet/topup-checkout', [WalletController::class, 'topupCheckout'])->name('wallet.topup-checkout');
 
     // Withdraw routes
     Route::get('/wallet/withdraw', [WithdrawController::class, 'create'])->name('wallet.withdraw.create');
     Route::post('/wallet/withdraw', [WithdrawController::class, 'store'])->middleware('rate.limit:3,1')->name('wallet.withdraw.store');
-
-    // Featured Notes routes - only for sellers (strictly block admin and buyer)
-    Route::middleware('seller_only')->group(function () {
-        Route::get('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'index'])->name('featured-notes.index');
-        Route::get('/featured-notes/create', [\App\Http\Controllers\FeaturedNoteController::class, 'create'])->name('featured-notes.create');
-        Route::post('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'store'])->name('featured-notes.store');
-        Route::get('/featured-notes/export', [\App\Http\Controllers\FeaturedNoteController::class, 'exportReport'])->name('featured-notes.export');
-
-        // Seller Analytics routes
-        Route::prefix('seller-analytics')->name('seller-analytics.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\SellerAnalyticsController::class, 'index'])->name('index');
-            Route::get('/api/revenue', [\App\Http\Controllers\SellerAnalyticsController::class, 'apiRevenue'])->name('api.revenue');
-        });
-    });
-
-    // Referral routes - Only accessible to sellers and buyers (not admin)
-    Route::middleware('not_admin_referral')->group(function () {
-        Route::get('/referral', [ReferralController::class, 'index'])->name('referral.index');
-        Route::get('/referral/statistics', [ReferralController::class, 'statistics'])->name('referral.statistics');
-        Route::get('/referral/transactions', [ReferralController::class, 'transactions'])->name('referral.transactions');
-    });
-
-    // Affiliate routes - Only accessible to sellers and buyers (not admin)
-    Route::prefix('affiliate')->name('affiliate.')->middleware('not_admin_affiliate')->group(function () {
-        Route::get('/', [AffiliateController::class, 'index'])->name('index');
-        Route::post('/links', [AffiliateController::class, 'storeLink'])->name('links.store');
-        Route::put('/links/{affiliateLink}', [AffiliateController::class, 'updateLink'])->name('links.update');
-        Route::delete('/links/{affiliateLink}', [AffiliateController::class, 'deleteLink'])->name('links.delete');
-        Route::put('/links/{affiliateLink}/landing', [AffiliateController::class, 'updateLandingPage'])->name('links.landing.update');
-        Route::get('/links/{affiliateLink}/promotional-materials', [AffiliateController::class, 'getPromotionalMaterials'])->name('promotional-materials.index');
-        Route::post('/links/{affiliateLink}/promotional-materials', [AffiliateController::class, 'storePromotionalMaterial'])->name('promotional-materials.store');
-        Route::put('/promotional-materials/{promotionalMaterial}', [AffiliateController::class, 'updatePromotionalMaterial'])->name('promotional-materials.update');
-        Route::delete('/promotional-materials/{promotionalMaterial}', [AffiliateController::class, 'deletePromotionalMaterial'])->name('promotional-materials.delete');
-        Route::put('/landing-page', [AffiliateController::class, 'updateGlobalLandingPage'])->name('landing-page.update');
-        Route::post('/payouts', [AffiliateController::class, 'requestPayout'])->name('payouts.request');
-    });
-
-    // API routes for affiliate
-    Route::get('/api/affiliate-links/{affiliateLink}', [AffiliateController::class, 'getLinkDetails']);
-
-    // Affiliate leaderboard
-    Route::get('/affiliate-leaderboard', [AffiliateLeaderboardController::class, 'index'])->name('affiliate.leaderboard');
-
-    // Share Analytics routes (seller only, not admin)
-    Route::get('/share/analytics', [ShareAnalyticsController::class, 'index'])->middleware('seller_only')->name('share.analytics');
-    Route::get('/share/leaderboard', [ShareLeaderboardController::class, 'index'])->middleware('seller_only')->name('share.leaderboard');
 
     // Support Ticket routes
     Route::resource('support-tickets', SupportTicketController::class);
@@ -498,6 +445,11 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'buyer_only'])->
 
     // Note Q&A routes
     Route::post('/notes/{note}/questions', [\App\Http\Controllers\NoteQuestionController::class, 'store'])->name('notes.questions.store');
+    Route::get('/notes/{note}/questions', function (App\Models\Note $note) {
+        return redirect()->route('marketplace.show', $note)->withFragment('questions');
+    })->name('notes.questions.index');
+    Route::post('/questions/{question}/answer', [\App\Http\Controllers\NoteQuestionController::class, 'answer'])->name('questions.answer');
+    Route::post('/questions/{question}/helpful', [\App\Http\Controllers\NoteQuestionController::class, 'markHelpful'])->name('questions.helpful');
 
     // Note Collaboration routes
     Route::prefix('notes/{note}/collaboration')->name('notes.collaboration.')->group(function () {
@@ -522,12 +474,6 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'buyer_only'])->
         Route::get('/comments', [\App\Http\Controllers\NoteCollaborationController::class, 'getComments'])->name('comments.index');
         Route::post('/comments/{comment}/resolve', [\App\Http\Controllers\NoteCollaborationController::class, 'resolveComment'])->name('comments.resolve');
     });
-    // Handle GET requests (e.g., browser refresh after POST) by redirecting to marketplace
-    Route::get('/notes/{note}/questions', function (App\Models\Note $note) {
-        return redirect()->route('marketplace.show', $note)->withFragment('questions');
-    })->name('notes.questions.index');
-    Route::post('/questions/{question}/answer', [\App\Http\Controllers\NoteQuestionController::class, 'answer'])->name('questions.answer');
-    Route::post('/questions/{question}/helpful', [\App\Http\Controllers\NoteQuestionController::class, 'markHelpful'])->name('questions.helpful');
 
     // Notification Preferences routes
     Route::prefix('notifications')->name('notifications.')->group(function () {
@@ -584,10 +530,7 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'buyer_only'])->
         Route::delete('/{webhook}', [\App\Http\Controllers\WebhookController::class, 'destroy'])->name('destroy');
         Route::post('/{webhook}/test', [\App\Http\Controllers\WebhookController::class, 'test'])->name('test');
     });
-});
 
-// Routes that require KYC - Available for all authenticated users (admin, seller, buyer)
-Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function () {
     // Notification routes - Available to all KYC'd users
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
@@ -599,6 +542,54 @@ Route::middleware(['auth', 'verified', 'username.setup'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Featured Notes routes - only for sellers (strictly block admin and buyer)
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'seller_only'])->group(function () {
+    Route::get('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'index'])->name('featured-notes.index');
+    Route::get('/featured-notes/create', [\App\Http\Controllers\FeaturedNoteController::class, 'create'])->name('featured-notes.create');
+    Route::post('/featured-notes', [\App\Http\Controllers\FeaturedNoteController::class, 'store'])->name('featured-notes.store');
+    Route::get('/featured-notes/export', [\App\Http\Controllers\FeaturedNoteController::class, 'exportReport'])->name('featured-notes.export');
+
+    // Seller Analytics routes
+    Route::prefix('seller-analytics')->name('seller-analytics.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\SellerAnalyticsController::class, 'index'])->name('index');
+        Route::get('/api/revenue', [\App\Http\Controllers\SellerAnalyticsController::class, 'apiRevenue'])->name('api.revenue');
+    });
+});
+
+// Referral routes - Only accessible to sellers and buyers (not admin)
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'not_admin_referral'])->group(function () {
+    Route::get('/referral', [ReferralController::class, 'index'])->name('referral.index');
+    Route::get('/referral/statistics', [ReferralController::class, 'statistics'])->name('referral.statistics');
+    Route::get('/referral/transactions', [ReferralController::class, 'transactions'])->name('referral.transactions');
+});
+
+// Affiliate routes - Only accessible to sellers and buyers (not admin)
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'not_admin_affiliate'])->prefix('affiliate')->name('affiliate.')->group(function () {
+    Route::get('/', [AffiliateController::class, 'index'])->name('index');
+    Route::post('/links', [AffiliateController::class, 'storeLink'])->name('links.store');
+    Route::put('/links/{affiliateLink}', [AffiliateController::class, 'updateLink'])->name('links.update');
+    Route::delete('/links/{affiliateLink}', [AffiliateController::class, 'deleteLink'])->name('links.delete');
+    Route::put('/links/{affiliateLink}/landing', [AffiliateController::class, 'updateLandingPage'])->name('links.landing.update');
+    Route::get('/links/{affiliateLink}/promotional-materials', [AffiliateController::class, 'getPromotionalMaterials'])->name('promotional-materials.index');
+    Route::post('/links/{affiliateLink}/promotional-materials', [AffiliateController::class, 'storePromotionalMaterial'])->name('promotional-materials.store');
+    Route::put('/promotional-materials/{promotionalMaterial}', [AffiliateController::class, 'updatePromotionalMaterial'])->name('promotional-materials.update');
+    Route::delete('/promotional-materials/{promotionalMaterial}', [AffiliateController::class, 'deletePromotionalMaterial'])->name('promotional-materials.delete');
+    Route::put('/landing-page', [AffiliateController::class, 'updateGlobalLandingPage'])->name('landing-page.update');
+    Route::post('/payouts', [AffiliateController::class, 'requestPayout'])->name('payouts.request');
+});
+
+// API routes for affiliate
+Route::get('/api/affiliate-links/{affiliateLink}', [AffiliateController::class, 'getLinkDetails']);
+
+// Affiliate leaderboard
+Route::middleware(['auth', 'verified', 'username.setup'])->get('/affiliate-leaderboard', [AffiliateLeaderboardController::class, 'index'])->name('affiliate.leaderboard');
+
+// Share Analytics routes (seller and admin)
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'seller_and_admin'])->group(function () {
+    Route::get('/share/analytics', [ShareAnalyticsController::class, 'index'])->name('share.analytics');
+    Route::get('/share/leaderboard', [ShareLeaderboardController::class, 'index'])->name('share.leaderboard');
 });
 
 // Admin wallet report routes
@@ -871,5 +862,10 @@ Route::post('/api/ai-detection', function (Request $request) {
     // Return success response (don't reveal if detection is working)
     return response()->json(['status' => 'logged'], 200);
 })->name('api.ai-detection');
+
+// Diagnostic route - check current authenticated user
+Route::get('/api/diagnostic/auth', [\App\Http\Controllers\DiagnosticController::class, 'checkAuth'])
+    ->middleware('auth')
+    ->name('api.diagnostic.auth');
 
 require __DIR__ . '/auth.php';

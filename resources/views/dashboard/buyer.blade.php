@@ -93,7 +93,7 @@
                         </div>
                     </a>
 
-                    <a href="{{ route('profile.edit') }}"
+                    <a href="{{ route('referral.index') }}"
                         class="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-green-50 to-green-100 hover:shadow-md transition">
                         <i class="fas fa-link text-green-600 text-xl"></i>
                         <div>

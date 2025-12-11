@@ -28,8 +28,8 @@ class EnsureBuyerOnly
             abort(403, 'Admin tidak dapat mengakses fitur ini. Fitur ini hanya tersedia untuk Buyer.');
         }
 
-        // Only buyers can access
-        if ($user->role !== 'buyer') {
+        // Only buyers can access (use hasRole for Spatie permission compatibility)
+        if (!$user->hasRole('buyer')) {
             return redirect()->back()->with('error', 'Fitur ini hanya tersedia untuk Buyer. Seller tidak dapat menggunakan fitur Collections. Jika ingin membeli catatan, silakan buat akun Buyer dengan email berbeda.');
         }
 

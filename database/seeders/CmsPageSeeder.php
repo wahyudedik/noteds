@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\CmsPage;
 use Illuminate\Database\Seeder;
 
-class CmsPageSeeder extends Seeder
+class CmsPageSeeder extends Seeder 
 {
     /**
      * Run the database seeds.

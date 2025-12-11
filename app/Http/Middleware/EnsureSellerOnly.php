@@ -28,8 +28,8 @@ class EnsureSellerOnly
             abort(403, 'Admin tidak dapat mengakses fitur ini. Fitur ini hanya tersedia untuk Seller.');
         }
 
-        // Only sellers can access
-        if ($user->role !== 'seller') {
+        // Only sellers can access (use hasRole for Spatie permission compatibility)
+        if (!$user->hasRole('seller')) {
             return redirect()->back()->with('error', 'Fitur ini hanya tersedia untuk Seller. Jika ingin menjual, silakan buat akun Seller dengan email berbeda.');
         }
 

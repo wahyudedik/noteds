@@ -6,11 +6,12 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureNotAdminReferral
+class SellerAndAdmin
 {
     /**
      * Handle an incoming request.
-     * Referral features are accessible to sellers, buyers, and admin (for audit).
+     * Allow both sellers and admin to access features.
+     * Admin can access for audit and oversight purposes.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
@@ -22,12 +23,11 @@ class EnsureNotAdminReferral
 
         $user = auth()->user();
 
-        // Allow sellers, buyers, and admin to access referral features
-        // Admin can access for audit and oversight purposes
-        if ($user->role === 'seller' || $user->role === 'buyer' || $user->hasRole('admin')) {
+        // Allow sellers and admin to access
+        if ($user->role === 'seller' || $user->hasRole('admin')) {
             return $next($request);
         }
 
-        abort(403, 'Anda tidak memiliki akses ke fitur referral.');
+        abort(403, 'Anda tidak memiliki akses ke fitur ini.');
     }
 }

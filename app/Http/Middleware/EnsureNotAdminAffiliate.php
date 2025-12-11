@@ -10,7 +10,7 @@ class EnsureNotAdminAffiliate
 {
     /**
      * Handle an incoming request.
-     * Affiliate features are only accessible to sellers and buyers, not admin.
+     * Affiliate features are accessible to sellers, buyers, and admin (for audit).
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
@@ -22,13 +22,9 @@ class EnsureNotAdminAffiliate
 
         $user = auth()->user();
 
-        // Deny admin access to affiliate features
-        if ($user->hasRole('admin')) {
-            abort(403, 'Admin tidak dapat mengakses fitur affiliate.');
-        }
-
-        // Only sellers and buyers can access
-        if ($user->role === 'seller' || $user->role === 'buyer') {
+        // Allow sellers, buyers, and admin to access affiliate features
+        // Admin can access for audit and oversight purposes
+        if ($user->role === 'seller' || $user->role === 'buyer' || $user->hasRole('admin')) {
             return $next($request);
         }
 

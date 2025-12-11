@@ -21,14 +21,14 @@ class EnsureBuyerRole
         }
 
         $user = auth()->user();
-        
+
         // Admin can access everything
         if ($user->hasRole('admin')) {
             return $next($request);
         }
 
-        // Only buyers can access
-        if ($user->role !== 'buyer') {
+        // Only buyers can access (use hasRole for Spatie permission compatibility)
+        if (!$user->hasRole('buyer')) {
             return redirect()->back()->with('error', 'Fitur ini hanya tersedia untuk Buyer. Seller tidak dapat membeli note. Jika ingin membeli, silakan buat akun Buyer dengan email berbeda.');
         }
 

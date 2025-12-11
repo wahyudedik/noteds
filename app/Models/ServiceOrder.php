@@ -62,6 +62,16 @@ class ServiceOrder extends Model
         return $this->hasMany(WorkSubmission::class);
     }
 
+    public function serviceQuotes(): HasMany
+    {
+        return $this->hasMany(ServiceQuote::class);
+    }
+
+    public function quotes(): HasMany
+    {
+        return $this->hasMany(ServiceQuote::class);
+    }
+
     public function latestWorkSubmission(): BelongsTo|null
     {
         return $this->belongsTo(WorkSubmission::class, 'id', 'service_order_id')

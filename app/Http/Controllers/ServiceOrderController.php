@@ -24,6 +24,28 @@ class ServiceOrderController extends Controller
         return view('studio.orders.index', compact('orders'));
     }
 
+    public function pendingApprovals(): View
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // Only buyers can see pending approvals
+        if ($user->hasRole('seller') || $user->hasRole('admin')) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Get orders where the buyer is waiting for vendor work submission for approval
+        // Filter: buyer's orders + accepted quote + work submitted awaiting approval
+        $orders = ServiceOrder::where('user_id', $user->id)
+            ->where('work_status', 'submitted')
+            ->where('buyer_approval_status', 'pending')
+            ->with('assignedVendor', 'workSubmissions')
+            ->latest()
+            ->paginate(12);
+
+        return view('studio.orders.pending-approvals', compact('orders'));
+    }
+
     public function create(): View
     {
         return view('studio.orders.create');
