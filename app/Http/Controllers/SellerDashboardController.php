@@ -64,6 +64,7 @@ class SellerDashboardController extends Controller
 
         // Get recent sales
         $recentSales = $sellerTransactions
+            ->whereNotNull('note_id')  // Only include transactions with notes
             ->with(['note', 'buyer'])
             ->latest('created_at')
             ->take(10)

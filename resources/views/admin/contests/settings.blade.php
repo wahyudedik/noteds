@@ -41,7 +41,7 @@
                 <!-- Enable/Disable Contests -->
                 <div>
                     <label class="flex items-center">
-                        <input type="checkbox" name="enabled" value="on" {{ $setting->enabled ? 'checked' : '' }}
+                        <input type="checkbox" name="enabled" value="1" {{ $setting->enabled ? 'checked' : '' }}
                             class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                         <span class="ml-3 text-sm font-medium text-gray-700">Enable Contest Feature</span>
                     </label>
@@ -93,7 +93,7 @@
                 <!-- KYC Requirement -->
                 <div>
                     <label class="flex items-center">
-                        <input type="checkbox" name="require_kyc" value="on"
+                        <input type="checkbox" name="require_kyc" value="1"
                             {{ $setting->require_kyc ? 'checked' : '' }}
                             class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                         <span class="ml-3 text-sm font-medium text-gray-700">Require KYC Verification</span>
@@ -105,7 +105,7 @@
                 <!-- Auto Distribute Prizes -->
                 <div>
                     <label class="flex items-center">
-                        <input type="checkbox" name="auto_distribute_prizes" value="on"
+                        <input type="checkbox" name="auto_distribute_prizes" value="1"
                             {{ $setting->auto_distribute_prizes ? 'checked' : '' }}
                             class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                         <span class="ml-3 text-sm font-medium text-gray-700">Auto-Distribute Prizes</span>

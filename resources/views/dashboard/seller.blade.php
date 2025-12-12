@@ -196,16 +196,18 @@
                             </thead>
                             <tbody class="divide-y">
                                 @foreach ($recentSales as $sale)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 text-gray-900">{{ $sale->note->title }}</td>
-                                        <td class="px-4 py-3 text-gray-600">{{ $sale->buyer->name }}</td>
-                                        <td class="px-4 py-3 font-semibold text-green-600">
-                                            {{ currency($sale->amount, $userCurrency, 'IDR') }}
-                                        </td>
-                                        <td class="px-4 py-3 text-gray-600">
-                                            {{ $sale->created_at->format('d M Y') }}
-                                        </td>
-                                    </tr>
+                                    @if ($sale->note && $sale->buyer)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-4 py-3 text-gray-900">{{ $sale->note->title }}</td>
+                                            <td class="px-4 py-3 text-gray-600">{{ $sale->buyer->name }}</td>
+                                            <td class="px-4 py-3 font-semibold text-green-600">
+                                                {{ currency($sale->amount, $userCurrency, 'IDR') }}
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-600">
+                                                {{ $sale->created_at->format('d M Y') }}
+                                            </td>
+                                        </tr>
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>

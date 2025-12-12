@@ -45,7 +45,28 @@ class AdminContestSettingController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
+        // First, convert checkbox values before validation
+        $data = $request->all();
+
+        // Convert checkboxes: if checkbox is present, set to true (value="1"), otherwise false
+        $data['enabled'] = $request->has('enabled') ? true : false;
+        $data['require_kyc'] = $request->has('require_kyc') ? true : false;
+        $data['auto_distribute_prizes'] = $request->has('auto_distribute_prizes') ? true : false;
+
+        // Now validate with proper boolean values
+        $validated = [
+            'enabled' => $data['enabled'],
+            'platform_fee_percentage' => $data['platform_fee_percentage'] ?? null,
+            'terms_and_conditions' => $data['terms_and_conditions'] ?? null,
+            'approval_guidelines' => $data['approval_guidelines'] ?? null,
+            'max_contests_per_buyer' => $data['max_contests_per_buyer'] ?? null,
+            'max_prize_amount' => $data['max_prize_amount'] ?? null,
+            'require_kyc' => $data['require_kyc'],
+            'auto_distribute_prizes' => $data['auto_distribute_prizes'],
+        ];
+
+        // Validate each field
+        $rules = [
             'enabled' => 'required|boolean',
             'platform_fee_percentage' => 'required|numeric|min:0|max:100',
             'terms_and_conditions' => 'nullable|string',
@@ -54,12 +75,17 @@ class AdminContestSettingController extends Controller
             'max_prize_amount' => 'nullable|numeric|min:0',
             'require_kyc' => 'required|boolean',
             'auto_distribute_prizes' => 'required|boolean',
-        ]);
+        ];
 
-        // Convert string boolean values to actual booleans
-        $validated['enabled'] = $request->has('enabled') && $request->enabled === 'on' ? true : false;
-        $validated['require_kyc'] = $request->has('require_kyc') && $request->require_kyc === 'on' ? true : false;
-        $validated['auto_distribute_prizes'] = $request->has('auto_distribute_prizes') && $request->auto_distribute_prizes === 'on' ? true : false;
+        $validator = validator($validated, $rules);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $validated = $validator->validated();
 
         $setting = ContestSetting::first();
 
