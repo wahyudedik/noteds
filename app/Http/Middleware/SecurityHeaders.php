@@ -62,6 +62,7 @@ class SecurityHeaders
             "img-src 'self' data: blob: " . $this->getAllowedImageSources(),
             "font-src 'self' data: https://fonts.bunny.net",
             "connect-src 'self' " . $this->getAllowedConnectSources(),
+            "frame-src 'self' " . $this->getAllowedFrameSources(),
             "media-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
@@ -105,6 +106,11 @@ class SecurityHeaders
         // cdnjs.cloudflare.com (Prism, PDF.js, Model Viewer, etc.)
         $sources[] = 'https://cdnjs.cloudflare.com';
         $sources[] = 'https://ajax.googleapis.com';
+        
+        // Google Tag Manager & Google Analytics
+        $sources[] = 'https://www.googletagmanager.com';
+        $sources[] = 'https://www.google-analytics.com';
+        $sources[] = 'https://*.google-analytics.com';
 
         // CDN URLs
         if ($cdnUrl = config('filesystems.disks.public.url')) {
@@ -155,6 +161,23 @@ class SecurityHeaders
     }
 
     /**
+     * Get allowed frame sources (iframes)
+     */
+    private function getAllowedFrameSources(): string
+    {
+        $sources = [];
+
+        // Midtrans Snap iframe
+        if (config('services.midtrans.is_production', false)) {
+            $sources[] = 'https://app.midtrans.com';
+        } else {
+            $sources[] = 'https://app.sandbox.midtrans.com';
+        }
+
+        return implode(' ', $sources);
+    }
+
+    /**
      * Get allowed image sources
      */
     private function getAllowedImageSources(): string
@@ -195,6 +218,12 @@ class SecurityHeaders
         // Cloudflare Insights & Analytics
         $sources[] = 'https://*.cloudflare.com';
         $sources[] = 'https://cloudflareinsights.com';
+        $sources[] = 'https://*.cloudflareinsights.com';
+        
+        // Google Tag Manager & Analytics
+        $sources[] = 'https://www.googletagmanager.com';
+        $sources[] = 'https://www.google-analytics.com';
+        $sources[] = 'https://*.google-analytics.com';
 
         // CDN URLs
         if ($cdnUrl = config('filesystems.disks.public.url')) {
