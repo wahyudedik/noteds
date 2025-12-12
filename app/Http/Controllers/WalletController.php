@@ -327,7 +327,8 @@ class WalletController extends Controller
             }
 
             // Log audit trail for security compliance
-            Log::info('✅ Webhook processed successfully', 
+            Log::info(
+                '✅ Webhook processed successfully',
                 MidtransWebhookSecurityService::auditLog($request, $notification, 'success')
             );
 
@@ -339,7 +340,8 @@ class WalletController extends Controller
 
             // Log failed webhook attempt for security
             if (isset($notification)) {
-                Log::warning('⚠️ Webhook security check failed', 
+                Log::warning(
+                    '⚠️ Webhook security check failed',
                     MidtransWebhookSecurityService::auditLog($request, $notification, 'failed')
                 );
             }

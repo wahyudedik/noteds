@@ -170,7 +170,7 @@ class MidtransWebhookSecurityService
 
             throw new \Exception(
                 "Amount mismatch for {$orderId}. " .
-                "Expected: {$transaction->amount}, Received: {$grossAmount}"
+                    "Expected: {$transaction->amount}, Received: {$grossAmount}"
             );
         }
 
@@ -200,7 +200,7 @@ class MidtransWebhookSecurityService
 
             throw new \Exception(
                 "Webhook rate limit exceeded for {$orderId}. " .
-                "Please try again in an hour."
+                    "Please try again in an hour."
             );
         }
 

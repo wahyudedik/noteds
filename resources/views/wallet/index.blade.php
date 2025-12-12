@@ -421,52 +421,53 @@
                 // Auto-refresh wallet data every 10 seconds if there are pending transactions
                 function checkAndRefreshWallet() {
                     const hasPendingTransactions = document.querySelector('td:has(span.text-yellow-700)');
-                    
+
                     if (hasPendingTransactions) {
                         fetch(window.location.href, {
-                            method: 'GET',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        })
-                        .then(response => response.text())
-                        .then(html => {
-                            const parser = new DOMParser();
-                            const newDoc = parser.parseFromString(html, 'text/html');
-                            
-                            // Update wallet balance
-                            const newBalance = newDoc.querySelector('.text-5xl.font-bold.text-gray-900');
-                            const currentBalance = document.querySelector('.text-5xl.font-bold.text-gray-900');
-                            
-                            if (newBalance && currentBalance && newBalance.textContent !== currentBalance.textContent) {
-                                currentBalance.textContent = newBalance.textContent;
-                                // Show a subtle notification
-                                showRefreshNotification('Wallet balance updated!');
-                            }
-                            
-                            // Update transaction table
-                            const newTable = newDoc.querySelector('table');
-                            const currentTable = document.querySelector('table');
-                            if (newTable && currentTable) {
-                                const newBody = newTable.querySelector('tbody');
-                                const currentBody = currentTable.querySelector('tbody');
-                                if (newBody && currentBody && newBody.innerHTML !== currentBody.innerHTML) {
-                                    currentBody.innerHTML = newBody.innerHTML;
-                                    showRefreshNotification('Transaction status updated!');
+                                method: 'GET',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
                                 }
-                            }
-                        })
-                        .catch(error => console.error('Refresh error:', error));
+                            })
+                            .then(response => response.text())
+                            .then(html => {
+                                const parser = new DOMParser();
+                                const newDoc = parser.parseFromString(html, 'text/html');
+
+                                // Update wallet balance
+                                const newBalance = newDoc.querySelector('.text-5xl.font-bold.text-gray-900');
+                                const currentBalance = document.querySelector('.text-5xl.font-bold.text-gray-900');
+
+                                if (newBalance && currentBalance && newBalance.textContent !== currentBalance.textContent) {
+                                    currentBalance.textContent = newBalance.textContent;
+                                    // Show a subtle notification
+                                    showRefreshNotification('Wallet balance updated!');
+                                }
+
+                                // Update transaction table
+                                const newTable = newDoc.querySelector('table');
+                                const currentTable = document.querySelector('table');
+                                if (newTable && currentTable) {
+                                    const newBody = newTable.querySelector('tbody');
+                                    const currentBody = currentTable.querySelector('tbody');
+                                    if (newBody && currentBody && newBody.innerHTML !== currentBody.innerHTML) {
+                                        currentBody.innerHTML = newBody.innerHTML;
+                                        showRefreshNotification('Transaction status updated!');
+                                    }
+                                }
+                            })
+                            .catch(error => console.error('Refresh error:', error));
                     }
                 }
 
                 function showRefreshNotification(message) {
                     // Create a toast notification
                     const toast = document.createElement('div');
-                    toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
+                    toast.className =
+                        'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
                     toast.textContent = message;
                     document.body.appendChild(toast);
-                    
+
                     setTimeout(() => {
                         toast.remove();
                     }, 3000);
@@ -486,6 +487,7 @@
                         opacity: 0;
                         transform: translateY(20px);
                     }
+
                     to {
                         opacity: 1;
                         transform: translateY(0);
