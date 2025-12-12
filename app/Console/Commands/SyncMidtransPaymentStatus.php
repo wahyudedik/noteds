@@ -6,6 +6,7 @@ use App\Models\Transaction;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Midtrans\Config;
 use Midtrans\Transaction as MidtransTransaction;
 
 class SyncMidtransPaymentStatus extends Command
@@ -35,6 +36,13 @@ class SyncMidtransPaymentStatus extends Command
                 $this->error('❌ Midtrans Server Key is not configured!');
                 return self::FAILURE;
             }
+
+            // Initialize Midtrans Config
+            Config::$serverKey = config('services.midtrans.server_key');
+            Config::$clientKey = config('services.midtrans.client_key');
+            Config::$isProduction = config('services.midtrans.is_production', false);
+            Config::$isSanitized = true;
+            Config::$is3ds = true;
 
             $orderId = $this->argument('order_id');
             $syncAll = $this->option('all');
