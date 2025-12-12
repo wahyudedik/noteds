@@ -106,7 +106,9 @@ class SyncMidtransPaymentStatus extends Command
 
                 // Process the payment
                 DB::transaction(function () use ($transaction, $grossAmount, $orderId, $transactionStatus) {
-                    $transaction->lockForUpdate()->refresh();
+                    // Refresh and lock the transaction
+                    $transaction->refresh();
+                    $transaction->lockForUpdate();
 
                     if ($transaction->status === 'success') {
                         $this->info('✅ Transaction already processed by another process.');
