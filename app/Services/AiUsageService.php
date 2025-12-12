@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AiFeatureUsage;
 use App\Models\Setting;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use Carbon\Carbon;
@@ -93,6 +94,19 @@ class AiUsageService
                 $user->save();
 
                 $chargedAmount = $amountToCharge;
+
+                // Create transaction record with currency tracking
+                Transaction::create([
+                    'user_id' => $user->id,
+                    'type' => 'ai_feature',
+                    'amount' => $chargedAmount,
+                    'currency' => $currency,
+                    'original_amount' => $decision['original_amount'] ?? (float) Setting::getAiFeaturePrice($feature),
+                    'original_currency' => $decision['original_currency'] ?? $this->currencyService->getBaseCurrency(),
+                    'exchange_rate' => $decision['exchange_rate'] ?? 1,
+                    'description' => "AI Feature: {$feature}",
+                    'metadata' => ! empty($metadata) ? $metadata : null,
+                ]);
             }
 
             AiFeatureUsage::create([
@@ -161,43 +175,55 @@ class AiUsageService
      */
     protected function buildPaidDecision(User $user, string $feature, array $summary): array
     {
-        $price = Setting::getAiFeaturePrice($feature);
-        $currency = $summary['currency'] ?? $this->currencyService->getBaseCurrency();
+        $basePrice = Setting::getAiFeaturePrice($feature);
+        $userCurrency = $summary['currency'] ?? $this->currencyService->getBaseCurrency();
+        $baseCurrency = $this->currencyService->getBaseCurrency();
 
-        if ($price <= 0) {
+        if ($basePrice <= 0) {
             return [
                 'allowed' => true,
                 'is_paid' => false,
                 'amount' => 0.0,
-                'currency' => $currency,
+                'currency' => $userCurrency,
                 'usage_summary' => $summary,
             ];
+        }
+
+        // Convert price from base currency to user's currency
+        $priceInUserCurrency = $basePrice;
+        $exchangeRate = 1;
+        if ($userCurrency !== $baseCurrency) {
+            $exchangeRate = $this->currencyService->getExchangeRate($baseCurrency, $userCurrency);
+            $priceInUserCurrency = $basePrice * $exchangeRate;
         }
 
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $user->id],
             [
                 'balance' => $user->wallet_balance ?? 0,
-                'currency' => $currency,
+                'currency' => $userCurrency,
             ]
         );
 
-        if ($wallet->currency !== $currency) {
-            $wallet->currency = $currency;
+        if ($wallet->currency !== $userCurrency) {
+            $wallet->currency = $userCurrency;
             $wallet->save();
         }
 
-        $allowed = (float) $wallet->balance >= $price;
+        // Compare wallet balance against converted price (both in user's currency)
+        $allowed = (float) $wallet->balance >= $priceInUserCurrency;
 
         return [
             'allowed' => $allowed,
             'is_paid' => true,
-            'amount' => $price,
-            'currency' => $currency,
+            'amount' => $priceInUserCurrency,
+            'currency' => $userCurrency,
+            'original_amount' => $basePrice,
+            'original_currency' => $baseCurrency,
+            'exchange_rate' => $exchangeRate,
             'usage_summary' => $summary,
             'wallet_balance' => (float) $wallet->balance,
             'message' => $allowed ? null : 'Saldo wallet kamu tidak mencukupi untuk menggunakan fitur AI ini.',
         ];
     }
 }
-

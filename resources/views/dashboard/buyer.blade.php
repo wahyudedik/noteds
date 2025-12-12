@@ -25,7 +25,7 @@
                         <div>
                             <p class="text-gray-600 text-sm font-medium">Total Spent</p>
                             <p class="text-2xl font-bold text-gray-900 mt-2">
-                                Rp {{ number_format($metrics['total_spent'], 0, ',', '.') }}
+                                {{ $metrics['total_spent_display'] }}
                             </p>
                         </div>
                         <div class="text-blue-500 text-3xl">
@@ -133,7 +133,7 @@
                         <div class="border-l-4 border-yellow-500 pl-4">
                             <p class="text-gray-600 text-sm">Referral Earnings</p>
                             <p class="text-2xl font-bold text-gray-900 mt-1">
-                                Rp {{ number_format($referralStats['referral_earnings'], 0, ',', '.') }}
+                                {{ currency($referralStats['referral_earnings'], $userCurrency, 'IDR') }}
                             </p>
                         </div>
                     </div>

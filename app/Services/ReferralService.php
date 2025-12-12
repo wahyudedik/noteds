@@ -45,25 +45,49 @@ class ReferralService
             return null;
         }
 
+        $currencyService = app(\App\Services\CurrencyService::class);
         $baseCurrency = config('currency.base_currency', 'IDR');
+        $referrerCurrency = $currencyService->getUserCurrency($referrer);
 
         try {
             DB::beginTransaction();
 
             $signupReward = $this->getSignupReward();
 
+            // Convert reward to referrer's currency if different from base
+            $rewardInReferrerCurrency = $signupReward;
+            $exchangeRate = 1;
+            if ($referrerCurrency !== $baseCurrency) {
+                $rewardInReferrerCurrency = $currencyService->convertFromBase($signupReward, $referrerCurrency);
+                $exchangeRate = $currencyService->getExchangeRate($baseCurrency, $referrerCurrency);
+            }
+
             // Create referral record
             $referral = Referral::create([
                 'referrer_id' => $referrer->id,
                 'referred_id' => $referredUser->id,
                 'reward_type' => 'signup',
-                'reward_amount' => $signupReward,
+                'reward_amount' => $rewardInReferrerCurrency,
                 'status' => 'pending',
                 'notes' => 'Signup bonus',
             ]);
 
+            // Create transaction record for audit trail
+            \App\Models\Transaction::create([
+                'buyer_id' => $referrer->id,
+                'seller_id' => null,
+                'amount' => $rewardInReferrerCurrency,
+                'currency' => $referrerCurrency,
+                'original_amount' => $signupReward,
+                'original_currency' => $baseCurrency,
+                'exchange_rate' => $exchangeRate,
+                'status' => 'success',
+                'payment_method' => 'referral_bonus',
+                'notes' => 'Referral signup bonus from ' . $referredUser->name,
+            ]);
+
             // Add reward to referrer's wallet immediately
-            $referrer->increment('wallet_balance', $signupReward);
+            $referrer->increment('wallet_balance', $rewardInReferrerCurrency);
 
             // Sync Wallet model with user wallet_balance
             $referrerWallet = \App\Models\Wallet::firstOrCreate(

@@ -21,11 +21,18 @@ return [
     |
     | List of currencies that can be selected by end users. Make sure matching
     | exchange rates are configured in the admin exchange rate management UI.
+    | 
+    | Mapped by locale:
+    | - 'en' (English) => USD
+    | - 'id' (Indonesian) => IDR
+    | - 'ar' (Arabic) => AED
     |
     */
     'supported_currencies' => [
         'IDR',
         'USD',
+        'AED',
+        'SAR',
     ],
 
     /*
@@ -40,4 +47,3 @@ return [
     */
     'cache_ttl' => env('CURRENCY_CACHE_TTL', 300),
 ];
-

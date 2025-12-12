@@ -16,14 +16,38 @@ class ExchangeRateSeeder extends Seeder
             [
                 'from_currency' => 'USD',
                 'to_currency' => 'IDR',
-                'rate' => 15500.0000,
-                'notes' => 'Seeded USD→IDR rate for testing multi-currency flows.',
+                'rate' => 16652.50,
+                'notes' => 'Updated Dec 12, 2025 - Current market rate USD→IDR.',
             ],
             [
                 'from_currency' => 'IDR',
                 'to_currency' => 'USD',
-                'rate' => round(1 / 15500, 6),
-                'notes' => 'Seeded IDR→USD rate derived from base USD rate.',
+                'rate' => round(1 / 16652.50, 8),
+                'notes' => 'Updated Dec 12, 2025 - Inverse rate IDR→USD.',
+            ],
+            [
+                'from_currency' => 'USD',
+                'to_currency' => 'SAR',
+                'rate' => 3.75,
+                'notes' => 'Standard rate USD→SAR.',
+            ],
+            [
+                'from_currency' => 'SAR',
+                'to_currency' => 'USD',
+                'rate' => round(1 / 3.75, 6),
+                'notes' => 'Inverse rate SAR→USD.',
+            ],
+            [
+                'from_currency' => 'IDR',
+                'to_currency' => 'SAR',
+                'rate' => 4437.60,
+                'notes' => 'Updated Dec 12, 2025 - Current market rate IDR→SAR.',
+            ],
+            [
+                'from_currency' => 'SAR',
+                'to_currency' => 'IDR',
+                'rate' => round(1 / 4437.60, 8),
+                'notes' => 'Updated Dec 12, 2025 - Inverse rate SAR→IDR.',
             ],
             [
                 'from_currency' => 'USD',
@@ -34,6 +58,12 @@ class ExchangeRateSeeder extends Seeder
             [
                 'from_currency' => 'IDR',
                 'to_currency' => 'IDR',
+                'rate' => 1,
+                'notes' => 'Identity rate to simplify conversions.',
+            ],
+            [
+                'from_currency' => 'SAR',
+                'to_currency' => 'SAR',
                 'rate' => 1,
                 'notes' => 'Identity rate to simplify conversions.',
             ],
@@ -54,5 +84,3 @@ class ExchangeRateSeeder extends Seeder
         }
     }
 }
-
-

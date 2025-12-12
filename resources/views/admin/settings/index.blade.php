@@ -2,6 +2,13 @@
 
 @section('title', __('messages.settings_admin'))
 
+@php
+    $currencyService = app(\App\Services\CurrencyService::class);
+    $userCurrency = $currencyService->getDefaultCurrencyForLocale();
+    $currencyInfo = \App\Helpers\CurrencyHelper::getCurrencyInfo($userCurrency);
+    $currencySymbol = $currencyInfo['symbol'] ?? $userCurrency;
+@endphp
+
 @section('content')
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
@@ -235,7 +242,7 @@
                                     </label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span class="text-gray-500 sm:text-sm">Rp</span>
+                                            <span class="text-gray-500 sm:text-sm">{{ $currencySymbol }}</span>
                                         </div>
                                         <input type="number" name="min_price_default" id="min_price_default"
                                             value="{{ old('min_price_default', $minPriceDefault) }}" min="0"
@@ -291,7 +298,7 @@
                                         <div class="relative">
                                             <div
                                                 class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <span class="text-gray-500 sm:text-sm">Rp</span>
+                                                <span class="text-gray-500 sm:text-sm">{{ $currencySymbol }}</span>
                                             </div>
                                             <input type="number" name="min_price" min="0" step="1000"
                                                 required placeholder="75000"
@@ -339,7 +346,8 @@
                                                             <div class="relative">
                                                                 <div
                                                                     class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                                    <span class="text-gray-500 sm:text-xs">Rp</span>
+                                                                    <span
+                                                                        class="text-gray-500 sm:text-xs">{{ $currencySymbol }}</span>
                                                                 </div>
                                                                 <input type="number" name="min_price"
                                                                     value="{{ old('min_price_' . $rule['tag_slug'], $rule['min_price']) }}"
@@ -607,12 +615,12 @@
                                     <div>
                                         <label for="premium_price_monthly"
                                             class="block text-sm font-medium text-gray-700 mb-2">
-                                            Monthly Price (Rp) <span class="text-red-500">*</span>
+                                            Monthly Price ({{ $userCurrency }}) <span class="text-red-500">*</span>
                                         </label>
                                         <div class="relative">
                                             <div
                                                 class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <span class="text-gray-500 text-sm">Rp</span>
+                                                <span class="text-gray-500 text-sm">{{ $currencySymbol }}</span>
                                             </div>
                                             <input type="number" name="premium_price_monthly" id="premium_price_monthly"
                                                 value="{{ old('premium_price_monthly', $premiumPrice) }}" min="0"
@@ -1164,12 +1172,12 @@
                                     <div>
                                         <label for="referral_reward_signup"
                                             class="block text-sm font-medium text-gray-700 mb-2">
-                                            Signup Reward (Rp) <span class="text-red-500">*</span>
+                                            Signup Reward ({{ $userCurrency }}) <span class="text-red-500">*</span>
                                         </label>
                                         <div class="relative">
                                             <div
                                                 class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <span class="text-gray-500 text-sm">Rp</span>
+                                                <span class="text-gray-500 text-sm">{{ $currencySymbol }}</span>
                                             </div>
                                             <input type="number" name="referral_reward_signup"
                                                 id="referral_reward_signup"
@@ -1296,12 +1304,13 @@
                                         <div>
                                             <label for="referral_min_amount_to_send"
                                                 class="block text-sm font-medium text-gray-700 mb-2">
-                                                Minimum Amount to Send (Rp) <span class="text-red-500">*</span>
+                                                Minimum Amount to Send ({{ $userCurrency }}) <span
+                                                    class="text-red-500">*</span>
                                             </label>
                                             <div class="relative">
                                                 <div
                                                     class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span class="text-gray-500 text-sm">Rp</span>
+                                                    <span class="text-gray-500 text-sm">{{ $currencySymbol }}</span>
                                                 </div>
                                                 <input type="number" name="referral_min_amount_to_send"
                                                     id="referral_min_amount_to_send"
@@ -1396,7 +1405,8 @@
                                                         <div class="relative">
                                                             <div
                                                                 class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                                <span class="text-gray-500 text-sm">Rp</span>
+                                                                <span
+                                                                    class="text-gray-500 text-sm">{{ $currencySymbol }}</span>
                                                             </div>
                                                             <input type="number"
                                                                 name="featured_price[{{ $location }}][{{ $duration }}]"
@@ -2417,14 +2427,15 @@
                     // Premium price preview
                     const priceInput = document.getElementById('premium_price_monthly');
                     const pricePreview = document.getElementById('price-preview');
+                    const currencySymbol = '{{ $currencySymbol }}';
 
                     function updatePricePreview() {
                         const price = parseFloat(priceInput.value) || 0;
                         if (price >= 1000) {
                             const kPrice = price / 1000;
-                            pricePreview.textContent = 'Rp' + Math.round(kPrice) + 'k/mo';
+                            pricePreview.textContent = currencySymbol + Math.round(kPrice) + 'k/mo';
                         } else {
-                            pricePreview.textContent = 'Rp' + price.toLocaleString('id-ID') + '/mo';
+                            pricePreview.textContent = currencySymbol + price.toLocaleString('id-ID') + '/mo';
                         }
                     }
 

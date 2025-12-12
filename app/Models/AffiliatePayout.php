@@ -15,6 +15,10 @@ class AffiliatePayout extends Model
     protected $fillable = [
         'affiliate_id',
         'amount',
+        'currency',
+        'original_amount',
+        'original_currency',
+        'exchange_rate',
         'status',
         'payout_method',
         'payout_reference',

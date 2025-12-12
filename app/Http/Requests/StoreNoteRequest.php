@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Setting;
+use App\Services\CurrencyService;
 use Illuminate\Support\Str;
 
 class StoreNoteRequest extends FormRequest
@@ -209,8 +210,19 @@ class StoreNoteRequest extends FormRequest
                     }
                 }
 
-                if ($price < $minPrice) {
-                    $formattedMinPrice = 'Rp ' . number_format($minPrice, 0, ',', '.');
+                // Convert minimum price to user's currency for validation
+                $currencyService = app(\App\Services\CurrencyService::class);
+                $user = auth()->user();
+                $userCurrency = $currencyService->getUserCurrency($user);
+                $baseCurrency = $currencyService->getBaseCurrency();
+
+                $minPriceInUserCurrency = $minPrice;
+                if ($userCurrency !== $baseCurrency) {
+                    $minPriceInUserCurrency = $currencyService->convertFromBase($minPrice, $userCurrency);
+                }
+
+                if ($price < $minPriceInUserCurrency) {
+                    $formattedMinPrice = currency($minPriceInUserCurrency);
                     $validator->errors()->add('price', __('messages.price_below_minimum', [
                         'amount' => $formattedMinPrice,
                     ]));

@@ -21,6 +21,39 @@ class CurrencyService
         return $this->baseCurrency;
     }
 
+    /**
+     * Get default currency for a specific locale
+     * Maps language → currency (en→USD, id→IDR, ar→AED)
+     * Also returns timezone for that locale
+     */
+    public function getDefaultCurrencyForLocale(?string $locale = null): string
+    {
+        $locale = $locale ?? app()->getLocale();
+
+        return match ($locale) {
+            'en' => 'USD',
+            'id' => 'IDR',
+            'ar' => 'AED',
+            default => $this->baseCurrency,
+        };
+    }
+
+    /**
+     * Get default timezone for a specific locale
+     * Maps language → timezone
+     */
+    public function getDefaultTimezoneForLocale(?string $locale = null): string
+    {
+        $locale = $locale ?? app()->getLocale();
+
+        return match ($locale) {
+            'en' => 'UTC',
+            'id' => 'Asia/Jakarta',
+            'ar' => 'Asia/Riyadh',
+            default => 'UTC',
+        };
+    }
+
     public function getSupportedCurrencies(): array
     {
         return config('currency.supported_currencies', [$this->baseCurrency]);
@@ -99,8 +132,8 @@ class CurrencyService
             }
 
             $fallbacks = [
-                'USD' => ['IDR' => 15000],
-                'IDR' => ['USD' => 1 / 15000],
+                'USD' => ['IDR' => 15500],
+                'IDR' => ['USD' => 1 / 15500],
             ];
 
             if (isset($fallbacks[$from][$to])) {
@@ -115,6 +148,10 @@ class CurrencyService
         });
     }
 
+    public function getExchangeRate(string $from, string $to): float
+    {
+        return $this->getRate($from, $to);
+    }
     protected function round(float $amount, string $currency, ?int $precision = null): float
     {
         $precision ??= match ($currency) {

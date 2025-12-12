@@ -20,7 +20,7 @@ class FeaturedNoteController extends Controller
     public function create(Request $request): View
     {
         $user = auth()->user();
-        
+
         // Get user's notes that are public and active
         $notes = Note::where('user_id', $user->id)
             ->where('is_public', true)
@@ -90,12 +90,12 @@ class FeaturedNoteController extends Controller
             ->where(function ($query) {
                 $query->where(function ($q) {
                     $q->where('end_date', '>=', now())
-                      ->orWhereNull('end_date');
+                        ->orWhereNull('end_date');
                 })
-                ->orWhere(function ($q) {
-                    $q->whereNull('start_date')
-                      ->whereNull('end_date');
-                });
+                    ->orWhere(function ($q) {
+                        $q->whereNull('start_date')
+                            ->whereNull('end_date');
+                    });
             })
             ->first();
 
@@ -108,21 +108,21 @@ class FeaturedNoteController extends Controller
         $locations = $request->has('locations') && is_array($request->locations) && count($request->locations) > 0
             ? $request->locations
             : [$validated['location']];
-        
+
         // Calculate total price for all locations
         $totalPrice = 0;
         foreach ($locations as $loc) {
             $totalPrice += $this->calculatePrice($loc, $validated['duration_days']);
         }
-        
+
         // Apply bulk discount if multiple locations
         $discountPercent = 0;
         if (count($locations) > 1) {
             $discountPercent = min(20, count($locations) * 5); // 5% per additional location, max 20%
         }
-        
+
         $finalPrice = $totalPrice * (1 - $discountPercent / 100);
-        
+
         // Check if custom duration
         $isCustomDuration = !in_array($validated['duration_days'], [7, 14, 30]);
 
@@ -152,8 +152,8 @@ class FeaturedNoteController extends Controller
             // All users now have premium access, but featured notes still require admin approval for quality control
             $autoApprove = false; // Changed: All featured notes require admin approval
             $scheduledDate = $request->scheduled_date ? \Carbon\Carbon::parse($request->scheduled_date) : null;
-            
-            DB::transaction(function () use ($user, $wallet, $note, $validated, $finalPrice, $autoApprove, $locations, $discountPercent, $isCustomDuration, $scheduledDate) {
+
+            DB::transaction(function () use ($user, $wallet, $note, $validated, $finalPrice, $autoApprove, $locations, $discountPercent, $isCustomDuration, $scheduledDate, $currencyService, $baseCurrency, $userCurrency) {
                 // Deduct from wallet
                 $wallet->balance -= $finalPrice;
                 $wallet->save();
@@ -184,7 +184,7 @@ class FeaturedNoteController extends Controller
                 // Create featured note(s) for each location
                 foreach ($locations as $index => $location) {
                     $locationPrice = $this->calculatePrice($location, $validated['duration_days']);
-                    
+
                     FeaturedNote::create([
                         'note_id' => $note->id,
                         'user_id' => $user->id,
@@ -204,21 +204,29 @@ class FeaturedNoteController extends Controller
                 }
 
                 // Create transaction record
-                $locationText = count($locations) > 1 
+                $locationText = count($locations) > 1
                     ? implode(', ', $locations) . ' (' . count($locations) . ' lokasi)'
                     : $validated['location'];
-                    
+
+                // Calculate exchange rate if user's currency is different from base
+                $exchangeRate = 1;
+                $convertedAmount = $finalPrice;
+                if ($userCurrency !== $baseCurrency) {
+                    $exchangeRate = $currencyService->getExchangeRate($baseCurrency, $userCurrency);
+                    $convertedAmount = $finalPrice * $exchangeRate;
+                }
+
                 Transaction::create([
                     'buyer_id' => $user->id,
                     'seller_id' => $user->id,
                     'note_id' => $note->id,
-                    'amount' => $finalPrice,
+                    'amount' => $convertedAmount,
                     'commission' => 0,
-                    'currency' => $baseCurrency,
+                    'currency' => $userCurrency,
                     'original_amount' => $finalPrice,
                     'original_currency' => $baseCurrency,
-                    'exchange_rate' => 1,
-                    'platform_fee' => $finalPrice, // Full amount as platform fee for ad
+                    'exchange_rate' => $exchangeRate,
+                    'platform_fee' => $convertedAmount, // Full amount as platform fee for ad
                     'creator_commission' => 0,
                     'status' => $autoApprove ? 'success' : 'pending',
                     'payment_method' => 'wallet',
@@ -242,7 +250,7 @@ class FeaturedNoteController extends Controller
     public function index(): View
     {
         $user = auth()->user();
-        
+
         $featuredNotes = FeaturedNote::where('user_id', $user->id)
             ->with(['note'])
             ->latest()
@@ -257,20 +265,20 @@ class FeaturedNoteController extends Controller
             ->where('start_date', '<=', now())
             ->where('end_date', '>=', now())
             ->count();
-        
+
         $avgCTR = $totalImpressions > 0 ? ($totalClicks / $totalImpressions * 100) : 0;
-        
+
         // Get revenue from featured notes (notes sold after being featured)
         $featuredNoteIds = FeaturedNote::where('user_id', $user->id)
             ->whereNotNull('start_date')
             ->pluck('note_id')
             ->toArray();
-        
+
         $firstFeaturedDate = FeaturedNote::where('user_id', $user->id)
             ->whereNotNull('start_date')
             ->where('status', 'active')
             ->min('start_date');
-        
+
         $revenueFromFeatured = 0;
         if ($firstFeaturedDate && count($featuredNoteIds) > 0) {
             $revenueFromFeatured = \App\Models\Transaction::whereIn('note_id', $featuredNoteIds)
@@ -329,7 +337,7 @@ class FeaturedNoteController extends Controller
     {
         $key = "featured_price_{$location}_{$durationDays}";
         $price = Setting::getSetting($key, 'featured_notes', $this->getDefaultPrice($location, $durationDays));
-        
+
         return (float) $price;
     }
 
@@ -360,7 +368,7 @@ class FeaturedNoteController extends Controller
             $featuredNote->incrementClicks();
             return response()->json(['success' => true]);
         }
-        
+
         return response()->json(['success' => false, 'message' => 'Featured note is not active'], 400);
     }
 
@@ -373,7 +381,7 @@ class FeaturedNoteController extends Controller
             $featuredNote->incrementImpressions();
             return response()->json(['success' => true]);
         }
-        
+
         return response()->json(['success' => false, 'message' => 'Featured note is not active'], 400);
     }
 
@@ -384,7 +392,7 @@ class FeaturedNoteController extends Controller
     {
         $user = auth()->user();
         $format = $request->get('format', 'csv'); // csv or pdf
-        
+
         $featuredNotes = FeaturedNote::where('user_id', $user->id)
             ->with(['note'])
             ->latest()
@@ -399,7 +407,7 @@ class FeaturedNoteController extends Controller
 
             $callback = function () use ($featuredNotes) {
                 $file = fopen('php://output', 'w');
-                
+
                 // CSV Header
                 fputcsv($file, [
                     'Note Title',

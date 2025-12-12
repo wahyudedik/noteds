@@ -2,6 +2,13 @@
 
 @section('title', 'Leaderboard Settings')
 
+@php
+    $currencyService = app(\App\Services\CurrencyService::class);
+    $userCurrency = $currencyService->getDefaultCurrencyForLocale();
+    $currencyInfo = \App\Helpers\CurrencyHelper::getCurrencyInfo($userCurrency);
+    $currencySymbol = $currencyInfo['symbol'] ?? $userCurrency;
+@endphp
+
 @section('content')
     <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-6xl mx-auto">
@@ -243,7 +250,7 @@
                                 </label>
                                 <div class="relative">
                                     <span
-                                        class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">Rp</span>
+                                        class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">{{ $currencySymbol }}</span>
                                     <input type="number"
                                         class="w-full pl-11 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_rank_1') border-red-500 @enderror"
                                         id="monthly_reward_rank_1" name="monthly_reward_rank_1"
@@ -261,7 +268,7 @@
                                 </label>
                                 <div class="relative">
                                     <span
-                                        class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">Rp</span>
+                                        class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">{{ $currencySymbol }}</span>
                                     <input type="number"
                                         class="w-full pl-11 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_rank_2') border-red-500 @enderror"
                                         id="monthly_reward_rank_2" name="monthly_reward_rank_2"
@@ -279,7 +286,7 @@
                                 </label>
                                 <div class="relative">
                                     <span
-                                        class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">Rp</span>
+                                        class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">{{ $currencySymbol }}</span>
                                     <input type="number"
                                         class="w-full pl-11 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_rank_3') border-red-500 @enderror"
                                         id="monthly_reward_rank_3" name="monthly_reward_rank_3"
@@ -297,7 +304,7 @@
                                 </label>
                                 <div class="relative">
                                     <span
-                                        class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">Rp</span>
+                                        class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">{{ $currencySymbol }}</span>
                                     <input type="number"
                                         class="w-full pl-11 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_top_10') border-red-500 @enderror"
                                         id="monthly_reward_top_10" name="monthly_reward_top_10"
@@ -315,7 +322,7 @@
                                 </label>
                                 <div class="relative">
                                     <span
-                                        class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">Rp</span>
+                                        class="absolute left-3 top-2.5 text-gray-600 text-sm font-medium pointer-events-none">{{ $currencySymbol }}</span>
                                     <input type="number"
                                         class="w-full pl-11 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('monthly_reward_top_50') border-red-500 @enderror"
                                         id="monthly_reward_top_50" name="monthly_reward_top_50"

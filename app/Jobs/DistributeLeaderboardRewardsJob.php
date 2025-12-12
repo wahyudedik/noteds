@@ -5,6 +5,8 @@ namespace App\Jobs;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\SharePoint;
+use App\Models\Transaction;
+use App\Services\CurrencyService;
 use Illuminate\Bus\Queueable;
 use App\Models\LeaderboardSetting;
 use App\Models\MonthlyShareReward;
@@ -21,10 +23,12 @@ class DistributeLeaderboardRewardsJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $month;
+    protected $currencyService;
 
     public function __construct($month = null)
     {
         $this->month = $month ?? now()->subMonth()->format('Y-m');
+        $this->currencyService = app(CurrencyService::class);
     }
 
     public function handle()
@@ -59,7 +63,8 @@ class DistributeLeaderboardRewardsJob implements ShouldQueue
 
         DB::transaction(function () use ($leaderboard, $adminUser, $rank1Reward, $rank2Reward, $rank3Reward, $top10Reward, $top50Reward, &$distributedRewards, &$totalAmount) {
             foreach ($leaderboard as $entry) {
-                $userId = $entry['user']->id;
+                $user = $entry['user'];
+                $userId = $user->id;
                 $rank = $entry['rank'];
                 $reward = 0;
 
@@ -76,6 +81,18 @@ class DistributeLeaderboardRewardsJob implements ShouldQueue
                 }
 
                 if ($reward > 0) {
+                    // Get user's currency and base currency
+                    $userCurrency = $this->currencyService->getUserCurrency($user);
+                    $baseCurrency = $this->currencyService->getBaseCurrency();
+
+                    // Convert reward to user's currency
+                    $rewardInUserCurrency = $reward;
+                    $exchangeRate = 1;
+                    if ($userCurrency !== $baseCurrency) {
+                        $exchangeRate = $this->currencyService->getExchangeRate($baseCurrency, $userCurrency);
+                        $rewardInUserCurrency = $reward * $exchangeRate;
+                    }
+
                     $adminWallet = Wallet::firstOrCreate(
                         ['user_id' => $adminUser->id],
                         ['balance' => 0]
@@ -86,27 +103,42 @@ class DistributeLeaderboardRewardsJob implements ShouldQueue
 
                         $userWallet = Wallet::firstOrCreate(
                             ['user_id' => $userId],
-                            ['balance' => 0]
+                            ['balance' => 0, 'currency' => $userCurrency]
                         );
-                        $userWallet->increment('balance', $reward);
+                        if ($userWallet->currency !== $userCurrency) {
+                            $userWallet->currency = $userCurrency;
+                        }
+                        $userWallet->increment('balance', $rewardInUserCurrency);
 
                         MonthlyShareReward::create([
                             'user_id' => $userId,
                             'month' => $this->month,
                             'rank' => $rank,
                             'points' => $entry['total_points'],
-                            'reward_amount' => $reward,
+                            'reward_amount' => $rewardInUserCurrency,
                             'transferred_at' => now(),
+                        ]);
+
+                        // Create transaction record for audit trail
+                        Transaction::create([
+                            'user_id' => $userId,
+                            'type' => 'leaderboard_reward',
+                            'amount' => $rewardInUserCurrency,
+                            'currency' => $userCurrency,
+                            'original_amount' => $reward,
+                            'original_currency' => $baseCurrency,
+                            'exchange_rate' => $exchangeRate,
+                            'description' => "Leaderboard Monthly Reward - Rank {$rank}",
                         ]);
 
                         $distributedRewards[$userId] = [
                             'user' => $entry['user'],
                             'rank' => $rank,
-                            'amount' => $reward,
+                            'amount' => $rewardInUserCurrency,
                         ];
-                        $totalAmount += $reward;
+                        $totalAmount += $rewardInUserCurrency;
 
-                        Log::info("Distributed reward to user {$userId}: Rank {$rank}, Amount {$reward}");
+                        Log::info("Distributed reward to user {$userId}: Rank {$rank}, Amount {$rewardInUserCurrency} {$userCurrency} (Base: {$reward} {$baseCurrency})");
                     } else {
                         Log::warning("Insufficient admin balance for reward distribution. User: {$userId}, Reward: {$reward}");
                     }

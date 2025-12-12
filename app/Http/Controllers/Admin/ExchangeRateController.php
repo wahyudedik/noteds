@@ -17,7 +17,7 @@ class ExchangeRateController extends Controller
         $exchangeRates = ExchangeRate::orderBy('from_currency')
             ->orderBy('to_currency')
             ->get();
-        
+
         return view('admin.exchange-rates.index', compact('exchangeRates'));
     }
 
@@ -35,8 +35,8 @@ class ExchangeRateController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'from_currency' => ['required', 'in:IDR,USD'],
-            'to_currency' => ['required', 'in:IDR,USD', 'different:from_currency'],
+            'from_currency' => ['required', 'in:IDR,USD,AED,SAR'],
+            'to_currency' => ['required', 'in:IDR,USD,AED,SAR', 'different:from_currency'],
             'rate' => ['required', 'numeric', 'min:0.0001'],
             'is_active' => ['boolean'],
             'notes' => ['nullable', 'string', 'max:500'],

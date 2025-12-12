@@ -12,8 +12,14 @@
         {{ $rejectionReason }}
     @endcomponent
 
+    @php
+        $currencyService = app(\App\Services\CurrencyService::class);
+        $userCurrency = $currencyService->getUserCurrency($buyer);
+        $refundDisplay = currency($refundAmount, $userCurrency, 'IDR');
+    @endphp
+
     **Refund Processed:**
-    - Amount Refunded: Rp {{ number_format($refundAmount, 0, ',', '.') }}
+    - Amount Refunded: {{ $refundDisplay }}
     - Status: Returned to your wallet ✓
 
     You have two options:

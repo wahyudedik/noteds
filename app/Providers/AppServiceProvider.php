@@ -11,7 +11,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register CurrencyService as singleton
+        $this->app->singleton('CurrencyService', function ($app) {
+            return new \App\Services\CurrencyService();
+        });
+
+        // Also bind by class name for type hinting
+        $this->app->singleton(\App\Services\CurrencyService::class, function ($app) {
+            return new \App\Services\CurrencyService();
+        });
     }
 
     /**

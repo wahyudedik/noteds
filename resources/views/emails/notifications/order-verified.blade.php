@@ -5,12 +5,19 @@
 
     The order **{{ $order->title }}** has been verified by our admin team and approved for final payment release.
 
+    @php
+        $currencyService = app(\App\Services\CurrencyService::class);
+        $userCurrency = $currencyService->getUserCurrency($notifiable);
+        $paymentAmount = $order->budget * 0.9;
+        $paymentDisplay = currency($paymentAmount, $userCurrency, 'IDR');
+    @endphp
+
     @component('mail::panel')
         **Order Details:**
         - Title: {{ $order->title }}
         - Status: ✓ Verified & Approved
         @if ($isVendor)
-            - Your Payment: Rp {{ number_format($order->budget * 0.9, 0, ',', '.') }} (after 10% platform fee)
+            - Your Payment: {{ $paymentDisplay }} (after 10% platform fee)
         @endif
 
         **Admin Notes:**

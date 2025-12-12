@@ -24,6 +24,22 @@ class CurrencyHelper
             'decimal_separator' => '.',
             'locale' => 'en_US',
         ],
+        'AED' => [
+            'symbol' => 'د.إ',
+            'name' => 'United Arab Emirates Dirham',
+            'decimal_places' => 2,
+            'thousands_separator' => ',',
+            'decimal_separator' => '.',
+            'locale' => 'ar_AE',
+        ],
+        'SAR' => [
+            'symbol' => '﷼',
+            'name' => 'Saudi Riyal',
+            'decimal_places' => 2,
+            'thousands_separator' => ',',
+            'decimal_separator' => '.',
+            'locale' => 'ar_SA',
+        ],
     ];
 
     /**
@@ -57,6 +73,7 @@ class CurrencyHelper
 
     /**
      * Get user's default currency (from session or user preference)
+     * Uses CurrencyService for consistent locale-to-currency mapping
      */
     public static function getDefaultCurrency(): string
     {
@@ -70,15 +87,9 @@ class CurrencyHelper
             return session('currency');
         }
 
-        // Default based on locale
-        $locale = app()->getLocale();
-
-        return match ($locale) {
-            'id' => 'IDR',
-            'ar' => 'USD', // Arabic countries often use USD
-            'en' => 'USD',
-            default => 'IDR', // Default to IDR for Indonesia
-        };
+        // Use CurrencyService for locale-based defaults
+        $currencyService = app(\App\Services\CurrencyService::class);
+        return $currencyService->getDefaultCurrencyForLocale();
     }
 
     /**
@@ -122,17 +133,16 @@ class CurrencyHelper
             }
         }
 
-        // Fallback: use default rates if no database entry
+        // Fallback: use updated default rates if no database entry
         $defaultRates = [
-            'USD' => ['IDR' => 15000], // 1 USD = 15000 IDR (default, should be updated by admin)
+            'USD' => ['IDR' => 15500, 'AED' => 3.67, 'SAR' => 3.75],
+            'IDR' => ['USD' => 1 / 15500, 'AED' => 3.67 / 15500, 'SAR' => 3.75 / 15500],
+            'AED' => ['USD' => 1 / 3.67, 'IDR' => 15500 / 3.67, 'SAR' => 3.75 / 3.67],
+            'SAR' => ['USD' => 1 / 3.75, 'IDR' => 15500 / 3.75, 'AED' => 3.67 / 3.75],
         ];
 
         if (isset($defaultRates[$from][$to])) {
             return $amount * $defaultRates[$from][$to];
-        }
-
-        if (isset($defaultRates[$to][$from])) {
-            return $amount / $defaultRates[$to][$from];
         }
 
         // If no rate found, return original amount

@@ -14,6 +14,10 @@ class Withdraw extends Model
     protected $fillable = [
         'user_id',
         'amount',
+        'currency',
+        'original_amount',
+        'original_currency',
+        'exchange_rate',
         'status',
         'bank_name',
         'account_number',

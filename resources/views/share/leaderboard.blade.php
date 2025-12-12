@@ -202,14 +202,23 @@
             <!-- Monthly Rewards Info -->
             @if ($type === 'monthly')
                 <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                    @php
+                        $currencyService = app(\App\Services\CurrencyService::class);
+                        $userCurrency = $currencyService->getUserCurrency(auth()->user());
+                        $reward1 = currency($settings['monthly_reward_rank_1'], $userCurrency, 'IDR');
+                        $reward2 = currency($settings['monthly_reward_rank_2'], $userCurrency, 'IDR');
+                        $reward3 = currency($settings['monthly_reward_rank_3'], $userCurrency, 'IDR');
+                        $reward4_10 = currency($settings['monthly_reward_top_10'], $userCurrency, 'IDR');
+                        $reward11_50 = currency($settings['monthly_reward_top_50'], $userCurrency, 'IDR');
+                    @endphp
                     <h3 class="text-lg font-semibold text-yellow-900 mb-3">Monthly Rewards</h3>
                     <p class="text-yellow-800 mb-3">Top sharers receive monthly cash rewards:</p>
                     <ul class="space-y-2 text-yellow-800">
-                        <li>🥇 <strong>Rank 1:</strong> Rp {{ number_format($settings['monthly_reward_rank_1']) }}</li>
-                        <li>🥈 <strong>Rank 2:</strong> Rp {{ number_format($settings['monthly_reward_rank_2']) }}</li>
-                        <li>🥉 <strong>Rank 3:</strong> Rp {{ number_format($settings['monthly_reward_rank_3']) }}</li>
-                        <li>🏆 <strong>Rank 4-10:</strong> Rp {{ number_format($settings['monthly_reward_top_10']) }}</li>
-                        <li>⭐ <strong>Rank 11-50:</strong> Rp {{ number_format($settings['monthly_reward_top_50']) }}</li>
+                        <li>🥇 <strong>Rank 1:</strong> {{ $reward1 }}</li>
+                        <li>🥈 <strong>Rank 2:</strong> {{ $reward2 }}</li>
+                        <li>🥉 <strong>Rank 3:</strong> {{ $reward3 }}</li>
+                        <li>🏆 <strong>Rank 4-10:</strong> {{ $reward4_10 }}</li>
+                        <li>⭐ <strong>Rank 11-50:</strong> {{ $reward11_50 }}</li>
                     </ul>
                     <p class="text-sm text-yellow-700 mt-4">Rewards are automatically distributed at the end of each month.
                     </p>

@@ -16,7 +16,7 @@ class SubscriptionController extends Controller
     public function index(): View
     {
         $subscription = auth()->user()->subscription;
-        
+
         return view('subscription.index', compact('subscription'));
     }
 
@@ -24,7 +24,7 @@ class SubscriptionController extends Controller
     {
         // Check if user already has an active or pending subscription
         $existingSubscription = auth()->user()->subscription;
-        
+
         if ($existingSubscription && in_array($existingSubscription->status, ['active', 'pending'])) {
             return redirect()->route('subscription.index')
                 ->with('error', 'You already have a subscription request or active subscription.');
@@ -41,7 +41,7 @@ class SubscriptionController extends Controller
             $wallet->currency = $baseCurrency;
             $wallet->save();
         }
-        
+
         // Sync wallet balance
         if ($wallet->balance != $user->wallet_balance) {
             $wallet->balance = $user->wallet_balance;
@@ -67,7 +67,7 @@ class SubscriptionController extends Controller
             $wallet->currency = $baseCurrency;
             $wallet->save();
         }
-        
+
         // Sync wallet balance
         if ($wallet->balance != $user->wallet_balance) {
             $wallet->balance = $user->wallet_balance;
@@ -92,9 +92,17 @@ class SubscriptionController extends Controller
                 ->with('insufficient_balance', true);
         }
 
-        DB::transaction(function () use ($user, $wallet, $premiumPrice, $baseCurrency) {
+        DB::transaction(function () use ($user, $wallet, $premiumPrice, $baseCurrency, $userCurrency, $currencyService) {
+            // Calculate exchange rate for user's currency
+            $exchangeRate = 1;
+            $premiumInUserCurrency = $premiumPrice;
+            if ($userCurrency !== $baseCurrency) {
+                $exchangeRate = $currencyService->getExchangeRate($baseCurrency, $userCurrency);
+                $premiumInUserCurrency = $premiumPrice * $exchangeRate;
+            }
+
             // Deduct from wallet
-            $wallet->balance -= $premiumPrice;
+            $wallet->balance -= $premiumInUserCurrency;
             $wallet->save();
 
             // Update user wallet_balance
@@ -106,12 +114,12 @@ class SubscriptionController extends Controller
                 'buyer_id' => $user->id,
                 'seller_id' => $user->id, // Self payment
                 'note_id' => null,
-                'amount' => $premiumPrice,
+                'amount' => $premiumInUserCurrency,
                 'commission' => 0,
-                'currency' => $baseCurrency,
+                'currency' => $userCurrency,
                 'original_amount' => $premiumPrice,
                 'original_currency' => $baseCurrency,
-                'exchange_rate' => 1,
+                'exchange_rate' => $exchangeRate,
                 'status' => 'success',
                 'payment_method' => 'wallet',
                 'notes' => 'Premium subscription payment',

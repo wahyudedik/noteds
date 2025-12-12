@@ -20,10 +20,16 @@
 
         <!-- Order Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            @php
+                $currencyService = app(\App\Services\CurrencyService::class);
+                $userCurrency = $currencyService->getUserCurrency(auth()->user());
+                $budgetDisplay = currency($order->budget, $userCurrency, 'IDR');
+                $escrowDisplay = currency($order->escrow_amount, $userCurrency, 'IDR');
+            @endphp
             <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $order->title }}</h1>
             <div class="flex items-center justify-between text-gray-600 text-sm">
-                <span>Budget: <strong>Rp {{ number_format($order->budget, 0, ',', '.') }}</strong></span>
-                <span>Escrow Funded: <strong>Rp {{ number_format($order->escrow_amount, 0, ',', '.') }}</strong></span>
+                <span>Budget: <strong>{{ $budgetDisplay }}</strong></span>
+                <span>Escrow Funded: <strong>{{ $escrowDisplay }}</strong></span>
                 <span
                     class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full">{{ ucfirst(str_replace('_', ' ', $order->status)) }}</span>
             </div>

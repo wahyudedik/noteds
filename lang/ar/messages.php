@@ -40,6 +40,8 @@ return [
     'dashboard_title' => 'لوحة التحكم',
     'currency_option_idr' => 'Rp IDR',
     'currency_option_usd' => '$ USD',
+    'currency_option_aed' => 'د.إ AED',
+    'currency_option_sar' => '﷼ SAR',
     'timezone_option_wib' => 'WIB (جاكرتا)',
     'timezone_option_ast' => 'AST (الرياض)',
     'timezone_option_utc' => 'UTC',
@@ -1765,7 +1767,7 @@ return [
 
     // Note selling
     'already_sold' => 'تم البيع بالفعل',
-    
+
     // Identity Verification (KYC)
     'ktp_upload' => 'رفع بطاقة الهوية (JPG/PNG/PDF)',
     'ktp_upload_help' => 'التنسيق: JPG أو PNG أو PDF. الحد الأقصى 5 ميجابايت.',
@@ -1787,7 +1789,7 @@ return [
     'reject_verification' => 'رفض التحقق',
     'verification_notes' => 'ملاحظات التحقق',
     'verification_notes_placeholder' => 'أضف ملاحظات حول هذا التحقق...',
-    
+
     // Studio (Service Orders)
     'studio' => 'الاستوديو',
     'studio_title' => 'الاستوديو — الخدمات الإبداعية',
@@ -1853,7 +1855,7 @@ return [
     'studio_email_vendor_assigned' => 'البريد الإلكتروني عند تعيين البائع',
     'sla_funding_reminder_days' => 'تذكير تمويل SLA (أيام)',
     'sla_reminder_sent' => 'تم إرسال تذكير SLA',
-    
+
     // Ecosystem Creative
     'ecosystem' => 'النظام البيئي',
     'ecosystem_creative' => 'النظام البيئي الإبداعي',
@@ -1889,7 +1891,7 @@ return [
     'publish_now' => 'نشر الآن',
     'publish_scheduled' => 'نشر مجدول',
     'close' => 'إغلاق',
-    
+
     // System Health
     'system_health' => 'صحة النظام',
     'system_health_title' => 'صحة النظام والتكوين',
@@ -1920,14 +1922,14 @@ return [
     'configuration' => 'التكوين',
     'scheduled_commands' => 'الأوامر المجدولة',
     'queue_worker_detected' => 'تم اكتشاف عامل قائمة الانتظار',
-    
+
     // Studio Services
     'example_services' => 'أمثلة على الخدمات',
     'service_logo_design' => 'تصميم الشعار والهوية البصرية',
     'service_video_editing' => 'تحرير الفيديو والرسوم المتحركة',
     'service_web_development' => 'تطوير الويب (WordPress/Laravel)',
     'service_voice_over' => 'التعليق الصوتي ومزج الصوت',
-    
+
     // Additional Studio translations
     'no_orders' => 'لا توجد طلبات بعد.',
     'no_assigned_orders' => 'لا توجد طلبات مخصصة بعد.',
@@ -1990,7 +1992,7 @@ return [
     'order_id' => 'معرف الطلب (UUID)',
     'bulk_assign' => 'تعيين جماعي',
     'order' => 'طلب',
-    
+
     // Tuts+ & Education
     'education_creative_coding' => 'التعليم الإبداعي والبرمجة',
     'tuts_description' => 'منصة تعليمية تحتوي على دروس ودورات حول التصميم والبرمجة والتصوير والإبداع الرقمي.',
@@ -1999,7 +2001,7 @@ return [
     'tuts_category_photo' => 'التصوير وتحرير الفيديو',
     'tuts_category_business' => 'الإنتاجية والأعمال الإبداعية',
     'access_with_premium' => 'الوصول مع Premium',
-    
+
     // Ecosystem Sub-pages
     'music_sfx' => 'الموسيقى ومؤثرات الصوت',
     'plugins_code_scripts' => 'الإضافات والكود والنصوص البرمجية',
@@ -2037,7 +2039,7 @@ return [
     '3d_use_game' => 'أصول الألعاب والنماذج الأولية',
     '3d_use_material' => 'المواد/القوام لخط أنابيب 3D',
     'subscribe_3d_access' => 'اشترك للوصول إلى الأصول ثلاثية الأبعاد',
-    
+
     // Admin Settings - Studio
     'studio_platform_fee' => 'رسوم منصة Studio',
     'studio_platform_fee_description' => 'تعيين نسبة رسوم المنصة لإصدار الضمان في Studio (طلبات الخدمة).',
@@ -2049,7 +2051,7 @@ return [
     'sla_funding_reminder_days' => 'تذكير تمويل SLA (أيام)',
     'sla_funding_reminder_description' => 'إرسال تذكير التمويل للطلبات المقتبسة التي لم يتم تمويلها بعد N أيام.',
     'save_studio_email_settings' => 'حفظ إعدادات بريد Studio',
-    
+
     // View History
     'view_history_title' => 'سجل المشاهدات والإيرادات',
     'export_csv' => 'تصدير CSV',
@@ -2079,7 +2081,7 @@ return [
     'invalid' => 'غير صالح',
     'no_view_history_found' => 'لم يتم العثور على سجل المشاهدات.',
     'views_today' => 'مشاهدات اليوم',
-    
+
     // Repurchase Report
     'repurchase_statistics_report' => 'تقرير إحصائيات إعادة الشراء',
     'repurchase_statistics_description' => 'تحليلات مفصلة لإعادة شراء الملاحظات في وضع الندرة',
@@ -2108,7 +2110,7 @@ return [
     'after' => 'بعد',
     'no_repurchases_found' => 'لم يتم العثور على إعادة شراء',
     'no_repurchase_transactions_found' => 'لم يتم العثور على معاملات إعادة شراء للنطاق الزمني المحدد.',
-    
+
     // View History Show
     'view_revenue_details' => 'تفاصيل إيرادات المشاهدة',
     'back_to_view_history' => 'العودة إلى سجل المشاهدات',
@@ -2126,7 +2128,7 @@ return [
     'bot_detection_data' => 'بيانات كشف البوت',
     'related_views' => 'المشاهدات ذات الصلة',
     'same_ip_fingerprint' => 'نفس IP/البصمة',
-    
+
     // Refund Management
     'admin_refund_management' => 'المسؤول - إدارة الاسترداد',
     'refund_management' => 'إدارة الاسترداد',
@@ -2154,7 +2156,7 @@ return [
     'explain_why_rejected' => 'يرجى شرح سبب رفض هذا الاسترداد...',
     'message_will_be_sent_to_buyer' => 'سيتم إرسال هذه الرسالة إلى المشتري.',
     'reject_refund' => 'رفض الاسترداد',
-    
+
     // Workspaces Management
     'workspaces_management' => 'إدارة مساحات العمل',
     'workspace_details' => 'تفاصيل مساحة العمل',
@@ -2175,7 +2177,7 @@ return [
     'no_notes_found' => 'لم يتم العثور على ملاحظات.',
     'total_folders' => 'إجمالي المجلدات',
     'total_members' => 'إجمالي الأعضاء',
-    
+
     // Notes Management
     'all_sale_mode' => 'جميع أوضاع البيع',
     'sale_mode' => 'وضع البيع',
@@ -2191,7 +2193,7 @@ return [
     'reject' => 'رفض',
     'confirm_reject_monetization' => 'هل أنت متأكد من رفض الاستثمار؟',
     'rejected_by_admin' => 'مرفوض من قبل المسؤول',
-    
+
     // Identity Verification
     'identity_verification_title' => 'التحقق من الهوية',
     'status_label' => 'الحالة:',
@@ -2200,7 +2202,7 @@ return [
     'reviewed_label' => 'تمت المراجعة:',
     'notes_label' => 'ملاحظات:',
     'rejection_reason_required' => 'سبب الرفض (مطلوب)',
-    
+
     // Pricing Guidance Settings
     'pricing_guidance_settings' => 'إعدادات إرشادات التسعير',
     'pricing_guidance_description' => 'تعيين حدود الحد الأدنى للسعر والأسعار الموصى بها لكل فئة ملاحظة.',
@@ -2219,11 +2221,11 @@ return [
     'action' => 'الإجراء',
     'save_studio_email_settings' => 'حفظ إعدادات بريد Studio',
     'sla_funding_reminder_days' => 'تذكير تمويل SLA (أيام)',
-    
+
     // Tickets
     'premium_only' => 'مميز فقط',
     'all_users' => 'جميع المستخدمين',
-    
+
     // Ecosystem Use Cases
     'photos_use_website' => 'المواقع الإلكترونية والمدونات وصفحات الهبوط',
     'photos_use_promo' => 'المواد الترويجية والإعلانات',
@@ -2245,14 +2247,14 @@ return [
     'code_use_plugins' => 'الإضافات الجاهزة لأنظمة إدارة المحتوى الشائعة',
     'code_use_components' => 'مكونات واجهة المستخدم/تجربة المستخدم القابلة للتخصيص',
     'subscribe_code_access' => 'اشترك للوصول إلى الكود',
-    
+
     // Studio Services
     'example_services' => 'خدمات مثال',
     'service_logo_design' => 'تصميم الشعار والهوية البصرية',
     'service_video_editing' => 'تحرير الفيديو والرسوم المتحركة',
     'service_web_development' => 'تطوير المواقع (WordPress/Laravel)',
     'service_voice_over' => 'التعليق الصوتي ومزج الصوت',
-    
+
     // Tuts
     'tuts_description' => 'منصة تعليمية تحتوي على دروس ودورات حول التصميم والبرمجة والتصوير والإبداع الرقمي.',
     'search_tutorials' => 'البحث عن دروس...',
@@ -2265,10 +2267,10 @@ return [
     'views' => 'مشاهدات',
     'no_tutorials_found' => 'لم يتم العثور على دروس',
     'try_adjusting_search' => 'حاول تعديل معايير البحث أو التصفية.',
-    
+
     // Ecosystem Index
     'ecosystem_explore' => 'استكشف عروض النظام البيئي الشبيهة بـ Envato لـ Noteds.',
-    
+
     // Marketplace Ecosystem Filter
     'all_ecosystem' => 'جميع الأنظمة البيئية',
     'design' => 'التصميم',
@@ -2278,20 +2280,20 @@ return [
     'video' => 'الفيديو',
     'theme' => 'القالب',
     'elements' => 'العناصر',
-    
+
     // Notes Create
     'ecosystem_category' => 'النظام البيئي الإبداعي',
     'note_language' => 'لغة المحتوى',
     'scheduled_publish_at' => 'جدولة النشر',
     'scheduled_publish_help' => 'إذا تم ملؤه، سيتم نشر الملاحظة تلقائياً في ذلك الوقت.',
-    
+
     // Studio Orders Show
     'no_quotes_found' => 'لم يتم العثور على عروض أسعار.',
-    
+
     // Registration Verification Info
     'verification_info_title' => 'معلومات التحقق',
     'verification_info_description' => 'بعد التسجيل، سيُطلب منك إكمال ملفك الشخصي عن طريق تحميل وثيقة الهوية (بطاقة الهوية أو بطاقة الطالب) وصورة سيلفي للتحقق من الهوية.',
-    
+
     // Profile Edit - Document Types
     'ktp_full' => 'بطاقة الهوية (KTP)',
     'student_card' => 'بطاقة الطالب (للقاصرين/الطلاب)',
@@ -2307,11 +2309,11 @@ return [
     'file_format_help' => 'التنسيق: JPG أو PNG أو PDF. الحد الأقصى 5MB.',
     'document_type_label' => 'نوع وثيقة الهوية',
     'selfie_upload_help' => 'استخدم صورة مشرقة مع وجه واضح. الحد الأقصى 5MB.',
-    
+
     // Notes Show
     'cannot_delete_sold' => 'لا يمكن الحذف (تم البيع)',
     'cannot_delete_sold_tooltip' => 'لا يمكن حذف الملاحظة التي تم بيعها',
-    
+
     // Admin Pending Verification
     'user_verification_pending_title' => 'التحقق من المستخدم معلق',
     'verification_pending_title' => 'التحقق من المستخدم معلق',
@@ -2333,11 +2335,11 @@ return [
     'confirm_reject_verification' => 'هل أنت متأكد أنك تريد رفض التحقق لهذا المستخدم؟',
     'verified_by_admin' => 'تم التحقق بواسطة المشرف',
     'selfie' => 'السيلفي',
-    
+
     // Studio Orders
     'order_singular' => 'طلب',
     'orders' => 'طلبات',
-    
+
     // Navigation
     'workspaces' => 'مساحات العمل',
     'forum' => 'المنتدى',
@@ -2350,11 +2352,11 @@ return [
     'reading_history' => 'تاريخ القراءة',
     'batch_download' => 'التنزيل المجمع',
     'my_library' => 'مكتبتي',
-    
+
     // Forum
     'post_details' => 'تفاصيل المنشور',
     'back_to_forum' => 'العودة إلى المنتدى',
-    
+
     // Refunds
     'refund_requests' => 'طلبات الاسترداد',
     'view_and_manage_refunds' => 'عرض وإدارة طلبات الاسترداد الخاصة بك',
@@ -2362,65 +2364,65 @@ return [
     'no_refund_requests_description' => 'لم تقم بتقديم أي طلبات استرداد بعد.',
     'view_details' => 'عرض التفاصيل',
     'processed' => 'تمت المعالجة',
-    
+
     // Series
     'back_to_series' => 'العودة إلى السلسلة',
     'notes_in_series' => 'الملاحظات في هذه السلسلة',
     'no_notes_in_series' => 'لا توجد ملاحظات في هذه السلسلة بعد.',
     'active' => 'نشط',
     'inactive' => 'غير نشط',
-    
+
     // Admin Tutorials
     'admin_tutorials' => 'دروس المشرف',
     'tutorial_management' => 'إدارة الدروس',
     'create_tutorial' => 'إنشاء درس',
     'edit_tutorial' => 'تعديل الدرس',
     'back_to_tutorials' => '← العودة إلى الدروس',
-    
+
     // Notes Resale
     'resale_note' => 'إعادة بيع الملاحظة',
-    
+
     // AI Memory
     'ai_memory_platform' => 'منصة ذاكرة AI',
-    
+
     // AI Chat
     'ai_chat' => 'محادثة AI',
-    
+
     // Forum Moderation
     'post_moderation' => 'تعديل المنشور',
     'forum_moderation' => 'تعديل المنتدى',
-    
+
     // Note Moderation
     'note_moderation' => 'تعديل الملاحظة',
     'moderate_note' => 'تعديل الملاحظة',
-    
+
     // Account Moderation
     'account_moderation' => 'تعديل الحساب',
     'moderate_account' => 'تعديل الحساب',
-    
+
     // Forum Pages
     'forum_index' => 'المنتدى',
     'forum_analytics' => 'تحليلات المنتدى',
     'forum_email_preferences' => 'تفضيلات بريد المنتدى',
     'forum_email_notifications' => 'إشعارات بريد المنتدى',
     'bookmarked_posts_forum' => 'المنشورات المرجعية - المنتدى',
-    
+
     // Reading History
     'reading_history' => 'تاريخ القراءة',
-    
+
     // Collections
     'my_collections' => 'مجموعاتي',
     'create_collection' => 'إنشاء مجموعة',
-    
+
     // Workspaces
     'invite_team' => 'دعوة الفريق',
-    
+
     // Forum Hashtag
     'hashtag_forum' => 'المنتدى',
-    
+
     // MyNoteds
     'mynoteds_ai_memory_platform' => 'MyNoteds - منصة ذاكرة AI',
-    
+
     // AI Memory
     'ai_memory_description' => 'اسأل أي شيء عن ملاحظاتك باستخدام AI الذي يفهم جميع بياناتك',
     'total_notes' => 'إجمالي الملاحظات',
@@ -2430,7 +2432,7 @@ return [
     'ai_processing' => 'AI يعالج سؤالك...',
     'quick_actions' => 'إجراءات سريعة',
     'popular_topics' => 'مواضيع شائعة',
-    
+
     // Note Conversations
     'product_conversations' => 'محادثات المنتج',
     'product_conversations_description' => 'محادثة خاصة بين المشتري والبائع بعد الشراء. كل منتج له منتدى محادثة خاص به.',

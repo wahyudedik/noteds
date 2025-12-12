@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AffiliateLink;
 use App\Models\AffiliateConversion;
+use App\Services\CurrencyService;
 use App\Models\AffiliateCommission;
 use App\Models\AffiliatePayout;
 use App\Models\AffiliateCommissionTier;
@@ -323,6 +324,11 @@ class AffiliateService
      */
     public function createPayoutRequest(User $affiliate, float $amount, string $payoutMethod = 'wallet', ?array $payoutDetails = null): ?AffiliatePayout
     {
+        // Get currency service for conversion
+        $currencyService = app(CurrencyService::class);
+        $userCurrency = $currencyService->getUserCurrency($affiliate);
+        $baseCurrency = $currencyService->getBaseCurrency();
+
         // Get available balance
         $stats = $this->getAffiliateStats($affiliate);
         $availableBalance = $stats['available_balance'];
@@ -347,9 +353,21 @@ class AffiliateService
         try {
             DB::beginTransaction();
 
+            // Calculate exchange rate if user's currency differs from base
+            $exchangeRate = 1;
+            $amountInBase = $amount;
+            if ($userCurrency !== $baseCurrency) {
+                $exchangeRate = $currencyService->getExchangeRate($baseCurrency, $userCurrency);
+                $amountInBase = $amount / $exchangeRate; // Convert user currency amount back to base
+            }
+
             $payout = AffiliatePayout::create([
                 'affiliate_id' => $affiliate->id,
                 'amount' => $amount,
+                'currency' => $userCurrency,
+                'original_amount' => $amountInBase,
+                'original_currency' => $baseCurrency,
+                'exchange_rate' => $exchangeRate,
                 'status' => 'pending',
                 'payout_method' => $payoutMethod,
                 'payout_details' => $payoutDetails,

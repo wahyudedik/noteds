@@ -5,8 +5,14 @@
 
     Your payment for the order **{{ $order->title }}** has been released to your wallet!
 
+    @php
+        $currencyService = app(\App\Services\CurrencyService::class);
+        $userCurrency = $currencyService->getUserCurrency($vendor);
+        $amountDisplay = currency($amountReceived, $userCurrency, 'IDR');
+    @endphp
+
     @component('mail::panel')
-        **Amount Received:** Rp {{ number_format($amountReceived, 0, ',', '.') }}
+        **Amount Received:** {{ $amountDisplay }}
 
         **Order:** {{ $order->title }}
 

@@ -17,12 +17,20 @@ class SellerDashboardController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        // Get currency service
+        $currencyService = app(\App\Services\CurrencyService::class);
+        $userCurrency = $currencyService->getUserCurrency($user);
+        $baseCurrency = $currencyService->getBaseCurrency();
+
         // Get seller-specific metrics
         $sellerTransactions = $user->transactionsAsSeller();
 
+        $totalRevenueBase = $sellerTransactions
+            ->sum('amount') ?? 0;
+
         $metrics = [
-            'total_revenue' => $sellerTransactions
-                ->sum('amount') ?? 0,
+            'total_revenue' => $totalRevenueBase,
+            'total_revenue_display' => currency($totalRevenueBase, $userCurrency, $baseCurrency),
 
             'notes_published' => $user->notes()
                 ->where('status', 'published')
@@ -76,6 +84,8 @@ class SellerDashboardController extends Controller
             'affiliateStats' => $affiliateStats,
             'recentSales' => $recentSales,
             'salesTrend' => $salesTrend,
+            'userCurrency' => $userCurrency,
+            'baseCurrency' => $baseCurrency,
         ]);
     }
 }

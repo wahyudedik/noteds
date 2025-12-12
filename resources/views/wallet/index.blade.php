@@ -15,6 +15,11 @@
         $topupMaxDisplay = $currencyService->convert($topupMaxBase, $baseCurrency, $userCurrency);
         $withdrawMinBase = 50000;
         $withdrawMinDisplay = $currencyService->convert($withdrawMinBase, $baseCurrency, $userCurrency);
+        $walletBalanceInUserCurrency = $currencyService->convert(
+            (float) $wallet->balance,
+            $walletCurrency,
+            $userCurrency,
+        );
         $decimalPlaces = $currencyInfo['decimal_places'] ?? 0;
         $stepValue = $decimalPlaces > 0 ? 1 / 10 ** $decimalPlaces : 1;
         $stepAttribute = number_format($stepValue, $decimalPlaces, '.', '');
@@ -125,7 +130,7 @@
                                 </div>
                             </form>
                             <div class="flex items-end">
-                                @if ($wallet->balance >= 50000)
+                                @if ($walletBalanceInUserCurrency >= $withdrawMinDisplay)
                                     <a href="{{ route('wallet.withdraw.create') }}"
                                         class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-md hover:shadow-lg transition-all duration-200 w-full sm:w-auto h-[42px]">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

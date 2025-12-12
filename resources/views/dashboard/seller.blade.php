@@ -25,7 +25,7 @@
                         <div>
                             <p class="text-gray-600 text-sm font-medium">Total Revenue</p>
                             <p class="text-2xl font-bold text-gray-900 mt-2">
-                                Rp {{ number_format($metrics['total_revenue'], 0, ',', '.') }}
+                                {{ $metrics['total_revenue_display'] }}
                             </p>
                         </div>
                         <div class="text-green-500 text-3xl">
@@ -134,7 +134,7 @@
                         <div class="border-l-4 border-yellow-500 pl-4">
                             <p class="text-gray-600 text-sm">Affiliate Earnings</p>
                             <p class="text-2xl font-bold text-gray-900 mt-1">
-                                Rp {{ number_format($affiliateStats['affiliate_earnings'], 0, ',', '.') }}
+                                {{ currency($affiliateStats['affiliate_earnings'], $userCurrency, 'IDR') }}
                             </p>
                         </div>
                     </div>
@@ -161,7 +161,7 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="text-lg font-bold text-green-600">
-                                        Rp {{ number_format($note->sales->sum('amount'), 0, ',', '.') }}
+                                        {{ currency($note->sales->sum('amount'), $userCurrency, 'IDR') }}
                                     </p>
                                     <a href="{{ route('notes.edit', $note) }}"
                                         class="text-blue-600 hover:text-blue-800 text-sm font-medium">
@@ -200,7 +200,7 @@
                                         <td class="px-4 py-3 text-gray-900">{{ $sale->note->title }}</td>
                                         <td class="px-4 py-3 text-gray-600">{{ $sale->buyer->name }}</td>
                                         <td class="px-4 py-3 font-semibold text-green-600">
-                                            Rp {{ number_format($sale->amount, 0, ',', '.') }}
+                                            {{ currency($sale->amount, $userCurrency, 'IDR') }}
                                         </td>
                                         <td class="px-4 py-3 text-gray-600">
                                             {{ $sale->created_at->format('d M Y') }}

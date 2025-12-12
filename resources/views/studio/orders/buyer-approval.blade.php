@@ -23,10 +23,15 @@
             <div class="col-span-2 space-y-6">
                 <!-- Order Info Card -->
                 <div class="bg-white rounded-lg shadow-md p-6">
+                    @php
+                        $currencyService = app(\App\Services\CurrencyService::class);
+                        $userCurrency = $currencyService->getUserCurrency(auth()->user());
+                        $budgetDisplay = currency($order->budget, $userCurrency, 'IDR');
+                    @endphp
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $order->title }}</h1>
                     <div class="flex items-center gap-4 text-sm text-gray-600">
                         <span>Vendor: <strong>{{ $order->assignedVendor->name }}</strong></span>
-                        <span>Budget: <strong>Rp {{ number_format($order->budget, 0, ',', '.') }}</strong></span>
+                        <span>Budget: <strong>{{ $budgetDisplay }}</strong></span>
                     </div>
                 </div>
 
@@ -146,13 +151,13 @@
                     <div class="space-y-3 text-sm">
                         <div>
                             <p class="text-gray-600">Budget</p>
-                            <p class="font-semibold text-gray-900">Rp {{ number_format($order->budget, 0, ',', '.') }}</p>
+                            <p class="font-semibold text-gray-900">{{ $budgetDisplay }}</p>
                         </div>
 
                         <div class="border-t border-gray-200 pt-3">
                             <p class="text-gray-600">Escrow Amount</p>
-                            <p class="font-semibold text-gray-900">Rp
-                                {{ number_format($order->escrow_amount, 0, ',', '.') }}</p>
+                            <p class="font-semibold text-gray-900">
+                                {{ currency($order->escrow_amount, $userCurrency, 'IDR') }}</p>
                         </div>
 
                         <div class="border-t border-gray-200 pt-3">

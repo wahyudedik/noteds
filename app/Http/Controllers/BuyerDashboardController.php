@@ -16,10 +16,18 @@ class BuyerDashboardController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        // Get currency service
+        $currencyService = app(\App\Services\CurrencyService::class);
+        $userCurrency = $currencyService->getUserCurrency($user);
+        $baseCurrency = $currencyService->getBaseCurrency();
+
         // Get buyer-specific metrics
+        $totalSpentBase = $user->transactionsAsBuyer()
+            ->sum('amount') ?? 0;
+
         $metrics = [
-            'total_spent' => $user->transactionsAsBuyer()
-                ->sum('amount') ?? 0,
+            'total_spent' => $totalSpentBase,
+            'total_spent_display' => currency($totalSpentBase, $userCurrency, $baseCurrency),
 
             'notes_purchased' => $user->purchasedNotes()
                 ->count() ?? 0,
@@ -56,6 +64,8 @@ class BuyerDashboardController extends Controller
             'recentPurchases' => $recentPurchases,
             'referralStats' => $referralStats,
             'wishlisted' => $wishlisted,
+            'userCurrency' => $userCurrency,
+            'baseCurrency' => $baseCurrency,
         ]);
     }
 }

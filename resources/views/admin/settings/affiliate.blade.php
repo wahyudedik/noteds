@@ -2,6 +2,11 @@
 
 @section('title', __('affiliate.settings_title'))
 
+@php
+    $currencyService = app(\App\Services\CurrencyService::class);
+    $userCurrency = $currencyService->getDefaultCurrencyForLocale();
+@endphp
+
 @section('content')
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
@@ -101,8 +106,7 @@
                                     {{ __('affiliate.min_payout_amount') }}
                                 </label>
                                 <div class="flex items-center gap-2">
-                                    <span
-                                        class="text-gray-600 font-medium">{{ config('currency.base_currency', 'IDR') }}</span>
+                                    <span class="text-gray-600 font-medium">{{ $userCurrency }}</span>
                                     <input type="number" name="affiliate_min_payout_amount"
                                         id="affiliate_min_payout_amount" step="0.01" min="0.01"
                                         value="{{ $settings['affiliate_min_payout_amount'] }}"

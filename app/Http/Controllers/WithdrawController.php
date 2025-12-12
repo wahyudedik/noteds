@@ -11,9 +11,7 @@ use App\Services\NotificationService;
 
 class WithdrawController extends Controller
 {
-    public function __construct(private NotificationService $notificationService)
-    {
-    }
+    public function __construct(private NotificationService $notificationService) {}
 
     public function create(): View
     {
@@ -59,6 +57,7 @@ class WithdrawController extends Controller
             $wallet->save();
         }
 
+        $amountInUserCurrency = (float) $request->input('amount');
         $amountBase = $request->amountInBase();
         $minimumBase = 50000;
 
@@ -72,9 +71,19 @@ class WithdrawController extends Controller
 
         $validated = $request->validated();
 
+        // Calculate exchange rate for audit trail
+        $exchangeRate = 1;
+        if ($userCurrency !== $baseCurrency) {
+            $exchangeRate = $currencyService->getExchangeRate($baseCurrency, $userCurrency);
+        }
+
         $withdraw = Withdraw::create([
             'user_id' => $user->id,
-            'amount' => $amountBase,
+            'amount' => $amountInUserCurrency,
+            'currency' => $userCurrency,
+            'original_amount' => $amountBase,
+            'original_currency' => $baseCurrency,
+            'exchange_rate' => $exchangeRate,
             'bank_name' => $validated['bank_name'],
             'account_number' => $validated['account_number'],
             'account_name' => $validated['account_name'],

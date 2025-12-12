@@ -216,16 +216,23 @@ class LocaleService
      */
     public function getFullSettings(?User $user = null): array
     {
+        $locale = $user?->locale ?? config('app.locale', 'en');
+
+        // Get default currency and timezone based on locale
+        $currencyService = app(CurrencyService::class);
+        $defaultCurrency = $currencyService->getDefaultCurrencyForLocale($locale);
+        $defaultTimezone = $currencyService->getDefaultTimezoneForLocale($locale);
+
         return array_merge(
             [
                 'locale' => config('app.locale', 'en'),
                 'timezone' => config('app.timezone', 'UTC'),
-                'currency' => 'USD',
+                'currency' => $defaultCurrency,
             ],
             $user ? [
                 'locale' => $user->locale ?? config('app.locale', 'en'),
-                'timezone' => $user->timezone ?? config('app.timezone', 'UTC'),
-                'currency' => $user->currency ?? 'USD',
+                'timezone' => $user->timezone ?? $defaultTimezone,
+                'currency' => $user->currency ?? $defaultCurrency,
             ] : []
         );
     }
