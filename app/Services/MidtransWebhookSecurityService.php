@@ -178,8 +178,8 @@ class MidtransWebhookSecurityService
 
             throw new \Exception(
                 "Amount mismatch for {$orderId}. " .
-                "Expected: {$expectedAmount}, Received: {$receivedAmount}, " .
-                "Variance: {$variance} exceeds tolerance of {$tolerance}"
+                    "Expected: {$expectedAmount}, Received: {$receivedAmount}, " .
+                    "Variance: {$variance} exceeds tolerance of {$tolerance}"
             );
         }
 
@@ -220,7 +220,7 @@ class MidtransWebhookSecurityService
 
             throw new \Exception(
                 "Webhook rate limit exceeded for {$orderId}. " .
-                "Please try again in an hour."
+                    "Please try again in an hour."
             );
         }
 
