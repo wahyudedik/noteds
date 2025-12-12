@@ -97,7 +97,7 @@ class SyncMidtransPaymentStatus extends Command
                 $this->warn('⚠️  Payment is settled in Midtrans but not updated in DB. Processing...');
 
                 // Process the payment
-                DB::transaction(function () use ($transaction, $grossAmount) {
+                DB::transaction(function () use ($transaction, $grossAmount, $orderId, $transactionStatus) {
                     $transaction->lockForUpdate()->refresh();
 
                     if ($transaction->status === 'success') {
