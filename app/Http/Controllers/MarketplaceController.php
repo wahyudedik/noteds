@@ -897,32 +897,53 @@ class MarketplaceController extends Controller
                 return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
             }
 
+            // Additional validation to prevent NaN/Infinite amounts
+            if (!is_numeric($finalPrice) || is_nan($finalPrice) || is_infinite($finalPrice)) {
+                DB::rollBack();
+                return redirect()->route('marketplace.show', $note)->with('error', 'Invalid price calculation. Please try again.');
+            }
+
             $taxContext = $taxService->resolveTaxForPurchase($note, $buyer);
             $taxBreakdown = $taxService->calculateAmounts((float) $finalPrice, $taxContext);
             $buyerPaysAmount = $taxBreakdown['total_amount'];
             $priceExcludingTax = $taxBreakdown['price_excluding_tax'];
+
+            // Validate calculated amounts
+            if (!is_numeric($buyerPaysAmount) || $buyerPaysAmount <= 0 || is_nan($buyerPaysAmount) || is_infinite($buyerPaysAmount)) {
+                DB::rollBack();
+                return redirect()->route('marketplace.show', $note)->with('error', 'Invalid amount calculation. Please try again.');
+            }
+
+            if (!is_numeric($priceExcludingTax) || $priceExcludingTax <= 0 || is_nan($priceExcludingTax) || is_infinite($priceExcludingTax)) {
+                DB::rollBack();
+                return redirect()->route('marketplace.show', $note)->with('error', 'Invalid price. Please try again.');
+            }
 
             if ($buyerPaysAmount <= 0) {
                 DB::rollBack();
                 return redirect()->route('marketplace.show', $note)->with('error', 'Catatan ini gratis, tidak perlu dibeli.');
             }
 
-            // Ensure wallets exist
+            // Ensure wallets exist with pessimistic locking to prevent race conditions
             $baseCurrency = config('currency.base_currency', 'IDR');
 
-            $buyerWallet = Wallet::firstOrCreate(
-                ['user_id' => $buyer->id],
-                ['balance' => 0, 'currency' => $baseCurrency]
-            );
+            $buyerWallet = Wallet::where('user_id', $buyer->id)
+                ->lockForUpdate()
+                ->firstOrCreate(
+                    ['user_id' => $buyer->id],
+                    ['balance' => 0, 'currency' => $baseCurrency]
+                );
             if ($buyerWallet->currency !== $baseCurrency) {
                 $buyerWallet->currency = $baseCurrency;
                 $buyerWallet->save();
             }
 
-            $sellerWallet = Wallet::firstOrCreate(
-                ['user_id' => $seller->id],
-                ['balance' => 0, 'currency' => $baseCurrency]
-            );
+            $sellerWallet = Wallet::where('user_id', $seller->id)
+                ->lockForUpdate()
+                ->firstOrCreate(
+                    ['user_id' => $seller->id],
+                    ['balance' => 0, 'currency' => $baseCurrency]
+                );
             if ($sellerWallet->currency !== $baseCurrency) {
                 $sellerWallet->currency = $baseCurrency;
                 $sellerWallet->save();
@@ -970,10 +991,27 @@ class MarketplaceController extends Controller
                 $levelDiscount = $levelService->getCommissionDiscount($seller);
                 $platformCommissionPercent = max(0, $basePlatformCommissionPercent - $levelDiscount);
 
+                // Validate commission percentages
+                if (!is_numeric($platformCommissionPercent) || $platformCommissionPercent < 0 || $platformCommissionPercent > 100) {
+                    DB::rollBack();
+                    return redirect()->route('marketplace.show', $note)->with('error', 'Invalid platform commission. Please try again.');
+                }
+
                 $creatorCommissionPercent = $commissionTier?->creator_commission_percent ?? Setting::getSetting('creator_commission_percent', 'marketplace', 0);
+
+                if (!is_numeric($creatorCommissionPercent) || $creatorCommissionPercent < 0 || $creatorCommissionPercent > 100) {
+                    DB::rollBack();
+                    return redirect()->route('marketplace.show', $note)->with('error', 'Invalid creator commission. Please try again.');
+                }
 
                 // Platform fee (always deducted from every transaction)
                 $platformFee = $priceExcludingTax * ($platformCommissionPercent / 100);
+
+                // Validate platform fee
+                if (!is_numeric($platformFee) || is_nan($platformFee) || is_infinite($platformFee) || $platformFee < 0) {
+                    DB::rollBack();
+                    return redirect()->route('marketplace.show', $note)->with('error', 'Invalid platform fee calculation. Please try again.');
+                }
 
                 // Original creator commission (always for original creator in every transaction)
                 // Original creator gets commission every time the note is sold, regardless of seller
@@ -1025,9 +1063,21 @@ class MarketplaceController extends Controller
                     $creatorCommission = $priceExcludingTax * ($creatorCommissionPercent / 100);
                 }
 
+                // Validate commission calculation
+                if (!is_numeric($creatorCommission) || is_nan($creatorCommission) || is_infinite($creatorCommission) || $creatorCommission < 0) {
+                    DB::rollBack();
+                    return redirect()->route('marketplace.show', $note)->with('error', 'Invalid commission calculation. Please try again.');
+                }
+
                 // Seller gets: amount - platform_fee - creator_commission
                 // If seller is original creator, they get seller amount + creator commission (total = amount - platform fee)
                 $sellerAmount = $priceExcludingTax - $platformFee - $creatorCommission;
+
+                // Validate seller amount
+                if (!is_numeric($sellerAmount) || is_nan($sellerAmount) || is_infinite($sellerAmount) || $sellerAmount < 0) {
+                    DB::rollBack();
+                    return redirect()->route('marketplace.show', $note)->with('error', 'Invalid seller amount calculation. Please try again.');
+                }
             }
 
             $taxAmount = $taxBreakdown['tax_amount'];
@@ -1061,10 +1111,12 @@ class MarketplaceController extends Controller
                     $seller->save();
                 } else {
                     // Seller is different: original creator gets separate commission
-                    $creatorWallet = Wallet::firstOrCreate(
-                        ['user_id' => $originalCreator->id],
-                        ['balance' => 0, 'currency' => $baseCurrency]
-                    );
+                    $creatorWallet = Wallet::where('user_id', $originalCreator->id)
+                        ->lockForUpdate()
+                        ->firstOrCreate(
+                            ['user_id' => $originalCreator->id],
+                            ['balance' => 0, 'currency' => $baseCurrency]
+                        );
                     if ($creatorWallet->currency !== $baseCurrency) {
                         $creatorWallet->currency = $baseCurrency;
                     }
@@ -1078,10 +1130,12 @@ class MarketplaceController extends Controller
             // Get or create admin wallet (platform wallet)
             $admin = User::where('role', 'admin')->first();
             if ($admin) {
-                $adminWallet = Wallet::firstOrCreate(
-                    ['user_id' => $admin->id],
-                    ['balance' => 0, 'currency' => $baseCurrency]
-                );
+                $adminWallet = Wallet::where('user_id', $admin->id)
+                    ->lockForUpdate()
+                    ->firstOrCreate(
+                        ['user_id' => $admin->id],
+                        ['balance' => 0, 'currency' => $baseCurrency]
+                    );
                 if ($adminWallet->currency !== $baseCurrency) {
                     $adminWallet->currency = $baseCurrency;
                 }

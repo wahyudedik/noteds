@@ -28,7 +28,7 @@ class BuyerSubscriptionController extends Controller
         $plans = SubscriptionPlan::active()->get();
         $user = auth()->user();
         $activeSubscription = $user->activeBuyerSubscription();
-        
+
         return view('subscriptions.plans', compact('plans', 'activeSubscription'));
     }
 
@@ -39,7 +39,7 @@ class BuyerSubscriptionController extends Controller
     {
         $user = auth()->user();
         $activeSubscription = $user->activeBuyerSubscription();
-        
+
         return view('subscriptions.show', compact('plan', 'activeSubscription'));
     }
 
@@ -86,8 +86,29 @@ class BuyerSubscriptionController extends Controller
     private function processWalletSubscription($user, SubscriptionPlan $plan, string $billingCycle, float $price): RedirectResponse
     {
         DB::transaction(function () use ($user, $plan, $billingCycle, $price) {
+            // Lock wallet for update to prevent race conditions
+            $wallet = Wallet::where('user_id', $user->id)
+                ->lockForUpdate()
+                ->firstOrCreate(
+                    ['user_id' => $user->id],
+                    ['balance' => 0, 'currency' => config('app.currency', 'USD')]
+                );
+
+            // Validate price before deduction
+            if (!is_numeric($price) || $price <= 0 || is_nan($price) || is_infinite($price)) {
+                throw new \Exception('Invalid subscription price');
+            }
+
+            // Double-check wallet balance with locking
+            if ($wallet->balance < $price) {
+                throw new \Exception('Insufficient wallet balance');
+            }
+
             // Deduct from wallet
-            $user->wallet_balance -= $price;
+            $wallet->balance -= $price;
+            $wallet->save();
+
+            $user->wallet_balance = $wallet->balance;
             $user->save();
 
             // Create transaction
@@ -108,7 +129,7 @@ class BuyerSubscriptionController extends Controller
 
             // Create subscription
             $periodStart = now();
-            $periodEnd = $billingCycle === 'monthly' 
+            $periodEnd = $billingCycle === 'monthly'
                 ? $periodStart->copy()->addMonth()
                 : $periodStart->copy()->addYear();
 
@@ -146,7 +167,7 @@ class BuyerSubscriptionController extends Controller
 
         // Create subscription record
         $periodStart = now();
-        $periodEnd = $billingCycle === 'monthly' 
+        $periodEnd = $billingCycle === 'monthly'
             ? $periodStart->copy()->addMonth()
             : $periodStart->copy()->addYear();
 
@@ -188,7 +209,7 @@ class BuyerSubscriptionController extends Controller
 
         try {
             $snapToken = Snap::getSnapToken($params);
-            
+
             $subscription->update([
                 'midtrans_order_id' => $params['transaction_details']['order_id'],
                 'midtrans_token' => $snapToken,
@@ -272,7 +293,7 @@ class BuyerSubscriptionController extends Controller
         $user = auth()->user();
         $subscription = $user->activeBuyerSubscription();
         $subscriptions = $user->buyerSubscriptions()->with('plan')->latest()->paginate(10);
-        
+
         return view('subscriptions.my-subscription', compact('subscription', 'subscriptions'));
     }
 
@@ -326,7 +347,7 @@ class BuyerSubscriptionController extends Controller
 
             // Update subscription
             $periodStart = now();
-            $periodEnd = $validated['billing_cycle'] === 'monthly' 
+            $periodEnd = $validated['billing_cycle'] === 'monthly'
                 ? $periodStart->copy()->addMonth()
                 : $periodStart->copy()->addYear();
 
@@ -393,7 +414,7 @@ class BuyerSubscriptionController extends Controller
                 $user->save();
 
                 $periodStart = now();
-                $periodEnd = $validated['billing_cycle'] === 'monthly' 
+                $periodEnd = $validated['billing_cycle'] === 'monthly'
                     ? $periodStart->copy()->addMonth()
                     : $periodStart->copy()->addYear();
 
