@@ -268,7 +268,20 @@ class WalletController extends Controller
     public function webhook(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
+            Log::info('🔔 Webhook received from Midtrans', [
+                'ip' => $request->ip(),
+                'method' => $request->method(),
+                'content_type' => $request->header('content-type'),
+                'timestamp' => now()->toDateTimeString(),
+            ]);
+
             $notification = json_decode($request->getContent(), true);
+
+            Log::info('Webhook Payload:', [
+                'order_id' => $notification['order_id'] ?? null,
+                'transaction_status' => $notification['transaction_status'] ?? null,
+                'gross_amount' => $notification['gross_amount'] ?? null,
+            ]);
 
             // ⚠️ CRITICAL: Verify Midtrans signature to prevent spoofed webhooks
             $this->verifyMidtransSignature($notification);
