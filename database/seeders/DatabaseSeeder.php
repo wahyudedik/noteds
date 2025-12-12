@@ -37,9 +37,9 @@ class DatabaseSeeder extends Seeder
             // 3. CMS Content - REQUIRED (Static pages)
             CmsPageSeeder::class,
             FaqSeeder::class,
-            LandingPageSectionSeeder::class, // Optional - uncomment if needed
-            SocialMediaLinkSeeder::class, // Optional - uncomment if needed
-            DocumentationSeeder::class, // Optional - uncomment if needed
+            // LandingPageSectionSeeder::class, // Optional - uncomment if needed
+            // SocialMediaLinkSeeder::class, // Optional - uncomment if needed
+            // DocumentationSeeder::class, // Optional - uncomment if needed
 
             // 4. Subscription Plans - REQUIRED if using premium features
             SubscriptionPlanSeeder::class,
@@ -49,6 +49,7 @@ class DatabaseSeeder extends Seeder
             // ========================================
 
             AdminSeeder::class, // Create admin manually via CLI
+            LandingPageSectionSeeder::class, // Requires admin user
             // UserSeeder::class, // Real users will register 
             // WalletSeeder::class, // Auto-created on user registration
             // ReferralCodeSeeder::class, // Auto-created on user registration
