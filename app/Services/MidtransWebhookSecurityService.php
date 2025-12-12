@@ -8,23 +8,26 @@ use Illuminate\Http\Request;
 /**
  * Midtrans Webhook Security Service
  * Provides comprehensive validation and protection against spoofed webhooks
+ * 
+ * IMPORTANT: Signature verification (SHA512) is the PRIMARY security layer
+ * IP verification is a secondary defense layer
  */
 class MidtransWebhookSecurityService
 {
     /**
      * Verify webhook is legitimate from Midtrans (not spoofed)
      * Multiple security checks:
-     * 1. Signature verification (SHA512 with server key)
-     * 2. IP whitelist check (Midtrans IP ranges)
+     * 1. Signature verification (SHA512 with server key) - PRIMARY
+     * 2. IP whitelist check (optional, can be disabled)
      * 3. Amount validation
      * 4. Order existence check
      */
     public static function verifyWebhook(Request $request, array $notification): void
     {
-        // Check 1: Verify signature (CRITICAL)
+        // Check 1: Verify signature (CRITICAL - PRIMARY SECURITY)
         self::verifySignature($notification);
 
-        // Check 2: Verify IP (if enabled)
+        // Check 2: Verify IP (if enabled - SECONDARY DEFENSE)
         if (config('services.midtrans.webhook_ip_check', true)) {
             self::verifyIP($request);
         }
@@ -88,48 +91,36 @@ class MidtransWebhookSecurityService
 
     /**
      * Verify webhook source IP is from Midtrans
-     * Midtrans uses specific IP ranges for webhook delivery
-     * Reference: https://midtrans.com/en/technical-reference/ip-addresses
+     * NOTE: This is SECONDARY defense. Signature verification is PRIMARY.
+     * Can be disabled via config if causing issues with Midtrans webhooks via proxies/CDN
      */
     private static function verifyIP(Request $request): void
     {
         $clientIP = $request->ip();
 
-        // Midtrans IP ranges (production and sandbox)
+        // Midtrans official IP ranges
         $midtransIPs = [
-            // Midtrans production IP ranges
             '119.110.75.51',
             '103.58.103.188',
             '103.58.103.189',
             '119.110.75.35',
-            // Midtrans sandbox can come from various IPs during testing
         ];
 
-        // For local development or sandbox, allow localhost
+        // For local development, allow localhost
         if (in_array($clientIP, ['127.0.0.1', '::1', 'localhost'])) {
-            Log::debug('✅ Webhook from localhost (development/testing)', [
-                'ip' => $clientIP,
-            ]);
+            Log::debug('✅ Webhook from localhost (development/testing)', ['ip' => $clientIP]);
             return;
         }
 
-        // Check if IP is in allowed ranges
-        $isValidIP = false;
-        foreach ($midtransIPs as $midtransIP) {
-            if ($clientIP === $midtransIP) {
-                $isValidIP = true;
-                break;
-            }
-        }
-
-        if (!$isValidIP) {
-            Log::warning('⚠️ Webhook from unexpected IP address', [
+        // Check exact match
+        if (!in_array($clientIP, $midtransIPs)) {
+            Log::warning('⚠️ Webhook from IP not in whitelist (but signature verified)', [
                 'ip' => $clientIP,
-                'allowed_ips' => $midtransIPs,
+                'note' => 'Signature verification passed. IP check disabled or client using proxy.',
             ]);
 
-            // In production, this should throw exception
-            if (config('app.env') === 'production') {
+            // Only throw if strict IP check enabled (most don't need this)
+            if (config('services.midtrans.webhook_strict_ip_check', false)) {
                 throw new \Exception("Webhook from unauthorized IP: {$clientIP}");
             }
         } else {
@@ -170,7 +161,7 @@ class MidtransWebhookSecurityService
 
             throw new \Exception(
                 "Amount mismatch for {$orderId}. " .
-                    "Expected: {$transaction->amount}, Received: {$grossAmount}"
+                "Expected: {$transaction->amount}, Received: {$grossAmount}"
             );
         }
 
@@ -200,7 +191,7 @@ class MidtransWebhookSecurityService
 
             throw new \Exception(
                 "Webhook rate limit exceeded for {$orderId}. " .
-                    "Please try again in an hour."
+                "Please try again in an hour."
             );
         }
 
