@@ -14,12 +14,22 @@ class ServiceOrderController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        
+        // Optimize: Add eager loading to prevent N+1 queries
         if ($user->hasRole('admin')) {
-            $orders = ServiceOrder::latest()->paginate(12);
+            $orders = ServiceOrder::with(['user', 'assignedVendor', 'serviceQuotes', 'workSubmissions'])
+                ->latest()
+                ->paginate(12);
         } elseif ($user->hasRole('seller')) {
-            $orders = ServiceOrder::where('assigned_user_id', $user->id)->latest()->paginate(12);
+            $orders = ServiceOrder::where('assigned_user_id', $user->id)
+                ->with(['user', 'assignedVendor', 'serviceQuotes', 'workSubmissions'])
+                ->latest()
+                ->paginate(12);
         } else {
-            $orders = ServiceOrder::where('user_id', $user->id)->latest()->paginate(12);
+            $orders = ServiceOrder::where('user_id', $user->id)
+                ->with(['assignedVendor', 'serviceQuotes', 'workSubmissions'])
+                ->latest()
+                ->paginate(12);
         }
         return view('studio.orders.index', compact('orders'));
     }
@@ -36,10 +46,11 @@ class ServiceOrderController extends Controller
 
         // Get orders where the buyer is waiting for vendor work submission for approval
         // Filter: buyer's orders + accepted quote + work submitted awaiting approval
+        // Optimize: Add eager loading to prevent N+1 queries
         $orders = ServiceOrder::where('user_id', $user->id)
             ->where('work_status', 'submitted')
             ->where('buyer_approval_status', 'pending')
-            ->with('assignedVendor', 'workSubmissions')
+            ->with(['assignedVendor', 'workSubmissions', 'user', 'serviceQuotes'])
             ->latest()
             ->paginate(12);
 
@@ -84,16 +95,19 @@ class ServiceOrderController extends Controller
             $vendors = \App\Models\User::role('vendor')->orderBy('name')->get(['id', 'name']);
         }
 
-        // Preload related data to avoid N+1 queries in view
+        // Optimize: Preload related data with eager loading to avoid N+1 queries in view
         $ledger = \App\Models\EscrowLedger::where('service_order_id', $order->id)
+            ->with(['order', 'user'])
             ->latest()
             ->get();
 
         $activities = \App\Models\OrderActivity::where('service_order_id', $order->id)
+            ->with(['user', 'order'])
             ->latest()
             ->get();
 
         $quotes = \App\Models\ServiceQuote::where('service_order_id', $order->id)
+            ->with(['user', 'vendor', 'attachments'])
             ->latest()
             ->get();
 

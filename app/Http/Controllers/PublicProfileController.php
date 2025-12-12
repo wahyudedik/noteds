@@ -25,11 +25,23 @@ class PublicProfileController extends Controller
             ->latest()
             ->paginate(12);
 
-        // Calculate seller statistics
+        // Calculate seller statistics (optimized: 3 queries → 1 aggregation)
+        $notesStats = \DB::table('notes')
+            ->selectRaw('COUNT(*) as total_notes')
+            ->where('user_id', $user->id)
+            ->where('is_public', true)
+            ->first();
+
+        $salesStats = \DB::table('transactions')
+            ->selectRaw('COUNT(*) as total_sales, SUM(amount) as total_revenue')
+            ->where('seller_id', $user->id)
+            ->where('status', 'success')
+            ->first();
+
         $stats = [
-            'total_notes' => $user->notes()->where('is_public', true)->count(),
-            'total_sales' => $user->transactionsAsSeller()->where('status', 'success')->count(),
-            'total_revenue' => $user->transactionsAsSeller()->where('status', 'success')->sum('amount'),
+            'total_notes' => $notesStats->total_notes ?? 0,
+            'total_sales' => $salesStats->total_sales ?? 0,
+            'total_revenue' => $salesStats->total_revenue ?? 0,
             'average_rating' => $this->calculateAverageRating($user),
             'total_reviews' => $this->getTotalReviewsCount($user),
             'total_posts' => $user->posts()->whereNull('parent_id')->where('is_hidden', false)->published()->visibleTo($viewer)->count(),

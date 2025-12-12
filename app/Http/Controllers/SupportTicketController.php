@@ -20,7 +20,9 @@ class SupportTicketController extends Controller
      */
     public function index(Request $request): View
     {
+        // Optimize: Add eager loading to prevent N+1 queries
         $tickets = auth()->user()->supportTickets()
+            ->with(['user', 'replies.user', 'attachments'])
             ->when($request->status, function ($query) use ($request) {
                 return $query->where('status', $request->status);
             })
