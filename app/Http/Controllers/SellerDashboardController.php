@@ -49,9 +49,10 @@ class SellerDashboardController extends Controller
         // CRITICAL: Only count successful transactions
         $bestPerforming = $user->notes()
             ->where('status', 'published')
-            ->with(['transactionsAsSeller' => fn($q) => $q
-                ->where('seller_id', $user->id)
-                ->where('status', 'success')  // Only successful transactions
+            ->with([
+                'transactionsAsSeller' => fn($q) => $q
+                    ->where('seller_id', $user->id)
+                    ->where('status', 'success')  // Only successful transactions
             ])
             ->get()
             ->sortByDesc(
