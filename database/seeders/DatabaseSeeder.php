@@ -38,8 +38,8 @@ class DatabaseSeeder extends Seeder
             CmsPageSeeder::class,
             FaqSeeder::class,
             LandingPageSectionSeeder::class, // Optional - uncomment if needed
-            // SocialMediaLinkSeeder::class, // Optional - uncomment if needed
-            // DocumentationSeeder::class, // Optional - uncomment if needed
+            SocialMediaLinkSeeder::class, // Optional - uncomment if needed
+            DocumentationSeeder::class, // Optional - uncomment if needed
 
             // 4. Subscription Plans - REQUIRED if using premium features
             SubscriptionPlanSeeder::class,
