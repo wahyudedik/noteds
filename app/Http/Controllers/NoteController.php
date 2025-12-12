@@ -173,7 +173,7 @@ class NoteController extends Controller
         }
 
         $validated = $request->validated();
-        
+
         // Sanitize HTML content to prevent XSS attacks
         $htmlSanitizer = app(\App\Services\HtmlSanitizer::class);
         $validated['content'] = $htmlSanitizer->sanitize($validated['content'] ?? '');
@@ -183,7 +183,7 @@ class NoteController extends Controller
         if (!empty($validated['preview_content'])) {
             $validated['preview_content'] = strip_tags($validated['preview_content']); // Preview should be plain text
         }
-        
+
         $validated['ecosystem_category'] = $request->input('ecosystem_category') ?: null;
         $validated['language'] = $request->input('language') ?: null;
         $validated['scheduled_publish_at'] = $request->input('scheduled_publish_at') ?: null;
@@ -579,7 +579,7 @@ class NoteController extends Controller
         }
 
         $validated = $request->validated();
-        
+
         // Sanitize HTML content to prevent XSS attacks
         if (isset($validated['content'])) {
             $htmlSanitizer = app(\App\Services\HtmlSanitizer::class);
@@ -591,7 +591,7 @@ class NoteController extends Controller
         if (!empty($validated['preview_content'])) {
             $validated['preview_content'] = strip_tags($validated['preview_content']); // Preview should be plain text
         }
-        
+
         if ($request->has('ecosystem_category')) {
             $validated['ecosystem_category'] = $request->input('ecosystem_category') ?: null;
         }

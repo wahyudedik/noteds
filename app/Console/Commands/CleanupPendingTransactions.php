@@ -54,11 +54,11 @@ class CleanupPendingTransactions extends Command
 
         foreach ($pendingTransactions as $transaction) {
             $message = "{$transaction->id} | Amount: " . number_format($transaction->amount, 2) . " {$transaction->currency} | Created: {$transaction->created_at->diffForHumans()}";
-            
+
             // Verify dengan Midtrans jika --verify flag
             if ($verify && $transaction->midtrans_order_id) {
                 $status = $this->checkMidtransStatus($transaction->midtrans_order_id);
-                
+
                 if ($status === 'failed' || $status === 'cancelled') {
                     $this->line("🗑️  DELETE | {$message} (Status: {$status})");
                     $toDelete->push($transaction);
@@ -126,7 +126,7 @@ class CleanupPendingTransactions extends Command
     {
         try {
             $serverKey = config('services.midtrans.server_key');
-            $baseUrl = config('services.midtrans.is_production') 
+            $baseUrl = config('services.midtrans.is_production')
                 ? 'https://api.midtrans.com/v2'
                 : 'https://app.sandbox.midtrans.com/v2';
 
@@ -156,7 +156,7 @@ class CleanupPendingTransactions extends Command
         try {
             $transaction->status = 'success';
             $transaction->save();
-            
+
             Log::info('Updated pending transaction to success', [
                 'id' => $transaction->id,
                 'amount' => $transaction->amount,

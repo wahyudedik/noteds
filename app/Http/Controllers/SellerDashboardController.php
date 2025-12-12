@@ -23,7 +23,10 @@ class SellerDashboardController extends Controller
         $baseCurrency = $currencyService->getBaseCurrency();
 
         // Get seller-specific metrics
-        $sellerTransactions = $user->transactionsAsSeller();
+        // CRITICAL: Only count successful transactions (status = 'success')
+        // This prevents injected/pending transactions from inflating revenue
+        $sellerTransactions = $user->transactionsAsSeller()
+            ->where('status', 'success');
 
         $totalRevenueBase = $sellerTransactions
             ->sum('amount') ?? 0;
@@ -37,15 +40,19 @@ class SellerDashboardController extends Controller
                 ->count() ?? 0,
 
             'total_sales' => $sellerTransactions
-                ->count() ?? 0,
+                ->count() ?? 0,  // Already filtered by status = 'success' above
 
             'average_rating' => 0, // Can be calculated from ratings table if exists
         ];
 
         // Get best performing notes (by revenue)
+        // CRITICAL: Only count successful transactions
         $bestPerforming = $user->notes()
             ->where('status', 'published')
-            ->with(['transactionsAsSeller' => fn($q) => $q->where('seller_id', $user->id)])
+            ->with(['transactionsAsSeller' => fn($q) => $q
+                ->where('seller_id', $user->id)
+                ->where('status', 'success')  // Only successful transactions
+            ])
             ->get()
             ->sortByDesc(
                 fn($note) =>
@@ -71,8 +78,10 @@ class SellerDashboardController extends Controller
             ->get();
 
         // Get sales trend (last 30 days)
+        // CRITICAL: Only count successful transactions
         $salesTrend = DB::table('transactions')
             ->where('seller_id', $user->id)
+            ->where('status', 'success')  // Only successful transactions
             ->whereDate('created_at', '>=', now()->subDays(30))
             ->groupBy(DB::raw('DATE(created_at)'))
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count, SUM(amount) as total')

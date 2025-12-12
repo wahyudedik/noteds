@@ -32,7 +32,7 @@ class CleanupSummary extends Command
 
         // Get statistics for last 24 hours
         $yesterday = now()->subDay();
-        
+
         $stats = [
             'pending_total' => Transaction::where('status', 'pending')->count(),
             'pending_old' => Transaction::where('status', 'pending')

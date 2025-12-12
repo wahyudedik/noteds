@@ -49,9 +49,9 @@ class ReportPendingTransactions extends Command
             $hours = $transaction->created_at->diffInHours(now());
             $days = floor($hours / 24);
             $remainingHours = $hours % 24;
-            
+
             $timeAgo = $days > 0 ? "{$days}d {$remainingHours}h" : "{$hours}h";
-            
+
             $this->line("🔴 {$transaction->id}");
             $this->line("   Amount: " . number_format($transaction->amount, 2) . " {$transaction->currency}");
             $this->line("   Pending: {$timeAgo} ago");

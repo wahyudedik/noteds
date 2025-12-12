@@ -43,7 +43,7 @@ class AdminCleanupTransactions extends Command
 
         // Build query
         $query = Transaction::where('created_at', '<', $cutoffDate);
-        
+
         if ($status !== 'all') {
             $query->where('status', $status);
         }
@@ -130,7 +130,6 @@ class AdminCleanupTransactions extends Command
             if ($failed > 0) {
                 $this->warn("⚠️  {$failed} transaction(s) failed to delete - check logs");
             }
-
         } catch (\Exception $e) {
             DB::rollBack();
             $this->error('❌ Transaction failed - all changes rolled back');
@@ -151,7 +150,7 @@ class AdminCleanupTransactions extends Command
         foreach ($transactions as $t) {
             $hours = $t->created_at->diffInHours(now());
             $days = floor($hours / 24);
-            
+
             $rows[] = [
                 substr($t->id, 0, 8) . '...',
                 $t->status,
@@ -176,12 +175,12 @@ class AdminCleanupTransactions extends Command
     private function exportToCSV($transactions): void
     {
         $filename = storage_path('logs/cleanup_export_' . now()->format('Y-m-d_H-i-s') . '.csv');
-        
+
         $fp = fopen($filename, 'w');
-        
+
         // Headers
         fputcsv($fp, ['ID', 'Status', 'Amount', 'Currency', 'Payment Method', 'Buyer', 'Created At']);
-        
+
         // Data
         foreach ($transactions as $t) {
             fputcsv($fp, [
@@ -194,9 +193,9 @@ class AdminCleanupTransactions extends Command
                 $t->created_at->format('Y-m-d H:i:s'),
             ]);
         }
-        
+
         fclose($fp);
-        
+
         $this->info("✅ Exported to: {$filename}");
     }
 }
