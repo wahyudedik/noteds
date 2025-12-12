@@ -16,14 +16,12 @@ class VendorController extends Controller
             ->with(['user', 'serviceQuotes', 'attachments'])
             ->latest()
             ->paginate(10);
-        
+
         $myQuotes = ServiceQuote::where('vendor_id', $vendorId)
             ->with(['user', 'order', 'attachments'])
             ->latest()
             ->paginate(10);
-        
+
         return view('vendor.index', compact('assignedOrders', 'myQuotes'));
     }
 }
-
-
