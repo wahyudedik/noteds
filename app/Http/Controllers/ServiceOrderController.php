@@ -14,7 +14,7 @@ class ServiceOrderController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        
+
         // Optimize: Add eager loading to prevent N+1 queries
         if ($user->hasRole('admin')) {
             $orders = ServiceOrder::with(['user', 'assignedVendor', 'serviceQuotes', 'workSubmissions'])
@@ -174,7 +174,7 @@ class ServiceOrderController extends Controller
 
         return DB::transaction(function () use ($request, $order) {
             $amount = (float) $request->input('amount');
-            
+
             // Validate amount
             if (!is_numeric($amount) || $amount <= 0 || is_nan($amount) || is_infinite($amount)) {
                 return back()->with('error', 'Jumlah escrow tidak valid.');
@@ -182,15 +182,15 @@ class ServiceOrderController extends Controller
 
             /** @var \App\Models\User $buyer */
             $buyer = Auth::user();
-            
+
             // Lock wallet for update to prevent race conditions
             $buyerWallet = \App\Models\Wallet::where('user_id', $buyer->id)
                 ->lockForUpdate()
                 ->firstOrCreate(
-                    ['user_id' => $buyer->id], 
+                    ['user_id' => $buyer->id],
                     ['balance' => 0, 'currency' => config('currency.base_currency', 'IDR')]
                 );
-            
+
             if ($buyerWallet->balance < $amount) {
                 return back()->with('error', 'Saldo wallet tidak cukup untuk funding escrow.');
             }
@@ -207,84 +207,86 @@ class ServiceOrderController extends Controller
 
             if ($order->status === 'quoted') {
                 $order->update(['status' => 'in_progress']);
-        }
-        // Auto-assign vendor to first admin if not set (placeholder)
-        if (!$order->assigned_user_id) {
-            $admin = \App\Models\User::where('role', 'admin')->first();
-            if ($admin) {
-                $order->assigned_user_id = $admin->id;
             }
-        }
-        $order->save();
 
-        // Ledger
-        \App\Models\EscrowLedger::create([
-            'service_order_id' => $order->id,
-            'user_id' => $buyer->id,
-            'type' => 'fund',
-            'amount' => $amount,
-            'milestone_index' => null,
-            'meta' => [],
-        ]);
-        \App\Models\OrderActivity::create([
-            'service_order_id' => $order->id,
-            'user_id' => $buyer->id,
-            'action' => 'escrow_funded',
-            'description' => 'Buyer mendanai escrow',
-            'meta' => ['amount' => $amount],
-        ]);
+            // Auto-assign vendor to first admin if not set (placeholder)
+            if (!$order->assigned_user_id) {
+                $admin = \App\Models\User::where('role', 'admin')->first();
+                if ($admin) {
+                    $order->assigned_user_id = $admin->id;
+                }
+            }
+            $order->save();
 
-        // Notify vendor if assigned, otherwise notify buyer
-        if ($order->assigned_user_id) {
-            \App\Models\AppNotification::create([
-                'user_id' => $order->assigned_user_id,
-                'type' => 'studio_escrow',
-                'title' => 'Escrow didanai',
-                'message' => 'Buyer mendanai escrow untuk order "' . $order->title . '".',
-                'link' => route('studio.orders.show', $order),
-                'is_read' => false,
-                'data' => ['amount' => $amount],
+            // Ledger
+            \App\Models\EscrowLedger::create([
+                'service_order_id' => $order->id,
+                'user_id' => $buyer->id,
+                'type' => 'fund',
+                'amount' => $amount,
+                'milestone_index' => null,
+                'meta' => [],
             ]);
-            if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_funded', 'studio', true)) {
-                try {
-                    $vendor = \App\Models\User::find($order->assigned_user_id);
-                    if ($vendor) {
-                        \Illuminate\Support\Facades\Mail::to($vendor)->queue(
+            \App\Models\OrderActivity::create([
+                'service_order_id' => $order->id,
+                'user_id' => $buyer->id,
+                'action' => 'escrow_funded',
+                'description' => 'Buyer mendanai escrow',
+                'meta' => ['amount' => $amount],
+            ]);
+
+            // Notify vendor if assigned, otherwise notify buyer
+            if ($order->assigned_user_id) {
+                \App\Models\AppNotification::create([
+                    'user_id' => $order->assigned_user_id,
+                    'type' => 'studio_escrow',
+                    'title' => 'Escrow didanai',
+                    'message' => 'Buyer mendanai escrow untuk order "' . $order->title . '".',
+                    'link' => route('studio.orders.show', $order),
+                    'is_read' => false,
+                    'data' => ['amount' => $amount],
+                ]);
+                if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_funded', 'studio', true)) {
+                    try {
+                        $vendor = \App\Models\User::find($order->assigned_user_id);
+                        if ($vendor) {
+                            \Illuminate\Support\Facades\Mail::to($vendor)->queue(
+                                new \App\Mail\StudioNotification(
+                                    'Escrow didanai',
+                                    'Buyer mendanai escrow untuk order "' . $order->title . '".',
+                                    route('studio.orders.show', $order)
+                                )
+                            );
+                        }
+                    } catch (\Throwable $e) {
+                    }
+                }
+            } else {
+                \App\Models\AppNotification::create([
+                    'user_id' => $order->user_id,
+                    'type' => 'studio_escrow',
+                    'title' => 'Escrow didanai',
+                    'message' => 'Escrow berhasil didanai untuk order "' . $order->title . '".',
+                    'link' => route('studio.orders.show', $order),
+                    'is_read' => false,
+                    'data' => ['amount' => $amount],
+                ]);
+                if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_funded', 'studio', true)) {
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($order->user)->queue(
                             new \App\Mail\StudioNotification(
                                 'Escrow didanai',
-                                'Buyer mendanai escrow untuk order "' . $order->title . '".',
+                                'Escrow berhasil didanai untuk order "' . $order->title . '".',
                                 route('studio.orders.show', $order)
                             )
                         );
+                    } catch (\Throwable $e) {
                     }
-                } catch (\Throwable $e) {
                 }
             }
-        } else {
-            \App\Models\AppNotification::create([
-                'user_id' => $order->user_id,
-                'type' => 'studio_escrow',
-                'title' => 'Escrow didanai',
-                'message' => 'Escrow berhasil didanai untuk order "' . $order->title . '".',
-                'link' => route('studio.orders.show', $order),
-                'is_read' => false,
-                'data' => ['amount' => $amount],
-            ]);
-            if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_funded', 'studio', true)) {
-                try {
-                    \Illuminate\Support\Facades\Mail::to($order->user)->queue(
-                        new \App\Mail\StudioNotification(
-                            'Escrow didanai',
-                            'Escrow berhasil didanai untuk order "' . $order->title . '".',
-                            route('studio.orders.show', $order)
-                        )
-                    );
-                } catch (\Throwable $e) {
-                }
-            }
-        }
 
-        return back()->with('success', 'Escrow berhasil di-fund.');
+            return back()->with('success', 'Escrow berhasil di-fund.');
+        });
     }
 
     public function releaseEscrow(Request $request, ServiceOrder $order): RedirectResponse
@@ -314,16 +316,16 @@ class ServiceOrderController extends Controller
             'amount' => ['required', 'numeric', 'min:1'],
             'milestone_index' => ['nullable', 'integer', 'min:0'],
         ]);
-        
+
         return DB::transaction(function () use ($request, $order, $user) {
             $amount = (float) $request->input('amount');
             $milestoneIndex = $request->input('milestone_index');
-            
+
             // Validate amount
             if (!is_numeric($amount) || $amount <= 0 || is_nan($amount) || is_infinite($amount)) {
                 return back()->with('error', 'Jumlah release tidak valid.');
             }
-            
+
             if ($amount > $order->escrow_amount) {
                 return back()->with('error', 'Jumlah release melebihi escrow.');
             }
@@ -353,22 +355,22 @@ class ServiceOrderController extends Controller
 
             // Validate platform fee calculations
             $platformPercent = (float) (\App\Models\Setting::getSetting('studio_platform_fee_percent', 'studio', 10) ?? 10);
-            
+
             if (!is_numeric($platformPercent) || $platformPercent < 0 || $platformPercent > 100) {
                 return back()->with('error', 'Invalid platform fee percentage.');
             }
-            
+
             $platformFee = $amount * ($platformPercent / 100);
             $vendorNet = $amount - $platformFee;
-            
+
             if (!is_numeric($platformFee) || is_nan($platformFee) || is_infinite($platformFee) || $platformFee < 0) {
                 return back()->with('error', 'Invalid platform fee calculation.');
             }
-            
+
             if (!is_numeric($vendorNet) || is_nan($vendorNet) || is_infinite($vendorNet) || $vendorNet < 0) {
                 return back()->with('error', 'Invalid vendor amount calculation.');
             }
-            
+
             if ($vendorNet < 0) {
                 $vendorNet = 0;
             }
@@ -385,7 +387,7 @@ class ServiceOrderController extends Controller
             $vendorWallet = \App\Models\Wallet::where('user_id', $vendor->id)
                 ->lockForUpdate()
                 ->firstOrCreate(
-                    ['user_id' => $vendor->id], 
+                    ['user_id' => $vendor->id],
                     ['balance' => 0, 'currency' => config('currency.base_currency', 'IDR')]
                 );
             $vendorWallet->balance += $vendorNet;
@@ -400,7 +402,7 @@ class ServiceOrderController extends Controller
                     $adminWallet = \App\Models\Wallet::where('user_id', $admin->id)
                         ->lockForUpdate()
                         ->firstOrCreate(
-                            ['user_id' => $admin->id], 
+                            ['user_id' => $admin->id],
                             ['balance' => 0, 'currency' => config('currency.base_currency', 'IDR')]
                         );
                     $adminWallet->balance += $platformFee;
@@ -424,63 +426,64 @@ class ServiceOrderController extends Controller
                 'service_order_id' => $order->id,
                 'user_id' => Auth::id(),
                 'type' => 'release',
-            'amount' => $amount,
-            'milestone_index' => $milestoneIndex,
-            'meta' => ['vendor_net' => $vendorNet, 'platform_fee' => $platformFee],
-        ]);
-        \App\Models\OrderActivity::create([
-            'service_order_id' => $order->id,
-            'user_id' => Auth::id(),
-            'action' => 'escrow_released',
-            'description' => 'Buyer merilis escrow',
-            'meta' => ['amount' => $amount, 'milestone_index' => $milestoneIndex, 'vendor_net' => $vendorNet, 'platform_fee' => $platformFee],
-        ]);
+                'amount' => $amount,
+                'milestone_index' => $milestoneIndex,
+                'meta' => ['vendor_net' => $vendorNet, 'platform_fee' => $platformFee],
+            ]);
+            \App\Models\OrderActivity::create([
+                'service_order_id' => $order->id,
+                'user_id' => Auth::id(),
+                'action' => 'escrow_released',
+                'description' => 'Buyer merilis escrow',
+                'meta' => ['amount' => $amount, 'milestone_index' => $milestoneIndex, 'vendor_net' => $vendorNet, 'platform_fee' => $platformFee],
+            ]);
 
-        // Notify vendor & buyer
-        \App\Models\AppNotification::create([
-            'user_id' => $vendor->id,
-            'type' => 'studio_escrow',
-            'title' => 'Escrow dirilis',
-            'message' => 'Dana escrow dirilis untuk order "' . $order->title . '".',
-            'link' => route('studio.orders.show', $order),
-            'is_read' => false,
-            'data' => ['amount' => $amount, 'net' => $vendorNet],
-        ]);
-        if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_released', 'studio', true)) {
-            try {
-                \Illuminate\Support\Facades\Mail::to($vendor)->queue(
-                    new \App\Mail\StudioNotification(
-                        'Escrow dirilis',
-                        'Dana escrow dirilis untuk order "' . $order->title . '".',
-                        route('studio.orders.show', $order)
-                    )
-                );
-            } catch (\Throwable $e) {
+            // Notify vendor & buyer
+            \App\Models\AppNotification::create([
+                'user_id' => $vendor->id,
+                'type' => 'studio_escrow',
+                'title' => 'Escrow dirilis',
+                'message' => 'Dana escrow dirilis untuk order "' . $order->title . '".',
+                'link' => route('studio.orders.show', $order),
+                'is_read' => false,
+                'data' => ['amount' => $amount, 'net' => $vendorNet],
+            ]);
+            if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_released', 'studio', true)) {
+                try {
+                    \Illuminate\Support\Facades\Mail::to($vendor)->queue(
+                        new \App\Mail\StudioNotification(
+                            'Escrow dirilis',
+                            'Dana escrow dirilis untuk order "' . $order->title . '".',
+                            route('studio.orders.show', $order)
+                        )
+                    );
+                } catch (\Throwable $e) {
+                }
             }
-        }
-        \App\Models\AppNotification::create([
-            'user_id' => $order->user_id,
-            'type' => 'studio_escrow',
-            'title' => 'Escrow dirilis',
-            'message' => 'Anda merilis dana escrow untuk order "' . $order->title . '".',
-            'link' => route('studio.orders.show', $order),
-            'is_read' => false,
-            'data' => ['amount' => $amount],
-        ]);
-        if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_released', 'studio', true)) {
-            try {
-                \Illuminate\Support\Facades\Mail::to($order->user)->queue(
-                    new \App\Mail\StudioNotification(
-                        'Escrow dirilis',
-                        'Anda merilis dana escrow untuk order "' . $order->title . '".',
-                        route('studio.orders.show', $order)
-                    )
-                );
-            } catch (\Throwable $e) {
+            \App\Models\AppNotification::create([
+                'user_id' => $order->user_id,
+                'type' => 'studio_escrow',
+                'title' => 'Escrow dirilis',
+                'message' => 'Anda merilis dana escrow untuk order "' . $order->title . '".',
+                'link' => route('studio.orders.show', $order),
+                'is_read' => false,
+                'data' => ['amount' => $amount],
+            ]);
+            if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_released', 'studio', true)) {
+                try {
+                    \Illuminate\Support\Facades\Mail::to($order->user)->queue(
+                        new \App\Mail\StudioNotification(
+                            'Escrow dirilis',
+                            'Anda merilis dana escrow untuk order "' . $order->title . '".',
+                            route('studio.orders.show', $order)
+                        )
+                    );
+                } catch (\Throwable $e) {
+                }
             }
-        }
 
-        return back()->with('success', 'Escrow dilepas ke vendor.');
+            return back()->with('success', 'Escrow dilepas ke vendor.');
+        });
     }
 
     public function refundEscrow(Request $request, ServiceOrder $order): RedirectResponse
@@ -491,15 +494,15 @@ class ServiceOrderController extends Controller
         $request->validate([
             'amount' => ['required', 'numeric', 'min:1'],
         ]);
-        
+
         return DB::transaction(function () use ($request, $order, $user) {
             $amount = (float) $request->input('amount');
-            
+
             // Validate amount
             if (!is_numeric($amount) || $amount <= 0 || is_nan($amount) || is_infinite($amount)) {
                 return back()->with('error', 'Jumlah refund tidak valid.');
             }
-            
+
             if ($amount > $order->escrow_amount) {
                 return back()->with('error', 'Jumlah refund melebihi escrow.');
             }
@@ -517,7 +520,7 @@ class ServiceOrderController extends Controller
             $buyerWallet = \App\Models\Wallet::where('user_id', $buyer->id)
                 ->lockForUpdate()
                 ->firstOrCreate(
-                    ['user_id' => $buyer->id], 
+                    ['user_id' => $buyer->id],
                     ['balance' => 0, 'currency' => config('currency.base_currency', 'IDR')]
                 );
             $buyerWallet->balance += $amount;
@@ -536,34 +539,35 @@ class ServiceOrderController extends Controller
             ]);
             \App\Models\OrderActivity::create([
                 'service_order_id' => $order->id,
-            'user_id' => Auth::id(),
-            'action' => 'escrow_refunded',
-            'description' => 'Buyer menerima refund escrow',
-            'meta' => ['amount' => $amount],
-        ]);
+                'user_id' => Auth::id(),
+                'action' => 'escrow_refunded',
+                'description' => 'Buyer menerima refund escrow',
+                'meta' => ['amount' => $amount],
+            ]);
 
-        \App\Models\AppNotification::create([
-            'user_id' => $order->user_id,
-            'type' => 'studio_escrow',
-            'title' => 'Escrow direfund',
-            'message' => 'Dana escrow dikembalikan ke wallet Anda untuk order "' . $order->title . '".',
-            'link' => route('studio.orders.show', $order),
-            'is_read' => false,
-            'data' => ['amount' => $amount],
-        ]);
-        if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_refunded', 'studio', true)) {
-            try {
-                \Illuminate\Support\Facades\Mail::to($order->user)->queue(
-                    new \App\Mail\StudioNotification(
-                        'Escrow direfund',
-                        'Dana escrow dikembalikan ke wallet Anda untuk order "' . $order->title . '".',
-                        route('studio.orders.show', $order)
-                    )
-                );
-            } catch (\Throwable $e) {
+            \App\Models\AppNotification::create([
+                'user_id' => $order->user_id,
+                'type' => 'studio_escrow',
+                'title' => 'Escrow direfund',
+                'message' => 'Dana escrow dikembalikan ke wallet Anda untuk order "' . $order->title . '".',
+                'link' => route('studio.orders.show', $order),
+                'is_read' => false,
+                'data' => ['amount' => $amount],
+            ]);
+            if ((bool) \App\Models\Setting::getSetting('studio_email_escrow_refunded', 'studio', true)) {
+                try {
+                    \Illuminate\Support\Facades\Mail::to($order->user)->queue(
+                        new \App\Mail\StudioNotification(
+                            'Escrow direfund',
+                            'Dana escrow dikembalikan ke wallet Anda untuk order "' . $order->title . '".',
+                            route('studio.orders.show', $order)
+                        )
+                    );
+                } catch (\Throwable $e) {
+                }
             }
-        }
 
-        return back()->with('success', 'Escrow dikembalikan ke wallet Anda.');
+            return back()->with('success', 'Escrow dikembalikan ke wallet Anda.');
+        });
     }
 }

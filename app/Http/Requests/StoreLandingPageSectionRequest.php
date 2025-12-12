@@ -45,4 +45,20 @@ class StoreLandingPageSectionRequest extends FormRequest
             'valid_until.after_or_equal' => 'Valid until date must be after or equal to valid from date.',
         ];
     }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        // Convert JSON string content to array
+        if ($this->has('content') && is_string($this->input('content'))) {
+            try {
+                $content = json_decode($this->input('content'), true);
+                $this->merge(['content' => $content ?: []]);
+            } catch (\Exception $e) {
+                $this->merge(['content' => []]);
+            }
+        }
+    }
 }
