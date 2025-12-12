@@ -130,6 +130,7 @@ class MidtransWebhookSecurityService
 
     /**
      * Verify order exists and amount matches (prevents amount tampering)
+     * Allows small variance for payment gateway fees (up to 5% or 100,000 IDR)
      */
     private static function verifyOrderAmount(array $notification): void
     {
@@ -150,19 +151,39 @@ class MidtransWebhookSecurityService
             throw new \Exception("Transaction not found: {$orderId}");
         }
 
-        // Verify amount matches (prevent amount tampering)
-        if ((float) $grossAmount !== (float) $transaction->amount) {
-            Log::error('🚨 SECURITY: Amount mismatch in webhook', [
+        // Verify amount is within tolerance
+        // Allow up to 5% variance or 100,000 IDR (whichever is larger) for gateway fees
+        $expectedAmount = (float) $transaction->amount;
+        $receivedAmount = (float) $grossAmount;
+        $variance = abs($receivedAmount - $expectedAmount);
+        $tolerance = max($expectedAmount * 0.05, 100000); // 5% or 100k, whichever is larger
+
+        if ($variance > $tolerance) {
+            Log::error('🚨 SECURITY: Amount mismatch exceeds tolerance in webhook', [
                 'order_id' => $orderId,
-                'expected_amount' => $transaction->amount,
-                'webhook_amount' => $grossAmount,
+                'expected_amount' => $expectedAmount,
+                'webhook_amount' => $receivedAmount,
+                'variance' => $variance,
+                'tolerance' => $tolerance,
                 'ip_address' => request()->ip(),
             ]);
 
             throw new \Exception(
                 "Amount mismatch for {$orderId}. " .
-                "Expected: {$transaction->amount}, Received: {$grossAmount}"
+                "Expected: {$expectedAmount}, Received: {$receivedAmount}, " .
+                "Variance: {$variance} exceeds tolerance of {$tolerance}"
             );
+        }
+
+        // Log if there's variance (for auditing)
+        if ($variance > 0) {
+            Log::info('ℹ️ Amount variance detected (within tolerance)', [
+                'order_id' => $orderId,
+                'expected_amount' => $expectedAmount,
+                'received_amount' => $receivedAmount,
+                'variance' => $variance,
+                'likely_cause' => 'Payment gateway fee or currency conversion',
+            ]);
         }
 
         Log::debug('✅ Order amount verified', [
