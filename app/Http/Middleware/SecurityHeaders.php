@@ -106,7 +106,7 @@ class SecurityHeaders
         // cdnjs.cloudflare.com (Prism, PDF.js, Model Viewer, etc.)
         $sources[] = 'https://cdnjs.cloudflare.com';
         $sources[] = 'https://ajax.googleapis.com';
-        
+
         // Google Tag Manager & Google Analytics
         $sources[] = 'https://www.googletagmanager.com';
         $sources[] = 'https://www.google-analytics.com';
@@ -219,7 +219,7 @@ class SecurityHeaders
         $sources[] = 'https://*.cloudflare.com';
         $sources[] = 'https://cloudflareinsights.com';
         $sources[] = 'https://*.cloudflareinsights.com';
-        
+
         // Google Tag Manager & Analytics
         $sources[] = 'https://www.googletagmanager.com';
         $sources[] = 'https://www.google-analytics.com';
