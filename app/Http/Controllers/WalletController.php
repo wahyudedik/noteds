@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use App\Services\CurrencyService;
 use App\Services\NotificationService;
+use App\Services\MidtransWebhookSecurityService;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Transaction as MidtransTransaction;
@@ -283,8 +284,10 @@ class WalletController extends Controller
                 'gross_amount' => $notification['gross_amount'] ?? null,
             ]);
 
-            // ⚠️ CRITICAL: Verify Midtrans signature to prevent spoofed webhooks
-            $this->verifyMidtransSignature($notification);
+            // ⚠️ CRITICAL: Verify webhook using comprehensive security service
+            // This includes: signature verification, IP check, amount validation, rate limiting
+            MidtransWebhookSecurityService::verifyWebhook($request, $notification);
+            MidtransWebhookSecurityService::checkRateLimit($notification['order_id'] ?? '');
 
             Log::info('Midtrans Webhook Received:', [
                 'order_id' => $notification['order_id'] ?? null,
@@ -323,12 +326,23 @@ class WalletController extends Controller
                 $this->handlePurchaseWebhook($transaction, $transactionStatus, $fraudStatus);
             }
 
+            // Log audit trail for security compliance
+            Log::info('✅ Webhook processed successfully', 
+                MidtransWebhookSecurityService::auditLog($request, $notification, 'success')
+            );
+
             return response()->json(['status' => 'ok', 'message' => 'Webhook processed']);
         } catch (\Exception $e) {
-            Log::error('Webhook Error: ' . $e->getMessage(), [
+            Log::error('❌ Webhook Error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
-                'notification' => $request->getContent(),
             ]);
+
+            // Log failed webhook attempt for security
+            if (isset($notification)) {
+                Log::warning('⚠️ Webhook security check failed', 
+                    MidtransWebhookSecurityService::auditLog($request, $notification, 'failed')
+                );
+            }
 
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
