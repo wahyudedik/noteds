@@ -62,6 +62,19 @@ class Kernel extends ConsoleKernel
                 \Illuminate\Support\Facades\Log::info('✅ Subscription renewals completed');
             });
 
+        // ===== MIDTRANS PAYMENT SYNC =====
+        // Sync pending topups with Midtrans every 5 minutes to catch missed webhooks
+        $schedule->command('midtrans:sync-status --all')
+            ->everyFiveMinutes()
+            ->name('sync-midtrans-payment-status')
+            ->withoutOverlapping()
+            ->onSuccess(function () {
+                \Illuminate\Support\Facades\Log::info('✅ Midtrans payment status sync completed');
+            })
+            ->onFailure(function () {
+                \Illuminate\Support\Facades\Log::error('❌ Midtrans payment status sync failed');
+            });
+
         // ===== MONITORING & REPORTING =====
         // Check for suspicious pending transactions (every 6 hours)
         $schedule->command('transactions:report-pending')
