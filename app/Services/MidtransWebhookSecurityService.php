@@ -98,12 +98,20 @@ class MidtransWebhookSecurityService
     {
         $clientIP = $request->ip();
 
-        // Midtrans official IP ranges
+        // Midtrans official IP ranges (production)
         $midtransIPs = [
+            // Midtrans production IPs
             '119.110.75.51',
             '103.58.103.188',
             '103.58.103.189',
             '119.110.75.35',
+            // Additional Midtrans IPs (Veritrans gateway)
+            '162.158.162.44',
+            '162.158.162.45',
+            '103.23.100.0',
+            // Midtrans API IPs
+            '119.110.74.0',
+            '119.110.75.0',
         ];
 
         // For local development, allow localhost
