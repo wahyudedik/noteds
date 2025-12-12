@@ -111,8 +111,10 @@
                                         </div>
                                         <input type="number" name="amount" min="{{ $minAttribute }}"
                                             max="{{ $maxAttribute }}" step="{{ $stepAttribute }}"
-                                            value="{{ old('amount') }}" placeholder="0" required
-                                            class="block w-full pl-10 pr-4 py-2.5 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 text-sm h-[42px]">
+                                            value="{{ old('amount') }}" placeholder="0" required inputmode="decimal"
+                                            pattern="[0-9]*\.?[0-9]{0,4}"
+                                            class="block w-full pl-10 pr-4 py-2.5 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 text-sm h-[42px]"
+                                            onchange="validateAmount(this)" oninput="validateAmount(this)">
                                     </div>
                                     {{-- <p class="mt-1.5 text-xs text-gray-500">
                                     {{ __('messages.minimum_topup_amount', ['amount' => currency($topupMinBase, $userCurrency, $baseCurrency)]) }}
@@ -370,6 +372,52 @@
                     @endif
                 </div>
             </div>
+
+            <script>
+                function validateAmount(input) {
+                    const value = parseFloat(input.value);
+                    const min = parseFloat(input.min);
+                    const max = parseFloat(input.max);
+
+                    // Check if value is a valid number
+                    if (isNaN(value) || !isFinite(value)) {
+                        input.setCustomValidity('Please enter a valid amount');
+                        return false;
+                    }
+
+                    // Check min/max
+                    if (value < min) {
+                        input.setCustomValidity('Amount is below minimum ({{ $minAttribute }})');
+                        return false;
+                    }
+
+                    if (value > max) {
+                        input.setCustomValidity('Amount exceeds maximum ({{ $maxAttribute }})');
+                        return false;
+                    }
+
+                    // Check if value has too many decimal places
+                    const decimalPlaces = (input.value.split('.')[1] || '').length;
+                    if (decimalPlaces > 4) {
+                        input.setCustomValidity('Maximum 4 decimal places allowed');
+                        return false;
+                    }
+
+                    input.setCustomValidity('');
+                    return true;
+                }
+
+                // Form submission validation
+                document.querySelectorAll('form[action="{{ route('wallet.topup') }}"]').forEach(form => {
+                    form.addEventListener('submit', function(e) {
+                        const input = this.querySelector('input[name="amount"]');
+                        if (!validateAmount(input)) {
+                            e.preventDefault();
+                            alert('Invalid amount. ' + input.validationMessage);
+                        }
+                    });
+                });
+            </script>
         </div>
     </div>
 @endsection
