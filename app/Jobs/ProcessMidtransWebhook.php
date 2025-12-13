@@ -69,7 +69,6 @@ class ProcessMidtransWebhook implements ShouldQueue
             }
 
             Log::info('✅ Webhook job completed successfully', ['order_id' => $this->orderId]);
-
         } catch (\Exception $e) {
             Log::error('❌ Error processing webhook job: ' . $e->getMessage(), [
                 'order_id' => $this->orderId,
@@ -130,7 +129,7 @@ class ProcessMidtransWebhook implements ShouldQueue
                 DB::transaction(function () use ($transaction, $grossAmount, $currencyService, &$successContext) {
                     // Use pessimistic locking to prevent duplicate processing
                     $transaction = $transaction->lockForUpdate()->refresh();
-                    
+
                     if ($transaction->status === 'success') {
                         Log::info('Transaction already processed, skipping: ' . $transaction->id);
                         return;
@@ -140,7 +139,7 @@ class ProcessMidtransWebhook implements ShouldQueue
                     $transaction->save();
 
                     $baseCurrency = $currencyService->getBaseCurrency();
-                    
+
                     // Lock and create/update wallet
                     $wallet = Wallet::where('user_id', $transaction->buyer_id)
                         ->lockForUpdate()

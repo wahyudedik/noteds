@@ -269,7 +269,7 @@ class WalletController extends Controller
     public function webhook(Request $request): \Illuminate\Http\JsonResponse
     {
         $notification = null;
-        
+
         try {
             // Log incoming webhook
             Log::info('🔔 Webhook received from Midtrans', [
@@ -318,7 +318,6 @@ class WalletController extends Controller
             // The actual processing happens in the job queue
             Log::info('✅ Webhook queued for processing: ' . $orderId);
             return response()->json(['status' => 'ok', 'message' => 'Webhook queued for processing'], 200);
-            
         } catch (\Exception $e) {
             // Log the error but still return 200 OK to prevent Midtrans from retrying excessively
             Log::error('❌ Webhook Error: ' . $e->getMessage(), [

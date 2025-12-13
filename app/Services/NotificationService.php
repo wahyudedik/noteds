@@ -213,7 +213,7 @@ class NotificationService
     {
         $admins = User::role('admin')->get();
         $userName = $withdraw->user->name ?? 'Unknown User';
-        
+
         foreach ($admins as $admin) {
             $message = "{$userName} telah mengajukan penarikan sebesar {$this->formatCurrency((float)$withdraw->amount)}. Bank: {$withdraw->bank_name}";
             $data = [

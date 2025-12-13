@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Production Webhook Diagnostics
  * Untuk check status webhook dan transaction
@@ -17,7 +18,7 @@ $env = [];
 foreach ($lines as $line) {
     $line = trim($line);
     if (!$line || strpos($line, '#') === 0) continue;
-    
+
     if (strpos($line, '=') !== false) {
         list($key, $value) = explode('=', $line, 2);
         $env[trim($key)] = trim($value, '"\'');
@@ -48,21 +49,21 @@ if (function_exists('mysqli_connect')) {
     $user = $env['DB_USERNAME'] ?? 'root';
     $pass = $env['DB_PASSWORD'] ?? '';
     $db = $env['DB_DATABASE'] ?? '';
-    
+
     $conn = @mysqli_connect($host, $user, $pass, $db);
     if ($conn) {
         $result = mysqli_query($conn, "SELECT COUNT(*) as cnt FROM transactions WHERE status = 'pending'");
         $row = mysqli_fetch_assoc($result);
         echo "├─ Pending Transactions: " . ($row['cnt'] ?? 0) . "\n";
-        
+
         $result = mysqli_query($conn, "SELECT COUNT(*) as cnt FROM transactions WHERE status = 'settlement'");
         $row = mysqli_fetch_assoc($result);
         echo "├─ Settlement Transactions: " . ($row['cnt'] ?? 0) . "\n";
-        
+
         $result = mysqli_query($conn, "SELECT COUNT(*) as cnt FROM transactions WHERE user_id = 71");
         $row = mysqli_fetch_assoc($result);
         echo "└─ User 71 Transactions: " . ($row['cnt'] ?? 0) . "\n";
-        
+
         mysqli_close($conn);
     } else {
         echo "└─ ❌ Database connection failed\n";
@@ -76,8 +77,8 @@ $logfile = __DIR__ . '/storage/logs/laravel.log';
 if (file_exists($logfile)) {
     echo "├─ Log File: EXISTS\n";
     $size = filesize($logfile);
-    echo "├─ Size: " . ($size > 1024*1024 ? round($size/(1024*1024), 2) . ' MB' : round($size/1024, 2) . ' KB') . "\n";
-    
+    echo "├─ Size: " . ($size > 1024 * 1024 ? round($size / (1024 * 1024), 2) . ' MB' : round($size / 1024, 2) . ' KB') . "\n";
+
     $lines = array_slice(explode("\n", file_get_contents($logfile)), -20);
     echo "├─ Last 5 ERROR/WARNING lines:\n";
     $count = 0;
