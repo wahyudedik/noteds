@@ -207,6 +207,36 @@ class NotificationService
     }
 
     /**
+     * Notify all admins when a new withdraw request is submitted
+     */
+    public function notifyAdminNewWithdrawRequest(Withdraw $withdraw): void
+    {
+        $admins = User::role('admin')->get();
+        $userName = $withdraw->user->name ?? 'Unknown User';
+        
+        foreach ($admins as $admin) {
+            $message = "{$userName} telah mengajukan penarikan sebesar {$this->formatCurrency((float)$withdraw->amount)}. Bank: {$withdraw->bank_name}";
+            $data = [
+                'withdraw_id' => $withdraw->id,
+                'user_id' => $withdraw->user_id,
+                'amount' => $withdraw->amount,
+                'bank_name' => $withdraw->bank_name,
+            ];
+
+            $notification = $this->create(
+                $admin,
+                'admin_new_withdraw',
+                '💳 Withdraw Request Submitted',
+                $message,
+                route('admin.withdraws.show', $withdraw),
+                $data
+            );
+
+            $this->sendPushIfEnabled($admin, $notification->title, $message, $data);
+        }
+    }
+
+    /**
      * Notify all admins when a user uploads document identity and selfie and needs verification.
      */
     public function notifyAdminUserVerificationPending(User $user): void

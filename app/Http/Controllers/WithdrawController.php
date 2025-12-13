@@ -92,9 +92,12 @@ class WithdrawController extends Controller
 
         $this->notificationService->notifyWithdrawRequested($user, (float) $amountBase);
 
+        // 🔔 NOTIFY ALL ADMINS about new withdraw request
+        $withdraw->setRelation('user', $user);
+        $this->notificationService->notifyAdminNewWithdrawRequest($withdraw);
+
         $threshold = $this->notificationService->getHighValueWithdrawThreshold();
         if ($amountBase >= $threshold) {
-            $withdraw->setRelation('user', $user);
             $this->notificationService->notifyAdminHighValueWithdraw($withdraw, $threshold);
         }
 
