@@ -268,7 +268,10 @@ class WalletController extends Controller
 
     public function webhook(Request $request): \Illuminate\Http\JsonResponse
     {
+        $notification = null;
+        
         try {
+            // Log incoming webhook
             Log::info('🔔 Webhook received from Midtrans', [
                 'ip' => $request->ip(),
                 'method' => $request->method(),
@@ -277,6 +280,11 @@ class WalletController extends Controller
             ]);
 
             $notification = json_decode($request->getContent(), true);
+
+            if (!$notification) {
+                Log::warning('Invalid JSON in webhook payload');
+                return response()->json(['status' => 'ok'], 200); // Still return 200 to acknowledge
+            }
 
             Log::info('Webhook Payload:', [
                 'order_id' => $notification['order_id'] ?? null,
@@ -289,12 +297,6 @@ class WalletController extends Controller
             MidtransWebhookSecurityService::verifyWebhook($request, $notification);
             MidtransWebhookSecurityService::checkRateLimit($notification['order_id'] ?? '');
 
-            Log::info('Midtrans Webhook Received:', [
-                'order_id' => $notification['order_id'] ?? null,
-                'transaction_status' => $notification['transaction_status'] ?? null,
-                'timestamp' => now()->toDateTimeString(),
-            ]);
-
             $orderId = $notification['order_id'] ?? null;
             $transactionStatus = $notification['transaction_status'] ?? null;
             $fraudStatus = $notification['fraud_status'] ?? null;
@@ -302,51 +304,39 @@ class WalletController extends Controller
 
             if (!$orderId) {
                 Log::warning('Webhook received without order_id');
-                return response()->json(['status' => 'error', 'message' => 'Missing order_id'], 400);
+                return response()->json(['status' => 'ok'], 200); // Return 200 to prevent Midtrans retry
             }
 
-            $transaction = Transaction::where('midtrans_order_id', $orderId)->first();
-
-            if (!$transaction) {
-                Log::warning('Transaction not found for order_id: ' . $orderId);
-                return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
-            }
-
-            // Prevent duplicate processing
-            if ($transaction->status === 'success' && ($transactionStatus === 'settlement' || $transactionStatus === 'capture')) {
-                Log::info('Transaction already processed: ' . $orderId);
-                return response()->json(['status' => 'ok', 'message' => 'Already processed']);
-            }
-
-            // Handle different transaction types
-            if ($transaction->payment_method === 'topup') {
-                $this->handleTopupWebhook($transaction, $transactionStatus, $fraudStatus, $grossAmount);
-            } else {
-                // Handle purchase webhook if needed
-                $this->handlePurchaseWebhook($transaction, $transactionStatus, $fraudStatus);
-            }
-
-            // Log audit trail for security compliance
-            Log::info(
-                '✅ Webhook processed successfully',
-                MidtransWebhookSecurityService::auditLog($request, $notification, 'success')
+            // IMPORTANT: Process webhook asynchronously to prevent timeout
+            // Queue the webhook processing job to ensure Midtrans gets 200 OK response quickly
+            \Illuminate\Support\Facades\Queue::pushOn(
+                'default',
+                new \App\Jobs\ProcessMidtransWebhook($orderId, $notification)
             );
 
-            return response()->json(['status' => 'ok', 'message' => 'Webhook processed']);
+            // Return 200 OK immediately to Midtrans
+            // The actual processing happens in the job queue
+            Log::info('✅ Webhook queued for processing: ' . $orderId);
+            return response()->json(['status' => 'ok', 'message' => 'Webhook queued for processing'], 200);
+            
         } catch (\Exception $e) {
+            // Log the error but still return 200 OK to prevent Midtrans from retrying excessively
             Log::error('❌ Webhook Error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
+                'order_id' => $notification['order_id'] ?? 'unknown',
             ]);
 
             // Log failed webhook attempt for security
-            if (isset($notification)) {
+            if ($notification) {
                 Log::warning(
-                    '⚠️ Webhook security check failed',
+                    '⚠️ Webhook validation failed',
                     MidtransWebhookSecurityService::auditLog($request, $notification, 'failed')
                 );
             }
 
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            // CRITICAL: Return 200 OK even on error to prevent Midtrans from retrying excessively
+            // The cron job will handle missed updates every 5 minutes
+            return response()->json(['status' => 'ok', 'message' => 'Acknowledged'], 200);
         }
     }
 
