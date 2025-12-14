@@ -12,6 +12,6 @@ class GuestLayout extends Component
      */
     public function render(): View
     {
-        return view('layouts.guest');
+        return view('40-shared/layouts/guest');
     }
 }

@@ -55,7 +55,7 @@ class WalletController extends Controller
             ->latest()
             ->paginate(20);
 
-        return view('wallet.index', compact('wallet', 'transactions'));
+        return view('40-shared/wallet/index', compact('wallet', 'transactions'));
     }
 
     public function topup(Request $request): RedirectResponse
@@ -263,7 +263,7 @@ class WalletController extends Controller
             abort(403);
         }
 
-        return view('wallet.topup-checkout', compact('snapToken', 'transaction'));
+        return view('40-shared/wallet/topup-checkout', compact('snapToken', 'transaction'));
     }
 
     public function webhook(Request $request): \Illuminate\Http\JsonResponse
@@ -857,7 +857,7 @@ class WalletController extends Controller
         // Get paginated transactions
         $transactions = $query->latest()->paginate(50);
 
-        return view('wallet.admin-report', compact(
+        return view('40-shared/wallet/admin-report', compact(
             'transactions',
             'totalTransactions',
             'totalAmount',

@@ -36,7 +36,7 @@ class NoteTemplateController extends Controller
             ->latest()
             ->paginate(12, ['*'], 'public');
 
-        return view('templates.index', compact('myTemplates', 'publicTemplates'));
+        return view('40-shared/templates/index', compact('myTemplates', 'publicTemplates'));
     }
 
     /**
@@ -44,7 +44,7 @@ class NoteTemplateController extends Controller
      */
     public function create(): View
     {
-        return view('templates.create');
+        return view('40-shared/templates/create');
     }
 
     /**
@@ -85,7 +85,7 @@ class NoteTemplateController extends Controller
 
         $template->load('user');
 
-        return view('templates.show', compact('template'));
+        return view('40-shared/templates/show', compact('template'));
     }
 
     /**

@@ -25,7 +25,7 @@ class PostBookmarkController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('forum.bookmarks', compact('bookmarkedPosts'));
+        return view('40-shared/forum/bookmarks', compact('bookmarkedPosts'));
     }
 
     /**

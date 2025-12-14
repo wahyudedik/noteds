@@ -29,7 +29,7 @@ class BuyerSubscriptionController extends Controller
         $user = auth()->user();
         $activeSubscription = $user->activeBuyerSubscription();
 
-        return view('subscriptions.plans', compact('plans', 'activeSubscription'));
+        return view('40-shared/subscriptions/plans', compact('plans', 'activeSubscription'));
     }
 
     /**
@@ -40,7 +40,7 @@ class BuyerSubscriptionController extends Controller
         $user = auth()->user();
         $activeSubscription = $user->activeBuyerSubscription();
 
-        return view('subscriptions.show', compact('plan', 'activeSubscription'));
+        return view('40-shared/subscriptions/show', compact('plan', 'activeSubscription'));
     }
 
     /**
@@ -237,7 +237,7 @@ class BuyerSubscriptionController extends Controller
             return redirect()->route('subscriptions.my-subscription');
         }
 
-        return view('subscriptions.payment', compact('subscription'));
+        return view('40-shared/subscriptions/payment', compact('subscription'));
     }
 
     /**
@@ -294,7 +294,7 @@ class BuyerSubscriptionController extends Controller
         $subscription = $user->activeBuyerSubscription();
         $subscriptions = $user->buyerSubscriptions()->with('plan')->latest()->paginate(10);
 
-        return view('subscriptions.my-subscription', compact('subscription', 'subscriptions'));
+        return view('40-shared/subscriptions/my-subscription', compact('subscription', 'subscriptions'));
     }
 
     /**

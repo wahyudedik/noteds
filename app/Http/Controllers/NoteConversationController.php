@@ -28,7 +28,7 @@ class NoteConversationController extends Controller
             ->orderByDesc(DB::raw('COALESCE(last_message_at, updated_at)'))
             ->paginate(15);
 
-        return view('note-conversations.index', compact('conversations', 'user'));
+        return view('40-shared/note-conversations/index', compact('conversations', 'user'));
     }
 
     public function show(Request $request, NoteConversation $conversation): View
@@ -58,7 +58,7 @@ class NoteConversationController extends Controller
         $hasRated = $conversation->hasRatingFrom($user->id);
         $userRating = $hasRated ? $conversation->getRatingFrom($user->id) : null;
 
-        return view('note-conversations.show', compact('conversation', 'user', 'quickReplies', 'hasRated', 'userRating'));
+        return view('40-shared/note-conversations/show', compact('conversation', 'user', 'quickReplies', 'hasRated', 'userRating'));
     }
 
     public function store(Request $request, NoteConversation $conversation, NotificationService $notificationService, TranslationService $translationService): RedirectResponse|JsonResponse

@@ -520,7 +520,7 @@ class DashboardController extends Controller
         $topBuyersBySpending = $leaderboardService->getTopBuyersBySpending('all-time', 5);
         $topContributorsByReviews = $leaderboardService->getTopContributorsByReviews('all-time', 5);
 
-        return view('admin.dashboard', compact(
+        return view('10-admin.dashboard', compact(
             'stats',
             'platformBalance',
             'walletStats',

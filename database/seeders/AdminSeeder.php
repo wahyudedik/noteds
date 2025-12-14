@@ -16,7 +16,7 @@ class AdminSeeder extends Seeder
     {
         $admin = User::updateOrCreate(
             ['email' => 'info@noteds.com'],
-            [ 
+            [  
                 'name' => 'Noteds Admin',
                 'username' => 'noteds',
                 'password' => bcrypt('Wahyu123456789@'),

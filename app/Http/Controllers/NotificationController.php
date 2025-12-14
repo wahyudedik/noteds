@@ -12,7 +12,7 @@ class NotificationController extends Controller
     {
         $notifications = auth()->user()->notifications()->latest()->paginate(20);
         
-        return view('notifications.index', compact('notifications'));
+        return view('40-shared/notifications/index', compact('notifications'));
     }
 
     public function markAsRead(AppNotification $notification): RedirectResponse

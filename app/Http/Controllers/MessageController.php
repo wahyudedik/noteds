@@ -38,7 +38,7 @@ class MessageController extends Controller
             ->sortByDesc('created_at')
             ->values();
 
-        return view('messages.index', compact('conversations'));
+        return view('40-shared/messages/index', compact('conversations'));
     }
 
     /**
@@ -67,7 +67,7 @@ class MessageController extends Controller
             ->where('is_read', false)
             ->update(['is_read' => true, 'read_at' => now()]);
 
-        return view('messages.conversation', compact('user', 'messages'));
+        return view('40-shared/messages/conversation', compact('user', 'messages'));
     }
 
     /**

@@ -25,7 +25,7 @@ class WebhookController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('webhooks.index', compact('webhooks'));
+        return view('40-shared/webhooks/index', compact('webhooks'));
     }
 
     /**
@@ -33,7 +33,7 @@ class WebhookController extends Controller
      */
     public function create(): View
     {
-        return view('webhooks.create');
+        return view('40-shared/webhooks/create');
     }
 
     /**
@@ -70,7 +70,7 @@ class WebhookController extends Controller
             abort(403);
         }
 
-        return view('webhooks.show', compact('webhook'));
+        return view('40-shared/webhooks/show', compact('webhook'));
     }
 
     /**

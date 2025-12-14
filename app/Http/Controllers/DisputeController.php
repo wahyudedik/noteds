@@ -28,7 +28,7 @@ class DisputeController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('disputes.index', compact('disputes'));
+        return view('40-shared/disputes/index', compact('disputes'));
     }
 
     /**
@@ -51,7 +51,7 @@ class DisputeController extends Controller
                 ->with('info', 'A dispute already exists for this transaction.');
         }
 
-        return view('disputes.create', compact('transaction'));
+        return view('40-shared/disputes/create', compact('transaction'));
     }
 
     /**
@@ -105,7 +105,7 @@ class DisputeController extends Controller
 
         $dispute->load(['note', 'transaction', 'buyer', 'seller', 'refund', 'resolver']);
 
-        return view('disputes.show', compact('dispute'));
+        return view('40-shared/disputes/show', compact('dispute'));
     }
 
     /**

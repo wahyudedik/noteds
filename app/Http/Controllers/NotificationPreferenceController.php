@@ -61,7 +61,7 @@ class NotificationPreferenceController extends Controller
             'timezone' => $user->email_digest_timezone ?? $user->timezone ?? config('app.timezone', 'UTC'),
         ];
 
-        return view('notifications.preferences', compact('notificationTypes', 'preferences', 'quietHours', 'emailDigest'));
+        return view('40-shared/notifications/preferences', compact('notificationTypes', 'preferences', 'quietHours', 'emailDigest'));
     }
 
     /**

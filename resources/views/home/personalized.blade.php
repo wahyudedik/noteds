@@ -1,146 +1,170 @@
-@extends('layouts.app')
+@extends('40-shared/layouts/app')
 
-@section('title', __('messages.home') . ' - ' . config('app.name'))
+@section('title', __('messages.home') ?? 'Home')
 
 @section('content')
-<div class="py-8 sm:py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Welcome Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">
-                {{ __('messages.welcome_back', ['name' => auth()->user()->name]) }}
-            </h1>
-            <p class="mt-2 text-base text-gray-600">
-                {{ __('messages.personalized_feed_description') }}
-            </p>
-        </div>
-
-        <!-- Featured Hero -->
-        @if(isset($featuredHero) && $featuredHero)
-            <div class="mb-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg p-6 shadow-lg">
-                <div class="flex items-center justify-between">
+    <div class="py-10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+            @if ($featuredHero)
+                <div
+                    class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl shadow-lg p-8 flex flex-col md:flex-row items-center gap-6">
                     <div class="flex-1">
-                        <span class="inline-block px-3 py-1 bg-white rounded-full text-xs font-semibold text-orange-600 mb-2">⭐ {{ __('messages.featured_note') }}</span>
-                        <h3 class="text-2xl font-bold text-white mb-2">
-                            <a href="{{ route('marketplace.show', $featuredHero->note) }}" 
-                               class="hover:underline">
-                                {{ $featuredHero->note->title }}
-                            </a>
-                        </h3>
-                        <p class="text-white/90 mb-3">{{ Str::limit($featuredHero->note->summary ?? strip_tags($featuredHero->note->content), 100) }}</p>
-                        <div class="flex items-center gap-4">
-                            @if($featuredHero->note->price > 0)
-                                <span class="text-white font-semibold">{{ currency($featuredHero->note->price) }}</span>
-                            @else
-                                <span class="text-white font-semibold">{{ __('messages.free') }}</span>
+                        <p class="text-sm uppercase tracking-wide font-semibold opacity-80">Featured</p>
+                        <h1 class="text-2xl md:text-3xl font-bold mt-1">{{ $featuredHero->note?->title ?? 'Featured note' }}
+                        </h1>
+                        <p class="mt-2 text-white/90 text-sm">{{ Str::limit($featuredHero->note?->description, 140) }}</p>
+                        <div class="mt-4 flex items-center gap-3 text-sm">
+                            <span
+                                class="px-3 py-1 rounded-full bg-white/15 border border-white/20">{{ $featuredHero->note?->user?->name ?? 'Creator' }}</span>
+                            @if ($featuredHero->note?->avg_rating)
+                                <span class="px-3 py-1 rounded-full bg-white/15 border border-white/20">⭐
+                                    {{ number_format($featuredHero->note->avg_rating, 1) }}
+                                    ({{ $featuredHero->note->reviews_count ?? 0 }})</span>
                             @endif
-                            <a href="{{ route('marketplace.show', $featuredHero->note) }}" 
-                               class="px-4 py-2 bg-white text-orange-600 font-semibold rounded-lg hover:bg-orange-50 transition">
-                                {{ __('messages.view_note') }} →
+                        </div>
+                        <div class="mt-6 flex gap-3">
+                            @if ($featuredHero->note)
+                                <a href="{{ route('notes.show', $featuredHero->note) }}"
+                                    class="inline-flex items-center px-4 py-2 rounded-lg bg-white text-blue-700 font-semibold hover:bg-blue-50 shadow">View
+                                    note</a>
+                            @endif
+                            <a href="{{ route('marketplace.index') }}"
+                                class="inline-flex items-center px-4 py-2 rounded-lg border border-white/40 text-white font-semibold hover:bg-white/10">Browse
+                                more</a>
+                        </div>
+                    </div>
+                    @if ($featuredHero->note?->cover_image)
+                        <div class="w-40 h-40 rounded-xl overflow-hidden shadow-lg">
+                            <img src="{{ asset('storage/' . ltrim($featuredHero->note->cover_image, '/')) }}"
+                                alt="{{ $featuredHero->note->title }}" class="w-full h-full object-cover">
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            @if (($featuredCarousel ?? collect())->count() > 0)
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-slate-900">Featured picks</h2>
+                        <a href="{{ route('marketplace.index') }}"
+                            class="text-sm text-blue-600 hover:text-blue-700 font-medium">See all</a>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach ($featuredCarousel as $featured)
+                            <a href="{{ route('notes.show', $featured->note) }}"
+                                class="block rounded-xl border border-slate-100 hover:border-blue-200 hover:shadow transition p-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
+                                        @if ($featured->note?->cover_image)
+                                            <img src="{{ asset('storage/' . ltrim($featured->note->cover_image, '/')) }}"
+                                                alt="{{ $featured->note->title }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div
+                                                class="w-full h-full flex items-center justify-center text-slate-400 text-xs">
+                                                Note</div>
+                                        @endif
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-semibold text-slate-900 truncate">
+                                            {{ $featured->note?->title ?? 'Untitled' }}</p>
+                                        <p class="text-xs text-slate-500 truncate">
+                                            {{ $featured->note?->user?->name ?? 'Creator' }}</p>
+                                        @if ($featured->note?->avg_rating)
+                                            <p class="text-xs text-amber-600 mt-1">⭐
+                                                {{ number_format($featured->note->avg_rating, 1) }}
+                                                ({{ $featured->note->reviews_count ?? 0 }})
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
                             </a>
-                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-lg font-semibold text-slate-900">Recommended for you</h2>
+                        <a href="{{ route('marketplace.index') }}"
+                            class="text-sm text-blue-600 hover:text-blue-700 font-medium">More</a>
+                    </div>
+                    <div class="space-y-3">
+                        @forelse($recommendations ?? [] as $note)
+                            <a href="{{ route('notes.show', $note) }}"
+                                class="block p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-blue-100 transition">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-10 h-10 rounded-md bg-slate-100 overflow-hidden flex-shrink-0">
+                                        @if ($note->cover_image)
+                                            <img src="{{ asset('storage/' . ltrim($note->cover_image, '/')) }}"
+                                                alt="{{ $note->title }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div
+                                                class="w-full h-full flex items-center justify-center text-slate-400 text-xs">
+                                                Note</div>
+                                        @endif
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-semibold text-slate-900 truncate">{{ $note->title }}</p>
+                                        <p class="text-xs text-slate-500 truncate">{{ $note->user?->name ?? 'Creator' }}
+                                        </p>
+                                        @if ($note->avg_rating)
+                                            <p class="text-xs text-amber-600 mt-1">⭐
+                                                {{ number_format($note->avg_rating, 1) }}
+                                                ({{ $note->reviews_count ?? 0 }})
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </a>
+                        @empty
+                            <p class="text-sm text-slate-500">No recommendations yet.</p>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-lg font-semibold text-slate-900">Recently viewed</h2>
+                        <a href="{{ route('notes.index') }}"
+                            class="text-sm text-blue-600 hover:text-blue-700 font-medium">Browse</a>
+                    </div>
+                    <div class="space-y-3">
+                        @forelse($recentlyViewed ?? [] as $note)
+                            <a href="{{ route('notes.show', $note) }}"
+                                class="block p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-blue-100 transition">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-10 h-10 rounded-md bg-slate-100 overflow-hidden flex-shrink-0">
+                                        @if ($note?->cover_image)
+                                            <img src="{{ asset('storage/' . ltrim($note->cover_image, '/')) }}"
+                                                alt="{{ $note?->title ?? 'Note' }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div
+                                                class="w-full h-full flex items-center justify-center text-slate-400 text-xs">
+                                                Note</div>
+                                        @endif
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-semibold text-slate-900 truncate">
+                                            {{ $note?->title ?? 'Untitled' }}</p>
+                                        <p class="text-xs text-slate-500 truncate">{{ $note?->user?->name ?? 'Creator' }}
+                                        </p>
+                                        @if ($note?->avg_rating)
+                                            <p class="text-xs text-amber-600 mt-1">⭐
+                                                {{ number_format($note->avg_rating, 1) }}
+                                                ({{ $note?->reviews_count ?? 0 }})
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </a>
+                        @empty
+                            <p class="text-sm text-slate-500">No history yet.</p>
+                        @endforelse
                     </div>
                 </div>
             </div>
-        @endif
-
-        <!-- Recently Viewed Notes -->
-        @if(isset($recentlyViewed) && count($recentlyViewed) > 0)
-            <div class="mb-8">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold text-gray-900">📚 {{ __('messages.recently_viewed') }}</h2>
-                    <a href="{{ route('reading-history.index') }}" class="text-sm text-blue-600 hover:text-blue-800">
-                        {{ __('messages.view_all') }} →
-                    </a>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($recentlyViewed as $note)
-                        @include('home.partials.note-card', ['note' => $note])
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
-        <!-- Personalized Recommendations -->
-        @if(isset($recommendations) && count($recommendations) > 0)
-            <div class="mb-8">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-900">✨ {{ __('messages.recommended_for_you') }}</h2>
-                        <p class="text-sm text-gray-600 mt-1">
-                            {{ __('messages.based_on_your_interests') }}
-                        </p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($recommendations as $note)
-                        @include('home.partials.note-card', ['note' => $note])
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
-        <!-- Category Preferences -->
-        @if(isset($preferences) && $preferences && ($preferences->preferred_categories || $preferences->preferred_tags))
-            <div class="mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">🎯 {{ __('messages.your_interests') }}</h2>
-                <div class="bg-white rounded-lg border border-gray-200 p-6">
-                    @if($preferences->preferred_categories && count($preferences->preferred_categories) > 0)
-                        <div class="mb-4">
-                            <h3 class="text-sm font-semibold text-gray-700 mb-2">{{ __('messages.preferred_categories') }}</h3>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach($preferences->preferred_categories as $category)
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        {{ ucfirst($category) }}
-                                    </span>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-                    @if($preferences->preferred_tags && count($preferences->preferred_tags) > 0)
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-700 mb-2">{{ __('messages.preferred_tags') }}</h3>
-                            <div class="flex flex-wrap gap-2">
-                                @php
-                                    $tags = \App\Models\Tag::whereIn('id', $preferences->preferred_tags)->get();
-                                @endphp
-                                @foreach($tags as $tag)
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        {{ $tag->name }}
-                                    </span>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-                    <div class="mt-4">
-                        <a href="{{ route('profile.edit') }}" class="text-sm text-blue-600 hover:text-blue-800">
-                            {{ __('messages.update_preferences') }} →
-                        </a>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        <!-- Featured Carousel -->
-        @if(isset($featuredCarousel) && $featuredCarousel->count() > 0)
-            <div class="mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">⭐ {{ __('messages.featured_notes') }}</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($featuredCarousel as $featured)
-                        @php($note = $featured->note)
-                        @include('home.partials.note-card', ['note' => $note, 'isFeatured' => true])
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
-        <!-- Browse Marketplace CTA -->
-        <div class="text-center py-8">
-            <a href="{{ route('marketplace.index') }}" 
-               class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
-                {{ __('messages.browse_marketplace') }} →
-            </a>
         </div>
     </div>
-</div>
 @endsection

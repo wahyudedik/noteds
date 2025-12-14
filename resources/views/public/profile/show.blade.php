@@ -1,609 +1,419 @@
-@extends('layouts.app')
+@extends('40-shared/layouts/app')
 
-@section('title', $user->name . ' - Profile')
-
-@push('meta')
-    @php
-        $shareUrl = route('public.profile.show', $user->username);
-        $shareTitle = $user->name . ' - ' . config('app.name') . ' Seller Profile';
-        $shareDescription =
-            $user->bio ?:
-            'Check out my notes on ' . config('app.name') . '! ' . $stats['total_notes'] . ' notes available.';
-        $shareImage = $user->avatar
-            ? (str_starts_with($user->avatar, 'http')
-                ? $user->avatar
-                : url(Storage::url($user->avatar)))
-            : null;
-    @endphp
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="profile">
-    <meta property="og:url" content="{{ $shareUrl }}">
-    <meta property="og:title" content="{{ $shareTitle }}">
-    <meta property="og:description" content="{{ $shareDescription }}">
-    @if ($shareImage)
-        <meta property="og:image" content="{{ $shareImage }}">
-        <meta property="og:image:width" content="1200">
-        <meta property="og:image:height" content="630">
-    @endif
-    <meta property="og:site_name" content="{{ config('app.name') }}">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ $shareUrl }}">
-    <meta property="twitter:title" content="{{ $shareTitle }}">
-    <meta property="twitter:description" content="{{ $shareDescription }}">
-    @if ($shareImage)
-        <meta property="twitter:image" content="{{ $shareImage }}">
-    @endif
-
-    <!-- Additional Meta -->
-    <meta name="description" content="{{ $shareDescription }}">
-@endpush
+@section('title', $user->name . ' - ' . config('app.name'))
 
 @section('content')
-    <div class="py-8 sm:py-12 bg-gray-50 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Profile Header -->
-            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
-                <div class="p-8">
-                    <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
-                        <!-- Avatar -->
-                        <div
-                            class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-lg overflow-hidden">
-                            @if ($user->avatar)
-                                @if (str_starts_with($user->avatar, 'http'))
-                                    <img src="{{ $user->avatar }}" alt="{{ $user->name }}"
-                                        class="w-24 h-24 rounded-full object-cover">
-                                @else
-                                    <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}"
-                                        class="w-24 h-24 rounded-full object-cover">
-                                @endif
+    <div class="min-h-screen bg-gray-50">
+        <!-- Profile Header -->
+        <div class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+                    <!-- Avatar -->
+                    <div
+                        class="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
+                        @if ($user->avatar)
+                            @if (str_starts_with($user->avatar, 'http'))
+                                <img src="{{ $user->avatar }}" alt="{{ $user->name }}"
+                                    class="w-32 h-32 rounded-full object-cover">
                             @else
+                                <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}"
+                                    class="w-32 h-32 rounded-full object-cover">
+                            @endif
+                        @else
+                            <span class="text-6xl font-bold text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                        @endif
+                    </div>
+
+                    <!-- User Info -->
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h1 class="text-4xl font-bold text-gray-900">{{ $user->name }}</h1>
+                            @if ($user->hasRole('seller'))
                                 <span
-                                    class="text-4xl font-bold text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                    Seller
+                                </span>
+                            @endif
+                            @if ($user->verification_status === 'verified')
+                                <span
+                                    class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    Verified
+                                </span>
                             @endif
                         </div>
 
-                        <!-- User Info -->
-                        <div class="flex-1">
-                            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $user->name }}</h1>
-                            @if ($user->bio)
-                                <p class="text-base text-gray-600 mb-3">{{ $user->bio }}</p>
-                            @endif
-                            <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                                @if ($user->location)
-                                    <div class="flex items-center">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        {{ $user->location }}
-                                    </div>
-                                @endif
+                        @if ($user->username)
+                            <p class="text-gray-600 text-lg mb-3">@{{ $user - > username }}</p>
+                        @endif
+
+                        @if ($user->bio)
+                            <p class="text-gray-700 text-base mb-4 max-w-2xl">{{ $user->bio }}</p>
+                        @endif
+
+                        <!-- Location & Contact -->
+                        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                            @if ($user->location)
                                 <div class="flex items-center">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     </svg>
-                                    Joined {{ $user->created_at->format('M Y') }}
+                                    {{ $user->location }}
+                                </div>
+                            @endif
+
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Joined {{ $user->created_at->format('M Y') }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3 w-full md:w-auto">
+                        @auth
+                            @if (auth()->id() !== $user->id)
+                                <a href="{{ route('messages.index') }}"
+                                    class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    Message
+                                </a>
+                            @endif
+                        @else
+                            <a href="{{ route('login') }}"
+                                class="flex-1 md:flex-none inline-flex items-center justify-center px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+                                Sign In
+                            </a>
+                        @endauth
+
+                        <!-- Share Buttons -->
+                        <div class="flex gap-2">
+                            <a href="https://facebook.com/sharer/sharer.php?u={{ urlencode(route('public.profile.show', $user->username)) }}"
+                                target="_blank" rel="noopener noreferrer"
+                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                                title="Share on Facebook">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5c-.563-.074-2.323-.216-4.408-.216-4.979 0-8.385 3.541-8.385 10.045v1.671z" />
+                                </svg>
+                            </a>
+
+                            <a href="https://twitter.com/intent/tweet?text={{ urlencode('Check out ' . $user->name . ' on ' . config('app.name')) }}&url={{ urlencode(route('public.profile.show', $user->username)) }}"
+                                target="_blank" rel="noopener noreferrer"
+                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-sky-500 text-white hover:bg-sky-600 transition-colors"
+                                title="Share on Twitter">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2s9 5 20 5a9.5 9.5 0 00-9-5.5c4.75 2.25 7-7 7-7s1.08-7-8-13.25z" />
+                                </svg>
+                            </a>
+
+                            <button onclick="copyToClipboard('{{ route('public.profile.show', $user->username) }}')"
+                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-600 text-white hover:bg-gray-700 transition-colors"
+                                title="Copy profile link">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                            </button>
+
+                            <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode(route('public.profile.show', $user->username)) }}"
+                                target="_blank" rel="noopener noreferrer"
+                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-700 text-white hover:bg-blue-800 transition-colors"
+                                title="Share on LinkedIn">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="bg-white border-b border-gray-200 py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Notes Count -->
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-600">{{ number_format($stats['total_notes']) }}</div>
+                        <div class="text-sm text-gray-600 mt-1">Notes Published</div>
+                    </div>
+
+                    <!-- Sales Count -->
+                    @if ($user->hasRole('seller'))
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-green-600">{{ number_format($stats['total_sales']) }}</div>
+                            <div class="text-sm text-gray-600 mt-1">Sales</div>
+                        </div>
+
+                        <!-- Revenue -->
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-purple-600">Rp
+                                {{ number_format($stats['total_revenue'], 0, ',', '.') }}</div>
+                            <div class="text-sm text-gray-600 mt-1">Total Revenue</div>
+                        </div>
+                    @endif
+
+                    <!-- Rating -->
+                    <div class="text-center">
+                        <div class="flex items-center justify-center gap-2 mb-1">
+                            <div class="flex text-yellow-400">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    @if ($i <= floor($stats['average_rating']))
+                                        <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                                            <path
+                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                        </svg>
+                                    @else
+                                        <svg class="w-5 h-5 text-gray-300 fill-current" viewBox="0 0 20 20">
+                                            <path
+                                                d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                        </svg>
+                                    @endif
+                                @endfor
+                            </div>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-900">{{ $stats['average_rating'] }}</div>
+                        <div class="text-sm text-gray-600">{{ number_format($stats['total_reviews']) }} Reviews</div>
+                    </div>
+
+                    <!-- Posts -->
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-orange-600">{{ number_format($stats['total_posts']) }}</div>
+                        <div class="text-sm text-gray-600 mt-1">Forum Posts</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Badges & Certifications -->
+        @if ($user->badges->count() > 0 || $user->approvedCertifications->count() > 0)
+            <div class="bg-white border-b border-gray-200 py-8">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Achievements & Certifications</h2>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Badges -->
+                        @if ($user->badges->count() > 0)
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Badges</h3>
+                                <div class="flex flex-wrap gap-4">
+                                    @foreach ($user->badges as $badge)
+                                        <div class="text-center">
+                                            <div
+                                                class="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 flex items-center justify-center mx-auto mb-2 shadow-md">
+                                                <svg class="w-10 h-10 text-white" fill="currentColor"
+                                                    viewBox="0 0 20 20">
+                                                    <path
+                                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            </div>
+                                            <p class="text-sm font-medium text-gray-900">{{ $badge->name }}</p>
+                                            <p class="text-xs text-gray-500">
+                                                {{ $badge->pivot->earned_at?->format('M Y') }}</p>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
-                        </div>
+                        @endif
 
-                        <!-- Role Badge and Share Buttons -->
-                        <div class="flex flex-col items-end gap-3">
-                            <div class="flex flex-wrap items-center gap-2 justify-end">
-                                @if ($user->role === 'admin')
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                                        {{ __('messages.admin') }}
-                                    </span>
-                                @elseif($user->role === 'seller')
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                        {{ __('messages.seller') }}
-                                    </span>
-                                @endif
-                                
-                                {{-- Levels --}}
-                                @if($user->current_seller_level)
-                                    <div class="relative inline-block group">
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold 
-                                            @if($user->current_seller_level->color === 'bronze') bg-gradient-to-r from-orange-600 to-amber-700 text-white shadow-md
-                                            @elseif($user->current_seller_level->color === 'silver') bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900 shadow-md
-                                            @elseif($user->current_seller_level->color === 'gold') bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-md
-                                            @elseif($user->current_seller_level->color === 'platinum') bg-gradient-to-r from-gray-400 to-gray-600 text-white shadow-md
-                                            @elseif($user->current_seller_level->color === 'diamond') bg-gradient-to-r from-cyan-400 to-blue-500 text-white shadow-md
-                                            @else bg-gray-100 text-gray-800
-                                            @endif"
-                                            title="{{ $user->current_seller_level->name }}">
-                                            @if($user->current_seller_level->icon)
-                                                <span class="mr-1">{{ $user->current_seller_level->icon }}</span>
-                                            @endif
-                                            {{ $user->current_seller_level->name }}
-                                        </span>
-                                        <!-- Tooltip -->
-                                        <div class="absolute right-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
-                                            <div class="font-semibold mb-1">{{ $user->current_seller_level->name }}</div>
-                                            <p class="text-gray-300 mb-2">{{ $user->current_seller_level->description }}</p>
-                                            @if($user->current_seller_level->benefits_array)
-                                                <div class="mt-2 pt-2 border-t border-gray-700">
-                                                    <p class="font-semibold mb-1">Benefits:</p>
-                                                    <ul class="list-disc list-inside text-gray-300 space-y-1">
-                                                        @foreach($user->current_seller_level->benefits_array as $benefit)
-                                                            <li>{{ $benefit }}</li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                            @endif
-                                            <div class="absolute right-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                                        </div>
-                                    </div>
-                                @endif
-                                @if($user->current_buyer_level)
-                                    <div class="relative inline-block group">
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold 
-                                            @if($user->current_buyer_level->color === 'blue') bg-blue-100 text-blue-800
-                                            @elseif($user->current_buyer_level->color === 'green') bg-green-100 text-green-800
-                                            @elseif($user->current_buyer_level->color === 'purple') bg-purple-100 text-purple-800
-                                            @elseif($user->current_buyer_level->color === 'gold') bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-md
-                                            @elseif($user->current_buyer_level->color === 'diamond') bg-gradient-to-r from-cyan-400 to-blue-500 text-white shadow-md
-                                            @else bg-gray-100 text-gray-800
-                                            @endif"
-                                            title="{{ $user->current_buyer_level->name }}">
-                                            @if($user->current_buyer_level->icon)
-                                                <span class="mr-1">{{ $user->current_buyer_level->icon }}</span>
-                                            @endif
-                                            {{ $user->current_buyer_level->name }}
-                                        </span>
-                                        <!-- Tooltip -->
-                                        <div class="absolute right-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
-                                            <div class="font-semibold mb-1">{{ $user->current_buyer_level->name }}</div>
-                                            <p class="text-gray-300 mb-2">{{ $user->current_buyer_level->description }}</p>
-                                            @if($user->current_buyer_level->benefits_array)
-                                                <div class="mt-2 pt-2 border-t border-gray-700">
-                                                    <p class="font-semibold mb-1">Benefits:</p>
-                                                    <ul class="list-disc list-inside text-gray-300 space-y-1">
-                                                        @foreach($user->current_buyer_level->benefits_array as $benefit)
-                                                            <li>{{ $benefit }}</li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                            @endif
-                                            <div class="absolute right-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                {{-- Achievement Badges --}}
-                                @if($user->badges->count() > 0)
-                                    @foreach($user->badges->take(5) as $badge)
-                                        <div class="relative inline-block group">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold 
-                                                @if($badge->color === 'gold') bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-md
-                                                @elseif($badge->color === 'green') bg-green-100 text-green-800
-                                                @elseif($badge->color === 'blue') bg-blue-100 text-blue-800
-                                                @elseif($badge->color === 'purple') bg-purple-100 text-purple-800
-                                                @elseif($badge->color === 'yellow') bg-yellow-100 text-yellow-800
-                                                @elseif($badge->color === 'orange') bg-orange-100 text-orange-800
-                                                @else bg-gray-100 text-gray-800
-                                                @endif"
-                                                title="{{ $badge->name }}">
-                                                @if($badge->icon)
-                                                    <span class="mr-1">{{ $badge->icon }}</span>
-                                                @endif
-                                                {{ $badge->name }}
-                                            </span>
-                                            <!-- Tooltip -->
-                                            <div class="absolute right-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
-                                                <div class="font-semibold mb-1">{{ $badge->name }}</div>
-                                                <p class="text-gray-300">{{ $badge->description }}</p>
-                                                <div class="absolute right-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                        <!-- Certifications -->
+                        @if ($user->approvedCertifications->count() > 0)
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Certifications</h3>
+                                <div class="space-y-3">
+                                    @foreach ($user->approvedCertifications as $cert)
+                                        <div
+                                            class="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                                            <svg class="w-6 h-6 text-green-600 flex-shrink-0" fill="currentColor"
+                                                viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            <div class="flex-1">
+                                                <p class="font-medium text-gray-900">{{ $cert->certification->name }}</p>
+                                                <p class="text-sm text-gray-600">
+                                                    {{ $cert->certification->issuer ?? 'Verified' }}</p>
                                             </div>
                                         </div>
                                     @endforeach
-                                    @if($user->badges->count() > 5)
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                            +{{ $user->badges->count() - 5 }} more
-                                        </span>
-                                    @endif
-                                @endif
-
-                                {{-- Certifications --}}
-                                @if($user->approvedCertifications && $user->approvedCertifications->count() > 0)
-                                    @foreach($user->approvedCertifications->take(5) as $userCertification)
-                                        @php
-                                            $cert = $userCertification->certification;
-                                        @endphp
-                                        <div class="relative inline-block group">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border-2"
-                                                style="background-color: {{ $cert->color }}20; border-color: {{ $cert->color }}; color: {{ $cert->color }};"
-                                                title="{{ $cert->name }}">
-                                                @if($cert->icon)
-                                                    <span class="mr-1">{{ $cert->icon }}</span>
-                                                @endif
-                                                {{ $cert->name }}
-                                            </span>
-                                            <!-- Tooltip -->
-                                            <div class="absolute right-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50">
-                                                <div class="font-semibold mb-1">{{ $cert->name }}</div>
-                                                <p class="text-gray-300 mb-2">{{ $cert->description }}</p>
-                                                @if($cert->benefits)
-                                                    <div class="mt-2 pt-2 border-t border-gray-700">
-                                                        <p class="font-semibold mb-1">Benefits:</p>
-                                                        <p class="text-gray-300">{{ $cert->benefits }}</p>
-                                                    </div>
-                                                @endif
-                                                @if($userCertification->approved_at)
-                                                    <div class="mt-2 pt-2 border-t border-gray-700 text-gray-400">
-                                                        Certified: {{ $userCertification->approved_at->format('M Y') }}
-                                                    </div>
-                                                @endif
-                                                <div class="absolute right-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                    @if($user->approvedCertifications->count() > 5)
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600"
-                                            title="View all certifications">
-                                            +{{ $user->approvedCertifications->count() - 5 }} more
-                                        </span>
-                                    @endif
-                                @endif
+                                </div>
                             </div>
-
-                            <!-- Share Profile Buttons -->
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-500 mr-1">Share Profile:</span>
-                                @php
-                                    $profileUrl = route('public.profile.show', $user->username);
-                                    $profileTitle = urlencode(
-                                        $user->name . ' - ' . config('app.name') . ' Seller Profile',
-                                    );
-                                    $profileText = urlencode(
-                                        'Check out my notes on ' .
-                                            config('app.name') .
-                                            '! ' .
-                                            $stats['total_notes'] .
-                                            ' notes available.',
-                                    );
-                                @endphp
-
-                                <!-- Facebook -->
-                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($profileUrl) }}"
-                                    target="_blank" rel="noopener noreferrer"
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
-                                    title="Share on Facebook">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                                    </svg>
-                                </a>
-
-                                <!-- Twitter -->
-                                <a href="https://twitter.com/intent/tweet?url={{ urlencode($profileUrl) }}&text={{ $profileTitle }}"
-                                    target="_blank" rel="noopener noreferrer"
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-500 text-white hover:bg-sky-600 transition-colors duration-200"
-                                    title="Share on Twitter">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
-                                    </svg>
-                                </a>
-
-                                <!-- WhatsApp -->
-                                <a href="https://wa.me/?text={{ $profileTitle }}%20{{ urlencode($profileUrl) }}"
-                                    target="_blank" rel="noopener noreferrer"
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white hover:bg-green-600 transition-colors duration-200"
-                                    title="Share on WhatsApp">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                                    </svg>
-                                </a>
-
-                                <!-- LinkedIn -->
-                                <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode($profileUrl) }}"
-                                    target="_blank" rel="noopener noreferrer"
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-700 text-white hover:bg-blue-800 transition-colors duration-200"
-                                    title="Share on LinkedIn">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                                    </svg>
-                                </a>
-
-                                <!-- Copy Link -->
-                                <button onclick="copyToClipboard('{{ $profileUrl }}')"
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-600 text-white hover:bg-gray-700 transition-colors duration-200"
-                                    title="Copy profile link">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                    </svg>
-                                </button>
-                                @auth
-                                    @if(auth()->id() !== $user->id)
-                                        @if(auth()->user()->isFollowing($user))
-                                            <form action="{{ route('follow.unfollow', $user) }}" method="POST" class="inline-flex">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200"
-                                                    title="Unfollow this account">
-                                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" />
-                                                    </svg>
-                                                    Following
-                                                </button>
-                                            </form>
-                                        @else
-                                            <form action="{{ route('follow.follow', $user) }}" method="POST" class="inline-flex">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
-                                                    title="Follow this account">
-                                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6" />
-                                                    </svg>
-                                                    Follow
-                                                </button>
-                                            </form>
-                                        @endif
-                                        <button type="button" onclick="showAccountReportModal()"
-                                            class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors duration-200"
-                                            title="Report this account">
-                                            Report Account
-                                        </button>
-                                    @else
-                                        <button type="button" onclick="showAccountReportModal()"
-                                            class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors duration-200"
-                                            title="Report this account">
-                                            Report Account
-                                        </button>
-                                    @endif
-                                @else
-                                    <a href="{{ route('login') }}"
-                                        class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
-                                        title="Login to follow this account">
-                                        Follow
-                                    </a>
-                                    <a href="{{ route('login') }}"
-                                        class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors duration-200"
-                                        title="Login to report this account">
-                                        Report Account
-                                    </a>
-                                @endauth
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div
-                    class="bg-white overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
-                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">{{ __('messages.public_notes') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $stats['total_notes'] }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    class="bg-white overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
-                            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">{{ __('messages.total_sales') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $stats['total_sales'] }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    class="bg-white overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
-                            @if ($stats['average_rating'] > 0)
-                                <svg class="h-6 w-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                            @else
-                                <svg class="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                            @endif
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">{{ __('messages.average_rating') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">
-                                @if ($stats['average_rating'] > 0)
-                                    {{ $stats['average_rating'] }} / 5
-                                @else
-                                    N/A
-                                @endif
-                            </p>
-                            <p class="text-xs text-gray-500">{{ $stats['total_reviews'] }}
-                                {{ $stats['total_reviews'] == 1 ? __('messages.review') : __('messages.reviews_count') }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    class="bg-white overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0 bg-purple-100 rounded-lg p-3">
-                            <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">{{ __('messages.total_revenue') }}</p>
-                            <p class="text-2xl font-bold text-gray-900">
-                                {{ currency($stats['total_revenue']) }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabs -->
-            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
-                <div class="border-b border-gray-200">
-                    <nav class="flex -mb-px" aria-label="Tabs">
-                        <button onclick="showTab('notes')" id="tab-notes"
-                            class="tab-button px-6 py-4 text-sm font-medium border-b-2 border-blue-500 text-blue-600">
-                            {{ __('messages.public_notes') }} ({{ $stats['total_notes'] }})
-                        </button>
-                        <button onclick="showTab('posts')" id="tab-posts"
-                            class="tab-button px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                            Forum Posts ({{ $stats['total_posts'] }})
-                        </button>
-                    </nav>
-                </div>
-
-                <!-- Notes Tab Content -->
-                <div id="tab-content-notes" class="tab-content">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                        <div>
-                            <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.public_notes') }}</h2>
-                            <p class="text-sm text-gray-600 mt-1">All notes published by {{ $user->name }}</p>
-                        </div>
-                        @if ($publicNotes->count() > 0)
-                            <a href="{{ route('marketplace.index', ['seller' => $user->id]) }}"
-                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                                View in Marketplace
-                            </a>
                         @endif
                     </div>
-                    <div class="p-6">
+                </div>
+            </div>
+        @endif
+
+        <!-- Tabs: Notes & Posts -->
+        <div class="bg-white py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-6" x-data="{ tab: 'notes' }">
+                    <div class="flex gap-4 border-b border-gray-200">
+                        <button @click="tab = 'notes'"
+                            :class="tab === 'notes' ? 'border-b-2 border-blue-600 text-blue-600' :
+                                'text-gray-600 hover:text-gray-900'"
+                            class="py-4 px-4 font-medium transition-colors">
+                            Notes ({{ number_format($stats['total_notes']) }})
+                        </button>
+                        <button @click="tab = 'posts'"
+                            :class="tab === 'posts' ? 'border-b-2 border-blue-600 text-blue-600' :
+                                'text-gray-600 hover:text-gray-900'"
+                            class="py-4 px-4 font-medium transition-colors">
+                            Forum Posts ({{ number_format($stats['total_posts']) }})
+                        </button>
+                    </div>
+
+                    <!-- Notes Tab -->
+                    <div x-show="tab === 'notes'" class="mt-8">
                         @if ($publicNotes->count() > 0)
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 @foreach ($publicNotes as $note)
                                     <div
-                                        class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 group">
-                                        <!-- Thumbnail -->
-                                        @if ($note->hasThumbnails())
-                                            <div class="h-48 overflow-hidden">
-                                                <img src="{{ Storage::url($note->thumbnails[0]) }}"
-                                                    alt="{{ $note->title }}"
-                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                                            </div>
-                                        @endif
-                                        <div class="p-6">
-                                            <div class="mb-4">
-                                                <h3
-                                                    class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
-                                                    <a href="{{ route('marketplace.show', $note) }}">{{ $note->title }}</a>
-                                                </h3>
-                                                <p class="text-sm text-gray-600 line-clamp-3">{!! Str::limit(strip_tags($note->content), 100) !!}</p>
-                                            </div>
-
-                                            @if ($note->tags->count() > 0)
-                                                <div class="flex flex-wrap gap-2 mb-4">
-                                                    @foreach ($note->tags->take(3) as $tag)
-                                                        <span
-                                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                            {{ $tag->name }}
-                                                        </span>
-                                                    @endforeach
+                                        class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                                        <a href="{{ route('marketplace.show', $note) }}" class="block group">
+                                            @if ($note->cover_image)
+                                                <div class="w-full h-40 bg-gray-200 overflow-hidden">
+                                                    <img src="{{ Storage::url($note->cover_image) }}"
+                                                        alt="{{ $note->title }}"
+                                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                                </div>
+                                            @else
+                                                <div
+                                                    class="w-full h-40 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                                                    <svg class="w-12 h-12 text-white opacity-50" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
                                                 </div>
                                             @endif
 
-                                            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                                                @if ($note->average_rating > 0)
-                                                    <div class="flex items-center gap-1">
-                                                        @for ($i = 1; $i <= 5; $i++)
-                                                            <svg class="w-3 h-3 {{ $i <= $note->average_rating ? 'text-yellow-400' : 'text-gray-300' }}"
-                                                                fill="currentColor" viewBox="0 0 20 20">
-                                                                <path
-                                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                            </svg>
-                                                        @endfor
-                                                        <span class="text-xs text-gray-600">{{ $note->average_rating }}</span>
+                                            <div class="p-4">
+                                                <h3
+                                                    class="font-semibold text-gray-900 group-hover:text-blue-600 line-clamp-2">
+                                                    {{ $note->title }}</h3>
+                                                <p class="text-sm text-gray-600 mt-1 line-clamp-2">
+                                                    {{ Str::limit($note->description, 80) }}</p>
+
+                                                <div class="mt-3 flex items-center justify-between">
+                                                    @if ($note->price > 0)
+                                                        <span class="font-bold text-blue-600">Rp
+                                                            {{ number_format($note->price, 0, ',', '.') }}</span>
+                                                    @else
+                                                        <span class="text-green-600 font-medium">Free</span>
+                                                    @endif
+
+                                                    @if ($note->reviews_count > 0)
+                                                        <div class="flex items-center gap-1">
+                                                            <span class="text-yellow-400">★</span>
+                                                            <span
+                                                                class="text-sm font-medium">{{ number_format($note->average_rating ?? 0, 1) }}</span>
+                                                        </div>
+                                                    @endif
+                                                </div>
+
+                                                @if ($note->tags->count() > 0)
+                                                    <div class="mt-3 flex flex-wrap gap-1">
+                                                        @foreach ($note->tags->take(2) as $tag)
+                                                            <span
+                                                                class="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded">{{ $tag->name }}</span>
+                                                        @endforeach
                                                     </div>
                                                 @endif
-                                                @if ($note->price > 0)
-                                                    <span class="text-sm font-semibold text-yellow-600">
-                                                        {{ currency($note->price) }}</span>
-                                                @else
-                                                    <span class="text-xs text-gray-500">{{ __('messages.free') }}</span>
-                                                @endif
                                             </div>
+                                        </a>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <!-- Pagination -->
+                            <div class="mt-8">
+                                {{ $publicNotes->links() }}
+                            </div>
+                        @else
+                            <div class="text-center py-12">
+                                <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <p class="text-gray-600 text-lg">No notes published yet</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Posts Tab -->
+                    <div x-show="tab === 'posts'" class="mt-8">
+                        @if ($userPosts->count() > 0)
+                            <div class="space-y-6 max-w-2xl">
+                                @foreach ($userPosts as $post)
+                                    <div
+                                        class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                                        <a href="{{ route('forum.show', $post) }}" class="block group mb-4">
+                                            <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600">
+                                                {{ $post->title }}</h3>
+                                            <p class="text-gray-600 mt-2 line-clamp-3">
+                                                {{ Str::limit(strip_tags($post->content), 200) }}</p>
+                                        </a>
+
+                                        <div
+                                            class="flex items-center justify-between text-sm text-gray-600 pt-4 border-t border-gray-100">
+                                            <div class="flex items-center gap-4">
+                                                <div class="flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                                                    </svg>
+                                                    {{ $post->all_comments_count }} Responses
+                                                </div>
+                                                <div class="flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M14 10h4.764a2 2 0 011.789 2.894l-3.646 7.23a2 2 0 01-1.789 1.106H7a2 2 0 01-2-2v-8a2 2 0 012-2h2.4a1 1 0 00.894-.553l1.342-2.683a1 1 0 00.894-.553h2.17a1 1 0 00.894.553l1.342 2.683a1 1 0 00.894.553Z" />
+                                                    </svg>
+                                                    {{ $post->likes_count }} Likes
+                                                </div>
+                                            </div>
+                                            <time
+                                                class="text-xs text-gray-500">{{ $post->created_at->diffForHumans() }}</time>
                                         </div>
                                     </div>
                                 @endforeach
                             </div>
 
-                            <div class="mt-6">
-                                {{ $publicNotes->links() }}
-                            </div>
-                        @else
-                            <div class="text-center py-12">
-                                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <h3 class="mt-4 text-lg font-medium text-gray-900">{{ __('messages.no_public_notes_yet') }}
-                                </h3>
-                                <p class="mt-2 text-sm text-gray-500">{{ __('messages.user_hasnt_published_notes') }}</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Posts Tab Content -->
-                <div id="tab-content-posts" class="tab-content hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h2 class="text-lg font-semibold text-gray-900">Forum Posts</h2>
-                        <p class="text-sm text-gray-600 mt-1">All forum posts by {{ $user->name }}</p>
-                    </div>
-                    <div class="p-6">
-                        @if ($userPosts->count() > 0)
-                            <div class="space-y-4">
-                                @foreach ($userPosts as $post)
-                                    @include('forum.partials.post-card', ['post' => $post])
-                                @endforeach
-                            </div>
-
-                            <div class="mt-6">
+                            <!-- Pagination -->
+                            <div class="mt-8">
                                 {{ $userPosts->links() }}
                             </div>
                         @else
                             <div class="text-center py-12">
-                                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor"
+                                <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                                 </svg>
-                                <h3 class="mt-4 text-lg font-medium text-gray-900">No posts yet</h3>
-                                <p class="mt-2 text-sm text-gray-500">This user hasn't posted anything in the forum yet.</p>
+                                <p class="text-gray-600 text-lg">No forum posts yet</p>
                             </div>
                         @endif
                     </div>
@@ -614,187 +424,12 @@
 
     @push('scripts')
         <script>
-            // Tab switching
-            function showTab(tabName) {
-                // Hide all tab contents
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.add('hidden');
-                });
-                
-                // Remove active state from all tabs
-                document.querySelectorAll('.tab-button').forEach(button => {
-                    button.classList.remove('border-blue-500', 'text-blue-600');
-                    button.classList.add('border-transparent', 'text-gray-500');
-                });
-                
-                // Show selected tab content
-                document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
-                
-                // Add active state to selected tab
-                const activeTab = document.getElementById(`tab-${tabName}`);
-                activeTab.classList.remove('border-transparent', 'text-gray-500');
-                activeTab.classList.add('border-blue-500', 'text-blue-600');
-            }
-
-            // Copy to clipboard function
             function copyToClipboard(text) {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(text).then(function() {
-                        if (typeof Swal !== 'undefined') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Link Copied!',
-                                text: 'Profile link has been copied to your clipboard.',
-                                timer: 2000,
-                                showConfirmButton: false
-                            });
-                        } else {
-                            alert('Profile link copied to clipboard!');
-                        }
-                    }).catch(function(err) {
-                        console.error('Failed to copy:', err);
-                        // Fallback for older browsers
-                        fallbackCopyToClipboard(text);
-                    });
-                } else {
-                    fallbackCopyToClipboard(text);
-                }
-            }
-
-            function fallbackCopyToClipboard(text) {
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-999999px';
-                textArea.style.top = '-999999px';
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Link Copied!',
-                            text: 'Profile link has been copied to your clipboard.',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    } else {
-                        alert('Profile link copied to clipboard!');
-                    }
-                } catch (err) {
-                    console.error('Fallback copy failed:', err);
-                    alert('Failed to copy link. Please copy manually.');
-                }
-                document.body.removeChild(textArea);
-            }
-
-            const accountReportEndpoint = "{{ route('users.report', $user) }}";
-
-            function showAccountReportModal() {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        title: 'Report Account',
-                        html: `
-                            <form id="accountReportForm" class="text-left">
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Reason</label>
-                                    <select id="accountReportReason" name="reason" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" required>
-                                        <option value="">Select a reason</option>
-                                        <option value="spam">Spam</option>
-                                        <option value="harassment">Harassment</option>
-                                        <option value="inappropriate">Inappropriate Content</option>
-                                        <option value="fraud">Fraud / Scam</option>
-                                        <option value="impersonation">Impersonation</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
-                                    <textarea id="accountReportDescription" name="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Provide additional context (max 1000 characters)" maxlength="1000"></textarea>
-                                </div>
-                            </form>
-                        `,
-                        showCancelButton: true,
-                        confirmButtonText: 'Submit Report',
-                        confirmButtonColor: '#dc2626',
-                        cancelButtonText: 'Cancel',
-                        focusConfirm: false,
-                        preConfirm: () => {
-                            const reason = document.getElementById('accountReportReason').value;
-                            const description = document.getElementById('accountReportDescription').value;
-
-                            if (!reason) {
-                                Swal.showValidationMessage('Please select a reason');
-                                return false;
-                            }
-
-                            return { reason, description };
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            submitAccountReport(result.value.reason, result.value.description);
-                        }
-                    });
-                } else {
-                    const reason = prompt('Reason for reporting (spam, harassment, inappropriate, fraud, impersonation, other):');
-                    if (reason) {
-                        const description = prompt('Additional details (optional):');
-                        submitAccountReport(reason, description || '');
-                    }
-                }
-            }
-
-            function submitAccountReport(reason, description) {
-                const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
-                if (!csrfTokenMeta) {
-                    console.error('Missing CSRF token meta tag.');
-                    return;
-                }
-
-                fetch(accountReportEndpoint, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfTokenMeta.content,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ reason, description })
-                })
-                    .then(async (response) => {
-                        if (!response.ok) {
-                            let message = 'Failed to submit report. Please try again.';
-                            try {
-                                const data = await response.json();
-                                message = data.message || message;
-                            } catch (e) {
-                                // ignore parse errors
-                            }
-                            throw new Error(message);
-                        }
-                        return response.json();
-                    })
-                    .then((data) => {
-                        if (typeof Swal !== 'undefined') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Report Submitted',
-                                text: data.message || 'Thank you for reporting. Our team will review it shortly.',
-                                timer: 3000,
-                                showConfirmButton: false
-                            });
-                        } else {
-                            alert(data.message || 'Report submitted successfully.');
-                        }
-                    })
-                    .catch((error) => {
-                        if (typeof Swal !== 'undefined') {
-                            Swal.fire('Error', error.message || 'Failed to submit report.', 'error');
-                        } else {
-                            alert(error.message || 'Failed to submit report.');
-                        }
-                    });
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Profile link copied to clipboard!');
+                }).catch(() => {
+                    alert('Failed to copy link');
+                });
             }
         </script>
     @endpush

@@ -22,7 +22,7 @@ class SetupUsernameController extends Controller
             return redirect()->route('dashboard');
         }
 
-        return view('setup-username.create');
+        return view('40-shared/setup-username/create');
     }
 
     /**

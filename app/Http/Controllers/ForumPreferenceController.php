@@ -11,7 +11,7 @@ class ForumPreferenceController extends Controller
         $user = $request->user();
         $preferences = $user->forum_email_preferences;
 
-        return view('forum.preferences', compact('preferences'));
+        return view('40-shared/forum/preferences', compact('preferences'));
     }
 
     public function update(Request $request)

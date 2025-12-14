@@ -62,7 +62,7 @@ class ShareLeaderboardController extends Controller
             'duplicate_share_prevention' => LeaderboardSetting::get('duplicate_share_prevention', true),
         ];
 
-        return view('share.leaderboard', [
+        return view('40-shared/share/leaderboard', [
             'leaderboard' => $leaderboard,
             'title' => $title,
             'month' => $month,

@@ -30,7 +30,7 @@ class EscrowController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('escrows.index', compact('escrows'));
+        return view('40-shared/escrows/index', compact('escrows'));
     }
 
     /**
@@ -45,7 +45,7 @@ class EscrowController extends Controller
 
         $escrow->load(['note', 'transaction', 'buyer', 'seller', 'dispute', 'releaser', 'refunder']);
 
-        return view('escrows.show', compact('escrow'));
+        return view('40-shared/escrows/show', compact('escrow'));
     }
 
     /**

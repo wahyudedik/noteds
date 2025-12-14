@@ -22,6 +22,6 @@ class VendorController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('vendor.index', compact('assignedOrders', 'myQuotes'));
+        return view('40-shared/vendor/index', compact('assignedOrders', 'myQuotes'));
     }
 }

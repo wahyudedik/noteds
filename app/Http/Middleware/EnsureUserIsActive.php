@@ -25,6 +25,12 @@ class EnsureUserIsActive
             $user = Auth::user();
 
             if ($user && (! $user->is_active || $user->isSuspended())) {
+                \Log::warning('EnsureUserIsActive blocked login', [
+                    'user_id' => $user->id ?? null,
+                    'email' => $user->email ?? null,
+                    'is_active' => $user->is_active ?? null,
+                    'suspended_at' => $user->suspended_at ?? null,
+                ]);
                 Auth::guard('web')->logout();
 
                 $request->session()->invalidate();

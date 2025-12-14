@@ -28,7 +28,7 @@ class NoteAttachmentController extends Controller
     {
         // Get attachments array
         $attachments = $note->attachments ?? [];
-        
+
         // Find the file in attachments
         $filePath = null;
         $externalUrl = null;
@@ -54,7 +54,7 @@ class NoteAttachmentController extends Controller
         if ($externalUrl) {
             // Authorization checks for external links
             $user = auth()->user();
-            
+
             // Allow note owner
             if ($user && $user->id === $note->user_id) {
                 return redirect($externalUrl);
@@ -86,7 +86,7 @@ class NoteAttachmentController extends Controller
 
         // Authorization checks
         $user = auth()->user();
-        
+
         // Allow note owner
         if ($user && $user->id === $note->user_id) {
             return $this->sendFile($filePath);
@@ -118,13 +118,13 @@ class NoteAttachmentController extends Controller
 
                 // Track download
                 $this->trackDownload($user, $note, $filename, $filePath, 'attachment');
-                
+
                 // Increment download count
                 $purchasedNote->incrementDownload();
 
                 // Apply DRM encryption if enabled
                 $finalFilePath = $this->applyDrmProtection($note, $filePath);
-                
+
                 return $this->sendFile($finalFilePath);
             }
         }
@@ -144,10 +144,10 @@ class NoteAttachmentController extends Controller
             $drmService->logAccess($note, $user, $filePath, 'download', $licenseKey);
 
             $this->trackDownload($user, $note, $filename, $filePath, 'attachment');
-            
+
             // Apply DRM encryption if enabled
             $finalFilePath = $this->applyDrmProtection($note, $filePath);
-            
+
             return $this->sendFile($finalFilePath);
         }
 
@@ -167,7 +167,7 @@ class NoteAttachmentController extends Controller
         }
 
         $drmService = app(DrmService::class);
-        
+
         // Check if encrypted version exists
         $encryptedPath = $this->getEncryptedPath($filePath);
         if (Storage::disk('private')->exists($encryptedPath)) {
@@ -178,7 +178,7 @@ class NoteAttachmentController extends Controller
 
         // Encrypt file
         $encryptedPath = $drmService->encryptFile($filePath, 'private');
-        
+
         // Decrypt for download
         $tempPath = $drmService->decryptFile($encryptedPath, 'private');
         return $tempPath;
@@ -191,7 +191,7 @@ class NoteAttachmentController extends Controller
     {
         $pathInfo = pathinfo($originalPath);
         $watermarkedPath = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '_watermarked.' . $pathInfo['extension'];
-        
+
         if (Storage::disk('private')->exists($watermarkedPath)) {
             return $watermarkedPath;
         }
@@ -215,7 +215,7 @@ class NoteAttachmentController extends Controller
     {
         // Check if it's a temp file (decrypted)
         $isTemp = str_contains($filePath, storage_path('app/temp'));
-        
+
         if ($isTemp) {
             $fullPath = $filePath;
             $originalName = basename($filePath, '.tmp');
@@ -223,7 +223,7 @@ class NoteAttachmentController extends Controller
             $fullPath = Storage::disk('private')->path($filePath);
             $originalName = basename($filePath);
         }
-        
+
         if (!file_exists($fullPath)) {
             abort(404, 'File not found');
         }
@@ -247,8 +247,8 @@ class NoteAttachmentController extends Controller
      */
     protected function trackDownload($user, Note $note, string $filename, string $filePath, string $downloadType): void
     {
-        $fileSize = Storage::disk('private')->exists($filePath) 
-            ? Storage::disk('private')->size($filePath) 
+        $fileSize = Storage::disk('private')->exists($filePath)
+            ? Storage::disk('private')->size($filePath)
             : null;
 
         NoteDownload::create([
@@ -269,32 +269,32 @@ class NoteAttachmentController extends Controller
     public function batchDownloadIndex(): View
     {
         $user = auth()->user();
-        
+
         // Get all purchased notes with attachments
         $purchasedNotes = $user->purchasedNotes()
             ->with(['note.user'])
-            ->whereHas('note', function($query) {
+            ->whereHas('note', function ($query) {
                 $query->where('status', 'active')
-                      ->whereNotNull('attachments');
+                    ->whereNotNull('attachments');
             })
             ->get()
-            ->filter(function($purchasedNote) {
+            ->filter(function ($purchasedNote) {
                 if (!$purchasedNote->note) {
                     return false;
                 }
-                
+
                 $attachments = $purchasedNote->note->attachments ?? [];
                 return !empty($attachments) && is_array($attachments) && count($attachments) > 0;
             })
-            ->map(function($purchasedNote) {
+            ->map(function ($purchasedNote) {
                 return $purchasedNote->note;
             })
-            ->filter(function($note) {
+            ->filter(function ($note) {
                 return $note !== null;
             })
             ->values();
 
-        return view('buyer.batch-download.index', compact('purchasedNotes'));
+        return view('40-shared.batch-download.index', compact('purchasedNotes'));
     }
 
     /**
@@ -303,7 +303,7 @@ class NoteAttachmentController extends Controller
     public function batchDownload(Request $request): Response
     {
         $user = auth()->user();
-        
+
         // Premium only
         if (!$user->hasPremium()) {
             abort(403, 'Batch download is only available for premium users.');
@@ -315,22 +315,22 @@ class NoteAttachmentController extends Controller
         ]);
 
         $noteIds = $validated['note_ids'];
-        
+
         // Get notes that user has purchased
         $notes = Note::whereIn('id', $noteIds)
             ->where('status', 'active')
             ->whereNotNull('attachments')
             ->get()
-            ->filter(function($note) use ($user) {
+            ->filter(function ($note) use ($user) {
                 // Check if user owns or has purchased the note
                 if ($note->user_id === $user->id) {
                     return true;
                 }
-                
+
                 if ($note->price > 0) {
                     return $user->hasPurchasedNote($note->id);
                 }
-                
+
                 return true; // Free notes
             });
 
@@ -341,7 +341,7 @@ class NoteAttachmentController extends Controller
         // Create temporary ZIP file
         $zipFileName = 'batch-download-' . time() . '-' . Str::random(8) . '.zip';
         $zipPath = storage_path('app/temp/' . $zipFileName);
-        
+
         // Ensure temp directory exists
         if (!file_exists(storage_path('app/temp'))) {
             mkdir(storage_path('app/temp'), 0755, true);
@@ -357,18 +357,18 @@ class NoteAttachmentController extends Controller
 
         foreach ($notes as $note) {
             $attachments = $note->attachments ?? [];
-            
+
             if (empty($attachments)) {
                 continue;
             }
 
             // Create folder for each note in ZIP
             $noteFolder = Str::slug($note->title) . '/';
-            
+
             foreach ($attachments as $attachment) {
                 $filePath = null;
                 $filename = null;
-                
+
                 if (is_array($attachment)) {
                     $filePath = $attachment['path'] ?? null;
                     $filename = $attachment['filename'] ?? basename($filePath);
@@ -382,16 +382,16 @@ class NoteAttachmentController extends Controller
                 }
 
                 $fullPath = Storage::disk('private')->path($filePath);
-                
+
                 if (file_exists($fullPath)) {
                     // Add file to ZIP with note folder structure
                     $zip->addFile($fullPath, $noteFolder . $filename);
                     $totalFiles++;
                     $totalSize += filesize($fullPath);
-                    
+
                     // Track download for each file
                     $this->trackDownload($user, $note, $filename, $filePath, 'batch_download');
-                    
+
                     // Increment download count if purchased
                     if ($note->price > 0 && $user->hasPurchasedNote($note->id)) {
                         $purchasedNote = PurchasedNote::where('user_id', $user->id)

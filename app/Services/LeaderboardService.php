@@ -29,9 +29,13 @@ class LeaderboardService
         $results = $query->limit($limit)->get();
 
         return $results->map(function ($item, $index) {
+            $seller = $item->seller;
             return [
                 'rank' => $index + 1,
-                'user' => $item->seller,
+                'id' => $seller?->id,
+                'name' => $seller?->name,
+                'username' => $seller?->username,
+                'avatar' => $seller?->avatar,
                 'total_revenue' => (float) $item->total_revenue,
             ];
         })->toArray();
@@ -97,12 +101,10 @@ class LeaderboardService
         return $results->map(function ($item, $index) {
             return [
                 'rank' => $index + 1,
-                'user' => (object) [
-                    'id' => $item->id,
-                    'name' => $item->name,
-                    'username' => $item->username,
-                    'avatar' => $item->avatar,
-                ],
+                'id' => $item->id,
+                'name' => $item->name,
+                'username' => $item->username,
+                'avatar' => $item->avatar,
                 'average_rating' => round((float) $item->average_rating, 2),
                 'review_count' => (int) $item->review_count,
             ];
@@ -155,9 +157,13 @@ class LeaderboardService
         $results = $query->limit($limit)->get();
 
         return $results->map(function ($item, $index) {
+            $buyer = $item->buyer;
             return [
                 'rank' => $index + 1,
-                'user' => $item->buyer,
+                'id' => $buyer?->id,
+                'name' => $buyer?->name,
+                'username' => $buyer?->username,
+                'avatar' => $buyer?->avatar,
                 'total_spending' => (float) $item->total_spending,
             ];
         })->toArray();
@@ -181,9 +187,14 @@ class LeaderboardService
         $results = $query->limit($limit)->get();
 
         return $results->map(function ($item, $index) {
+            $user = $item->user;
             return [
                 'rank' => $index + 1,
-                'user' => $item->user,
+                'id' => $user?->id,
+                'name' => $user?->name,
+                'username' => $user?->username,
+                'avatar' => $user?->avatar,
+                'user_id' => (int) $item->user_id,
                 'review_count' => (int) $item->review_count,
             ];
         })->toArray();
@@ -254,11 +265,10 @@ class LeaderboardService
     {
         $now = Carbon::now();
 
-        return match($period) {
+        return match ($period) {
             'weekly' => [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()],
             'monthly' => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
             default => [$now->copy()->startOfYear(), $now->copy()->endOfYear()],
         };
     }
 }
-

@@ -47,7 +47,7 @@ class MyNotedsController extends Controller
             'total_tags' => (clone $baseQuery)->with('tags')->get()->flatMap->tags->unique('id')->count(),
         ];
 
-        return view('mynoteds.index', compact('notes', 'stats'));
+        return view('40-shared/mynoteds/index', compact('notes', 'stats'));
     }
 
     /**
@@ -55,7 +55,7 @@ class MyNotedsController extends Controller
      */
     public function ask(): View
     {
-        return view('mynoteds.ask');
+        return view('40-shared/mynoteds/ask');
     }
 
     /**
@@ -79,7 +79,7 @@ class MyNotedsController extends Controller
                 ->paginate(10);
         }
 
-        return view('mynoteds.search', compact('query', 'results'));
+        return view('40-shared/mynoteds/search', compact('query', 'results'));
     }
 
     /**
@@ -110,6 +110,6 @@ class MyNotedsController extends Controller
         // Always show basic statistics
         $statistics = $insightService->getNoteStatistics($user);
 
-        return view('mynoteds.insights', compact('weeklySummary', 'topics', 'statistics'));
+        return view('40-shared/mynoteds/insights', compact('weeklySummary', 'topics', 'statistics'));
     }
 }

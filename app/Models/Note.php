@@ -140,6 +140,29 @@ class Note extends Model
         ];
     }
 
+    /**
+     * Primary thumbnail URL derived from JSON array or placeholder.
+     */
+    public function getPrimaryThumbnailUrlAttribute(): string
+    {
+        // If thumbnails casted to array and has first item
+        $thumbs = $this->thumbnails;
+        if (is_array($thumbs) && !empty($thumbs) && is_string($thumbs[0])) {
+            return $thumbs[0];
+        }
+
+        // If stored as JSON string, attempt to decode
+        $raw = $this->attributes['thumbnails'] ?? null;
+        if (is_string($raw)) {
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded) && !empty($decoded) && is_string($decoded[0])) {
+                return $decoded[0];
+            }
+        }
+
+        return asset('placeholder.png');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

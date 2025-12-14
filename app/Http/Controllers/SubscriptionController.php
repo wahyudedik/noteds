@@ -17,7 +17,7 @@ class SubscriptionController extends Controller
     {
         $subscription = auth()->user()->subscription;
 
-        return view('subscription.index', compact('subscription'));
+        return view('40-shared/subscription/index', compact('subscription'));
     }
 
     public function create(): View|RedirectResponse
@@ -50,7 +50,7 @@ class SubscriptionController extends Controller
 
         $premiumPrice = Setting::getPremiumPrice();
 
-        return view('subscription.create', compact('wallet', 'premiumPrice'));
+        return view('40-shared/subscription/create', compact('wallet', 'premiumPrice'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -146,6 +146,6 @@ class SubscriptionController extends Controller
             abort(403);
         }
 
-        return view('subscription.show', compact('subscription'));
+        return view('40-shared/subscription/show', compact('subscription'));
     }
 }

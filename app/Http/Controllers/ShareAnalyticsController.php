@@ -71,7 +71,7 @@ class ShareAnalyticsController extends Controller
             ];
         });
 
-        return view('share.analytics', [
+        return view('40-shared/share/analytics', [
             'stats' => $stats,
             'shareReferrals' => $shareReferrals,
             'isAdmin' => $isAdmin,

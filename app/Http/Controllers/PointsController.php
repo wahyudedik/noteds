@@ -104,7 +104,7 @@ class PointsController extends Controller
             ],
         ];
 
-        return view('points.index', compact('points', 'redemptions', 'stats', 'redemptionOptions'));
+        return view('40-shared/points/index', compact('points', 'redemptions', 'stats', 'redemptionOptions'));
     }
 
     /**

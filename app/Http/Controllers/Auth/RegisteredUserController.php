@@ -37,7 +37,7 @@ class RegisteredUserController extends Controller
                 ->first();
         }
 
-        return view('auth.register', compact('refCode', 'invitation', 'inviteToken'));
+        return view('00-auth.auth.register', compact('refCode', 'invitation', 'inviteToken'));
     }
 
     /**

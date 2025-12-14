@@ -33,7 +33,7 @@ class WithdrawController extends Controller
             $wallet->save();
         }
 
-        return view('wallet.withdraw', compact('wallet', 'user'));
+        return view('40-shared/wallet/withdraw', compact('wallet', 'user'));
     }
 
     public function store(StoreWithdrawRequest $request): RedirectResponse

@@ -17,7 +17,7 @@ class PublicCmsPageController extends Controller
             ->latest()
             ->paginate(12);
 
-        return view('cms.index', compact('pages'));
+        return view('40-shared/cms/index', compact('pages'));
     }
 
     /**
@@ -29,7 +29,7 @@ class PublicCmsPageController extends Controller
             abort(404);
         }
 
-        return view('cms.show', compact('cmsPage'));
+        return view('40-shared/cms/show', compact('cmsPage'));
     }
 }
 

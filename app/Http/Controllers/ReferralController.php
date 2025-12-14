@@ -43,7 +43,7 @@ class ReferralController extends Controller
         // Get reward config
         $rewardConfig = $this->referralService->getRewardConfig();
 
-        return view('referral.index', compact(
+        return view('40-shared/referral/index', compact(
             'user',
             'referralCode',
             'referralLink',
@@ -70,7 +70,7 @@ class ReferralController extends Controller
             ->latest()
             ->paginate(20);
 
-        return view('referral.statistics', compact('referrals'));
+        return view('40-shared/referral/statistics', compact('referrals'));
     }
 
     /**
@@ -102,7 +102,7 @@ class ReferralController extends Controller
             ->where('status', 'pending')
             ->sum('amount');
 
-        return view('referral.transaction-history', compact(
+        return view('40-shared/referral/transaction-history', compact(
             'user',
             'transactions',
             'totalReceived',

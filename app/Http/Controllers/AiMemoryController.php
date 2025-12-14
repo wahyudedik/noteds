@@ -30,7 +30,7 @@ class AiMemoryController extends Controller
         // Get knowledge base stats
         $knowledgeBase = $this->aiMemoryService->buildKnowledgeBase($user, null, 100);
         
-        return view('ai-memory.index', [
+        return view('40-shared/ai-memory/index', [
             'total_notes' => $knowledgeBase['total_notes'] ?? 0,
             'topics' => array_slice($knowledgeBase['topics'] ?? [], 0, 20),
         ]);

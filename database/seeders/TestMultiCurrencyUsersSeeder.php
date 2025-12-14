@@ -21,6 +21,8 @@ class TestMultiCurrencyUsersSeeder extends Seeder
                 'username' => 'test_usd_user',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
+                'is_active' => true,
+                'suspended_at' => null,
                 'locale' => 'en_US',
                 'wallet_balance' => 5000000, // 5M IDR = ~$300 USD
                 'role' => 'user',
@@ -35,6 +37,8 @@ class TestMultiCurrencyUsersSeeder extends Seeder
                 'username' => 'test_sar_user',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
+                'is_active' => true,
+                'suspended_at' => null,
                 'locale' => 'ar_SA',
                 'wallet_balance' => 5000000, // 5M IDR = ~1,125 SAR
                 'role' => 'user',
@@ -49,6 +53,8 @@ class TestMultiCurrencyUsersSeeder extends Seeder
                 'username' => 'test_idr_user',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
+                'is_active' => true,
+                'suspended_at' => null,
                 'locale' => 'id_ID',
                 'wallet_balance' => 5000000, // 5M IDR
                 'role' => 'user',

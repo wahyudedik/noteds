@@ -94,7 +94,9 @@ Route::prefix('ecosystem')->name('ecosystem.')->group(function () {
 // Tutorial routes (public)
 Route::get('/tuts', [\App\Http\Controllers\TutsController::class, 'index'])->name('tuts.index');
 Route::get('/tuts/{tutorial:slug}', [\App\Http\Controllers\TutsController::class, 'show'])->name('tuts.show');
-Route::get('/studio', [\App\Http\Controllers\StudioController::class, 'index'])->name('studio.index');
+Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'not.admin', 'role:seller'])
+    ->get('/studio', [\App\Http\Controllers\StudioController::class, 'index'])
+    ->name('studio.index');
 Route::middleware(['auth', 'verified', 'role:seller'])->get('/vendor', [\App\Http\Controllers\VendorController::class, 'index'])->name('vendor.index');
 Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'not.admin'])->prefix('studio')->name('studio.')->group(function () {
     Route::get('/orders', [\App\Http\Controllers\ServiceOrderController::class, 'index'])->name('orders.index');
@@ -511,11 +513,8 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc'])->group(function
     Route::post('/activity/{activity}/comment', [\App\Http\Controllers\ActivityController::class, 'comment'])->name('activity.comment');
     Route::post('/activity/{activity}/share', [\App\Http\Controllers\ActivityController::class, 'share'])->name('activity.share');
 
-    // Messaging routes
-    Route::get('/messages', [\App\Http\Controllers\MessageController::class, 'index'])->name('messages.index');
-    Route::get('/messages/{user}', [\App\Http\Controllers\MessageController::class, 'conversation'])->name('messages.conversation');
-    Route::post('/messages/{user}', [\App\Http\Controllers\MessageController::class, 'store'])->name('messages.store');
-    Route::post('/messages/{message}/read', [\App\Http\Controllers\MessageController::class, 'markAsRead'])->name('messages.read');
+    // NOTE: Messaging routes moved to line 205 with UserMessageController
+    // Duplicate MessageController routes removed to fix route name conflict (messages.store was defined twice)
 
     // Recently Viewed Notes routes
     Route::get('/viewed-notes', [\App\Http\Controllers\NoteViewHistoryController::class, 'index'])->name('viewed-notes.index');
@@ -612,6 +611,13 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin', 'username.setup'])->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/repurchase-report', [AdminDashboardController::class, 'repurchaseReport'])->name('repurchase-report');
+
+    // Platform Dashboard Routes (Advanced Metrics)
+    Route::prefix('platform')->name('platform.')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Admin\PlatformDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/api/metrics', [\App\Http\Controllers\Admin\PlatformDashboardController::class, 'metrics'])->name('metrics');
+        Route::get('/export/metrics', [\App\Http\Controllers\Admin\PlatformDashboardController::class, 'export'])->name('export-metrics');
+    });
 
     // User verification routes - MUST be before resource routes
     Route::get('/users/pending-verification', [UserController::class, 'pendingVerification'])->name('users.pending-verification');

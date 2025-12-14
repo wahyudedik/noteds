@@ -30,7 +30,7 @@ class RefundController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('refunds.index', compact('refunds'));
+        return view('40-shared/refunds/index', compact('refunds'));
     }
 
     /**
@@ -60,7 +60,7 @@ class RefundController extends Controller
                 ->with('error', $eligibility['reason']);
         }
 
-        return view('refunds.create', compact('transaction'));
+        return view('40-shared/refunds/create', compact('transaction'));
     }
 
     /**
@@ -165,6 +165,6 @@ class RefundController extends Controller
 
         $refund->load(['note', 'transaction', 'seller', 'buyer', 'processedBy']);
 
-        return view('refunds.show', compact('refund'));
+        return view('40-shared/refunds/show', compact('refund'));
     }
 }

@@ -1,131 +1,203 @@
-@extends('layouts.app')
+@extends('40-shared/layouts/app')
 
-@section('title', __('messages.note_moderation'))
+@section('title', __('Notes Moderation'))
 
 @section('content')
-<div class="py-12 bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.note_moderation') }}</h1>
-                <p class="mt-1 text-sm text-gray-600">Review reported notes, update statuses, and keep the marketplace safe.</p>
+    <div class="min-h-screen bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold text-gray-900">{{ __('Notes Moderation') }}</h1>
+                <p class="text-lg text-gray-600 mt-2">{{ __('Review and manage reported marketplace notes') }}</p>
             </div>
-            <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800">
-                ← Back to Admin Dashboard
-            </a>
-        </div>
 
-        <div class="bg-white shadow-sm rounded-lg p-6 mb-8">
-            <form method="GET" action="{{ route('admin.notes.moderation.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                    <input type="text" name="search" value="{{ $search }}" placeholder="Search title or owner..."
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Note Status</label>
-                    <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">All</option>
-                        <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="sold" {{ $status === 'sold' ? 'selected' : '' }}>Sold</option>
-                        <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Report Status</label>
-                    <select name="report_status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">All</option>
-                        <option value="pending" {{ $reportStatus === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="reviewed" {{ $reportStatus === 'reviewed' ? 'selected' : '' }}>Reviewed</option>
-                        <option value="resolved" {{ $reportStatus === 'resolved' ? 'selected' : '' }}>Resolved</option>
-                        <option value="dismissed" {{ $reportStatus === 'dismissed' ? 'selected' : '' }}>Dismissed</option>
-                        <option value="unreported" {{ $reportStatus === 'unreported' ? 'selected' : '' }}>No Reports</option>
-                    </select>
-                </div>
-                <div class="flex items-end gap-2">
-                    <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm">
-                        Filter
-                    </button>
-                    @if($search || $status || $reportStatus)
-                        <a href="{{ route('admin.notes.moderation.index') }}" class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg">
-                            Clear
-                        </a>
-                    @endif
-                </div>
-            </form>
-        </div>
+            <!-- Filters -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+                <form method="GET" action="{{ route('admin.notes.moderation.index') }}" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Search -->
+                        <div>
+                            <label for="search"
+                                class="block text-sm font-medium text-gray-700 mb-2">{{ __('Search') }}</label>
+                            <input type="text" id="search" name="search" value="{{ $search ?? '' }}"
+                                placeholder="{{ __('Search notes or authors...') }}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
 
-        <div class="bg-white shadow-sm rounded-lg overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reports</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($notes as $note)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 text-sm text-gray-900 max-w-md">
-                                    <p class="font-medium text-gray-900">{{ \Illuminate\Support\Str::limit($note->title, 120) }}</p>
-                                    <div class="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                                        <span>ID: {{ $note->id }}</span>
-                                        @if(!$note->is_public)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-200 text-gray-700">Private</span>
+                        <!-- Status Filter -->
+                        <div>
+                            <label for="status"
+                                class="block text-sm font-medium text-gray-700 mb-2">{{ __('Note Status') }}</label>
+                            <select id="status" name="status"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">{{ __('All Notes') }}</option>
+                                <option value="active" {{ $status === 'active' ? 'selected' : '' }}>{{ __('Active') }}
+                                </option>
+                                <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>
+                                    {{ __('Inactive') }}</option>
+                                <option value="sold" {{ $status === 'sold' ? 'selected' : '' }}>{{ __('Sold') }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Report Status Filter -->
+                        <div>
+                            <label for="report_status"
+                                class="block text-sm font-medium text-gray-700 mb-2">{{ __('Report Status') }}</label>
+                            <select id="report_status" name="report_status"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">{{ __('All Reports') }}</option>
+                                <option value="pending" {{ $reportStatus === 'pending' ? 'selected' : '' }}>
+                                    {{ __('Pending') }}</option>
+                                <option value="reviewed" {{ $reportStatus === 'reviewed' ? 'selected' : '' }}>
+                                    {{ __('Reviewed') }}</option>
+                                <option value="resolved" {{ $reportStatus === 'resolved' ? 'selected' : '' }}>
+                                    {{ __('Resolved') }}</option>
+                                <option value="dismissed" {{ $reportStatus === 'dismissed' ? 'selected' : '' }}>
+                                    {{ __('Dismissed') }}</option>
+                                <option value="unreported" {{ $reportStatus === 'unreported' ? 'selected' : '' }}>
+                                    {{ __('Unreported') }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4">
+                        <button type="submit"
+                            class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition">
+                            {{ __('Apply Filters') }}
+                        </button>
+                        @if ($search || $status || $reportStatus)
+                            <a href="{{ route('admin.notes.moderation.index') }}"
+                                class="px-6 py-2 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition">
+                                {{ __('Clear Filters') }}
+                            </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
+            <!-- Notes List -->
+            @if (($notes ?? collect())->count() > 0)
+                <div class="space-y-4">
+                    @foreach ($notes ?? [] as $note)
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex-1">
+                                    <!-- Note Header -->
+                                    <div class="flex items-center gap-3 mb-3">
+                                        @if ($note?->user?->avatar_url)
+                                            <img src="{{ $note->user->avatar_url }}" alt="{{ $note->user->name }}"
+                                                class="w-10 h-10 rounded-full">
+                                        @else
+                                            <div
+                                                class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold">
+                                                {{ strtoupper(substr($note?->user?->name ?? 'U', 0, 1)) }}
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <p class="font-semibold text-gray-900">
+                                                {{ $note?->user?->name ?? 'Unknown User' }}</p>
+                                            <p class="text-sm text-gray-500">@{{ $note - > user - > username ?? 'unknown' }} ·
+                                                {{ $note?->created_at?->diffForHumans() ?? 'N/A' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Note Title -->
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ $note?->title ?? 'Untitled' }}
+                                    </h3>
+
+                                    <!-- Note Content Preview -->
+                                    @if ($note?->description)
+                                        <p class="text-gray-700 mb-4 line-clamp-2">
+                                            {{ Str::limit($note->description, 200) }}</p>
+                                    @endif
+
+                                    <!-- Status Badges -->
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        @php
+                                            $statusColors = [
+                                                'active' => 'bg-green-100 text-green-800',
+                                                'inactive' => 'bg-gray-100 text-gray-800',
+                                                'sold' => 'bg-blue-100 text-blue-800',
+                                            ];
+                                            $statusColor = $statusColors[$note->status] ?? 'bg-gray-100 text-gray-800';
+                                        @endphp
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $statusColor }}">
+                                            {{ ucfirst($note->status) }}
+                                        </span>
+
+                                        @if ($note->pending_reports_count > 0)
+                                            <span
+                                                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                                                {{ $note->pending_reports_count }}
+                                                {{ __('Pending Report') }}{{ $note->pending_reports_count !== 1 ? 's' : '' }}
+                                            </span>
+                                        @endif
+
+                                        @if ($note->reports_count > 0)
+                                            <span
+                                                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                                {{ $note->reports_count }}
+                                                {{ __('Total Report') }}{{ $note->reports_count !== 1 ? 's' : '' }}
+                                            </span>
                                         @endif
                                     </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ $note->user->name }}</div>
-                                    <div class="text-sm text-gray-500">{{ '@' . $note->user->username }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center gap-2">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $note->pending_reports_count > 0 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
-                                            {{ $note->pending_reports_count }} pending
-                                        </span>
-                                        <span class="text-xs text-gray-500">Total: {{ $note->reports_count }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                        @if($note->status === 'active') bg-green-100 text-green-800
-                                        @elseif($note->status === 'sold') bg-blue-100 text-blue-800
-                                        @else bg-red-100 text-red-800
-                                        @endif">
-                                        {{ ucfirst($note->status) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $note->created_at->format('d M Y H:i') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="{{ route('admin.notes.moderation.show', $note) }}" class="inline-flex items-center px-3 py-1.5 text-sm text-blue-600 hover:text-blue-800">
-                                        View
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">
-                                    No notes found for the selected filters.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                </div>
 
-            <div class="px-6 py-4 border-top border-gray-200">
-                {{ $notes->links() }}
-            </div>
+                                <!-- Quick Actions -->
+                                <div class="ml-6 flex items-center gap-2">
+                                    <a href="{{ route('admin.notes.moderation.show', $note) }}"
+                                        class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition text-sm">
+                                        {{ __('Review') }}
+                                    </a>
+                                    @if ($note->status === 'active')
+                                        <form action="{{ route('admin.notes.moderation.suspend', $note) }}" method="POST"
+                                            class="inline-block">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit"
+                                                class="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition text-sm"
+                                                onclick="return confirm('{{ __('Suspend this note?') }}')">
+                                                {{ __('Suspend') }}
+                                            </button>
+                                        </form>
+                                    @elseif ($note->status === 'inactive')
+                                        <form action="{{ route('admin.notes.moderation.activate', $note) }}" method="POST"
+                                            class="inline-block">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit"
+                                                class="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition text-sm"
+                                                onclick="return confirm('{{ __('Activate this note?') }}')">
+                                                {{ __('Activate') }}
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Pagination -->
+                @if ($notes->hasPages())
+                    <div class="mt-8">
+                        {{ $notes->links() }}
+                    </div>
+                @endif
+            @else
+                <!-- Empty State -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ __('No notes to moderate') }}</h3>
+                    <p class="text-gray-600">{{ __('All notes are in order!') }}</p>
+                </div>
+            @endif
         </div>
     </div>
-</div>
 @endsection
-

@@ -26,7 +26,7 @@ class NoteSeriesController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        return view('series.index', compact('series'));
+        return view('40-shared/series/index', compact('series'));
     }
 
     /**
@@ -34,7 +34,7 @@ class NoteSeriesController extends Controller
      */
     public function create(): View
     {
-        return view('series.create');
+        return view('40-shared/series/create');
     }
 
     /**
@@ -78,7 +78,7 @@ class NoteSeriesController extends Controller
 
         $series->load(['notes.tags', 'notes.reviews', 'user']);
 
-        return view('series.show', compact('series'));
+        return view('40-shared/series/show', compact('series'));
     }
 
     /**

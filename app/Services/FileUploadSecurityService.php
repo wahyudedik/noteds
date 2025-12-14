@@ -12,25 +12,65 @@ class FileUploadSecurityService
      */
     private const ALLOWED_EXTENSIONS = [
         // Documents
-        'pdf', 'doc', 'docx', 'txt', 'rtf',
+        'pdf',
+        'doc',
+        'docx',
+        'txt',
+        'rtf',
         // Archives
-        'zip', 'rar', '7z',
+        'zip',
+        'rar',
+        '7z',
         // Images
-        'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg',
+        'jpg',
+        'jpeg',
+        'png',
+        'gif',
+        'webp',
+        'svg',
         // Spreadsheets
-        'xls', 'xlsx', 'csv',
+        'xls',
+        'xlsx',
+        'csv',
         // Presentations
-        'ppt', 'pptx',
+        'ppt',
+        'pptx',
     ];
 
     /**
      * Blocked dangerous extensions
      */
     private const BLOCKED_EXTENSIONS = [
-        'exe', 'bat', 'cmd', 'com', 'pif', 'scr', 'vbs', 'js', 'jar',
-        'php', 'php3', 'php4', 'php5', 'phtml', 'asp', 'aspx', 'jsp',
-        'sh', 'bash', 'ps1', 'py', 'rb', 'pl', 'cgi', 'htaccess',
-        'html', 'htm', 'xml', 'swf', 'fla',
+        'exe',
+        'bat',
+        'cmd',
+        'com',
+        'pif',
+        'scr',
+        'vbs',
+        'js',
+        'jar',
+        'php',
+        'php3',
+        'php4',
+        'php5',
+        'phtml',
+        'asp',
+        'aspx',
+        'jsp',
+        'sh',
+        'bash',
+        'ps1',
+        'py',
+        'rb',
+        'pl',
+        'cgi',
+        'htaccess',
+        'html',
+        'htm',
+        'xml',
+        'swf',
+        'fla',
     ];
 
     /**
@@ -71,7 +111,7 @@ class FileUploadSecurityService
 
         // Check extension
         $extension = strtolower($file->getClientOriginalExtension());
-        
+
         if (in_array($extension, self::BLOCKED_EXTENSIONS)) {
             $errors[] = "File extension '{$extension}' is not allowed for security reasons.";
         }
@@ -176,8 +216,8 @@ class FileUploadSecurityService
      */
     private function getExtensionsByType(string $type): array
     {
-        return match($type) {
-            'document' => ['pdf', 'doc', 'docx', 'txt', 'rtf'],
+        return match ($type) {
+            'document' => ['pdf', 'doc', 'docx', 'txt', 'rtf', 'jpg', 'jpeg', 'png', 'gif', 'webp'],
             'image' => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
             'archive' => ['zip', 'rar', '7z'],
             'spreadsheet' => ['xls', 'xlsx', 'csv'],
@@ -193,23 +233,22 @@ class FileUploadSecurityService
     {
         // Remove path traversal attempts
         $filename = basename($filename);
-        
+
         // Remove null bytes
         $filename = str_replace("\0", '', $filename);
-        
+
         // Remove control characters
         $filename = preg_replace('/[\x00-\x1F\x7F]/', '', $filename);
-        
+
         // Replace spaces with underscores
         $filename = str_replace(' ', '_', $filename);
-        
+
         // Remove special characters except dots, dashes, underscores
         $filename = preg_replace('/[^a-zA-Z0-9._-]/', '', $filename);
-        
+
         // Limit length
         $filename = substr($filename, 0, 255);
-        
+
         return $filename;
     }
 }
-

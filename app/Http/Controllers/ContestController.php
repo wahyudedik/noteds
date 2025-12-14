@@ -25,7 +25,7 @@ class ContestController extends Controller
             ->orderBy('start_date', 'desc')
             ->paginate(12);
 
-        return view('contests.index', [
+        return view('40-shared/contests/index', [
             'contests' => $contests,
         ]);
     }
@@ -50,7 +50,7 @@ class ContestController extends Controller
         // Get top entries for display
         $topEntries = $contest->getTopEntries(10);
 
-        return view('contests.show', [
+        return view('40-shared/contests/show', [
             'contest' => $contest,
             'userVote' => $userVote,
             'userEntry' => $userEntry,
@@ -86,7 +86,7 @@ class ContestController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('contests.submit', [
+        return view('40-shared/contests/submit', [
             'contest' => $contest,
             'userNotes' => $userNotes,
         ]);

@@ -21,7 +21,7 @@ class EmailUnsubscribeController extends Controller
             abort(404, 'Unsubscribe link not found');
         }
         
-        return view('emails.unsubscribe', [
+        return view('40-shared/emails/unsubscribe', [
             'unsubscribe' => $unsubscribe,
         ]);
     }

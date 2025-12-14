@@ -24,7 +24,7 @@ class FolderController extends Controller
             ->orderBy('order')
             ->get();
 
-        return view('folders.index', compact('folders'));
+        return view('40-shared/folders/index', compact('folders'));
     }
 
     /**
@@ -58,7 +58,7 @@ class FolderController extends Controller
             }
         }
         
-        return view('folders.create', compact('folders', 'workspace', 'parentFolder'));
+        return view('40-shared/folders/create', compact('folders', 'workspace', 'parentFolder'));
     }
 
     /**
@@ -143,7 +143,7 @@ class FolderController extends Controller
 
         $folder->load(['notes', 'children']);
 
-        return view('folders.show', compact('folder'));
+        return view('40-shared/folders/show', compact('folder'));
     }
 
     /**
@@ -161,7 +161,7 @@ class FolderController extends Controller
             ->where('id', '!=', $folder->id)
             ->get();
 
-        return view('folders.edit', compact('folder', 'folders'));
+        return view('40-shared/folders/edit', compact('folder', 'folders'));
     }
 
     /**

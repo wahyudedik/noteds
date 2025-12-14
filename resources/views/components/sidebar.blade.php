@@ -6,7 +6,7 @@
     $isSellerOrAdmin = $user && ($isSeller || $isAdmin);
     $isBuyerOrAdmin = $user && ($isBuyer || $isAdmin);
 
-    // Build menu structure
+    // Build menu structure with clearer organization by role
     $menuGroups = [];
 
     // Home
@@ -38,10 +38,10 @@
                 ],
             ];
         } else {
-            // Dashboard - Hide untuk admin
+            // Dashboard (non-admin only)
             if (!$isAdmin) {
                 $menuGroups[] = [
-                    'title' => null,
+                    'title' => __('messages.dashboard'),
                     'items' => [
                         [
                             'label' => __('messages.dashboard'),
@@ -91,7 +91,7 @@
                 'label' => __('messages.marketplace'),
                 'href' => route('marketplace.index'),
                 'icon' =>
-                    '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>',
+                    '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M5 7h14l-1 12a2 2 0 01-2 2H8a2 2 0 01-2-2L5 7zm3 4h8" /></svg>',
                 'active' => request()->routeIs('marketplace.*'),
             ];
 
@@ -101,7 +101,7 @@
                     'label' => 'Leaderboards',
                     'href' => route('leaderboard.index'),
                     'icon' =>
-                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>',
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13h4v8H3v-8zm7-6h4v14h-4V7zm7 3h4v11h-4V10z" /></svg>',
                     'active' => request()->routeIs('leaderboard.*'),
                 ];
             }
@@ -112,14 +112,14 @@
                     'label' => 'Contests',
                     'href' => route('contests.index'),
                     'icon' =>
-                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21l4-2 4 2V7l-4-2-4 2v14zm4-10l4-2m-4 2l-4-2" /></svg>',
                     'active' => request()->routeIs('contests.*'),
                 ];
             }
 
             if (!empty($mainItems)) {
                 $menuGroups[] = [
-                    'title' => null,
+                    'title' => 'Main',
                     'items' => $mainItems,
                 ];
             }
@@ -243,7 +243,7 @@
                             'label' => __('messages.analytics'),
                             'href' => route('buyer-analytics.index'),
                             'icon' =>
-                                '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>',
+                                '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19h16M4 8h16M4 12h10" /></svg>',
                             'active' => request()->routeIs('buyer-analytics.*'),
                         ],
                         [
@@ -257,7 +257,7 @@
                             'label' => __('messages.batch_download'),
                             'href' => route('batch-download.index'),
                             'icon' =>
-                                '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>',
+                                '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16l-4-4m4 4l4-4m-4 4V4m8 12v1a3 3 0 01-3 3H7a3 3 0 01-3-3v-1" /></svg>',
                             'active' => request()->routeIs('batch-download.*'),
                         ],
                     ],
@@ -283,6 +283,24 @@
                 'active' => request()->routeIs('tuts.*'),
             ];
 
+            // Activity Feed
+            $moreItems[] = [
+                'label' => __('messages.activity'),
+                'href' => route('activity.index'),
+                'icon' =>
+                    '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m-8-4h6m-6-4h4M3 7h2m-2 4h4m-4 4h6" /></svg>',
+                'active' => request()->routeIs('activity.*'),
+            ];
+
+            // Notifications
+            $moreItems[] = [
+                'label' => __('messages.notifications'),
+                'href' => route('notifications.index'),
+                'icon' =>
+                    '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>',
+                'active' => request()->routeIs('notifications.*'),
+            ];
+
             // Hide Note Conversations from admin (only for seller and buyer)
             if (!$isAdmin) {
                 $moreItems[] = [
@@ -298,9 +316,27 @@
                 'label' => __('messages.simulators'),
                 'href' => route('simulators.index'),
                 'icon' =>
-                    '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>',
+                    '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l4 4-4 4-4-4 4-4zm0 8l6 6-6 6-6-6 6-6z" /></svg>',
                 'active' => request()->routeIs('simulators.*'),
             ];
+
+            // Messages (non-admin only)
+            if (!$isAdmin && Route::has('messages.index')) {
+                $moreItems[] = [
+                    'label' => __('messages.messages'),
+                    'href' => route('messages.index'),
+                    'icon' =>
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" /></svg>',
+                    'active' => request()->routeIs('messages.*'),
+                    'comingSoon' => function () {
+                        try {
+                            return !\Illuminate\Support\Facades\View::exists('40-shared/messages/index');
+                        } catch (\Throwable $e) {
+                            return false;
+                        }
+                    },
+                ];
+            }
 
             if (!empty($moreItems)) {
                 $menuGroups[] = [
@@ -321,6 +357,21 @@
                         '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>',
                     'active' => request()->routeIs('referral.*'),
                 ];
+                // Referral details
+                $settingsItems[] = [
+                    'label' => __('messages.referral_stats'),
+                    'href' => route('referral.statistics'),
+                    'icon' =>
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13h4v8H3v-8zm7-6h4v14h-4V7zm7 3h4v11h-4V10z" /></svg>',
+                    'active' => request()->routeIs('referral.statistics'),
+                ];
+                $settingsItems[] = [
+                    'label' => __('messages.referral_transactions'),
+                    'href' => route('referral.transactions'),
+                    'icon' =>
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10" /></svg>',
+                    'active' => request()->routeIs('referral.transactions'),
+                ];
             }
 
             // Affiliate (only for sellers and buyers, hide from admin)
@@ -340,7 +391,7 @@
                     'label' => 'Share Analytics',
                     'href' => route('share.analytics'),
                     'icon' =>
-                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>',
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h16v4H4V4zm0 6h10v10H4V10zm12 6h4v4h-4v-4z" /></svg>',
                     'active' => request()->routeIs('share.analytics'),
                 ];
 
@@ -349,9 +400,45 @@
                     'label' => 'Share Leaderboard',
                     'href' => route('share.leaderboard'),
                     'icon' =>
-                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>',
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 20h14v-2H5v2zm2-4h10V6H7v10zm3-7h4v4h-4V9z" /></svg>',
                     'active' => request()->routeIs('share.leaderboard'),
                 ];
+
+                // Webhooks management (auth + KYC)
+                if (Route::has('webhooks.index')) {
+                    $settingsItems[] = [
+                        'label' => __('messages.webhooks'),
+                        'href' => route('webhooks.index'),
+                        'icon' =>
+                            '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5a7 7 0 00-7 7 4 4 0 004 4h10a3 3 0 100-6h-1" /></svg>',
+                        'active' => request()->routeIs('webhooks.*'),
+                        'comingSoon' => function () {
+                            try {
+                                return !\Illuminate\Support\Facades\View::exists('40-shared/webhooks/index');
+                            } catch (\Throwable $e) {
+                                return false;
+                            }
+                        },
+                    ];
+                }
+
+                // Support Tickets (user)
+                if (Route::has('support-tickets.index')) {
+                    $settingsItems[] = [
+                        'label' => __('messages.support_tickets'),
+                        'href' => route('support-tickets.index'),
+                        'icon' =>
+                            '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M7 20h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>',
+                        'active' => request()->routeIs('support-tickets.*'),
+                        'comingSoon' => function () {
+                            try {
+                                return !\Illuminate\Support\Facades\View::exists('40-shared/support-tickets/index');
+                            } catch (\Throwable $e) {
+                                return false;
+                            }
+                        },
+                    ];
+                }
             }
 
             // Points & Rewards (only for buyers)
@@ -362,6 +449,14 @@
                     'icon' =>
                         '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
                     'active' => request()->routeIs('points.*'),
+                ];
+                // Buyer subscriptions
+                $settingsItems[] = [
+                    'label' => __('messages.subscriptions'),
+                    'href' => route('subscriptions.index'),
+                    'icon' =>
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 6h14M5 18h10" /></svg>',
+                    'active' => request()->routeIs('subscriptions.*'),
                 ];
             }
 
@@ -375,6 +470,32 @@
             // Admin
             if ($isAdmin) {
                 $adminItems = [];
+                // Wallet Report
+                $adminItems[] = [
+                    'label' => __('messages.wallet_report'),
+                    'href' => route('admin.wallet.report'),
+                    'icon' =>
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /></svg>',
+                    'active' => request()->routeIs('admin.wallet.*'),
+                ];
+
+                // Support Tickets (admin view)
+                if (Route::has('admin.tickets.index')) {
+                    $adminItems[] = [
+                        'label' => __('messages.tickets'),
+                        'href' => route('admin.tickets.index'),
+                        'icon' =>
+                            '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M7 20h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>',
+                        'active' => request()->routeIs('admin.tickets.*'),
+                        'comingSoon' => function () {
+                            try {
+                                return !\Illuminate\Support\Facades\View::exists('admin/tickets/index');
+                            } catch (\Throwable $e) {
+                                return false;
+                            }
+                        },
+                    ];
+                }
                 $adminItems[] = [
                     'label' => __('messages.admin'),
                     'href' => route('admin.dashboard'),
@@ -430,14 +551,14 @@
                     'label' => 'Leaderboard Report',
                     'href' => route('admin.leaderboard.index'),
                     'icon' =>
-                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>',
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13h4v8H3v-8zm7-6h4v14h-4V7zm7 3h4v11h-4V10z" /></svg>',
                     'active' => request()->routeIs('admin.leaderboard.*'),
                 ];
                 $adminItems[] = [
                     'label' => 'Contest Settings',
                     'href' => route('admin.contests.settings'),
                     'icon' =>
-                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8l-2-2m2 2l2-2m-2 2v8m-7 2h14a2 2 0 002-2V7l-6-3H7L1 7v9a2 2 0 002 2z" /></svg>',
                     'active' => request()->routeIs('admin.contests.settings*'),
                 ];
 
@@ -551,34 +672,80 @@
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto py-4 px-2">
             @foreach ($menuGroups as $group)
-                @if ($group['title'])
-                    <div x-show="isExpanded" x-transition
-                        class="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        {{ $group['title'] }}
+                <div x-data="{ open: true }" class="mb-2">
+                    @if ($group['title'])
+                        <div x-show="isExpanded" x-transition class="px-3 py-2 flex items-center justify-between">
+                            <span
+                                class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                {{ $group['title'] }}
+                            </span>
+                            <button @click="open = !open"
+                                class="p-1 rounded-md text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <svg x-show="open" class="w-4 h-4" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                <svg x-show="!open" class="w-4 h-4" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
+                        </div>
+                    @endif
+                    <div x-show="open" class="space-y-1">
+                        @foreach ($group['items'] as $item)
+                            <a href="{{ $item['href'] }}"
+                                class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150 group
+                                    {{ $item['active']
+                                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+                                title="{{ $item['label'] }}">
+                                <span class="flex-shrink-0 {!! $item['active']
+                                    ? 'text-blue-600 dark:text-blue-400'
+                                    : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300' !!}">
+                                    {!! $item['icon'] !!}
+                                </span>
+                                <span x-show="isExpanded" x-transition class="flex-1 truncate">
+                                    {{ $item['label'] }}
+                                </span>
+                                @php
+                                    // Show small badge if the linked view is missing
+                                    $isComingSoon = false;
+                                    try {
+                                        $parsed = parse_url($item['href']);
+                                        $path = $parsed['path'] ?? '';
+                                        // Map common paths to view names heuristically
+                                        $pathToView =
+                                            [
+                                                '/buyer-analytics' => '40-shared.buyer-analytics.index',
+                                                '/buyer-analytics/purchase-history' =>
+                                                    '40-shared.buyer-analytics.purchase-history',
+                                                '/batch-download' => '40-shared.batch-download.index',
+                                                '/simulators' => '40-shared.simulators.index',
+                                                '/ecosystem' => '40-shared.ecosystem.index',
+                                                '/tuts' => '40-shared.tuts.index',
+                                                '/leaderboard' => 'admin.leaderboard.index',
+                                                '/contests' => '40-shared.contests.index',
+                                            ][$path] ?? null;
+                                        if ($pathToView && !\Illuminate\Support\Facades\View::exists($pathToView)) {
+                                            $isComingSoon = true;
+                                        }
+                                    } catch (\Throwable $e) {
+                                    }
+                                @endphp
+                                @if ($isComingSoon)
+                                    <span class="ml-2 text-xs px-2 py-0.5 rounded bg-yellow-100 text-yellow-800">Coming
+                                        Soon</span>
+                                @endif
+                            </a>
+                        @endforeach
                     </div>
-                @endif
-                <div class="space-y-1">
-                    @foreach ($group['items'] as $item)
-                        <a href="{{ $item['href'] }}"
-                            class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150 group
-                                {{ $item['active']
-                                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
-                            title="{{ $item['label'] }}">
-                            <span class="flex-shrink-0 {!! $item['active']
-                                ? 'text-blue-600 dark:text-blue-400'
-                                : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300' !!}">
-                                {!! $item['icon'] !!}
-                            </span>
-                            <span x-show="isExpanded" x-transition class="flex-1 truncate">
-                                {{ $item['label'] }}
-                            </span>
-                        </a>
-                    @endforeach
+                    @if (!$loop->last)
+                        <div class="my-2 border-t border-gray-200 dark:border-gray-700"></div>
+                    @endif
                 </div>
-                @if (!$loop->last)
-                    <div class="my-2 border-t border-gray-200 dark:border-gray-700"></div>
-                @endif
             @endforeach
         </nav>
 

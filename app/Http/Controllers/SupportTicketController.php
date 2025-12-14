@@ -33,7 +33,7 @@ class SupportTicketController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('support-tickets.index', compact('tickets'));
+        return view('40-shared/support-tickets/index', compact('tickets'));
     }
 
     /**
@@ -41,7 +41,7 @@ class SupportTicketController extends Controller
      */
     public function create(): View
     {
-        return view('support-tickets.create');
+        return view('40-shared/support-tickets/create');
     }
 
     /**
@@ -120,7 +120,7 @@ class SupportTicketController extends Controller
 
         $supportTicket->load(['user', 'assignedAdmin', 'closedByUser', 'replies.user']);
 
-        return view('support-tickets.show', compact('supportTicket'));
+        return view('40-shared/support-tickets/show', compact('supportTicket'));
     }
 
     /**
@@ -221,7 +221,7 @@ class SupportTicketController extends Controller
                 ->with('error', 'You can only edit open tickets.');
         }
 
-        return view('support-tickets.edit', compact('supportTicket'));
+        return view('40-shared/support-tickets/edit', compact('supportTicket'));
     }
 
     /**

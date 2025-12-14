@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\EnsureUserIsActive::class,
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\SecurityHeaders::class,
+            \App\Http\Middleware\EnhancedSecurityHeaders::class,
             \App\Http\Middleware\SanitizeInput::class,
         ];
 
@@ -54,6 +55,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure_admin_can_verify' => \App\Http\Middleware\EnsureAdminCanVerify::class,
             'not.admin' => \App\Http\Middleware\NotAdmin::class,
             'seller_and_buyer_not_admin' => \App\Http\Middleware\EnsureSellerAndBuyerNotAdmin::class,
+            'rate.limit.sensitive' => \App\Http\Middleware\RateLimitSensitive::class,
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\ContentSecurityPolicy::class,

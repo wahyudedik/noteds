@@ -33,7 +33,7 @@ class ReadingHistoryController extends Controller
             ->whereYear('viewed_at', now()->year)
             ->count();
 
-        return view('buyer.reading-history.index', compact(
+        return view('40-shared.reading-history.index', compact(
             'viewHistory',
             'totalViews',
             'uniqueNotes',

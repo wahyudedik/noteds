@@ -56,7 +56,7 @@ class UserMessageController extends Controller
 
         $unreadCount = $user->getUnreadMessageCount();
 
-        return view('messages.inbox', compact('conversations', 'unreadCount'));
+        return view('40-shared/messages/inbox', compact('conversations', 'unreadCount'));
     }
 
     /**
@@ -103,7 +103,7 @@ class UserMessageController extends Controller
         $total = count($conversations);
         $conversations = array_slice($conversations, ($page - 1) * $perPage, $perPage);
 
-        return view('messages.sent', compact('conversations'));
+        return view('40-shared/messages/sent', compact('conversations'));
     }
 
     /**
@@ -135,7 +135,7 @@ class UserMessageController extends Controller
             $currentUser->receivedMessages()->where('sender_id', $user->id)->count()
         );
 
-        return view('messages.thread', compact('user', 'messages'));
+        return view('40-shared/messages/thread', compact('user', 'messages'));
     }
 
     /**
@@ -217,6 +217,6 @@ class UserMessageController extends Controller
             $recipient = User::findOrFail($recipientId);
         }
 
-        return view('messages.compose', compact('recipient'));
+        return view('40-shared/messages/compose', compact('recipient'));
     }
 }

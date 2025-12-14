@@ -17,7 +17,13 @@ return new class extends Migration
             $table->uuid('user_id');
             $table->uuid('admin_id')->nullable();
             $table->decimal('amount', 15, 2);
-            $table->enum('type', ['signup', 'transaction'])->default('signup');
+            // Allow both legacy and more specific reward types used across services and seeders
+            $table->enum('type', [
+                'signup',
+                'transaction',
+                'signup_bonus',
+                'transaction_commission',
+            ])->default('signup_bonus');
             $table->enum('status', ['pending', 'sent', 'failed'])->default('pending');
             $table->timestamp('sent_at')->nullable();
             $table->text('notes')->nullable();

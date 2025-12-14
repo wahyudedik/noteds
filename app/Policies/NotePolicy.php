@@ -6,14 +6,25 @@ use App\Models\Note;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class NotePolicy
+/**
+ * Note Authorization Policy
+ * 
+ * Security Controls:
+ * - Ownership verification for edit/delete
+ * - Visibility checks for view
+ * - Account status verification
+ * - Rate limiting for creation
+ * - Audit logging for all operations
+ * - KYC verification for public notes (sellers)
+ */
+class NotePolicy extends BasePolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $this->isAuthenticated($user);
     }
 
     /**
@@ -21,14 +32,55 @@ class NotePolicy
      */
     public function view(User $user, Note $note): bool
     {
-        return $user->id === $note->user_id || $note->is_public;
+        // Owner can always view their notes
+        if ($user->id === $note->user_id) {
+            return true;
+        }
+
+        // Public notes can be viewed by anyone
+        if ($note->is_public) {
+            return true;
+        }
+
+        // Private notes can only be viewed by owner
+        return false;
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determine whether the user can create models with security checks.
      */
     public function create(User $user): bool
     {
+        // Must be authenticated
+        if (!$this->isAuthenticated($user)) {
+            return false;
+        }
+
+        // Account must be active
+        if (!$this->isActive($user)) {
+            return false;
+        }
+
+        // Account cannot be suspended
+        if ($this->isSuspended($user)) {
+            return false;
+        }
+
+        // Check for suspicious activity
+        if ($this->checkSuspiciousActivity($user)) {
+            return false;
+        }
+
+        // Rate limiting: max 20 notes per hour
+        $recentNotes = $user->notes()
+            ->where('created_at', '>', now()->subHour())
+            ->count();
+
+        if ($recentNotes >= 20) {
+            return false;
+        }
+
+        $this->logAccess($user, 'create', 'Note');
         return true;
     }
 
@@ -37,7 +89,28 @@ class NotePolicy
      */
     public function update(User $user, Note $note): bool
     {
-        return $user->id === $note->user_id;
+        // Must be authenticated
+        if (!$this->isAuthenticated($user)) {
+            return false;
+        }
+
+        // Only owner can update
+        if (!$this->isOwner($user, $note)) {
+            return false;
+        }
+
+        // Account must be active
+        if (!$this->isActive($user)) {
+            return false;
+        }
+
+        // Cannot be suspended
+        if ($this->isSuspended($user)) {
+            return false;
+        }
+
+        $this->logAccess($user, 'update', 'Note', ['note_id' => $note->id]);
+        return true;
     }
 
     /**
@@ -48,6 +121,17 @@ class NotePolicy
     {
         // Only original creator (or current owner if not sold) can delete
         if ($user->id !== $note->user_id && $user->id !== $note->original_creator_id) {
+            return false;
+        }
+
+        // Must be active
+        if (!$this->isActive($user)) {
+            return false;
+        }
+
+        $this->logAccess($user, 'delete', 'Note', ['note_id' => $note->id]);
+        return true;
+    }
             return false;
         }
         

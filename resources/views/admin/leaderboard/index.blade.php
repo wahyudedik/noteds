@@ -1,272 +1,359 @@
-@extends('layouts.app')
+@extends('40-shared/layouts/app')
 
-@section('title', 'Leaderboard Report')
+@section('title', __('Admin Leaderboard'))
 
 @section('content')
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Leaderboard Report</h2>
+    <div class="min-h-screen bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold text-gray-900">{{ __('Leaderboard') }}</h1>
+                <p class="text-lg text-gray-600 mt-2">{{ __('Track top performers across your platform') }}</p>
+            </div>
 
-            <!-- Top Sellers by Revenue -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 5 Sellers by Revenue</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Rank</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Seller Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Username</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Total Revenue</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($topSellersByRevenue as $seller)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                        @if ($seller['rank'] == 1)
-                                            🥇
-                                        @elseif($seller['rank'] == 2)
-                                            🥈
-                                        @elseif($seller['rank'] == 3)
-                                            🥉
-                                        @else
-                                            #{{ $seller['rank'] }}
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            @if ($seller['user']->avatar)
-                                                <img class="h-8 w-8 rounded-full mr-3" src="{{ $seller['user']->avatar }}"
-                                                    alt="">
+            <!-- Leaderboards Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Top Sellers by Revenue -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
+                        <h2 class="text-2xl font-bold text-white">{{ __('Top Sellers by Revenue') }}</h2>
+                        <p class="text-green-100 text-sm mt-1">{{ __('All-time ranking') }}</p>
+                    </div>
+
+                    <div class="p-6">
+                        @php
+                            $topSellersByRevenue = collect($topSellersByRevenue ?? []);
+                        @endphp
+                        @if ($topSellersByRevenue->count() > 0)
+                            <div class="space-y-3">
+                                @foreach ($topSellersByRevenue as $index => $seller)
+                                    <div
+                                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition border border-gray-100">
+                                        <!-- Rank Badge -->
+                                        <div
+                                            class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm
+                                            @if ($index === 0) bg-yellow-100 text-yellow-800
+                                            @elseif ($index === 1) bg-gray-300 text-gray-800
+                                            @elseif ($index === 2) bg-amber-100 text-amber-800
+                                            @else bg-gray-100 text-gray-800 @endif">
+                                            @if ($index === 0)
+                                                🥇
+                                            @elseif ($index === 1)
+                                                🥈
+                                            @elseif ($index === 2)
+                                                🥉
                                             @else
-                                                <div
-                                                    class="h-8 w-8 rounded-full mr-3 bg-gray-300 flex items-center justify-center">
-                                                    <span
-                                                        class="text-gray-600 text-xs font-semibold">{{ substr($seller['user']->name, 0, 1) }}</span>
-                                                </div>
+                                                {{ $index + 1 }}
                                             @endif
-                                            <span
-                                                class="text-sm font-medium text-gray-900">{{ $seller['user']->name }}</span>
                                         </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">@{{ $seller['user'] - > username }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right">
-                                        <span
-                                            class="text-sm font-semibold text-green-600">{{ currency($seller['total_revenue']) }}</span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">No data available</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+
+                                        <!-- User Info -->
+                                        <div class="flex-1 min-w-0">
+                                            @php
+                                                $avatar = is_array($seller)
+                                                    ? $seller['avatar'] ?? null
+                                                    : $seller->avatar ?? null;
+                                                $name = is_array($seller) ? $seller['name'] ?? '' : $seller->name ?? '';
+                                                $username = is_array($seller)
+                                                    ? $seller['username'] ?? ''
+                                                    : $seller->username ?? '';
+                                            @endphp
+                                            <div class="flex items-center gap-2">
+                                                @if ($avatar)
+                                                    <img src="{{ $avatar }}" alt="{{ $name }}"
+                                                        class="w-8 h-8 rounded-full">
+                                                @else
+                                                    <div
+                                                        class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600">
+                                                    </div>
+                                                @endif
+                                                <div class="min-w-0">
+                                                    <p class="font-semibold text-gray-900 truncate">{{ $name }}</p>
+                                                    <p class="text-xs text-gray-500">@{{ $username }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Revenue -->
+                                        <div class="flex-shrink-0 text-right">
+                                            @php
+                                                $revenue = is_array($seller)
+                                                    ? $seller['total_revenue'] ?? 0
+                                                    : $seller->total_revenue ?? 0;
+                                            @endphp
+                                            <p class="text-lg font-bold text-green-600">{{ currency($revenue) }}</p>
+                                            <p class="text-xs text-gray-500">{{ __('revenue') }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-gray-500 text-center py-8">{{ __('No data available') }}</p>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Top Sellers by Ratings -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                        <h2 class="text-2xl font-bold text-white">{{ __('Top Sellers by Ratings') }}</h2>
+                        <p class="text-blue-100 text-sm mt-1">{{ __('All-time ranking (5+ reviews)') }}</p>
+                    </div>
+
+                    <div class="p-6">
+                        @php
+                            $topSellersByRatings = collect($topSellersByRatings ?? []);
+                        @endphp
+                        @if ($topSellersByRatings->count() > 0)
+                            <div class="space-y-3">
+                                @foreach ($topSellersByRatings as $index => $seller)
+                                    <div
+                                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition border border-gray-100">
+                                        <!-- Rank Badge -->
+                                        <div
+                                            class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm
+                                            @if ($index === 0) bg-yellow-100 text-yellow-800
+                                            @elseif ($index === 1) bg-gray-300 text-gray-800
+                                            @elseif ($index === 2) bg-amber-100 text-amber-800
+                                            @else bg-gray-100 text-gray-800 @endif">
+                                            @if ($index === 0)
+                                                🥇
+                                            @elseif ($index === 1)
+                                                🥈
+                                            @elseif ($index === 2)
+                                                🥉
+                                            @else
+                                                {{ $index + 1 }}
+                                            @endif
+                                        </div>
+
+                                        <!-- User Info -->
+                                        <div class="flex-1 min-w-0">
+                                            @php
+                                                $avatar = is_array($seller)
+                                                    ? $seller['avatar'] ?? null
+                                                    : $seller->avatar ?? null;
+                                                $name = is_array($seller) ? $seller['name'] ?? '' : $seller->name ?? '';
+                                                $username = is_array($seller)
+                                                    ? $seller['username'] ?? ''
+                                                    : $seller->username ?? '';
+                                            @endphp
+                                            <div class="flex items-center gap-2">
+                                                @if ($avatar)
+                                                    <img src="{{ $avatar }}" alt="{{ $name }}"
+                                                        class="w-8 h-8 rounded-full">
+                                                @else
+                                                    <div
+                                                        class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600">
+                                                    </div>
+                                                @endif
+                                                <div class="min-w-0">
+                                                    <p class="font-semibold text-gray-900 truncate">{{ $name }}</p>
+                                                    <p class="text-xs text-gray-500">@{{ $username }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Rating -->
+                                        <div class="flex-shrink-0 text-right">
+                                            @php
+                                                $rating = is_array($seller)
+                                                    ? $seller['average_rating'] ?? 0
+                                                    : $seller->average_rating ?? 0;
+                                                $reviewCount = is_array($seller)
+                                                    ? $seller['review_count'] ?? 0
+                                                    : $seller->review_count ?? 0;
+                                            @endphp
+                                            <div class="flex items-center gap-1 justify-end mb-1">
+                                                @for ($i = 0; $i < 5; $i++)
+                                                    <svg class="w-3 h-3 @if ($i < floor($rating)) text-yellow-400 @else text-gray-300 @endif"
+                                                        fill="currentColor" viewBox="0 0 20 20">
+                                                        <path
+                                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                @endfor
+                                            </div>
+                                            <p class="text-sm font-bold text-gray-900">{{ number_format($rating, 1) }}</p>
+                                            <p class="text-xs text-gray-500">{{ $reviewCount }} {{ __('reviews') }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-gray-500 text-center py-8">{{ __('No data available') }}</p>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Top Buyers by Spending -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
+                        <h2 class="text-2xl font-bold text-white">{{ __('Top Buyers by Spending') }}</h2>
+                        <p class="text-purple-100 text-sm mt-1">{{ __('All-time ranking') }}</p>
+                    </div>
+
+                    <div class="p-6">
+                        @php
+                            $topBuyersBySpending = collect($topBuyersBySpending ?? []);
+                        @endphp
+                        @if ($topBuyersBySpending->count() > 0)
+                            <div class="space-y-3">
+                                @foreach ($topBuyersBySpending as $index => $buyer)
+                                    <div
+                                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition border border-gray-100">
+                                        <!-- Rank Badge -->
+                                        <div
+                                            class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm
+                                            @if ($index === 0) bg-yellow-100 text-yellow-800
+                                            @elseif ($index === 1) bg-gray-300 text-gray-800
+                                            @elseif ($index === 2) bg-amber-100 text-amber-800
+                                            @else bg-gray-100 text-gray-800 @endif">
+                                            @if ($index === 0)
+                                                🥇
+                                            @elseif ($index === 1)
+                                                🥈
+                                            @elseif ($index === 2)
+                                                🥉
+                                            @else
+                                                {{ $index + 1 }}
+                                            @endif
+                                        </div>
+
+                                        <!-- User Info -->
+                                        <div class="flex-1 min-w-0">
+                                            @php
+                                                $avatar = is_array($buyer)
+                                                    ? $buyer['avatar'] ?? null
+                                                    : $buyer->avatar ?? null;
+                                                $name = is_array($buyer) ? $buyer['name'] ?? '' : $buyer->name ?? '';
+                                                $username = is_array($buyer)
+                                                    ? $buyer['username'] ?? ''
+                                                    : $buyer->username ?? '';
+                                            @endphp
+                                            <div class="flex items-center gap-2">
+                                                @if ($avatar)
+                                                    <img src="{{ $avatar }}" alt="{{ $name }}"
+                                                        class="w-8 h-8 rounded-full">
+                                                @else
+                                                    <div
+                                                        class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600">
+                                                    </div>
+                                                @endif
+                                                <div class="min-w-0">
+                                                    <p class="font-semibold text-gray-900 truncate">{{ $name }}</p>
+                                                    <p class="text-xs text-gray-500">@{{ $username }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Spending -->
+                                        <div class="flex-shrink-0 text-right">
+                                            @php
+                                                $spending = is_array($buyer)
+                                                    ? $buyer['total_spending'] ?? 0
+                                                    : $buyer->total_spending ?? 0;
+                                            @endphp
+                                            <p class="text-lg font-bold text-purple-600">{{ currency($spending) }}</p>
+                                            <p class="text-xs text-gray-500">{{ __('spent') }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-gray-500 text-center py-8">{{ __('No data available') }}</p>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Top Reviewers -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-pink-500 to-pink-600 px-6 py-4">
+                        <h2 class="text-2xl font-bold text-white">{{ __('Top Reviewers') }}</h2>
+                        <p class="text-pink-100 text-sm mt-1">{{ __('All-time ranking') }}</p>
+                    </div>
+
+                    <div class="p-6">
+                        @php
+                            $topContributorsByReviews = collect($topContributorsByReviews ?? []);
+                        @endphp
+                        @if ($topContributorsByReviews->count() > 0)
+                            <div class="space-y-3">
+                                @foreach ($topContributorsByReviews as $index => $contributor)
+                                    <div
+                                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition border border-gray-100">
+                                        <!-- Rank Badge -->
+                                        <div
+                                            class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm
+                                            @if ($index === 0) bg-yellow-100 text-yellow-800
+                                            @elseif ($index === 1) bg-gray-300 text-gray-800
+                                            @elseif ($index === 2) bg-amber-100 text-amber-800
+                                            @else bg-gray-100 text-gray-800 @endif">
+                                            @if ($index === 0)
+                                                🥇
+                                            @elseif ($index === 1)
+                                                🥈
+                                            @elseif ($index === 2)
+                                                🥉
+                                            @else
+                                                {{ $index + 1 }}
+                                            @endif
+                                        </div>
+
+                                        <!-- User Info -->
+                                        <div class="flex-1 min-w-0">
+                                            @php
+                                                $avatar = is_array($contributor)
+                                                    ? $contributor['avatar'] ?? null
+                                                    : $contributor->avatar ?? null;
+                                                $name = is_array($contributor)
+                                                    ? $contributor['name'] ?? ''
+                                                    : $contributor->name ?? '';
+                                                $username = is_array($contributor)
+                                                    ? $contributor['username'] ?? ''
+                                                    : $contributor->username ?? '';
+                                            @endphp
+                                            <div class="flex items-center gap-2">
+                                                @if ($avatar)
+                                                    <img src="{{ $avatar }}" alt="{{ $name }}"
+                                                        class="w-8 h-8 rounded-full">
+                                                @else
+                                                    <div
+                                                        class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600">
+                                                    </div>
+                                                @endif
+                                                <div class="min-w-0">
+                                                    <p class="font-semibold text-gray-900 truncate">{{ $name }}</p>
+                                                    <p class="text-xs text-gray-500">@{{ $username }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Review Count -->
+                                        <div class="flex-shrink-0 text-right">
+                                            @php
+                                                $reviewCount = is_array($contributor)
+                                                    ? $contributor['review_count'] ?? 0
+                                                    : $contributor->review_count ?? 0;
+                                            @endphp
+                                            <p class="text-lg font-bold text-pink-600">{{ $reviewCount }}</p>
+                                            <p class="text-xs text-gray-500">{{ __('reviews') }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-gray-500 text-center py-8">{{ __('No data available') }}</p>
+                        @endif
+                    </div>
                 </div>
             </div>
 
-            <!-- Top Sellers by Ratings -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 5 Sellers by Ratings</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Rank</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Seller Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Username</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Rating</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Reviews</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($topSellersByRatings as $seller)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                        @if ($seller['rank'] == 1)
-                                            🥇
-                                        @elseif($seller['rank'] == 2)
-                                            🥈
-                                        @elseif($seller['rank'] == 3)
-                                            🥉
-                                        @else
-                                            #{{ $seller['rank'] }}
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            @if ($seller['user']->avatar)
-                                                <img class="h-8 w-8 rounded-full mr-3" src="{{ $seller['user']->avatar }}"
-                                                    alt="">
-                                            @else
-                                                <div
-                                                    class="h-8 w-8 rounded-full mr-3 bg-gray-300 flex items-center justify-center">
-                                                    <span
-                                                        class="text-gray-600 text-xs font-semibold">{{ substr($seller['user']->name, 0, 1) }}</span>
-                                                </div>
-                                            @endif
-                                            <span
-                                                class="text-sm font-medium text-gray-900">{{ $seller['user']->name }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">@{{ $seller['user'] - > username }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right">
-                                        <span class="text-sm font-semibold text-yellow-600">
-                                            ⭐ {{ number_format($seller['average_rating'], 2) }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right">
-                                        <span class="text-sm text-gray-600">{{ $seller['review_count'] }}</span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">No data available</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Top Buyers by Spending -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 5 Buyers by Spending</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Rank</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Buyer Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Username</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Total Spending</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($topBuyersBySpending as $buyer)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                        @if ($buyer['rank'] == 1)
-                                            🥇
-                                        @elseif($buyer['rank'] == 2)
-                                            🥈
-                                        @elseif($buyer['rank'] == 3)
-                                            🥉
-                                        @else
-                                            #{{ $buyer['rank'] }}
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            @if ($buyer['user']->avatar)
-                                                <img class="h-8 w-8 rounded-full mr-3" src="{{ $buyer['user']->avatar }}"
-                                                    alt="">
-                                            @else
-                                                <div
-                                                    class="h-8 w-8 rounded-full mr-3 bg-gray-300 flex items-center justify-center">
-                                                    <span
-                                                        class="text-gray-600 text-xs font-semibold">{{ substr($buyer['user']->name, 0, 1) }}</span>
-                                                </div>
-                                            @endif
-                                            <span
-                                                class="text-sm font-medium text-gray-900">{{ $buyer['user']->name }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">@{{ $buyer['user'] - > username }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right">
-                                        <span
-                                            class="text-sm font-semibold text-blue-600">{{ currency($buyer['total_spending']) }}</span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">No data available</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Top Contributors by Reviews -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 5 Contributors by Reviews</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Rank</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Contributor Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Username</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                    Total Reviews</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($topContributorsByReviews as $contributor)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                        @if ($contributor['rank'] == 1)
-                                            🥇
-                                        @elseif($contributor['rank'] == 2)
-                                            🥈
-                                        @elseif($contributor['rank'] == 3)
-                                            🥉
-                                        @else
-                                            #{{ $contributor['rank'] }}
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            @if ($contributor['user']->avatar)
-                                                <img class="h-8 w-8 rounded-full mr-3"
-                                                    src="{{ $contributor['user']->avatar }}" alt="">
-                                            @else
-                                                <div
-                                                    class="h-8 w-8 rounded-full mr-3 bg-gray-300 flex items-center justify-center">
-                                                    <span
-                                                        class="text-gray-600 text-xs font-semibold">{{ substr($contributor['user']->name, 0, 1) }}</span>
-                                                </div>
-                                            @endif
-                                            <span
-                                                class="text-sm font-medium text-gray-900">{{ $contributor['user']->name }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">@{{ $contributor['user'] - > username }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right">
-                                        <span
-                                            class="text-sm font-semibold text-purple-600">{{ $contributor['review_count'] }}</span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">No data available</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+            <!-- Info Box -->
+            <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-blue-900 mb-2">{{ __('About the Leaderboard') }}</h3>
+                <p class="text-blue-800">
+                    {{ __('This leaderboard displays top performers across different metrics including sales revenue, customer ratings, buyer spending, and review contributions. Rankings are updated in real-time based on transaction and review data.') }}
+                </p>
             </div>
         </div>
     </div>

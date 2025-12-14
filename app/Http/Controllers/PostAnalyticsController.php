@@ -74,7 +74,7 @@ class PostAnalyticsController extends Controller
             'shares' => $topPosts->pluck('shares_count'),
         ];
 
-        return view('forum.analytics', [
+        return view('40-shared/forum/analytics', [
             'summary' => $summary,
             'chartLabels' => $chartLabels,
             'chartData' => $chartData,

@@ -57,6 +57,6 @@ class LeaderboardController extends Controller
                 break;
         }
 
-        return view('leaderboard.index', compact('leaderboard', 'type', 'metric', 'period', 'title'));
+        return view('40-shared/leaderboard/index', compact('leaderboard', 'type', 'metric', 'period', 'title'));
     }
 }

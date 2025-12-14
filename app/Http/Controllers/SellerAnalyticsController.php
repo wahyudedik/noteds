@@ -57,7 +57,7 @@ class SellerAnalyticsController extends Controller
         // Overall statistics
         $stats = $this->getOverallStats($sellerNotes, $startDate, $endDate);
 
-        return view('seller.analytics.index', compact(
+        return view('40-shared/seller/analytics/index', compact(
             'revenueData',
             'conversionData',
             'trafficSources',

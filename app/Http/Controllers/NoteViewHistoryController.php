@@ -23,6 +23,6 @@ class NoteViewHistoryController extends Controller
             ->latest('viewed_at')
             ->paginate(20);
 
-        return view('viewed-notes.index', compact('viewedNotes'));
+        return view('40-shared/viewed-notes/index', compact('viewedNotes'));
     }
 }

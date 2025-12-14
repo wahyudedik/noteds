@@ -1,382 +1,273 @@
-@extends('layouts.app')
+@extends('40-shared/layouts/app')
 
-@section('title', __('messages.forum_index'))
+@section('title', __('Forum'))
 
 @section('content')
-    @include('forum.partials.quill-assets')
-    <div class="py-10 sm:py-12 bg-slate-50 min-h-screen">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="bg-gray-50 min-h-screen">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Header -->
-            <div class="mb-10">
-                <div
-                    class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-500 to-purple-500 text-white shadow-lg">
-                    <div class="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top,_#ffffff33,_transparent_55%)]">
-                    </div>
-                    <div
-                        class="relative z-10 px-6 py-8 sm:px-8 sm:py-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <p
-                                class="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide backdrop-blur">
-                                Community Hub
-                            </p>
-                            <h1 class="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight">Forum Noteds</h1>
-                            <p class="mt-2 text-sm sm:text-base text-white/80 max-w-xl">
-                                Ngobrol santai, berbagi insight, dan temukan catatan terbaik dari para kreator lain. Semua
-                                dalam satu tempat.
-                            </p>
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ __('Forum') }}</h1>
+                <p class="text-lg text-gray-600">{{ __('Join the discussion with our community') }}</p>
+            </div>
+
+            <!-- Create Post Button -->
+            @auth
+                <div class="mb-8">
+                    <button onclick="alert('Create post functionality coming soon')"
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        {{ __('Create a Post') }}
+                    </button>
+                </div>
+            @else
+                <div class="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-blue-900">
+                        {{ __('Please') }}
+                        <a href="{{ route('login') }}"
+                            class="font-semibold underline hover:no-underline">{{ __('login') }}</a>
+                        {{ __('to create a post') }}
+                    </p>
+                </div>
+            @endauth
+
+            <!-- Filters and Search -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <form action="{{ route('forum.index') }}" method="GET" class="flex gap-2">
+                                <input type="text" name="search" value="{{ request('search') }}"
+                                    placeholder="{{ __('Search posts...') }}"
+                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <button type="submit"
+                                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                    {{ __('Search') }}
+                                </button>
+                            </form>
                         </div>
-                        <a href="{{ route('forum.preferences.edit') }}"
-                            class="inline-flex items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-5 py-2 text-sm font-medium text-white transition hover:bg-white/20">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2" />
-                            </svg>
-                            Email Preferences
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <a href="{{ route('forum.index', ['filter' => 'latest']) }}"
+                            class="px-4 py-2 rounded-lg transition {{ $filter === 'latest' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                            {{ __('Latest') }}
+                        </a>
+                        <a href="{{ route('forum.index', ['filter' => 'trending']) }}"
+                            class="px-4 py-2 rounded-lg transition {{ $filter === 'trending' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                            {{ __('Trending') }}
+                        </a>
+                        <a href="{{ route('forum.index', ['filter' => 'following']) }}"
+                            class="px-4 py-2 rounded-lg transition {{ $filter === 'following' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                            {{ __('Following') }}
+                        </a>
+                        <a href="{{ route('forum.index') }}"
+                            class="px-4 py-2 rounded-lg transition {{ !$filter || $filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                            {{ __('All Posts') }}
                         </a>
                     </div>
                 </div>
-
-                <!-- Search Form -->
-                <div class="relative z-10 -mt-6 sm:-mt-8">
-                    <div class="rounded-2xl bg-white px-4 py-4 shadow-lg ring-1 ring-slate-100 sm:px-5">
-                        <form action="{{ route('forum.index') }}" method="GET"
-                            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-                            <div class="relative flex-1">
-                                <span
-                                    class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </span>
-                                <input type="text" name="search" value="{{ $search ?? '' }}"
-                                    placeholder="Cari diskusi, topik, atau kreator..."
-                                    class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100">
-                            </div>
-                            @if (request('filter'))
-                                <input type="hidden" name="filter" value="{{ request('filter') }}">
-                            @endif
-                            <div class="flex items-center gap-2">
-                                @if ($search ?? false)
-                                    <a href="{{ route('forum.index', ['filter' => $filter]) }}"
-                                        class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-500 transition hover:border-slate-300 hover:text-slate-700">
-                                        Reset
-                                    </a>
-                                @endif
-                                <button type="submit"
-                                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                                    Cari
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13 7l5 5-5 5M6 7h11" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Filter Tabs -->
-                <div class="mt-6">
-                    <div class="flex gap-2 overflow-x-auto pb-1">
-                        @php
-                            $filters = [
-                                'timeline' => 'Timeline',
-                                'following' => 'Mengikuti',
-                                'all' => 'Semua Post',
-                                'trending' => 'Trending',
-                            ];
-                        @endphp
-                        @foreach ($filters as $value => $label)
-                            <a href="{{ route('forum.index', ['filter' => $value]) }}"
-                                class="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition {{ $filter === $value ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-slate-600 shadow ring-1 ring-slate-200 hover:text-slate-900' }}">
-                                {{ $label }}
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
             </div>
 
-            <!-- Create Post Form -->
-            <div class="mb-10 rounded-3xl border border-white/60 bg-white/90 p-6 shadow-xl shadow-blue-50/40 backdrop-blur">
-                <form action="{{ route('forum.store') }}" method="POST" id="createPostForm" enctype="multipart/form-data">
-                    @csrf
-                    <div class="mb-5">
-                        <input type="hidden" name="content" id="postContent" required>
-                        <div id="postContentEditor"
-                            class="forum-quill-editor rounded-2xl border border-slate-200 bg-white/70"></div>
-                        <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <span class="text-xs font-medium uppercase tracking-wide text-slate-400" id="charCount">0 /
-                                5000</span>
-                            <div class="flex flex-wrap items-center gap-2 text-sm font-medium text-blue-600">
-                                <label for="media-upload"
-                                    class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-blue-700 transition hover:border-blue-200 hover:bg-blue-100">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    Upload Media
-                                </label>
-                                <input type="file" id="media-upload" name="media[]" multiple accept="image/*"
-                                    class="hidden" onchange="previewMedia(this)">
-                                @auth
-                                    @if (auth()->user()->hasRole('seller'))
-                                        <button type="button" id="shareNoteBtn"
-                                            class="inline-flex items-center gap-2 rounded-full border border-blue-100 px-3 py-1.5 text-blue-600 transition hover:border-blue-200 hover:bg-blue-50">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M4 4h16v16H4V4zM8 4v16M4 8h16" />
-                                            </svg>
-                                            Bagikan Catatan
-                                        </button>
-                                    @endif
-                                @endauth
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Media Preview -->
-                    <div id="mediaPreview" class="mb-5 hidden">
-                        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4" id="mediaPreviewGrid"></div>
-                    </div>
-
-                    <!-- Note Selection (Hidden by default, only for sellers) -->
-                    @auth
-                        @if (auth()->user()->hasRole('seller'))
-                            <div id="noteSelection" class="mb-5 hidden">
-                                <label class="mb-2 block text-sm font-semibold text-slate-700">Pilih catatan yang ingin
-                                    dibagikan</label>
-                                <select name="note_id" id="noteSelect"
-                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
-                                    <option value="">-- No note --</option>
-                                    @foreach (auth()->user()->notes()->where('status', 'active')->get() as $note)
-                                        <option value="{{ $note->id }}">{{ $note->title }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        @endif
-                    @endauth
-
-                    <div class="mb-5 grid gap-5 md:grid-cols-2">
-                        <div>
-                            <label class="mb-2 block text-sm font-semibold text-slate-700">Visibilitas Post</label>
-                            <select name="visibility"
-                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
-                                <option value="public">Publik — semua orang bisa lihat</option>
-                                <option value="followers">Followers saja</option>
-                                <option value="private">Pribadi — hanya kamu</option>
-                            </select>
-                            <p class="mt-2 text-xs text-slate-400">Balasan akan otomatis mengikuti visibilitas post utama.
-                            </p>
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-semibold text-slate-700">Jadwalkan Post
-                                (opsional)</label>
-                            <input type="datetime-local" name="scheduled_for" value="{{ old('scheduled_for') }}"
-                                min="{{ now()->format('Y-m-d\TH:i') }}"
-                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
-                            <p class="mt-2 text-xs text-slate-400">Kosongkan jika ingin langsung tayang. Pilih waktu untuk
-                                menjadwalkan publikasi otomatis.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div class="flex items-center gap-2 text-xs text-slate-400">
-                            <span
-                                class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-600">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 6v6l3 3" />
-                                    <circle cx="12" cy="12" r="9" stroke-width="2"></circle>
-                                </svg>
-                                Auto-save aktif
-                            </span>
-                            <span>Draft akan tersimpan saat kamu mengetik.</span>
-                        </div>
-                        <button type="submit"
-                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                            </svg>
-                            Posting sekarang
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Posts Feed -->
+            <!-- Posts List -->
             @if ($posts->count() > 0)
-                <div class="space-y-6">
+                <div class="space-y-4">
                     @foreach ($posts as $post)
-                        @include('forum.partials.post-card', ['post' => $post])
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition">
+                            <!-- Post Header -->
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-start gap-4 flex-1">
+                                    <!-- User Avatar -->
+                                    <div class="flex-shrink-0">
+                                        @if ($post->user->avatar)
+                                            <img src="{{ $post->user->avatar }}" alt="{{ $post->user->name }}"
+                                                class="w-12 h-12 rounded-full object-cover">
+                                        @else
+                                            <div
+                                                class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold">
+                                                {{ substr($post->user->name, 0, 1) }}
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- User Info and Post Title -->
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="font-semibold text-gray-900">
+                                                {{ $post->user->name }}
+                                            </span>
+                                            <span class="text-gray-500">@</span>
+                                            <span class="text-gray-600">
+                                                {{ $post->user->username }}
+                                            </span>
+                                            <span class="text-gray-400 text-sm">
+                                                {{ $post->created_at->diffForHumans() }}
+                                            </span>
+                                        </div>
+                                        <a href="{{ route('forum.show', $post) }}" class="block">
+                                            @php
+                                                $postTitle = (string) ($post->title ?? '');
+                                            @endphp
+                                            <h3 class="text-xl font-bold text-gray-900 hover:text-blue-600 mb-2">
+                                                {{ $postTitle }}
+                                            </h3>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- More Options -->
+                                @if (auth()->check() && (auth()->id() === $post->user_id || auth()->user()->hasRole('admin')))
+                                    <div class="flex-shrink-0">
+                                        <!-- Edit/Delete options can be added here when routes are defined -->
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Post Content -->
+                            <a href="{{ route('forum.show', $post) }}" class="block">
+                                @php
+                                    $postContent = is_string($post->content)
+                                        ? $post->content
+                                        : (is_array($post->content)
+                                            ? implode(' ', $post->content)
+                                            : '');
+                                @endphp
+                                <p class="text-gray-700 mb-4 line-clamp-3">
+                                    {{ Str::limit(strip_tags($postContent), 300) }}
+                                </p>
+                            </a>
+
+                            <!-- Post Media -->
+                            @if ($post->media && $post->media->count() > 0)
+                                <div class="mb-4">
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                        @foreach ($post->media->take(3) as $media)
+                                            @if ($media->type === 'image')
+                                                <a href="{{ route('forum.show', $post) }}"
+                                                    class="rounded-lg overflow-hidden">
+                                                    <img src="{{ $media->url }}" alt="Post media"
+                                                        class="w-full h-32 object-cover hover:opacity-75 transition">
+                                                </a>
+                                            @elseif ($media->type === 'video')
+                                                <a href="{{ route('forum.show', $post) }}"
+                                                    class="rounded-lg overflow-hidden bg-gray-900 flex items-center justify-center h-32 relative">
+                                                    <svg class="w-12 h-12 text-white" fill="currentColor"
+                                                        viewBox="0 0 20 20">
+                                                        <path
+                                                            d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z">
+                                                        </path>
+                                                    </svg>
+                                                </a>
+                                            @endif
+                                        @endforeach
+                                        @if ($post->media->count() > 3)
+                                            <a href="{{ route('forum.show', $post) }}"
+                                                class="rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center h-32 font-semibold text-gray-700 hover:bg-gray-300 transition">
+                                                +{{ $post->media->count() - 3 }}
+                                            </a>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Hashtags -->
+                            @if ($post->hashtags && $post->hashtags->count() > 0)
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                    @foreach ($post->hashtags as $hashtag)
+                                        <a href="{{ route('forum.index', ['search' => '#' . $hashtag->name]) }}"
+                                            class="text-blue-600 hover:text-blue-800">
+                                            #{{ $hashtag->name }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <!-- Post Stats and Actions -->
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                                <div class="flex items-center gap-6 text-sm text-gray-500">
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2h-3l-4 4z">
+                                            </path>
+                                        </svg>
+                                        {{ $post->all_comments_count ?? 0 }}
+                                    </span>
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M14 10h4.764a2 2 0 011.789 2.894l-3.646 7.23a2 2 0 01-1.789 1.106H7a2 2 0 01-2-2V9a2 2 0 012-2h6a2 2 0 012 2v5">
+                                            </path>
+                                        </svg>
+                                        {{ $post->likes_count ?? 0 }}
+                                    </span>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="flex items-center gap-4">
+                                    @auth
+                                        <button onclick="alert('Like functionality coming soon')"
+                                            class="text-gray-500 hover:text-red-600 transition {{ $post->is_liked ? 'text-red-600' : '' }}">
+                                            <svg class="w-5 h-5 {{ $post->is_liked ? 'fill-current' : '' }}" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M14 10h4.764a2 2 0 011.789 2.894l-3.646 7.23a2 2 0 01-1.789 1.106H7a2 2 0 01-2-2V9a2 2 0 012-2h6a2 2 0 012 2v5">
+                                                </path>
+                                            </svg>
+                                        </button>
+                                        <button onclick="alert('Bookmark functionality coming soon')"
+                                            class="text-gray-500 hover:text-yellow-600 transition {{ $post->is_bookmarked ? 'text-yellow-600' : '' }}">
+                                            <svg class="w-5 h-5 {{ $post->is_bookmarked ? 'fill-current' : '' }}"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 5a2 2 0 012-2h6a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                                            </svg>
+                                        </button>
+                                    @endauth
+                                    <a href="{{ route('forum.show', $post) }}"
+                                        class="text-blue-600 hover:text-blue-800 font-semibold">
+                                        {{ __('View') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     @endforeach
                 </div>
 
                 <!-- Pagination -->
-                <div class="mt-10">
+                <div class="mt-8">
                     {{ $posts->links() }}
                 </div>
             @else
-                <div class="rounded-3xl border border-dashed border-slate-200 bg-white p-12 text-center shadow-sm">
-                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-blue-500">
-                        <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                    </div>
-                    <h3 class="mt-4 text-lg font-semibold text-slate-900">Belum ada diskusi</h3>
-                    <p class="mt-2 text-sm text-slate-500">
-                        @if ($filter === 'following')
-                            Kamu belum mengikuti siapa pun. Mulai follow kreator favoritmu untuk melihat update mereka di
-                            sini.
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2h-3l-4 4z">
+                        </path>
+                    </svg>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ __('No posts found') }}</h3>
+                    <p class="text-gray-600 mb-6">
+                        @if ($search)
+                            {{ __('No posts match your search for ":query"', ['query' => $search]) }}
                         @else
-                            Yuk mulai percakapan pertama kamu di komunitas Noteds!
+                            {{ __('Be the first to start a conversation!') }}
                         @endif
                     </p>
+                    @auth
+                        <button onclick="alert('Create post functionality coming soon')"
+                            class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                                </path>
+                            </svg>
+                            {{ __('Create a Post') }}
+                        </button>
+                    @endauth
                 </div>
             @endif
         </div>
     </div>
-
-    @push('scripts')
-        <script>
-            window.forumQuillToolbar = window.forumQuillToolbar || [
-                ['bold', 'italic', 'underline', 'strike'],
-                [{
-                    header: [1, 2, 3, false]
-                }],
-                [{
-                    list: 'ordered'
-                }, {
-                    list: 'bullet'
-                }],
-                ['blockquote', 'code-block'],
-                ['link'],
-                ['clean']
-            ];
-
-            window.forumQuillMaxLength = 5000;
-
-            document.addEventListener('DOMContentLoaded', function() {
-                const postContentInput = document.getElementById('postContent');
-                const postContentEditor = document.getElementById('postContentEditor');
-                const charCount = document.getElementById('charCount');
-                const createPostForm = document.getElementById('createPostForm');
-
-                if (postContentInput && postContentEditor && window.Quill) {
-                    const quill = new Quill(postContentEditor, {
-                        theme: 'snow',
-                        modules: {
-                            toolbar: window.forumQuillToolbar,
-                        },
-                    });
-
-                    if (!postContentInput.value) {
-                        postContentInput.value = '<p><br></p>';
-                    }
-
-                    quill.root.innerHTML = postContentInput.value;
-
-                    const updateCharCount = () => {
-                        const length = quill.getText().trim().length;
-                        if (charCount) {
-                            charCount.textContent = `${length} / ${window.forumQuillMaxLength}`;
-                            if (length > window.forumQuillMaxLength) {
-                                charCount.classList.add('text-red-600');
-                            } else {
-                                charCount.classList.remove('text-red-600');
-                            }
-                        }
-                    };
-
-                    updateCharCount();
-
-                    quill.on('text-change', function() {
-                        postContentInput.value = quill.root.innerHTML;
-                        updateCharCount();
-                    });
-
-                    if (createPostForm) {
-                        createPostForm.addEventListener('submit', function(event) {
-                            const textLength = quill.getText().trim().length;
-
-                            if (textLength === 0) {
-                                event.preventDefault();
-                                alert('Please enter some content before posting.');
-                                return false;
-                            }
-
-                            if (textLength > window.forumQuillMaxLength) {
-                                event.preventDefault();
-                                alert('Post content may not be greater than 5000 characters.');
-                                return false;
-                            }
-
-                            postContentInput.value = quill.root.innerHTML;
-                        });
-                    }
-
-                    window.forumQuillEditors = window.forumQuillEditors || {};
-                    window.forumQuillEditors.create = quill;
-                }
-
-                const shareNoteBtn = document.getElementById('shareNoteBtn');
-                const noteSelection = document.getElementById('noteSelection');
-
-                if (shareNoteBtn && noteSelection) {
-                    shareNoteBtn.addEventListener('click', function() {
-                        noteSelection.classList.toggle('hidden');
-                    });
-                }
-            });
-
-            function previewMedia(input) {
-                const preview = document.getElementById('mediaPreview');
-                const previewGrid = document.getElementById('mediaPreviewGrid');
-
-                if (input.files && input.files.length > 0) {
-                    preview.classList.remove('hidden');
-                    previewGrid.innerHTML = '';
-
-                    Array.from(input.files).forEach((file, index) => {
-                        if (file.type.startsWith('image/')) {
-                            const reader = new FileReader();
-                            reader.onload = function(e) {
-                                const div = document.createElement('div');
-                                div.className = 'relative';
-                                div.innerHTML = `
-                                <img src="${e.target.result}" alt="Preview ${index + 1}" class="w-full h-24 object-cover rounded-lg">
-                                <button type="button" onclick="removeMedia(${index})" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600">
-                                    ×
-                                </button>
-                            `;
-                                previewGrid.appendChild(div);
-                            };
-                            reader.readAsDataURL(file);
-                        }
-                    });
-                } else {
-                    preview.classList.add('hidden');
-                }
-            }
-
-            function removeMedia(index) {
-                const input = document.getElementById('media-upload');
-                const dt = new DataTransfer();
-                const files = Array.from(input.files);
-
-                files.forEach((file, i) => {
-                    if (i !== index) {
-                        dt.items.add(file);
-                    }
-                });
-
-                input.files = dt.files;
-                previewMedia(input);
-            }
-
-            window.previewMedia = previewMedia;
-            window.removeMedia = removeMedia;
-        </script>
-    @endpush
 @endsection

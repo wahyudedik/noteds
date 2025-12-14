@@ -88,6 +88,47 @@ class Kernel extends ConsoleKernel
             ->timezone('Asia/Jakarta')
             ->name('cleanup-summary')
             ->withoutOverlapping();
+
+        // ===== GROWTH HACKING & ENGAGEMENT =====
+        // Process user streak rewards (daily at 1 AM)
+        $schedule->command('growth:process --type=streaks')
+            ->dailyAt('01:00')
+            ->timezone('Asia/Jakarta')
+            ->name('process-user-streaks')
+            ->withoutOverlapping()
+            ->onSuccess(function () {
+                \Illuminate\Support\Facades\Log::info('✅ User streak rewards processed');
+            });
+
+        // Send engagement nudges (daily at 9 AM)
+        $schedule->command('growth:process --type=nudges')
+            ->dailyAt('09:00')
+            ->timezone('Asia/Jakarta')
+            ->name('send-engagement-nudges')
+            ->withoutOverlapping()
+            ->onSuccess(function () {
+                \Illuminate\Support\Facades\Log::info('✅ Engagement nudges sent');
+            });
+
+        // Process creator quality bonuses (weekly on Monday at 8 AM)
+        $schedule->command('growth:process --type=bonuses')
+            ->weeklyOn(1, '08:00')
+            ->timezone('Asia/Jakarta')
+            ->name('process-quality-bonuses')
+            ->withoutOverlapping()
+            ->onSuccess(function () {
+                \Illuminate\Support\Facades\Log::info('✅ Creator quality bonuses processed');
+            });
+
+        // ===== RECOMMENDATIONS & CONTENT =====
+        // Refresh recommendation cache (every 6 hours)
+        $schedule->command('recommendations:refresh')
+            ->everySixHours()
+            ->name('refresh-recommendations-cache')
+            ->withoutOverlapping()
+            ->onSuccess(function () {
+                \Illuminate\Support\Facades\Log::info('✅ Recommendations cache refreshed');
+            });
     }
 
     /**

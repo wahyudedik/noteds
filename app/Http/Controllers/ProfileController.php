@@ -18,7 +18,7 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
+        return view('40-shared.profile.edit', [
             'user' => $request->user(),
         ]);
     }
@@ -31,24 +31,37 @@ class ProfileController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
+        \Log::info('Profile update attempt', [
+            'user_id' => $user->id,
+            'has_ktp_file' => $request->hasFile('ktp_file'),
+            'has_selfie_file' => $request->hasFile('selfie_file'),
+            'document_type' => $request->input('document_type'),
+            'validated_keys' => array_keys($validated),
+            'ktp_file_details' => $request->hasFile('ktp_file') ? [
+                'name' => $request->file('ktp_file')->getClientOriginalName(),
+                'size' => $request->file('ktp_file')->getSize(),
+                'mime' => $request->file('ktp_file')->getMimeType(),
+            ] : null,
+        ]);
+
         // Handle avatar file upload
         if ($request->hasFile('avatar_file')) {
             $file = $request->file('avatar_file');
-            
+
             // Delete old avatar if it's a stored file (not URL)
             if ($user->avatar && !str_starts_with($user->avatar, 'http')) {
                 Storage::disk('public')->delete($user->avatar);
             }
-            
+
             // Ensure avatars directory exists
             if (!Storage::disk('public')->exists('avatars')) {
                 Storage::disk('public')->makeDirectory('avatars');
             }
-            
+
             // Generate unique filename
             $filename = Str::uuid() . '_' . time() . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('avatars/' . $user->id, $filename, 'public');
-            
+
             // Store the path (relative to public storage)
             $validated['avatar'] = $path;
         } elseif ($request->filled('avatar') && str_starts_with($request->input('avatar'), 'http')) {
@@ -67,28 +80,28 @@ class ProfileController extends Controller
         $hadKtpBefore = (bool) $user->ktp_path;
         $hadSelfieBefore = (bool) $user->selfie_path;
         $bothUploadedForFirstTime = false;
-        
+
         // Handle KTP/Kartu Pelajar file upload
         if ($request->hasFile('ktp_file')) {
             // Delete old KTP/Kartu Pelajar if exists
             if ($user->ktp_path) {
                 Storage::disk('private')->delete($user->ktp_path);
             }
-            
+
             // Determine document type and directory
             $documentType = $request->input('document_type', 'ktp'); // Default to ktp if not specified
             $directory = $documentType === 'kartu_pelajar' ? 'kyc/kartu_pelajar' : 'kyc/ktp';
-            
+
             // Ensure kyc directory exists
             if (!Storage::disk('private')->exists($directory)) {
                 Storage::disk('private')->makeDirectory($directory, 0755, true);
             }
-            
+
             // Store in private disk
             $ktpPath = $request->file('ktp_file')->store($directory, 'private');
             $validated['ktp_path'] = $ktpPath;
             $validated['document_type'] = $documentType;
-            
+
             // Reset verification status to pending if document is updated
             if ($user->verification_status === 'verified') {
                 $validated['verification_status'] = 'pending';
@@ -104,22 +117,22 @@ class ProfileController extends Controller
             if ($user->selfie_path) {
                 Storage::disk('private')->delete($user->selfie_path);
             }
-            
+
             // Ensure kyc directory exists
             if (!Storage::disk('private')->exists('kyc/selfie')) {
                 Storage::disk('private')->makeDirectory('kyc/selfie');
             }
-            
+
             // Store in private disk
             $selfiePath = $request->file('selfie_file')->store('kyc/selfie', 'private');
             $validated['selfie_path'] = $selfiePath;
-            
+
             // Reset verification status to pending if selfie is updated
             if ($user->verification_status === 'verified') {
                 $validated['verification_status'] = 'pending';
             }
         }
-        
+
         // Fill validated data
         $user->fill($validated);
 
@@ -127,7 +140,20 @@ class ProfileController extends Controller
             $user->email_verified_at = null;
         }
 
+        \Log::info('Before save', [
+            'ktp_path' => $user->ktp_path,
+            'selfie_path' => $user->selfie_path,
+            'document_type' => $user->document_type,
+            'dirty' => $user->getDirty(),
+        ]);
+
         $user->save();
+
+        \Log::info('After save', [
+            'ktp_path' => $user->ktp_path,
+            'selfie_path' => $user->selfie_path,
+            'document_type' => $user->document_type,
+        ]);
 
         // Check if both KTP and selfie are now uploaded for the first time (after saving)
         if (!$hadKtpBefore && !$hadSelfieBefore && $user->ktp_path && $user->selfie_path) {

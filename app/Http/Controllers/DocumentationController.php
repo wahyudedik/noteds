@@ -42,7 +42,7 @@ class DocumentationController extends Controller
             $categoryCounts[$key] = Documentation::active()->where('category', $key)->count();
         }
 
-        return view('docs.index', compact('documentations', 'categories', 'categoryCounts'));
+        return view('40-shared/docs/index', compact('documentations', 'categories', 'categoryCounts'));
     }
 
     /**
@@ -76,7 +76,7 @@ class DocumentationController extends Controller
             'video_tutorial' => 'Video Tutorial',
         ];
 
-        return view('docs.category', compact('documentations', 'categories', 'category'));
+        return view('40-shared/docs/category', compact('documentations', 'categories', 'category'));
     }
 
     /**
@@ -108,7 +108,7 @@ class DocumentationController extends Controller
             ->limit(5)
             ->get();
 
-        return view('docs.show', compact('documentation', 'relatedDocs'));
+        return view('40-shared/docs/show', compact('documentation', 'relatedDocs'));
     }
 
     /**

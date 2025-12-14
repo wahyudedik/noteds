@@ -40,7 +40,7 @@ class TutsController extends Controller
 
         $featuredCount = Tutorial::published()->featured()->count();
 
-        return view('tuts.index', compact('tutorials', 'categories', 'featuredCount'));
+        return view('40-shared/tuts/index', compact('tutorials', 'categories', 'featuredCount'));
     }
 
     /**
@@ -67,6 +67,6 @@ class TutsController extends Controller
             ->limit(4)
             ->get();
 
-        return view('tuts.show', compact('tutorial', 'relatedTutorials'));
+        return view('40-shared/tuts/show', compact('tutorial', 'relatedTutorials'));
     }
 }

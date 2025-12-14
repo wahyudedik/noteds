@@ -88,7 +88,7 @@ class SellerDashboardController extends Controller
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count, SUM(amount) as total')
             ->get();
 
-        return view('dashboard.seller', [
+        return view('40-shared/dashboard/seller', [
             'user' => $user,
             'metrics' => $metrics,
             'bestPerforming' => $bestPerforming,

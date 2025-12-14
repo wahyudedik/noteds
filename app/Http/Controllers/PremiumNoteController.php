@@ -55,7 +55,7 @@ class PremiumNoteController extends Controller
             $suggestions = $this->searchService->getSuggestions($query, $user);
         }
 
-        return view('premium.search', compact('notes', 'query', 'suggestions'));
+        return view('40-shared/premium/search', compact('notes', 'query', 'suggestions'));
     }
 
     /**
@@ -247,7 +247,7 @@ class PremiumNoteController extends Controller
             abort(403, 'Fitur ini memerlukan subscription premium.');
         }
 
-        return view('premium.insights');
+        return view('40-shared/premium/insights');
     }
 
     /**
@@ -263,6 +263,6 @@ class PremiumNoteController extends Controller
 
         $notes = $user->notes()->latest()->limit(50)->get(['id', 'title']);
 
-        return view('premium.qa', compact('notes'));
+        return view('40-shared/premium/qa', compact('notes'));
     }
 }

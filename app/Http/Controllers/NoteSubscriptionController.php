@@ -27,7 +27,7 @@ class NoteSubscriptionController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('subscriptions.index', compact('subscriptions'));
+        return view('40-shared/subscriptions/index', compact('subscriptions'));
     }
 
     /**
@@ -41,7 +41,7 @@ class NoteSubscriptionController extends Controller
 
         $subscription->load(['note', 'payments.transaction']);
 
-        return view('subscriptions.show', compact('subscription'));
+        return view('40-shared/subscriptions/show', compact('subscription'));
     }
 
     /**

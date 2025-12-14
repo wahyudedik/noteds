@@ -11,6 +11,6 @@ class SimulatorController extends Controller
      */
     public function index(): View
     {
-        return view('simulators.index');
+        return view('40-shared/simulators/index');
     }
 }
