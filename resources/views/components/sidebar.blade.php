@@ -504,6 +504,13 @@
                     'active' => request()->routeIs('admin.dashboard'),
                 ];
                 $adminItems[] = [
+                    'label' => 'Platform Analytics',
+                    'href' => route('admin.platform.dashboard'),
+                    'icon' =>
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>',
+                    'active' => request()->routeIs('admin.platform.*'),
+                ];
+                $adminItems[] = [
                     'label' => 'Forum Moderation',
                     'href' => route('admin.forum.moderation.index'),
                     'icon' =>
@@ -696,27 +703,19 @@
                     @endif
                     <div x-show="open" class="space-y-1">
                         @foreach ($group['items'] as $item)
-                            <a href="{{ $item['href'] }}"
-                                class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150 group
-                                    {{ $item['active']
-                                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
-                                title="{{ $item['label'] }}">
-                                <span class="flex-shrink-0 {!! $item['active']
-                                    ? 'text-blue-600 dark:text-blue-400'
-                                    : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300' !!}">
-                                    {!! $item['icon'] !!}
-                                </span>
-                                <span x-show="isExpanded" x-transition class="flex-1 truncate">
-                                    {{ $item['label'] }}
-                                </span>
-                                @php
-                                    // Show small badge if the linked view is missing
-                                    $isComingSoon = false;
-                                    try {
-                                        $parsed = parse_url($item['href']);
+                            @php
+                                // Determine coming soon state from optional flag or heuristic view mapping
+                                $isComingSoon = false;
+                                try {
+                                    // If item provides a callable flag, respect it
+                                    if (isset($item['comingSoon']) && is_callable($item['comingSoon'])) {
+                                        $isComingSoon = (bool) call_user_func($item['comingSoon']);
+                                    }
+
+                                    // Fallback heuristic based on path → view existence
+                                    if (!$isComingSoon) {
+                                        $parsed = parse_url($item['href'] ?? '');
                                         $path = $parsed['path'] ?? '';
-                                        // Map common paths to view names heuristically
                                         $pathToView =
                                             [
                                                 '/buyer-analytics' => '40-shared.buyer-analytics.index',
@@ -732,14 +731,41 @@
                                         if ($pathToView && !\Illuminate\Support\Facades\View::exists($pathToView)) {
                                             $isComingSoon = true;
                                         }
-                                    } catch (\Throwable $e) {
                                     }
-                                @endphp
-                                @if ($isComingSoon)
+                                } catch (\Throwable $e) {
+                                }
+                            @endphp
+
+                            @if ($isComingSoon)
+                                <span
+                                    class="cursor-not-allowed pointer-events-none flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150 group text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700"
+                                    title="Segera hadir">
+                                    <span class="flex-shrink-0 text-gray-400 dark:text-gray-500">
+                                        {!! $item['icon'] !!}
+                                    </span>
+                                    <span x-show="isExpanded" x-transition class="flex-1 truncate">
+                                        {{ $item['label'] }}
+                                    </span>
                                     <span class="ml-2 text-xs px-2 py-0.5 rounded bg-yellow-100 text-yellow-800">Coming
                                         Soon</span>
-                                @endif
-                            </a>
+                                </span>
+                            @else
+                                <a href="{{ $item['href'] }}"
+                                    class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150 group
+                                        {{ $item['active']
+                                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+                                    title="{{ $item['label'] }}">
+                                    <span class="flex-shrink-0 {!! $item['active']
+                                        ? 'text-blue-600 dark:text-blue-400'
+                                        : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300' !!}">
+                                        {!! $item['icon'] !!}
+                                    </span>
+                                    <span x-show="isExpanded" x-transition class="flex-1 truncate">
+                                        {{ $item['label'] }}
+                                    </span>
+                                </a>
+                            @endif
                         @endforeach
                     </div>
                     @if (!$loop->last)

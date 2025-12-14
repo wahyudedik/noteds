@@ -41,13 +41,13 @@ class PlatformDashboardController extends Controller
                 'active_users_today' => $this->getActiveUsersToday(),
                 'active_users_week' => $this->getActiveUsersThisWeek(),
                 'content_creators' => DB::table('users')
-                    ->whereExists(fn($q) => $q->select(1)->from('notes')->whereColumn('notes.user_id', 'users.id'))
+                    ->whereExists(fn($q) => $q->select('id')->from('notes')->whereColumn('notes.user_id', 'users.id'))
                     ->count(),
                 'total_notes' => DB::table('notes')->count(),
                 'published_notes' => DB::table('notes')->where('status', 'published')->count(),
                 'total_transactions' => DB::table('transactions')->count(),
                 'total_revenue' => DB::table('transactions')
-                    ->where('type', 'sale')
+                    ->where('status', 'success')
                     ->sum('amount') ?? 0,
             ];
         });
@@ -74,25 +74,25 @@ class PlatformDashboardController extends Controller
                     ->where('created_at', '>=', $thisMonth)
                     ->count(),
                 'daily_gmv' => DB::table('transactions')
-                    ->where('type', 'sale')
+                    ->where('status', 'success')
                     ->whereDate('created_at', $today)
                     ->sum('amount') ?? 0,
                 'daily_gmv_yesterday' => DB::table('transactions')
-                    ->where('type', 'sale')
+                    ->where('status', 'success')
                     ->whereDate('created_at', $yesterday)
                     ->sum('amount') ?? 0,
                 'monthly_gmv' => DB::table('transactions')
-                    ->where('type', 'sale')
+                    ->where('status', 'success')
                     ->where('created_at', '>=', $thisMonth)
                     ->sum('amount') ?? 0,
                 'avg_order_value' => DB::table('transactions')
-                    ->where('type', 'sale')
+                    ->where('status', 'success')
                     ->whereDate('created_at', $today)
                     ->avg('amount') ?? 0,
                 'platform_commission_today' => DB::table('transactions')
-                    ->where('type', 'commission')
+                    ->where('status', 'success')
                     ->whereDate('created_at', $today)
-                    ->sum('amount') ?? 0,
+                    ->sum('commission') ?? 0,
             ];
         });
     }
@@ -133,20 +133,18 @@ class PlatformDashboardController extends Controller
                 'total_sales' => DB::table('purchased_notes')->count(),
                 'repeat_customer_rate' => $this->getRepeatCustomerRate(),
                 'avg_customer_ltv' => $this->getAverageCustomerLTV(),
-                'top_categories' => DB::table('notes')
-                    ->join('categories', 'notes.category_id', '=', 'categories.id')
-                    ->select('categories.name', DB::raw('COUNT(notes.id) as count'))
-                    ->groupBy('categories.name')
-                    ->orderByDesc('count')
-                    ->limit(5)
-                    ->get(),
+                'top_categories' => collect([
+                    ['name' => 'Technology', 'count' => DB::table('notes')->where('ecosystem_category', 'technology')->count()],
+                    ['name' => 'Design', 'count' => DB::table('notes')->where('ecosystem_category', 'design')->count()],
+                    ['name' => 'Business', 'count' => DB::table('notes')->where('ecosystem_category', 'business')->count()],
+                ])->sortByDesc('count')->take(5),
                 'payment_methods' => DB::table('transactions')
                     ->select('payment_method', DB::raw('COUNT(*) as count'), DB::raw('SUM(amount) as total'))
                     ->groupBy('payment_method')
                     ->get(),
                 'affiliate_earnings' => DB::table('affiliate_commissions')
                     ->where('created_at', '>=', $thisMonth)
-                    ->sum('amount') ?? 0,
+                    ->sum('commission_amount') ?? 0,
             ];
         });
     }
@@ -171,10 +169,12 @@ class PlatformDashboardController extends Controller
      */
     private function getActiveUsersToday()
     {
-        return DB::table('activity')
+        // Count distinct users who made transactions today
+        return DB::table('transactions')
             ->whereDate('created_at', Carbon::today())
-            ->distinct('user_id')
-            ->count('user_id') ?? 0;
+            ->select('user_id')
+            ->distinct()
+            ->count() ?? 0;
     }
 
     /**
@@ -182,10 +182,12 @@ class PlatformDashboardController extends Controller
      */
     private function getActiveUsersThisWeek()
     {
-        return DB::table('activity')
+        // Count distinct users who made transactions this week
+        return DB::table('transactions')
             ->where('created_at', '>=', Carbon::today()->subDays(7))
-            ->distinct('user_id')
-            ->count('user_id') ?? 0;
+            ->select('user_id')
+            ->distinct()
+            ->count() ?? 0;
     }
 
     /**
@@ -213,10 +215,14 @@ class PlatformDashboardController extends Controller
      */
     private function getAverageCustomerLTV()
     {
-        return DB::table('purchased_notes')
-            ->select('user_id', DB::raw('SUM(price) as total_spent'))
-            ->groupBy('user_id')
-            ->avg(DB::raw('total_spent')) ?? 0;
+        // Calculate average spending per customer using subquery
+        $subquery = DB::table('purchased_notes')
+            ->select('user_id', DB::raw('SUM(purchase_price) as total_spent'))
+            ->groupBy('user_id');
+
+        return DB::table(DB::raw("({$subquery->toSql()}) as subquery"))
+            ->mergeBindings($subquery)
+            ->avg('total_spent') ?? 0;
     }
 
     /**
@@ -339,22 +345,36 @@ class PlatformDashboardController extends Controller
     public function export()
     {
         $filename = 'platform-metrics-' . now()->format('Y-m-d-H-i-s') . '.csv';
+        $healthMetrics = $this->getHealthMetrics();
+        $businessMetrics = $this->getBusinessMetrics();
+        $revenueMetrics = $this->getRevenueMetrics();
 
         $metrics = [
             ['Metric', 'Value', 'Date'],
-            ['Total Users', $this->getHealthMetrics()['total_users'], now()],
-            ['Active Users Today', $this->getHealthMetrics()['active_users_today'], now()],
-            ['Total Notes', $this->getHealthMetrics()['total_notes'], now()],
-            ['Daily Revenue', $this->getBusinessMetrics()['daily_gmv'], now()],
-            ['Monthly Revenue', $this->getBusinessMetrics()['monthly_gmv'], now()],
+            ['Total Users', $healthMetrics['total_users'], now()],
+            ['Active Users Today', $healthMetrics['active_users_today'], now()],
+            ['Total Notes', $healthMetrics['total_notes'], now()],
+            ['Daily Revenue', $businessMetrics['daily_gmv'], now()],
+            ['Monthly Revenue', $businessMetrics['monthly_gmv'], now()],
+            ['Avg Order Value', $businessMetrics['avg_order_value'], now()],
+            ['', '', ''],
+            ['Top Categories', '', ''],
+            ['Category', 'Count', 'Date'],
         ];
 
-        return response()->streamDownload(function () use ($metrics) {
-            $handle = fopen('php://output', 'w');
-            foreach ($metrics as $row) {
-                fputcsv($handle, $row);
-            }
-            fclose($handle);
-        }, $filename);
+        // Add category data
+        foreach ($revenueMetrics['top_categories'] as $category) {
+            $metrics[] = [$category['name'], $category['count'], now()];
+        }
+
+        // Generate CSV content
+        $csv = "";
+        foreach ($metrics as $row) {
+            $csv .= implode(',', $row) . "\n";
+        }
+
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
     }
 }

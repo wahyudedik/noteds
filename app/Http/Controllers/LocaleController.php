@@ -61,7 +61,9 @@ class LocaleController extends Controller
             Session::put('timezone', $this->currencyService->getDefaultTimezoneForLocale($locale));
         }
 
-        return redirect()->back()->with('success', __('messages.locale_changed', [], $locale));
+        return redirect()->back()
+            ->with('success', __('messages.locale_changed', [], $locale))
+            ->with('locale_changed', $locale); // For toast notification
     }
 
     /**

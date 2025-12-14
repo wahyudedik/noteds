@@ -264,6 +264,64 @@
                 </div>
             @endif
 
+            <!-- Recommended For You (Personalized) -->
+            @auth
+                @if (!empty($recommendedForYou) && count($recommendedForYou) > 0)
+                    <div class="mb-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-2xl font-bold text-gray-900">✨ {{ __('Recommended For You') }}</h2>
+                            <span class="text-sm text-gray-500">{{ __('Based on your activity') }}</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <div class="flex gap-4 pb-4" style="scroll-snap-type: x mandatory;">
+                                @foreach ($recommendedForYou as $note)
+                                    <div class="flex-none w-64" style="scroll-snap-align: start;">
+                                        <a href="{{ route('notes.show', $note) }}"
+                                            class="block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition h-full">
+                                            @if ($note->thumbnails)
+                                                <div class="relative h-40 bg-gray-100">
+                                                    @php
+                                                        $thumbnailData = json_decode($note->thumbnails, true);
+                                                        $thumbnailUrl =
+                                                            is_array($thumbnailData) && count($thumbnailData) > 0
+                                                                ? Storage::url($thumbnailData[0])
+                                                                : asset('placeholder.png');
+                                                    @endphp
+                                                    <img src="{{ $thumbnailUrl }}" alt="{{ $note->title }}"
+                                                        class="w-full h-full object-cover">
+                                                    @if ($note->avg_rating ?? 0 > 0)
+                                                        <div
+                                                            class="absolute bottom-2 right-2 px-2 py-1 bg-yellow-500 text-white text-xs font-semibold rounded">
+                                                            ⭐ {{ number_format($note->avg_rating, 1) }}
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <div
+                                                    class="h-40 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                                                    <i class="fas fa-book text-4xl text-gray-400"></i>
+                                                </div>
+                                            @endif
+                                            <div class="p-4">
+                                                <h3 class="text-md font-semibold text-gray-900 mb-2 line-clamp-2">
+                                                    {{ $note->title }}
+                                                </h3>
+                                                <div class="flex items-center justify-between">
+                                                    <span
+                                                        class="font-semibold text-blue-600">{{ currency($note->price) }}</span>
+                                                    <span class="text-xs text-gray-500">{{ __('by') }}
+                                                        {{ $note->user->name ?? 'Seller' }}</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endauth
+
             <!-- Tags Cloud -->
             @if ($tags->count() > 0)
                 <div class="mb-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">

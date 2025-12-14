@@ -17,6 +17,7 @@ use App\Services\TaxService;
 use App\Services\NotificationService;
 use App\Services\NoteShareService;
 use App\Services\EmailCampaignService;
+use App\Services\ContentRecommendationEngine;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -305,7 +306,14 @@ class MarketplaceController extends Controller
                 ->get();
         }
 
-        return view('marketplace.index', compact('notes', 'tags', 'featuredNotes', 'featuredBanner', 'searchHistory', 'savedSearches'));
+        // Get personalized recommendations for authenticated users
+        $recommendedForYou = [];
+        if (auth()->check()) {
+            $engine = app(ContentRecommendationEngine::class);
+            $recommendedForYou = $engine->getPersonalizedRecommendations(auth()->user(), 6);
+        }
+
+        return view('marketplace.index', compact('notes', 'tags', 'featuredNotes', 'featuredBanner', 'searchHistory', 'savedSearches', 'recommendedForYou'));
     }
 
     /**

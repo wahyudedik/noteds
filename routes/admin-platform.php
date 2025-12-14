@@ -17,4 +17,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin/platform')->name('admin.plat
     // Export Metrics
     Route::get('export/metrics', [PlatformDashboardController::class, 'export'])
         ->name('export-metrics');
+
+    // Export CSV alias to align with view guard
+    Route::get('export', [PlatformDashboardController::class, 'export'])
+        ->name('export');
 });

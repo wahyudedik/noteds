@@ -2,12 +2,12 @@
     $user = auth()->user();
 @endphp
 
-<div x-data="{ mobileMenuOpen: false }" class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-40">
+<div x-data="{ mobileMenuOpen: false }"
+    class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-40">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 items-center justify-between">
             <!-- Mobile sidebar toggle button -->
-            <button 
-                onclick="document.dispatchEvent(new CustomEvent('toggle-sidebar'))"
+            <button onclick="document.dispatchEvent(new CustomEvent('toggle-sidebar'))"
                 class="lg:hidden p-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -22,38 +22,14 @@
             </div>
 
             <!-- Right side actions -->
-            <div class="flex items-center gap-3 sm:gap-4"> 
-                <!-- Locale Switcher -->
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open"
-                        class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                        </svg>
-                        <span class="hidden sm:inline">{{ strtoupper(app()->getLocale()) }}</span>
-                    </button>
-                    <div x-show="open" x-cloak @click.away="open = false" x-transition
-                        class="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50">
-                        <a href="{{ route('locale.switch', 'en') }}"
-                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 {{ app()->getLocale() === 'en' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : '' }}">
-                            🇺🇸 English
-                        </a>
-                        <a href="{{ route('locale.switch', 'id') }}"
-                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 {{ app()->getLocale() === 'id' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : '' }}">
-                            🇮🇩 Indonesia
-                        </a>
-                        <a href="{{ route('locale.switch', 'ar') }}"
-                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 {{ app()->getLocale() === 'ar' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : '' }}">
-                            🇸🇦 العربية
-                        </a>
-                    </div>
-                </div>
+            <div class="flex items-center gap-3 sm:gap-4">
+                <!-- Enhanced Currency & Language Selector -->
+                @include('components.currency-language-selector')
 
                 @auth
                     <div class="flex items-center gap-3">
                         <!-- Notifications Bell -->
-                        <div class="relative" x-data="{ 
+                        <div class="relative" x-data="{
                             open: false,
                             init() {
                                 try {
@@ -83,15 +59,18 @@
                                 </svg>
                                 @if ($unreadCount > 0)
                                     <span
-                                        class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full" data-notif-badge>{{ $unreadCount }}</span>
+                                        class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full"
+                                        data-notif-badge>{{ $unreadCount }}</span>
                                 @endif
                             </button>
 
                             <!-- Notifications Dropdown -->
                             <div x-show="open" x-cloak @click.away="open = false" x-transition
                                 class="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50 max-h-96 overflow-y-auto">
-                                <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('messages.notifications') }}
+                                <div
+                                    class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+                                        {{ __('messages.notifications') }}
                                     </h3>
                                     @if ($unreadCount > 0)
                                         <a href="{{ route('notifications.index') }}"
@@ -103,7 +82,9 @@
                                 @endphp
                                 <div id="notif-list">
                                     @forelse($notifications as $notification)
-                                        @include('partials.notification-item', ['notification' => $notification])
+                                        @include('partials.notification-item', [
+                                            'notification' => $notification,
+                                        ])
                                     @empty
                                         <div class="px-4 py-8 text-center" data-notif-empty>
                                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none"
@@ -125,7 +106,8 @@
                                             if (empty) empty.remove();
                                             const a = document.createElement('a');
                                             a.href = n.link || '#';
-                                            a.className = 'block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 bg-blue-50 dark:bg-blue-900/20';
+                                            a.className =
+                                                'block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 bg-blue-50 dark:bg-blue-900/20';
                                             a.innerHTML = `
                                                 <div class="flex items-start">
                                                     <div class="flex-shrink-0">
@@ -143,7 +125,7 @@
                                                     <div class="flex-shrink-0"><span class="w-2 h-2 bg-blue-600 rounded-full block"></span></div>
                                                 </div>`;
                                             list.prepend(a);
-                                        } catch(e) {}
+                                        } catch (e) {}
                                     }
                                     if (window.Echo && {{ auth()->check() ? 'true' : 'false' }}) {
                                         window.Echo.private('user.{{ auth()->id() }}')
@@ -162,8 +144,7 @@
                                     @if (auth()->user()->avatar)
                                         @if (str_starts_with(auth()->user()->avatar, 'http'))
                                             <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}"
-                                                class="w-8 h-8 rounded-full object-cover"
-                                                loading="lazy"
+                                                class="w-8 h-8 rounded-full object-cover" loading="lazy"
                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         @else
                                             @php
@@ -171,14 +152,14 @@
                                                 $avatarPath = ltrim($avatarPath, '/');
                                                 $avatarPath = preg_replace('#^marketplace/#', '', $avatarPath);
                                             @endphp
-                                            <img src="{{ asset('storage/' . $avatarPath) }}" alt="{{ auth()->user()->name }}"
-                                                class="w-8 h-8 rounded-full object-cover"
+                                            <img src="{{ asset('storage/' . $avatarPath) }}"
+                                                alt="{{ auth()->user()->name }}" class="w-8 h-8 rounded-full object-cover"
                                                 loading="lazy"
                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         @endif
                                     @endif
-                                    <span
-                                        class="text-xs font-semibold text-white" style="display: {{ auth()->user()->avatar ? 'none' : 'flex' }};">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                                    <span class="text-xs font-semibold text-white"
+                                        style="display: {{ auth()->user()->avatar ? 'none' : 'flex' }};">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
                                 </div>
                                 <span class="hidden sm:inline">{{ auth()->user()->name }}</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,8 +174,7 @@
                                 <a href="{{ route('public.profile.show', auth()->user()->username) }}"
                                     class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
                                     <div class="flex items-center">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M12 7a4 4 0 110 8 4 4 0 010-8zm0 10c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z" />
                                         </svg>
@@ -204,8 +184,7 @@
                                 <a href="{{ route('profile.edit') }}"
                                     class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
                                     <div class="flex items-center">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
@@ -215,8 +194,7 @@
                                 <a href="{{ route('support-tickets.create') }}"
                                     class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150">
                                     <div class="flex items-center">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
@@ -229,11 +207,15 @@
                                     class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 dark:text-gray-300 dark:hover:bg-gray-700">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center">
-                                            <svg id="dark-mode-icon" class="w-4 h-4 mr-2 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                            <svg id="dark-mode-icon" class="w-4 h-4 mr-2 hidden" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                                             </svg>
-                                            <svg id="light-mode-icon" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                            <svg id="light-mode-icon" class="w-4 h-4 mr-2" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                                             </svg>
                                             <span id="dark-mode-text">Dark Mode</span>
                                         </div>
@@ -272,4 +254,3 @@
     </div>
 
 </div>
-

@@ -81,6 +81,73 @@
                             <p class="text-gray-700 leading-relaxed mb-4">{{ $note->summary }}</p>
                         @endif
 
+                        <!-- Share to Unlock Discount -->
+                        @auth
+                            @if ($note->price > 0 && !$showFullContent)
+                                <div id="share-to-unlock"
+                                    class="mb-6 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-lg p-5">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div>
+                                            <h3 class="text-lg font-bold text-gray-900 mb-1">🎁
+                                                {{ __('Share to Unlock 10% Discount!') }}</h3>
+                                            <p class="text-sm text-gray-600">
+                                                {{ __('Share this note on 3 platforms to unlock a special discount') }}</p>
+                                        </div>
+                                        <span id="discount-badge"
+                                            class="flex-shrink-0 px-3 py-1 bg-red-500 text-white text-sm font-bold rounded-full hidden">
+                                            -10%
+                                        </span>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <div class="flex items-center justify-between text-sm mb-2">
+                                            <span class="text-gray-700 font-medium">{{ __('Progress') }}</span>
+                                            <span id="share-progress-text" class="font-semibold text-orange-600">0 / 3
+                                                {{ __('shares') }}</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-3">
+                                            <div id="share-progress-bar"
+                                                class="bg-gradient-to-r from-orange-500 to-red-500 h-3 rounded-full transition-all"
+                                                style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <button onclick="shareOnPlatform('whatsapp', {{ $note->id }})"
+                                            class="share-btn px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition flex items-center justify-center gap-2"
+                                            data-platform="whatsapp">
+                                            <i class="fab fa-whatsapp text-xl"></i>
+                                            <span class="text-sm">WhatsApp</span>
+                                        </button>
+                                        <button onclick="shareOnPlatform('twitter', {{ $note->id }})"
+                                            class="share-btn px-4 py-3 bg-blue-400 hover:bg-blue-500 text-white rounded-lg font-medium transition flex items-center justify-center gap-2"
+                                            data-platform="twitter">
+                                            <i class="fab fa-twitter text-xl"></i>
+                                            <span class="text-sm">Twitter</span>
+                                        </button>
+                                        <button onclick="shareOnPlatform('facebook', {{ $note->id }})"
+                                            class="share-btn px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition flex items-center justify-center gap-2"
+                                            data-platform="facebook">
+                                            <i class="fab fa-facebook text-xl"></i>
+                                            <span class="text-sm">Facebook</span>
+                                        </button>
+                                    </div>
+
+                                    <div id="discount-unlocked"
+                                        class="hidden mt-4 p-4 bg-green-100 border-2 border-green-500 rounded-lg">
+                                        <div class="flex items-center gap-3">
+                                            <i class="fas fa-check-circle text-3xl text-green-600"></i>
+                                            <div>
+                                                <p class="font-bold text-green-800">{{ __('Discount Unlocked!') }}</p>
+                                                <p class="text-sm text-green-700">
+                                                    {{ __('Your 10% discount has been applied. Purchase now to save!') }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endauth
+
                         <div class="border-t border-gray-200 pt-4">
                             <h2 class="text-lg font-semibold text-gray-900 mb-2">{{ __('Content') }}</h2>
                             @if ($showFullContent)
@@ -154,7 +221,8 @@
                                             {{ $comment->user->name ?? __('Anonymous') }}</p>
                                         <p class="text-xs text-gray-500 mb-1">
                                             {{ optional($comment->created_at)->diffForHumans() }}</p>
-                                        <p class="text-sm text-gray-700">{{ Str::limit($comment->content ?? '', 160) }}</p>
+                                        <p class="text-sm text-gray-700">{{ Str::limit($comment->content ?? '', 160) }}
+                                        </p>
                                     </div>
                                 @empty
                                     <p class="text-sm text-gray-500">{{ __('No comments yet.') }}</p>
@@ -304,4 +372,113 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Share to Unlock functionality
+        let shareProgress = {
+            shares: 0,
+            platforms: []
+        };
+        const noteId = {{ $note->id }};
+
+        async function loadShareProgress() {
+            try {
+                const response = await fetch(`/api/growth/share-discount/${noteId}`);
+                const data = await response.json();
+
+                shareProgress = data;
+                updateShareUI();
+            } catch (error) {
+                console.error('Failed to load share progress:', error);
+            }
+        }
+
+        function updateShareUI() {
+            const progressBar = document.getElementById('share-progress-bar');
+            const progressText = document.getElementById('share-progress-text');
+            const discountBadge = document.getElementById('discount-badge');
+            const discountUnlocked = document.getElementById('discount-unlocked');
+
+            if (!progressBar || !progressText) return;
+
+            const shares = shareProgress.shares || 0;
+            const progressPercentage = (shares / 3) * 100;
+
+            progressBar.style.width = `${progressPercentage}%`;
+            progressText.textContent = `${shares} / 3 shares`;
+
+            // Mark shared platforms as completed
+            (shareProgress.platforms || []).forEach(platform => {
+                const btn = document.querySelector(`[data-platform="${platform}"]`);
+                if (btn) {
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn.disabled = true;
+                    btn.innerHTML += ' <i class="fas fa-check ml-1"></i>';
+                }
+            });
+
+            // Show discount unlocked message
+            if (shares >= 3) {
+                discountBadge?.classList.remove('hidden');
+                discountUnlocked?.classList.remove('hidden');
+            }
+        }
+
+        async function shareOnPlatform(platform, noteId) {
+            const noteUrl = window.location.href;
+            const noteTitle = '{{ addslashes($note->title) }}';
+            const shareText = `Check out this note: ${noteTitle}`;
+
+            // Open share dialog
+            let shareUrl = '';
+            switch (platform) {
+                case 'whatsapp':
+                    shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + noteUrl)}`;
+                    break;
+                case 'twitter':
+                    shareUrl =
+                        `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(noteUrl)}`;
+                    break;
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(noteUrl)}`;
+                    break;
+            }
+
+            if (shareUrl) {
+                window.open(shareUrl, '_blank', 'width=600,height=400');
+
+                // Track share
+                try {
+                    const response = await fetch('/api/growth/track-share', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            note_id: noteId,
+                            platform: platform
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        shareProgress = data;
+                        updateShareUI();
+                    }
+                } catch (error) {
+                    console.error('Failed to track share:', error);
+                }
+            }
+        }
+
+        // Load share progress on page load
+        @auth
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('share-to-unlock')) {
+                loadShareProgress();
+            }
+        });
+        @endauth
+    </script>
 @endsection

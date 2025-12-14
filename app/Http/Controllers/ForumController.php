@@ -326,7 +326,7 @@ class ForumController extends Controller
     /**
      * Like or unlike a post.
      */
-    public function like(Post $post): JsonResponse
+    public function like(Post $post)
     {
         $user = auth()->user();
 
@@ -342,11 +342,12 @@ class ForumController extends Controller
             $post->likes()->detach($user->id);
             $post->decrement('likes_count');
 
-            return response()->json([
+            $payload = [
                 'success' => true,
                 'liked' => false,
                 'likes_count' => $post->fresh()->likes_count,
-            ]);
+            ];
+            return request()->wantsJson() ? response()->json($payload) : redirect()->back()->with('success', 'Unliked');
         } else {
             // Like
             $post->likes()->attach($user->id, ['id' => (string) Str::uuid()]);
@@ -363,18 +364,52 @@ class ForumController extends Controller
                 );
             }
 
-            return response()->json([
+            $payload = [
                 'success' => true,
                 'liked' => true,
                 'likes_count' => $post->fresh()->likes_count,
-            ]);
+            ];
+            return request()->wantsJson() ? response()->json($payload) : redirect()->back()->with('success', 'Liked');
         }
+    }
+
+    /**
+     * Bookmark or remove bookmark from a post.
+     */
+    public function bookmark(Post $post)
+    {
+        $user = auth()->user();
+
+        if (!$post->canBeViewedBy($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This post is not available.',
+            ], 403);
+        }
+
+        // Toggle bookmark
+        if ($post->bookmarks()->where('user_id', $user->id)->exists()) {
+            $post->bookmarks()->where('user_id', $user->id)->delete();
+            $bookmarked = false;
+        } else {
+            $post->bookmarks()->create([
+                'id' => (string) Str::uuid(),
+                'user_id' => $user->id,
+            ]);
+            $bookmarked = true;
+        }
+
+        $payload = [
+            'success' => true,
+            'bookmarked' => $bookmarked,
+        ];
+        return request()->wantsJson() ? response()->json($payload) : redirect()->back()->with('success', $bookmarked ? 'Bookmarked' : 'Bookmark removed');
     }
 
     /**
      * Store a comment on a post.
      */
-    public function comment(Request $request, Post $post): JsonResponse
+    public function comment(Request $request, Post $post)
     {
         $validated = $request->validate([
             'content' => 'required|string|max:2000',
@@ -426,11 +461,12 @@ class ForumController extends Controller
 
         $comment->load('user');
 
-        return response()->json([
+        $payload = [
             'success' => true,
             'comment' => $comment,
             'message' => 'Comment posted successfully!',
-        ]);
+        ];
+        return $request->wantsJson() ? response()->json($payload) : redirect()->back()->with('success', 'Comment posted successfully!');
     }
 
     /**

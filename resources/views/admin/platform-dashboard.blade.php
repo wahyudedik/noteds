@@ -242,6 +242,171 @@
                     <canvas id="revenueChart" class="w-full" style="max-height: 300px;"></canvas>
                 </div>
             </div>
+
+            <!-- Revenue Metrics Section -->
+            <div class="mb-12">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 6H6.28l-.31-1.243A1 1 0 005 4H3z" />
+                        <path d="M16 16a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 17.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                    </svg>
+                    Revenue Metrics
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Total Sales -->
+                    <div
+                        class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 border-l-4 border-indigo-500">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-medium text-gray-600">Total Sales</h3>
+                            <div class="p-2 bg-indigo-100 rounded-lg">
+                                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">{{ number_format($revenueMetrics['total_sales']) }}
+                        </p>
+                        <p class="text-xs text-indigo-600 mt-2">Transactions completed</p>
+                    </div>
+
+                    <!-- Repeat Customer Rate -->
+                    <div
+                        class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 border-l-4 border-pink-500">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-medium text-gray-600">Repeat Rate</h3>
+                            <div class="p-2 bg-pink-100 rounded-lg">
+                                <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 15v-1v-2a4 4 0 00-8 0v2v1m0 0h.01M4 15h16" />
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">
+                            {{ number_format($revenueMetrics['repeat_customer_rate'], 1) }}%</p>
+                        <p class="text-xs text-pink-600 mt-2">Customers who bought again</p>
+                    </div>
+
+                    <!-- Avg Customer LTV -->
+                    <div
+                        class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 border-l-4 border-cyan-500">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-medium text-gray-600">Avg Customer LTV</h3>
+                            <div class="p-2 bg-cyan-100 rounded-lg">
+                                <svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">Rp
+                            {{ number_format($revenueMetrics['avg_customer_ltv'], 0) }}</p>
+                        <p class="text-xs text-cyan-600 mt-2">Lifetime value per customer</p>
+                    </div>
+
+                    <!-- Top Ecosystem Category -->
+                    <div
+                        class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 border-l-4 border-teal-500">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-medium text-gray-600">Top Category</h3>
+                            <div class="p-2 bg-teal-100 rounded-lg">
+                                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v2a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900">
+                            @php
+                                $topCategory = $revenueMetrics['top_categories']->first();
+                            @endphp
+                            {{ $topCategory['name'] ?? 'N/A' }}
+                        </p>
+                        <p class="text-xs text-teal-600 mt-2">{{ $topCategory['count'] ?? 0 }} notes</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Categories Breakdown and Export -->
+            <div class="mb-12">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                    </svg>
+                    Top Categories
+                </h2>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm text-gray-700">Filter:</label>
+                            <select class="text-sm border rounded px-2 py-1">
+                                <option value="all">All</option>
+                                <option value="top5">Top 5</option>
+                                <option value="top10">Top 10</option>
+                            </select>
+                        </div>
+                        @php $exportRouteExists = \Illuminate\Support\Facades\Route::has('admin.platform.export'); @endphp
+                        <form action="{{ $exportRouteExists ? route('admin.platform.export') : '#' }}" method="GET">
+                            <button type="submit" @if (!$exportRouteExists) disabled @endif
+                                class="px-3 py-1.5 text-sm rounded text-white @if (!$exportRouteExists) bg-gray-300 cursor-not-allowed @else bg-indigo-600 hover:bg-indigo-700 @endif">
+                                Export CSV
+                            </button>
+                            @unless ($exportRouteExists)
+                                <span class="ml-2 text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">Route not
+                                    ready</span>
+                            @endunless
+                        </form>
+                    </div>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Category</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Count</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @php
+                                $totalCount = $revenueMetrics['top_categories']->sum('count');
+                            @endphp
+                            @forelse($revenueMetrics['top_categories'] as $category)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {{ $category['name'] }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $category['count'] }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-24 bg-gray-200 rounded-full h-2">
+                                                <div class="bg-blue-600 h-2 rounded-full"
+                                                    style="width: {{ $totalCount > 0 ? ($category['count'] / $totalCount) * 100 : 0 }}%">
+                                                </div>
+                                            </div>
+                                            <span
+                                                class="ml-2 text-sm text-gray-600">{{ $totalCount > 0 ? number_format(($category['count'] / $totalCount) * 100, 1) : 0 }}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">No categories
+                                        data available</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="mb-12">
                 <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                     <svg class="w-5 h-5 mr-2 text-cyan-600" fill="currentColor" viewBox="0 0 20 20">
@@ -595,6 +760,34 @@
                     }
                 }
             }
+        </script>
+
+        <script>
+            // Additional action handlers
+            document.addEventListener('DOMContentLoaded', function() {
+                // Detailed Report Button
+                const detailedReportBtn = document.querySelector('[href="javascript:void(0)"]');
+                if (detailedReportBtn && detailedReportBtn.textContent.includes('Detailed Report')) {
+                    detailedReportBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        // Create a comprehensive report modal or redirect
+                        alert(
+                            'Detailed Report feature coming soon. For now, please use Export CSV to get detailed metrics.'
+                            );
+                    });
+                }
+
+                // Settings Button
+                const settingsBtn = Array.from(document.querySelectorAll('[href="javascript:void(0)"]'))
+                    .find(btn => btn.textContent.includes('Settings'));
+
+                if (settingsBtn) {
+                    settingsBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        alert('Dashboard settings panel will be available soon.');
+                    });
+                }
+            });
         </script>
     @endpush
 @endsection

@@ -564,6 +564,17 @@ Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'not_admin_refer
     Route::get('/referral/transactions', [ReferralController::class, 'transactions'])->name('referral.transactions');
 });
 
+// Growth Hacking routes - Accessible to all authenticated users
+Route::middleware(['auth', 'verified'])->prefix('growth')->name('growth.')->group(function () {
+    Route::get('/referrals', function () {
+        return view('growth.referrals');
+    })->name('referrals');
+
+    Route::get('/challenges', function () {
+        return view('growth.challenges');
+    })->name('challenges');
+});
+
 // Affiliate routes - Only accessible to sellers and buyers (not admin)
 Route::middleware(['auth', 'verified', 'username.setup', 'kyc', 'not_admin_affiliate'])->prefix('affiliate')->name('affiliate.')->group(function () {
     Route::get('/', [AffiliateController::class, 'index'])->name('index');

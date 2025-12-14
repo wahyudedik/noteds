@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\ContentRecommendationEngine;
+use App\Services\GrowthHackingService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Contracts\View\View;
 
@@ -58,6 +60,14 @@ class BuyerDashboardController extends Controller
         // Get wishlisted notes (collections)
         $wishlisted = collect();
 
+        // Get personalized recommendations
+        $engine = app(ContentRecommendationEngine::class);
+        $recommendations = $engine->getPersonalizedRecommendations($user, 8);
+
+        // Get growth hacking data
+        $growthService = app(GrowthHackingService::class);
+        $streakInfo = $growthService->updateStreak($user);
+
         return view('dashboard.buyer', [
             'user' => $user,
             'metrics' => $metrics,
@@ -66,6 +76,8 @@ class BuyerDashboardController extends Controller
             'wishlisted' => $wishlisted,
             'userCurrency' => $userCurrency,
             'baseCurrency' => $baseCurrency,
+            'recommendations' => $recommendations,
+            'streakInfo' => $streakInfo,
         ]);
     }
 }

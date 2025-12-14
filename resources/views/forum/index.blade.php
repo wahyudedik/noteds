@@ -14,7 +14,7 @@
             <!-- Create Post Button -->
             @auth
                 <div class="mb-8">
-                    <button onclick="alert('Create post functionality coming soon')"
+                    <button type="button" data-modal-target="create-post-modal"
                         class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -208,8 +208,10 @@
                                 <!-- Action Buttons -->
                                 <div class="flex items-center gap-4">
                                     @auth
-                                        <button onclick="alert('Like functionality coming soon')"
-                                            class="text-gray-500 hover:text-red-600 transition {{ $post->is_liked ? 'text-red-600' : '' }}">
+                                        <button type="button"
+                                            class="js-like-btn text-gray-500 hover:text-red-600 transition {{ $post->is_liked ? 'text-red-600' : '' }}"
+                                            data-like-url="{{ route('forum.like', $post) }}"
+                                            data-liked="{{ $post->is_liked ? '1' : '0' }}">
                                             <svg class="w-5 h-5 {{ $post->is_liked ? 'fill-current' : '' }}" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -217,8 +219,10 @@
                                                 </path>
                                             </svg>
                                         </button>
-                                        <button onclick="alert('Bookmark functionality coming soon')"
-                                            class="text-gray-500 hover:text-yellow-600 transition {{ $post->is_bookmarked ? 'text-yellow-600' : '' }}">
+                                        <button type="button"
+                                            class="js-bookmark-btn text-gray-500 hover:text-yellow-600 transition {{ $post->is_bookmarked ? 'text-yellow-600' : '' }}"
+                                            data-bookmark-url="{{ route('forum.bookmark', $post) }}"
+                                            data-bookmarked="{{ $post->is_bookmarked ? '1' : '0' }}">
                                             <svg class="w-5 h-5 {{ $post->is_bookmarked ? 'fill-current' : '' }}"
                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -257,7 +261,7 @@
                         @endif
                     </p>
                     @auth
-                        <button onclick="alert('Create post functionality coming soon')"
+                        <button type="button" data-modal-target="create-post-modal"
                             class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
@@ -270,4 +274,108 @@
             @endif
         </div>
     </div>
+
+    @auth
+        <!-- Create Post Modal -->
+        <div id="create-post-modal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-xl">
+                <div class="px-6 py-4 border-b">
+                    <h3 class="text-lg font-semibold">{{ __('Create a Post') }}</h3>
+                </div>
+                <form id="create-post-form" action="{{ route('forum.store') }}" method="POST" class="px-6 py-4">
+                    @csrf
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Title') }}</label>
+                        <input type="text" name="title" required
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Content') }}</label>
+                        <textarea name="content" rows="5" required
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    <div class="flex items-center justify-end gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300" data-modal-close>
+                            {{ __('Cancel') }}
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            {{ __('Post') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endauth
+
+    @push('scripts')
+        <script>
+            // Modal open/close
+            document.querySelectorAll('[data-modal-target="create-post-modal"]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const modal = document.getElementById('create-post-modal');
+                    if (modal) {
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                    }
+                });
+            });
+            document.querySelectorAll('[data-modal-close]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const modal = document.getElementById('create-post-modal');
+                    if (modal) {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                    }
+                });
+            });
+
+            // Like handler
+            document.querySelectorAll('.js-like-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const url = btn.getAttribute('data-like-url');
+                    if (!url) return;
+                    try {
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        });
+                        if (res.ok) {
+                            btn.classList.toggle('text-red-600');
+                            btn.querySelector('svg')?.classList.toggle('fill-current');
+                        } else {
+                            console.warn('Like route not available');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                });
+            });
+
+            // Bookmark handler
+            document.querySelectorAll('.js-bookmark-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const url = btn.getAttribute('data-bookmark-url');
+                    if (!url) return;
+                    try {
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        });
+                        if (res.ok) {
+                            btn.classList.toggle('text-yellow-600');
+                            btn.querySelector('svg')?.classList.toggle('fill-current');
+                        } else {
+                            console.warn('Bookmark route not available');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                });
+            });
+        </script>
+    @endpush
 @endsection

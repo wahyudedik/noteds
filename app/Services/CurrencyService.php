@@ -132,8 +132,10 @@ class CurrencyService
             }
 
             $fallbacks = [
-                'USD' => ['IDR' => 15500],
-                'IDR' => ['USD' => 1 / 15500],
+                'USD' => ['IDR' => 15500, 'AED' => 3.67, 'SAR' => 3.75],
+                'IDR' => ['USD' => 1 / 15500, 'AED' => 1 / 4230, 'SAR' => 1 / 4130],
+                'AED' => ['USD' => 1 / 3.67, 'IDR' => 4230, 'SAR' => 1.02],
+                'SAR' => ['USD' => 1 / 3.75, 'IDR' => 4130, 'AED' => 1 / 1.02],
             ];
 
             if (isset($fallbacks[$from][$to])) {

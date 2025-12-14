@@ -7,14 +7,50 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Welcome Card -->
-            <div class="mb-6 bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-2xl font-bold text-gray-900">
-                    Welcome back, {{ $user->name }}!
-                </h3>
-                <p class="text-gray-600 mt-2">
-                    Discover and purchase quality notes from expert sellers
-                </p>
+            <!-- Welcome Card with Streak -->
+            <div class="mb-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <!-- Welcome Message -->
+                    <div class="lg:col-span-2 bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-900">
+                            Welcome back, {{ $user->name }}!
+                        </h3>
+                        <p class="text-gray-600 mt-2">
+                            Discover and purchase quality notes from expert sellers
+                        </p>
+                    </div>
+
+                    <!-- Streak Display -->
+                    <div
+                        class="bg-gradient-to-br from-orange-500 to-red-600 overflow-hidden shadow-sm sm:rounded-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <p class="text-orange-100 text-sm font-medium">🔥 Current Streak</p>
+                                <p class="text-4xl font-bold mt-1">
+                                    {{ $streakInfo['current_streak'] ?? 0 }}
+                                </p>
+                                <p class="text-orange-100 text-sm">
+                                    {{ ($streakInfo['current_streak'] ?? 0) === 1 ? 'day' : 'days' }}</p>
+                            </div>
+                            <div class="text-right">
+                                <span
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/20">
+                                    {{ $streakInfo['level_name'] ?? 'Bronze' }}
+                                </span>
+                                <p class="text-xs text-orange-100 mt-2">
+                                    {{ $streakInfo['days_until_next_level'] ?? 'N/A' }} days to
+                                    {{ $streakInfo['next_level_name'] ?? 'Silver' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="w-full bg-white/20 rounded-full h-2">
+                                <div class="bg-white h-2 rounded-full"
+                                    style="width: {{ $streakInfo['progress_percentage'] ?? 0 }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Key Metrics -->
@@ -136,6 +172,53 @@
                                 {{ currency($referralStats['referral_earnings'], $userCurrency, 'IDR') }}
                             </p>
                         </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Recommended For You -->
+            @if (!empty($recommendations) && count($recommendations) > 0)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-bold text-gray-900">📚 Recommended For You</h4>
+                        <a href="{{ route('marketplace.index') }}"
+                            class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            View All →
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        @foreach ($recommendations as $note)
+                            <div class="border rounded-lg overflow-hidden hover:shadow-md transition">
+                                <div class="aspect-w-16 aspect-h-9 bg-gray-100">
+                                    @if ($note->thumbnails && is_array($thumbnail = json_decode($note->thumbnails, true)) && count($thumbnail) > 0)
+                                        <img src="{{ Storage::url($thumbnail[0]) }}" alt="{{ $note->title }}"
+                                            class="object-cover w-full h-32">
+                                    @else
+                                        <div
+                                            class="flex items-center justify-center h-32 bg-gradient-to-br from-blue-100 to-purple-100">
+                                            <i class="fas fa-book text-4xl text-gray-400"></i>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="p-3">
+                                    <h5 class="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">
+                                        {{ $note->title }}</h5>
+                                    <div class="flex items-center justify-between">
+                                        <span
+                                            class="text-blue-600 font-bold text-sm">{{ currency($note->price, $userCurrency, 'IDR') }}</span>
+                                        @if ($note->avg_rating ?? 0 > 0)
+                                            <span class="text-xs text-gray-600">
+                                                ⭐ {{ number_format($note->avg_rating, 1) }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <a href="{{ route('notes.show', $note) }}"
+                                        class="block mt-2 text-center text-xs text-blue-600 hover:text-blue-800 font-medium">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             @endif

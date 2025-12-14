@@ -81,6 +81,39 @@ class GrowthHackingService
     }
 
     /**
+     * Update user streak and return streak info
+     */
+    public function updateStreak(User $user): array
+    {
+        $this->processStreakRewards($user);
+
+        $currentStreak = $user->current_streak ?? 0;
+        $level = $user->level ?? 1;
+
+        $levelNames = [1 => 'Bronze', 2 => 'Silver', 3 => 'Gold', 4 => 'Platinum'];
+        $levelThresholds = [1 => 0, 2 => 7, 3 => 30, 4 => 100];
+
+        $nextLevel = min($level + 1, 4);
+        $currentLevelThreshold = $levelThresholds[$level] ?? 0;
+        $nextLevelThreshold = $levelThresholds[$nextLevel] ?? 100;
+
+        $daysUntilNextLevel = max(0, $nextLevelThreshold - $currentStreak);
+        $progressPercentage = $nextLevel > $level
+            ? (($currentStreak - $currentLevelThreshold) / ($nextLevelThreshold - $currentLevelThreshold)) * 100
+            : 100;
+
+        return [
+            'current_streak' => $currentStreak,
+            'level' => $level,
+            'level_name' => $levelNames[$level] ?? 'Bronze',
+            'next_level' => $nextLevel,
+            'next_level_name' => $levelNames[$nextLevel] ?? 'Platinum',
+            'days_until_next_level' => $daysUntilNextLevel,
+            'progress_percentage' => round($progressPercentage, 1),
+        ];
+    }
+
+    /**
      * Gamification: Streak Rewards
      * Reward consistent daily engagement
      */

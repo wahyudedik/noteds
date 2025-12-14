@@ -52,8 +52,8 @@ class ContentRecommendationEngine
     {
         // Get user's viewing history and purchases
         $userCategories = $user->viewedNotes()
-            ->pluck('notes.category_id')
-            ->merge($user->purchasedNotes()->pluck('notes.category_id'))
+            ->pluck('notes.ecosystem_category')
+            ->merge($user->purchasedNotes()->with('note')->get()->pluck('note.ecosystem_category'))
             ->unique();
 
         $userTags = $user->viewedNotes()
@@ -65,13 +65,13 @@ class ContentRecommendationEngine
         return Note::where('status', 'published')
             ->where('user_id', '!=', $user->id)
             ->where(function ($query) use ($userCategories, $userTags) {
-                $query->whereIn('category_id', $userCategories)
+                $query->whereIn('ecosystem_category', $userCategories)
                     ->orWhereHas('tags', fn($q) => $q->whereIn('tags.id', $userTags));
             })
-            ->withCount('purchases', 'views')
+            ->withCount('purchasedBy', 'viewHistory')
             ->get()
             ->map(function ($note) {
-                $note->recommendation_score = $note->purchases_count * 0.5 + $note->views_count * 0.1;
+                $note->recommendation_score = $note->purchased_by_count * 0.5 + $note->view_history_count * 0.1;
                 return $note;
             })
             ->take($limit);
@@ -101,12 +101,12 @@ class ContentRecommendationEngine
         // Get what those users bought
         return Note::where('status', 'published')
             ->where('user_id', '!=', $user->id)
-            ->whereHas('purchases', fn($q) => $q->whereIn('purchased_notes.user_id', $similarUserIds))
+            ->whereHas('purchasedBy', fn($q) => $q->whereIn('purchased_notes.user_id', $similarUserIds))
             ->whereNotIn('id', $userPurchases)
-            ->withCount('purchases')
+            ->withCount('purchasedBy')
             ->get()
             ->map(function ($note) {
-                $note->recommendation_score = $note->purchases_count * 0.3;
+                $note->recommendation_score = $note->purchased_by_count * 0.3;
                 return $note;
             })
             ->take($limit);
@@ -122,11 +122,11 @@ class ContentRecommendationEngine
         return Note::where('status', 'published')
             ->whereHas('viewHistory', fn($q) => $q->where('created_at', '>=', $sevenDaysAgo))
             ->withCount(['viewHistory' => fn($q) => $q->where('created_at', '>=', $sevenDaysAgo)])
-            ->withCount(['purchases' => fn($q) => $q->where('created_at', '>=', $sevenDaysAgo)])
+            ->withCount(['purchasedBy' => fn($q) => $q->where('created_at', '>=', $sevenDaysAgo)])
             ->orderByDesc('view_history_count')
             ->get()
             ->map(function ($note) {
-                $note->recommendation_score = $note->view_history_count * 0.2 + $note->purchases_count * 0.5;
+                $note->recommendation_score = $note->view_history_count * 0.2 + $note->purchased_by_count * 0.5;
                 return $note;
             })
             ->take($limit);
@@ -161,10 +161,10 @@ class ContentRecommendationEngine
         }
 
         return $query
-            ->withCount('purchases', 'views')
+            ->withCount('purchasedBy', 'viewHistory')
             ->get()
             ->map(function ($note) {
-                $note->recommendation_score = $note->purchases_count * 0.4 + $note->views_count * 0.1;
+                $note->recommendation_score = $note->purchased_by_count * 0.4 + $note->view_history_count * 0.1;
                 return $note;
             })
             ->take($limit);
@@ -177,7 +177,7 @@ class ContentRecommendationEngine
     {
         return Cache::remember("similar_notes:{$note->id}", 3600, function () use ($note, $limit) {
             // Get users who purchased this note
-            $buyerIds = $note->purchases()->pluck('user_id');
+            $buyerIds = $note->purchasedBy()->pluck('user_id');
 
             if ($buyerIds->isEmpty()) {
                 // Fallback: get similar by category/tags
@@ -187,9 +187,9 @@ class ContentRecommendationEngine
             // Get notes these users also purchased
             return Note::where('id', '!=', $note->id)
                 ->where('status', 'published')
-                ->whereHas('purchases', fn($q) => $q->whereIn('user_id', $buyerIds))
-                ->withCount('purchases')
-                ->orderByDesc('purchases_count')
+                ->whereHas('purchasedBy', fn($q) => $q->whereIn('user_id', $buyerIds))
+                ->withCount('purchasedBy')
+                ->orderByDesc('purchased_by_count')
                 ->take($limit)
                 ->get();
         });
@@ -203,7 +203,7 @@ class ContentRecommendationEngine
         return Note::where('id', '!=', $note->id)
             ->where('status', 'published')
             ->where(function ($query) use ($note) {
-                $query->where('category_id', $note->category_id)
+                $query->where('ecosystem_category', $note->ecosystem_category)
                     ->orWhereHas('tags', fn($q) => $q->whereIn('tags.id', $note->tags->pluck('id')));
             })
             ->withCount('purchases', 'views')

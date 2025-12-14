@@ -84,6 +84,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_digest_time',
         'email_digest_timezone',
         'last_digest_sent_at',
+        'level',
+        'current_streak',
+        'last_login_at',
     ];
 
     /**
@@ -858,6 +861,42 @@ class User extends Authenticatable implements MustVerifyEmail
     public function purchasedNotes()
     {
         return $this->hasMany(PurchasedNote::class);
+    }
+
+    /**
+     * Check if user has purchased a specific note.
+     */
+    public function hasPurchased($noteId): bool
+    {
+        return $this->purchasedNotes()->where('note_id', $noteId)->exists();
+    }
+
+    /**
+     * Get notes viewed by this user with view history.
+     */
+    public function viewedNotes()
+    {
+        return $this->belongsToMany(Note::class, 'note_view_history', 'user_id', 'note_id')
+            ->withPivot('viewed_at')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get user's last activity date.
+     */
+    public function lastActivityDate(): ?\Carbon\Carbon
+    {
+        // Check multiple activity sources
+        $lastLogin = $this->last_login_at;
+        $lastPurchase = $this->purchasedNotes()->latest('created_at')->value('created_at');
+        $lastView = \DB::table('note_view_history')
+            ->where('user_id', $this->id)
+            ->latest('viewed_at')
+            ->value('viewed_at');
+
+        $dates = array_filter([$lastLogin, $lastPurchase, $lastView]);
+
+        return $dates ? \Carbon\Carbon::parse(max($dates)) : null;
     }
 
     /**
