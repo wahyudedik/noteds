@@ -1,4 +1,11 @@
 <?php return array (
+  'inertiajs/inertia-laravel' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Inertia\\ServiceProvider',
+    ),
+  ),
   'laravel/breeze' => 
   array (
     'providers' => 
@@ -20,22 +27,11 @@
       0 => 'Laravel\\Sail\\SailServiceProvider',
     ),
   ),
-  'laravel/socialite' => 
-  array (
-    'aliases' => 
-    array (
-      'Socialite' => 'Laravel\\Socialite\\Facades\\Socialite',
-    ),
-    'providers' => 
-    array (
-      0 => 'Laravel\\Socialite\\SocialiteServiceProvider',
-    ),
-  ),
-  'laravel/telescope' => 
+  'laravel/sanctum' => 
   array (
     'providers' => 
     array (
-      0 => 'Laravel\\Telescope\\TelescopeServiceProvider',
+      0 => 'Laravel\\Sanctum\\SanctumServiceProvider',
     ),
   ),
   'laravel/tinker' => 
@@ -66,18 +62,11 @@
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
     ),
   ),
-  'pestphp/pest-plugin-laravel' => 
+  'tightenco/ziggy' => 
   array (
     'providers' => 
     array (
-      0 => 'Pest\\Laravel\\PestServiceProvider',
-    ),
-  ),
-  'spatie/laravel-permission' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Spatie\\Permission\\PermissionServiceProvider',
+      0 => 'Tighten\\Ziggy\\ZiggyServiceProvider',
     ),
   ),
 );

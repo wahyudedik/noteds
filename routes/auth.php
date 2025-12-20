@@ -22,12 +22,6 @@ Route::middleware('guest')->group(function () {
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-    // Social Login Routes
-    Route::prefix('auth/{provider}')->name('auth.social.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Auth\SocialAuthController::class, 'redirect'])->name('redirect');
-        Route::get('/callback', [\App\Http\Controllers\Auth\SocialAuthController::class, 'callback'])->name('callback');
-    });
-
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 

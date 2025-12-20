@@ -1,50 +1,27 @@
+import '../css/app.css';
 import './bootstrap';
 
-import Alpine from 'alpinejs';
-import Quill from 'quill';
-import 'quill/dist/quill.snow.css';
-import './utils/notifications';
+import { createInertiaApp } from '@inertiajs/vue3';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { createApp, h } from 'vue';
+import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
-window.Alpine = Alpine;
-window.Quill = Quill;
+const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
-// Navigation menu component with responsive behavior
-window.navigationMenu = () => ({
-    mobileMenuOpen: false,
-    init() {
-        // Close menu when screen resizes to desktop
-        const handleResize = () => {
-            if (window.innerWidth >= 1024) { // lg breakpoint
-                this.mobileMenuOpen = false;
-            }
-        };
-
-        // Close menu when user clicks a link (handled by @click in template)
-        // Close menu on route change
-        const handleRouteChange = () => {
-            this.mobileMenuOpen = false;
-        };
-
-        window.addEventListener('resize', handleResize);
-        document.addEventListener('turbo:load', handleRouteChange);
-        document.addEventListener('turbo:visit', handleRouteChange);
-
-        // Update body overflow for accessibility
-        this.$watch('mobileMenuOpen', (value) => {
-            if (value) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = '';
-            }
-        });
-
-        // Cleanup on destroy
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            document.removeEventListener('turbo:load', handleRouteChange);
-            document.removeEventListener('turbo:visit', handleRouteChange);
-        };
-    }
+createInertiaApp({
+    title: (title) => `${title} - ${appName}`,
+    resolve: (name) =>
+        resolvePageComponent(
+            `./Pages/${name}.vue`,
+            import.meta.glob('./Pages/**/*.vue'),
+        ),
+    setup({ el, App, props, plugin }) {
+        return createApp({ render: () => h(App, props) })
+            .use(plugin)
+            .use(ZiggyVue)
+            .mount(el);
+    },
+    progress: {
+        color: '#4B5563',
+    },
 });
-
-Alpine.start();

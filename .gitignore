@@ -1,70 +1,24 @@
-# Laravel Framework & Environment
+*.log
+.DS_Store
 .env
-.env.*.backup
 .env.backup
 .env.production
-.env.production.backup
-.env.local
-
-# IDE & Editor
-.idea/
-.vscode/
-.fleet/
-.nova/
 .phpactor.json
-*.code-workspace
-.zed/
-*.swp
-*.swo
-*~
-
-# Build & Dependencies
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
 /node_modules
-/vendor
 /public/build
 /public/hot
-/build/
-composer.lock
-
-# Cache & Logs
-*.log
-/bootstrap/cache
-/storage/logs
-/storage/pail
-/storage/framework
+/public/storage
 /storage/*.key
-.phpunit.cache
-.phpunit.result.cache
-
-# OS & Editor
-.DS_Store
-.git/hooks/
-Thumbs.db
-*.ini
-auth.json
+/storage/pail
+/vendor
 Homestead.json
 Homestead.yaml
-
-# Project Specific
-/storage/uploads/
-temp/
-*.pem
-private_key.pem
-
-# Testing
-.coverage
-coverage/
-
-# Scripts & Utilities (Keep clean copies)
-cleanup.ps1
-cleanup.bat
-
-# IDE Cache
-.phpstan.cache/
-.psalm.cache/
-.php-cs-fixer.cache
-
-# Development files
-debug.log
-.env.dusk
-
+Thumbs.db
