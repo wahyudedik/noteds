@@ -1,11 +1,13 @@
 <script setup>
 import { ref } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, usePage } from '@inertiajs/vue3';
 import PostPurposeSelector from '@/Components/PostPurposeSelector.vue';
 import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Textarea from '@/Components/Textarea.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+
+const page = usePage();
 
 const showComposer = ref(false);
 
@@ -37,7 +39,7 @@ const toggleComposer = () => {
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div v-if="!showComposer" class="flex items-center gap-3">
             <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                {{ $page.props.auth.user.name.charAt(0).toUpperCase() }}
+                {{ page.props.auth?.user?.name?.charAt(0).toUpperCase() || 'U' }}
             </div>
             <button
                 @click="toggleComposer"

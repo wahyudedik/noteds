@@ -6,7 +6,9 @@ import PostComposer from '@/Components/PostComposer.vue';
 import TrendingTopics from '@/Components/Widgets/TrendingTopics.vue';
 import SuggestedUsers from '@/Components/Widgets/SuggestedUsers.vue';
 import QuickStats from '@/Components/Widgets/QuickStats.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
+
+const page = usePage();
 
 defineProps({
     posts: Object,
@@ -31,7 +33,7 @@ defineProps({
                     <div class="lg:col-span-8 order-2 lg:order-1">
                         <!-- Post Composer -->
                         <div class="mb-6">
-                            <PostComposer v-if="$page.props.auth?.user" />
+                            <PostComposer v-if="page.props.auth?.user" />
                         </div>
 
                         <!-- Post Feed -->

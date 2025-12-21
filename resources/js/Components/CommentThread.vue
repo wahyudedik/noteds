@@ -8,8 +8,8 @@ import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
     comments: Array,
-    postId: Number,
-    postAuthorId: Number,
+    postId: String,
+    postAuthorId: String,
     auth: Object,
 });
 

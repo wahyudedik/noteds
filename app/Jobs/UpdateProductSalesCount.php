@@ -14,7 +14,7 @@ class UpdateProductSalesCount implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public function __construct(
-        public int $productId
+        public string $productId
     ) {}
 
     public function handle(): void

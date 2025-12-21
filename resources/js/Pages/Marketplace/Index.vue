@@ -3,8 +3,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import ProductCard from '@/Components/Marketplace/ProductCard.vue';
 import SearchBar from '@/Components/Marketplace/SearchBar.vue';
 import ProductFilter from '@/Components/Marketplace/ProductFilter.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
+
+const page = usePage();
 
 const props = defineProps({
     products: Object,
@@ -123,7 +125,7 @@ const loadMore = () => {
                         <div class="mb-4 flex justify-between items-center">
                             <h3 class="text-lg font-semibold">Products</h3>
                             <Link
-                                v-if="$page.props.auth?.user"
+                                v-if="page.props.auth?.user"
                                 :href="route('marketplace.products.create')"
                                 class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                             >

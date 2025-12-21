@@ -12,15 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('moderation_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('post_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignId('comment_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignId('moderator_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->uuid('id')->primary();
+            $table->uuid('user_id')->nullable();
+            $table->uuid('post_id')->nullable();
+            $table->uuid('comment_id')->nullable();
+            $table->uuid('moderator_id')->nullable();
             $table->string('reason');
             $table->enum('action', ['warn', 'hide', 'delete']);
             $table->timestamps();
 
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
+            $table->foreign('comment_id')->references('id')->on('comments')->onDelete('cascade');
+            $table->foreign('moderator_id')->references('id')->on('users')->onDelete('set null');
             $table->index('user_id');
             $table->index('post_id');
             $table->index('comment_id');

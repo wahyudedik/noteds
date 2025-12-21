@@ -42,7 +42,7 @@ class ModerationService
         return $issues;
     }
 
-    public function moderatePost(Post $post, ?int $moderatorId = null, string $action = 'warn'): ModerationLog
+    public function moderatePost(Post $post, ?string $moderatorId = null, string $action = 'warn'): ModerationLog
     {
         $issues = $this->checkContent($post->title . ' ' . $post->content);
         $reason = !empty($issues) ? implode('; ', $issues) : 'Manual moderation';
@@ -62,7 +62,7 @@ class ModerationService
         ]);
     }
 
-    public function moderateComment(Comment $comment, ?int $moderatorId = null, string $action = 'warn'): ModerationLog
+    public function moderateComment(Comment $comment, ?string $moderatorId = null, string $action = 'warn'): ModerationLog
     {
         $issues = $this->checkContent($comment->content);
         $reason = !empty($issues) ? implode('; ', $issues) : 'Manual moderation';

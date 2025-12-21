@@ -1,8 +1,11 @@
 <script setup>
 import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
 
 const balance = computed(() => {
-    return $page.props.auth?.user?.balance || 0;
+    return page.props.auth?.user?.balance || 0;
 });
 </script>
 

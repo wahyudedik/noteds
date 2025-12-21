@@ -1,11 +1,13 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps({
     product: Object,
 });
+
+const page = usePage();
 
 const form = useForm({
     quantity: 1,
@@ -16,7 +18,7 @@ const buyProduct = () => {
 };
 
 const canEdit = computed(() => {
-    return props.product.user_id === $page.props.auth?.user?.id;
+    return props.product.user_id === page.props.auth?.user?.id;
 });
 </script>
 

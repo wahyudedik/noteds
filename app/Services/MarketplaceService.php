@@ -11,7 +11,7 @@ class MarketplaceService
     /**
      * Create order and initiate payment.
      */
-    public function createOrder(Product $product, int $userId, int $quantity = 1): Order
+    public function createOrder(Product $product, string $userId, int $quantity = 1): Order
     {
         if (!$product->is_active) {
             throw new \Exception('Product is not available');
@@ -74,7 +74,8 @@ class MarketplaceService
         }
         $random = strtoupper(Str::random(12));
         $timestamp = now()->format('Ymd');
-        $orderPart = str_pad($order->id, 6, '0', STR_PAD_LEFT);
+        // Use first 8 characters of UUID for order part
+        $orderPart = strtoupper(substr(str_replace('-', '', $order->id), 0, 8));
         
         return "{$prefix}-{$timestamp}-{$orderPart}-{$random}";
     }

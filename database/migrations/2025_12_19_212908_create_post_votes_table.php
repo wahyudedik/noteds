@@ -12,12 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('post_votes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('post_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->uuid('user_id');
+            $table->uuid('post_id');
             $table->enum('vote_type', ['upvote', 'downvote']);
             $table->timestamps();
 
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
             $table->unique(['user_id', 'post_id']);
             $table->index('post_id');
         });

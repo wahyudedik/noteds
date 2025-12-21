@@ -22,6 +22,7 @@ const user = usePage().props.auth.user;
 const form = useForm({
     name: user.name,
     email: user.email,
+    avatar: null,
     business_name: user.business_name || '',
     business_field: user.business_field || '',
     skills: user.skills || [],
@@ -30,6 +31,21 @@ const form = useForm({
     website_url: user.website_url || '',
     is_verified_mentor: user.is_verified_mentor || false,
 });
+
+const avatarPreview = ref(user.avatar_url || null);
+
+const handleAvatarChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        form.avatar = file;
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            avatarPreview.value = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+};
 
 const newSkill = ref('');
 const newGoal = ref('');
@@ -70,9 +86,43 @@ const removeGoal = (index) => {
         </header>
 
         <form
-            @submit.prevent="form.patch(route('profile.update'))"
+            @submit.prevent="form.post(route('profile.update'), {
+                forceFormData: true,
+                preserveScroll: true,
+            })"
             class="mt-6 space-y-6"
         >
+            <!-- Avatar Upload -->
+            <div>
+                <InputLabel for="avatar" value="Profile Photo" />
+                <div class="mt-2 flex items-center gap-4">
+                    <div class="relative">
+                        <div class="h-20 w-20 rounded-full bg-indigo-500 border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
+                            <img 
+                                v-if="avatarPreview"
+                                :src="avatarPreview"
+                                alt="Avatar preview"
+                                class="w-full h-full object-cover"
+                            />
+                            <span v-else>{{ (user.business_name || user.name).charAt(0).toUpperCase() }}</span>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <input
+                            id="avatar"
+                            type="file"
+                            accept="image/jpeg,image/jpg,image/png,image/gif"
+                            @change="handleAvatarChange"
+                            class="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-900 dark:file:text-indigo-300"
+                        />
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            PNG, JPG, GIF up to 2MB
+                        </p>
+                    </div>
+                </div>
+                <InputError class="mt-2" :message="form.errors.avatar" />
+            </div>
+
             <div>
                 <InputLabel for="name" value="Name" />
 

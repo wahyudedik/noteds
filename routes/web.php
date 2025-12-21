@@ -105,4 +105,10 @@ Route::middleware('auth')->group(function () {
 // Payment Webhook (no auth required)
 Route::post('/payment/webhook', [App\Http\Controllers\PaymentController::class, 'webhook'])->name('payment.webhook');
 
+// Explorer Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/explorer', [App\Http\Controllers\ExplorerController::class, 'index'])->name('explorer.index');
+    Route::get('/explorer/search', [App\Http\Controllers\ExplorerController::class, 'search'])->name('explorer.search');
+});
+
 require __DIR__.'/auth.php';

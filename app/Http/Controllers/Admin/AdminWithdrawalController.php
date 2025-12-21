@@ -15,7 +15,6 @@ class AdminWithdrawalController extends Controller
         private BalanceService $balanceService,
         private NotificationService $notificationService
     ) {
-        $this->middleware('admin');
     }
 
     public function index(Request $request)

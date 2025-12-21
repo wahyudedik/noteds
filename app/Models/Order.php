@@ -2,13 +2,25 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuid;
+
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+        if (!isset($this->attributes['id'])) {
+            $this->attributes['id'] = (string) \Illuminate\Support\Str::uuid();
+        }
+    }
 
     protected $fillable = [
         'order_number',

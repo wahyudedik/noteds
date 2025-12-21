@@ -4,7 +4,7 @@ import { computed } from 'vue';
 
 const props = defineProps({
     postId: {
-        type: Number,
+        type: String,
         required: true,
     },
     upvotes: {

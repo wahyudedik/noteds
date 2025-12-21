@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('withdrawals', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->uuid('user_id');
             $table->decimal('amount', 15, 2);
             $table->enum('method', ['bank_transfer', 'ewallet']);
             $table->string('account_number');
@@ -21,7 +21,9 @@ return new class extends Migration
             $table->string('bank_name')->nullable();
             $table->enum('ewallet_type', ['OVO', 'GoPay', 'DANA', 'LinkAja'])->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected', 'completed'])->default('pending');
-            $table->foreignId('admin_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->uuid('admin_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('admin_id')->references('id')->on('users')->onDelete('set null');
             $table->text('admin_notes')->nullable();
             $table->timestamp('processed_at')->nullable();
             $table->timestamps();

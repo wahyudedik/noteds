@@ -8,7 +8,7 @@ import TextInput from '@/Components/TextInput.vue';
 import Textarea from '@/Components/Textarea.vue';
 
 const props = defineProps({
-    postId: Number,
+    postId: String,
     userValidation: Object,
 });
 

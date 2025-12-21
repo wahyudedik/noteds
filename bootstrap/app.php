@@ -21,5 +21,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, $request) {
+            if ($request->expectsJson() || $request->is('marketplace/*')) {
+                return response()->json([
+                    'message' => 'File terlalu besar. Ukuran maksimal: 50MB.',
+                    'error' => 'post_too_large'
+                ], 413);
+            }
+            return back()->withErrors([
+                'file_download' => 'File terlalu besar. Ukuran maksimal: 50MB.'
+            ])->withInput();
+        });
     })->create();

@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,10 +26,14 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $user = $request->user();
+        $userArray = $user->toArray();
+        $userArray['avatar_url'] = $user->avatar_url;
+
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
-            'user' => $request->user()->loadMissing([]),
+            'user' => $userArray,
         ]);
     }
 
@@ -73,8 +78,12 @@ class ProfileController extends Controller
             $topPosts = $this->analyticsService->getTopPosts($profileUser, 5);
         }
 
+        // Add avatar_url to profileUser
+        $profileUserArray = $profileUser->toArray();
+        $profileUserArray['avatar_url'] = $profileUser->avatar_url;
+
         return Inertia::render('Profile/Show', [
-            'profileUser' => $profileUser,
+            'profileUser' => $profileUserArray,
             'isOwnProfile' => $isOwnProfile,
             'posts' => $posts,
             'userVotes' => $userVotes,
@@ -89,15 +98,31 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+            // Store new avatar
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $avatarPath;
         }
 
-        $request->user()->save();
+        // Fill other validated fields (exclude avatar from fillable)
+        $validated = $request->safe()->except(['avatar']);
+        $user->fill($validated);
 
-        return Redirect::route('profile.edit');
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**

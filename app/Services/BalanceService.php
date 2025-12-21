@@ -11,7 +11,7 @@ class BalanceService
     /**
      * Add balance to user account.
      */
-    public function addBalance(User $user, float $amount, string $description, ?int $referenceId = null, string $type = 'sale'): Transaction
+    public function addBalance(User $user, float $amount, string $description, ?string $referenceId = null, string $type = 'sale'): Transaction
     {
         return DB::transaction(function () use ($user, $amount, $description, $referenceId, $type) {
             $balanceBefore = $user->balance;
@@ -39,7 +39,7 @@ class BalanceService
     /**
      * Deduct balance from user account.
      */
-    public function deductBalance(User $user, float $amount, string $description, ?int $referenceId = null): Transaction
+    public function deductBalance(User $user, float $amount, string $description, ?string $referenceId = null): Transaction
     {
         return DB::transaction(function () use ($user, $amount, $description, $referenceId) {
             if ($user->balance < $amount) {

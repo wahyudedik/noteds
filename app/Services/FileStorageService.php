@@ -24,7 +24,7 @@ class FileStorageService
     /**
      * Generate secure download link.
      */
-    public function generateDownloadLink(Product $product, int $userId, int $orderId): string
+    public function generateDownloadLink(Product $product, string $userId, string $orderId): string
     {
         // For local storage, return the route directly
         // In production, you might want to use signed URLs

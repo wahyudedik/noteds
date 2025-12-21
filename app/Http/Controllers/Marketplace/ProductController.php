@@ -60,9 +60,13 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'category' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:2048',
-            'file_download' => 'nullable|file|max:10240',
+            'file_download' => 'nullable|file|max:51200',
             'license_key' => 'nullable|boolean',
             'stock' => 'nullable|integer|min:0',
+        ], [
+            'file_download.max' => 'File terlalu besar. Ukuran maksimal: 50MB.',
+            'file_download.file' => 'File yang diunggah harus berupa file yang valid.',
+            'image.max' => 'Gambar terlalu besar. Ukuran maksimal: 2MB.',
         ]);
 
         $validated['user_id'] = auth()->id();
@@ -105,10 +109,14 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'category' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:2048',
-            'file_download' => 'nullable|file|max:10240',
+            'file_download' => 'nullable|file|max:51200',
             'license_key' => 'nullable|boolean',
             'stock' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
+        ], [
+            'file_download.max' => 'File terlalu besar. Ukuran maksimal: 50MB.',
+            'file_download.file' => 'File yang diunggah harus berupa file yang valid.',
+            'image.max' => 'Gambar terlalu besar. Ukuran maksimal: 2MB.',
         ]);
 
         if ($request->hasFile('image')) {
