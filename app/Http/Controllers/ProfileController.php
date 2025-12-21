@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Models\Comment;
+use App\Services\AnalyticsService;
 use App\Models\Post;
 use App\Models\PostVote;
 use App\Models\User;
@@ -11,13 +11,15 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        private AnalyticsService $analyticsService
+    ) {}
     /**
      * Display the user's profile form.
      */
@@ -37,7 +39,7 @@ class ProfileController extends Controller
     {
         $profileUser = $user ?? $request->user();
         $isOwnProfile = $request->user() && $request->user()->id === $profileUser->id;
-        
+
         // Get user's posts
         $posts = \App\Models\Post::where('user_id', $profileUser->id)
             ->where('status', 'active')
@@ -53,65 +55,24 @@ class ProfileController extends Controller
                 ->whereIn('post_id', $postIds)
                 ->get()
                 ->keyBy('post_id');
-            
+
             foreach ($posts as $post) {
                 $vote = $votes->get($post->id);
                 $userVotes[$post->id] = $vote ? $vote->vote_type : null;
             }
         }
 
-        // Analytics data (only for own profile or if needed)
+        // Analytics data (only for own profile)
         $stats = null;
         $engagementData = null;
         $topPosts = null;
-        
+
         if ($isOwnProfile) {
-            $stats = [
-                'total_posts' => \App\Models\Post::where('user_id', $profileUser->id)->count(),
-                'total_comments' => \App\Models\Comment::where('user_id', $profileUser->id)->count(),
-                'total_upvotes' => \App\Models\PostVote::whereHas('post', function ($q) use ($profileUser) {
-                    $q->where('user_id', $profileUser->id);
-                })->where('vote_type', 'upvote')->count(),
-                'total_downvotes' => \App\Models\PostVote::whereHas('post', function ($q) use ($profileUser) {
-                    $q->where('user_id', $profileUser->id);
-                })->where('vote_type', 'downvote')->count(),
-                'engagement_rate' => 0,
-                'posts_last_30_days' => \App\Models\Post::where('user_id', $profileUser->id)
-                    ->where('created_at', '>=', now()->subDays(30))
-                    ->count(),
-            ];
-            
-            $totalEngagement = $stats['total_upvotes'] + $stats['total_comments'];
-            $stats['engagement_rate'] = $stats['total_posts'] > 0 
-                ? round(($totalEngagement / $stats['total_posts']) * 100, 2) 
-                : 0;
-
-            $last30Days = now()->subDays(30);
-            $engagementData = \App\Models\Post::where('user_id', $profileUser->id)
-                ->where('created_at', '>=', $last30Days)
-                ->get()
-                ->map(function ($post) {
-                    return [
-                        'date' => $post->created_at->format('Y-m-d'),
-                        'upvotes' => $post->upvotes_count,
-                        'comments' => $post->comments_count,
-                    ];
-                })
-                ->groupBy('date')
-                ->map(function ($items) {
-                    return [
-                        'upvotes' => $items->sum('upvotes'),
-                        'comments' => $items->sum('comments'),
-                    ];
-                });
-
-            $topPosts = \App\Models\Post::where('user_id', $profileUser->id)
-                ->orderByDesc(\Illuminate\Support\Facades\DB::raw('upvotes_count + comments_count'))
-                ->limit(5)
-                ->with('user')
-                ->get();
+            $stats = $this->analyticsService->getUserStats($profileUser);
+            $engagementData = $this->analyticsService->getEngagementData($profileUser, 30);
+            $topPosts = $this->analyticsService->getTopPosts($profileUser, 5);
         }
-        
+
         return Inertia::render('Profile/Show', [
             'profileUser' => $profileUser,
             'isOwnProfile' => $isOwnProfile,

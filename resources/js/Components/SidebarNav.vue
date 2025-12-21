@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const props = defineProps({
     show: {
@@ -26,6 +27,12 @@ const navItems = [
         active: () => page.url.startsWith('/dashboard'),
     },
     {
+        name: 'Marketplace',
+        route: 'marketplace.index',
+        icon: 'M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z',
+        active: () => page.url.startsWith('/marketplace'),
+    },
+    {
         name: 'Profile',
         route: 'profile.show',
         routeParams: () => page.props.auth?.user?.id,
@@ -33,6 +40,27 @@ const navItems = [
         active: () => page.url.startsWith('/profile'),
     },
 ];
+
+// Add admin menu items if user is admin
+const adminNavItems = [
+    {
+        name: 'Admin Dashboard',
+        route: 'admin.dashboard',
+        icon: 'M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z',
+        active: () => page.url.startsWith('/admin'),
+    },
+];
+
+// Filter nav items based on authentication
+const filteredNavItems = computed(() => {
+    return navItems.filter(item => {
+        // If item has routeParams, only show if user is authenticated
+        if (item.routeParams) {
+            return !!page.props.auth?.user;
+        }
+        return true;
+    });
+});
 </script>
 
 <template>
@@ -47,9 +75,9 @@ const navItems = [
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-1 space-y-1 px-3 py-4">
+            <nav class="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
                 <Link
-                    v-for="item in navItems"
+                    v-for="item in filteredNavItems"
                     :key="item.name"
                     :href="item.routeParams ? route(item.route, item.routeParams()) : route(item.route)"
                     :class="[
@@ -74,23 +102,54 @@ const navItems = [
                     </svg>
                     <span>{{ item.name }}</span>
                 </Link>
+
+                <!-- Admin Section -->
+                <div v-if="page.props.auth?.user?.role === 'admin'" class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Admin</p>
+                    <Link
+                        v-for="item in adminNavItems"
+                        :key="item.name"
+                        :href="route(item.route)"
+                        :class="[
+                            'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition',
+                            item.active()
+                                ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="h-6 w-6 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                :d="item.icon"
+                            />
+                        </svg>
+                        <span>{{ item.name }}</span>
+                    </Link>
+                </div>
             </nav>
 
             <!-- User Profile Card -->
-            <div class="border-t border-gray-200 p-4 dark:border-gray-700">
+            <div v-if="page.props.auth?.user" class="border-t border-gray-200 p-4 dark:border-gray-700">
                 <Link
-                    :href="route('profile.show', page.props.auth?.user?.id)"
+                    :href="route('profile.show', page.props.auth.user.id)"
                     class="flex items-center gap-3 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                 >
                     <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
-                        {{ (page.props.auth?.user?.business_name || page.props.auth?.user?.name || 'U').charAt(0).toUpperCase() }}
+                        {{ (page.props.auth.user.business_name || page.props.auth.user.name || 'U').charAt(0).toUpperCase() }}
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {{ page.props.auth?.user?.business_name || page.props.auth?.user?.name }}
+                            {{ page.props.auth.user.business_name || page.props.auth.user.name }}
                         </p>
                         <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {{ page.props.auth?.user?.email }}
+                            {{ page.props.auth.user.email }}
                         </p>
                     </div>
                 </Link>

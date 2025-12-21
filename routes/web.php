@@ -43,4 +43,66 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
 });
 
+// Marketplace Routes
+Route::get('/marketplace', [App\Http\Controllers\Marketplace\ProductController::class, 'index'])->name('marketplace.index');
+Route::get('/marketplace/search', [App\Http\Controllers\Marketplace\SearchController::class, 'search'])->name('marketplace.search');
+
+Route::middleware('auth')->group(function () {
+    // Products
+    Route::resource('marketplace/products', App\Http\Controllers\Marketplace\ProductController::class)->names([
+        'index' => 'marketplace.products.index',
+        'create' => 'marketplace.products.create',
+        'store' => 'marketplace.products.store',
+        'show' => 'marketplace.products.show',
+        'edit' => 'marketplace.products.edit',
+        'update' => 'marketplace.products.update',
+        'destroy' => 'marketplace.products.destroy',
+    ]);
+
+    // Orders
+    Route::resource('marketplace/orders', App\Http\Controllers\Marketplace\OrderController::class)->names([
+        'index' => 'marketplace.orders.index',
+        'show' => 'marketplace.orders.show',
+        'store' => 'marketplace.orders.store',
+    ]);
+    Route::post('/marketplace/orders/{order}/cancel', [App\Http\Controllers\Marketplace\OrderController::class, 'cancel'])->name('marketplace.orders.cancel');
+
+    // Cart
+    Route::get('/marketplace/cart', [App\Http\Controllers\Marketplace\CartController::class, 'index'])->name('marketplace.cart');
+
+    // Downloads
+    Route::get('/marketplace/products/{product}/download', [App\Http\Controllers\Marketplace\DownloadController::class, 'download'])->name('marketplace.products.download');
+
+    // Withdrawals
+    Route::resource('marketplace/withdrawals', App\Http\Controllers\Marketplace\WithdrawalController::class)->names([
+        'index' => 'marketplace.withdrawals.index',
+        'create' => 'marketplace.withdrawals.create',
+        'store' => 'marketplace.withdrawals.store',
+        'show' => 'marketplace.withdrawals.show',
+    ]);
+
+    // Sales Analytics
+    Route::get('/marketplace/sales/analytics', [App\Http\Controllers\Marketplace\SalesAnalyticsController::class, 'index'])->name('marketplace.sales.analytics');
+
+    // Admin Routes
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::resource('withdrawals', App\Http\Controllers\Admin\AdminWithdrawalController::class)->names([
+            'index' => 'withdrawals.index',
+            'show' => 'withdrawals.show',
+        ]);
+        Route::post('/withdrawals/{withdrawal}/approve', [App\Http\Controllers\Admin\AdminWithdrawalController::class, 'approve'])->name('withdrawals.approve');
+        Route::post('/withdrawals/{withdrawal}/reject', [App\Http\Controllers\Admin\AdminWithdrawalController::class, 'reject'])->name('withdrawals.reject');
+        Route::post('/withdrawals/{withdrawal}/complete', [App\Http\Controllers\Admin\AdminWithdrawalController::class, 'complete'])->name('withdrawals.complete');
+        Route::resource('products', App\Http\Controllers\Admin\ProductModerationController::class)->names([
+            'index' => 'products.index',
+            'update' => 'products.update',
+            'destroy' => 'products.destroy',
+        ]);
+    });
+});
+
+// Payment Webhook (no auth required)
+Route::post('/payment/webhook', [App\Http\Controllers\PaymentController::class, 'webhook'])->name('payment.webhook');
+
 require __DIR__.'/auth.php';

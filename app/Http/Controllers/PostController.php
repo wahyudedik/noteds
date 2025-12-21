@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePostRequest;
+use App\Services\FeedService;
 use App\Models\Post;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,6 +12,9 @@ use Inertia\Response;
 
 class PostController extends Controller
 {
+    public function __construct(
+        private FeedService $feedService
+    ) {}
     /**
      * Display a listing of the resource.
      */
@@ -34,56 +38,25 @@ class PostController extends Controller
                 ->whereIn('post_id', $postIds)
                 ->get()
                 ->keyBy('post_id');
-            
+
             foreach ($posts as $post) {
                 $vote = $votes->get($post->id);
                 $userVotes[$post->id] = $vote ? $vote->vote_type : null;
             }
         }
 
-        // Trending topics (purpose types by count)
-        $purposeTypeLabels = [
-            'idea_business' => '💡 Ide Bisnis',
-            'ask_question' => '❓ Tanya Masalah Bisnis',
-            'share_experience' => '📈 Sharing Pengalaman',
-            'find_partner' => '🤝 Cari Partner',
-            'find_tools' => '🛠 Cari Tools / Resource',
-            'validate_idea' => '🧪 Validasi Ide',
-        ];
-
-        $trending = Post::where('status', 'active')
-            ->where('created_at', '>=', now()->subDays(7))
-            ->select('purpose_type', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
-            ->groupBy('purpose_type')
-            ->orderByDesc('count')
-            ->limit(5)
-            ->get()
-            ->map(function ($item) use ($purposeTypeLabels) {
-                return [
-                    'id' => $item->purpose_type,
-                    'name' => $purposeTypeLabels[$item->purpose_type] ?? $item->purpose_type,
-                    'count' => $item->count,
-                ];
-            });
-
-        // Suggested users (users with most posts in last 30 days)
-        $suggestedUsers = \App\Models\User::whereHas('posts', function ($query) {
-                $query->where('created_at', '>=', now()->subDays(30));
-            })
-            ->withCount(['posts' => function ($query) {
-                $query->where('created_at', '>=', now()->subDays(30));
-            }])
-            ->orderByDesc('posts_count')
-            ->limit(5)
-            ->get();
-
         // Check if this is home route or posts.index route
         if ($request->routeIs('home')) {
+            $trending = $this->feedService->getTrendingTopics(7, 5);
+            $suggestedUsers = $this->feedService->getSuggestedUsers(30, 5);
+            $quickStats = $this->feedService->getQuickStats($request->user());
+
             return Inertia::render('Home', [
                 'posts' => $posts,
                 'filters' => $request->only(['purpose_type']),
                 'trending' => $trending,
                 'suggestedUsers' => $suggestedUsers,
+                'quickStats' => $quickStats,
                 'userVotes' => $userVotes,
             ]);
         }
@@ -140,7 +113,7 @@ class PostController extends Controller
         if ($post->purpose_type === 'validate_idea') {
             $validationController = new \App\Http\Controllers\IdeaValidationController();
             $validationStats = $validationController->getStats($post);
-            
+
             if ($request->user()) {
                 $userValidation = \App\Models\IdeaValidation::where('post_id', $post->id)
                     ->where('user_id', $request->user()->id)

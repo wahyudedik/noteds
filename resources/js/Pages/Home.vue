@@ -3,13 +3,17 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PostFeed from '@/Components/PostFeed.vue';
 import SidebarWidget from '@/Components/SidebarWidget.vue';
 import PostComposer from '@/Components/PostComposer.vue';
-import { Head, router } from '@inertiajs/vue3';
+import TrendingTopics from '@/Components/Widgets/TrendingTopics.vue';
+import SuggestedUsers from '@/Components/Widgets/SuggestedUsers.vue';
+import QuickStats from '@/Components/Widgets/QuickStats.vue';
+import { Head } from '@inertiajs/vue3';
 
 defineProps({
     posts: Object,
     filters: Object,
     trending: Array,
     suggestedUsers: Array,
+    quickStats: Object,
     userVotes: Object,
     auth: Object,
 });
@@ -41,47 +45,19 @@ defineProps({
                     <!-- Right Sidebar -->
                     <div class="lg:col-span-4 hidden lg:block order-1 lg:order-2">
                         <div class="sticky top-4 space-y-6">
+                            <!-- Quick Stats Widget -->
+                            <SidebarWidget title="Quick Stats" v-if="quickStats">
+                                <QuickStats :stats="quickStats" />
+                            </SidebarWidget>
+
                             <!-- Trending Topics Widget -->
                             <SidebarWidget title="Trending Topics" v-if="trending && trending.length > 0">
-                                <div class="space-y-2">
-                                    <button
-                                        v-for="topic in trending"
-                                        :key="topic.id"
-                                        @click="router.get(route('home'), { purpose_type: topic.id === 'all' ? null : topic.id }, { preserveState: true, preserveScroll: true })"
-                                        class="w-full text-left block px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                                    >
-                                        <div class="font-medium text-gray-900 dark:text-gray-100">
-                                            {{ topic.name }}
-                                        </div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">
-                                            {{ topic.count }} posts
-                                        </div>
-                                    </button>
-                                </div>
+                                <TrendingTopics :topics="trending" />
                             </SidebarWidget>
 
                             <!-- Suggested Users Widget -->
                             <SidebarWidget title="Suggested Users" v-if="suggestedUsers && suggestedUsers.length > 0">
-                                <div class="space-y-3">
-                                    <a
-                                        v-for="user in suggestedUsers"
-                                        :key="user.id"
-                                        :href="route('profile.show', user.id)"
-                                        class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                                    >
-                                        <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
-                                            {{ (user.business_name || user.name).charAt(0).toUpperCase() }}
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="font-medium text-gray-900 dark:text-gray-100">
-                                                {{ user.business_name || user.name }}
-                                            </div>
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">
-                                                {{ user.business_field || 'Business' }}
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
+                                <SuggestedUsers :users="suggestedUsers" />
                             </SidebarWidget>
                         </div>
                     </div>

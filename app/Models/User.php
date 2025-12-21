@@ -29,6 +29,9 @@ class User extends Authenticatable
         'portfolio_url',
         'website_url',
         'is_verified_mentor',
+        'role',
+        'balance',
+        'midtrans_merchant_id',
     ];
 
     /**
@@ -54,6 +57,7 @@ class User extends Authenticatable
             'skills' => 'array',
             'goals' => 'array',
             'is_verified_mentor' => 'boolean',
+            'balance' => 'decimal:2',
         ];
     }
 
@@ -71,5 +75,53 @@ class User extends Authenticatable
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * Check if user is admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Get the products created by the user (as seller).
+     */
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    /**
+     * Get the orders created by the user (as buyer).
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get the transactions for the user.
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Get the withdrawals for the user.
+     */
+    public function withdrawals(): HasMany
+    {
+        return $this->hasMany(Withdrawal::class);
+    }
+
+    /**
+     * Get the payment methods for the user.
+     */
+    public function paymentMethods(): HasMany
+    {
+        return $this->hasMany(UserPaymentMethod::class);
     }
 }

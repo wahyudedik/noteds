@@ -1,0 +1,109 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Order extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'order_number',
+        'user_id',
+        'product_id',
+        'quantity',
+        'price',
+        'total',
+        'status',
+        'payment_status',
+        'midtrans_order_id',
+        'midtrans_transaction_id',
+        'license_key',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'price' => 'decimal:2',
+            'total' => 'decimal:2',
+            'quantity' => 'integer',
+        ];
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($order) {
+            if (empty($order->order_number)) {
+                $order->order_number = static::generateOrderNumber();
+            }
+        });
+    }
+
+    /**
+     * Generate unique order number.
+     */
+    public static function generateOrderNumber(): string
+    {
+        $date = now()->format('Ymd');
+        $random = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        $orderNumber = "ORD-{$date}-{$random}";
+        
+        // Ensure uniqueness
+        while (static::where('order_number', $orderNumber)->exists()) {
+            $random = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            $orderNumber = "ORD-{$date}-{$random}";
+        }
+        
+        return $orderNumber;
+    }
+
+    /**
+     * Get the buyer (user) that placed the order.
+     */
+    public function buyer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Get the seller (user) that owns the product.
+     */
+    public function seller()
+    {
+        return $this->product?->seller;
+    }
+
+    /**
+     * Get the product for the order.
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Mark order as paid.
+     */
+    public function markAsPaid(): void
+    {
+        $this->update([
+            'status' => 'paid',
+            'payment_status' => 'paid',
+        ]);
+    }
+
+    /**
+     * Mark order as completed.
+     */
+    public function markAsCompleted(): void
+    {
+        $this->update([
+            'status' => 'completed',
+        ]);
+    }
+}
