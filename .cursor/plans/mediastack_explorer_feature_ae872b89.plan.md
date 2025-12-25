@@ -345,5 +345,3 @@ http://api.mediastack.com/v1/news?access_key=XXX&categories=business,technology&
 6. **Search from Database**: Search dilakukan di database, bukan via API
 
 **API Call Scenarios:**
-
-- ✅ Scheduled job (3x per hari) = ~90 calls/month (3 x 30 hari)

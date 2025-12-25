@@ -602,11 +602,3 @@ Update `database/seeders/UserSeeder.php`:
 
 - Custom exception: `InsufficientBalanceException`
 - Custom exception: `ProductNotAvailableException`
-- Error handling untuk Midtrans webhook failures
-- Retry mechanism untuk failed webhook processing
-
-### Logging & Monitoring
-
-- Log semua payment transactions
-- Log withdrawal requests dan approvals
-- Log file downloads

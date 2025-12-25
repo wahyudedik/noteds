@@ -181,6 +181,8 @@ const openProductModal = () => {
                            └─ [Add Product Button]
 ```
 
+
+
 ## Files to Modify
 
 ### Backend
@@ -245,5 +247,3 @@ const openProductModal = () => {
 
 - [x] Menu opens/closes smoothly
 - [x] Both actions open correct modals
-- [x] Menu closes on outside click
-- [x] Works on mobile

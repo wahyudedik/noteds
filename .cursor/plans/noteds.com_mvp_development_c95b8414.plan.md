@@ -349,7 +349,3 @@ resources/js/
 - Best answer can only be set by post author
 
 ## Testing Strategy (Future)
-
-- Feature tests for post creation
-- Test voting system
-- Test idea validation aggregation

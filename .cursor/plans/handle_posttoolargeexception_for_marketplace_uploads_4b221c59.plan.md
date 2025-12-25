@@ -150,7 +150,3 @@ MAX_IMAGE_SIZE=2048
 5. `resources/js/Pages/Marketplace/Product/Edit.vue` - Client-side validation
 6. `MARKETPLACE_SETUP.md` - Documentation updates
 7. `.env.example` (optional) - Add upload size configuration
-
-## Testing Checklist
-
-- [ ] Upload file < 50MB (should succeed)
