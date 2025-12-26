@@ -147,6 +147,3 @@ MAX_IMAGE_SIZE=2048
 2. `bootstrap/app.php` - Exception handler for PostTooLargeException
 3. `app/Http/Controllers/Marketplace/ProductController.php` - Validation rules and error messages
 4. `resources/js/Pages/Marketplace/Product/Create.vue` - Client-side validation
-5. `resources/js/Pages/Marketplace/Product/Edit.vue` - Client-side validation
-6. `MARKETPLACE_SETUP.md` - Documentation updates
-7. `.env.example` (optional) - Add upload size configuration

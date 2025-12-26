@@ -111,4 +111,33 @@ Route::middleware('auth')->group(function () {
     Route::get('/explorer/search', [App\Http\Controllers\ExplorerController::class, 'search'])->name('explorer.search');
 });
 
-require __DIR__.'/auth.php';
+// Legal Pages (Public)
+Route::prefix('legal')->name('legal.')->group(function () {
+    Route::get('/privacy-policy', function () {
+        return Inertia::render('Legal/PrivacyPolicy');
+    })->name('privacy-policy');
+
+    Route::get('/terms-conditions', function () {
+        return Inertia::render('Legal/TermsConditions');
+    })->name('terms-conditions');
+
+    Route::get('/disclaimer', function () {
+        return Inertia::render('Legal/Disclaimer');
+    })->name('disclaimer');
+
+    Route::get('/cookie-policy', function () {
+        return Inertia::render('Legal/CookiePolicy');
+    })->name('cookie-policy');
+
+    Route::get('/refund-policy', function () {
+        return Inertia::render('Legal/RefundPolicy');
+    })->name('refund-policy');
+
+    Route::get('/contact', function () {
+        return Inertia::render('Legal/Contact');
+    })->name('contact');
+
+    Route::post('/contact', [App\Http\Controllers\Legal\ContactController::class, 'submit'])->name('contact.submit');
+});
+
+require __DIR__ . '/auth.php';

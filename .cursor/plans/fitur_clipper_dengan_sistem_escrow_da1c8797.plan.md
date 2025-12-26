@@ -36,7 +36,7 @@ todos:
     content: Create migration create_top_ups_table (user_id, amount, status, payment_method, midtrans fields, paid_at)
     status: pending
   - id: db_migration_extend_withdrawals
-    content: "Create migration add user_type to withdrawals table (enum: seller, clipper) atau create clipper_withdrawals table"
+    content: "Create migration add user_type to withdrawals table (enum: seller, clipper) - REUSE existing withdrawals table"
     status: pending
   - id: db_migration_brand_registrations
     content: Create migration create_brand_registrations_table (user_id, company_name, business_type, website, social_media, contact_person, phone, status, admin_notes, approved_at, rejected_at)
@@ -45,7 +45,7 @@ todos:
     content: Create migration create_clipper_profiles_table (user_id, platform_username, platform_type, follower_count, average_views, portfolio_url, status, verified_at)
     status: pending
   - id: db_migration_notifications_clipper
-    content: Create migration create_notifications table untuk clipper system (user_id, type, title, message, data, read_at, created_at)
+    content: REUSE existing Laravel notifications table - extend dengan type untuk clipper notifications (new_campaign, clip_approved, reward_received, dll)
     status: pending
   - id: model_creator_wallet
     content: Create CreatorWallet model dengan relationships dan methods (lockAmount, unlockAmount, addBalance, deductBalance)
@@ -114,7 +114,7 @@ todos:
     content: Create ClipperOnboardingService (registerClipper, updateProfile, verifyClipper, getClipperStats)
     status: pending
   - id: service_notification_clipper
-    content: Create ClipperNotificationService (notifyNewCampaign, notifyClipApproved, notifyRewardReceived, notifyCampaignEnded)
+    content: EXTEND existing NotificationService dengan methods untuk clipper (notifyNewCampaign, notifyClipApproved, notifyRewardReceived, notifyCampaignEnded, notifyBrandApproved)
     status: pending
   - id: controller_top_up
     content: Create TopUpController (index, create, store, webhook)
@@ -307,6 +307,33 @@ todos:
     status: pending
   - id: component_clipper_profile_form
     content: Create Clipper/ProfileForm.vue component untuk Clipper profile form
+    status: pending
+  - id: extend_floating_action_button
+    content: "EXTEND FloatingActionButton.vue untuk tambahkan options: Create Campaign (Brand) dan Submit Clip (Clipper) - reuse existing pattern"
+    status: pending
+  - id: infinite_scroll_campaigns
+    content: REUSE infinite scroll pattern untuk Campaigns/Index.vue (similar to Marketplace/Index.vue)
+    status: pending
+  - id: infinite_scroll_clips
+    content: REUSE infinite scroll pattern untuk Clips/Index.vue dan AvailableCampaigns.vue
+    status: pending
+  - id: integrate_profile_system
+    content: INTEGRATE Brand/Clipper profile dengan existing business profile system - extend Profile/Show.vue dengan tabs untuk Brand/Clipper info
+    status: pending
+  - id: reuse_file_upload_validation
+    content: REUSE file upload validation pattern dari marketplace untuk clip content URL validation (prevent SSRF, validate URLs)
+    status: pending
+  - id: integrate_balance_service
+    content: INTEGRATE atau extend existing BalanceService dengan WalletService - atau create adapter untuk reuse balance logic
+    status: pending
+  - id: extend_withdrawal_controller
+    content: EXTEND existing WithdrawalController untuk support clipper withdrawals dengan user_type filter
+    status: pending
+  - id: reuse_notification_components
+    content: REUSE existing NotificationBell.vue component - extend untuk support clipper notification types
+    status: pending
+  - id: campaign_post_integration
+    content: INTEGRATE campaign dengan Post system - Brand bisa share campaign sebagai post di forum dengan link ke campaign
     status: pending
   - id: db_indexes_optimization
     content: Add database indexes untuk performance (campaigns.creator_id, campaigns.status, clips.campaign_id, clips.status, ledger_entries.reference_id, dll)
@@ -920,11 +947,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
 - List clips yang di-submit (clipper view)
 - Show status, reward, views
+- **REUSE**: Infinite scroll pattern dari Marketplace/Index.vue
 
 #### `resources/js/Pages/Clipper/Clips/AvailableCampaigns.vue`
 
 - List available campaigns untuk submit clip
 - Filter dan search
+- **REUSE**: Infinite scroll pattern dari Marketplace/Index.vue
+- **REUSE**: ProductCard pattern untuk campaign cards
 
 #### `resources/js/Pages/Clipper/Clips/Create.vue`
 
@@ -990,6 +1020,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 #### `resources/js/Components/Clipper/ClipCard.vue`
 
 - Card untuk display clip di list
+- **REUSE**: ProductCard.vue pattern dan styling
+- Adapt untuk clip-specific data (views, reward, status)
 
 #### `resources/js/Components/Clipper/WalletBalance.vue`
 
@@ -1785,6 +1817,99 @@ Body: { Midtrans webhook payload }
 - Duplicate content detection
 - Fraud detection (view spikes)
 
+## Integration dengan Existing Systems
+
+### Reuse Existing Components & Services
+
+#### 1. Notification System (REUSE)
+
+- **Extend**: `app/Services/NotificationService.php` (jangan buat service baru)
+- Add methods: `notifyNewCampaign()`, `notifyClipApproved()`, `notifyRewardReceived()`, `notifyCampaignEnded()`, `notifyBrandApproved()`
+- **Extend**: Laravel notifications table (jangan buat table baru)
+- Add notification types: `new_campaign`, `clip_approved`, `reward_received`, `campaign_ended`, `brand_approved`
+- **Extend**: `resources/js/Components/Notifications/NotificationBell.vue`
+- Add support untuk clipper notification types
+- Filter notifications by type
+- Display clipper-specific notification icons
+
+#### 2. Withdrawal System (REUSE)
+
+- **Extend**: `withdrawals` table dengan `user_type` field (enum: seller, clipper)
+- **Extend**: `app/Http/Controllers/Marketplace/WithdrawalController.php`
+- Update `index()` untuk filter by `user_type`
+- Update `create()` dan `store()` untuk support clipper withdrawal
+- Reuse existing withdrawal approval flow
+- **Extend**: `app/Models/Withdrawal.php`
+- Add scopes: `scopeForClipper()`, `scopeForSeller()`
+- Reuse existing `approve()`, `reject()`, `complete()` methods
+- **Reuse**: Existing withdrawal admin dashboard dengan filter untuk clipper withdrawals
+
+#### 3. Balance System (INTEGRATE)
+
+- **Option 1**: Create adapter untuk reuse `BalanceService` logic
+- **Option 2**: Extend `BalanceService` dengan wallet-specific methods
+- **Option 3**: Use `BalanceService` untuk backward compatibility dengan existing `user.balance` field
+- Maintain consistency antara `user.balance` dan wallet balances
+- Consider migration strategy untuk existing balance data
+
+#### 4. Floating Action Button (EXTEND)
+
+- **Extend**: `resources/js/Components/FloatingActionButton.vue`
+- Add options: "Create Campaign" (untuk Brand) dan "Submit Clip" (untuk Clipper)
+- Conditional display berdasarkan user role (Brand/Clipper)
+- Reuse existing menu pattern dan modal structure
+- Import `CreateCampaignModal` dan `SubmitClipModal`
+
+#### 5. Infinite Scroll Pattern (REUSE)
+
+- **Reuse**: Pattern dari `Marketplace/Index.vue` untuk:
+- `Campaigns/Index.vue` - Brand campaign list
+- `Clips/Index.vue` - Clipper clip list
+- `AvailableCampaigns.vue` - Available campaigns untuk clipper
+- Reuse Intersection Observer implementation
+- Reuse loading states dan pagination logic
+- Reuse sentinel element pattern
+
+#### 6. Component Patterns (REUSE)
+
+- **Reuse**: `ProductCard.vue` pattern untuk `ClipCard.vue`
+- Adapt untuk clip-specific data (views, reward, status)
+- Reuse styling dan layout structure
+- **Reuse**: `ProductForm.vue` pattern untuk campaign/clip forms
+- Reuse validation patterns
+- Reuse file upload handling
+- **Reuse**: Search/Filter components dari marketplace
+- Reuse search bar component
+- Reuse filter sidebar pattern
+- **Reuse**: Modal patterns untuk create/edit forms
+
+#### 7. Profile System (INTEGRATE)
+
+- **Extend**: `Profile/Show.vue` dengan tabs untuk Brand/Clipper info
+- Existing tabs: Posts, Analytics, About
+- New tabs: Brand Info (jika Brand), Clipper Info (jika Clipper)
+- **Reuse**: Existing business profile components
+- Integrate Brand/Clipper data dengan existing profile
+- Reuse profile header dan styling
+
+#### 8. File Upload Validation (REUSE)
+
+- **Reuse**: File upload validation pattern dari marketplace
+- Apply untuk clip content URL validation:
+- Validate URL format
+- Prevent SSRF attacks
+- Check URL accessibility
+- Validate platform URLs (TikTok, Instagram, YouTube)
+- Reuse SSRF prevention logic dari marketplace
+
+#### 9. Campaign-Post Integration (NEW)
+
+- Brand bisa share campaign sebagai post di forum
+- Create post dengan link ke campaign detail
+- Clipper bisa discuss campaign di forum
+- Link campaign ke marketplace (jika relevan)
+- Integration dengan existing Post system
+
 ## Dependencies
 
 - Existing: MidtransService (untuk top up)
@@ -1792,5 +1917,3 @@ Body: { Midtrans webhook payload }
 - Existing: Forum system (untuk integration)
 - Existing: Marketplace system (untuk integration)
 - New: View tracking API atau scraping service (untuk track views dari platform)
-- Queue system untuk background jobs
-- Real-time notification system (Laravel Echo + Pusher/Broadcasting)

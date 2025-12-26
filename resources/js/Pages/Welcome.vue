@@ -13,7 +13,7 @@ defineProps({
 </script>
 
 <template>
-    <Head title="Welcome to Noteds - Social Network for Business Thinkers & Doers" />
+    <Head title="Welcome to Noteds - Social Network for Business Thinkers & Doers" /> 
     
     <div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <!-- Navigation -->
@@ -54,7 +54,7 @@ defineProps({
                 </h1>
                 <p class="mt-6 max-w-2xl mx-auto text-xl text-gray-600 dark:text-gray-300">
                     Platform untuk berbagi ide bisnis, validasi ide, diskusi serius, dan kolaborasi. 
-                    Bukan tempat galau, tapi tempat membangun bisnis.
+                    Plus fitur Clipper untuk distribusi konten viral dan Marketplace Digital untuk jual beli produk digital.
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-4">
                     <Link
@@ -76,7 +76,7 @@ defineProps({
 
             <!-- Features Grid -->
             <div class="mt-24">
-                <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
                     <!-- Feature 1 -->
                     <div class="rounded-xl bg-white p-8 shadow-lg dark:bg-gray-800">
                         <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900">
@@ -154,6 +154,103 @@ defineProps({
                             Komunitas berkualitas dengan aturan jelas: tidak ada curhat, drama, atau hoaks. Fokus bisnis saja.
                         </p>
                     </div>
+
+                    <!-- Feature 7 - Clipper System -->
+                    <div class="rounded-xl bg-white p-8 shadow-lg dark:bg-gray-800">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900">
+                            <svg class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">Clipper System</h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                            Brand buat campaign, Clipper submit konten viral. Pembayaran otomatis berbasis views dengan sistem escrow yang transparan.
+                        </p>
+                    </div>
+
+                    <!-- Feature 8 - Marketplace Digital -->
+                    <div class="rounded-xl bg-white p-8 shadow-lg dark:bg-gray-800">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-cyan-100 dark:bg-cyan-900">
+                            <svg class="h-6 w-6 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">Marketplace Digital</h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                            Jual beli produk digital dengan sistem escrow. Pembayaran aman, saldo otomatis, dan penarikan dengan approval.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clipper System Highlight -->
+            <div class="mt-24 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-16 text-center">
+                <div class="max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold text-white">Clipper System - Distribusi Konten Viral</h2>
+                    <p class="mt-4 text-lg text-emerald-100">
+                        Brand/Influencer buat campaign dengan budget. Clipper submit konten dan dapat reward otomatis berbasis views. 
+                        Sistem escrow transparan, pembayaran otomatis, dan dashboard analytics real-time.
+                    </p>
+                    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-white mb-2">Untuk Brand/Influencer</h3>
+                            <ul class="space-y-2 text-emerald-50 text-sm">
+                                <li class="flex items-start gap-2">
+                                    <svg class="h-5 w-5 text-emerald-200 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Top up saldo via Midtrans</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="h-5 w-5 text-emerald-200 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Buat campaign dengan CPM & budget</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="h-5 w-5 text-emerald-200 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Dashboard analytics real-time</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="h-5 w-5 text-emerald-200 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Sistem escrow aman & transparan</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-white mb-2">Untuk Clipper</h3>
+                            <ul class="space-y-2 text-emerald-50 text-sm">
+                                <li class="flex items-start gap-2">
+                                    <svg class="h-5 w-5 text-emerald-200 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Submit clip ke campaign aktif</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="h-5 w-5 text-emerald-200 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Tracking views otomatis</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="h-5 w-5 text-emerald-200 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Reward otomatis setelah approval</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="h-5 w-5 text-emerald-200 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Withdraw ke bank/e-wallet</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -161,7 +258,8 @@ defineProps({
             <div class="mt-24 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-16 text-center">
                 <h2 class="text-3xl font-bold text-white">Siap Membangun Bisnis Anda?</h2>
                 <p class="mt-4 text-lg text-indigo-100">
-                    Bergabung dengan komunitas pebisnis dan pengusaha yang serius
+                    Bergabung dengan komunitas pebisnis dan pengusaha yang serius. 
+                    Plus akses ke Clipper System dan Marketplace Digital.
                 </p>
                 <div class="mt-8">
                     <Link
@@ -178,8 +276,111 @@ defineProps({
         <!-- Footer -->
         <footer class="border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
             <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-                <div class="text-center text-sm text-gray-600 dark:text-gray-400">
-                    <p>&copy; {{ new Date().getFullYear() }} Noteds. Social Network for Business Thinkers & Doers.</p>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                    <!-- About -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Tentang</h3>
+                        <ul class="space-y-2">
+                            <li>
+                                <Link :href="route('legal.contact')" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    Kontak
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Legal -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Legal</h3>
+                        <ul class="space-y-2">
+                            <li>
+                                <Link :href="route('legal.privacy-policy')" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    Kebijakan Privasi
+                                </Link>
+                            </li>
+                            <li>
+                                <Link :href="route('legal.terms-conditions')" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    Syarat & Ketentuan
+                                </Link>
+                            </li>
+                            <li>
+                                <Link :href="route('legal.disclaimer')" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    Disclaimer
+                                </Link>
+                            </li>
+                            <li>
+                                <Link :href="route('legal.cookie-policy')" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    Kebijakan Cookie
+                                </Link>
+                            </li>
+                            <li>
+                                <Link :href="route('legal.refund-policy')" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    Kebijakan Pengembalian
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Resources -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Sumber Daya</h3>
+                        <ul class="space-y-2">
+                            <li>
+                                <a href="#" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    FAQ
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    Dokumentasi
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Social -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Ikuti Kami</h3>
+                        <ul class="space-y-2">
+                            <li>
+                                <a href="#" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    Twitter/X
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    LinkedIn
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    Instagram
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    Facebook
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    YouTube
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                    TikTok
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-8">
+                    <div class="text-center text-sm text-gray-600 dark:text-gray-400">
+                        <p>&copy; {{ new Date().getFullYear() }} Noteds. Social Network for Business Thinkers & Doers.</p>
+                        <p class="mt-2">Semua hak dilindungi.</p>
+                    </div>
                 </div>
             </div>
         </footer>
