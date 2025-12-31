@@ -1,6 +1,7 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import FollowButton from '@/Components/Follow/FollowButton.vue';
 
 const props = defineProps({
     profileUser: {
@@ -11,7 +12,13 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    isFollowing: {
+        type: Boolean,
+        default: false,
+    },
 });
+
+const page = usePage();
 
 const displayName = computed(() => props.profileUser.business_name || props.profileUser.name);
 const displaySubtitle = computed(() => {
@@ -59,13 +66,22 @@ const avatarUrl = computed(() => props.profileUser.avatar_url || null);
                                 {{ displaySubtitle }}
                             </p>
                         </div>
-                        <Link
-                            v-if="isOwnProfile"
-                            :href="route('profile.edit')"
-                            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
-                        >
-                            Edit Profile
-                        </Link>
+                        <div class="flex items-center gap-2">
+                            <FollowButton
+                                v-if="!isOwnProfile && page.props.auth?.user"
+                                :user-id="profileUser.id"
+                                :is-following="isFollowing"
+                                :can-follow="!!page.props.auth?.user"
+                                size="md"
+                            />
+                            <Link
+                                v-if="isOwnProfile"
+                                :href="route('profile.edit')"
+                                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+                            >
+                                Edit Profile
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

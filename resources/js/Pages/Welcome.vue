@@ -326,14 +326,14 @@ defineProps({
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Sumber Daya</h3>
                         <ul class="space-y-2">
                             <li>
-                                <a href="#" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                <Link :href="route('faqs.index')" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
                                     FAQ
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                                <Link :href="route('documentations.index')" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
                                     Dokumentasi
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>

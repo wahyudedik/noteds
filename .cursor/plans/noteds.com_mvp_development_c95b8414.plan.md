@@ -344,8 +344,3 @@ resources/js/
 ### Business Rules
 
 - Users can only vote once per post/comment
-- Users cannot vote on their own posts/comments
-- Idea validation only available for posts with purpose_type = validate_idea
-- Best answer can only be set by post author
-
-## Testing Strategy (Future)

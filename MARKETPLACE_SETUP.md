@@ -222,7 +222,7 @@ Sistem marketplace menggunakan disk `products` untuk menyimpan file produk digit
 
 3. **Storage Link (untuk images)**
 
-   Untuk product images yang disimpan di public disk:
+   Untuk product images yang disimpan di public disk: 
    ```bash
    php artisan storage:link
    ```

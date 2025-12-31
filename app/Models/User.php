@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Concerns\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -72,6 +73,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
         'balance',
         'midtrans_merchant_id',
+        'clipper_role',
     ];
 
     /**
@@ -179,5 +181,109 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return asset('storage/' . $this->avatar);
+    }
+
+    /**
+     * Get the creator wallet for the user.
+     */
+    public function creatorWallet(): HasOne
+    {
+        return $this->hasOne(CreatorWallet::class);
+    }
+
+    /**
+     * Get the clipper wallet for the user.
+     */
+    public function clipperWallet(): HasOne
+    {
+        return $this->hasOne(ClipperWallet::class);
+    }
+
+    /**
+     * Get the campaigns created by the user (as creator/brand).
+     */
+    public function campaigns(): HasMany
+    {
+        return $this->hasMany(Campaign::class, 'creator_id');
+    }
+
+    /**
+     * Get the clips submitted by the user (as clipper).
+     */
+    public function clips(): HasMany
+    {
+        return $this->hasMany(Clip::class, 'clipper_id');
+    }
+
+    /**
+     * Get the top ups for the user.
+     */
+    public function topUps(): HasMany
+    {
+        return $this->hasMany(TopUp::class);
+    }
+
+    /**
+     * Check if user is a brand/creator.
+     */
+    public function isBrand(): bool
+    {
+        return $this->clipper_role === 'brand';
+    }
+
+    /**
+     * Check if user is a clipper.
+     */
+    public function isClipper(): bool
+    {
+        return $this->clipper_role === 'clipper';
+    }
+
+    /**
+     * Get the users that this user is following.
+     */
+    public function following(): HasMany
+    {
+        return $this->hasMany(Follow::class, 'follower_id');
+    }
+
+    /**
+     * Get the users that follow this user.
+     */
+    public function followers(): HasMany
+    {
+        return $this->hasMany(Follow::class, 'following_id');
+    }
+
+    /**
+     * Get the bookmarks created by the user.
+     */
+    public function bookmarks(): HasMany
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+
+    /**
+     * Get the user settings.
+     */
+    public function settings(): HasOne
+    {
+        return $this->hasOne(UserSetting::class);
+    }
+
+    /**
+     * Check if the user is following another user.
+     */
+    public function isFollowing(User $user): bool
+    {
+        return $this->following()->where('following_id', $user->id)->exists();
+    }
+
+    /**
+     * Check if the user is followed by another user.
+     */
+    public function isFollowedBy(User $user): bool
+    {
+        return $this->followers()->where('follower_id', $user->id)->exists();
     }
 }

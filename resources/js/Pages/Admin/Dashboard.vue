@@ -48,6 +48,42 @@ defineProps({
                     </div>
                 </div>
 
+                <!-- Quick Links -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2">FAQ Management</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                    Manage frequently asked questions and answers
+                                </p>
+                            </div>
+                            <Link
+                                :href="route('admin.faqs.index')"
+                                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                            >
+                                Manage FAQs
+                            </Link>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2">Documentation Management</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                    Manage platform documentation and guides
+                                </p>
+                            </div>
+                            <Link
+                                :href="route('admin.documentations.index')"
+                                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                            >
+                                Manage Docs
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Recent Withdrawals -->
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <div class="flex justify-between items-center mb-4">

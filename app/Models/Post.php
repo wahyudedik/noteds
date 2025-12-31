@@ -33,6 +33,7 @@ class Post extends Model
 
     protected $fillable = [
         'user_id',
+        'campaign_id',
         'purpose_type',
         'title',
         'content',
@@ -66,5 +67,29 @@ class Post extends Model
     public function votes(): HasMany
     {
         return $this->hasMany(\App\Models\PostVote::class);
+    }
+
+    /**
+     * Get the campaign associated with this post (if shared from campaign).
+     */
+    public function campaign(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Campaign::class);
+    }
+
+    /**
+     * Get the users who bookmarked this post.
+     */
+    public function bookmarkedBy(): HasMany
+    {
+        return $this->hasMany(\App\Models\Bookmark::class);
+    }
+
+    /**
+     * Check if the post is bookmarked by a specific user.
+     */
+    public function isBookmarkedBy(string $userId): bool
+    {
+        return $this->bookmarkedBy()->where('user_id', $userId)->exists();
     }
 }

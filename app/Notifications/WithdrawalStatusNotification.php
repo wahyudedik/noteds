@@ -42,8 +42,17 @@ class WithdrawalStatusNotification extends Notification implements ShouldQueue
 
     public function toArray(object $notifiable): array
     {
+        $statusMessages = [
+            'approved' => 'Your withdrawal request has been approved.',
+            'rejected' => 'Your withdrawal request has been rejected.',
+            'completed' => 'Your withdrawal has been processed and completed.',
+        ];
+
         return [
+            'type' => 'withdrawal_status',
             'withdrawal_id' => $this->withdrawal->id,
+            'title' => "Withdrawal Request {$this->withdrawal->status}",
+            'message' => $statusMessages[$this->withdrawal->status] ?? "Withdrawal status: {$this->withdrawal->status}",
             'status' => $this->withdrawal->status,
             'amount' => $this->withdrawal->amount,
             'admin_notes' => $this->withdrawal->admin_notes,

@@ -1,6 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import VoteButton from '@/Components/VoteButton.vue';
+import BookmarkButton from '@/Components/Bookmark/BookmarkButton.vue';
 import { PURPOSE_TYPE_LABELS } from '@/Utils/constants';
 import { usePage } from '@inertiajs/vue3';
 
@@ -12,6 +13,10 @@ const props = defineProps({
     userVote: {
         type: String,
         default: null,
+    },
+    isBookmarked: {
+        type: Boolean,
+        default: false,
     },
 });
 
@@ -74,23 +79,33 @@ const formatDate = (date) => {
             </Link>
 
             <!-- Actions -->
-            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <VoteButton
-                    :post-id="post.id"
-                    :upvotes="post.upvotes_count"
-                    :downvotes="post.downvotes_count"
-                    :user-vote="userVote"
-                    :can-vote="page.props.auth?.user && page.props.auth.user.id !== post.user_id"
-                />
-                <Link
-                    :href="route('posts.show', post.id)"
-                    class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    {{ post.comments_count || 0 }}
-                </Link>
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-2">
+                    <VoteButton
+                        :post-id="post.id"
+                        :upvotes="post.upvotes_count"
+                        :downvotes="post.downvotes_count"
+                        :user-vote="userVote"
+                        :can-vote="page.props.auth?.user && page.props.auth.user.id !== post.user_id"
+                    />
+                    <div class="flex items-center gap-3">
+                        <BookmarkButton
+                            v-if="page.props.auth?.user"
+                            :post-id="post.id"
+                            :is-bookmarked="isBookmarked"
+                            :can-bookmark="!!page.props.auth?.user"
+                        />
+                        <Link
+                            :href="route('posts.show', post.id)"
+                            class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            {{ post.comments_count || 0 }}
+                        </Link>
+                    </div>
+                </div>
             </div>
         </div>
     </article>

@@ -35,6 +35,7 @@ class Withdrawal extends Model
         'admin_id',
         'admin_notes',
         'processed_at',
+        'user_type',
     ];
 
     protected function casts(): array
@@ -94,5 +95,21 @@ class Withdrawal extends Model
             'status' => 'completed',
             'processed_at' => now(),
         ]);
+    }
+
+    /**
+     * Scope a query to only include seller withdrawals.
+     */
+    public function scopeForSeller($query)
+    {
+        return $query->where('user_type', 'seller');
+    }
+
+    /**
+     * Scope a query to only include clipper withdrawals.
+     */
+    public function scopeForClipper($query)
+    {
+        return $query->where('user_type', 'clipper');
     }
 }

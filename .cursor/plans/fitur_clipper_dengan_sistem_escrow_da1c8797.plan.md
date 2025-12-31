@@ -4,370 +4,370 @@ overview: "Menambahkan sistem clipper lengkap dengan escrow payment, wallet syst
 todos:
   - id: db_migration_user_clipper_role
     content: "Create migration add clipper_role to users table (enum: brand, clipper, admin) atau extend existing role field"
-    status: pending
+    status: completed
   - id: db_migration_creator_wallets
     content: Create migration create_creator_wallets_table (user_id, balance_available, balance_locked)
-    status: pending
+    status: completed
   - id: db_migration_campaign_wallets
     content: Create migration create_campaign_wallets_table (campaign_id, total_budget, remaining_budget, locked_amount)
-    status: pending
+    status: completed
   - id: db_migration_clipper_wallets
     content: Create migration create_clipper_wallets_table (user_id, balance_pending, balance_available, balance_withdrawn)
-    status: pending
+    status: completed
   - id: db_migration_platform_wallets
     content: Create migration create_platform_wallets_table (fee_balance, operational_balance)
-    status: pending
+    status: completed
   - id: db_migration_campaigns
     content: Create migration create_campaigns_table (creator_id, title, description, cpm, max_budget, max_reward_per_clipper, duration_days, status, started_at, ended_at)
-    status: pending
+    status: completed
   - id: db_migration_clips
     content: Create migration create_clips_table (campaign_id, clipper_id, content_url, platform, platform_content_id, status, valid_views, reward fields, timestamps)
-    status: pending
+    status: completed
   - id: db_migration_clip_view_tracking
     content: Create migration create_clip_view_tracking_table (clip_id, views_count, tracked_at, stability_score, is_valid)
-    status: pending
+    status: completed
   - id: db_migration_ledger_entries
     content: Create migration create_ledger_entries_table (transaction_id unique, from_wallet_type, from_wallet_id, to_wallet_type, to_wallet_id, amount, reason, reference_type, reference_id, metadata, admin_id)
-    status: pending
+    status: completed
   - id: db_migration_audit_logs
     content: Create migration create_audit_logs_table (user_id, admin_id, action, target_type, target_id, old_value, new_value, notes, ip_address, user_agent)
-    status: pending
+    status: completed
   - id: db_migration_top_ups
     content: Create migration create_top_ups_table (user_id, amount, status, payment_method, midtrans fields, paid_at)
-    status: pending
+    status: completed
   - id: db_migration_extend_withdrawals
     content: "Create migration add user_type to withdrawals table (enum: seller, clipper) - REUSE existing withdrawals table"
-    status: pending
+    status: completed
   - id: db_migration_brand_registrations
     content: Create migration create_brand_registrations_table (user_id, company_name, business_type, website, social_media, contact_person, phone, status, admin_notes, approved_at, rejected_at)
-    status: pending
+    status: completed
   - id: db_migration_clipper_profiles
     content: Create migration create_clipper_profiles_table (user_id, platform_username, platform_type, follower_count, average_views, portfolio_url, status, verified_at)
-    status: pending
+    status: completed
   - id: db_migration_notifications_clipper
     content: REUSE existing Laravel notifications table - extend dengan type untuk clipper notifications (new_campaign, clip_approved, reward_received, dll)
-    status: pending
+    status: completed
   - id: model_creator_wallet
     content: Create CreatorWallet model dengan relationships dan methods (lockAmount, unlockAmount, addBalance, deductBalance)
-    status: pending
+    status: completed
   - id: model_campaign_wallet
     content: Create CampaignWallet model dengan relationships dan methods (lockBudget, releaseBudget, deductBudget, refund)
-    status: pending
+    status: completed
   - id: model_clipper_wallet
     content: Create ClipperWallet model dengan relationships dan methods (addReward, movePendingToAvailable, lockForWithdrawal)
-    status: pending
+    status: completed
   - id: model_platform_wallet
     content: Create PlatformWallet model dengan methods (addFee, getTotalBalance)
-    status: pending
+    status: completed
   - id: model_campaign
     content: Create Campaign model dengan relationships (creator, clips, campaignWallet) dan methods (activate, pause, complete, cancel, canActivate, getRemainingBudget)
-    status: pending
+    status: completed
   - id: model_clip
     content: Create Clip model dengan relationships (campaign, clipper, viewTrackings) dan methods (approve, reject, calculateReward, markAsPaid)
-    status: pending
+    status: completed
   - id: model_clip_view_tracking
     content: Create ClipViewTracking model dengan relationship ke Clip
-    status: pending
+    status: completed
   - id: model_ledger_entry
     content: Create LedgerEntry model dengan static method createEntry() dan relationships
-    status: pending
+    status: completed
   - id: model_audit_log
     content: Create AuditLog model dengan static method logAction()
-    status: pending
+    status: completed
   - id: model_top_up
     content: Create TopUp model dengan relationship ke User dan methods (markAsPaid, markAsFailed)
-    status: pending
+    status: completed
   - id: service_wallet
     content: Create WalletService (getCreatorWallet, getClipperWallet, getCampaignWallet, getPlatformWallet, transferBetweenWallets)
-    status: pending
+    status: completed
   - id: service_escrow
     content: Create EscrowService (lockCampaignBudget, releaseCampaignBudget, refundRemainingBudget)
-    status: pending
+    status: completed
   - id: service_reward_calculation
     content: Create RewardCalculationService (calculateReward, estimateReward, applyMaxRewardLimit)
-    status: pending
+    status: completed
   - id: service_view_validation
     content: Create ViewValidationService (trackViews, validateViews, checkStability, detectFraud, approveViews)
-    status: pending
+    status: completed
   - id: service_auto_transfer
     content: Create AutoTransferService (transferRewardToClipper, deductPlatformFee, processApprovedClips)
-    status: pending
+    status: completed
   - id: service_ledger
     content: Create LedgerService (createEntry, getWalletHistory, getAuditTrail)
-    status: pending
+    status: completed
   - id: service_top_up
     content: Create TopUpService (createTopUp, processTopUpSuccess, addToCreatorWallet)
-    status: pending
+    status: completed
   - id: service_campaign
     content: Create CampaignService (createCampaign, activateCampaign, pauseCampaign, completeCampaign)
-    status: pending
+    status: completed
   - id: service_clip
     content: Create ClipService (submitClip, approveClip, rejectClip)
-    status: pending
+    status: completed
   - id: service_campaign_analytics
     content: Create CampaignAnalyticsService untuk Brand dashboard (getCampaignStats, getViewsChart, getTopClips, getROI)
-    status: pending
+    status: completed
   - id: service_brand_onboarding
     content: Create BrandOnboardingService (registerBrand, approveBrand, rejectBrand, getPendingBrands, sendApprovalNotification)
-    status: pending
+    status: completed
   - id: service_clipper_onboarding
     content: Create ClipperOnboardingService (registerClipper, updateProfile, verifyClipper, getClipperStats)
-    status: pending
+    status: completed
   - id: service_notification_clipper
     content: EXTEND existing NotificationService dengan methods untuk clipper (notifyNewCampaign, notifyClipApproved, notifyRewardReceived, notifyCampaignEnded, notifyBrandApproved)
-    status: pending
+    status: completed
   - id: controller_top_up
     content: Create TopUpController (index, create, store, webhook)
-    status: pending
+    status: completed
   - id: controller_campaign
     content: Create CampaignController (index, create, store, show, edit, update, activate, pause, cancel)
-    status: pending
+    status: completed
   - id: controller_clip
     content: Create ClipController (index, availableCampaigns, create, store, show, trackViews)
-    status: pending
+    status: completed
   - id: controller_creator_wallet
     content: Create CreatorWalletController (index, history)
-    status: pending
+    status: completed
   - id: controller_clipper_wallet
     content: Create ClipperWalletController (index, history)
-    status: pending
+    status: completed
   - id: controller_campaign_analytics
     content: Create CampaignAnalyticsController untuk Brand dashboard (index dengan stats dan charts)
-    status: pending
+    status: completed
   - id: controller_admin_campaign
     content: Create AdminCampaignController (index, show, approve, reject)
-    status: pending
+    status: completed
   - id: controller_admin_clip
     content: Create AdminClipController (index, show, approve, reject, adjustReward)
-    status: pending
+    status: completed
   - id: controller_admin_wallet
     content: Create AdminWalletController (freezeWallet, unfreezeWallet, adjustBalance, viewLedger, viewAuditLog)
-    status: pending
+    status: completed
   - id: controller_brand_registration
     content: Create BrandRegistrationController (create, store, show, edit, update) untuk Brand apply sebagai Brand
-    status: pending
+    status: completed
   - id: controller_clipper_profile
     content: Create ClipperProfileController (create, store, show, edit, update) untuk Clipper setup profile
-    status: pending
+    status: completed
   - id: controller_admin_brand_approval
     content: Create AdminBrandApprovalController (index, show, approve, reject) untuk admin approve Brand
-    status: pending
+    status: completed
   - id: controller_notifications_clipper
     content: Create ClipperNotificationController (index, markAsRead, markAllAsRead, unreadCount)
-    status: pending
+    status: completed
   - id: job_process_top_up_webhook
     content: Create ProcessTopUpWebhook job untuk handle Midtrans webhook top up
-    status: pending
+    status: completed
   - id: job_track_clip_views
     content: Create TrackClipViews job untuk track views tiap interval
-    status: pending
+    status: completed
   - id: job_validate_clip_views
     content: Create ValidateClipViews job untuk validate views setelah delay
-    status: pending
+    status: completed
   - id: job_auto_transfer_rewards
     content: Create AutoTransferRewards job untuk auto transfer reward ke clipper wallet
-    status: pending
+    status: completed
   - id: job_process_campaign_completion
     content: Create ProcessCampaignCompletion job untuk process campaign completion dan refund
-    status: pending
+    status: completed
   - id: command_track_all_clip_views
     content: Create TrackAllClipViews command (scheduled setiap 6-12 jam)
-    status: pending
+    status: completed
   - id: command_validate_pending_clips
     content: Create ValidatePendingClips command (scheduled setiap 1-2 jam)
-    status: pending
+    status: completed
   - id: command_auto_transfer_pending_rewards
     content: Create AutoTransferPendingRewards command (scheduled setiap 15-30 menit)
-    status: pending
+    status: completed
   - id: command_complete_expired_campaigns
     content: Create CompleteExpiredCampaigns command (scheduled daily)
-    status: pending
+    status: completed
   - id: middleware_ensure_creator
     content: Create EnsureUserIsCreator middleware
-    status: pending
+    status: completed
   - id: middleware_ensure_clipper
     content: Create EnsureUserIsClipper middleware
-    status: pending
+    status: completed
   - id: routes_clipper
     content: Add clipper routes (top-ups, campaigns, clips, wallets) dengan middleware auth
-    status: pending
+    status: completed
   - id: routes_admin_clipper
     content: Add admin clipper routes (campaigns, clips, wallets) dengan admin middleware
-    status: pending
+    status: completed
   - id: config_clipper
     content: Create config/clipper.php dengan platform fee, min withdrawal, tracking intervals
-    status: pending
+    status: completed
   - id: scheduled_tasks
     content: Update scheduled tasks di Kernel.php atau console.php untuk clipper commands
-    status: pending
+    status: completed
   - id: page_top_ups_index
     content: Create TopUps/Index.vue untuk list top up history
-    status: pending
+    status: completed
   - id: page_top_ups_create
     content: Create TopUps/Create.vue untuk form top up dengan payment method selection
-    status: pending
+    status: completed
   - id: page_campaigns_index
     content: Create Campaigns/Index.vue untuk Brand view campaigns dengan filter
-    status: pending
+    status: completed
   - id: page_campaigns_create
     content: Create Campaigns/Create.vue untuk form create campaign
-    status: pending
+    status: completed
   - id: page_campaigns_show
     content: Create Campaigns/Show.vue untuk campaign detail dengan clips dan budget usage
-    status: pending
+    status: completed
   - id: page_campaigns_analytics
     content: Create Campaigns/Analytics.vue untuk Brand dashboard analytics (views chart, ROI, top clips)
-    status: pending
+    status: completed
   - id: page_clips_index
     content: Create Clips/Index.vue untuk Clipper view clips yang di-submit
-    status: pending
+    status: completed
   - id: page_clips_available_campaigns
     content: Create Clips/AvailableCampaigns.vue untuk list available campaigns
-    status: pending
+    status: completed
   - id: page_clips_create
     content: Create Clips/Create.vue untuk form submit clip
-    status: pending
+    status: completed
   - id: page_clips_show
     content: Create Clips/Show.vue untuk clip detail dengan view tracking chart
-    status: pending
+    status: completed
   - id: page_wallet_creator
     content: Create Wallet/Creator.vue untuk Brand wallet balance dan transactions
-    status: pending
+    status: completed
   - id: page_wallet_clipper
     content: Create Wallet/Clipper.vue untuk Clipper wallet balance dan withdraw
-    status: pending
+    status: completed
   - id: page_admin_campaigns_index
     content: Create Admin/Campaigns/Index.vue untuk admin view all campaigns
-    status: pending
+    status: completed
   - id: page_admin_campaigns_show
     content: Create Admin/Campaigns/Show.vue untuk admin campaign detail
-    status: pending
+    status: completed
   - id: page_admin_clips_index
     content: Create Admin/Clips/Index.vue untuk admin view all clips dengan filter
-    status: pending
+    status: completed
   - id: page_admin_clips_show
     content: Create Admin/Clips/Show.vue untuk admin clip detail dengan approval panel
-    status: pending
+    status: completed
   - id: page_admin_wallets_ledger
     content: Create Admin/Wallets/Ledger.vue untuk ledger entries dengan filter
-    status: pending
+    status: completed
   - id: page_admin_wallets_audit_log
     content: Create Admin/Wallets/AuditLog.vue untuk audit logs
-    status: pending
+    status: completed
   - id: component_campaign_card
     content: Create CampaignCard.vue component
-    status: pending
+    status: completed
   - id: component_clip_card
     content: Create ClipCard.vue component
-    status: pending
+    status: completed
   - id: component_wallet_balance
     content: Create WalletBalance.vue widget component
-    status: pending
+    status: completed
   - id: component_view_tracking_chart
     content: Create ViewTrackingChart.vue untuk chart views over time
-    status: pending
+    status: completed
   - id: component_reward_calculator
     content: Create RewardCalculator.vue untuk estimasi reward
-    status: pending
+    status: completed
   - id: component_clip_approval_panel
     content: Create Admin/ClipApprovalPanel.vue untuk approve/reject
-    status: pending
+    status: completed
   - id: component_reward_adjustment_form
     content: Create Admin/RewardAdjustmentForm.vue untuk adjust reward
-    status: pending
+    status: completed
   - id: component_campaign_analytics_chart
     content: Create CampaignAnalyticsChart.vue untuk Brand dashboard charts
-    status: pending
+    status: completed
   - id: page_brand_registration_create
     content: Create Brand/Registration/Create.vue untuk Brand apply sebagai Brand (form dengan company info, business type, contact)
-    status: pending
+    status: completed
   - id: page_brand_registration_show
     content: Create Brand/Registration/Show.vue untuk Brand lihat status registration mereka
-    status: pending
+    status: completed
   - id: page_clipper_profile_create
     content: Create Clipper/Profile/Create.vue untuk Clipper setup profile (platform username, follower count, portfolio)
-    status: pending
+    status: completed
   - id: page_clipper_profile_show
     content: Create Clipper/Profile/Show.vue untuk Clipper lihat dan edit profile mereka
-    status: pending
+    status: completed
   - id: page_admin_brand_approvals_index
     content: Create Admin/BrandApprovals/Index.vue untuk admin lihat semua Brand registration requests
-    status: pending
+    status: completed
   - id: page_admin_brand_approvals_show
     content: Create Admin/BrandApprovals/Show.vue untuk admin review dan approve/reject Brand
-    status: pending
+    status: completed
   - id: page_notifications_index
     content: Create Notifications/Index.vue untuk semua notifications (Brand & Clipper)
-    status: pending
+    status: completed
   - id: component_notification_bell_clipper
     content: Create Notifications/NotificationBell.vue component untuk notification dropdown
-    status: pending
+    status: completed
   - id: component_brand_registration_form
     content: Create Brand/RegistrationForm.vue component untuk Brand registration form
-    status: pending
+    status: completed
   - id: component_clipper_profile_form
     content: Create Clipper/ProfileForm.vue component untuk Clipper profile form
-    status: pending
+    status: completed
   - id: extend_floating_action_button
     content: "EXTEND FloatingActionButton.vue untuk tambahkan options: Create Campaign (Brand) dan Submit Clip (Clipper) - reuse existing pattern"
-    status: pending
+    status: completed
   - id: infinite_scroll_campaigns
     content: REUSE infinite scroll pattern untuk Campaigns/Index.vue (similar to Marketplace/Index.vue)
-    status: pending
+    status: completed
   - id: infinite_scroll_clips
     content: REUSE infinite scroll pattern untuk Clips/Index.vue dan AvailableCampaigns.vue
-    status: pending
+    status: completed
   - id: integrate_profile_system
     content: INTEGRATE Brand/Clipper profile dengan existing business profile system - extend Profile/Show.vue dengan tabs untuk Brand/Clipper info
-    status: pending
+    status: completed
   - id: reuse_file_upload_validation
     content: REUSE file upload validation pattern dari marketplace untuk clip content URL validation (prevent SSRF, validate URLs)
-    status: pending
+    status: completed
   - id: integrate_balance_service
     content: INTEGRATE atau extend existing BalanceService dengan WalletService - atau create adapter untuk reuse balance logic
-    status: pending
+    status: completed
   - id: extend_withdrawal_controller
     content: EXTEND existing WithdrawalController untuk support clipper withdrawals dengan user_type filter
-    status: pending
+    status: completed
   - id: reuse_notification_components
     content: REUSE existing NotificationBell.vue component - extend untuk support clipper notification types
-    status: pending
+    status: completed
   - id: campaign_post_integration
     content: INTEGRATE campaign dengan Post system - Brand bisa share campaign sebagai post di forum dengan link ke campaign
-    status: pending
+    status: completed
   - id: db_indexes_optimization
     content: Add database indexes untuk performance (campaigns.creator_id, campaigns.status, clips.campaign_id, clips.status, ledger_entries.reference_id, dll)
-    status: pending
+    status: completed
   - id: cache_strategy_redis
     content: Setup Redis cache untuk analytics data dan frequently accessed data
-    status: pending
+    status: completed
   - id: rate_limiting_middleware
     content: Create rate limiting middleware untuk view tracking API dan critical endpoints
-    status: pending
+    status: completed
   - id: error_tracking_sentry
     content: Setup error tracking (Sentry/Bugsnag) untuk monitor errors dan exceptions
-    status: pending
+    status: completed
   - id: logging_strategy
     content: Setup structured logging untuk clipper system (view tracking, transfers, validations)
-    status: pending
+    status: completed
   - id: retry_mechanism_failed_transfers
     content: Create retry mechanism untuk failed auto transfers dengan exponential backoff
-    status: pending
+    status: completed
   - id: backup_strategy_ledger
     content: Setup backup strategy untuk critical data (ledger entries, audit logs)
-    status: pending
+    status: completed
   - id: view_tracking_api_service
     content: Create ViewTrackingApiService untuk handle API calls ke platform (TikTok, Instagram, YouTube) dengan rate limiting dan error handling
-    status: pending
+    status: completed
   - id: unit_tests_services
     content: Create unit tests untuk semua services (WalletService, EscrowService, RewardCalculationService, dll)
-    status: pending
+    status: completed
   - id: feature_tests_controllers
     content: Create feature tests untuk controllers (CampaignController, ClipController, TopUpController, dll)
-    status: pending
+    status: completed
   - id: integration_tests_escrow_flow
     content: Create integration tests untuk escrow flow end-to-end (top up → campaign → clip → reward transfer)
-    status: pending
+    status: completed
 ---
 
 # Fitur Clipper dengan Sistem Escrow
@@ -1911,9 +1911,3 @@ Body: { Midtrans webhook payload }
 - Integration dengan existing Post system
 
 ## Dependencies
-
-- Existing: MidtransService (untuk top up)
-- Existing: BalanceService (bisa extend atau buat WalletService baru)
-- Existing: Forum system (untuk integration)
-- Existing: Marketplace system (untuk integration)
-- New: View tracking API atau scraping service (untuk track views dari platform)

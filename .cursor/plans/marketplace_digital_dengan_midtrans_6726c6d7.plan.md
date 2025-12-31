@@ -229,28 +229,28 @@ todos:
     status: completed
   - id: test_payment_flow
     content: Test payment flow dengan Midtrans sandbox
-    status: pending
+    status: completed
   - id: test_withdrawal_approval
     content: Test withdrawal approval flow
-    status: pending
+    status: completed
   - id: test_file_download_security
     content: Test file download security (hanya buyer bisa download)
-    status: pending
+    status: completed
   - id: test_order_cancellation
     content: Test order cancellation flow
-    status: pending
+    status: completed
   - id: test_product_search
     content: Test product search dan filtering
-    status: pending
+    status: completed
   - id: test_balance_calculations
     content: Test balance calculations accuracy
-    status: pending
+    status: completed
   - id: test_webhook_retry
     content: Test webhook retry mechanism
-    status: pending
+    status: completed
   - id: test_email_notifications
     content: Test email notifications
-    status: pending
+    status: completed
 ---
 
 # Marketpl
@@ -587,18 +587,3 @@ Update `database/seeders/UserSeeder.php`:
 
 - `resources/js/Components/Marketplace/SearchBar.vue` - search products
 - `resources/js/Components/Marketplace/ProductFilter.vue` - filter sidebar
-- `resources/js/Components/Marketplace/DownloadButton.vue` - download button
-- `resources/js/Components/Marketplace/BalanceWidget.vue` - show balance di sidebar
-- `resources/js/Components/Notifications/NotificationBell.vue` - notification dropdown
-- `resources/js/Components/Admin/ProductModerationTable.vue` - admin manage products
-
-### API Routes (Optional)
-
-- REST API untuk mobile app (jika diperlukan)
-- API routes di `routes/api.php`
-- Sanctum authentication untuk API
-
-### Error Handling
-
-- Custom exception: `InsufficientBalanceException`
-- Custom exception: `ProductNotAvailableException`

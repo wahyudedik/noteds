@@ -97,4 +97,32 @@ class FeedService
             'total_posts' => $totalPosts,
         ];
     }
+
+    /**
+     * Filter posts query to only include posts from followed users.
+     * This is an optional filter that can be applied to the query.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param User|null $user
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function filterByFollowedUsers($query, User $user = null)
+    {
+        if (!$user) {
+            return $query;
+        }
+
+        // Get IDs of users that the current user is following
+        $followingIds = \App\Models\Follow::where('follower_id', $user->id)
+            ->pluck('following_id')
+            ->toArray();
+
+        // If user is not following anyone, return empty results
+        if (empty($followingIds)) {
+            return $query->whereRaw('1 = 0'); // Return no results
+        }
+
+        // Filter posts to only include posts from followed users
+        return $query->whereIn('user_id', $followingIds);
+    }
 }

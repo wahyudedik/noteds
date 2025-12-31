@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'creator' => \App\Http\Middleware\EnsureUserIsCreator::class,
+            'clipper' => \App\Http\Middleware\EnsureUserIsClipper::class,
+            'not_banned' => \App\Http\Middleware\EnsureUserNotBanned::class,
+            'rate_limit.view_tracking' => \App\Http\Middleware\RateLimitViewTracking::class,
+            'rate_limit.clipper_api' => \App\Http\Middleware\RateLimitClipperApi::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

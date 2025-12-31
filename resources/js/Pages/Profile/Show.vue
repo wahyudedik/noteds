@@ -1,11 +1,13 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import ProfileHeader from '@/Components/Profile/ProfileHeader.vue';
 import Tabs from '@/Components/Profile/Tabs.vue';
 import TabPosts from '@/Components/Profile/TabPosts.vue';
 import TabAnalytics from '@/Components/Profile/TabAnalytics.vue';
 import TabAbout from '@/Components/Profile/TabAbout.vue';
+import TabBrand from '@/Components/Profile/TabBrand.vue';
+import TabClipper from '@/Components/Profile/TabClipper.vue';
 import { usePage } from '@inertiajs/vue3';
 import { Head } from '@inertiajs/vue3';
 
@@ -29,9 +31,25 @@ const props = defineProps({
     stats: Object,
     engagement_data: Object,
     top_posts: Array,
+    brandRegistration: {
+        type: Object,
+        default: null,
+    },
+    clipperProfile: {
+        type: Object,
+        default: null,
+    },
 });
 
 const activeTab = ref('posts');
+
+const hasBrandProfile = computed(() => {
+    return !!props.brandRegistration;
+});
+
+const hasClipperProfile = computed(() => {
+    return !!props.clipperProfile;
+});
 </script>
 
 <template>
@@ -48,7 +66,14 @@ const activeTab = ref('posts');
 
                 <!-- Tabs -->
                 <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                    <Tabs :active-tab="activeTab" :is-own-profile="isOwnProfile" @update:active-tab="activeTab = $event" />
+                    <Tabs 
+                        :active-tab="activeTab" 
+                        :is-own-profile="isOwnProfile"
+                        :profile-user="profileUser"
+                        :has-brand-profile="hasBrandProfile"
+                        :has-clipper-profile="hasClipperProfile"
+                        @update:active-tab="activeTab = $event" 
+                    />
 
                     <!-- Tab Content -->
                     <div class="p-6">
@@ -72,6 +97,20 @@ const activeTab = ref('posts');
                         <TabAbout 
                             v-else-if="activeTab === 'about'"
                             :profile-user="profileUser"
+                        />
+
+                        <TabBrand
+                            v-else-if="activeTab === 'brand'"
+                            :profile-user="profileUser"
+                            :brand-registration="brandRegistration"
+                            :is-own-profile="isOwnProfile"
+                        />
+
+                        <TabClipper
+                            v-else-if="activeTab === 'clipper'"
+                            :profile-user="profileUser"
+                            :clipper-profile="clipperProfile"
+                            :is-own-profile="isOwnProfile"
                         />
                     </div>
                 </div>

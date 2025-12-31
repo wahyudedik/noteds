@@ -242,8 +242,3 @@ const openProductModal = () => {
 - [x] Resets when search/filter changes
 - [x] Shows loading indicator
 - [x] Works on mobile devices
-
-### Floating Action Button
-
-- [x] Menu opens/closes smoothly
-- [x] Both actions open correct modals

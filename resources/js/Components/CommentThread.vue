@@ -4,6 +4,7 @@ import { router, useForm } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import Textarea from '@/Components/Textarea.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import ReportButton from '@/Components/Report/ReportButton.vue';
 import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -81,13 +82,21 @@ const markBestAnswer = (commentId) => {
                         {{ new Date(comment.created_at).toLocaleDateString('id-ID') }}
                     </span>
                 </div>
-                <button
-                    v-if="auth?.user && auth.user.id === postAuthorId && !comment.is_best_answer"
-                    @click="markBestAnswer(comment.id)"
-                    class="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
-                >
-                    Mark as Best Answer
-                </button>
+                <div class="flex items-center gap-2">
+                    <button
+                        v-if="auth?.user && auth.user.id === postAuthorId && !comment.is_best_answer"
+                        @click="markBestAnswer(comment.id)"
+                        class="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    >
+                        Mark as Best Answer
+                    </button>
+                    <ReportButton
+                        v-if="auth?.user && auth.user.id !== comment.user_id"
+                        reportable-type="comment"
+                        :reportable-id="comment.id"
+                        variant="icon"
+                    />
+                </div>
             </div>
 
             <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-3">

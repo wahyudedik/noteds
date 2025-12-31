@@ -1,11 +1,16 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
+import NotificationBell from '@/Components/Notifications/NotificationBell.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 
 const page = usePage();
 const showingProfileDropdown = ref(false);
+
+const notifications = computed(() => {
+    return page.props.notifications || [];
+});
 </script>
 
 <template>
@@ -39,6 +44,9 @@ const showingProfileDropdown = ref(false);
 
             <!-- Right Side Actions -->
             <div class="flex items-center gap-4">
+                <!-- Notification Bell -->
+                <NotificationBell :notifications="notifications" />
+                
                 <!-- Desktop Profile Dropdown -->
                 <div class="hidden lg:block">
                     <Dropdown align="right" width="48">

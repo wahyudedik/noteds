@@ -25,11 +25,15 @@ class AdminWithdrawalController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->has('user_type')) {
+            $query->where('user_type', $request->user_type);
+        }
+
         $withdrawals = $query->latest()->paginate(20);
 
         return Inertia::render('Admin/Withdrawals/Index', [
             'withdrawals' => $withdrawals,
-            'filters' => $request->only('status'),
+            'filters' => $request->only(['status', 'user_type']),
         ]);
     }
 
@@ -74,12 +78,23 @@ class AdminWithdrawalController extends Controller
             return back()->withErrors(['error' => 'Withdrawal must be approved first']);
         }
 
-        $this->balanceService->deductBalance(
-            $withdrawal->user,
-            $withdrawal->amount,
-            "Withdrawal #{$withdrawal->id}",
-            $withdrawal->id
-        );
+        // Handle different withdrawal types
+        if ($withdrawal->user_type === 'clipper') {
+            // Use clipper wallet service
+            $clipperWallet = \App\Services\WalletService::class;
+            $walletService = app(\App\Services\WalletService::class);
+            $clipperWallet = $walletService->getClipperWallet($withdrawal->user);
+            $clipperWallet->lockForWithdrawal($withdrawal->amount);
+            $clipperWallet->markAsWithdrawn($withdrawal->amount);
+        } else {
+            // Use balance service for seller withdrawals
+            $this->balanceService->deductBalance(
+                $withdrawal->user,
+                $withdrawal->amount,
+                "Withdrawal #{$withdrawal->id}",
+                $withdrawal->id
+            );
+        }
 
         $withdrawal->complete();
         $this->notificationService->notifyWithdrawalStatus($withdrawal);

@@ -145,5 +145,3 @@ MAX_IMAGE_SIZE=2048
 
 1. `.user.ini` or Herd/Valet PHP config - PHP upload limits
 2. `bootstrap/app.php` - Exception handler for PostTooLargeException
-3. `app/Http/Controllers/Marketplace/ProductController.php` - Validation rules and error messages
-4. `resources/js/Pages/Marketplace/Product/Create.vue` - Client-side validation

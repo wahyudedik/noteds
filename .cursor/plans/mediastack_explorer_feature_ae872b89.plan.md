@@ -340,8 +340,3 @@ http://api.mediastack.com/v1/news?access_key=XXX&categories=business,technology&
 1. **Scheduled Job**: Fetch artikel 3x per hari (08:00, 14:00, 20:00) untuk update yang lebih fresh
 2. **Database Storage**: Semua artikel disimpan di database sebagai primary source
 3. **No Direct API Calls**: Controller hanya query dari database, tidak langsung call API
-4. **Smart Fallback**: API hanya dipanggil jika database kosong atau data terlalu lama (> 8 jam)
-5. **Cache Layer**: Query results di-cache 8 jam untuk performance (sesuai interval fetch)
-6. **Search from Database**: Search dilakukan di database, bukan via API
-
-**API Call Scenarios:**

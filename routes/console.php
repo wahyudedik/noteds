@@ -12,3 +12,9 @@ Artisan::command('inspire', function () {
 Schedule::command('mediastack:fetch')->dailyAt('08:00');
 Schedule::command('mediastack:fetch')->dailyAt('14:00');
 Schedule::command('mediastack:fetch')->dailyAt('20:00');
+
+// Clipper System Scheduled Commands
+Schedule::command('clipper:track-views')->everySixHours();
+Schedule::command('clipper:validate-pending-clips')->hourly();
+Schedule::command('clipper:auto-transfer-rewards')->everyFifteenMinutes();
+Schedule::command('clipper:complete-expired-campaigns')->daily();

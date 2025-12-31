@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    'youtube' => [
+        'api_key' => env('YOUTUBE_API_KEY'),
+    ],
+
+    'tiktok' => [
+        'api_key' => env('TIKTOK_API_KEY'),
+        'api_secret' => env('TIKTOK_API_SECRET'),
+    ],
+
+    'instagram' => [
+        'access_token' => env('INSTAGRAM_ACCESS_TOKEN'),
+        'app_id' => env('INSTAGRAM_APP_ID'),
+        'app_secret' => env('INSTAGRAM_APP_SECRET'),
+    ],
+
 ];
