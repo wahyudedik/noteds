@@ -33,6 +33,7 @@ class ClipController extends Controller
 
     public function availableCampaigns(Request $request)
     {
+        // Allow anyone to view available campaigns, but only clippers can submit
         $query = Campaign::available()->with('creator');
 
         if ($request->has('search')) {
@@ -52,6 +53,11 @@ class ClipController extends Controller
 
     public function create($campaignId)
     {
+        if (!auth()->user()->isClipper()) {
+            return redirect()->route('clipper.profile.create')
+                ->with('error', 'You must set up your clipper profile first to submit clips.');
+        }
+
         $campaign = Campaign::available()->findOrFail($campaignId);
 
         return Inertia::render('Clipper/Clips/Create', [
@@ -61,6 +67,10 @@ class ClipController extends Controller
 
     public function store(StoreClipRequest $request)
     {
+        if (!auth()->user()->isClipper()) {
+            return back()->withErrors(['error' => 'You must be a registered clipper to submit clips.']);
+        }
+
         $validated = $request->validated();
         $campaign = Campaign::findOrFail($validated['campaign_id']);
 

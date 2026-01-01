@@ -88,6 +88,10 @@ class ClipService
                 ]);
             }
 
+            // Notify clipper about approval
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->notifyClipApproved($clip);
+
             // Invalidate cache
             $this->cacheService->clearClipCache($clip->id, $clip->campaign_id, $clip->clipper_id);
 
@@ -119,6 +123,9 @@ class ClipService
                     ],
                 ]);
             }
+
+            // Notify clipper about rejection
+            $clip->clipper->notify(new \App\Notifications\ClipRejectedNotification($clip));
 
             // Invalidate cache
             $this->cacheService->clearClipCache($clip->id, $clip->campaign_id, $clip->clipper_id);

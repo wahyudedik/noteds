@@ -29,14 +29,21 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+        $userArray = null;
+        if ($user) {
+            $userArray = $user->toArray();
+            $userArray['avatar_url'] = $user->avatar_url;
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $userArray,
             ],
             'midtrans_client_key' => config('midtrans.client_key'),
-            'notifications' => $request->user() 
-                ? $request->user()->unreadNotifications()->latest()->limit(10)->get()
+            'notifications' => $user 
+                ? $user->unreadNotifications()->latest()->limit(10)->get()
                 : [],
         ];
     }

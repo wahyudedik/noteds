@@ -32,6 +32,7 @@ const navItems = [
         route: 'dashboard',
         icon: 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z',
         active: () => page.url.startsWith('/dashboard'),
+        requiresAuth: true,
     },
     {
         name: 'Marketplace',
@@ -44,6 +45,17 @@ const navItems = [
         route: 'explorer.index',
         icon: 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z',
         active: () => page.url.startsWith('/explorer'),
+    },
+    {
+        name: 'Clipper',
+        route: 'clipper.campaigns.index',
+        icon: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z',
+        active: () => page.url.startsWith('/clipper'),
+        requiresAuth: true,
+        showIf: () => {
+            const user = page.props.auth?.user;
+            return user?.clipper_role === 'brand' || user?.clipper_role === 'clipper' || user?.role === 'brand' || user?.role === 'clipper';
+        },
     },
     {
         name: 'Bookmarks',
@@ -85,13 +97,19 @@ const adminNavItems = [
     },
 ];
 
-// Filter nav items based on authentication
+// Filter nav items based on authentication and custom conditions
 const filteredNavItems = computed(() => {
     return navItems.filter(item => {
         // If item requires auth or has routeParams, only show if user is authenticated
         if (item.requiresAuth || item.routeParams) {
-            return !!page.props.auth?.user;
+            if (!page.props.auth?.user) return false;
         }
+        
+        // Check custom showIf condition if exists
+        if (item.showIf && typeof item.showIf === 'function') {
+            return item.showIf();
+        }
+        
         return true;
     });
 });
@@ -175,8 +193,16 @@ const filteredNavItems = computed(() => {
                     :href="route('profile.show', page.props.auth.user.id)"
                     class="flex items-center gap-3 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                 >
-                    <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
-                        {{ (page.props.auth.user.business_name || page.props.auth.user.name || 'U').charAt(0).toUpperCase() }}
+                    <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold overflow-hidden flex-shrink-0">
+                        <img
+                            v-if="page.props.auth.user.avatar_url"
+                            :src="page.props.auth.user.avatar_url"
+                            :alt="page.props.auth.user.business_name || page.props.auth.user.name"
+                            class="w-full h-full object-cover"
+                        />
+                        <span v-else>
+                            {{ (page.props.auth.user.business_name || page.props.auth.user.name || 'U').charAt(0).toUpperCase() }}
+                        </span>
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">

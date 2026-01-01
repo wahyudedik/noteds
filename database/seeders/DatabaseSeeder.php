@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             CommentSeeder::class,
             VoteSeeder::class,
             IdeaValidationSeeder::class,
-            MarketplaceSeeder::class, 
+            MarketplaceSeeder::class,
+            ClipperSeeder::class,
         ]);
     }
 }

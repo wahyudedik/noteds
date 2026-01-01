@@ -177,6 +177,28 @@ Route::middleware('auth')->group(function () {
 
     // Clipper Routes
     Route::prefix('clipper')->name('clipper.')->group(function () {
+        // Brand Registration
+        Route::get('brand-registration/create', [App\Http\Controllers\Clipper\BrandRegistrationController::class, 'create'])->name('brand-registration.create');
+        Route::post('brand-registration', [App\Http\Controllers\Clipper\BrandRegistrationController::class, 'store'])
+            ->middleware('throttle:3,60') // 3 registrations per hour
+            ->name('brand-registration.store');
+        Route::get('brand-registration', [App\Http\Controllers\Clipper\BrandRegistrationController::class, 'show'])->name('brand-registration.show');
+        Route::get('brand-registration/edit', [App\Http\Controllers\Clipper\BrandRegistrationController::class, 'edit'])->name('brand-registration.edit');
+        Route::put('brand-registration', [App\Http\Controllers\Clipper\BrandRegistrationController::class, 'update'])
+            ->middleware('throttle:5,60') // 5 updates per hour
+            ->name('brand-registration.update');
+        
+        // Clipper Profile
+        Route::get('profile/create', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'create'])->name('profile.create');
+        Route::post('profile', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'store'])
+            ->middleware('throttle:3,60') // 3 profiles per hour
+            ->name('profile.store');
+        Route::get('profile', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'show'])->name('profile.show');
+        Route::get('profile/edit', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('profile', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'update'])
+            ->middleware('throttle:5,60') // 5 updates per hour
+            ->name('profile.update');
+        
         // Top Up
         Route::get('top-ups', [App\Http\Controllers\Clipper\TopUpController::class, 'index'])->name('top-ups.index');
         Route::get('top-ups/create', [App\Http\Controllers\Clipper\TopUpController::class, 'create'])->name('top-ups.create');
@@ -202,6 +224,8 @@ Route::middleware('auth')->group(function () {
         Route::post('campaigns/{campaign}/pause', [App\Http\Controllers\Clipper\CampaignController::class, 'pause'])->name('campaigns.pause');
         Route::post('campaigns/{campaign}/cancel', [App\Http\Controllers\Clipper\CampaignController::class, 'cancel'])->name('campaigns.cancel');
         Route::post('campaigns/{campaign}/share', [App\Http\Controllers\Clipper\CampaignController::class, 'shareAsPost'])->name('campaigns.share');
+        Route::post('campaigns/{campaign}/clips/{clip}/approve', [App\Http\Controllers\Clipper\CampaignController::class, 'approveClip'])->name('campaigns.clips.approve');
+        Route::post('campaigns/{campaign}/clips/{clip}/reject', [App\Http\Controllers\Clipper\CampaignController::class, 'rejectClip'])->name('campaigns.clips.reject');
         
         // Clips (Clipper)
         Route::get('campaigns/available', [App\Http\Controllers\Clipper\ClipController::class, 'availableCampaigns'])->name('campaigns.available');

@@ -75,11 +75,17 @@ const formatDate = (date) => {
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow"
                 >
                     <div class="flex items-center gap-3">
-                        <img
-                            :src="user.avatar || '/default-avatar.png'"
-                            :alt="user.name"
-                            class="w-12 h-12 rounded-full object-cover"
-                        />
+                        <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold overflow-hidden flex-shrink-0">
+                            <img
+                                v-if="user.avatar_url"
+                                :src="user.avatar_url"
+                                :alt="user.business_name || user.name"
+                                class="w-full h-full object-cover"
+                            />
+                            <span v-else>
+                                {{ (user.business_name || user.name).charAt(0).toUpperCase() }}
+                            </span>
+                        </div>
                         <div class="flex-1 min-w-0">
                             <h4 class="text-base font-semibold text-gray-900 dark:text-white truncate">
                                 {{ user.name }}

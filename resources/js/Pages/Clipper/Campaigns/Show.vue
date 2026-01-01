@@ -1,7 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import InputError from '@/Components/InputError.vue';
+import Textarea from '@/Components/Textarea.vue';
 
 const props = defineProps({
     campaign: Object,
@@ -48,6 +50,41 @@ const canCancel = computed(() => {
 const activateForm = useForm({});
 const pauseForm = useForm({});
 const cancelForm = useForm({});
+
+const rejectingClipId = ref(null);
+const rejectForm = useForm({
+    reason: '',
+});
+
+const approveClip = (clipId) => {
+    if (confirm('Are you sure you want to approve this clip?')) {
+        router.post(route('clipper.campaigns.clips.approve', props.campaign.id, clipId), {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Success handled by Inertia
+            },
+        });
+    }
+};
+
+const startReject = (clipId) => {
+    rejectingClipId.value = clipId;
+    rejectForm.reset();
+};
+
+const cancelReject = () => {
+    rejectingClipId.value = null;
+    rejectForm.reset();
+};
+
+const submitReject = (clipId) => {
+    rejectForm.post(route('clipper.campaigns.clips.reject', props.campaign.id, clipId), {
+        preserveScroll: true,
+        onSuccess: () => {
+            rejectingClipId.value = null;
+        },
+    });
+};
 
 const activate = () => {
     if (confirm('Are you sure you want to activate this campaign? The budget will be locked in escrow.')) {
@@ -263,13 +300,64 @@ const cancel = () => {
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- Reject Form -->
+                                    <div v-if="rejectingClipId === clip.id" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                        <form @submit.prevent="submitReject(clip.id)" class="space-y-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Rejection Reason *
+                                                </label>
+                                                <Textarea
+                                                    v-model="rejectForm.reason"
+                                                    class="w-full"
+                                                    rows="3"
+                                                    placeholder="Please provide a reason for rejecting this clip..."
+                                                    required
+                                                />
+                                                <InputError :message="rejectForm.errors.reason" />
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button
+                                                    type="submit"
+                                                    :disabled="rejectForm.processing"
+                                                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors text-sm"
+                                                >
+                                                    Confirm Reject
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    @click="cancelReject"
+                                                    class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
-                                <Link
-                                    :href="route('clipper.clips.show', clip.id)"
-                                    class="ml-4 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                                >
-                                    View
-                                </Link>
+                                <div class="ml-4 flex flex-col gap-2">
+                                    <Link
+                                        :href="route('clipper.clips.show', clip.id)"
+                                        class="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm text-center"
+                                    >
+                                        View
+                                    </Link>
+                                    <button
+                                        v-if="clip.status === 'pending'"
+                                        @click="approveClip(clip.id)"
+                                        class="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                                    >
+                                        Approve
+                                    </button>
+                                    <button
+                                        v-if="clip.status === 'pending' && rejectingClipId !== clip.id"
+                                        @click="startReject(clip.id)"
+                                        class="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                                    >
+                                        Reject
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

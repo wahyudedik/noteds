@@ -47,9 +47,17 @@ const formatDate = (date) => {
                 <div class="flex items-center gap-3">
                     <Link
                         :href="route('profile.show', post.user.id)"
-                        class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold hover:ring-2 hover:ring-indigo-300 transition"
+                        class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold hover:ring-2 hover:ring-indigo-300 transition overflow-hidden flex-shrink-0"
                     >
-                        {{ (post.user.business_name || post.user.name).charAt(0).toUpperCase() }}
+                        <img
+                            v-if="post.user.avatar_url"
+                            :src="post.user.avatar_url"
+                            :alt="post.user.business_name || post.user.name"
+                            class="w-full h-full object-cover"
+                        />
+                        <span v-else>
+                            {{ (post.user.business_name || post.user.name).charAt(0).toUpperCase() }}
+                        </span>
                     </Link>
                     <div>
                         <Link

@@ -22,8 +22,10 @@ class NotificationController extends Controller
         $query = $user->notifications();
 
         // Filter by type if provided
-        if ($request->has('type') && $request->type) {
-            $query->where('type', $request->type);
+        // Frontend uses values like 'new_campaign', 'clip_approved', 'brand_approved'
+        // These are stored in the data->type field, not the type column
+        if ($request->has('type') && $request->type && $request->type !== 'all') {
+            $query->whereJsonContains('data->type', $request->type);
         }
 
         // Filter by read/unread

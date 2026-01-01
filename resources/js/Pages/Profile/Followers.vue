@@ -135,8 +135,16 @@ const handleUnfollowed = (userId) => {
                         :href="route('profile.show', user.id)"
                         class="flex items-center gap-3"
                     >
-                        <div class="h-12 w-12 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold text-lg">
-                            {{ (user.business_name || user.name).charAt(0).toUpperCase() }}
+                        <div class="h-12 w-12 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold text-lg overflow-hidden flex-shrink-0">
+                            <img
+                                v-if="user.avatar_url"
+                                :src="user.avatar_url"
+                                :alt="user.business_name || user.name"
+                                class="w-full h-full object-cover"
+                            />
+                            <span v-else>
+                                {{ (user.business_name || user.name).charAt(0).toUpperCase() }}
+                            </span>
                         </div>
                         <div>
                             <div class="font-semibold text-gray-900 dark:text-white">
@@ -161,8 +169,16 @@ const handleUnfollowed = (userId) => {
                                 :href="route('profile.show', follow.follower.id)"
                                 class="flex items-center gap-3 flex-1"
                             >
-                                <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                    {{ (follow.follower.business_name || follow.follower.name).charAt(0).toUpperCase() }}
+                                <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold flex-shrink-0 overflow-hidden">
+                                    <img
+                                        v-if="follow.follower.avatar_url"
+                                        :src="follow.follower.avatar_url"
+                                        :alt="follow.follower.business_name || follow.follower.name"
+                                        class="w-full h-full object-cover"
+                                    />
+                                    <span v-else>
+                                        {{ (follow.follower.business_name || follow.follower.name).charAt(0).toUpperCase() }}
+                                    </span>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <div class="font-medium text-gray-900 dark:text-white truncate">

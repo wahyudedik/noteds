@@ -98,7 +98,7 @@ const formatDate = (date) => {
                         </p>
                         <p class="text-sm text-red-700 dark:text-red-300 mt-2">
                             If you believe this is an error, please contact our support team or 
-                            <Link :href="route('clipper.brand-registrations.create')" class="underline font-semibold">
+                            <Link :href="route('clipper.brand-registration.create')" class="underline font-semibold">
                                 submit a new registration
                             </Link>.
                         </p>
@@ -242,7 +242,7 @@ const formatDate = (date) => {
                     </Link>
                     <Link
                         v-if="registration.status === 'rejected'"
-                        :href="route('clipper.brand-registrations.create')"
+                        :href="route('clipper.brand-registration.create')"
                         class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                         Submit New Registration

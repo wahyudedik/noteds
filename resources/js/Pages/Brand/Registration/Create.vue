@@ -38,7 +38,7 @@ const businessTypes = [
 ];
 
 const submit = () => {
-    form.post(route('clipper.brand-registrations.store'), {
+    form.post(route('clipper.brand-registration.store'), {
         onSuccess: () => {
             // Redirect to show page after successful registration
         },

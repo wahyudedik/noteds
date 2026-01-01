@@ -12,6 +12,8 @@ class ClipViewTracking extends Model
 {
     use HasFactory, HasUuid;
 
+    protected $table = 'clip_view_tracking';
+
     protected $keyType = 'string';
     public $incrementing = false;
 

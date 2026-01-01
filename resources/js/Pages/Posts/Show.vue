@@ -61,25 +61,41 @@ const submitComment = () => {
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800">
                     <div class="p-6">
                         <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                                    {{ PURPOSE_TYPE_LABELS[post.purpose_type] }}
-                                </span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">•</span>
+                            <div class="flex items-center gap-3">
                                 <Link
                                     :href="route('profile.show', post.user.id)"
-                                    class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                                    class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold hover:ring-2 hover:ring-indigo-300 transition overflow-hidden flex-shrink-0"
                                 >
-                                    {{ post.user.business_name || post.user.name }}
+                                    <img
+                                        v-if="post.user.avatar_url"
+                                        :src="post.user.avatar_url"
+                                        :alt="post.user.business_name || post.user.name"
+                                        class="w-full h-full object-cover"
+                                    />
+                                    <span v-else>
+                                        {{ (post.user.business_name || post.user.name).charAt(0).toUpperCase() }}
+                                    </span>
                                 </Link>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">•</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ new Date(post.created_at).toLocaleDateString('id-ID', { 
-                                        year: 'numeric', 
-                                        month: 'long', 
-                                        day: 'numeric' 
-                                    }) }}
-                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                                        {{ PURPOSE_TYPE_LABELS[post.purpose_type] }}
+                                    </span>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">•</span>
+                                    <Link
+                                        :href="route('profile.show', post.user.id)"
+                                        class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 font-semibold"
+                                    >
+                                        {{ post.user.business_name || post.user.name }}
+                                    </Link>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">•</span>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ new Date(post.created_at).toLocaleDateString('id-ID', { 
+                                            year: 'numeric', 
+                                            month: 'long', 
+                                            day: 'numeric' 
+                                        }) }}
+                                    </span>
+                                </div>
                             </div>
                             <div v-if="auth?.user && auth.user.id !== post.user_id">
                                 <ReportButton

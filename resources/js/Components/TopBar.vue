@@ -44,7 +44,7 @@ const notifications = computed(() => {
             </div>
 
             <!-- Right Side Actions -->
-            <div class="flex items-center gap-4">
+            <div v-if="page.props.auth?.user" class="flex items-center gap-4">
                 <!-- Notification Bell -->
                 <NotificationBell :notifications="notifications" />
                 
@@ -53,8 +53,16 @@ const notifications = computed(() => {
                     <Dropdown align="right" width="48">
                         <template #trigger>
                             <button class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                                <div class="h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold text-sm">
-                                    {{ (page.props.auth?.user?.business_name || page.props.auth?.user?.name || 'U').charAt(0).toUpperCase() }}
+                                <div class="h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold text-sm overflow-hidden flex-shrink-0">
+                                    <img
+                                        v-if="page.props.auth?.user?.avatar_url"
+                                        :src="page.props.auth.user.avatar_url"
+                                        :alt="page.props.auth.user.business_name || page.props.auth.user.name"
+                                        class="w-full h-full object-cover"
+                                    />
+                                    <span v-else>
+                                        {{ (page.props.auth?.user?.business_name || page.props.auth?.user?.name || 'U').charAt(0).toUpperCase() }}
+                                    </span>
                                 </div>
                                 <div class="hidden text-left xl:block">
                                     <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -80,6 +88,18 @@ const notifications = computed(() => {
                             <DropdownLink :href="route('dashboard')">
                                 Dashboard
                             </DropdownLink>
+                            <DropdownLink 
+                                v-if="page.props.auth?.user?.clipper_role === 'brand' || page.props.auth?.user?.clipper_role === 'clipper' || page.props.auth?.user?.role === 'brand' || page.props.auth?.user?.role === 'clipper'"
+                                :href="route('clipper.campaigns.index')"
+                            >
+                                Clipper
+                            </DropdownLink>
+                            <DropdownLink :href="route('marketplace.index')">
+                                Marketplace
+                            </DropdownLink>
+                            <DropdownLink :href="route('settings.index')">
+                                Settings
+                            </DropdownLink>
                             <div class="border-t border-gray-200 dark:border-gray-700"></div>
                             <DropdownLink :href="route('logout')" method="post" as="button">
                                 Log Out
@@ -91,9 +111,17 @@ const notifications = computed(() => {
                 <!-- Mobile Profile Button -->
                 <Link
                     :href="route('profile.show', page.props.auth?.user?.id)"
-                    class="lg:hidden h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold text-sm"
+                    class="lg:hidden h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold text-sm overflow-hidden flex-shrink-0"
                 >
-                    {{ (page.props.auth?.user?.business_name || page.props.auth?.user?.name || 'U').charAt(0).toUpperCase() }}
+                    <img
+                        v-if="page.props.auth?.user?.avatar_url"
+                        :src="page.props.auth.user.avatar_url"
+                        :alt="page.props.auth.user.business_name || page.props.auth.user.name"
+                        class="w-full h-full object-cover"
+                    />
+                    <span v-else>
+                        {{ (page.props.auth?.user?.business_name || page.props.auth?.user?.name || 'U').charAt(0).toUpperCase() }}
+                    </span>
                 </Link>
             </div>
         </div>

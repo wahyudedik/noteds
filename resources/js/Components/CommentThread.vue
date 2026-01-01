@@ -68,6 +68,20 @@ const markBestAnswer = (commentId) => {
                 <div class="flex items-center gap-2">
                     <Link
                         :href="route('profile.show', comment.user.id)"
+                        class="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-semibold hover:ring-2 hover:ring-indigo-300 transition overflow-hidden flex-shrink-0"
+                    >
+                        <img
+                            v-if="comment.user.avatar_url"
+                            :src="comment.user.avatar_url"
+                            :alt="comment.user.business_name || comment.user.name"
+                            class="w-full h-full object-cover"
+                        />
+                        <span v-else>
+                            {{ (comment.user.business_name || comment.user.name).charAt(0).toUpperCase() }}
+                        </span>
+                    </Link>
+                    <Link
+                        :href="route('profile.show', comment.user.id)"
                         class="font-semibold text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400"
                     >
                         {{ comment.user.business_name || comment.user.name }}

@@ -53,8 +53,16 @@ const toggleComposer = () => {
 <template>
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div v-if="!showComposer" class="flex items-center gap-3">
-            <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                {{ page.props.auth?.user?.name?.charAt(0).toUpperCase() || 'U' }}
+            <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold flex-shrink-0 overflow-hidden">
+                <img
+                    v-if="page.props.auth?.user?.avatar_url"
+                    :src="page.props.auth.user.avatar_url"
+                    :alt="page.props.auth.user.business_name || page.props.auth.user.name"
+                    class="w-full h-full object-cover"
+                />
+                <span v-else>
+                    {{ (page.props.auth?.user?.business_name || page.props.auth?.user?.name || 'U').charAt(0).toUpperCase() }}
+                </span>
             </div>
             <button
                 @click="toggleComposer"
