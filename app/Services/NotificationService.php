@@ -40,6 +40,46 @@ class NotificationService
     }
 
     /**
+     * Notify buyer about order status update.
+     */
+    public function notifyOrderStatusUpdate(Order $order): void
+    {
+        if ($order->buyer) {
+            // Create database notification
+            $order->buyer->notify(new class($order) extends \Illuminate\Notifications\Notification {
+                use \Illuminate\Bus\Queueable;
+                
+                public function __construct(public Order $order) {}
+                
+                public function via($notifiable): array
+                {
+                    return ['database'];
+                }
+                
+                public function toArray($notifiable): array
+                {
+                    return [
+                        'type' => 'order_status_update',
+                        'order_id' => $this->order->id,
+                        'title' => 'Order Status Updated',
+                        'message' => "Your order #{$this->order->order_number} status has been updated to {$this->order->status}",
+                        'order_number' => $this->order->order_number,
+                        'status' => $this->order->status,
+                    ];
+                }
+            });
+
+            // Send email notification
+            try {
+                \Illuminate\Support\Facades\Mail::to($order->buyer->email)
+                    ->send(new \App\Mail\OrderStatusUpdateMail($order));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to send order status update email: ' . $e->getMessage());
+            }
+        }
+    }
+
+    /**
      * Notify brand about new campaign available.
      */
     public function notifyNewCampaign(\App\Models\Campaign $campaign): void
@@ -66,6 +106,14 @@ class NotificationService
     public function notifyRewardReceived(\App\Models\Clip $clip): void
     {
         $clip->clipper->notify(new \App\Notifications\RewardReceivedNotification($clip));
+    }
+
+    /**
+     * Notify clipper about view validation.
+     */
+    public function notifyViewValidated(\App\Models\Clip $clip): void
+    {
+        $clip->clipper->notify(new \App\Notifications\ViewValidatedNotification($clip));
     }
 
     /**
@@ -142,6 +190,59 @@ class NotificationService
     public function notifyMention(\App\Models\User $user, $mentionable): void
     {
         // Future implementation for mentions
+    }
+
+    /**
+     * Notify user about successful top up.
+     */
+    public function notifyTopUpSuccess(\App\Models\TopUp $topUp): void
+    {
+        $user = $topUp->user;
+        
+        // Create database notification
+        $user->notify(new class($topUp) extends \Illuminate\Notifications\Notification {
+            use \Illuminate\Bus\Queueable;
+            
+            public function __construct(public \App\Models\TopUp $topUp) {}
+            
+            public function via($notifiable): array
+            {
+                return ['database'];
+            }
+            
+            public function toArray($notifiable): array
+            {
+                return [
+                    'type' => 'topup_success',
+                    'top_up_id' => $this->topUp->id,
+                    'title' => 'Top Up Successful',
+                    'message' => 'Your wallet has been topped up with Rp ' . number_format($this->topUp->amount, 0, ',', '.'),
+                    'amount' => $this->topUp->amount,
+                ];
+            }
+        });
+
+        // Optional: Send email notification
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)
+                ->send(new class($topUp) extends \Illuminate\Mail\Mailable {
+                    use \Illuminate\Bus\Queueable, \Illuminate\Queue\SerializesModels;
+
+                    public function __construct(public \App\Models\TopUp $topUp) {}
+
+                    public function build()
+                    {
+                        return $this->subject('Top Up Successful - ' . config('app.name'))
+                            ->view('emails.topup-success')
+                            ->with([
+                                'topUp' => $this->topUp,
+                                'amount' => number_format($this->topUp->amount, 0, ',', '.'),
+                            ]);
+                    }
+                });
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send top up success email: ' . $e->getMessage());
+        }
     }
 }
 

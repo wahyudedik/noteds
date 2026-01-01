@@ -22,7 +22,20 @@ const getStatusBadgeClass = (status) => {
 };
 
 const filterByStatus = (status) => {
-    router.get(route('admin.clips.index'), { status: status || null }, {
+    router.get(route('admin.clips.index'), { 
+        status: status || null,
+        fraud_detected: filters?.fraud_detected || null,
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
+
+const filterByFraud = (fraudDetected) => {
+    router.get(route('admin.clips.index'), { 
+        status: filters?.status || null,
+        fraud_detected: fraudDetected || null,
+    }, {
         preserveState: true,
         preserveScroll: true,
     });
@@ -42,37 +55,53 @@ const filterByStatus = (status) => {
         <div class="px-4 py-6 lg:px-6">
             <div class="mx-auto max-w-7xl">
                 <!-- Filters -->
-                <div class="mb-4 flex space-x-2">
-                    <button
-                        @click="filterByStatus(null)"
-                        :class="['px-4 py-2 rounded-lg', !filters?.status ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700']"
-                    >
-                        All
-                    </button>
-                    <button
-                        @click="filterByStatus('pending')"
-                        :class="['px-4 py-2 rounded-lg', filters?.status === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700']"
-                    >
-                        Pending
-                    </button>
-                    <button
-                        @click="filterByStatus('approved')"
-                        :class="['px-4 py-2 rounded-lg', filters?.status === 'approved' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700']"
-                    >
-                        Approved
-                    </button>
-                    <button
-                        @click="filterByStatus('rejected')"
-                        :class="['px-4 py-2 rounded-lg', filters?.status === 'rejected' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700']"
-                    >
-                        Rejected
-                    </button>
-                    <button
-                        @click="filterByStatus('paid')"
-                        :class="['px-4 py-2 rounded-lg', filters?.status === 'paid' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700']"
-                    >
-                        Paid
-                    </button>
+                <div class="mb-4 flex flex-wrap gap-2">
+                    <div class="flex space-x-2">
+                        <button
+                            @click="filterByStatus(null)"
+                            :class="['px-4 py-2 rounded-lg', !filters?.status ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700']"
+                        >
+                            All
+                        </button>
+                        <button
+                            @click="filterByStatus('pending')"
+                            :class="['px-4 py-2 rounded-lg', filters?.status === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700']"
+                        >
+                            Pending
+                        </button>
+                        <button
+                            @click="filterByStatus('approved')"
+                            :class="['px-4 py-2 rounded-lg', filters?.status === 'approved' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700']"
+                        >
+                            Approved
+                        </button>
+                        <button
+                            @click="filterByStatus('rejected')"
+                            :class="['px-4 py-2 rounded-lg', filters?.status === 'rejected' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700']"
+                        >
+                            Rejected
+                        </button>
+                        <button
+                            @click="filterByStatus('paid')"
+                            :class="['px-4 py-2 rounded-lg', filters?.status === 'paid' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700']"
+                        >
+                            Paid
+                        </button>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button
+                            @click="filterByFraud(null)"
+                            :class="['px-4 py-2 rounded-lg', !filters?.fraud_detected ? 'bg-gray-200 dark:bg-gray-700' : 'bg-gray-200 dark:bg-gray-700']"
+                        >
+                            All Clips
+                        </button>
+                        <button
+                            @click="filterByFraud('1')"
+                            :class="['px-4 py-2 rounded-lg', filters?.fraud_detected === '1' ? 'bg-red-600 text-white' : 'bg-gray-200 dark:bg-gray-700']"
+                        >
+                            ⚠️ Fraud Detected
+                        </button>
+                    </div>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -113,11 +142,20 @@ const filterByStatus = (status) => {
                                         Rp {{ formatCurrency(clip.approved_reward || clip.pending_reward) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusBadgeClass(clip.status)]"
-                                        >
-                                            {{ clip.status }}
-                                        </span>
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusBadgeClass(clip.status)]"
+                                            >
+                                                {{ clip.status }}
+                                            </span>
+                                            <span
+                                                v-if="clip.fraud_detected"
+                                                class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                                title="Fraud detected - requires review"
+                                            >
+                                                ⚠️ Fraud
+                                            </span>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <Link

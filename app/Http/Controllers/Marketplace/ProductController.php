@@ -37,13 +37,32 @@ class ProductController extends Controller
         ]);
     }
 
-    public function show(Product $product)
+    public function show(Request $request, Product $product)
     {
         $product->increment('views_count');
-        $product->load('seller');
+        $product->load(['seller']);
+
+        // Check if user has purchased this product (for review form)
+        $hasPurchased = false;
+        if ($request->user()) {
+            $hasPurchased = \App\Models\Order::where('user_id', $request->user()->id)
+                ->where('product_id', $product->id)
+                ->where('payment_status', 'paid')
+                ->exists();
+        }
+
+        // Get paginated reviews
+        $reviews = $product->reviews()
+            ->with('user')
+            ->latest()
+            ->paginate(10);
 
         return Inertia::render('Marketplace/Product/Show', [
             'product' => $product,
+            'averageRating' => $product->averageRating(),
+            'reviewsCount' => $product->reviews()->count(),
+            'reviews' => $reviews,
+            'hasPurchased' => $hasPurchased,
         ]);
     }
 
@@ -155,5 +174,36 @@ class ProductController extends Controller
 
         return redirect()->route('marketplace.index')
             ->with('success', 'Product deleted successfully.');
+    }
+
+    public function myProducts(Request $request)
+    {
+        $query = Product::where('user_id', auth()->id());
+
+        // Filter by active/inactive
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('is_active', $request->status === 'active');
+        }
+
+        $products = $query->latest()->paginate(12);
+
+        // Get stats
+        $totalProducts = Product::where('user_id', auth()->id())->count();
+        $totalSales = Product::where('user_id', auth()->id())->sum('sales_count');
+        $totalEarnings = \App\Models\Order::whereHas('product', function ($q) {
+            $q->where('user_id', auth()->id());
+        })
+        ->where('payment_status', 'paid')
+        ->sum('total');
+
+        return Inertia::render('Marketplace/Products/MyProducts', [
+            'products' => $products,
+            'filters' => $request->only(['status']),
+            'stats' => [
+                'total_products' => $totalProducts,
+                'total_sales' => $totalSales,
+                'total_earnings' => $totalEarnings,
+            ],
+        ]);
     }
 }

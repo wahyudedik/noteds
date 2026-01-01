@@ -63,6 +63,22 @@ class PaymentController extends Controller
 
                 // Notify seller
                 $this->notificationService->notifyNewOrder($order);
+
+                // Send email to buyer
+                try {
+                    \Illuminate\Support\Facades\Mail::to($order->user->email)
+                        ->send(new \App\Mail\PaymentSuccessMail($order));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send payment success email: ' . $e->getMessage());
+                }
+
+                // Send email to seller
+                try {
+                    \Illuminate\Support\Facades\Mail::to($seller->email)
+                        ->send(new \App\Mail\NewOrderMail($order));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send new order email: ' . $e->getMessage());
+                }
             }
         }
 

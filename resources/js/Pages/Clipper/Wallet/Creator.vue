@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -26,18 +26,27 @@ const getTransactionTypeClass = (reason) => {
 <template>
     <Head title="Creator Wallet" />
 
-    <AuthenticatedLayout>
+    <ClipperLayout>
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                     Creator Wallet
                 </h2>
-                <Link
-                    :href="route('clipper.top-ups.create')"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                    Top Up
-                </Link>
+                <div class="flex gap-2">
+                    <Link
+                        :href="route('clipper.top-ups.create')"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Top Up
+                    </Link>
+                    <Link
+                        v-if="wallet?.balance_available > 0"
+                        :href="route('clipper.withdrawals.creator.create')"
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                        Withdraw
+                    </Link>
+                </div>
             </div>
         </template>
 
@@ -120,8 +129,26 @@ const getTransactionTypeClass = (reason) => {
                         No transactions yet.
                     </div>
                 </div>
+
+                <!-- Withdrawal History Link -->
+                <div v-if="wallet?.balance_available > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-1">Withdrawals</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                View and manage your withdrawal requests for remaining budget
+                            </p>
+                        </div>
+                        <Link
+                            :href="route('clipper.withdrawals.creator.index')"
+                            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                        >
+                            View Withdrawals
+                        </Link>
+                    </div>
+                </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </ClipperLayout>
 </template>
 

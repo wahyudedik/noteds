@@ -31,9 +31,14 @@ class HandleInertiaRequests extends Middleware
     {
         $user = $request->user();
         $userArray = null;
+        $cartCount = 0;
+        
         if ($user) {
             $userArray = $user->toArray();
             $userArray['avatar_url'] = $user->avatar_url;
+            
+            // Get cart count
+            $cartCount = \App\Models\CartItem::where('user_id', $user->id)->count();
         }
 
         return [
@@ -45,6 +50,7 @@ class HandleInertiaRequests extends Middleware
             'notifications' => $user 
                 ? $user->unreadNotifications()->latest()->limit(10)->get()
                 : [],
+            'cart_count' => $cartCount,
         ];
     }
 }

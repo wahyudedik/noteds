@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -21,6 +21,24 @@ const form = useForm({
     platform_content_id: '',
 });
 
+const getVideoType = (url) => {
+    if (!url) return null;
+    const youtubePattern = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)/i;
+    const drivePattern = /^(https?:\/\/)?(drive|docs)\.google\.com\/(file\/d\/|open\?id=|file\/d\/)/i;
+    
+    if (youtubePattern.test(url)) return 'youtube';
+    if (drivePattern.test(url)) return 'google_drive';
+    return null;
+};
+
+const getYouTubeThumbnail = (url) => {
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+    if (match) {
+        return `https://img.youtube.com/vi/${match[1]}/maxresdefault.jpg`;
+    }
+    return null;
+};
+
 const submit = () => {
     form.post(route('clipper.clips.store'), {
         preserveScroll: true,
@@ -31,7 +49,7 @@ const submit = () => {
 <template>
     <Head title="Submit Clip" />
 
-    <AuthenticatedLayout>
+    <ClipperLayout>
         <template #header>
             <div class="flex items-center gap-4">
                 <Link
@@ -81,7 +99,7 @@ const submit = () => {
                     <p class="text-gray-600 dark:text-gray-400 mb-4">
                         {{ campaign.description }}
                     </p>
-                    <div class="flex gap-4 text-sm">
+                    <div class="flex gap-4 text-sm mb-4">
                         <div>
                             <span class="text-gray-500 dark:text-gray-400">CPM:</span>
                             <span class="ml-2 font-semibold text-gray-900 dark:text-white">
@@ -96,6 +114,57 @@ const submit = () => {
                                 </span>
                                 <span v-else>No limit</span>
                             </span>
+                        </div>
+                    </div>
+
+                    <!-- Video References -->
+                    <div v-if="campaign.video_references && campaign.video_references.length > 0" class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                            Video References:
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div
+                                v-for="(videoRef, index) in campaign.video_references"
+                                :key="index"
+                                class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                            >
+                                <div class="flex items-start gap-3">
+                                    <div v-if="getVideoType(videoRef.url) === 'youtube' && getYouTubeThumbnail(videoRef.url)" class="flex-shrink-0">
+                                        <img
+                                            :src="getYouTubeThumbnail(videoRef.url)"
+                                            alt="Video thumbnail"
+                                            class="w-24 h-16 object-cover rounded border border-gray-300 dark:border-gray-600"
+                                            @error="$event.target.style.display='none'"
+                                        />
+                                    </div>
+                                    <div v-else class="flex-shrink-0 w-24 h-16 bg-gray-200 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center">
+                                        <span v-if="getVideoType(videoRef.url) === 'google_drive'" class="text-2xl">📁</span>
+                                        <span v-else class="text-2xl">🎬</span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <a
+                                            :href="videoRef.url"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="block text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mb-1 truncate"
+                                        >
+                                            {{ videoRef.title || `Video Reference ${index + 1}` }}
+                                        </a>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                            {{ videoRef.url }}
+                                        </p>
+                                        <span
+                                            :class="[
+                                                'inline-block mt-1 px-2 py-0.5 text-xs rounded',
+                                                getVideoType(videoRef.url) === 'youtube' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                                                'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                            ]"
+                                        >
+                                            {{ getVideoType(videoRef.url) === 'youtube' ? 'YouTube' : 'Google Drive' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -187,6 +256,6 @@ const submit = () => {
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </ClipperLayout>
 </template>
 

@@ -29,6 +29,7 @@ class Campaign extends Model
         'creator_id',
         'title',
         'description',
+        'video_references',
         'cpm',
         'max_budget',
         'max_reward_per_clipper',
@@ -44,6 +45,7 @@ class Campaign extends Model
     protected function casts(): array
     {
         return [
+            'video_references' => 'array',
             'cpm' => 'decimal:2',
             'max_budget' => 'decimal:2',
             'max_reward_per_clipper' => 'decimal:2',
@@ -109,6 +111,24 @@ class Campaign extends Model
     }
 
     /**
+     * Resume the campaign.
+     */
+    public function resume(): bool
+    {
+        if ($this->status !== 'paused') {
+            return false;
+        }
+
+        // Check if campaign masih dalam duration
+        if ($this->ended_at && $this->ended_at < now()) {
+            return false; // Already expired
+        }
+
+        $this->status = 'active';
+        return $this->save();
+    }
+
+    /**
      * Complete the campaign.
      */
     public function complete(): bool
@@ -146,6 +166,14 @@ class Campaign extends Model
     public function getRemainingBudget(): float
     {
         return $this->wallet ? (float) $this->wallet->remaining_budget : 0;
+    }
+
+    /**
+     * Check if campaign is expired.
+     */
+    public function isExpired(): bool
+    {
+        return $this->ended_at && $this->ended_at < now();
     }
 
     /**

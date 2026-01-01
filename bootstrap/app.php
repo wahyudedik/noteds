@@ -100,6 +100,26 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->view('errors.404', [], 404);
         });
 
+        // Handle CSRF Token Mismatch
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, $request) {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'message' => 'CSRF token mismatch. Please refresh the page and try again.',
+                    'error' => 'csrf_token_mismatch'
+                ], 419);
+            }
+
+            if ($request->header('X-Inertia')) {
+                return \Inertia\Inertia::render('Errors/419', [
+                    'message' => 'Sesi Anda telah berakhir. Silakan refresh halaman dan coba lagi.',
+                ])->toResponse($request)->setStatusCode(419);
+            }
+
+            return back()->withErrors([
+                'error' => 'Sesi Anda telah berakhir. Silakan refresh halaman dan coba lagi.'
+            ])->withInput();
+        });
+
         // Handle 422 Validation Exception
         $exceptions->render(function (\Illuminate\Validation\ValidationException $e, $request) {
             if ($request->expectsJson() || $request->wantsJson()) {

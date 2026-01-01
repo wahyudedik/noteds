@@ -83,4 +83,66 @@ class AdminCampaignController extends Controller
 
         return back()->with('success', 'Campaign rejected successfully.');
     }
+
+    /**
+     * Suspend a campaign.
+     */
+    public function suspend($id, Request $request)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|max:1000',
+        ]);
+
+        $campaign = Campaign::findOrFail($id);
+
+        if ($campaign->status !== 'active') {
+            return back()->withErrors(['error' => 'Only active campaigns can be suspended.']);
+        }
+
+        // Pause the campaign
+        $campaign->pause();
+
+        \App\Models\AuditLog::logAction([
+            'admin_id' => auth()->id(),
+            'action' => 'suspend_campaign',
+            'target_type' => 'campaign',
+            'target_id' => $campaign->id,
+            'notes' => $validated['reason'],
+        ]);
+
+        return back()->with('success', 'Campaign suspended successfully.');
+    }
+
+    /**
+     * View campaign analytics (admin view).
+     */
+    public function viewAnalytics($id)
+    {
+        $campaign = Campaign::with(['creator', 'wallet', 'clips.clipper', 'clips.viewTrackings'])
+            ->findOrFail($id);
+
+        // Get fraud detection summary
+        $viewValidationService = app(\App\Services\ViewValidationService::class);
+        $fraudClips = 0;
+        $totalClips = $campaign->clips->count();
+        
+        foreach ($campaign->clips as $clip) {
+            try {
+                if ($viewValidationService->detectFraud($clip)) {
+                    $fraudClips++;
+                }
+            } catch (\Exception $e) {
+                // Skip if validation fails
+            }
+        }
+
+        return Inertia::render('Admin/Campaigns/Analytics', [
+            'campaign' => $campaign,
+            'fraud_summary' => [
+                'total_clips' => $totalClips,
+                'fraud_clips' => $fraudClips,
+                'fraud_percentage' => $totalClips > 0 ? round(($fraudClips / $totalClips) * 100, 2) : 0,
+            ],
+        ]);
+    }
 }

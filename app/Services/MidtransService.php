@@ -99,17 +99,24 @@ class MidtransService
             }
 
             // Handle transaction status
+            // Note: Midtrans status flow: pending -> settlement (success) / deny/expire/cancel (failed)
+            // Status 'capture' happens before settlement, and 'settlement' is the final success state
             if ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
-                if ($fraudStatus === 'accept') {
+                // For capture, check fraud status
+                // For settlement, payment is confirmed successful
+                if ($transactionStatus === 'settlement' || ($fraudStatus === 'accept' || $fraudStatus === null)) {
                     $order->markAsPaid();
+                    Log::info("Order marked as paid: {$orderId}");
                     return true;
                 }
             } elseif ($transactionStatus === 'pending') {
                 // Payment is pending
                 $order->update(['payment_status' => 'pending']);
+                Log::info("Order payment pending: {$orderId}");
             } elseif ($transactionStatus === 'deny' || $transactionStatus === 'expire' || $transactionStatus === 'cancel') {
                 // Payment failed
                 $order->update(['payment_status' => 'failed']);
+                Log::info("Order payment failed: {$orderId}, status: {$transactionStatus}");
             }
 
             return true;

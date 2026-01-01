@@ -1,16 +1,34 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import ClipperLayout from '@/Layouts/ClipperLayout.vue';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import { computed, onMounted } from 'vue';
 
-defineProps({
+const props = defineProps({
     topUps: Object,
+});
+
+const page = usePage();
+
+// Show success message if redirected from payment
+const showSuccessMessage = computed(() => {
+    return page.props.flash?.success || page.props.flash?.message;
+});
+
+// Auto-refresh after redirect from payment
+onMounted(() => {
+    if (showSuccessMessage.value) {
+        // Optionally refresh data after a short delay
+        setTimeout(() => {
+            // Data will be refreshed on next page visit or manual refresh
+        }, 2000);
+    }
 });
 </script>
 
 <template>
     <Head title="Top Up History" />
 
-    <AuthenticatedLayout>
+    <ClipperLayout>
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -27,6 +45,18 @@ defineProps({
 
         <div class="px-4 py-6 lg:px-6">
             <div class="mx-auto max-w-7xl">
+                <!-- Success Message -->
+                <div v-if="showSuccessMessage" class="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-green-600 dark:text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        <p class="text-sm font-medium text-green-800 dark:text-green-200">
+                            {{ showSuccessMessage }}
+                        </p>
+                    </div>
+                </div>
+
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div v-if="topUps?.data && topUps.data.length > 0" class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -132,6 +162,6 @@ defineProps({
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </ClipperLayout>
 </template>
 

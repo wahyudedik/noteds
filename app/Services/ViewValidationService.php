@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Clip;
 use App\Models\ClipViewTracking;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class ViewValidationService
 {
@@ -26,32 +28,83 @@ class ViewValidationService
      */
     public function validateViews(Clip $clip): bool
     {
-        $trackingRecords = $clip->viewTrackings()
-            ->orderBy('tracked_at', 'desc')
-            ->limit(10)
-            ->get();
+        try {
+            // Validate clip exists
+            if (!$clip || !$clip->exists) {
+                throw new Exception('Clip not found. The clip may have been deleted.');
+            }
 
-        if ($trackingRecords->isEmpty()) {
-            return false;
+            $trackingRecords = $clip->viewTrackings()
+                ->orderBy('tracked_at', 'desc')
+                ->limit(10)
+                ->get();
+
+            if ($trackingRecords->isEmpty()) {
+                Log::warning('No tracking records found for view validation', [
+                    'clip_id' => $clip->id,
+                ]);
+                return false;
+            }
+
+            // Check stability
+            try {
+                $stabilityScore = $this->checkStability($clip);
+            } catch (Exception $e) {
+                Log::error('Failed to check view stability', [
+                    'clip_id' => $clip->id,
+                    'error' => $e->getMessage(),
+                ]);
+                throw new Exception('Failed to validate views. Please try again.');
+            }
+
+            // Check for fraud
+            try {
+                if ($this->detectFraud($clip)) {
+                    Log::warning('Fraud detected during view validation', [
+                        'clip_id' => $clip->id,
+                    ]);
+                    return false;
+                }
+            } catch (Exception $e) {
+                Log::error('Failed to detect fraud during view validation', [
+                    'clip_id' => $clip->id,
+                    'error' => $e->getMessage(),
+                ]);
+                // Continue with validation even if fraud detection fails
+            }
+
+            // Get latest valid views
+            $latestTracking = $trackingRecords->first();
+            $validViews = $latestTracking->views_count ?? 0;
+
+            if ($validViews < 0) {
+                throw new Exception('Invalid view count detected.');
+            }
+
+            // Update clip with valid views
+            try {
+                $clip->valid_views = $validViews;
+                if (!$clip->save()) {
+                    throw new Exception('Failed to save validated views.');
+                }
+            } catch (Exception $e) {
+                Log::error('Failed to update clip with validated views', [
+                    'clip_id' => $clip->id,
+                    'valid_views' => $validViews,
+                    'error' => $e->getMessage(),
+                ]);
+                throw new Exception('Failed to save view validation results. Please try again.');
+            }
+
+            return true;
+        } catch (Exception $e) {
+            Log::error('View validation failed', [
+                'clip_id' => $clip->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
         }
-
-        // Check stability
-        $stabilityScore = $this->checkStability($clip);
-
-        // Check for fraud
-        if ($this->detectFraud($clip)) {
-            return false;
-        }
-
-        // Get latest valid views
-        $latestTracking = $trackingRecords->first();
-        $validViews = $latestTracking->views_count;
-
-        // Update clip with valid views
-        $clip->valid_views = $validViews;
-        $clip->save();
-
-        return true;
     }
 
     /**

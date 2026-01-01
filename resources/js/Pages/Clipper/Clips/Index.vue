@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 
@@ -117,7 +117,7 @@ const formatCurrency = (amount) => {
 <template>
     <Head title="My Clips" />
 
-    <AuthenticatedLayout>
+    <ClipperLayout>
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -278,6 +278,6 @@ const formatCurrency = (amount) => {
                 <div ref="sentinelRef" class="h-4"></div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </ClipperLayout>
 </template>
 

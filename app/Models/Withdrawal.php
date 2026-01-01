@@ -112,4 +112,12 @@ class Withdrawal extends Model
     {
         return $query->where('user_type', 'clipper');
     }
+
+    /**
+     * Scope a query to only include creator withdrawals.
+     */
+    public function scopeForCreator($query)
+    {
+        return $query->where('user_type', 'creator');
+    }
 }

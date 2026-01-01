@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import ProfileHeader from '@/Components/Profile/ProfileHeader.vue';
 import ClipperProfileForm from '@/Components/Clipper/ProfileForm.vue';
 import { Head, usePage } from '@inertiajs/vue3';
@@ -40,7 +40,7 @@ const onProfileUpdated = () => {
 <template>
     <Head :title="(profileUser.business_name || profileUser.name) + ' - Clipper Profile'" />
 
-    <AuthenticatedLayout>
+    <ClipperLayout>
         <div class="px-4 py-6 lg:px-6">
             <div class="mx-auto max-w-7xl">
                 <!-- Profile Header -->
@@ -179,6 +179,6 @@ const onProfileUpdated = () => {
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </ClipperLayout>
 </template>
 

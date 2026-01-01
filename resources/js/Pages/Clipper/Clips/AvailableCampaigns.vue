@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 
@@ -101,12 +101,30 @@ const loadMore = () => {
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('id-ID').format(amount || 0);
 };
+
+const getYouTubeThumbnail = (url) => {
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+    if (match) {
+        return `https://img.youtube.com/vi/${match[1]}/maxresdefault.jpg`;
+    }
+    return null;
+};
+
+const getVideoType = (url) => {
+    if (!url) return null;
+    const youtubePattern = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)/i;
+    const drivePattern = /^(https?:\/\/)?(drive|docs)\.google\.com\/(file\/d\/|open\?id=|file\/d\/)/i;
+    
+    if (youtubePattern.test(url)) return 'youtube';
+    if (drivePattern.test(url)) return 'google_drive';
+    return null;
+};
 </script>
 
 <template>
     <Head title="Available Campaigns" />
 
-    <AuthenticatedLayout>
+    <ClipperLayout>
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -184,6 +202,36 @@ const formatCurrency = (amount) => {
                                 </div>
                             </div>
 
+                            <!-- Video References -->
+                            <div v-if="campaign.video_references && campaign.video_references.length > 0" class="mb-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Video References:
+                                </div>
+                                <div class="space-y-2">
+                                    <div
+                                        v-for="(videoRef, index) in campaign.video_references.slice(0, 2)"
+                                        :key="index"
+                                        class="flex items-center gap-2"
+                                    >
+                                        <a
+                                            :href="videoRef.url"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                                        >
+                                            <span v-if="getVideoType(videoRef.url) === 'youtube'" class="text-red-600">▶</span>
+                                            <span v-else-if="getVideoType(videoRef.url) === 'google_drive'" class="text-blue-600">📁</span>
+                                            <span class="truncate">
+                                                {{ videoRef.title || `Video ${index + 1}` }}
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <div v-if="campaign.video_references.length > 2" class="text-xs text-gray-500 dark:text-gray-400">
+                                        + {{ campaign.video_references.length - 2 }} more video(s)
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <Link
                                     :href="route('clipper.clips.create', campaign.id)"
@@ -220,6 +268,6 @@ const formatCurrency = (amount) => {
                 <div ref="sentinelRef" class="h-4"></div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </ClipperLayout>
 </template>
 

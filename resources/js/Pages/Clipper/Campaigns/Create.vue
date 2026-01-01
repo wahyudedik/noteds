@@ -1,12 +1,19 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Textarea from '@/Components/Textarea.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+
+const props = defineProps({
+    availableBalance: {
+        type: Number,
+        default: 0,
+    },
+});
 
 const page = usePage();
 const isBrand = computed(() => page.props.auth?.user?.clipper_role === 'brand' || page.props.auth?.user?.role === 'brand');
@@ -14,13 +21,106 @@ const isBrand = computed(() => page.props.auth?.user?.clipper_role === 'brand' |
 const form = useForm({
     title: '',
     description: '',
+    video_references: [{ url: '', title: '' }],
     cpm: '',
     max_budget: '',
     max_reward_per_clipper: '',
     duration_days: '',
 });
 
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('id-ID').format(amount || 0);
+};
+
+const budgetExceedsBalance = computed(() => {
+    const budget = parseFloat(form.max_budget) || 0;
+    return budget > props.availableBalance;
+});
+
+const canSubmit = computed(() => {
+    return !budgetExceedsBalance.value && !form.processing && hasValidVideoReferences.value;
+});
+
+// Video URL validation
+const validateVideoUrl = (url) => {
+    if (!url) return { valid: false, type: null };
+    
+    const youtubePattern = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)/i;
+    const drivePattern = /^(https?:\/\/)?(drive|docs)\.google\.com\/(file\/d\/|open\?id=|file\/d\/)/i;
+    
+    if (youtubePattern.test(url)) {
+        return { valid: true, type: 'youtube' };
+    }
+    if (drivePattern.test(url)) {
+        return { valid: true, type: 'google_drive' };
+    }
+    
+    return { valid: false, type: null };
+};
+
+const videoValidations = ref({});
+
+const validateVideoReference = (index) => {
+    const videoRef = form.video_references[index];
+    if (!videoRef || !videoRef.url) {
+        videoValidations.value[index] = { valid: false, type: null };
+        return;
+    }
+    const validation = validateVideoUrl(videoRef.url);
+    videoValidations.value[index] = validation;
+    return validation;
+};
+
+const hasValidVideoReferences = computed(() => {
+    if (!form.video_references || form.video_references.length === 0) {
+        return false;
+    }
+    return form.video_references.every((ref, index) => {
+        const validation = validateVideoReference(index);
+        return validation.valid && ref.url.trim() !== '';
+    });
+});
+
+const addVideoReference = () => {
+    form.video_references.push({ url: '', title: '' });
+};
+
+const removeVideoReference = (index) => {
+    if (form.video_references.length > 1) {
+        form.video_references.splice(index, 1);
+        delete videoValidations.value[index];
+        // Re-index validations
+        const newValidations = {};
+        form.video_references.forEach((_, i) => {
+            if (videoValidations.value[i] !== undefined) {
+                newValidations[i] = videoValidations.value[i];
+            }
+        });
+        videoValidations.value = newValidations;
+    }
+};
+
+const getYouTubeThumbnail = (url) => {
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+    if (match) {
+        return `https://img.youtube.com/vi/${match[1]}/maxresdefault.jpg`;
+    }
+    return null;
+};
+
 const submit = () => {
+    if (!canSubmit.value) return;
+    
+    // Ensure all video references have type
+    form.video_references = form.video_references.map(ref => {
+        const validation = validateVideoUrl(ref.url);
+        return {
+            url: ref.url.trim(),
+            title: ref.title?.trim() || null,
+            type: validation.type,
+        };
+    }).filter(ref => ref.url !== '');
+    
     form.post(route('clipper.campaigns.store'), {
         preserveScroll: true,
     });
@@ -30,7 +130,7 @@ const submit = () => {
 <template>
     <Head title="Create Campaign" />
 
-    <AuthenticatedLayout>
+    <ClipperLayout>
         <template #header>
             <div class="flex items-center gap-4">
                 <Link
@@ -105,6 +205,111 @@ const submit = () => {
                                     <InputError class="mt-2" :message="form.errors.description" />
                                 </div>
 
+                                <!-- Video References -->
+                                <div>
+                                    <InputLabel value="Video References *" />
+                                    <p class="mt-1 mb-3 text-sm text-gray-500 dark:text-gray-400">
+                                        Add YouTube or Google Drive links to the videos that clippers should reference when creating clips. At least one video reference is required.
+                                    </p>
+                                    
+                                    <div class="space-y-4">
+                                        <div
+                                            v-for="(videoRef, index) in form.video_references"
+                                            :key="index"
+                                            class="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50"
+                                        >
+                                            <div class="flex justify-between items-start mb-3">
+                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Video Reference #{{ index + 1 }}
+                                                </span>
+                                                <button
+                                                    v-if="form.video_references.length > 1"
+                                                    type="button"
+                                                    @click="removeVideoReference(index)"
+                                                    class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+
+                                            <!-- URL Input -->
+                                            <div class="mb-3">
+                                                <InputLabel :for="`video_url_${index}`" value="Video URL *" />
+                                                <div class="mt-1 relative">
+                                                    <TextInput
+                                                        :id="`video_url_${index}`"
+                                                        type="url"
+                                                        class="block w-full pr-10"
+                                                        :class="{
+                                                            'border-green-500': videoValidations[index]?.valid,
+                                                            'border-red-500': videoValidations[index] && !videoValidations[index].valid && videoRef.url
+                                                        }"
+                                                        v-model="videoRef.url"
+                                                        @input="validateVideoReference(index)"
+                                                        @blur="validateVideoReference(index)"
+                                                        required
+                                                        placeholder="https://www.youtube.com/watch?v=... or https://drive.google.com/file/d/..."
+                                                    />
+                                                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                                        <span
+                                                            v-if="videoValidations[index]?.valid"
+                                                            class="text-green-600 dark:text-green-400"
+                                                            title="Valid URL"
+                                                        >
+                                                            ✓
+                                                        </span>
+                                                        <span
+                                                            v-else-if="videoValidations[index] && !videoValidations[index].valid && videoRef.url"
+                                                            class="text-red-600 dark:text-red-400"
+                                                            title="Invalid URL - must be YouTube or Google Drive"
+                                                        >
+                                                            ✗
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div v-if="videoValidations[index]?.type === 'youtube' && videoRef.url" class="mt-2">
+                                                    <img
+                                                        :src="getYouTubeThumbnail(videoRef.url)"
+                                                        alt="YouTube thumbnail"
+                                                        class="w-32 h-20 object-cover rounded border border-gray-300 dark:border-gray-600"
+                                                        @error="$event.target.style.display='none'"
+                                                    />
+                                                </div>
+                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                    <span v-if="videoValidations[index]?.type === 'youtube'">✓ YouTube link detected</span>
+                                                    <span v-else-if="videoValidations[index]?.type === 'google_drive'">✓ Google Drive link detected</span>
+                                                    <span v-else-if="videoRef.url && !videoValidations[index]?.valid">✗ Must be a YouTube or Google Drive URL</span>
+                                                    <span v-else>Enter a YouTube or Google Drive URL</span>
+                                                </p>
+                                                <InputError class="mt-2" :message="form.errors[`video_references.${index}.url`]" />
+                                            </div>
+
+                                            <!-- Title Input (Optional) -->
+                                            <div>
+                                                <InputLabel :for="`video_title_${index}`" value="Title (Optional)" />
+                                                <TextInput
+                                                    :id="`video_title_${index}`"
+                                                    type="text"
+                                                    class="mt-1 block w-full"
+                                                    v-model="videoRef.title"
+                                                    placeholder="e.g., Main Video Reference, Additional Reference"
+                                                />
+                                                <InputError class="mt-2" :message="form.errors[`video_references.${index}.title`]" />
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            @click="addVideoReference"
+                                            class="w-full px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                                        >
+                                            + Add Another Video Reference
+                                        </button>
+                                    </div>
+                                    
+                                    <InputError class="mt-2" :message="form.errors.video_references" />
+                                </div>
+
                                 <!-- CPM (Cost Per Mille) -->
                                 <div>
                                     <InputLabel for="cpm" value="CPM (Cost Per 1000 Views)" />
@@ -127,6 +332,16 @@ const submit = () => {
                                     <InputError class="mt-2" :message="form.errors.cpm" />
                                 </div>
 
+                                <!-- Available Balance Info -->
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm font-medium text-blue-900 dark:text-blue-100">Available Balance:</span>
+                                        <span class="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                            Rp {{ formatCurrency(availableBalance) }}
+                                        </span>
+                                    </div>
+                                </div>
+
                                 <!-- Max Budget -->
                                 <div>
                                     <InputLabel for="max_budget" value="Maximum Budget" />
@@ -138,6 +353,7 @@ const submit = () => {
                                             step="0.01"
                                             min="0"
                                             class="block w-full pl-10"
+                                            :class="budgetExceedsBalance ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''"
                                             v-model="form.max_budget"
                                             required
                                             placeholder="0.00"
@@ -146,6 +362,11 @@ const submit = () => {
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                         Total budget for this campaign (will be locked in escrow)
                                     </p>
+                                    <div v-if="budgetExceedsBalance" class="mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                                        <p class="text-sm text-red-800 dark:text-red-200">
+                                            <strong>Warning:</strong> Budget exceeds available balance. Please top up your wallet or reduce the budget.
+                                        </p>
+                                    </div>
                                     <InputError class="mt-2" :message="form.errors.max_budget" />
                                 </div>
 
@@ -196,7 +417,7 @@ const submit = () => {
                                     >
                                         Cancel
                                     </Link>
-                                    <PrimaryButton :disabled="form.processing">
+                                    <PrimaryButton :disabled="!canSubmit">
                                         Create Campaign
                                     </PrimaryButton>
                                 </div>
@@ -206,6 +427,6 @@ const submit = () => {
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </ClipperLayout>
 </template>
 

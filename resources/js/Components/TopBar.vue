@@ -45,6 +45,23 @@ const notifications = computed(() => {
 
             <!-- Right Side Actions -->
             <div v-if="page.props.auth?.user" class="flex items-center gap-4">
+                <!-- Cart Icon -->
+                <Link
+                    :href="route('marketplace.cart')"
+                    class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    title="Shopping Cart"
+                >
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    <span
+                        v-if="page.props.cart_count > 0"
+                        class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
+                    >
+                        {{ page.props.cart_count > 99 ? '99+' : page.props.cart_count }}
+                    </span>
+                </Link>
+
                 <!-- Notification Bell -->
                 <NotificationBell :notifications="notifications" />
                 

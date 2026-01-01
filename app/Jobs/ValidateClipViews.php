@@ -37,6 +37,9 @@ class ValidateClipViews implements ShouldQueue
 
             // Validate views
             if ($viewValidationService->validateViews($this->clip)) {
+                // Refresh clip to get updated valid_views
+                $this->clip->refresh();
+                
                 // Check for fraud
                 if (!$viewValidationService->detectFraud($this->clip)) {
                     // Calculate reward
@@ -47,6 +50,10 @@ class ValidateClipViews implements ShouldQueue
 
                     $this->clip->pending_reward = $reward;
                     $this->clip->save();
+
+                    // Notify clipper about view validation
+                    $notificationService = app(\App\Services\NotificationService::class);
+                    $notificationService->notifyViewValidated($this->clip);
 
                     // Auto approve if valid
                     $this->clip->approve();

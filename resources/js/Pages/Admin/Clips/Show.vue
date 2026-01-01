@@ -14,6 +14,14 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    fraud_detected: {
+        type: Boolean,
+        default: false,
+    },
+    stability_score: {
+        type: Number,
+        default: null,
+    },
 });
 
 const formatCurrency = (amount) => {
@@ -38,9 +46,14 @@ const adjustRewardForm = useForm({
     reward_amount: props.clip?.approved_reward || props.clip?.pending_reward || 0,
     reason: '',
 });
+const overrideValidationForm = useForm({
+    valid_views: props.clip?.valid_views || 0,
+    reason: '',
+});
 
 const showRejectModal = ref(false);
 const showAdjustModal = ref(false);
+const showOverrideModal = ref(false);
 
 const approve = () => {
     if (confirm('Are you sure you want to approve this clip?')) {
@@ -66,6 +79,29 @@ const adjustReward = () => {
         onSuccess: () => {
             showAdjustModal.value = false;
             adjustRewardForm.reset();
+        },
+    });
+};
+
+const manualValidate = () => {
+    if (confirm('Are you sure you want to manually validate views for this clip?')) {
+        router.post(route('admin.clips.validate', props.clip.id), {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Reload page to get updated data
+                router.reload();
+            },
+        });
+    }
+};
+
+const overrideValidation = () => {
+    overrideValidationForm.post(route('admin.clips.override-validation', props.clip.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showOverrideModal.value = false;
+            overrideValidationForm.reset();
+            router.reload();
         },
     });
 };
@@ -370,6 +406,55 @@ const renderChart = () => {
                         </button>
                         <PrimaryButton :disabled="adjustRewardForm.processing">
                             Adjust
+                        </PrimaryButton>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Override Validation Modal -->
+        <div
+            v-if="showOverrideModal"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            @click.self="showOverrideModal = false"
+        >
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+                <h3 class="text-lg font-semibold mb-4">Override Validation</h3>
+                <form @submit.prevent="overrideValidation">
+                    <div class="mb-4">
+                        <InputLabel for="valid_views" value="Valid Views Count" />
+                        <TextInput
+                            id="valid_views"
+                            type="number"
+                            min="0"
+                            class="mt-1 block w-full"
+                            v-model.number="overrideValidationForm.valid_views"
+                            required
+                        />
+                        <InputError class="mt-2" :message="overrideValidationForm.errors.valid_views" />
+                    </div>
+                    <div class="mb-4">
+                        <InputLabel for="reason" value="Reason for Override *" />
+                        <Textarea
+                            id="reason"
+                            class="mt-1 block w-full"
+                            v-model="overrideValidationForm.reason"
+                            required
+                            rows="4"
+                            placeholder="Enter reason for overriding validation..."
+                        />
+                        <InputError class="mt-2" :message="overrideValidationForm.errors.reason" />
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button
+                            type="button"
+                            @click="showOverrideModal = false"
+                            class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+                        >
+                            Cancel
+                        </button>
+                        <PrimaryButton :disabled="overrideValidationForm.processing">
+                            Override
                         </PrimaryButton>
                     </div>
                 </form>

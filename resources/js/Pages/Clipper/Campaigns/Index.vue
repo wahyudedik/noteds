@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 
@@ -118,7 +118,7 @@ const formatCurrency = (amount) => {
 <template>
     <Head title="My Campaigns" />
 
-    <AuthenticatedLayout>
+    <ClipperLayout>
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -273,11 +273,10 @@ const formatCurrency = (amount) => {
                                 View Details
                             </Link>
                             <Link
-                                v-if="campaign.status === 'active' || campaign.status === 'draft'"
                                 :href="route('clipper.campaigns.analytics.show', campaign.id)"
                                 class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
                             >
-                                Analytics
+                                View Analytics
                             </Link>
                         </div>
                     </div>
@@ -313,6 +312,6 @@ const formatCurrency = (amount) => {
                 <div ref="sentinelRef" class="h-4"></div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </ClipperLayout>
 </template>
 

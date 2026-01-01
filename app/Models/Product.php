@@ -89,6 +89,22 @@ class Product extends Model
     }
 
     /**
+     * Get the reviews for the product.
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    /**
+     * Calculate average rating for the product.
+     */
+    public function averageRating(): float
+    {
+        return (float) $this->reviews()->avg('rating') ?? 0;
+    }
+
+    /**
      * Scope a query to only include active products.
      */
     public function scopeActive($query)

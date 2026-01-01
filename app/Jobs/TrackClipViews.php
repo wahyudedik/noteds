@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Clip;
 use App\Services\ViewValidationService;
+use App\Services\PlatformApiService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,15 +20,21 @@ class TrackClipViews implements ShouldQueue
         private Clip $clip
     ) {}
 
-    public function handle(ViewValidationService $viewValidationService): void
-    {
+    public function handle(
+        ViewValidationService $viewValidationService,
+        PlatformApiService $platformApiService
+    ): void {
         try {
-            // This would integrate with platform APIs (TikTok, Instagram, YouTube)
-            // For now, we'll use a placeholder implementation
-            $views = $this->fetchViewsFromPlatform($this->clip);
+            // Fetch views from platform API using PlatformApiService
+            $views = $platformApiService->fetchViews($this->clip);
 
             if ($views !== null) {
                 $viewValidationService->trackViews($this->clip, $views);
+            } else {
+                Log::warning('Failed to fetch views from platform API', [
+                    'clip_id' => $this->clip->id,
+                    'platform' => $this->clip->platform,
+                ]);
             }
         } catch (\Exception $e) {
             Log::error('TrackClipViews failed: ' . $e->getMessage(), [
@@ -36,19 +43,5 @@ class TrackClipViews implements ShouldQueue
             ]);
             throw $e;
         }
-    }
-
-    /**
-     * Fetch views from platform API.
-     * This is a placeholder - implement actual API integration.
-     */
-    private function fetchViewsFromPlatform(Clip $clip): ?int
-    {
-        // TODO: Implement actual platform API integration
-        // - TikTok API
-        // - Instagram API
-        // - YouTube API
-        
-        return null; // Placeholder
     }
 }

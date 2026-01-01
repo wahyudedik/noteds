@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -24,7 +24,7 @@ const getTransactionTypeClass = (reason) => {
 <template>
     <Head title="Clipper Wallet" />
 
-    <AuthenticatedLayout>
+    <ClipperLayout>
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -147,6 +147,6 @@ const getTransactionTypeClass = (reason) => {
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </ClipperLayout>
 </template>
 

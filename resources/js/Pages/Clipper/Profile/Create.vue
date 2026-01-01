@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -65,7 +65,7 @@ const formatNumber = (num) => {
 <template>
     <Head title="Clipper Profile Setup" />
 
-    <AuthenticatedLayout>
+    <ClipperLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                 Clipper Profile Setup
@@ -283,6 +283,6 @@ const formatNumber = (num) => {
                 </form>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </ClipperLayout>
 </template>
 

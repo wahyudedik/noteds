@@ -99,6 +99,66 @@ class ClipController extends Controller
         ]);
     }
 
+    public function edit($id)
+    {
+        $clip = auth()->user()->clips()
+            ->where('status', 'pending')
+            ->with('campaign')
+            ->findOrFail($id);
+
+        return Inertia::render('Clipper/Clips/Edit', [
+            'clip' => $clip,
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $clip = auth()->user()->clips()
+            ->where('status', 'pending')
+            ->findOrFail($id);
+
+        $validated = $request->validate([
+            'content_url' => 'required|url|max:500',
+            'platform' => 'required|in:tiktok,instagram,youtube,other',
+            'platform_content_id' => 'nullable|string|max:255',
+        ]);
+
+        $clip->update($validated);
+
+        return redirect()->route('clipper.clips.show', $clip)
+            ->with('success', 'Clip updated successfully.');
+    }
+
+    public function status($id)
+    {
+        $clip = auth()->user()->clips()
+            ->with(['campaign', 'viewTrackings'])
+            ->findOrFail($id);
+
+        // Calculate estimated reward if approved but not yet paid
+        $estimatedReward = null;
+        if ($clip->status === 'approved' && !$clip->paid_at) {
+            $estimatedReward = $clip->approved_reward ?? $clip->pending_reward;
+        }
+
+        return response()->json([
+            'status' => $clip->status,
+            'views' => [
+                'total' => $clip->total_views ?? 0,
+                'valid' => $clip->valid_views ?? 0,
+            ],
+            'rewards' => [
+                'pending' => $clip->pending_reward ?? 0,
+                'approved' => $clip->approved_reward ?? 0,
+                'estimated' => $estimatedReward,
+            ],
+            'submitted_at' => $clip->submitted_at,
+            'approved_at' => $clip->approved_at,
+            'paid_at' => $clip->paid_at,
+            'rejected_at' => $clip->rejected_at,
+        ]);
+    }
+
     public function trackViews($id)
     {
         $clip = auth()->user()->clips()->findOrFail($id);
@@ -110,6 +170,63 @@ class ClipController extends Controller
         return response()->json([
             'clip' => $clip,
             'tracking' => $clip->viewTrackings,
+        ]);
+    }
+
+    /**
+     * Get validation status for a clip.
+     */
+    public function getValidationStatus($id)
+    {
+        $clip = auth()->user()->clips()
+            ->with('viewTrackings')
+            ->findOrFail($id);
+        
+        $latestTracking = $clip->viewTrackings()->latest('tracked_at')->first();
+        
+        $totalViews = $latestTracking->views_count ?? $clip->total_views ?? 0;
+        $validViews = $clip->valid_views ?? 0;
+        $invalidViews = $totalViews - $validViews;
+        
+        $viewValidationService = app(\App\Services\ViewValidationService::class);
+        
+        $hasFraud = false;
+        $stabilityScore = null;
+        
+        try {
+            $hasFraud = $viewValidationService->detectFraud($clip);
+            $stabilityScore = $viewValidationService->checkStability($clip);
+        } catch (\Exception $e) {
+            // Use stored stability score if validation fails
+            $stabilityScore = $latestTracking->stability_score ?? null;
+        }
+        
+        // Get validation history (last 10 tracking records)
+        $validationHistory = $clip->viewTrackings()
+            ->orderBy('tracked_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($tracking) {
+                return [
+                    'tracked_at' => $tracking->tracked_at->toIso8601String(),
+                    'views_count' => $tracking->views_count,
+                    'is_valid' => $tracking->is_valid ?? true,
+                    'stability_score' => $tracking->stability_score,
+                ];
+            });
+        
+        return response()->json([
+            'clip_id' => $clip->id,
+            'valid_views' => $validViews,
+            'invalid_views' => $invalidViews,
+            'total_views' => $totalViews,
+            'stability_score' => $stabilityScore,
+            'fraud_detected' => $hasFraud,
+            'validation_rate' => $totalViews > 0 
+                ? round(($validViews / $totalViews) * 100, 2) 
+                : 0,
+            'last_validated_at' => $latestTracking ? $latestTracking->tracked_at->toIso8601String() : null,
+            'validation_history' => $validationHistory,
         ]);
     }
 }

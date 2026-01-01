@@ -41,7 +41,12 @@ class CampaignController extends Controller
                 ->with('error', 'You must register as a brand first to create campaigns.');
         }
 
-        return Inertia::render('Clipper/Campaigns/Create');
+        $walletService = app(\App\Services\WalletService::class);
+        $creatorWallet = $walletService->getCreatorWallet(auth()->user());
+
+        return Inertia::render('Clipper/Campaigns/Create', [
+            'availableBalance' => $creatorWallet->balance_available ?? 0,
+        ]);
     }
 
     public function store(Request $request)
@@ -53,11 +58,35 @@ class CampaignController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
+            'video_references' => 'required|array|min:1',
+            'video_references.*.url' => 'required|url',
+            'video_references.*.title' => 'nullable|string|max:255',
             'cpm' => 'required|numeric|min:1000',
             'max_budget' => 'required|numeric|min:10000',
             'max_reward_per_clipper' => 'nullable|numeric|min:0',
             'duration_days' => 'required|integer|min:1|max:365',
         ]);
+
+        // Validate each video URL is YouTube or Google Drive
+        foreach ($validated['video_references'] as $index => $videoRef) {
+            $validation = \App\Helpers\VideoUrlHelper::validateVideoUrl($videoRef['url']);
+            if (!$validation['valid']) {
+                return back()->withErrors([
+                    "video_references.{$index}.url" => $validation['error'],
+                ])->withInput();
+            }
+            // Add type to validated data
+            $validated['video_references'][$index]['type'] = $validation['type'];
+        }
+
+        // Check wallet balance
+        $walletService = app(\App\Services\WalletService::class);
+        $creatorWallet = $walletService->getCreatorWallet(auth()->user());
+        if ($creatorWallet->balance_available < $validated['max_budget']) {
+            return back()->withErrors([
+                'max_budget' => 'Insufficient wallet balance. Available balance: Rp ' . number_format($creatorWallet->balance_available, 0, ',', '.') . '. Please top up your wallet first.',
+            ])->withInput();
+        }
 
         try {
             $campaign = $this->campaignService->createCampaign(
@@ -78,8 +107,12 @@ class CampaignController extends Controller
             ->with(['wallet', 'clips.clipper'])
             ->findOrFail($id);
 
+        $walletService = app(\App\Services\WalletService::class);
+        $creatorWallet = $walletService->getCreatorWallet(auth()->user());
+
         return Inertia::render('Clipper/Campaigns/Show', [
             'campaign' => $campaign,
+            'availableBalance' => $creatorWallet->balance_available ?? 0,
         ]);
     }
 
@@ -121,6 +154,15 @@ class CampaignController extends Controller
             ->where('status', 'draft')
             ->findOrFail($id);
 
+        // Check wallet balance
+        $walletService = app(\App\Services\WalletService::class);
+        $creatorWallet = $walletService->getCreatorWallet(auth()->user());
+        if ($creatorWallet->balance_available < $campaign->max_budget) {
+            return back()->withErrors([
+                'error' => 'Insufficient wallet balance. Available balance: Rp ' . number_format($creatorWallet->balance_available, 0, ',', '.') . '. Campaign budget required: Rp ' . number_format($campaign->max_budget, 0, ',', '.') . '. Please top up your wallet first.',
+            ]);
+        }
+
         if (!$this->campaignService->activateCampaign($campaign)) {
             return back()->withErrors(['error' => 'Failed to activate campaign. Please check your balance.']);
         }
@@ -138,6 +180,19 @@ class CampaignController extends Controller
         $this->campaignService->pauseCampaign($campaign);
 
         return back()->with('success', 'Campaign paused successfully.');
+    }
+
+    public function resume($id)
+    {
+        $campaign = auth()->user()->campaigns()
+            ->where('status', 'paused')
+            ->findOrFail($id);
+
+        if (!$this->campaignService->resumeCampaign($campaign)) {
+            return back()->withErrors(['error' => 'Failed to resume campaign. Campaign may have expired.']);
+        }
+
+        return back()->with('success', 'Campaign resumed successfully.');
     }
 
     public function cancel($id)

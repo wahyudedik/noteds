@@ -91,6 +91,18 @@ class TopUpService
                 'reference_id' => $topUp->id,
             ]);
 
+            // Send notification
+            try {
+                $notificationService = app(\App\Services\NotificationService::class);
+                $notificationService->notifyTopUpSuccess($topUp);
+            } catch (\Exception $e) {
+                // Log error but don't fail the top up
+                \Illuminate\Support\Facades\Log::error('Failed to send top up notification', [
+                    'top_up_id' => $topUp->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             return true;
         });
     }

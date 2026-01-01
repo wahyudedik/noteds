@@ -1,7 +1,8 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import ViewValidationStatus from '@/Components/Clipper/ViewValidationStatus.vue';
 
 const props = defineProps({
     overallStats: {
@@ -33,12 +34,114 @@ const formatCurrency = (amount) => {
 const chartCanvas = ref(null);
 let chartInstance = null;
 
+// Real-time tracking
+const liveViews = ref({
+    total_views: props.campaign?.total_views || 0,
+    valid_views: 0,
+    invalid_views: 0,
+    last_updated: null,
+});
+const validationData = ref(null);
+const isPolling = ref(false);
+const pollInterval = ref(null);
+const shouldPoll = computed(() => {
+    return props.campaign && ['active', 'paused'].includes(props.campaign.status);
+});
+
+const fetchLiveViews = async () => {
+    if (!shouldPoll.value || !props.campaign) return;
+    
+    try {
+        const response = await fetch(route('clipper.campaigns.analytics.live', props.campaign.id), {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            liveViews.value = {
+                total_views: data.total_views || 0,
+                valid_views: data.valid_views || 0,
+                invalid_views: data.invalid_views || 0,
+                last_updated: data.last_updated ? new Date(data.last_updated) : new Date(),
+            };
+        }
+    } catch (error) {
+        console.error('Error fetching live views:', error);
+    }
+};
+
+const fetchValidationDetails = async () => {
+    if (!shouldPoll.value || !props.campaign) return;
+    
+    try {
+        const response = await fetch(route('clipper.campaigns.analytics.validation', props.campaign.id), {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            validationData.value = {
+                total_views: data.total_views || 0,
+                valid_views: data.total_valid_views || 0,
+                invalid_views: data.total_invalid_views || 0,
+                stability_score: data.average_stability_score,
+                fraud_detected: data.clips_with_fraud > 0,
+                validation_rate: data.validation_rate || 0,
+            };
+        }
+    } catch (error) {
+        console.error('Error fetching validation details:', error);
+    }
+};
+
 onMounted(() => {
     if (props.viewsChartData && Object.keys(props.viewsChartData).length > 0 && chartCanvas.value) {
-        // Simple chart rendering (can be enhanced with Chart.js or similar)
         renderChart();
     }
+    
+    if (shouldPoll.value) {
+        isPolling.value = true;
+        fetchLiveViews();
+        fetchValidationDetails();
+        
+        pollInterval.value = setInterval(() => {
+            fetchLiveViews();
+            fetchValidationDetails();
+        }, 30000);
+    }
 });
+
+onUnmounted(() => {
+    if (pollInterval.value) {
+        clearInterval(pollInterval.value);
+        pollInterval.value = null;
+    }
+    isPolling.value = false;
+});
+
+watch(() => props.campaign, (newCampaign) => {
+    if (newCampaign && ['active', 'paused'].includes(newCampaign.status) && !pollInterval.value) {
+        isPolling.value = true;
+        fetchLiveViews();
+        fetchValidationDetails();
+        pollInterval.value = setInterval(() => {
+            fetchLiveViews();
+            fetchValidationDetails();
+        }, 30000);
+    } else if ((!newCampaign || !['active', 'paused'].includes(newCampaign.status)) && pollInterval.value) {
+        clearInterval(pollInterval.value);
+        pollInterval.value = null;
+        isPolling.value = false;
+    }
+}, { deep: true });
 
 const renderChart = () => {
     // Simple bar chart implementation
@@ -72,7 +175,7 @@ const renderChart = () => {
 <template>
     <Head :title="campaign ? `${campaign.title} - Analytics` : 'Campaign Analytics'" />
 
-    <AuthenticatedLayout>
+    <ClipperLayout>
         <template #header>
             <div class="flex items-center gap-4">
                 <Link
@@ -120,9 +223,21 @@ const renderChart = () => {
                 <!-- Campaign-specific Stats -->
                 <div v-if="campaign" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Total Views</div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Total Views</div>
+                            <span
+                                v-if="isPolling"
+                                class="px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded"
+                                title="Auto-refreshing every 30 seconds"
+                            >
+                                🔄 Live
+                            </span>
+                        </div>
                         <div class="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                            {{ formatCurrency(campaign.total_views || 0) }}
+                            {{ formatCurrency(liveViews.total_views || campaign.total_views || 0) }}
+                        </div>
+                        <div v-if="liveViews.last_updated" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Updated: {{ new Date(liveViews.last_updated).toLocaleTimeString('id-ID') }}
                         </div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -144,6 +259,13 @@ const renderChart = () => {
                         </div>
                     </div>
                 </div>
+
+                <!-- View Validation Status -->
+                <ViewValidationStatus 
+                    v-if="campaign && validationData"
+                    :validation-data="validationData"
+                    :show-details="true"
+                />
 
                 <!-- Views Chart -->
                 <div v-if="campaign && viewsChartData" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -217,6 +339,6 @@ const renderChart = () => {
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </ClipperLayout>
 </template>
 

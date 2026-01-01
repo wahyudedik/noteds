@@ -79,13 +79,22 @@ class AdminWithdrawalController extends Controller
         }
 
         // Handle different withdrawal types
+        $walletService = app(\App\Services\WalletService::class);
+        
         if ($withdrawal->user_type === 'clipper') {
             // Use clipper wallet service
-            $clipperWallet = \App\Services\WalletService::class;
-            $walletService = app(\App\Services\WalletService::class);
             $clipperWallet = $walletService->getClipperWallet($withdrawal->user);
             $clipperWallet->lockForWithdrawal($withdrawal->amount);
             $clipperWallet->markAsWithdrawn($withdrawal->amount);
+        } elseif ($withdrawal->user_type === 'creator') {
+            // Use creator wallet service - deduct from available balance
+            $creatorWallet = $walletService->getCreatorWallet($withdrawal->user);
+            if ($creatorWallet->balance_available < $withdrawal->amount) {
+                return back()->withErrors(['error' => 'Insufficient available balance in creator wallet']);
+            }
+            // Deduct from available balance
+            $creatorWallet->balance_available -= $withdrawal->amount;
+            $creatorWallet->save();
         } else {
             // Use balance service for seller withdrawals
             $this->balanceService->deductBalance(

@@ -1,25 +1,73 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import ProductReviews from '@/Components/Marketplace/ProductReviews.vue';
+import ReviewForm from '@/Components/Marketplace/ReviewForm.vue';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
     product: Object,
+    reviews: Object,
+    averageRating: {
+        type: Number,
+        default: 0,
+    },
+    reviewsCount: {
+        type: Number,
+        default: 0,
+    },
+    hasPurchased: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const page = usePage();
+const editingReview = ref(null);
 
 const form = useForm({
     quantity: 1,
 });
 
+const addToCartForm = useForm({
+    quantity: 1,
+});
+
+const addingToCart = ref(false);
+
 const buyProduct = () => {
     form.post(route('marketplace.orders.store', { product_id: props.product.id }));
+};
+
+const addToCart = () => {
+    addingToCart.value = true;
+    addToCartForm.post(route('marketplace.cart.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            addingToCart.value = false;
+        },
+        onFinish: () => {
+            addingToCart.value = false;
+        },
+    });
 };
 
 const canEdit = computed(() => {
     return props.product.user_id === page.props.auth?.user?.id;
 });
+
+const handleEditReview = (review) => {
+    editingReview.value = review;
+};
+
+const handleReviewSubmitted = () => {
+    editingReview.value = null;
+    router.reload({ only: ['reviews', 'averageRating', 'reviewsCount'] });
+};
+
+const handleCancelReview = () => {
+    editingReview.value = null;
+};
 </script>
 
 <template>
@@ -108,7 +156,7 @@ const canEdit = computed(() => {
 
                         <!-- Buy Button -->
                         <div v-if="!canEdit" class="border-t pt-6">
-                            <form @submit.prevent="buyProduct">
+                            <div class="space-y-4">
                                 <div class="flex items-center space-x-4">
                                     <label class="text-sm font-medium">Quantity:</label>
                                     <input
@@ -116,19 +164,63 @@ const canEdit = computed(() => {
                                         type="number"
                                         min="1"
                                         :max="product.stock"
-                                        class="w-20 px-3 py-2 border border-gray-300 rounded-lg"
+                                        class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                                     />
-                                    <button
-                                        type="submit"
-                                        :disabled="form.processing || (product.stock !== null && product.stock < form.quantity)"
-                                        class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                                    >
-                                        Buy Now
-                                    </button>
                                 </div>
-                            </form>
+                                <div class="flex space-x-3">
+                                    <form @submit.prevent="buyProduct" class="flex-1">
+                                        <button
+                                            type="submit"
+                                            :disabled="form.processing || (product.stock !== null && product.stock < form.quantity)"
+                                            class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-semibold transition-colors"
+                                        >
+                                            Buy Now
+                                        </button>
+                                    </form>
+                                    <form @submit.prevent="addToCart" class="flex-1">
+                                        <button
+                                            type="submit"
+                                            :disabled="addToCartForm.processing || addingToCart || (product.stock !== null && product.stock < addToCartForm.quantity)"
+                                            class="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 font-semibold transition-colors"
+                                        >
+                                            <span v-if="addingToCart">Adding...</span>
+                                            <span v-else>Add to Cart</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Reviews Section -->
+                <div class="mt-6">
+                    <!-- Review Form (if user has purchased and not editing) -->
+                    <div v-if="hasPurchased && !editingReview && page.props.auth?.user" class="mb-6">
+                        <ReviewForm
+                            :product-id="product.id"
+                            @review-submitted="handleReviewSubmitted"
+                        />
+                    </div>
+
+                    <!-- Edit Review Form -->
+                    <div v-if="editingReview" class="mb-6">
+                        <ReviewForm
+                            :product-id="product.id"
+                            :existing-review="editingReview"
+                            @review-submitted="handleReviewSubmitted"
+                            @cancel="handleCancelReview"
+                        />
+                    </div>
+
+                    <!-- Reviews Display -->
+                    <ProductReviews
+                        :reviews="reviews"
+                        :average-rating="averageRating"
+                        :reviews-count="reviewsCount"
+                        :current-user-id="page.props.auth?.user?.id"
+                        @edit-review="handleEditReview"
+                    />
                 </div>
             </div>
         </div>
