@@ -28,6 +28,14 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    userBookmarks: {
+        type: Object,
+        default: () => ({}),
+    },
+    isFollowing: {
+        type: Boolean,
+        default: false,
+    },
     stats: Object,
     engagement_data: Object,
     top_posts: Array,
@@ -62,6 +70,7 @@ const hasClipperProfile = computed(() => {
                 <ProfileHeader 
                     :profile-user="profileUser"
                     :is-own-profile="isOwnProfile"
+                    :is-following="isFollowing"
                 />
 
                 <!-- Tabs -->
@@ -81,6 +90,7 @@ const hasClipperProfile = computed(() => {
                             v-if="activeTab === 'posts'"
                             :posts="posts"
                             :user-votes="userVotes"
+                            :user-bookmarks="userBookmarks"
                         />
 
                         <TabAnalytics 

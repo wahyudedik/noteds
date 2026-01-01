@@ -6,6 +6,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { PURPOSE_TYPE_LABELS } from '@/Utils/constants';
 import VoteButton from '@/Components/VoteButton.vue';
 import BookmarkButton from '@/Components/Bookmark/BookmarkButton.vue';
+import ReportButton from '@/Components/Report/ReportButton.vue';
 import CommentThread from '@/Components/CommentThread.vue';
 import Textarea from '@/Components/Textarea.vue';
 import InputError from '@/Components/InputError.vue';
@@ -59,25 +60,35 @@ const submitComment = () => {
             <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800">
                     <div class="p-6">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                                {{ PURPOSE_TYPE_LABELS[post.purpose_type] }}
-                            </span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">•</span>
-                            <Link
-                                :href="route('profile.show', post.user.id)"
-                                class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-                            >
-                                {{ post.user.business_name || post.user.name }}
-                            </Link>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">•</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ new Date(post.created_at).toLocaleDateString('id-ID', { 
-                                    year: 'numeric', 
-                                    month: 'long', 
-                                    day: 'numeric' 
-                                }) }}
-                            </span>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                                    {{ PURPOSE_TYPE_LABELS[post.purpose_type] }}
+                                </span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">•</span>
+                                <Link
+                                    :href="route('profile.show', post.user.id)"
+                                    class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                                >
+                                    {{ post.user.business_name || post.user.name }}
+                                </Link>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">•</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">
+                                    {{ new Date(post.created_at).toLocaleDateString('id-ID', { 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric' 
+                                    }) }}
+                                </span>
+                            </div>
+                            <div v-if="auth?.user && auth.user.id !== post.user_id">
+                                <ReportButton
+                                    reportable-type="post"
+                                    :reportable-id="post.id"
+                                    variant="icon"
+                                    size="sm"
+                                />
+                            </div>
                         </div>
 
                         <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">

@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import VoteButton from '@/Components/VoteButton.vue';
 import BookmarkButton from '@/Components/Bookmark/BookmarkButton.vue';
+import ReportButton from '@/Components/Report/ReportButton.vue';
 import { PURPOSE_TYPE_LABELS } from '@/Utils/constants';
 import { usePage } from '@inertiajs/vue3';
 
@@ -65,6 +66,14 @@ const formatDate = (date) => {
                             </span>
                         </div>
                     </div>
+                </div>
+                <div v-if="page.props.auth?.user && page.props.auth.user.id !== post.user_id">
+                    <ReportButton
+                        reportable-type="post"
+                        :reportable-id="post.id"
+                        variant="icon"
+                        size="sm"
+                    />
                 </div>
             </div>
 

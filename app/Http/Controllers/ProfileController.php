@@ -52,10 +52,13 @@ class ProfileController extends Controller
             ->latest()
             ->get();
 
-        // Get user votes for posts
+        // Get user votes and bookmarks for posts
         $userVotes = [];
+        $userBookmarks = [];
         if ($request->user()) {
             $postIds = $posts->pluck('id');
+            
+            // Get votes
             $votes = \App\Models\PostVote::where('user_id', $request->user()->id)
                 ->whereIn('post_id', $postIds)
                 ->get()
@@ -64,6 +67,16 @@ class ProfileController extends Controller
             foreach ($posts as $post) {
                 $vote = $votes->get($post->id);
                 $userVotes[$post->id] = $vote ? $vote->vote_type : null;
+            }
+
+            // Get bookmarks
+            $bookmarks = \App\Models\Bookmark::where('user_id', $request->user()->id)
+                ->whereIn('post_id', $postIds)
+                ->pluck('post_id')
+                ->toArray();
+
+            foreach ($posts as $post) {
+                $userBookmarks[$post->id] = in_array($post->id, $bookmarks);
             }
         }
 
@@ -82,11 +95,37 @@ class ProfileController extends Controller
         $profileUserArray = $profileUser->toArray();
         $profileUserArray['avatar_url'] = $profileUser->avatar_url;
 
+        // Get following status
+        $isFollowing = false;
+        if ($request->user() && !$isOwnProfile) {
+            $isFollowing = $request->user()->following()->where('following_id', $profileUser->id)->exists();
+        }
+
+        // Get brand registration if exists
+        $brandRegistration = null;
+        if ($profileUser->clipper_role === 'brand' || $profileUser->role === 'brand') {
+            $brandRegistration = \App\Models\BrandRegistration::where('user_id', $profileUser->id)
+                ->where('status', 'approved')
+                ->first();
+        }
+
+        // Get clipper profile if exists
+        $clipperProfile = null;
+        if ($profileUser->clipper_role === 'clipper' || $profileUser->role === 'clipper') {
+            $clipperProfile = \App\Models\ClipperProfile::where('user_id', $profileUser->id)
+                ->where('status', 'approved')
+                ->first();
+        }
+
         return Inertia::render('Profile/Show', [
             'profileUser' => $profileUserArray,
             'isOwnProfile' => $isOwnProfile,
+            'isFollowing' => $isFollowing,
             'posts' => $posts,
             'userVotes' => $userVotes,
+            'userBookmarks' => $userBookmarks,
+            'brandRegistration' => $brandRegistration,
+            'clipperProfile' => $clipperProfile,
             'stats' => $stats,
             'engagement_data' => $engagementData,
             'top_posts' => $topPosts,

@@ -10,6 +10,10 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    userBookmarks: {
+        type: Object,
+        default: () => ({}),
+    },
 });
 </script>
 
@@ -26,6 +30,7 @@ const props = defineProps({
                 :key="post.id"
                 :post="post"
                 :user-vote="userVotes && userVotes[post.id] ? userVotes[post.id] : null"
+                :is-bookmarked="userBookmarks && userBookmarks[post.id] ? userBookmarks[post.id] : false"
             />
         </div>
     </div>
