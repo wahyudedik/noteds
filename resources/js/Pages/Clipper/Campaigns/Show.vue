@@ -66,10 +66,6 @@ const hasInsufficientBalance = computed(() => {
     return props.availableBalance < props.campaign.max_budget;
 });
 
-const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('id-ID').format(amount || 0);
-};
-
 const canPause = computed(() => {
     return props.campaign.status === 'active';
 });
