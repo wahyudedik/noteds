@@ -142,7 +142,7 @@ class SearchService
         $articlesQuery = Article::query()
             ->where(function ($q) use ($query) {
                 $q->where('title', 'like', '%' . $query . '%')
-                  ->orWhere('content', 'like', '%' . $query . '%');
+                  ->orWhere('description', 'like', '%' . $query . '%');
             });
 
         if ($category) {
@@ -177,38 +177,47 @@ class SearchService
      * @param int $limit
      * @return array
      */
-    public function getSuggestions(string $query, int $limit = 5): array
+    public function getSuggestions(string $query, int $limit = 10): array
     {
         $suggestions = [];
+        $perTypeLimit = max(3, ceil($limit / 3)); // At least 3 per type
 
         // Post titles
         $postTitles = Post::where('status', 'active')
             ->where('title', 'like', '%' . $query . '%')
-            ->limit($limit)
+            ->limit($perTypeLimit)
             ->pluck('title')
             ->toArray();
         $suggestions = array_merge($suggestions, $postTitles);
 
-        // User names
-        $userNames = User::where('is_banned', false)
+        // User names and business names
+        $users = User::where('is_banned', false)
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', '%' . $query . '%')
                   ->orWhere('business_name', 'like', '%' . $query . '%');
             })
-            ->limit($limit)
-            ->pluck('name')
-            ->toArray();
-        $suggestions = array_merge($suggestions, $userNames);
+            ->limit($perTypeLimit)
+            ->get();
+        
+        foreach ($users as $user) {
+            if ($user->business_name && stripos($user->business_name, $query) !== false) {
+                $suggestions[] = $user->business_name;
+            } elseif ($user->name) {
+                $suggestions[] = $user->name;
+            }
+        }
 
         // Product names
         $productNames = Product::active()
             ->where('name', 'like', '%' . $query . '%')
-            ->limit($limit)
+            ->limit($perTypeLimit)
             ->pluck('name')
             ->toArray();
         $suggestions = array_merge($suggestions, $productNames);
 
-        return array_unique(array_slice($suggestions, 0, $limit));
+        // Remove duplicates and limit results
+        $uniqueSuggestions = array_unique($suggestions);
+        return array_slice($uniqueSuggestions, 0, $limit);
     }
 }
 
