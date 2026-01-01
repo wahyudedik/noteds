@@ -100,7 +100,7 @@ onUnmounted(() => {
 
                 <!-- Create Post Button -->
                 <button
-                    @click="openPostModal"
+                    @click.stop="openPostModal"
                     class="flex items-center gap-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border border-gray-200 dark:border-gray-700 min-w-[160px]"
                     aria-label="Create Post"
                 >
@@ -112,7 +112,7 @@ onUnmounted(() => {
 
                 <!-- Add Product Button -->
                 <button
-                    @click="openProductModal"
+                    @click.stop="openProductModal"
                     class="flex items-center gap-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border border-gray-200 dark:border-gray-700 min-w-[160px]"
                     aria-label="Add Product"
                 >
@@ -126,7 +126,7 @@ onUnmounted(() => {
 
         <!-- Main Floating Action Button -->
         <button
-            @click="toggleMenu"
+            @click.stop="toggleMenu"
             :class="[
                 'h-14 w-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transform transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
                 isMenuOpen ? 'rotate-45 scale-110' : 'hover:scale-110'
@@ -138,12 +138,17 @@ onUnmounted(() => {
             </svg>
         </button>
 
-        <!-- Create Post Modal -->
-        <CreatePostModal :show="showPostModal" @close="closePostModal" />
-
-        <!-- Create Product Modal -->
-        <CreateProductModal :show="showProductModal" @close="closeProductModal" />
     </div>
+
+    <!-- Create Post Modal - Teleported to body for fullscreen -->
+    <Teleport to="body">
+        <CreatePostModal :show="showPostModal" @close="closePostModal" />
+    </Teleport>
+
+    <!-- Create Product Modal - Teleported to body for fullscreen -->
+    <Teleport to="body">
+        <CreateProductModal :show="showProductModal" @close="closeProductModal" />
+    </Teleport>
 </template>
 
 

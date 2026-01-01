@@ -1,5 +1,5 @@
 <script setup>
-import { watch, onMounted, onUnmounted } from 'vue';
+import { watch, onMounted, onUnmounted, ref, nextTick } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import PostPurposeSelector from '@/Components/PostPurposeSelector.vue';
 import InputError from '@/Components/InputError.vue';
@@ -16,6 +16,8 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 
+const titleInput = ref(null);
+
 const form = useForm({
     purpose_type: '',
     title: '',
@@ -23,11 +25,25 @@ const form = useForm({
 });
 
 const submit = () => {
+    if (form.processing) return; // Prevent double submission
+    
     form.post(route('posts.store'), {
         preserveScroll: true,
         onSuccess: () => {
             form.reset();
             emit('close');
+        },
+        onError: (errors) => {
+            // Keep modal open if there are validation errors
+            // Handle 429 error - when there are no validation errors but request failed
+            if (!errors || Object.keys(errors).length === 0) {
+                const generalError = form.error('message') || form.error('error');
+                if (generalError) {
+                    alert(generalError);
+                } else {
+                    alert('Too many requests. Please wait a moment before creating another post.');
+                }
+            }
         },
     });
 };
@@ -44,10 +60,17 @@ const handleEscape = (e) => {
     }
 };
 
-watch(() => props.show, (isShow) => {
+watch(() => props.show, async (isShow) => {
     if (isShow) {
         document.body.style.overflow = 'hidden';
         window.addEventListener('keydown', handleEscape);
+        // Focus on title input after modal is shown
+        await nextTick();
+        if (titleInput.value) {
+            setTimeout(() => {
+                titleInput.value?.focus();
+            }, 100);
+        }
     } else {
         document.body.style.overflow = '';
         window.removeEventListener('keydown', handleEscape);
@@ -71,13 +94,14 @@ onUnmounted(() => {
     >
         <div
             v-if="show"
-            class="fixed inset-0 z-50 overflow-y-auto"
+            class="fixed inset-0 z-[9999] overflow-y-auto"
             @click.self="close"
         >
-            <div class="flex min-h-full items-center justify-center p-4">
-                <!-- Backdrop -->
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
+            <!-- Modal Container -->
+            <div class="relative flex min-h-full items-center justify-center p-4 w-full">
                 <!-- Modal -->
                 <Transition
                     enter-active-class="transition ease-out duration-300"
@@ -89,7 +113,7 @@ onUnmounted(() => {
                 >
                     <div
                         v-if="show"
-                        class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-6"
+                        class="relative w-full max-w-2xl transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:p-6"
                         @click.stop
                     >
                         <div class="absolute right-0 top-0 pr-4 pt-4">
@@ -116,12 +140,12 @@ onUnmounted(() => {
 
                                     <div>
                                         <TextInput
+                                            ref="titleInput"
                                             v-model="form.title"
                                             type="text"
                                             class="w-full"
                                             placeholder="Post title (min. 10 characters)"
                                             required
-                                            autofocus
                                         />
                                         <InputError :message="form.errors.title" />
                                     </div>

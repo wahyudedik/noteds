@@ -20,6 +20,8 @@ const hasMorePages = ref(true);
 const isLoading = ref(false);
 const sentinelRef = ref(null);
 const observerInstance = ref(null);
+const lastRequestTime = ref(0);
+const REQUEST_COOLDOWN = 1000; // Minimum 1 second between requests
 
 // Initialize posts and votes from props
 const initializePosts = () => {
@@ -41,7 +43,11 @@ onMounted(() => {
             observerInstance.value = new IntersectionObserver(
                 (entries) => {
                     if (entries[0].isIntersecting && hasMorePages.value && !isLoading.value) {
-                        loadMore();
+                        const now = Date.now();
+                        // Prevent requests if less than 1 second has passed since last request
+                        if (now - lastRequestTime.value >= REQUEST_COOLDOWN) {
+                            loadMore();
+                        }
                     }
                 },
                 {
@@ -75,7 +81,14 @@ const filterByPurpose = (purposeType) => {
 const loadMore = () => {
     if (isLoading.value || !hasMorePages.value) return;
     
+    const now = Date.now();
+    // Double-check cooldown before making request
+    if (now - lastRequestTime.value < REQUEST_COOLDOWN) {
+        return;
+    }
+    
     isLoading.value = true;
+    lastRequestTime.value = now;
     
     const nextPage = currentPage.value + 1;
     const queryParams = {

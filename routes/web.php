@@ -18,7 +18,9 @@ Route::get('/', function () {
 });
 
 // Home/Feed (redirect authenticated users to feed)
-Route::get('/home', [App\Http\Controllers\PostController::class, 'index'])->middleware(['auth', 'verified'])->name('home');
+Route::get('/home', [App\Http\Controllers\PostController::class, 'index'])
+    ->middleware(['auth', 'verified', 'throttle:60,1'])
+    ->name('home'); // 60 requests per minute (allows for infinite scroll)
 
 // Global Search
 Route::middleware('auth')->group(function () {
@@ -35,7 +37,7 @@ Route::get('/posts', [App\Http\Controllers\PostController::class, 'index'])->nam
 Route::middleware(['auth'])->group(function () {
     Route::get('/posts/create', [App\Http\Controllers\PostController::class, 'create'])->name('posts.create');
     Route::post('/posts', [App\Http\Controllers\PostController::class, 'store'])
-        ->middleware('throttle:5,10') // 5 posts per 10 minutes
+        ->middleware('throttle:10,5') // 10 posts per 5 minutes (more reasonable limit)
         ->name('posts.store');
     Route::get('/posts/{post}', [App\Http\Controllers\PostController::class, 'show'])->name('posts.show');
     Route::post('/posts/{post}/vote', [App\Http\Controllers\VoteController::class, 'votePost'])

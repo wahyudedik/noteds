@@ -3,7 +3,8 @@ import { PURPOSE_TYPES, PURPOSE_TYPE_LABELS, PURPOSE_TYPE_DESCRIPTIONS } from '@
 
 const model = defineModel({
     type: String,
-    required: true,
+    required: false,
+    default: '',
 });
 
 const purposes = Object.values(PURPOSE_TYPES);

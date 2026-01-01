@@ -86,7 +86,7 @@ const removeGoal = (index) => {
         </header>
 
         <form
-            @submit.prevent="form.post(route('profile.update'), {
+            @submit.prevent="form.patch(route('profile.update'), {
                 forceFormData: true,
                 preserveScroll: true,
             })"

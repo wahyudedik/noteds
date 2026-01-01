@@ -18,11 +18,26 @@ const form = useForm({
 });
 
 const submit = () => {
+    if (form.processing) return; // Prevent double submission
+    
     form.post(route('posts.store'), {
         preserveScroll: true,
         onSuccess: () => {
             form.reset();
             showComposer.value = false;
+        },
+        onError: (errors) => {
+            // Handle 429 error - when there are no validation errors but request failed
+            // This usually means rate limiting
+            if (!errors || Object.keys(errors).length === 0) {
+                // Check if form has a general error message
+                const generalError = form.error('message') || form.error('error');
+                if (generalError) {
+                    alert(generalError);
+                } else {
+                    alert('Too many requests. Please wait a moment before creating another post.');
+                }
+            }
         },
     });
 };
