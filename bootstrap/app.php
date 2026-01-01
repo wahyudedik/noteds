@@ -26,16 +26,124 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Handle 413 Post Too Large
         $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, $request) {
-            if ($request->expectsJson() || $request->is('marketplace/*')) {
+            if ($request->expectsJson() || $request->wantsJson()) {
                 return response()->json([
                     'message' => 'File terlalu besar. Ukuran maksimal: 50MB.',
                     'error' => 'post_too_large'
                 ], 413);
             }
+            
+            if ($request->header('X-Inertia')) {
+                return \Inertia\Inertia::render('Errors/413', [
+                    'message' => 'File terlalu besar. Ukuran maksimal: 50MB.',
+                ])->toResponse($request)->setStatusCode(413);
+            }
+            
             return back()->withErrors([
                 'file_download' => 'File terlalu besar. Ukuran maksimal: 50MB.'
             ])->withInput();
+        });
+
+        // Handle 401 Unauthorized
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Unauthenticated.',
+                    'error' => 'unauthenticated'
+                ], 401);
+            }
+
+            if ($request->header('X-Inertia')) {
+                return \Inertia\Inertia::render('Errors/401', [
+                    'message' => 'Kamu perlu login untuk mengakses halaman ini.',
+                ])->toResponse($request)->setStatusCode(401);
+            }
+
+            return redirect()->guest(route('login'));
+        });
+
+        // Handle 403 Forbidden
+        $exceptions->render(function (\Illuminate\Auth\Access\AuthorizationException $e, $request) {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'message' => $e->getMessage() ?: 'This action is unauthorized.',
+                    'error' => 'unauthorized'
+                ], 403);
+            }
+
+            if ($request->header('X-Inertia')) {
+                return \Inertia\Inertia::render('Errors/403', [
+                    'message' => $e->getMessage() ?: 'Kamu tidak memiliki izin untuk mengakses halaman ini.',
+                ])->toResponse($request)->setStatusCode(403);
+            }
+
+            return back()->withErrors(['error' => $e->getMessage() ?: 'This action is unauthorized.']);
+        });
+
+        // Handle 404 Not Found
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, $request) {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Resource not found.',
+                    'error' => 'not_found'
+                ], 404);
+            }
+
+            if ($request->header('X-Inertia')) {
+                return \Inertia\Inertia::render('Errors/404', [
+                    'message' => 'Halaman yang kamu cari tidak ditemukan atau sudah dihapus.',
+                ])->toResponse($request)->setStatusCode(404);
+            }
+
+            return response()->view('errors.404', [], 404);
+        });
+
+        // Handle 422 Validation Exception
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $e, $request) {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'message' => 'The given data was invalid.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
+            if ($request->header('X-Inertia')) {
+                // For Inertia, validation errors are handled automatically
+                // But we can show a custom page if needed
+                return back()->withErrors($e->errors())->withInput();
+            }
+
+            return back()->withErrors($e->errors())->withInput();
+        });
+
+        // Handle 500 Internal Server Error
+        $exceptions->render(function (\Throwable $e, $request) {
+            // Only show custom error page for non-validation, non-auth errors
+            if ($e instanceof \Illuminate\Validation\ValidationException ||
+                $e instanceof \Illuminate\Auth\AuthenticationException ||
+                $e instanceof \Illuminate\Auth\Access\AuthorizationException ||
+                $e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException ||
+                $e instanceof \Illuminate\Http\Exceptions\ThrottleRequestsException ||
+                $e instanceof \Illuminate\Http\Exceptions\PostTooLargeException) {
+                return null; // Let other handlers deal with it
+            }
+
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'message' => config('app.debug') ? $e->getMessage() : 'Server Error',
+                    'error' => 'server_error'
+                ], 500);
+            }
+
+            if ($request->header('X-Inertia')) {
+                return \Inertia\Inertia::render('Errors/500', [
+                    'message' => config('app.debug') ? $e->getMessage() : 'Terjadi kesalahan pada server. Tim kami telah diberitahu dan sedang memperbaikinya.',
+                ])->toResponse($request)->setStatusCode(500);
+            }
+
+            return null; // Let Laravel handle it with default error page
         });
 
         // Handle 429 Too Many Requests
