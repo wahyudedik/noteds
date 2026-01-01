@@ -17,6 +17,7 @@ defineProps({
     suggestedUsers: Array,
     quickStats: Object,
     userVotes: Object,
+    userBookmarks: Object,
     auth: Object,
 });
 </script>
@@ -41,6 +42,7 @@ defineProps({
                             :posts="posts" 
                             :filters="filters"
                             :user-votes="userVotes || {}"
+                            :user-bookmarks="userBookmarks || {}"
                         />
                     </div>
 

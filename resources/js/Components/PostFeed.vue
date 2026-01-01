@@ -11,10 +11,15 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    userBookmarks: {
+        type: Object,
+        default: () => ({}),
+    },
 });
 
 const postsList = ref([]);
 const userVotesList = ref({});
+const userBookmarksList = ref({});
 const currentPage = ref(1);
 const hasMorePages = ref(true);
 const isLoading = ref(false);
@@ -23,11 +28,12 @@ const observerInstance = ref(null);
 const lastRequestTime = ref(0);
 const REQUEST_COOLDOWN = 1000; // Minimum 1 second between requests
 
-// Initialize posts and votes from props
+// Initialize posts, votes, and bookmarks from props
 const initializePosts = () => {
     if (props.posts?.data) {
         postsList.value = [...props.posts.data];
         userVotesList.value = { ...props.userVotes };
+        userBookmarksList.value = { ...props.userBookmarks };
         currentPage.value = props.posts.current_page || 1;
         hasMorePages.value = props.posts.next_page_url !== null;
     }
@@ -67,7 +73,7 @@ onUnmounted(() => {
 });
 
 // Watch for filter changes and reset
-watch(() => [props.filters, props.posts, props.userVotes], () => {
+watch(() => [props.filters, props.posts, props.userVotes, props.userBookmarks], () => {
     initializePosts();
 }, { deep: true });
 
@@ -102,7 +108,7 @@ const loadMore = () => {
         {
             preserveState: true,
             preserveScroll: true,
-            only: ['posts', 'userVotes'],
+            only: ['posts', 'userVotes', 'userBookmarks'],
             onSuccess: (page) => {
                 const newPosts = page.props.posts?.data || [];
                 postsList.value.push(...newPosts);
@@ -110,6 +116,11 @@ const loadMore = () => {
                 // Merge userVotes (new votes from new posts)
                 if (page.props.userVotes) {
                     userVotesList.value = { ...userVotesList.value, ...page.props.userVotes };
+                }
+                
+                // Merge userBookmarks (new bookmarks from new posts)
+                if (page.props.userBookmarks) {
+                    userBookmarksList.value = { ...userBookmarksList.value, ...page.props.userBookmarks };
                 }
                 
                 currentPage.value = page.props.posts.current_page || nextPage;
@@ -161,6 +172,7 @@ const loadMore = () => {
                 :key="post.id"
                 :post="post"
                 :user-vote="userVotesList[post.id] || null"
+                :is-bookmarked="userBookmarksList[post.id] || false"
             />
 
             <!-- Empty State -->

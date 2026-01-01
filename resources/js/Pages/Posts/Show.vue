@@ -5,6 +5,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 // Posts/Show page - displays individual post with comments and validation
 import { PURPOSE_TYPE_LABELS } from '@/Utils/constants';
 import VoteButton from '@/Components/VoteButton.vue';
+import BookmarkButton from '@/Components/Bookmark/BookmarkButton.vue';
 import CommentThread from '@/Components/CommentThread.vue';
 import Textarea from '@/Components/Textarea.vue';
 import InputError from '@/Components/InputError.vue';
@@ -17,6 +18,10 @@ const props = defineProps({
     post: Object,
     auth: Object,
     userVote: String,
+    isBookmarked: {
+        type: Boolean,
+        default: false,
+    },
     validationStats: Object,
     userValidation: Object,
 });
@@ -86,13 +91,21 @@ const submitComment = () => {
                         </div>
 
                         <div class="flex items-center justify-between mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-                            <VoteButton
-                                :post-id="post.id"
-                                :upvotes="post.upvotes_count"
-                                :downvotes="post.downvotes_count"
-                                :user-vote="userVote"
-                                :can-vote="auth?.user && auth.user.id !== post.user_id"
-                            />
+                            <div class="flex items-center gap-3">
+                                <VoteButton
+                                    :post-id="post.id"
+                                    :upvotes="post.upvotes_count"
+                                    :downvotes="post.downvotes_count"
+                                    :user-vote="userVote"
+                                    :can-vote="auth?.user && auth.user.id !== post.user_id"
+                                />
+                                <BookmarkButton
+                                    v-if="auth?.user"
+                                    :post-id="post.id"
+                                    :is-bookmarked="isBookmarked"
+                                    :can-bookmark="!!auth?.user"
+                                />
+                            </div>
                             <span class="text-sm text-gray-500 dark:text-gray-400">
                                 💬 {{ post.comments_count }} komentar
                             </span>

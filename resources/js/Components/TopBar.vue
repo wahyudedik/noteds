@@ -10,7 +10,13 @@ const page = usePage();
 const showingProfileDropdown = ref(false);
 
 const notifications = computed(() => {
-    return page.props.notifications || [];
+    const notificationsData = page.props.notifications || [];
+    // Handle pagination object - extract data array if it's a pagination object
+    if (notificationsData && typeof notificationsData === 'object' && 'data' in notificationsData) {
+        return notificationsData.data || [];
+    }
+    // Return as-is if it's already an array
+    return Array.isArray(notificationsData) ? notificationsData : [];
 });
 </script>
 

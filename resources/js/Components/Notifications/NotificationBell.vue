@@ -4,7 +4,6 @@ import { Link, router } from '@inertiajs/vue3';
 
 const props = defineProps({
     notifications: {
-        type: Array,
         default: () => [],
     },
 });
@@ -12,12 +11,21 @@ const props = defineProps({
 const isOpen = ref(false);
 const dropdownRef = ref(null);
 
+const notificationsList = computed(() => {
+    // Handle pagination object - extract data array if it's a pagination object
+    if (props.notifications && typeof props.notifications === 'object' && 'data' in props.notifications) {
+        return props.notifications.data || [];
+    }
+    // Return as-is if it's already an array
+    return Array.isArray(props.notifications) ? props.notifications : [];
+});
+
 const unreadCount = computed(() => {
-    return props.notifications.filter(n => !n.read_at).length;
+    return notificationsList.value.filter(n => !n.read_at).length;
 });
 
 const recentNotifications = computed(() => {
-    return props.notifications.slice(0, 5);
+    return notificationsList.value.slice(0, 5);
 });
 
 const getNotificationType = (notification) => {

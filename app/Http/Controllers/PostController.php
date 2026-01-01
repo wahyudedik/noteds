@@ -30,10 +30,13 @@ class PostController extends Controller
 
         $posts = $query->paginate(15);
 
-        // Get user vote for each post if authenticated
+        // Get user vote and bookmarks for each post if authenticated
         $userVotes = [];
+        $userBookmarks = [];
         if ($request->user()) {
             $postIds = $posts->pluck('id');
+            
+            // Get votes
             $votes = \App\Models\PostVote::where('user_id', $request->user()->id)
                 ->whereIn('post_id', $postIds)
                 ->get()
@@ -42,6 +45,16 @@ class PostController extends Controller
             foreach ($posts as $post) {
                 $vote = $votes->get($post->id);
                 $userVotes[$post->id] = $vote ? $vote->vote_type : null;
+            }
+
+            // Get bookmarks
+            $bookmarks = \App\Models\Bookmark::where('user_id', $request->user()->id)
+                ->whereIn('post_id', $postIds)
+                ->pluck('post_id')
+                ->toArray();
+
+            foreach ($posts as $post) {
+                $userBookmarks[$post->id] = in_array($post->id, $bookmarks);
             }
         }
 
@@ -58,12 +71,15 @@ class PostController extends Controller
                 'suggestedUsers' => $suggestedUsers,
                 'quickStats' => $quickStats,
                 'userVotes' => $userVotes,
+                'userBookmarks' => $userBookmarks,
             ]);
         }
 
         return Inertia::render('Posts/Index', [
             'posts' => $posts,
             'filters' => $request->only(['purpose_type']),
+            'userVotes' => $userVotes,
+            'userBookmarks' => $userBookmarks,
         ]);
     }
 
@@ -103,9 +119,13 @@ class PostController extends Controller
         ]);
 
         $userVote = null;
+        $isBookmarked = false;
         if ($request->user()) {
             $vote = $post->votes()->where('user_id', $request->user()->id)->first();
             $userVote = $vote ? $vote->vote_type : null;
+            
+            $bookmark = $post->bookmarkedBy()->where('user_id', $request->user()->id)->first();
+            $isBookmarked = $bookmark !== null;
         }
 
         $validationStats = null;
@@ -124,6 +144,7 @@ class PostController extends Controller
         return Inertia::render('Posts/Show', [
             'post' => $post,
             'userVote' => $userVote,
+            'isBookmarked' => $isBookmarked,
             'validationStats' => $validationStats,
             'userValidation' => $userValidation,
         ]);

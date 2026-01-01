@@ -33,6 +33,13 @@ const vote = (voteType) => {
     }, {
         preserveScroll: true,
         preserveState: true,
+        onError: (errors) => {
+            // Error 429 will be handled by the exception handler
+            // This is just a fallback
+            if (errors && typeof errors === 'object' && 'message' in errors) {
+                console.error('Vote error:', errors.message);
+            }
+        },
     });
 };
 

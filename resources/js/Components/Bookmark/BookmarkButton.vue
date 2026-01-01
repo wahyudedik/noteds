@@ -1,6 +1,6 @@
 <script setup>
 import { router } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
     postId: {
@@ -17,20 +17,49 @@ const props = defineProps({
     },
 });
 
+// Local state for optimistic update
+const localIsBookmarked = ref(props.isBookmarked);
+
+// Watch prop changes
+watch(() => props.isBookmarked, (newVal) => {
+    localIsBookmarked.value = newVal;
+});
+
 const toggleBookmark = () => {
     if (!props.canBookmark) return;
 
-    if (props.isBookmarked) {
-        router.delete(route('posts.unbookmark', props.postId), {
-            preserveScroll: true,
-            preserveState: true,
-        });
-    } else {
-        router.post(route('posts.bookmark', props.postId), {}, {
-            preserveScroll: true,
-            preserveState: true,
-        });
-    }
+    // Optimistic update - immediately change UI
+    const wasBookmarked = localIsBookmarked.value;
+    localIsBookmarked.value = !wasBookmarked;
+
+    const method = wasBookmarked ? 'delete' : 'post';
+    const routeName = wasBookmarked ? route('posts.unbookmark', props.postId) : route('posts.bookmark', props.postId);
+
+    router[method](routeName, {}, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => {
+            // Reload only userBookmarks data to sync with server
+            router.reload({
+                only: ['userBookmarks'],
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    // Sync local state with server state after reload
+                    // The prop will be updated from server
+                },
+            });
+        },
+        onError: (errors) => {
+            // Revert optimistic update on error
+            localIsBookmarked.value = wasBookmarked;
+            
+            // Error 429 will be handled by the exception handler
+            if (errors && typeof errors === 'object' && 'message' in errors) {
+                console.error('Bookmark error:', errors.message);
+            }
+        },
+    });
 };
 </script>
 
@@ -39,16 +68,16 @@ const toggleBookmark = () => {
         @click="toggleBookmark"
         :disabled="!canBookmark"
         :class="[
-            'flex items-center gap-1 px-3 py-1 rounded-md text-sm transition',
-            isBookmarked
-                ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+            'flex items-center gap-1 px-3 py-1 rounded-md text-sm font-medium transition-all',
+            localIsBookmarked
+                ? 'bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-sm'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600',
             !canBookmark && 'opacity-50 cursor-not-allowed'
         ]"
-        :title="isBookmarked ? 'Remove bookmark' : 'Bookmark this post'"
+        :title="localIsBookmarked ? 'Remove bookmark' : 'Bookmark this post'"
     >
         <svg
-            v-if="isBookmarked"
+            v-if="localIsBookmarked"
             class="w-4 h-4"
             fill="currentColor"
             viewBox="0 0 20 20"
@@ -64,7 +93,7 @@ const toggleBookmark = () => {
         >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
         </svg>
-        <span>{{ isBookmarked ? 'Bookmarked' : 'Bookmark' }}</span>
+        <span>{{ localIsBookmarked ? 'Bookmarked' : 'Bookmark' }}</span>
     </button>
 </template>
 

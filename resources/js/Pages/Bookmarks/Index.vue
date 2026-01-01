@@ -73,6 +73,7 @@ const userVotes = {};
                             :key="bookmark.id"
                             :post="bookmark.post"
                             :user-vote="userVotes[bookmark.post.id] || null"
+                            :is-bookmarked="true"
                         />
                     </div>
 
