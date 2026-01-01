@@ -47,7 +47,7 @@ onMounted(() => {
             observerInstance.value.observe(sentinelRef.value);
         }
     });
-};
+});
 
 onUnmounted(() => {
     if (observerInstance.value) {
