@@ -59,7 +59,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div v-if="page.props.auth?.user" ref="menuRef" class="fixed bottom-6 z-40 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-8 md:bottom-8">
+    <div v-if="page.props.auth?.user" ref="menuRef" class="fixed bottom-20 z-50 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-8 md:bottom-8">
         <!-- Action Menu (expanded) -->
         <Transition
             enter-active-class="transition ease-out duration-200"
@@ -69,7 +69,7 @@ onUnmounted(() => {
             leave-from-class="opacity-100 scale-100 translate-y-0"
             leave-to-class="opacity-0 scale-95 translate-y-2"
         >
-            <div v-if="isMenuOpen" class="absolute bottom-16 right-0 mb-2 flex flex-col gap-2">
+            <div v-if="isMenuOpen" class="absolute bottom-16 right-0 mb-2 flex flex-col gap-2 md:right-0">
                 <!-- Create Campaign Button (Brand) -->
                 <Link
                     v-if="isBrand"

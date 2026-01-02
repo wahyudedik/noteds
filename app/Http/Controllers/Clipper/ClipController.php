@@ -90,9 +90,23 @@ class ClipController extends Controller
 
     public function show($id)
     {
-        $clip = auth()->user()->clips()
-            ->with(['campaign', 'viewTrackings'])
-            ->findOrFail($id);
+        $user = auth()->user();
+        
+        // First check if clip exists
+        $clip = \App\Models\Clip::with(['campaign', 'viewTrackings', 'clipper'])->find($id);
+        
+        if (!$clip) {
+            abort(404, 'Clip not found');
+        }
+        
+        // Allow clipper to view their own clips
+        // Allow brand to view clips from their campaigns
+        $hasAccess = $clip->clipper_id === $user->id || 
+                     ($clip->campaign && $clip->campaign->creator_id === $user->id);
+        
+        if (!$hasAccess) {
+            abort(403, 'You do not have permission to view this clip');
+        }
 
         return Inertia::render('Clipper/Clips/Show', [
             'clip' => $clip,

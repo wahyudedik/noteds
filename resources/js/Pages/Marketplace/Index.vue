@@ -107,14 +107,14 @@ const loadMore = () => {
             </h2>
         </template>
 
-        <div class="px-4 py-6 lg:px-6">
+        <div class="px-4 sm:px-6 py-4 sm:py-6">
             <div class="mx-auto max-w-7xl">
                 <!-- Search and Filter Bar -->
-                <div class="mb-6">
+                <div class="mb-4 sm:mb-6">
                     <SearchBar :filters="filters" />
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
                     <!-- Sidebar Filters -->
                     <aside class="lg:col-span-1">
                         <ProductFilter :filters="filters" />
@@ -122,18 +122,18 @@ const loadMore = () => {
 
                     <!-- Products Grid -->
                     <div class="lg:col-span-3">
-                        <div class="mb-4 flex justify-between items-center">
-                            <h3 class="text-lg font-semibold">Products</h3>
+                        <div class="mb-3 sm:mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                            <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Products</h3>
                             <Link
                                 v-if="page.props.auth?.user"
                                 :href="route('marketplace.products.create')"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm sm:text-base font-medium transition-colors text-center"
                             >
                                 Add Product
                             </Link>
                         </div>
 
-                        <div v-if="productsList.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <div v-if="productsList.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             <ProductCard
                                 v-for="product in productsList"
                                 :key="product.id"

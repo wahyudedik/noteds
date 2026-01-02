@@ -120,27 +120,27 @@ const formatCurrency = (amount) => {
 
     <ClipperLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <h2 class="text-lg sm:text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                     My Campaigns
                 </h2>
                 <Link
                     :href="route('clipper.campaigns.create')"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base font-medium text-center min-h-[44px] flex items-center justify-center"
                 >
                     Create Campaign
                 </Link>
             </div>
         </template>
 
-        <div class="px-4 py-6 lg:px-6">
+        <div class="px-4 sm:px-6 py-4 sm:py-6">
             <div class="mx-auto max-w-7xl">
                 <!-- Status Filters -->
-                <div class="mb-6 flex space-x-2">
+                <div class="mb-4 sm:mb-6 flex flex-wrap gap-2 overflow-x-auto pb-2">
                     <button
                         @click="filterByStatus('all')"
                         :class="[
-                            'px-4 py-2 rounded-lg transition-colors',
+                            'px-3 sm:px-4 py-2 rounded-lg transition-colors text-xs sm:text-sm font-medium whitespace-nowrap min-h-[44px]',
                             selectedStatus === 'all' 
                                 ? 'bg-blue-600 text-white' 
                                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -151,7 +151,7 @@ const formatCurrency = (amount) => {
                     <button
                         @click="filterByStatus('draft')"
                         :class="[
-                            'px-4 py-2 rounded-lg transition-colors',
+                            'px-3 sm:px-4 py-2 rounded-lg transition-colors text-xs sm:text-sm font-medium whitespace-nowrap min-h-[44px]',
                             selectedStatus === 'draft' 
                                 ? 'bg-blue-600 text-white' 
                                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -162,7 +162,7 @@ const formatCurrency = (amount) => {
                     <button
                         @click="filterByStatus('active')"
                         :class="[
-                            'px-4 py-2 rounded-lg transition-colors',
+                            'px-3 sm:px-4 py-2 rounded-lg transition-colors text-xs sm:text-sm font-medium whitespace-nowrap min-h-[44px]',
                             selectedStatus === 'active' 
                                 ? 'bg-blue-600 text-white' 
                                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -173,7 +173,7 @@ const formatCurrency = (amount) => {
                     <button
                         @click="filterByStatus('completed')"
                         :class="[
-                            'px-4 py-2 rounded-lg transition-colors',
+                            'px-3 sm:px-4 py-2 rounded-lg transition-colors text-xs sm:text-sm font-medium whitespace-nowrap min-h-[44px]',
                             selectedStatus === 'completed' 
                                 ? 'bg-blue-600 text-white' 
                                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -184,7 +184,7 @@ const formatCurrency = (amount) => {
                     <button
                         @click="filterByStatus('cancelled')"
                         :class="[
-                            'px-4 py-2 rounded-lg transition-colors',
+                            'px-3 sm:px-4 py-2 rounded-lg transition-colors text-xs sm:text-sm font-medium whitespace-nowrap min-h-[44px]',
                             selectedStatus === 'cancelled' 
                                 ? 'bg-blue-600 text-white' 
                                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -195,69 +195,69 @@ const formatCurrency = (amount) => {
                 </div>
 
                 <!-- Campaigns List -->
-                <div v-if="campaignsList.length > 0" class="space-y-4">
+                <div v-if="campaignsList.length > 0" class="space-y-3 sm:space-y-4">
                     <div
                         v-for="campaign in campaignsList"
                         :key="campaign.id"
-                        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
+                        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 hover:shadow-md transition-shadow"
                     >
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-2">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
                                     <Link
                                         :href="route('clipper.campaigns.show', campaign.id)"
-                                        class="text-xl font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
+                                        class="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 line-clamp-2"
                                     >
                                         {{ campaign.title }}
                                     </Link>
                                     <span
-                                        :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusBadgeClass(campaign.status)]"
+                                        :class="['px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0', getStatusBadgeClass(campaign.status)]"
                                     >
                                         {{ campaign.status }}
                                     </span>
                                 </div>
                                 
-                                <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3 sm:mb-4 line-clamp-2">
                                     {{ campaign.description }}
                                 </p>
 
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
                                     <div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">Budget</div>
-                                        <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                                        <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Budget</div>
+                                        <div class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white break-words">
                                             Rp {{ formatCurrency(campaign.max_budget) }}
                                         </div>
                                     </div>
                                     <div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">CPM</div>
-                                        <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                                        <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">CPM</div>
+                                        <div class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white">
                                             Rp {{ formatCurrency(campaign.cpm) }}
                                         </div>
                                     </div>
                                     <div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">Total Views</div>
-                                        <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                                        <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Views</div>
+                                        <div class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white">
                                             {{ formatCurrency(campaign.total_views) }}
                                         </div>
                                     </div>
                                     <div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">Total Clips</div>
-                                        <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                                        <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Clips</div>
+                                        <div class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white">
                                             {{ campaign.total_clips || 0 }}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div v-if="campaign.campaign_wallet" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                    <div class="flex justify-between items-center text-sm">
+                                <div v-if="campaign.campaign_wallet" class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <div class="flex justify-between items-center text-xs sm:text-sm">
                                         <span class="text-gray-500 dark:text-gray-400">Remaining Budget:</span>
-                                        <span class="font-semibold text-gray-900 dark:text-white">
+                                        <span class="font-semibold text-gray-900 dark:text-white break-words text-right ml-2">
                                             Rp {{ formatCurrency(campaign.campaign_wallet.remaining_budget) }}
                                         </span>
                                     </div>
-                                    <div class="flex justify-between items-center text-sm mt-1">
+                                    <div class="flex justify-between items-center text-xs sm:text-sm mt-1">
                                         <span class="text-gray-500 dark:text-gray-400">Total Spent:</span>
-                                        <span class="font-semibold text-gray-900 dark:text-white">
+                                        <span class="font-semibold text-gray-900 dark:text-white break-words text-right ml-2">
                                             Rp {{ formatCurrency(campaign.total_spent) }}
                                         </span>
                                     </div>
@@ -265,16 +265,16 @@ const formatCurrency = (amount) => {
                             </div>
                         </div>
 
-                        <div class="mt-4 flex gap-2">
+                        <div class="mt-3 sm:mt-4 flex flex-col sm:flex-row gap-2">
                             <Link
                                 :href="route('clipper.campaigns.show', campaign.id)"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                                class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base font-medium text-center min-h-[44px] flex items-center justify-center"
                             >
                                 View Details
                             </Link>
                             <Link
                                 :href="route('clipper.campaigns.analytics.show', campaign.id)"
-                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                                class="px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base font-medium text-center min-h-[44px] flex items-center justify-center"
                             >
                                 View Analytics
                             </Link>
@@ -282,11 +282,11 @@ const formatCurrency = (amount) => {
                     </div>
                 </div>
 
-                <div v-else class="text-center py-12">
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">No campaigns found.</p>
+                <div v-else class="text-center py-8 sm:py-12">
+                    <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4">No campaigns found.</p>
                     <Link
                         :href="route('clipper.campaigns.create')"
-                        class="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        class="inline-block px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base font-medium min-h-[44px] flex items-center justify-center"
                     >
                         Create Your First Campaign
                     </Link>

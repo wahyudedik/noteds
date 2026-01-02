@@ -1,7 +1,10 @@
 ---
 name: Fix Explorer Page - Add Business Content
 overview: Memperbaiki halaman Explorer yang kosong dengan mengintegrasikan API gratis untuk konten bisnis atau membuat sistem konten internal. Explorer akan menampilkan artikel bisnis, tips, dan resources untuk pengguna.
-todos: []
+todos:
+  - id: todo-1767327996479-aha9t45ac
+    content: "done "
+    status: completed
 ---
 
 # Plan:

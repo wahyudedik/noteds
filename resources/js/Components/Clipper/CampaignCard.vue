@@ -26,49 +26,49 @@ const getStatusBadgeClass = (status) => {
 
 <template>
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
-        <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
+        <div class="p-4 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 sm:mb-4 gap-2">
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
                         <Link
                             :href="route('clipper.campaigns.show', campaign.id)"
-                            class="text-xl font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition"
+                            class="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition line-clamp-2"
                         >
                             {{ campaign.title }}
                         </Link>
                         <span
-                            :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusBadgeClass(campaign.status)]"
+                            :class="['px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0', getStatusBadgeClass(campaign.status)]"
                         >
                             {{ campaign.status }}
                         </span>
                     </div>
                     
-                    <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                    <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3 sm:mb-4 line-clamp-2">
                         {{ campaign.description }}
                     </p>
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-3 sm:mb-4">
                         <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Budget</div>
-                            <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                            <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Budget</div>
+                            <div class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white break-words">
                                 Rp {{ formatCurrency(campaign.max_budget) }}
                             </div>
                         </div>
                         <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">CPM</div>
-                            <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                            <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">CPM</div>
+                            <div class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white">
                                 Rp {{ formatCurrency(campaign.cpm) }}
                             </div>
                         </div>
                         <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Total Views</div>
-                            <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                            <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Views</div>
+                            <div class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white">
                                 {{ formatCurrency(campaign.total_views) }}
                             </div>
                         </div>
                         <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Total Clips</div>
-                            <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                            <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Clips</div>
+                            <div class="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white">
                                 {{ campaign.total_clips || 0 }}
                             </div>
                         </div>

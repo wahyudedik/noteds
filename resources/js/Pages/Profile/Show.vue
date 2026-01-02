@@ -85,7 +85,7 @@ const hasClipperProfile = computed(() => {
                     />
 
                     <!-- Tab Content -->
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         <TabPosts 
                             v-if="activeTab === 'posts'"
                             :posts="posts"

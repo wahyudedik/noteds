@@ -103,6 +103,9 @@ const changeCategory = (category) => {
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                 Coba cari dengan kata kunci lain atau pilih kategori berbeda.
                             </p>
+                            <p v-if="!filters?.search && !filters?.category" class="mt-2 text-xs text-gray-400 dark:text-gray-500">
+                                Artikel akan otomatis di-sync dari berbagai sumber bisnis setiap hari.
+                            </p>
                         </div>
 
                         <!-- Pagination -->

@@ -26,14 +26,14 @@ defineProps({
     <Head title="Home - Noteds" />
 
     <AuthenticatedLayout>
-        <div class="px-4 py-6 lg:px-6">
+        <div class="px-4 sm:px-6 py-4 sm:py-6">
             <!-- Hybrid Layout: Feed + Sidebar -->
             <div class="mx-auto max-w-7xl">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
                     <!-- Main Feed Column -->
                     <div class="lg:col-span-8 order-2 lg:order-1">
                         <!-- Post Composer -->
-                        <div class="mb-6">
+                        <div class="mb-4 sm:mb-6">
                             <PostComposer v-if="page.props.auth?.user" />
                         </div>
 

@@ -10,7 +10,7 @@ import { computed, ref } from 'vue';
 
 const props = defineProps({
     availableBalance: {
-        type: Number,
+        type: [Number, String],
         default: 0,
     },
 });
@@ -34,7 +34,8 @@ const formatCurrency = (amount) => {
 
 const budgetExceedsBalance = computed(() => {
     const budget = parseFloat(form.max_budget) || 0;
-    return budget > props.availableBalance;
+    const available = Number(props.availableBalance) || 0;
+    return budget > available;
 });
 
 const canSubmit = computed(() => {
@@ -77,7 +78,7 @@ const hasValidVideoReferences = computed(() => {
     }
     return form.video_references.every((ref, index) => {
         const validation = validateVideoReference(index);
-        return validation.valid && ref.url.trim() !== '';
+        return validation && validation.valid && ref.url && ref.url.trim() !== '';
     });
 });
 
@@ -337,7 +338,7 @@ const submit = () => {
                                     <div class="flex justify-between items-center">
                                         <span class="text-sm font-medium text-blue-900 dark:text-blue-100">Available Balance:</span>
                                         <span class="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                            Rp {{ formatCurrency(availableBalance) }}
+                                            Rp {{ formatCurrency(Number(availableBalance) || 0) }}
                                         </span>
                                     </div>
                                 </div>

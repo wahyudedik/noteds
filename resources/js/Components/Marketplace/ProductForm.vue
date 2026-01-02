@@ -103,35 +103,35 @@ const submit = () => {
 </script>
 
 <template>
-    <form @submit.prevent="submit" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div class="space-y-6">
+    <form @submit.prevent="submit" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+        <div class="space-y-4 sm:space-y-6">
             <div>
-                <label class="block text-sm font-medium mb-2">Product Name *</label>
+                <label class="block text-sm sm:text-base font-medium mb-2 text-gray-900 dark:text-white">Product Name *</label>
                 <input
                     v-model="form.name"
                     type="text"
                     required
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    class="w-full px-3 sm:px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-                <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">
+                <div v-if="form.errors.name" class="text-red-500 dark:text-red-400 text-sm mt-1">
                     {{ form.errors.name }}
                 </div>
             </div>
 
             <div>
-                <label class="block text-sm font-medium mb-2">Description *</label>
+                <label class="block text-sm sm:text-base font-medium mb-2 text-gray-900 dark:text-white">Description *</label>
                 <textarea
                     v-model="form.description"
                     required
                     rows="5"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    class="w-full px-3 sm:px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 ></textarea>
-                <div v-if="form.errors.description" class="text-red-500 text-sm mt-1">
+                <div v-if="form.errors.description" class="text-red-500 dark:text-red-400 text-sm mt-1">
                     {{ form.errors.description }}
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-2">Price (Rp) *</label>
                     <input

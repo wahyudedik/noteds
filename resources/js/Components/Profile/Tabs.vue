@@ -62,21 +62,21 @@ const setActiveTab = (tabId) => {
 </script>
 
 <template>
-    <div class="border-b border-gray-200 dark:border-gray-700">
-        <nav class="-mb-px flex space-x-8">
+    <div class="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+        <nav class="-mb-px flex space-x-2 sm:space-x-4 lg:space-x-8 min-w-max sm:min-w-0">
             <button
                 v-for="tab in visibleTabs"
                 :key="tab.id"
                 @click="setActiveTab(tab.id)"
                 :class="[
-                    'group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition',
+                    'group inline-flex items-center py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition whitespace-nowrap',
                     activeTab === tab.id
                         ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
                 ]"
             >
                 <svg
-                    class="-ml-0.5 mr-2 h-5 w-5"
+                    class="-ml-0.5 mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0"
                     :class="activeTab === tab.id ? 'text-indigo-500 dark:text-indigo-400' : 'text-gray-400 group-hover:text-gray-500'"
                     fill="none"
                     stroke="currentColor"

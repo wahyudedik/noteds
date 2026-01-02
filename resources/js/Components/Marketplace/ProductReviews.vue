@@ -16,7 +16,7 @@ const props = defineProps({
         default: 0,
     },
     currentUserId: {
-        type: Number,
+        type: [Number, String],
         default: null,
     },
 });

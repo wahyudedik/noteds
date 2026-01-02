@@ -45,7 +45,7 @@ class CampaignController extends Controller
         $creatorWallet = $walletService->getCreatorWallet(auth()->user());
 
         return Inertia::render('Clipper/Campaigns/Create', [
-            'availableBalance' => $creatorWallet->balance_available ?? 0,
+            'availableBalance' => (float) ($creatorWallet->balance_available ?? 0),
         ]);
     }
 
@@ -112,7 +112,7 @@ class CampaignController extends Controller
 
         return Inertia::render('Clipper/Campaigns/Show', [
             'campaign' => $campaign,
-            'availableBalance' => $creatorWallet->balance_available ?? 0,
+            'availableBalance' => (float) ($creatorWallet->balance_available ?? 0),
         ]);
     }
 

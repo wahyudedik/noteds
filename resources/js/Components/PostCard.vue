@@ -41,13 +41,13 @@ const formatDate = (date) => {
 
 <template>
     <article class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             <!-- Header -->
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center gap-3">
+            <div class="flex items-start justify-between mb-3 sm:mb-4 gap-2">
+                <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                     <Link
                         :href="route('profile.show', post.user.id)"
-                        class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold hover:ring-2 hover:ring-indigo-300 transition overflow-hidden flex-shrink-0"
+                        class="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold hover:ring-2 hover:ring-indigo-300 transition overflow-hidden flex-shrink-0"
                     >
                         <img
                             v-if="post.user.avatar_url"
@@ -55,21 +55,21 @@ const formatDate = (date) => {
                             :alt="post.user.business_name || post.user.name"
                             class="w-full h-full object-cover"
                         />
-                        <span v-else>
+                        <span v-else class="text-xs sm:text-sm">
                             {{ (post.user.business_name || post.user.name).charAt(0).toUpperCase() }}
                         </span>
                     </Link>
-                    <div>
+                    <div class="flex-1 min-w-0">
                         <Link
                             :href="route('profile.show', post.user.id)"
-                            class="font-semibold text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                            class="block font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition truncate"
                         >
                             {{ post.user.business_name || post.user.name }}
                         </Link>
-                        <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <div class="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                             <span>{{ formatDate(post.created_at) }}</span>
-                            <span>•</span>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                            <span class="hidden sm:inline">•</span>
+                            <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
                                 {{ PURPOSE_TYPE_LABELS[post.purpose_type] }}
                             </span>
                         </div>

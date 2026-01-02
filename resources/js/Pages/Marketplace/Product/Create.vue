@@ -14,7 +14,7 @@ import { Head } from '@inertiajs/vue3';
             </h2>
         </template>
 
-        <div class="px-4 py-6 lg:px-6">
+        <div class="px-4 sm:px-6 py-4 sm:py-6">
             <div class="mx-auto max-w-4xl">
                 <ProductForm />
             </div>

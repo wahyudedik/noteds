@@ -35,15 +35,15 @@ const avatarUrl = computed(() => props.profileUser.avatar_url || null);
 <template>
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <!-- Gradient Header -->
-        <div class="h-32 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700"></div>
+        <div class="h-24 sm:h-32 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700"></div>
 
         <!-- Profile Info -->
-        <div class="px-6 pb-6 relative">
+        <div class="px-4 sm:px-6 pb-4 sm:pb-6 relative">
             <!-- Avatar (overlapping header) -->
-            <div class="flex items-end -mt-20 mb-4">
-                <div class="relative">
+            <div class="flex flex-col sm:flex-row items-center sm:items-end -mt-16 sm:-mt-20 mb-4">
+                <div class="relative mb-3 sm:mb-0">
                     <div 
-                        class="h-32 w-32 rounded-full bg-indigo-500 border-4 border-white dark:border-gray-800 flex items-center justify-center text-white text-4xl font-bold overflow-hidden"
+                        class="h-24 w-24 sm:h-32 sm:w-32 rounded-full bg-indigo-500 border-4 border-white dark:border-gray-800 flex items-center justify-center text-white text-2xl sm:text-4xl font-bold overflow-hidden"
                     >
                         <img 
                             v-if="avatarUrl"
@@ -56,17 +56,17 @@ const avatarUrl = computed(() => props.profileUser.avatar_url || null);
                 </div>
                 
                 <!-- Name and Edit Button -->
-                <div class="ml-6 flex-1">
-                    <div class="flex items-start justify-between">
+                <div class="sm:ml-6 flex-1 w-full sm:w-auto text-center sm:text-left">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div class="flex-1">
-                            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                                 {{ displayName }}
                             </h1>
-                            <p class="text-lg text-gray-600 dark:text-gray-400 mb-2">
+                            <p class="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 mb-2">
                                 {{ displaySubtitle }}
                             </p>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center justify-center sm:justify-end gap-2">
                             <FollowButton
                                 v-if="!isOwnProfile && page.props.auth?.user"
                                 :user-id="profileUser.id"
@@ -77,7 +77,7 @@ const avatarUrl = computed(() => props.profileUser.avatar_url || null);
                             <Link
                                 v-if="isOwnProfile"
                                 :href="route('profile.edit')"
-                                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+                                class="px-4 sm:px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
                             >
                                 Edit Profile
                             </Link>
@@ -88,14 +88,14 @@ const avatarUrl = computed(() => props.profileUser.avatar_url || null);
 
             <!-- Business Field -->
             <div v-if="profileUser.business_field && !displaySubtitle.includes(profileUser.business_field)" 
-                 class="text-gray-600 dark:text-gray-400 mb-4 text-base">
+                 class="text-gray-600 dark:text-gray-400 mb-3 sm:mb-4 text-sm sm:text-base text-center sm:text-left">
                 {{ profileUser.business_field }}
             </div>
 
             <!-- Verified Mentor Badge -->
-            <div v-if="profileUser.is_verified_mentor" class="mb-4">
-                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <div v-if="profileUser.is_verified_mentor" class="mb-3 sm:mb-4 flex justify-center sm:justify-start">
+                <span class="inline-flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
                     Verified Mentor
@@ -103,13 +103,13 @@ const avatarUrl = computed(() => props.profileUser.avatar_url || null);
             </div>
 
             <!-- Portfolio and Website Links -->
-            <div v-if="profileUser.portfolio_url || profileUser.website_url" class="flex gap-3">
+            <div v-if="profileUser.portfolio_url || profileUser.website_url" class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center sm:justify-start">
                 <a
                     v-if="profileUser.portfolio_url"
                     :href="profileUser.portfolio_url"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors"
+                    class="inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors"
                 >
                     Portfolio
                 </a>
@@ -118,7 +118,7 @@ const avatarUrl = computed(() => props.profileUser.avatar_url || null);
                     :href="profileUser.website_url"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors"
+                    class="inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors"
                 >
                     Website
                 </a>

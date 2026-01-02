@@ -125,21 +125,52 @@ const notifications = computed(() => {
                     </Dropdown>
                 </div>
 
-                <!-- Mobile Profile Button -->
-                <Link
-                    :href="route('profile.show', page.props.auth?.user?.id)"
-                    class="lg:hidden h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold text-sm overflow-hidden flex-shrink-0"
-                >
-                    <img
-                        v-if="page.props.auth?.user?.avatar_url"
-                        :src="page.props.auth.user.avatar_url"
-                        :alt="page.props.auth.user.business_name || page.props.auth.user.name"
-                        class="w-full h-full object-cover"
-                    />
-                    <span v-else>
-                        {{ (page.props.auth?.user?.business_name || page.props.auth?.user?.name || 'U').charAt(0).toUpperCase() }}
-                    </span>
-                </Link>
+                <!-- Mobile Profile Dropdown -->
+                <div class="lg:hidden">
+                    <Dropdown align="right" width="48">
+                        <template #trigger>
+                            <button class="h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold text-sm overflow-hidden flex-shrink-0">
+                                <img
+                                    v-if="page.props.auth?.user?.avatar_url"
+                                    :src="page.props.auth.user.avatar_url"
+                                    :alt="page.props.auth.user.business_name || page.props.auth.user.name"
+                                    class="w-full h-full object-cover"
+                                />
+                                <span v-else>
+                                    {{ (page.props.auth?.user?.business_name || page.props.auth?.user?.name || 'U').charAt(0).toUpperCase() }}
+                                </span>
+                            </button>
+                        </template>
+
+                        <template #content>
+                            <DropdownLink :href="route('profile.show', page.props.auth?.user?.id)">
+                                My Profile
+                            </DropdownLink>
+                            <DropdownLink :href="route('profile.edit')">
+                                Edit Profile
+                            </DropdownLink>
+                            <DropdownLink :href="route('dashboard')">
+                                Dashboard
+                            </DropdownLink>
+                            <DropdownLink 
+                                v-if="page.props.auth?.user?.clipper_role === 'brand' || page.props.auth?.user?.clipper_role === 'clipper' || page.props.auth?.user?.role === 'brand' || page.props.auth?.user?.role === 'clipper'"
+                                :href="route('clipper.campaigns.index')"
+                            >
+                                Clipper
+                            </DropdownLink>
+                            <DropdownLink :href="route('marketplace.index')">
+                                Marketplace
+                            </DropdownLink>
+                            <DropdownLink :href="route('settings.index')">
+                                Settings
+                            </DropdownLink>
+                            <div class="border-t border-gray-200 dark:border-gray-700"></div>
+                            <DropdownLink :href="route('logout')" method="post" as="button">
+                                Log Out
+                            </DropdownLink>
+                        </template>
+                    </Dropdown>
+                </div>
             </div>
         </div>
     </header>

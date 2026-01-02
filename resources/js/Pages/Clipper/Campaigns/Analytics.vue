@@ -102,9 +102,77 @@ const fetchValidationDetails = async () => {
     }
 };
 
+const renderChart = () => {
+    // Simple bar chart implementation
+    // In production, use Chart.js or similar library
+    const ctx = chartCanvas.value?.getContext('2d');
+    if (!ctx || !chartCanvas.value) return;
+
+    const container = chartCanvas.value.parentElement;
+    if (!container) return;
+    
+    const rect = container.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+
+    const data = props.viewsChartData;
+    const labels = Object.keys(data).sort();
+    const values = labels.map(date => data[date] || 0);
+    const maxValue = Math.max(...values, 1);
+
+    if (labels.length === 0) {
+        // Clear canvas if no data
+        ctx.clearRect(0, 0, width, height);
+        return;
+    }
+
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+
+    // Draw bars
+    const barWidth = width / labels.length;
+    const barMaxHeight = height - 40;
+    const padding = Math.max(2, barWidth * 0.1); // 10% padding, minimum 2px
+
+    values.forEach((value, index) => {
+        const barHeight = maxValue > 0 ? (value / maxValue) * barMaxHeight : 0;
+        const x = index * barWidth;
+        const y = height - barHeight - 20;
+
+        ctx.fillStyle = '#3B82F6';
+        ctx.fillRect(x + padding, y, barWidth - (padding * 2), barHeight);
+    });
+};
+
+const resizeChart = () => {
+    if (!chartCanvas.value) return;
+    
+    const container = chartCanvas.value.parentElement;
+    if (!container) return;
+    
+    const rect = container.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    
+    // Set actual size in memory (scaled for DPR)
+    chartCanvas.value.width = rect.width * dpr;
+    chartCanvas.value.height = rect.height * dpr;
+    
+    // Scale the canvas back down using CSS
+    chartCanvas.value.style.width = rect.width + 'px';
+    chartCanvas.value.style.height = rect.height + 'px';
+    
+    // Scale the drawing context so everything draws at the correct size
+    const ctx = chartCanvas.value.getContext('2d');
+    ctx.scale(dpr, dpr);
+    
+    // Re-render chart with new dimensions
+    renderChart();
+};
+
 onMounted(() => {
     if (props.viewsChartData && Object.keys(props.viewsChartData).length > 0 && chartCanvas.value) {
-        renderChart();
+        resizeChart();
+        window.addEventListener('resize', resizeChart);
     }
     
     if (shouldPoll.value) {
@@ -125,7 +193,14 @@ onUnmounted(() => {
         pollInterval.value = null;
     }
     isPolling.value = false;
+    window.removeEventListener('resize', resizeChart);
 });
+
+watch(() => props.viewsChartData, () => {
+    if (props.viewsChartData && Object.keys(props.viewsChartData).length > 0 && chartCanvas.value) {
+        resizeChart();
+    }
+}, { deep: true });
 
 watch(() => props.campaign, (newCampaign) => {
     if (newCampaign && ['active', 'paused'].includes(newCampaign.status) && !pollInterval.value) {
@@ -142,34 +217,6 @@ watch(() => props.campaign, (newCampaign) => {
         isPolling.value = false;
     }
 }, { deep: true });
-
-const renderChart = () => {
-    // Simple bar chart implementation
-    // In production, use Chart.js or similar library
-    const ctx = chartCanvas.value?.getContext('2d');
-    if (!ctx) return;
-
-    const data = props.viewsChartData;
-    const labels = Object.keys(data).sort();
-    const values = labels.map(date => data[date] || 0);
-    const maxValue = Math.max(...values, 1);
-
-    // Clear canvas
-    ctx.clearRect(0, 0, chartCanvas.value.width, chartCanvas.value.height);
-
-    // Draw bars
-    const barWidth = chartCanvas.value.width / labels.length;
-    const barMaxHeight = chartCanvas.value.height - 40;
-
-    values.forEach((value, index) => {
-        const barHeight = (value / maxValue) * barMaxHeight;
-        const x = index * barWidth;
-        const y = chartCanvas.value.height - barHeight - 20;
-
-        ctx.fillStyle = '#3B82F6';
-        ctx.fillRect(x + 5, y, barWidth - 10, barHeight);
-    });
-};
 </script>
 
 <template>
@@ -268,10 +315,13 @@ const renderChart = () => {
                 />
 
                 <!-- Views Chart -->
-                <div v-if="campaign && viewsChartData" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <div v-if="campaign && viewsChartData" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
                     <h3 class="text-lg font-semibold mb-4">Views Over Time</h3>
-                    <div class="h-64">
-                        <canvas ref="chartCanvas" width="800" height="200"></canvas>
+                    <div class="relative h-48 sm:h-64 overflow-hidden">
+                        <canvas 
+                            ref="chartCanvas" 
+                            class="w-full h-full"
+                        ></canvas>
                     </div>
                 </div>
 

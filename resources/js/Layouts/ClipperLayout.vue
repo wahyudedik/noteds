@@ -71,20 +71,74 @@ const tabs = computed(() => {
 });
 
 const isActiveTab = (routeName) => {
-    const currentUrl = page.url;
-    const routeUrl = route(routeName).split('?')[0];
+    const currentUrl = page.url.split('?')[0].replace(/\/$/, ''); // Remove query params and trailing slash
     
-    // Special handling for dashboard
-    if (routeName === 'clipper.dashboard') {
-        return currentUrl === routeUrl || currentUrl === '/clipper';
+    // Direct URL path mappings for each route
+    switch (routeName) {
+        case 'clipper.dashboard':
+            return currentUrl === '/clipper/dashboard' || currentUrl === '/clipper';
+            
+        case 'clipper.campaigns.index':
+            // Match /clipper/campaigns exactly or /clipper/campaigns/{id}
+            // But exclude analytics, available, create, edit
+            if (currentUrl === '/clipper/campaigns') {
+                return true;
+            }
+            if (currentUrl.startsWith('/clipper/campaigns/')) {
+                return !currentUrl.startsWith('/clipper/campaigns/analytics') &&
+                       !currentUrl.startsWith('/clipper/campaigns/available') &&
+                       !currentUrl.startsWith('/clipper/campaigns/create') &&
+                       !currentUrl.startsWith('/clipper/campaigns/edit');
+            }
+            return false;
+            
+        case 'clipper.campaigns.analytics':
+            return currentUrl.startsWith('/clipper/campaigns/analytics');
+            
+        case 'clipper.campaigns.available':
+            return currentUrl.startsWith('/clipper/campaigns/available');
+            
+        case 'clipper.top-ups.index':
+            // Match /clipper/top-ups exactly or /clipper/top-ups/{id}
+            // But exclude create and payment
+            if (currentUrl === '/clipper/top-ups') {
+                return true;
+            }
+            if (currentUrl.startsWith('/clipper/top-ups/')) {
+                return !currentUrl.startsWith('/clipper/top-ups/create') &&
+                       !currentUrl.startsWith('/clipper/top-ups/payment');
+            }
+            return false;
+            
+        case 'clipper.wallet.creator':
+            return currentUrl === '/clipper/wallet/creator' || 
+                   currentUrl.startsWith('/clipper/wallet/creator/');
+            
+        case 'clipper.wallet.clipper':
+            return currentUrl === '/clipper/wallet/clipper' || 
+                   currentUrl.startsWith('/clipper/wallet/clipper/');
+            
+        case 'clipper.clips.index':
+            // Match /clipper/clips exactly or /clipper/clips/{id}
+            // But exclude create and edit
+            if (currentUrl === '/clipper/clips') {
+                return true;
+            }
+            if (currentUrl.startsWith('/clipper/clips/')) {
+                return !currentUrl.startsWith('/clipper/clips/create') &&
+                       !currentUrl.startsWith('/clipper/clips/edit');
+            }
+            return false;
+            
+        default:
+            // Fallback: try to get route URL and match
+            try {
+                const routeUrl = route(routeName).split('?')[0].replace(/\/$/, '');
+                return currentUrl === routeUrl || currentUrl.startsWith(routeUrl + '/');
+            } catch (error) {
+                return false;
+            }
     }
-    
-    // Special handling for analytics
-    if (routeName === 'clipper.campaigns.analytics') {
-        return currentUrl.startsWith('/clipper/campaigns/analytics');
-    }
-    
-    return currentUrl.startsWith(routeUrl);
 };
 </script>
 
@@ -94,37 +148,36 @@ const isActiveTab = (routeName) => {
             <slot name="header" />
         </template>
 
-        <div class="px-4 py-6 lg:px-6">
+        <div class="px-4 sm:px-6 py-4 sm:py-6">
             <!-- Navigation Tabs -->
-            <div v-if="tabs.length > 0" class="mb-6 border-b border-gray-200 dark:border-gray-700">
-                <nav class="-mb-px flex space-x-8 overflow-x-auto">
+            <div v-if="tabs.length > 0" class="mb-4 sm:mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+                <nav class="-mb-px flex space-x-2 sm:space-x-4 lg:space-x-8 min-w-max sm:min-w-0">
                     <Link
                         v-for="tab in tabs"
                         :key="tab.name"
                         :href="route(tab.route)"
                         :class="[
-                            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors',
+                            'group inline-flex items-center py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition whitespace-nowrap',
                             isActiveTab(tab.route)
-                                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
                         ]"
                     >
-                        <div class="flex items-center gap-2">
-                            <svg
-                                class="h-5 w-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    :d="tab.icon"
-                                />
-                            </svg>
-                            <span>{{ tab.name }}</span>
-                        </div>
+                        <svg
+                            class="-ml-0.5 mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0"
+                            :class="isActiveTab(tab.route) ? 'text-indigo-500 dark:text-indigo-400' : 'text-gray-400 group-hover:text-gray-500'"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                :d="tab.icon"
+                            />
+                        </svg>
+                        <span>{{ tab.name }}</span>
                     </Link>
                 </nav>
             </div>

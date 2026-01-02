@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class ExplorerController extends Controller
@@ -14,27 +15,33 @@ class ExplorerController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Article::query()->recent();
+            $cacheKey = 'explorer_articles_' . md5($request->getQueryString());
+            $cacheTTL = config('articles.cache.articles_list_ttl', 900);
 
-            // Apply category filter
-            if ($request->has('category') && $request->category) {
-                $query->byCategory($request->category);
-            }
+            $articles = Cache::remember($cacheKey, $cacheTTL, function () use ($request) {
+                $query = Article::query()->recent();
 
-            // Apply search filter
-            if ($request->has('search') && $request->search) {
-                $query->search($request->search);
-            }
+                // Apply category filter
+                if ($request->has('category') && $request->category) {
+                    $query->byCategory($request->category);
+                }
 
-            // Paginate results
-            $articles = $query->paginate(20)->withQueryString();
+                // Apply search filter
+                if ($request->has('search') && $request->search) {
+                    $query->search($request->search);
+                }
 
-            // Get available categories
-            $categories = Article::distinct('category')
-                ->whereNotNull('category')
-                ->pluck('category')
-                ->sort()
-                ->values();
+                return $query->paginate(20)->withQueryString();
+            });
+
+            // Get available categories (cached)
+            $categories = Cache::remember('explorer_categories', config('articles.cache.categories_ttl', 3600), function () {
+                return Article::distinct('category')
+                    ->whereNotNull('category')
+                    ->pluck('category')
+                    ->sort()
+                    ->values();
+            });
 
             return Inertia::render('Explorer/Index', [
                 'articles' => $articles,
