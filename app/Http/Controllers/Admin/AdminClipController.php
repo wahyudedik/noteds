@@ -72,7 +72,7 @@ class AdminClipController extends Controller
         $viewValidationService = app(\App\Services\ViewValidationService::class);
         $fraudDetected = false;
         $stabilityScore = null;
-        
+
         try {
             $fraudDetected = $viewValidationService->detectFraud($clip);
             $stabilityScore = $viewValidationService->checkStability($clip);
@@ -147,12 +147,12 @@ class AdminClipController extends Controller
     public function manualValidate($id)
     {
         $clip = Clip::findOrFail($id);
-        
+
         $viewValidationService = app(\App\Services\ViewValidationService::class);
-        
+
         try {
             $result = $viewValidationService->validateViews($clip);
-            
+
             \App\Models\AuditLog::logAction([
                 'admin_id' => auth()->id(),
                 'action' => 'manual_validate_views',
@@ -160,7 +160,7 @@ class AdminClipController extends Controller
                 'target_id' => $clip->id,
                 'notes' => 'Admin manually triggered view validation',
             ]);
-            
+
             if ($result) {
                 return back()->with('success', 'Views validated successfully.');
             } else {
@@ -182,11 +182,11 @@ class AdminClipController extends Controller
         ]);
 
         $clip = Clip::findOrFail($id);
-        
+
         $oldValidViews = $clip->valid_views;
         $clip->valid_views = $validated['valid_views'];
         $clip->save();
-        
+
         \App\Models\AuditLog::logAction([
             'admin_id' => auth()->id(),
             'action' => 'override_validation',
@@ -196,7 +196,7 @@ class AdminClipController extends Controller
             'new_value' => ['valid_views' => $validated['valid_views']],
             'notes' => $validated['reason'],
         ]);
-        
+
         return back()->with('success', 'Validation result overridden successfully.');
     }
 
@@ -205,30 +205,77 @@ class AdminClipController extends Controller
      */
     public function getFraudAlerts()
     {
-        $clips = Clip::with(['campaign', 'clipper', 'viewTrackings'])
-            ->whereIn('status', ['pending', 'approved'])
-            ->get();
-        
-        $viewValidationService = app(\App\Services\ViewValidationService::class);
-        
-        $fraudClips = $clips->filter(function ($clip) use ($viewValidationService) {
-            try {
-                return $viewValidationService->detectFraud($clip);
-            } catch (\Exception $e) {
-                return false;
-            }
-        })->map(function ($clip) use ($viewValidationService) {
-            try {
-                $clip->stability_score = $viewValidationService->checkStability($clip);
-            } catch (\Exception $e) {
-                $clip->stability_score = null;
-            }
-            return $clip;
-        });
-        
-        return response()->json([
-            'fraud_clips' => $fraudClips->values(),
-            'count' => $fraudClips->count(),
-        ]);
+        try {
+            $clips = Clip::with(['campaign', 'clipper', 'viewTrackings'])
+                ->whereIn('status', ['pending', 'approved'])
+                ->get();
+
+            $viewValidationService = app(\App\Services\ViewValidationService::class);
+
+            $fraudClips = $clips->filter(function ($clip) use ($viewValidationService) {
+                try {
+                    return $viewValidationService->detectFraud($clip);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Failed to detect fraud for clip', [
+                        'clip_id' => $clip->id ?? null,
+                        'error' => $e->getMessage(),
+                    ]);
+                    return false;
+                }
+            })->map(function ($clip) use ($viewValidationService) {
+                try {
+                    if ($clip->viewTrackings && $clip->viewTrackings->isNotEmpty()) {
+                        $clip->stability_score = $viewValidationService->checkStability($clip);
+                    } else {
+                        $clip->stability_score = null;
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Failed to check stability for clip', [
+                        'clip_id' => $clip->id ?? null,
+                        'error' => $e->getMessage(),
+                    ]);
+                    $clip->stability_score = null;
+                }
+                return $clip;
+            })->values();
+
+            // Ensure fraudClips is a proper array/collection that can be serialized
+            $fraudClipsArray = $fraudClips->map(function ($clip) {
+                return [
+                    'id' => $clip->id,
+                    'campaign' => $clip->campaign ? [
+                        'id' => $clip->campaign->id,
+                        'title' => $clip->campaign->title,
+                    ] : null,
+                    'clipper' => $clip->clipper ? [
+                        'id' => $clip->clipper->id,
+                        'name' => $clip->clipper->name,
+                    ] : null,
+                    'platform' => $clip->platform,
+                    'status' => $clip->status,
+                    'valid_views' => $clip->valid_views,
+                    'views_count' => ($clip->viewTrackings->first()?->views_count) ?? $clip->valid_views ?? 0,
+                    'approved_reward' => $clip->approved_reward,
+                    'pending_reward' => $clip->pending_reward,
+                    'stability_score' => $clip->stability_score ?? null,
+                ];
+            })->toArray();
+
+            return Inertia::render('Admin/Clips/FraudAlerts', [
+                'fraudClips' => $fraudClipsArray,
+                'count' => count($fraudClipsArray),
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to get fraud alerts', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            // Return empty fraud alerts list if there's an error
+            return Inertia::render('Admin/Clips/FraudAlerts', [
+                'fraudClips' => [],
+                'count' => 0,
+            ]);
+        }
     }
 }

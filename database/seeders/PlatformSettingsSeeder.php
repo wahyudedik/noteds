@@ -33,5 +33,13 @@ class PlatformSettingsSeeder extends Seeder
             'number',
             'Flat fee commission amount (in Rupiah) per marketplace transaction'
         );
+
+        // Clipper Platform Fee Settings
+        PlatformSetting::set(
+            'clipper_platform_fee_percent',
+            config('clipper.platform_fee_percent', 5),
+            'number',
+            'Platform fee percentage (0-100) deducted from clipper rewards'
+        );
     }
 }

@@ -403,6 +403,22 @@ const formatCurrency = (amount) => {
                             </Link>
                         </div>
                     </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Clipper Settings</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                    Configure platform fee percentage for clipper rewards
+                                </p>
+                            </div>
+                            <Link
+                                :href="route('admin.clipper.settings')"
+                                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                            >
+                                Configure
+                            </Link>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

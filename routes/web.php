@@ -404,13 +404,15 @@ Route::middleware('auth')->group(function () {
         Route::resource('campaigns', App\Http\Controllers\Admin\AdminCampaignController::class)->only(['index', 'show']);
         Route::post('campaigns/{campaign}/suspend', [App\Http\Controllers\Admin\AdminCampaignController::class, 'suspend'])->name('campaigns.suspend');
         Route::get('campaigns/{campaign}/analytics', [App\Http\Controllers\Admin\AdminCampaignController::class, 'viewAnalytics'])->name('campaigns.analytics');
+        
+        // Clips routes - fraud-alerts must come BEFORE resource route to avoid route conflict
+        Route::get('clips/fraud-alerts', [App\Http\Controllers\Admin\AdminClipController::class, 'getFraudAlerts'])->name('clips.fraud-alerts');
         Route::resource('clips', App\Http\Controllers\Admin\AdminClipController::class)->only(['index', 'show']);
         Route::post('clips/{clip}/approve', [App\Http\Controllers\Admin\AdminClipController::class, 'approve'])->name('clips.approve');
         Route::post('clips/{clip}/reject', [App\Http\Controllers\Admin\AdminClipController::class, 'reject'])->name('clips.reject');
         Route::post('clips/{clip}/adjust-reward', [App\Http\Controllers\Admin\AdminClipController::class, 'adjustReward'])->name('clips.adjust-reward');
         Route::post('clips/{clip}/validate', [App\Http\Controllers\Admin\AdminClipController::class, 'manualValidate'])->name('clips.validate');
         Route::post('clips/{clip}/override-validation', [App\Http\Controllers\Admin\AdminClipController::class, 'overrideValidation'])->name('clips.override-validation');
-        Route::get('clips/fraud-alerts', [App\Http\Controllers\Admin\AdminClipController::class, 'getFraudAlerts'])->name('clips.fraud-alerts');
 
         // Brand Approvals
         Route::get('brand-approvals', [App\Http\Controllers\Admin\AdminBrandApprovalController::class, 'index'])->name('brand-approvals.index');
@@ -429,6 +431,13 @@ Route::middleware('auth')->group(function () {
         Route::put('marketplace/settings', [App\Http\Controllers\Admin\AdminMarketplaceSettingsController::class, 'update'])
             ->middleware('throttle:10,1')
             ->name('marketplace.settings.update');
+
+        // Clipper Settings
+        Route::get('clipper/settings', [App\Http\Controllers\Admin\AdminClipperSettingsController::class, 'index'])
+            ->name('clipper.settings');
+        Route::put('clipper/settings', [App\Http\Controllers\Admin\AdminClipperSettingsController::class, 'update'])
+            ->middleware('throttle:10,1')
+            ->name('clipper.settings.update');
 
         // User Management
         Route::resource('users', App\Http\Controllers\Admin\UserManagementController::class)->only(['index', 'show', 'edit', 'update']);

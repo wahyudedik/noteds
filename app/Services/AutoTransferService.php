@@ -284,8 +284,13 @@ class AutoTransferService
      */
     public function deductPlatformFee(float $amount): float
     {
-        $feePercent = config('clipper.platform_fee_percent', 5);
-        return round($amount * ($feePercent / 100), 2);
+        // Use PlatformSetting for dynamic configuration (admin can change via UI)
+        // Fallback to config file if setting doesn't exist yet
+        $feePercent = \App\Models\PlatformSetting::get(
+            'clipper_platform_fee_percent',
+            config('clipper.platform_fee_percent', 5)
+        );
+        return round($amount * ((float) $feePercent / 100), 2);
     }
 
     /**

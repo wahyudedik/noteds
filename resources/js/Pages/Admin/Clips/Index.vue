@@ -24,7 +24,7 @@ const getStatusBadgeClass = (status) => {
 const filterByStatus = (status) => {
     router.get(route('admin.clips.index'), { 
         status: status || null,
-        fraud_detected: filters?.fraud_detected || null,
+        fraud_detected: props.filters?.fraud_detected || null,
     }, {
         preserveState: true,
         preserveScroll: true,
@@ -33,7 +33,7 @@ const filterByStatus = (status) => {
 
 const filterByFraud = (fraudDetected) => {
     router.get(route('admin.clips.index'), { 
-        status: filters?.status || null,
+        status: props.filters?.status || null,
         fraud_detected: fraudDetected || null,
     }, {
         preserveState: true,
