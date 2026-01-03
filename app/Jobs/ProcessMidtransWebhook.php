@@ -6,6 +6,7 @@ use App\Services\MidtransService;
 use App\Services\MarketplaceService;
 use App\Services\BalanceService;
 use App\Services\NotificationService;
+use App\Services\MarketplaceCommissionService;
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -26,7 +27,8 @@ class ProcessMidtransWebhook implements ShouldQueue
         MidtransService $midtransService,
         MarketplaceService $marketplaceService,
         BalanceService $balanceService,
-        NotificationService $notificationService
+        NotificationService $notificationService,
+        MarketplaceCommissionService $commissionService
     ): void {
         try {
             $result = $midtransService->handleWebhook($this->webhookData);
@@ -37,20 +39,39 @@ class ProcessMidtransWebhook implements ShouldQueue
                     $order = Order::where('order_number', $orderId)->first();
                     
                     if ($order && $order->payment_status === 'paid') {
-                        // Complete the order
-                        $marketplaceService->completeOrder($order);
+                        // IMPORTANT: Apply commission BEFORE completing the order
+                        // This ensures commission data is set even if completeOrder fails
+                        // applyCommission is idempotent, so it's safe to call multiple times
+                        $commissionData = $commissionService->applyCommission($order);
 
-                        // Add balance to seller
+                        // Refresh order to get updated commission fields
+                        $order->refresh();
+
+                        // Complete the order only if not already completed
+                        // This is idempotent - completeOrder checks status before updating
+                        if ($order->status !== 'completed') {
+                            $marketplaceService->completeOrder($order);
+                            $order->refresh();
+                        }
+
+                        // Add balance to seller (seller amount after commission deduction)
+                        // Only add if seller_amount hasn't been added yet (check transaction history)
                         $seller = $order->product->seller;
-                        $balanceService->addBalance(
-                            $seller,
-                            $order->total,
-                            "Sale: Order #{$order->order_number}",
-                            $order->id,
-                            'sale'
-                        );
+                        $existingTransaction = \App\Models\Transaction::where('reference_id', $order->id)
+                            ->where('type', 'sale')
+                            ->first();
+                        
+                        if (!$existingTransaction) {
+                            $balanceService->addBalance(
+                                $seller,
+                                $commissionData['seller_amount'],
+                                "Sale: Order #{$order->order_number}" . ($commissionData['commission_total'] > 0 ? " (Commission: Rp " . number_format($commissionData['commission_total'], 0, ',', '.') . ")" : ''),
+                                $order->id,
+                                'sale'
+                            );
+                        }
 
-                        // Notify seller
+                        // Notify seller (idempotent - notification service should handle duplicates)
                         $notificationService->notifyNewOrder($order);
                     }
                 }

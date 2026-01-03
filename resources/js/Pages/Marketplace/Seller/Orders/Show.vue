@@ -72,10 +72,50 @@ const updateStatus = () => {
                         </div>
 
                         <div>
-                            <h4 class="font-semibold mb-2">Total</h4>
-                            <p class="text-xl text-green-600 font-semibold">
+                            <h4 class="font-semibold mb-2">Order Total</h4>
+                            <p class="text-xl text-blue-600 font-semibold">
                                 Rp {{ new Intl.NumberFormat('id-ID').format(order.total) }}
                             </p>
+                        </div>
+
+                        <!-- Commission Breakdown -->
+                        <div
+                            v-if="order.platform_commission_total !== null && order.platform_commission_total > 0"
+                            class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600"
+                        >
+                            <h4 class="font-semibold mb-3 text-gray-900 dark:text-white">Commission Breakdown</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Commission ({{ order.platform_commission_percentage }}%):</span>
+                                    <span class="font-medium text-red-600 dark:text-red-400">
+                                        - Rp {{ new Intl.NumberFormat('id-ID').format(order.platform_commission_percentage ? (order.total * order.platform_commission_percentage / 100) : 0) }}
+                                    </span>
+                                </div>
+                                <div
+                                    v-if="order.platform_commission_flat && order.platform_commission_flat > 0"
+                                    class="flex justify-between"
+                                >
+                                    <span class="text-gray-600 dark:text-gray-400">Flat Fee:</span>
+                                    <span class="font-medium text-red-600 dark:text-red-400">
+                                        - Rp {{ new Intl.NumberFormat('id-ID').format(order.platform_commission_flat) }}
+                                    </span>
+                                </div>
+                                <div class="border-t border-gray-300 dark:border-gray-500 pt-2 flex justify-between font-semibold">
+                                    <span class="text-red-600 dark:text-red-400">Total Commission:</span>
+                                    <span class="text-red-600 dark:text-red-400">
+                                        - Rp {{ new Intl.NumberFormat('id-ID').format(order.platform_commission_total) }}
+                                    </span>
+                                </div>
+                                <div class="border-t border-gray-300 dark:border-gray-500 pt-2 mt-2 flex justify-between items-center">
+                                    <span class="text-base font-semibold text-gray-900 dark:text-white">Amount You Received:</span>
+                                    <span class="text-xl font-bold text-green-600 dark:text-green-400">
+                                        Rp {{ new Intl.NumberFormat('id-ID').format(order.seller_amount || order.total) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else-if="order.seller_amount && order.seller_amount !== order.total" class="text-sm text-gray-600 dark:text-gray-400">
+                            You received: <span class="font-semibold text-green-600 dark:text-green-400">Rp {{ new Intl.NumberFormat('id-ID').format(order.seller_amount) }}</span>
                         </div>
 
                         <div v-if="order.license_key">

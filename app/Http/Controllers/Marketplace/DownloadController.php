@@ -20,14 +20,16 @@ class DownloadController extends Controller
     {
         $user = auth()->user();
 
-        // Check if user has a paid order for this product
+        // Check if user has a paid and completed order for this product
+        // Payment must be 'paid' (settlement) AND order must be 'completed' to allow download
         $order = Order::where('user_id', $user->id)
             ->where('product_id', $product->id)
-            ->where('payment_status', 'paid')
+            ->where('payment_status', 'paid') // Only settlement status sets this to 'paid'
+            ->where('status', 'completed') // Order must also be completed
             ->first();
 
         if (!$order) {
-            abort(403, 'You must purchase this product to download it.');
+            abort(403, 'You must purchase and complete payment for this product to download it. Please wait for payment confirmation.');
         }
 
         if (!$product->file_download) {

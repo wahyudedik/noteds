@@ -2,6 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import ProductReviews from '@/Components/Marketplace/ProductReviews.vue';
 import ReviewForm from '@/Components/Marketplace/ReviewForm.vue';
+import ProductShare from '@/Components/Marketplace/ProductShare.vue';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -111,8 +112,13 @@ const handleCancelReview = () => {
                                     Rp {{ new Intl.NumberFormat('id-ID').format(product.price) }}
                                 </p>
                             </div>
-                            <div v-if="canEdit" class="flex space-x-2">
+                            <div class="flex items-center gap-2">
+                                <!-- Share Button -->
+                                <ProductShare :product="product" />
+                                
+                                <!-- Edit Button (only for owner) -->
                                 <Link
+                                    v-if="canEdit"
                                     :href="route('marketplace.products.edit', product.id)"
                                     class="px-3 sm:px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm sm:text-base font-medium transition-colors"
                                 >

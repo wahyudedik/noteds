@@ -34,6 +34,10 @@ class Order extends Model
         'midtrans_order_id',
         'midtrans_transaction_id',
         'license_key',
+        'platform_commission_percentage',
+        'platform_commission_flat',
+        'platform_commission_total',
+        'seller_amount',
     ];
 
     protected function casts(): array
@@ -42,6 +46,10 @@ class Order extends Model
             'price' => 'decimal:2',
             'total' => 'decimal:2',
             'quantity' => 'integer',
+            'platform_commission_percentage' => 'decimal:2',
+            'platform_commission_flat' => 'decimal:2',
+            'platform_commission_total' => 'decimal:2',
+            'seller_amount' => 'decimal:2',
         ];
     }
 

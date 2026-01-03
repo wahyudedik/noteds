@@ -8,6 +8,8 @@ use App\Services\MarketplaceService;
 use App\Services\BalanceService;
 use App\Services\NotificationService;
 use App\Services\TopUpService;
+use App\Services\MarketplaceCommissionService;
+use App\Models\PlatformWallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -18,7 +20,8 @@ class PaymentController extends Controller
         private MarketplaceService $marketplaceService,
         private BalanceService $balanceService,
         private NotificationService $notificationService,
-        private TopUpService $topUpService
+        private TopUpService $topUpService,
+        private MarketplaceCommissionService $commissionService
     ) {}
 
     public function webhook(Request $request)
@@ -66,18 +69,25 @@ class PaymentController extends Controller
                 $fraudStatus = $data['fraud_status'] ?? null;
 
                 // Handle transaction status for TopUp
-                // Check for fraudulent captures first (capture with fraud_status = deny)
-                if ($transactionStatus === 'capture' && $fraudStatus === 'deny') {
-                    // Fraudulent capture - mark as failed
-                    $topUp->markAsFailed();
-                    Log::info("Top-up payment failed due to fraud: {$orderId}, status: {$transactionStatus}, fraud_status: {$fraudStatus}");
-                } elseif ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
-                    // For capture, check fraud status (must be accept or null)
-                    // For settlement, payment is confirmed successful
-                    if ($transactionStatus === 'settlement' || ($fraudStatus === 'accept' || $fraudStatus === null)) {
-                        // Process successful payment
-                        $this->topUpService->processTopUpSuccess($topUp);
-                        Log::info("Top-up processed successfully: {$topUpId}");
+                // Note: For consistency and security, only 'settlement' status is accepted as final payment
+                // 'capture' status is NOT final - payment can still be charged back
+                // This matches the order webhook handling logic
+                if ($transactionStatus === 'settlement') {
+                    // Settlement is the final confirmed state - payment is guaranteed
+                    // Process successful payment
+                    $this->topUpService->processTopUpSuccess($topUp);
+                    Log::info("Top-up processed successfully (settlement): {$topUpId}");
+                } elseif ($transactionStatus === 'capture') {
+                    // Capture means payment is authorized but NOT yet settled
+                    // Do NOT process yet - wait for settlement
+                    // Check for fraudulent captures (capture with fraud_status = deny)
+                    if ($fraudStatus === 'deny') {
+                        // Fraudulent capture - mark as failed
+                        $topUp->markAsFailed();
+                        Log::info("Top-up payment failed due to fraud: {$orderId}, status: {$transactionStatus}, fraud_status: {$fraudStatus}");
+                    } else {
+                        // Valid capture but not settled yet - keep as pending
+                        Log::info("Top-up payment captured but not settled yet: {$orderId}");
                     }
                 } elseif ($transactionStatus === 'pending') {
                     // Payment is pending - no action needed, just log
@@ -111,22 +121,38 @@ class PaymentController extends Controller
                     $order->refresh();
 
                     // Process completed payment
-                    if ($order->payment_status === 'paid' && $order->status !== 'completed') {
-                        // Complete the order (generates license key, updates sales count, etc.)
-                        $this->marketplaceService->completeOrder($order);
+                    if ($order->payment_status === 'paid') {
+                        // IMPORTANT: Apply commission BEFORE completing the order
+                        // This ensures commission data is set even if completeOrder fails
+                        // applyCommission is idempotent, so it's safe to call multiple times
+                        $commissionData = $this->commissionService->applyCommission($order);
 
-                        // Refresh again to get updated order
+                        // Refresh order to get updated commission fields
                         $order->refresh();
 
-                        // Add balance to seller
+                        // Complete the order only if not already completed
+                        // This is idempotent - completeOrder checks status before updating
+                        if ($order->status !== 'completed') {
+                            $this->marketplaceService->completeOrder($order);
+                            $order->refresh();
+                        }
+
+                        // Add balance to seller (seller amount after commission deduction)
+                        // Only add if seller_amount hasn't been added yet (check transaction history)
                         $seller = $order->product->seller;
-                        $this->balanceService->addBalance(
-                            $seller,
-                            (float) $order->total,
-                            "Sale: Order #{$order->order_number}",
-                            $order->id,
-                            'sale'
-                        );
+                        $existingTransaction = \App\Models\Transaction::where('reference_id', $order->id)
+                            ->where('type', 'sale')
+                            ->first();
+                        
+                        if (!$existingTransaction) {
+                            $this->balanceService->addBalance(
+                                $seller,
+                                $commissionData['seller_amount'],
+                                "Sale: Order #{$order->order_number}" . ($commissionData['commission_total'] > 0 ? " (Commission: Rp " . number_format($commissionData['commission_total'], 0, ',', '.') . ")" : ''),
+                                $order->id,
+                                'sale'
+                            );
+                        }
 
                         // Notify seller
                         $this->notificationService->notifyNewOrder($order);

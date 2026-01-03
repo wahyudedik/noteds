@@ -99,16 +99,20 @@ class MidtransService
             }
 
             // Handle transaction status
-            // Note: Midtrans status flow: pending -> settlement (success) / deny/expire/cancel (failed)
-            // Status 'capture' happens before settlement, and 'settlement' is the final success state
-            if ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
-                // For capture, check fraud status
-                // For settlement, payment is confirmed successful
-                if ($transactionStatus === 'settlement' || ($fraudStatus === 'accept' || $fraudStatus === null)) {
-                    $order->markAsPaid();
-                    Log::info("Order marked as paid: {$orderId}");
-                    return true;
-                }
+            // Note: Midtrans status flow: pending -> capture -> settlement (success) / deny/expire/cancel (failed)
+            // Status 'capture' happens before settlement but is NOT final - payment can still be charged back
+            // Only 'settlement' is the final confirmed state where payment is guaranteed
+            if ($transactionStatus === 'settlement') {
+                // Settlement is the final confirmed state - payment is guaranteed
+                $order->markAsPaid();
+                Log::info("Order marked as paid (settlement): {$orderId}");
+                return true;
+            } elseif ($transactionStatus === 'capture') {
+                // Capture means payment is authorized but NOT yet settled
+                // Do NOT mark as paid yet - wait for settlement
+                // Update status to pending to reflect that payment is in progress
+                $order->update(['payment_status' => 'pending']);
+                Log::info("Order payment captured but not settled yet: {$orderId}");
             } elseif ($transactionStatus === 'pending') {
                 // Payment is pending
                 $order->update(['payment_status' => 'pending']);
@@ -150,7 +154,8 @@ class MidtransService
     {
         try {
             $status = Transaction::status($transactionId);
-            return $status;
+            // Convert stdClass to array
+            return json_decode(json_encode($status), true);
         } catch (\Exception $e) {
             Log::error('Midtrans check status error: ' . $e->getMessage());
             return null;

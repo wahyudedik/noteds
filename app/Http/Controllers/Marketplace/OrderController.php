@@ -53,13 +53,15 @@ class OrderController extends Controller
         $order->load(['product', 'product.seller']);
 
         // Check payment status from Midtrans if still pending
+        // Only check if payment is still pending - if it's paid, webhook already handled it
         if ($order->payment_status === 'pending' && $order->midtrans_order_id) {
             try {
                 $status = $this->midtransService->checkTransactionStatus($order->midtrans_order_id);
                 if ($status) {
-                    $transactionStatus = $status->transaction_status ?? null;
-                    if ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
-                        // Update order status if payment is confirmed
+                    $transactionStatus = $status['transaction_status'] ?? null;
+                    // Only 'settlement' means payment is confirmed - 'capture' is not final
+                    if ($transactionStatus === 'settlement') {
+                        // Update order status if payment is confirmed (settlement)
                         $order->markAsPaid();
                         $order->refresh();
                     }

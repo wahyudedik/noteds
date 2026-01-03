@@ -66,6 +66,21 @@ class ProductController extends Controller
         ]);
     }
 
+    /**
+     * Track product share (for analytics).
+     */
+    public function trackShare(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'platform' => 'required|string|in:whatsapp,facebook,twitter,linkedin,telegram,email,copy_link',
+        ]);
+
+        // Optional: Track share analytics
+        // You can log this to a product_shares table or analytics service
+        
+        return response()->json(['success' => true]);
+    }
+
     public function create()
     {
         return Inertia::render('Marketplace/Product/Create');

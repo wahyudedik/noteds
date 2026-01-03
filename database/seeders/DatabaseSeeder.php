@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             IdeaValidationSeeder::class,
             MarketplaceSeeder::class,
             ClipperSeeder::class,
+            PlatformSettingsSeeder::class,
         ]);
     }
 }

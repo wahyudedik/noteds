@@ -148,6 +148,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:3,60') // 3 products per hour
         ->name('marketplace.products.store');
     Route::get('marketplace/products/{product}', [App\Http\Controllers\Marketplace\ProductController::class, 'show'])->name('marketplace.products.show');
+    Route::post('marketplace/products/{product}/share', [App\Http\Controllers\Marketplace\ProductController::class, 'trackShare'])->name('marketplace.products.share');
     Route::get('marketplace/products/{product}/edit', [App\Http\Controllers\Marketplace\ProductController::class, 'edit'])->name('marketplace.products.edit');
     Route::put('marketplace/products/{product}', [App\Http\Controllers\Marketplace\ProductController::class, 'update'])
         ->middleware('throttle:10,60') // 10 updates per hour
@@ -421,6 +422,13 @@ Route::middleware('auth')->group(function () {
             Route::get('ledger', [App\Http\Controllers\Admin\AdminWalletController::class, 'viewLedger'])->name('ledger');
             Route::get('audit-log', [App\Http\Controllers\Admin\AdminWalletController::class, 'viewAuditLog'])->name('audit-log');
         });
+
+        // Marketplace Settings
+        Route::get('marketplace/settings', [App\Http\Controllers\Admin\AdminMarketplaceSettingsController::class, 'index'])
+            ->name('marketplace.settings');
+        Route::put('marketplace/settings', [App\Http\Controllers\Admin\AdminMarketplaceSettingsController::class, 'update'])
+            ->middleware('throttle:10,1')
+            ->name('marketplace.settings.update');
 
         // User Management
         Route::resource('users', App\Http\Controllers\Admin\UserManagementController::class)->only(['index', 'show', 'edit', 'update']);

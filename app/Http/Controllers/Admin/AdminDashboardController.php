@@ -13,6 +13,8 @@ use App\Models\Campaign;
 use App\Models\Clip;
 use App\Models\BrandRegistration;
 use App\Models\AuditLog;
+use App\Models\PlatformWallet;
+use App\Models\LedgerEntry;
 use App\Services\AdminAnalyticsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -166,6 +168,26 @@ class AdminDashboardController extends Controller
                 ];
             });
 
+        // Marketplace Commission Stats
+        $platformWallet = PlatformWallet::getInstance();
+        $marketplaceCommissionTotal = (float) $platformWallet->fee_balance;
+        
+        // Get marketplace commission from orders (since ledger uses 'fee' reason)
+        $marketplaceCommissionThisMonth = (float) Order::whereNotNull('platform_commission_total')
+            ->where('platform_commission_total', '>', 0)
+            ->where('created_at', '>=', Carbon::now()->startOfMonth())
+            ->sum('platform_commission_total');
+        
+        $averageCommissionPerOrder = 0;
+        $totalOrdersWithCommission = Order::whereNotNull('platform_commission_total')
+            ->where('platform_commission_total', '>', 0)
+            ->count();
+        if ($totalOrdersWithCommission > 0) {
+            $averageCommissionPerOrder = (float) Order::whereNotNull('platform_commission_total')
+                ->where('platform_commission_total', '>', 0)
+                ->avg('platform_commission_total');
+        }
+
         // Analytics Trends
         $userGrowthTrends = $this->analyticsService->getUserGrowthTrends('monthly');
         $salesTrends = $this->analyticsService->getSalesTrends('monthly');
@@ -221,6 +243,11 @@ class AdminDashboardController extends Controller
                 'total_clips' => $totalClips,
                 'total_campaigns' => $totalCampaigns,
                 'fraud_alerts_count' => $fraudAlertsCount,
+                
+                // Marketplace Commission Stats
+                'marketplace_commission_total' => $marketplaceCommissionTotal,
+                'marketplace_commission_this_month' => $marketplaceCommissionThisMonth,
+                'average_commission_per_order' => $averageCommissionPerOrder,
             ],
             'recent_withdrawals' => $recentWithdrawals,
             'recent_reports' => $recentReports,

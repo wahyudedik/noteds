@@ -103,6 +103,21 @@ const formatCurrency = (amount) => {
                         </div>
                     </div>
 
+                    <!-- Marketplace Commission -->
+                    <Link
+                        :href="route('admin.marketplace.settings')"
+                        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow cursor-pointer"
+                    >
+                        <h3 class="text-sm font-medium text-gray-500 mb-2">Marketplace Commission</h3>
+                        <p class="text-3xl font-bold text-purple-600">
+                            Rp {{ formatCurrency(stats?.marketplace_commission_total || 0) }}
+                        </p>
+                        <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            This month: Rp {{ formatCurrency(stats?.marketplace_commission_this_month || 0) }} | 
+                            Avg/Order: Rp {{ formatCurrency(stats?.average_commission_per_order || 0) }}
+                        </div>
+                    </Link>
+
                     <!-- Products -->
                     <Link
                         :href="route('admin.products.index')"
@@ -369,6 +384,22 @@ const formatCurrency = (amount) => {
                                 class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
                             >
                                 Manage Docs
+                            </Link>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Marketplace Settings</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                    Configure commission percentage and flat fee for marketplace transactions
+                                </p>
+                            </div>
+                            <Link
+                                :href="route('admin.marketplace.settings')"
+                                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                            >
+                                Configure
                             </Link>
                         </div>
                     </div>
