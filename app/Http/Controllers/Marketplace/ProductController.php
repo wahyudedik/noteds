@@ -105,6 +105,17 @@ class ProductController extends Controller
             $product->update(['file_download' => $filePath]);
         }
 
+        // Notify admin about new product
+        try {
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->notifyProductCreated($product);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Failed to send product created notification', [
+                'product_id' => $product->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         return redirect()->route('marketplace.products.show', $product)
             ->with('success', 'Product created successfully.');
     }

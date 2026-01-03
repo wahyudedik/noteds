@@ -244,5 +244,173 @@ class NotificationService
             \Illuminate\Support\Facades\Log::error('Failed to send top up success email: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Notify admin about new campaign created.
+     */
+    public function notifyCampaignCreated(\App\Models\Campaign $campaign): void
+    {
+        // Ensure relationships are loaded
+        if (!$campaign->relationLoaded('creator')) {
+            $campaign->load('creator');
+        }
+        
+        $admins = User::where('role', 'admin')->get();
+        
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\CampaignCreatedNotification($campaign));
+        }
+    }
+
+    /**
+     * Notify admin about new clip submitted.
+     */
+    public function notifyClipSubmitted(\App\Models\Clip $clip): void
+    {
+        // Ensure relationships are loaded
+        if (!$clip->relationLoaded('clipper')) {
+            $clip->load('clipper');
+        }
+        if (!$clip->relationLoaded('campaign')) {
+            $clip->load('campaign');
+        }
+        
+        $admins = User::where('role', 'admin')->get();
+        
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\ClipSubmittedNotification($clip));
+        }
+    }
+
+    /**
+     * Notify admin about new product created.
+     */
+    public function notifyProductCreated(\App\Models\Product $product): void
+    {
+        // Ensure relationships are loaded
+        if (!$product->relationLoaded('seller')) {
+            $product->load('seller');
+        }
+        
+        $admins = User::where('role', 'admin')->get();
+        
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\ProductCreatedNotification($product));
+        }
+    }
+
+    /**
+     * Notify admin about fraud detected in clip.
+     */
+    public function notifyFraudDetected(\App\Models\Clip $clip, string $reason, ?float $stabilityScore = null): void
+    {
+        // Ensure relationships are loaded
+        if (!$clip->relationLoaded('clipper')) {
+            $clip->load('clipper');
+        }
+        if (!$clip->relationLoaded('campaign')) {
+            $clip->load('campaign');
+        }
+        
+        $admins = User::where('role', 'admin')->get();
+        
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\FraudDetectedNotification($clip, $reason, $stabilityScore));
+        }
+    }
+
+    /**
+     * Notify admin about new order created (optional, for monitoring).
+     */
+    public function notifyOrderCreated(Order $order): void
+    {
+        // Ensure relationships are loaded
+        if (!$order->relationLoaded('buyer')) {
+            $order->load('buyer');
+        }
+        if (!$order->relationLoaded('product')) {
+            $order->load('product');
+        }
+        if ($order->product && !$order->product->relationLoaded('seller')) {
+            $order->product->load('seller');
+        }
+        
+        $admins = User::where('role', 'admin')->get();
+        
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\OrderCreatedNotification($order));
+        }
+    }
+
+    /**
+     * Notify brand about campaign suspended.
+     */
+    public function notifyCampaignSuspended(\App\Models\Campaign $campaign, string $reason): void
+    {
+        // Ensure relationships are loaded
+        if (!$campaign->relationLoaded('creator')) {
+            $campaign->load('creator');
+        }
+        
+        if ($campaign->creator) {
+            $campaign->creator->notify(new \App\Notifications\CampaignSuspendedNotification($campaign, $reason));
+        }
+    }
+
+    /**
+     * Notify seller about product approved.
+     */
+    public function notifyProductApproved(\App\Models\Product $product): void
+    {
+        // Ensure relationships are loaded
+        if (!$product->relationLoaded('seller')) {
+            $product->load('seller');
+        }
+        
+        if ($product->seller) {
+            $product->seller->notify(new \App\Notifications\ProductApprovedNotification($product));
+        }
+    }
+
+    /**
+     * Notify seller about product rejected.
+     */
+    public function notifyProductRejected(\App\Models\Product $product, string $reason): void
+    {
+        // Ensure relationships are loaded
+        if (!$product->relationLoaded('seller')) {
+            $product->load('seller');
+        }
+        
+        if ($product->seller) {
+            $product->seller->notify(new \App\Notifications\ProductRejectedNotification($product, $reason));
+        }
+    }
+
+    /**
+     * Notify buyer and seller about order cancelled.
+     */
+    public function notifyOrderCancelled(Order $order, string $reason): void
+    {
+        // Notify buyer
+        if ($order->buyer) {
+            $order->buyer->notify(new \App\Notifications\OrderCancelledNotification($order, $reason));
+        }
+        
+        // Notify seller
+        if ($order->product && $order->product->seller) {
+            $order->product->seller->notify(new \App\Notifications\OrderCancelledNotification($order, $reason));
+        }
+    }
+
+    /**
+     * Notify buyer about payment failed.
+     */
+    public function notifyPaymentFailed(Order $order, string $failureReason): void
+    {
+        if ($order->buyer) {
+            $order->buyer->notify(new \App\Notifications\PaymentFailedNotification($order, $failureReason));
+        }
+    }
 }
 

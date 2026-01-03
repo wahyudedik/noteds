@@ -71,6 +71,18 @@ class CampaignService
                     throw new Exception('Failed to create campaign. Please try again or contact support if the problem persists.');
                 }
 
+                // Notify admin about new campaign
+                try {
+                    $notificationService = app(\App\Services\NotificationService::class);
+                    $notificationService->notifyCampaignCreated($campaign);
+                } catch (Exception $e) {
+                    Log::warning('Failed to send campaign created notification', [
+                        'campaign_id' => $campaign->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                    // Don't fail campaign creation if notification fails
+                }
+
                 return $campaign;
             });
         } catch (Exception $e) {

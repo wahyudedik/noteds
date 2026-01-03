@@ -86,6 +86,7 @@ class PaymentController extends Controller
                     // Payment failed
                     $topUp->markAsFailed();
                     Log::info("Top-up payment failed: {$orderId}, status: {$transactionStatus}");
+                    // Note: Top-up failure notification can be added later if needed
                 }
 
                 // Always return 200 to acknowledge receipt

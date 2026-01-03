@@ -4,11 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class AdminBrandApprovalController extends Controller
 {
+    public function __construct(
+        private NotificationService $notificationService
+    ) {}
+
     public function index()
     {
         // For now, we'll use a simple approach where users request brand role
@@ -38,6 +43,9 @@ class AdminBrandApprovalController extends Controller
         
         $user->update(['clipper_role' => 'brand']);
 
+        // Notify user
+        $this->notificationService->notifyBrandApproved($user);
+
         \App\Models\AuditLog::logAction([
             'admin_id' => auth()->id(),
             'action' => 'approve_brand',
@@ -56,6 +64,9 @@ class AdminBrandApprovalController extends Controller
         ]);
 
         $user = User::findOrFail($id);
+
+        // Notify user
+        $user->notify(new \App\Notifications\BrandRejectedNotification($validated['reason']));
 
         \App\Models\AuditLog::logAction([
             'admin_id' => auth()->id(),

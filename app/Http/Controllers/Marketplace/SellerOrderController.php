@@ -4,12 +4,17 @@ namespace App\Http\Controllers\Marketplace;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class SellerOrderController extends Controller
 {
+    public function __construct(
+        private NotificationService $notificationService
+    ) {}
+
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -64,13 +69,20 @@ class SellerOrderController extends Controller
 
         $validated = $request->validate([
             'status' => 'required|in:processing,completed,cancelled',
+            'reason' => 'nullable|string|max:500',
         ]);
 
+        $oldStatus = $order->status;
         $order->update(['status' => $validated['status']]);
 
-        // Send notification to buyer
-        if ($order->buyer) {
-            (new \App\Services\NotificationService)->notifyOrderStatusUpdate($order);
+        // Send notification based on status change
+        if ($validated['status'] === 'cancelled' && $oldStatus !== 'cancelled') {
+            // Notify buyer and seller about cancellation
+            $reason = $validated['reason'] ?? 'Order has been cancelled by seller';
+            $this->notificationService->notifyOrderCancelled($order, $reason);
+        } elseif ($order->buyer) {
+            // Send regular status update notification
+            $this->notificationService->notifyOrderStatusUpdate($order);
         }
 
         return back()->with('success', 'Order status updated successfully');

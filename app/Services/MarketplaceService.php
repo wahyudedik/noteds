@@ -33,6 +33,17 @@ class MarketplaceService
             'payment_status' => 'pending',
         ]);
 
+        // Notify admin about new order (optional, for monitoring)
+        try {
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->notifyOrderCreated($order);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Failed to send order created notification', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         return $order;
     }
 

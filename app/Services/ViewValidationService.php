@@ -63,6 +63,23 @@ class ViewValidationService
                     Log::warning('Fraud detected during view validation', [
                         'clip_id' => $clip->id,
                     ]);
+                    
+                    // Notify admin about fraud detection
+                    try {
+                        $stabilityScore = $this->checkStability($clip);
+                        $notificationService = app(\App\Services\NotificationService::class);
+                        $notificationService->notifyFraudDetected(
+                            $clip,
+                            'Suspicious view patterns detected during validation',
+                            $stabilityScore
+                        );
+                    } catch (Exception $e) {
+                        Log::warning('Failed to send fraud detection notification', [
+                            'clip_id' => $clip->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                    
                     return false;
                 }
             } catch (Exception $e) {
@@ -157,19 +174,26 @@ class ViewValidationService
         }
 
         $views = $trackingRecords->pluck('views_count')->toArray();
+        $fraudReasons = [];
 
         // Check for sudden spike (more than 500% growth)
         for ($i = 1; $i < count($views); $i++) {
             $growth = ($views[$i] - $views[$i - 1]) / max($views[$i - 1], 1);
             if ($growth > 5.0) {
-                return true; // Suspicious spike detected
+                $fraudReasons[] = 'Suspicious view spike detected (more than 500% growth)';
             }
         }
 
         // Check stability score
         $stabilityScore = $this->checkStability($clip);
         if ($stabilityScore > 0.8) {
-            return true; // Very unstable, likely fraud
+            $fraudReasons[] = 'Very unstable view pattern (stability score: ' . number_format($stabilityScore, 2) . ')';
+        }
+
+        // If fraud detected, notify admin (only notify once per validation run to avoid spam)
+        if (!empty($fraudReasons)) {
+            // Note: Notification will be sent in validateViews() method to avoid duplicate notifications
+            return true;
         }
 
         return false;

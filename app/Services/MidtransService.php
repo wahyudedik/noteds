@@ -117,6 +117,23 @@ class MidtransService
                 // Payment failed
                 $order->update(['payment_status' => 'failed']);
                 Log::info("Order payment failed: {$orderId}, status: {$transactionStatus}");
+                
+                // Notify buyer about payment failure
+                try {
+                    $notificationService = app(\App\Services\NotificationService::class);
+                    $failureReason = match($transactionStatus) {
+                        'deny' => 'Payment was denied by payment provider',
+                        'expire' => 'Payment expired',
+                        'cancel' => 'Payment was cancelled',
+                        default => 'Payment failed',
+                    };
+                    $notificationService->notifyPaymentFailed($order, $failureReason);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to send payment failed notification', [
+                        'order_id' => $order->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
 
             return true;

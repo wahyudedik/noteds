@@ -47,6 +47,20 @@ const getNotificationType = (notification) => {
     if (type.includes('BrandRejected')) return 'brand_rejected';
     if (type.includes('NewOrder')) return 'new_order';
     if (type.includes('WithdrawalStatus')) return 'withdrawal_status';
+    if (type.includes('PostModerated')) return 'post_moderated';
+    if (type.includes('PostRestored')) return 'post_restored';
+    if (type.includes('CampaignCreated')) return 'campaign_created';
+    if (type.includes('ClipSubmitted')) return 'clip_submitted';
+    if (type.includes('ProductCreated')) return 'product_created';
+    if (type.includes('FraudDetected')) return 'fraud_detected';
+    if (type.includes('OrderCreated')) return 'order_created';
+    if (type.includes('CampaignSuspended')) return 'campaign_suspended';
+    if (type.includes('ProductApproved')) return 'product_approved';
+    if (type.includes('ProductRejected')) return 'product_rejected';
+    if (type.includes('OrderCancelled')) return 'order_cancelled';
+    if (type.includes('PaymentFailed')) return 'payment_failed';
+    if (type.includes('ClipRejected')) return 'clip_rejected';
+    if (type.includes('ViewValidated')) return 'view_validated';
     return 'default';
 };
 
@@ -65,6 +79,20 @@ const getNotificationIcon = (notification) => {
         'brand_rejected': 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z',
         'new_order': 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z',
         'withdrawal_status': 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1',
+        'post_moderated': 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
+        'post_restored': 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+        'campaign_created': 'M12 4v16m8-8H4',
+        'clip_submitted': 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z',
+        'product_created': 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+        'fraud_detected': 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+        'order_created': 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z',
+        'campaign_suspended': 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636',
+        'product_approved': 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+        'product_rejected': 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z',
+        'order_cancelled': 'M6 18L18 6M6 6l12 12',
+        'payment_failed': 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+        'clip_rejected': 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z',
+        'view_validated': 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
     };
     return icons[type] || 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9';
 };
@@ -84,13 +112,44 @@ const getNotificationColor = (notification) => {
         'brand_rejected': 'text-red-600 dark:text-red-400',
         'new_order': 'text-indigo-600 dark:text-indigo-400',
         'withdrawal_status': 'text-purple-600 dark:text-purple-400',
+        'post_moderated': 'text-orange-600 dark:text-orange-400',
+        'post_restored': 'text-green-600 dark:text-green-400',
+        'campaign_created': 'text-blue-600 dark:text-blue-400',
+        'clip_submitted': 'text-indigo-600 dark:text-indigo-400',
+        'product_created': 'text-teal-600 dark:text-teal-400',
+        'fraud_detected': 'text-red-600 dark:text-red-400',
+        'order_created': 'text-indigo-600 dark:text-indigo-400',
+        'campaign_suspended': 'text-orange-600 dark:text-orange-400',
+        'product_approved': 'text-green-600 dark:text-green-400',
+        'product_rejected': 'text-red-600 dark:text-red-400',
+        'order_cancelled': 'text-red-600 dark:text-red-400',
+        'payment_failed': 'text-red-600 dark:text-red-400',
+        'clip_rejected': 'text-red-600 dark:text-red-400',
+        'view_validated': 'text-green-600 dark:text-green-400',
     };
     return colors[type] || 'text-gray-600 dark:text-gray-400';
 };
 
+const isHighPriority = (notification) => {
+    const type = getNotificationType(notification);
+    const highPriorityTypes = [
+        'fraud_detected',
+        'content_reported',
+        'payment_failed',
+        'order_cancelled',
+    ];
+    return highPriorityTypes.includes(type);
+};
+
 const formatDate = (date) => {
+    if (!date) return 'Unknown';
+    
     const now = new Date();
     const notificationDate = new Date(date);
+    
+    // Check if date is valid
+    if (isNaN(notificationDate.getTime())) return 'Invalid date';
+    
     const diffInSeconds = Math.floor((now - notificationDate) / 1000);
     
     if (diffInSeconds < 60) return 'Just now';
@@ -182,8 +241,9 @@ onUnmounted(() => {
                             :key="notification.id"
                             @click="markAsRead(notification)"
                             :class="[
-                                'px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors',
-                                !notification.read_at ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                                'px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors relative',
+                                !notification.read_at ? 'bg-blue-50 dark:bg-blue-900/20' : '',
+                                isHighPriority(notification) && !notification.read_at ? 'border-l-4 border-red-500' : ''
                             ]"
                         >
                             <div class="flex gap-3">
@@ -196,9 +256,18 @@ onUnmounted(() => {
 
                                 <!-- Content -->
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
-                                        {{ notification.data?.title || 'Notification' }}
-                                    </p>
+                                    <div class="flex items-start gap-2">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white line-clamp-1 flex-1">
+                                            {{ notification.data?.title || 'Notification' }}
+                                        </p>
+                                        <!-- High Priority Badge -->
+                                        <span
+                                            v-if="isHighPriority(notification) && !notification.read_at"
+                                            class="flex-shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                                        >
+                                            Urgent
+                                        </span>
+                                    </div>
                                     <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
                                         {{ notification.data?.message || notification.data?.body || '' }}
                                     </p>
@@ -209,7 +278,10 @@ onUnmounted(() => {
 
                                 <!-- Unread indicator -->
                                 <div v-if="!notification.read_at" class="flex-shrink-0 mt-1">
-                                    <span class="inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
+                                    <span :class="[
+                                        'inline-block w-2 h-2 rounded-full',
+                                        isHighPriority(notification) ? 'bg-red-600' : 'bg-blue-600'
+                                    ]"></span>
                                 </div>
                             </div>
                         </div>

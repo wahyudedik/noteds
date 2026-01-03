@@ -431,6 +431,18 @@ Route::middleware('auth')->group(function () {
         Route::resource('reports', App\Http\Controllers\Admin\ReportController::class)->only(['index', 'show', 'update']);
         Route::post('reports/{report}/resolve', [App\Http\Controllers\Admin\ReportController::class, 'resolve'])->name('reports.resolve');
         Route::post('reports/{report}/dismiss', [App\Http\Controllers\Admin\ReportController::class, 'dismiss'])->name('reports.dismiss');
+
+        // Post Moderation
+        Route::resource('posts', App\Http\Controllers\Admin\AdminPostController::class)->only(['index', 'show']);
+        Route::post('posts/{post}/moderate', [App\Http\Controllers\Admin\AdminPostController::class, 'moderate'])
+            ->middleware('throttle:20,1')
+            ->name('posts.moderate');
+        Route::post('posts/{post}/restore', [App\Http\Controllers\Admin\AdminPostController::class, 'restore'])
+            ->middleware('throttle:20,1')
+            ->name('posts.restore');
+        Route::post('posts/bulk-moderate', [App\Http\Controllers\Admin\AdminPostController::class, 'bulkModerate'])
+            ->middleware('throttle:10,1')
+            ->name('posts.bulk-moderate');
     });
 });
 

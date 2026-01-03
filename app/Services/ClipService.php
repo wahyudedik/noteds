@@ -116,6 +116,18 @@ class ClipService
                     // Don't fail the transaction for cache issues
                 }
 
+                // Notify admin about new clip submission
+                try {
+                    $notificationService = app(\App\Services\NotificationService::class);
+                    $notificationService->notifyClipSubmitted($clip);
+                } catch (Exception $e) {
+                    Log::warning('Failed to send clip submitted notification', [
+                        'clip_id' => $clip->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                    // Don't fail the transaction for notification issues
+                }
+
                 return $clip;
             });
         } catch (Exception $e) {

@@ -4,11 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class AdminCampaignController extends Controller
 {
+    public function __construct(
+        private NotificationService $notificationService
+    ) {}
+
     public function index(Request $request)
     {
         $query = Campaign::with(['creator', 'wallet']);
@@ -101,6 +106,16 @@ class AdminCampaignController extends Controller
 
         // Pause the campaign
         $campaign->pause();
+
+        // Notify brand about suspension
+        try {
+            $this->notificationService->notifyCampaignSuspended($campaign, $validated['reason']);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Failed to send campaign suspended notification', [
+                'campaign_id' => $campaign->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         \App\Models\AuditLog::logAction([
             'admin_id' => auth()->id(),

@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ProductModerationController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private NotificationService $notificationService
+    ) {
         $this->middleware('admin');
     }
 
@@ -35,7 +37,28 @@ class ProductModerationController extends Controller
             'is_active' => 'boolean',
         ]);
 
+        $oldStatus = $product->is_active;
         $product->update($validated);
+
+        // Notify seller about product status change
+        if ($oldStatus !== $product->is_active) {
+            try {
+                if ($product->is_active) {
+                    $this->notificationService->notifyProductApproved($product);
+                } else {
+                    // Product deactivated - could be rejection
+                    $this->notificationService->notifyProductRejected(
+                        $product,
+                        $request->input('reason', 'Product has been deactivated by admin')
+                    );
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Failed to send product status notification', [
+                    'product_id' => $product->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         return back()->with('success', 'Product updated successfully.');
     }
