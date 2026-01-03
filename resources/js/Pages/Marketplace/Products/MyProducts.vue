@@ -94,10 +94,11 @@ const applyFilter = () => {
                         <Link :href="route('marketplace.products.show', product.id)">
                             <div class="aspect-w-16 aspect-h-9 bg-gray-100 dark:bg-gray-700">
                                 <img
-                                    v-if="product.image"
-                                    :src="product.image"
+                                    v-if="product.image_url || product.image"
+                                    :src="product.image_url || product.image"
                                     :alt="product.name"
                                     class="w-full h-48 object-cover"
+                                    @error="$event.target.src = '/images/placeholder.png'"
                                 />
                                 <div v-else class="w-full h-48 flex items-center justify-center text-gray-400">
                                     No Image

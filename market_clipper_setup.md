@@ -27,6 +27,22 @@ Dokumentasi lengkap untuk setup dan konfigurasi payment gateway Midtrans untuk f
 - Node.js & NPM (untuk frontend)
 - Midtrans account (sandbox atau production)
 
+## Overview
+
+Dokumentasi ini mencakup setup payment gateway Midtrans untuk dua fitur utama:
+
+1. **Marketplace Digital** - Platform jual beli produk digital
+   - Order format: `ORD-YYYYMMDD-XXXXXX`
+   - Webhook handler: `PaymentController::webhook()`
+   - Flow: Order → Payment → Complete → Seller Balance
+
+2. **Clipper Top-Up** - Top-up saldo untuk creator wallet
+   - Order format: `TOPUP-{topUpId}`
+   - Webhook handler: `PaymentController::webhook()` (same endpoint)
+   - Flow: Top-Up → Payment → Success → Creator Wallet Balance
+
+**Important**: Kedua fitur menggunakan **satu webhook endpoint** (`/payment/webhook`) yang otomatis mendeteksi jenis transaksi berdasarkan format `order_id`.
+
 ## Database Setup
 
 1. Pastikan database sudah dibuat:

@@ -83,6 +83,14 @@ class Order extends Model
     }
 
     /**
+     * Alias for buyer() for consistency with Laravel conventions.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->buyer();
+    }
+
+    /**
      * Get the seller (user) that owns the product.
      */
     public function seller()
@@ -100,11 +108,12 @@ class Order extends Model
 
     /**
      * Mark order as paid.
+     * Only updates payment_status, not order status.
+     * Order status should be updated separately via markAsCompleted().
      */
     public function markAsPaid(): void
     {
         $this->update([
-            'status' => 'paid',
             'payment_status' => 'paid',
         ]);
     }

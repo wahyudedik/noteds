@@ -10,6 +10,7 @@ const props = defineProps({
 
 const page = usePage();
 const clientKey = page.props.midtrans_client_key;
+const isProduction = page.props.midtrans_is_production || false;
 const isLoading = ref(true);
 const error = ref(null);
 
@@ -20,9 +21,11 @@ onMounted(() => {
         return;
     }
 
-    // Load Midtrans script
+    // Load Midtrans script (sandbox or production)
     const script = document.createElement('script');
-    script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+    script.src = isProduction 
+        ? 'https://app.midtrans.com/snap/snap.js'
+        : 'https://app.sandbox.midtrans.com/snap/snap.js';
     script.setAttribute('data-client-key', clientKey);
     script.async = true;
     

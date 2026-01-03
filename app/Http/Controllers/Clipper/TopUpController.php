@@ -72,21 +72,32 @@ class TopUpController extends Controller
     {
         $data = $request->all();
         
-        if ($this->midtransService->handleWebhook($data)) {
-            // Find top up by order ID
-            $orderId = $data['order_id'] ?? null;
-            if ($orderId && str_starts_with($orderId, 'TOPUP-')) {
-                $topUpId = str_replace('TOPUP-', '', $orderId);
-                $topUp = \App\Models\TopUp::find($topUpId);
-                
-                if ($topUp && $data['transaction_status'] === 'settlement') {
-                    $this->topUpService->processTopUpSuccess($topUp);
+        try {
+            if ($this->midtransService->handleWebhook($data)) {
+                // Find top up by order ID
+                $orderId = $data['order_id'] ?? null;
+                if ($orderId && str_starts_with($orderId, 'TOPUP-')) {
+                    $topUpId = str_replace('TOPUP-', '', $orderId);
+                    $topUp = \App\Models\TopUp::find($topUpId);
+                    
+                    if ($topUp && $data['transaction_status'] === 'settlement') {
+                        $this->topUpService->processTopUpSuccess($topUp);
+                    }
                 }
+                
+                // Always return 200 to acknowledge receipt
+                return response()->json(['status' => 'success'], 200);
             }
-            
-            return response()->json(['status' => 'success']);
-        }
 
-        return response()->json(['status' => 'error'], 400);
+            // Always return 200 to acknowledge receipt, even on error
+            return response()->json(['status' => 'error', 'message' => 'Webhook processing failed'], 200);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('TopUp webhook error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'webhook_data' => $data,
+            ]);
+            // Always return 200 to acknowledge receipt, even on error
+            return response()->json(['status' => 'error', 'message' => 'Internal server error'], 200);
+        }
     }
 }

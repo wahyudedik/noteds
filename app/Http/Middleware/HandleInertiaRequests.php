@@ -47,6 +47,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $userArray,
             ],
             'midtrans_client_key' => config('midtrans.client_key'),
+            'midtrans_is_production' => config('midtrans.is_production'),
             'notifications' => $user 
                 ? $user->unreadNotifications()->latest()->limit(10)->get()
                 : [],

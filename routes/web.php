@@ -230,7 +230,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', function () {
             return redirect()->route('clipper.dashboard');
         });
-        
+
         // Brand Registration
         Route::get('brand-registration/create', [App\Http\Controllers\Clipper\BrandRegistrationController::class, 'create'])->name('brand-registration.create');
         Route::post('brand-registration', [App\Http\Controllers\Clipper\BrandRegistrationController::class, 'store'])
@@ -241,7 +241,7 @@ Route::middleware('auth')->group(function () {
         Route::put('brand-registration', [App\Http\Controllers\Clipper\BrandRegistrationController::class, 'update'])
             ->middleware('throttle:5,60') // 5 updates per hour
             ->name('brand-registration.update');
-        
+
         // Clipper Profile
         Route::get('profile/create', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'create'])->name('profile.create');
         Route::post('profile', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'store'])
@@ -252,7 +252,7 @@ Route::middleware('auth')->group(function () {
         Route::put('profile', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'update'])
             ->middleware('throttle:5,60') // 5 updates per hour
             ->name('profile.update');
-        
+
         // Top Up
         Route::get('top-ups', [App\Http\Controllers\Clipper\TopUpController::class, 'index'])->name('top-ups.index');
         Route::get('top-ups/create', [App\Http\Controllers\Clipper\TopUpController::class, 'create'])->name('top-ups.create');
@@ -260,18 +260,17 @@ Route::middleware('auth')->group(function () {
             ->middleware('throttle:5,60') // 5 requests per hour
             ->name('top-ups.store');
         Route::get('top-ups/{topUp}', [App\Http\Controllers\Clipper\TopUpController::class, 'show'])->name('top-ups.show');
-        Route::post('top-ups/webhook', [App\Http\Controllers\Clipper\TopUpController::class, 'webhook'])->name('top-ups.webhook');
-        
+
         // Campaigns (Creator)
         Route::get('campaigns', [App\Http\Controllers\Clipper\CampaignController::class, 'index'])->name('campaigns.index');
         Route::get('campaigns/create', [App\Http\Controllers\Clipper\CampaignController::class, 'create'])->name('campaigns.create');
         Route::post('campaigns', [App\Http\Controllers\Clipper\CampaignController::class, 'store'])
             ->middleware('throttle:3,60') // 3 campaigns per hour
             ->name('campaigns.store');
-        
+
         // Campaign Analytics (must be before campaigns/{campaign} to avoid route conflict)
         Route::get('campaigns/analytics', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'index'])->name('campaigns.analytics');
-        
+
         Route::get('campaigns/{campaign}', [App\Http\Controllers\Clipper\CampaignController::class, 'show'])->name('campaigns.show');
         Route::get('campaigns/{campaign}/edit', [App\Http\Controllers\Clipper\CampaignController::class, 'edit'])->name('campaigns.edit');
         Route::put('campaigns/{campaign}', [App\Http\Controllers\Clipper\CampaignController::class, 'update'])
@@ -285,7 +284,7 @@ Route::middleware('auth')->group(function () {
         Route::post('campaigns/{campaign}/share', [App\Http\Controllers\Clipper\CampaignController::class, 'shareAsPost'])->name('campaigns.share');
         Route::post('campaigns/{campaign}/clips/{clip}/approve', [App\Http\Controllers\Clipper\CampaignController::class, 'approveClip'])->name('campaigns.clips.approve');
         Route::post('campaigns/{campaign}/clips/{clip}/reject', [App\Http\Controllers\Clipper\CampaignController::class, 'rejectClip'])->name('campaigns.clips.reject');
-        
+
         // Clips (Clipper)
         Route::get('campaigns/available', [App\Http\Controllers\Clipper\ClipController::class, 'availableCampaigns'])->name('campaigns.available');
         Route::get('clips', [App\Http\Controllers\Clipper\ClipController::class, 'index'])->name('clips.index');
@@ -302,20 +301,20 @@ Route::middleware('auth')->group(function () {
         Route::post('clips/{clip}/track-views', [App\Http\Controllers\Clipper\ClipController::class, 'trackViews'])
             ->middleware('throttle:10,60') // 10 requests per hour (critical, prevent abuse)
             ->name('clips.track-views');
-        
+
         // Wallets
         Route::get('wallet/creator', [App\Http\Controllers\Clipper\CreatorWalletController::class, 'index'])->name('wallet.creator');
         Route::get('wallet/clipper', [App\Http\Controllers\Clipper\ClipperWalletController::class, 'index'])->name('wallet.clipper');
         Route::get('wallet/creator/history', [App\Http\Controllers\Clipper\CreatorWalletController::class, 'history'])->name('wallet.creator.history');
         Route::get('wallet/clipper/history', [App\Http\Controllers\Clipper\ClipperWalletController::class, 'history'])->name('wallet.clipper.history');
-        
+
         // Campaign Analytics - Individual Campaign (Brand Dashboard)
         Route::get('campaigns/{campaign}/analytics', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'show'])->name('campaigns.analytics.show');
         Route::get('campaigns/{campaign}/analytics/views-chart', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getViewsChart'])->name('campaigns.analytics.views-chart');
         Route::get('campaigns/{campaign}/analytics/roi', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getROI'])->name('campaigns.analytics.roi');
         Route::get('campaigns/{campaign}/analytics/live', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getLiveViews'])->name('campaigns.analytics.live');
         Route::get('campaigns/{campaign}/analytics/validation', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getValidationDetails'])->name('campaigns.analytics.validation');
-        
+
         // Clipper Withdrawals
         Route::get('withdrawals', [App\Http\Controllers\Clipper\ClipperWithdrawalController::class, 'index'])->name('withdrawals.index');
         Route::get('withdrawals/create', [App\Http\Controllers\Clipper\ClipperWithdrawalController::class, 'create'])->name('withdrawals.create');
@@ -323,7 +322,7 @@ Route::middleware('auth')->group(function () {
             ->middleware('throttle:3,1440') // 3 requests per 24 hours (very strict, financial operation)
             ->name('withdrawals.store');
         Route::get('withdrawals/{withdrawal}', [App\Http\Controllers\Clipper\ClipperWithdrawalController::class, 'show'])->name('withdrawals.show');
-        
+
         // Creator Withdrawals (for brand/creator wallet - remaining budget withdrawal)
         Route::get('withdrawals/creator', [App\Http\Controllers\Clipper\CreatorWithdrawalController::class, 'index'])->name('withdrawals.creator.index');
         Route::get('withdrawals/creator/create', [App\Http\Controllers\Clipper\CreatorWithdrawalController::class, 'create'])->name('withdrawals.creator.create');
@@ -356,7 +355,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('products/{product}', [App\Http\Controllers\Admin\ProductModerationController::class, 'destroy'])
             ->middleware('throttle:20,1') // 20 actions per minute
             ->name('products.destroy');
-        
+
         // FAQs
         Route::get('faqs', [App\Http\Controllers\Admin\FaqController::class, 'index'])->name('faqs.index');
         Route::get('faqs/create', [App\Http\Controllers\Admin\FaqController::class, 'create'])->name('faqs.create');
@@ -373,7 +372,7 @@ Route::middleware('auth')->group(function () {
             ->name('faqs.destroy');
         Route::post('faqs/{faq}/toggle-status', [App\Http\Controllers\Admin\FaqController::class, 'toggleStatus'])->name('faqs.toggle-status');
         Route::post('faqs/reorder', [App\Http\Controllers\Admin\FaqController::class, 'reorder'])->name('faqs.reorder');
-        
+
         // Documentations
         Route::get('documentations', [App\Http\Controllers\Admin\DocumentationController::class, 'index'])->name('documentations.index');
         Route::get('documentations/create', [App\Http\Controllers\Admin\DocumentationController::class, 'create'])->name('documentations.create');
@@ -390,7 +389,7 @@ Route::middleware('auth')->group(function () {
             ->name('documentations.destroy');
         Route::post('documentations/{documentation}/toggle-status', [App\Http\Controllers\Admin\DocumentationController::class, 'toggleStatus'])->name('documentations.toggle-status');
         Route::post('documentations/reorder', [App\Http\Controllers\Admin\DocumentationController::class, 'reorder'])->name('documentations.reorder');
-        
+
         // Clipper Admin Routes
         Route::resource('campaigns', App\Http\Controllers\Admin\AdminCampaignController::class)->only(['index', 'show']);
         Route::post('campaigns/{campaign}/suspend', [App\Http\Controllers\Admin\AdminCampaignController::class, 'suspend'])->name('campaigns.suspend');
@@ -402,13 +401,13 @@ Route::middleware('auth')->group(function () {
         Route::post('clips/{clip}/validate', [App\Http\Controllers\Admin\AdminClipController::class, 'manualValidate'])->name('clips.validate');
         Route::post('clips/{clip}/override-validation', [App\Http\Controllers\Admin\AdminClipController::class, 'overrideValidation'])->name('clips.override-validation');
         Route::get('clips/fraud-alerts', [App\Http\Controllers\Admin\AdminClipController::class, 'getFraudAlerts'])->name('clips.fraud-alerts');
-        
+
         // Brand Approvals
         Route::get('brand-approvals', [App\Http\Controllers\Admin\AdminBrandApprovalController::class, 'index'])->name('brand-approvals.index');
         Route::get('brand-approvals/{registration}', [App\Http\Controllers\Admin\AdminBrandApprovalController::class, 'show'])->name('brand-approvals.show');
         Route::post('brand-approvals/{registration}/approve', [App\Http\Controllers\Admin\AdminBrandApprovalController::class, 'approve'])->name('brand-approvals.approve');
         Route::post('brand-approvals/{registration}/reject', [App\Http\Controllers\Admin\AdminBrandApprovalController::class, 'reject'])->name('brand-approvals.reject');
-        
+
         Route::prefix('wallets')->name('wallets.')->group(function () {
             Route::get('ledger', [App\Http\Controllers\Admin\AdminWalletController::class, 'viewLedger'])->name('ledger');
             Route::get('audit-log', [App\Http\Controllers\Admin\AdminWalletController::class, 'viewAuditLog'])->name('audit-log');
@@ -426,8 +425,11 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-// Payment Webhook (no auth required)
+// Payment Webhooks (no auth required, CSRF excluded)
+// Single webhook endpoint handles both marketplace orders and top-ups
 Route::post('/payment/webhook', [App\Http\Controllers\PaymentController::class, 'webhook'])->name('payment.webhook');
+Route::post('/payment/recurring', [App\Http\Controllers\PaymentController::class, 'recurring'])->name('payment.recurring');
+Route::post('/payment/pay-account', [App\Http\Controllers\PaymentController::class, 'payAccount'])->name('payment.pay-account');
 
 // Explorer Routes
 Route::middleware('auth')->group(function () {

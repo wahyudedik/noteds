@@ -18,7 +18,7 @@
 
 ### ✅ Creator Wallet Withdrawal
 - **Controller**: `CreatorWithdrawalController.php`
-- **Routes**: 
+- **Routes**:  
   - `GET /clipper/withdrawals/creator` - Index
   - `GET /clipper/withdrawals/creator/create` - Create form
   - `POST /clipper/withdrawals/creator` - Store
