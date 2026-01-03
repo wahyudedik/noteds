@@ -4,6 +4,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 
 // Posts/Show page - displays individual post with comments and validation
 import { PURPOSE_TYPE_LABELS } from '@/Utils/constants';
+import { ref } from 'vue';
 import VoteButton from '@/Components/VoteButton.vue';
 import BookmarkButton from '@/Components/Bookmark/BookmarkButton.vue';
 import ReportButton from '@/Components/Report/ReportButton.vue';
@@ -13,6 +14,8 @@ import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import IdeaValidationForm from '@/Components/IdeaValidationForm.vue';
 import ValidationResults from '@/Components/ValidationResults.vue';
+import LinkPreview from '@/Components/LinkPreview.vue';
+import ImageGallery from '@/Components/ImageGallery.vue';
 import { PURPOSE_TYPES } from '@/Utils/constants';
 
 const props = defineProps({
@@ -31,6 +34,14 @@ const commentForm = useForm({
     content: '',
 });
 
+const showImageGallery = ref(false);
+const selectedImageIndex = ref(0);
+
+const openImageGallery = (index) => {
+    selectedImageIndex.value = index;
+    showImageGallery.value = true;
+};
+
 const submitComment = () => {
     commentForm.post(route('comments.store', props.post.id), {
         preserveScroll: true,
@@ -38,6 +49,83 @@ const submitComment = () => {
             commentForm.reset();
         },
     });
+};
+
+// Get image URL with fallback
+const getImageUrl = (media) => {
+    if (media.url) {
+        return media.url;
+    }
+    // Fallback: construct URL from file_path
+    if (media.file_path) {
+        return `/storage/${media.file_path}`;
+    }
+    return '';
+};
+
+// Handle image error
+const handleImageError = (event) => {
+    console.warn('Image failed to load:', event.target.src);
+    event.target.style.display = 'none';
+};
+
+// Get masonry grid style based on image count (Pinterest-style)
+const getMasonryStyle = (imageCount) => {
+    if (imageCount === 1) {
+        return {
+            gridTemplateColumns: '1fr',
+            gridAutoRows: 'minmax(200px, auto)',
+        };
+    } else if (imageCount === 2) {
+        return {
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gridAutoRows: 'minmax(200px, auto)',
+        };
+    } else if (imageCount === 3) {
+        return {
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gridAutoRows: 'minmax(180px, auto)',
+        };
+    } else if (imageCount === 4) {
+        return {
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gridAutoRows: 'minmax(180px, auto)',
+        };
+    } else {
+        // 5+ images: use 3 columns masonry for compact layout
+        return {
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridAutoRows: 'minmax(150px, auto)',
+        };
+    }
+};
+
+// Get image class based on position and count (Pinterest-style sizing)
+const getImageClass = (imageCount, index) => {
+    if (imageCount === 1) {
+        return 'aspect-video max-h-[400px]';
+    } else if (imageCount === 2) {
+        return 'aspect-square';
+    } else if (imageCount === 3) {
+        if (index === 0) {
+            return 'row-span-2 aspect-auto max-h-[360px]';
+        }
+        return 'aspect-square';
+    } else if (imageCount === 4) {
+        return 'aspect-square';
+    } else {
+        // 5+ images: varied heights for masonry effect (more compact)
+        const heightPatterns = [
+            { h: 'h-40', max: 'max-h-[240px]' },
+            { h: 'h-52', max: 'max-h-[280px]' },
+            { h: 'h-44', max: 'max-h-[260px]' },
+            { h: 'h-48', max: 'max-h-[270px]' },
+            { h: 'h-50', max: 'max-h-[275px]' },
+            { h: 'h-46', max: 'max-h-[265px]' },
+        ];
+        const pattern = heightPatterns[index % heightPatterns.length];
+        return `${pattern.h} ${pattern.max} min-h-[180px]`;
+    }
 };
 </script>
 
@@ -115,6 +203,54 @@ const submitComment = () => {
                             <p class="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
                                 {{ post.content }}
                             </p>
+                        </div>
+
+                        <!-- Images Masonry Layout (Pinterest-style) -->
+                        <div v-if="post.media && post.media.length > 0" class="mb-6">
+                            <div
+                                class="grid gap-3 rounded-lg overflow-hidden"
+                                :style="getMasonryStyle(post.media.length)"
+                            >
+                                <div
+                                    v-for="(media, index) in post.media"
+                                    :key="media.id"
+                                    :class="[
+                                        'relative overflow-hidden bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:opacity-90 transition-opacity',
+                                        getImageClass(post.media.length, index)
+                                    ]"
+                                    @click="openImageGallery(index)"
+                                >
+                                    <img
+                                        :src="getImageUrl(media)"
+                                        :alt="media.file_name"
+                                        class="w-full h-full object-cover"
+                                        loading="lazy"
+                                        @error="handleImageError($event)"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image Gallery Modal -->
+                        <ImageGallery
+                            v-if="post.media && post.media.length > 0"
+                            :images="post.media"
+                            :initial-index="selectedImageIndex"
+                            :show="showImageGallery"
+                            @close="showImageGallery = false"
+                        />
+
+                        <!-- Link Preview -->
+                        <div v-if="post.link_url" class="mb-6">
+                            <LinkPreview
+                                :preview="{
+                                    url: post.link_url,
+                                    title: post.link_preview_title,
+                                    description: post.link_preview_description,
+                                    image: post.link_preview_image,
+                                    site_name: post.link_preview_site_name,
+                                }"
+                            />
                         </div>
 
                         <div class="flex items-center justify-between mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">

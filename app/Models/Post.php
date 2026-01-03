@@ -37,6 +37,11 @@ class Post extends Model
         'purpose_type',
         'title',
         'content',
+        'link_url',
+        'link_preview_title',
+        'link_preview_description',
+        'link_preview_image',
+        'link_preview_site_name',
         'is_validated_post',
         'upvotes_count',
         'downvotes_count',
@@ -91,5 +96,31 @@ class Post extends Model
     public function isBookmarkedBy(string $userId): bool
     {
         return $this->bookmarkedBy()->where('user_id', $userId)->exists();
+    }
+
+    /**
+     * Get the media associated with this post.
+     */
+    public function media(): HasMany
+    {
+        return $this->hasMany(PostMedia::class)->orderBy('order');
+    }
+
+    /**
+     * Get link preview data as array.
+     */
+    public function getLinkPreviewAttribute(): ?array
+    {
+        if (!$this->link_url) {
+            return null;
+        }
+
+        return [
+            'url' => $this->link_url,
+            'title' => $this->link_preview_title,
+            'description' => $this->link_preview_description,
+            'image' => $this->link_preview_image,
+            'site_name' => $this->link_preview_site_name,
+        ];
     }
 }

@@ -1,8 +1,11 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import VoteButton from '@/Components/VoteButton.vue';
 import BookmarkButton from '@/Components/Bookmark/BookmarkButton.vue';
 import ReportButton from '@/Components/Report/ReportButton.vue';
+import LinkPreview from '@/Components/LinkPreview.vue';
+import ImageGallery from '@/Components/ImageGallery.vue';
 import { PURPOSE_TYPE_LABELS } from '@/Utils/constants';
 import { usePage } from '@inertiajs/vue3';
 
@@ -22,6 +25,13 @@ const props = defineProps({
 });
 
 const page = usePage();
+const showImageGallery = ref(false);
+const selectedImageIndex = ref(0);
+
+const openImageGallery = (index) => {
+    selectedImageIndex.value = index;
+    showImageGallery.value = true;
+};
 
 // Format date
 const formatDate = (date) => {
@@ -36,6 +46,83 @@ const formatDate = (date) => {
     if (hours < 24) return `${hours}h ago`;
     if (days < 7) return `${days}d ago`;
     return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+};
+
+// Get image URL with fallback
+const getImageUrl = (media) => {
+    if (media.url) {
+        return media.url;
+    }
+    // Fallback: construct URL from file_path
+    if (media.file_path) {
+        return `/storage/${media.file_path}`;
+    }
+    return '';
+};
+
+// Handle image error
+const handleImageError = (event) => {
+    console.warn('Image failed to load:', event.target.src);
+    event.target.style.display = 'none';
+};
+
+// Get masonry grid style based on image count (Pinterest-style)
+const getMasonryStyle = (imageCount) => {
+    if (imageCount === 1) {
+        return {
+            gridTemplateColumns: '1fr',
+            gridAutoRows: 'minmax(200px, auto)',
+        };
+    } else if (imageCount === 2) {
+        return {
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gridAutoRows: 'minmax(200px, auto)',
+        };
+    } else if (imageCount === 3) {
+        return {
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gridAutoRows: 'minmax(180px, auto)',
+        };
+    } else if (imageCount === 4) {
+        return {
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gridAutoRows: 'minmax(180px, auto)',
+        };
+    } else {
+        // 5+ images: use 3 columns masonry for compact layout
+        return {
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridAutoRows: 'minmax(150px, auto)',
+        };
+    }
+};
+
+// Get image class based on position and count (Pinterest-style sizing)
+const getImageClass = (imageCount, index) => {
+    if (imageCount === 1) {
+        return 'aspect-video max-h-[400px]';
+    } else if (imageCount === 2) {
+        return 'aspect-square';
+    } else if (imageCount === 3) {
+        if (index === 0) {
+            return 'row-span-2 aspect-auto max-h-[360px]';
+        }
+        return 'aspect-square';
+    } else if (imageCount === 4) {
+        return 'aspect-square';
+    } else {
+        // 5+ images: varied heights for masonry effect (more compact)
+        const heightPatterns = [
+            { h: 'h-40', max: 'max-h-[240px]' },
+            { h: 'h-52', max: 'max-h-[280px]' },
+            { h: 'h-44', max: 'max-h-[260px]' },
+            { h: 'h-48', max: 'max-h-[270px]' },
+            { h: 'h-50', max: 'max-h-[275px]' },
+            { h: 'h-46', max: 'max-h-[265px]' },
+        ];
+        const pattern = heightPatterns[index % heightPatterns.length];
+        return `${pattern.h} ${pattern.max} min-h-[180px]`;
+    }
 };
 </script>
 
@@ -94,6 +181,68 @@ const formatDate = (date) => {
                     {{ post.content }}
                 </p>
             </Link>
+
+            <!-- Images Grid -->
+            <div v-if="post.media && post.media.length > 0" class="mt-4">
+                <div
+                    :class="[
+                        'grid gap-2 rounded-lg overflow-hidden',
+                        post.media.length === 1 ? 'grid-cols-1' : '',
+                        post.media.length === 2 ? 'grid-cols-2' : '',
+                        post.media.length >= 3 ? 'grid-cols-2' : '',
+                    ]"
+                >
+                    <div
+                        v-for="(media, index) in post.media.slice(0, 4)"
+                        :key="media.id"
+                        :class="[
+                            'relative overflow-hidden bg-gray-100 dark:bg-gray-700 cursor-pointer hover:opacity-90 transition-opacity',
+                            post.media.length === 1 ? 'aspect-video' : 'aspect-square',
+                            index === 0 && post.media.length === 3 ? 'row-span-2' : '',
+                        ]"
+                        @click="openImageGallery(index)"
+                    >
+                        <img
+                            :src="getImageUrl(media)"
+                            :alt="media.file_name"
+                            class="w-full h-full object-cover"
+                            loading="lazy"
+                            @error="handleImageError($event)"
+                        />
+                    </div>
+                    <div
+                        v-if="post.media.length > 4"
+                        class="relative aspect-square bg-gray-900 bg-opacity-50 flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
+                        @click="openImageGallery(4)"
+                    >
+                        <span class="text-white font-semibold text-lg">
+                            +{{ post.media.length - 4 }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Gallery Modal -->
+            <ImageGallery
+                v-if="post.media && post.media.length > 0"
+                :images="post.media"
+                :initial-index="selectedImageIndex"
+                :show="showImageGallery"
+                @close="showImageGallery = false"
+            />
+
+            <!-- Link Preview -->
+            <div v-if="post.link_url" class="mt-4">
+                <LinkPreview
+                    :preview="{
+                        url: post.link_url,
+                        title: post.link_preview_title,
+                        description: post.link_preview_description,
+                        image: post.link_preview_image,
+                        site_name: post.link_preview_site_name,
+                    }"
+                />
+            </div>
 
             <!-- Actions -->
             <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">

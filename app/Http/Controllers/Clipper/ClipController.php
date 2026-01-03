@@ -188,15 +188,104 @@ class ClipController extends Controller
     }
 
     /**
+     * Get live views for a clip.
+     */
+    public function getLiveViews($id)
+    {
+        $clip = auth()->user()->clips()
+            ->with(['viewTrackings' => function ($query) {
+                $query->latest('tracked_at')->limit(10);
+            }])
+            ->findOrFail($id);
+        
+        // Cache for 5 seconds
+        $cacheKey = "clip_live_views_{$id}";
+        $cached = cache()->get($cacheKey);
+        if ($cached) {
+            return response()->json($cached);
+        }
+        
+        $latestTracking = $clip->viewTrackings->first();
+        $previousTracking = $clip->viewTrackings->skip(1)->first();
+        
+        $totalViews = $latestTracking->views_count ?? $clip->total_views ?? 0;
+        $validViews = $clip->valid_views ?? 0;
+        $previousViews = $previousTracking->views_count ?? $clip->total_views ?? 0;
+        
+        // Calculate growth rate
+        $growthRate = 0;
+        if ($previousViews > 0) {
+            $growthRate = (($totalViews - $previousViews) / $previousViews) * 100;
+        } elseif ($totalViews > 0) {
+            $growthRate = 100;
+        }
+        
+        $viewValidationService = app(\App\Services\ViewValidationService::class);
+        
+        $hasFraud = false;
+        $stabilityScore = null;
+        $fraudReasons = [];
+        
+        try {
+            $hasFraud = $viewValidationService->detectFraud($clip);
+            $stabilityScore = $viewValidationService->checkStability($clip);
+            
+            // Get fraud detection reasons
+            if ($hasFraud) {
+                $trackingRecords = $clip->viewTrackings()->orderBy('tracked_at', 'desc')->limit(5)->get();
+                if ($trackingRecords->count() >= 2) {
+                    $views = $trackingRecords->pluck('views_count')->toArray();
+                    for ($i = 1; $i < count($views); $i++) {
+                        $growth = ($views[$i] - $views[$i - 1]) / max($views[$i - 1], 1);
+                        if ($growth > 5.0) {
+                            $fraudReasons[] = 'Sudden spike detected (' . round($growth * 100, 1) . '% growth)';
+                        }
+                    }
+                    if ($stabilityScore > 0.8) {
+                        $fraudReasons[] = 'High instability score (' . round($stabilityScore, 2) . ')';
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            $stabilityScore = $latestTracking->stability_score ?? null;
+        }
+        
+        $result = [
+            'clip_id' => $clip->id,
+            'current_views' => $totalViews,
+            'valid_views' => $validViews,
+            'growth_rate' => round($growthRate, 2),
+            'last_tracking_timestamp' => $latestTracking ? $latestTracking->tracked_at->toIso8601String() : null,
+            'stability_score' => $stabilityScore,
+            'fraud_detected' => $hasFraud,
+            'fraud_reasons' => $fraudReasons,
+            'recent_tracking_history' => $clip->viewTrackings->take(10)->map(function ($tracking) {
+                return [
+                    'tracked_at' => $tracking->tracked_at->toIso8601String(),
+                    'views_count' => $tracking->views_count,
+                    'is_valid' => $tracking->is_valid ?? true,
+                    'stability_score' => $tracking->stability_score,
+                ];
+            })->values(),
+        ];
+        
+        cache()->put($cacheKey, $result, 5);
+        
+        return response()->json($result);
+    }
+
+    /**
      * Get validation status for a clip.
      */
     public function getValidationStatus($id)
     {
         $clip = auth()->user()->clips()
-            ->with('viewTrackings')
+            ->with(['viewTrackings' => function ($query) {
+                $query->orderBy('tracked_at', 'desc')->limit(10);
+            }])
             ->findOrFail($id);
         
-        $latestTracking = $clip->viewTrackings()->latest('tracked_at')->first();
+        $latestTracking = $clip->viewTrackings->first();
         
         $totalViews = $latestTracking->views_count ?? $clip->total_views ?? 0;
         $validViews = $clip->valid_views ?? 0;
@@ -206,28 +295,41 @@ class ClipController extends Controller
         
         $hasFraud = false;
         $stabilityScore = null;
+        $fraudReasons = [];
         
         try {
             $hasFraud = $viewValidationService->detectFraud($clip);
             $stabilityScore = $viewValidationService->checkStability($clip);
+            
+            // Get fraud detection reasons
+            if ($hasFraud) {
+                $trackingRecords = $clip->viewTrackings;
+                if ($trackingRecords->count() >= 2) {
+                    $views = $trackingRecords->pluck('views_count')->toArray();
+                    for ($i = 1; $i < count($views); $i++) {
+                        $growth = ($views[$i] - $views[$i - 1]) / max($views[$i - 1], 1);
+                        if ($growth > 5.0) {
+                            $fraudReasons[] = 'Sudden spike detected (' . round($growth * 100, 1) . '% growth)';
+                        }
+                    }
+                    if ($stabilityScore > 0.8) {
+                        $fraudReasons[] = 'High instability score (' . round($stabilityScore, 2) . ')';
+                    }
+                }
+            }
         } catch (\Exception $e) {
-            // Use stored stability score if validation fails
             $stabilityScore = $latestTracking->stability_score ?? null;
         }
         
         // Get validation history (last 10 tracking records)
-        $validationHistory = $clip->viewTrackings()
-            ->orderBy('tracked_at', 'desc')
-            ->limit(10)
-            ->get()
-            ->map(function ($tracking) {
-                return [
-                    'tracked_at' => $tracking->tracked_at->toIso8601String(),
-                    'views_count' => $tracking->views_count,
-                    'is_valid' => $tracking->is_valid ?? true,
-                    'stability_score' => $tracking->stability_score,
-                ];
-            });
+        $validationHistory = $clip->viewTrackings->map(function ($tracking) {
+            return [
+                'tracked_at' => $tracking->tracked_at->toIso8601String(),
+                'views_count' => $tracking->views_count,
+                'is_valid' => $tracking->is_valid ?? true,
+                'stability_score' => $tracking->stability_score,
+            ];
+        });
         
         return response()->json([
             'clip_id' => $clip->id,
@@ -236,6 +338,7 @@ class ClipController extends Controller
             'total_views' => $totalViews,
             'stability_score' => $stabilityScore,
             'fraud_detected' => $hasFraud,
+            'fraud_reasons' => $fraudReasons,
             'validation_rate' => $totalViews > 0 
                 ? round(($validViews / $totalViews) * 100, 2) 
                 : 0,

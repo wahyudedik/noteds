@@ -6,6 +6,9 @@ import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Textarea from '@/Components/Textarea.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import ImageUploader from '@/Components/ImageUploader.vue';
+import LinkPreview from '@/Components/LinkPreview.vue';
+import { detectUrl } from '@/Utils/linkDetector';
 
 const props = defineProps({
     show: {
@@ -17,20 +20,140 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 
 const titleInput = ref(null);
+const images = ref([]);
+const linkPreview = ref(null);
+const isGeneratingPreview = ref(false);
 
 const form = useForm({
     purpose_type: '',
     title: '',
     content: '',
+    images: [],
+    link_url: null,
+    link_preview_title: null,
+    link_preview_description: null,
+    link_preview_image: null,
+    link_preview_site_name: null,
 });
+
+// Debounce function
+let debounceTimer = null;
+const debounce = (func, delay) => {
+    return (...args) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func(...args), delay);
+    };
+};
+
+// Watch content for URL detection
+watch(() => form.content, debounce((newContent) => {
+    if (!newContent) {
+        linkPreview.value = null;
+        form.link_url = null;
+        form.link_preview_title = null;
+        form.link_preview_description = null;
+        form.link_preview_image = null;
+        form.link_preview_site_name = null;
+        return;
+    }
+
+    const detectedUrl = detectUrl(newContent);
+    if (detectedUrl && (!linkPreview.value || linkPreview.value.url !== detectedUrl)) {
+        generateLinkPreview(detectedUrl);
+    } else if (!detectedUrl && linkPreview.value) {
+        linkPreview.value = null;
+        form.link_url = null;
+        form.link_preview_title = null;
+        form.link_preview_description = null;
+        form.link_preview_image = null;
+        form.link_preview_site_name = null;
+    }
+}, 1000));
+
+// Generate link preview
+const generateLinkPreview = async (url) => {
+    if (!url) return;
+
+    // Validate URL format before sending
+    try {
+        new URL(url);
+    } catch (e) {
+        console.warn('Invalid URL format:', url);
+        linkPreview.value = null;
+        return;
+    }
+
+    isGeneratingPreview.value = true;
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        const response = await fetch(route('link-preview.generate'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ url }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            // Log validation errors if any
+            if (data.errors) {
+                console.warn('Validation errors:', data.errors);
+            }
+            if (data.message) {
+                console.warn('Error message:', data.message);
+            }
+            linkPreview.value = null;
+            return;
+        }
+
+        if (data.success && data.data) {
+            linkPreview.value = data.data;
+            form.link_url = data.data.url;
+            form.link_preview_title = data.data.title;
+            form.link_preview_description = data.data.description;
+            form.link_preview_image = data.data.image;
+            form.link_preview_site_name = data.data.site_name;
+        } else {
+            linkPreview.value = null;
+        }
+    } catch (error) {
+        console.error('Error generating link preview:', error);
+        linkPreview.value = null;
+    } finally {
+        isGeneratingPreview.value = false;
+    }
+};
+
+// Remove link preview
+const removeLinkPreview = () => {
+    linkPreview.value = null;
+    form.link_url = null;
+    form.link_preview_title = null;
+    form.link_preview_description = null;
+    form.link_preview_image = null;
+    form.link_preview_site_name = null;
+};
 
 const submit = () => {
     if (form.processing) return; // Prevent double submission
-    
+
+    // Set images in form (extract File objects from image data)
+    form.images = images.value.map(img => img.file);
+
+    // Submit using Inertia form
     form.post(route('posts.store'), {
         preserveScroll: true,
+        forceFormData: true,
         onSuccess: () => {
             form.reset();
+            images.value = [];
+            linkPreview.value = null;
             emit('close');
         },
         onError: (errors) => {
@@ -50,6 +173,8 @@ const submit = () => {
 
 const close = () => {
     form.reset();
+    images.value = [];
+    linkPreview.value = null;
     emit('close');
 };
 
@@ -162,6 +287,22 @@ onUnmounted(() => {
                                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                             Focus on business-related content. Personal drama is not allowed.
                                         </p>
+                                    </div>
+
+                                    <!-- Image Uploader -->
+                                    <div>
+                                        <ImageUploader v-model="images" :max-images="10" :max-size="2048" />
+                                        <InputError :message="form.errors.images" />
+                                    </div>
+
+                                    <!-- Link Preview -->
+                                    <div v-if="linkPreview">
+                                        <LinkPreview :preview="linkPreview" :show-remove="true" @remove="removeLinkPreview" />
+                                    </div>
+
+                                    <!-- Loading indicator for link preview -->
+                                    <div v-if="isGeneratingPreview" class="text-sm text-gray-500 dark:text-gray-400">
+                                        Generating link preview...
                                     </div>
 
                                     <div class="flex justify-end gap-3 pt-4">

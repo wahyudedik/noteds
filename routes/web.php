@@ -32,6 +32,13 @@ Route::middleware('auth')->group(function () {
         ->name('search.suggestions'); // 60 suggestions per minute
 });
 
+// Link Preview API
+Route::middleware('auth')->group(function () {
+    Route::post('/api/link-preview', [App\Http\Controllers\LinkPreviewController::class, 'generate'])
+        ->middleware('throttle:30,1')
+        ->name('link-preview.generate'); // 30 requests per minute
+});
+
 // Dashboard for analytics
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -294,7 +301,9 @@ Route::middleware('auth')->group(function () {
             ->name('clips.store');
         Route::get('clips/{clip}', [App\Http\Controllers\Clipper\ClipController::class, 'show'])->name('clips.show');
         Route::get('clips/{clip}/status', [App\Http\Controllers\Clipper\ClipController::class, 'status'])->name('clips.status');
+        Route::get('clips/{clip}/views/live', [App\Http\Controllers\Clipper\ClipController::class, 'getLiveViews'])->name('clips.views.live');
         Route::get('clips/{clip}/validation', [App\Http\Controllers\Clipper\ClipController::class, 'getValidationStatus'])->name('clips.validation');
+        Route::get('clips/{clip}/validation/history', [App\Http\Controllers\Clipper\ClipController::class, 'getValidationStatus'])->name('clips.validation.history');
         Route::get('clips/{clip}/edit', [App\Http\Controllers\Clipper\ClipController::class, 'edit'])->name('clips.edit');
         Route::put('clips/{clip}', [App\Http\Controllers\Clipper\ClipController::class, 'update'])->name('clips.update');
         Route::delete('clips/{clip}', [App\Http\Controllers\Clipper\ClipController::class, 'destroy'])->name('clips.destroy');

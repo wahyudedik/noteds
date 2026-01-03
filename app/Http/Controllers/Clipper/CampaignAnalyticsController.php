@@ -106,16 +106,28 @@ class CampaignAnalyticsController extends Controller
     {
         $campaign = auth()->user()->campaigns()->findOrFail($campaignId);
         
-        // Get latest views from all clips in campaign
-        $clips = $campaign->clips()->with('viewTrackings')->get();
+        // Cache for 5 seconds to reduce load
+        $cacheKey = "campaign_live_views_{$campaignId}";
+        $cached = cache()->get($cacheKey);
+        if ($cached) {
+            return response()->json($cached);
+        }
+        
+        // Get latest views from all clips in campaign with eager loading
+        $clips = $campaign->clips()
+            ->with(['viewTrackings' => function ($query) {
+                $query->latest('tracked_at')->limit(1);
+            }])
+            ->get();
         
         $totalViews = 0;
         $validViews = 0;
         $viewsPerClip = [];
         $lastUpdated = null;
+        $previousTotalViews = $campaign->total_views ?? 0;
         
         foreach ($clips as $clip) {
-            $latestTracking = $clip->viewTrackings()->latest('tracked_at')->first();
+            $latestTracking = $clip->viewTrackings->first();
             if ($latestTracking) {
                 $totalViews += $latestTracking->views_count;
                 if ($latestTracking->is_valid) {
@@ -131,21 +143,46 @@ class CampaignAnalyticsController extends Controller
                 $validViews += $clip->valid_views ?? 0;
             }
             
+            // Check fraud detection status
+            $viewValidationService = app(\App\Services\ViewValidationService::class);
+            $hasFraud = false;
+            try {
+                $hasFraud = $viewValidationService->detectFraud($clip);
+            } catch (\Exception $e) {
+                // Ignore errors
+            }
+            
             $viewsPerClip[] = [
                 'clip_id' => $clip->id,
                 'total_views' => $latestTracking->views_count ?? $clip->total_views ?? 0,
                 'valid_views' => $clip->valid_views ?? 0,
+                'fraud_detected' => $hasFraud,
             ];
         }
         
-        return response()->json([
+        // Calculate growth rate
+        $growthRate = 0;
+        if ($previousTotalViews > 0) {
+            $growthRate = (($totalViews - $previousTotalViews) / $previousTotalViews) * 100;
+        } elseif ($totalViews > 0) {
+            $growthRate = 100; // New views
+        }
+        
+        $result = [
             'total_views' => $totalViews,
             'valid_views' => $validViews,
             'invalid_views' => $totalViews - $validViews,
             'views_per_clip' => $viewsPerClip,
             'last_updated' => $lastUpdated ? $lastUpdated->toIso8601String() : now()->toIso8601String(),
             'campaign_id' => $campaign->id,
-        ]);
+            'growth_rate' => round($growthRate, 2),
+            'previous_views' => $previousTotalViews,
+        ];
+        
+        // Cache for 5 seconds
+        cache()->put($cacheKey, $result, 5);
+        
+        return response()->json($result);
     }
 
     /**
@@ -155,7 +192,19 @@ class CampaignAnalyticsController extends Controller
     {
         $campaign = auth()->user()->campaigns()->findOrFail($campaignId);
         
-        $clips = $campaign->clips()->with('viewTrackings')->get();
+        // Cache for 10 seconds
+        $cacheKey = "campaign_validation_details_{$campaignId}";
+        $cached = cache()->get($cacheKey);
+        if ($cached) {
+            return response()->json($cached);
+        }
+        
+        // Optimize query with eager loading and limit
+        $clips = $campaign->clips()
+            ->with(['viewTrackings' => function ($query) {
+                $query->latest('tracked_at')->limit(1);
+            }])
+            ->get();
         
         $totalValidViews = 0;
         $totalInvalidViews = 0;
@@ -166,7 +215,7 @@ class CampaignAnalyticsController extends Controller
         $viewValidationService = app(\App\Services\ViewValidationService::class);
         
         foreach ($clips as $clip) {
-            $latestTracking = $clip->viewTrackings()->latest('tracked_at')->first();
+            $latestTracking = $clip->viewTrackings->first();
             
             $validViews = $clip->valid_views ?? 0;
             $totalViews = $latestTracking->views_count ?? $clip->total_views ?? 0;
@@ -175,17 +224,22 @@ class CampaignAnalyticsController extends Controller
             $totalValidViews += $validViews;
             $totalInvalidViews += $invalidViews;
             
-            // Check for fraud
+            // Check for fraud (with error handling)
             $hasFraud = false;
             $stabilityScore = null;
             
             try {
                 $hasFraud = $viewValidationService->detectFraud($clip);
                 $stabilityScore = $viewValidationService->checkStability($clip);
-                $averageStabilityScore += $stabilityScore;
+                if ($stabilityScore !== null) {
+                    $averageStabilityScore += $stabilityScore;
+                }
             } catch (\Exception $e) {
                 // If validation fails, use stored stability score
                 $stabilityScore = $latestTracking->stability_score ?? null;
+                if ($stabilityScore !== null) {
+                    $averageStabilityScore += $stabilityScore;
+                }
             }
             
             if ($hasFraud) {
@@ -203,9 +257,14 @@ class CampaignAnalyticsController extends Controller
         }
         
         $totalClips = $clips->count();
-        $averageStabilityScore = $totalClips > 0 ? $averageStabilityScore / $totalClips : 0;
+        $clipsWithStability = $clips->filter(function ($clip) {
+            $latestTracking = $clip->viewTrackings->first();
+            return $latestTracking && $latestTracking->stability_score !== null;
+        })->count();
         
-        return response()->json([
+        $averageStabilityScore = $clipsWithStability > 0 ? $averageStabilityScore / $clipsWithStability : 0;
+        
+        $result = [
             'campaign_id' => $campaign->id,
             'total_valid_views' => $totalValidViews,
             'total_invalid_views' => $totalInvalidViews,
@@ -216,6 +275,11 @@ class CampaignAnalyticsController extends Controller
                 ? round(($totalValidViews / ($totalValidViews + $totalInvalidViews)) * 100, 2) 
                 : 0,
             'clips' => $validationDetails,
-        ]);
+        ];
+        
+        // Cache for 10 seconds
+        cache()->put($cacheKey, $result, 10);
+        
+        return response()->json($result);
     }
 }

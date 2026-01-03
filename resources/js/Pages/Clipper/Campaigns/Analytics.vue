@@ -3,6 +3,8 @@ import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import ViewValidationStatus from '@/Components/Clipper/ViewValidationStatus.vue';
+import RealTimeViewCounter from '@/Components/Clipper/RealTimeViewCounter.vue';
+import ViewHistoryChart from '@/Components/Clipper/ViewHistoryChart.vue';
 
 const props = defineProps({
     overallStats: {
@@ -270,21 +272,19 @@ watch(() => props.campaign, (newCampaign) => {
                 <!-- Campaign-specific Stats -->
                 <div v-if="campaign" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                        <div class="flex items-center gap-2">
+                        <RealTimeViewCounter
+                            v-if="shouldPoll"
+                            :initial-views="campaign.total_views || 0"
+                            :endpoint="route('clipper.campaigns.analytics.live', campaign.id)"
+                            :poll-interval="30000"
+                            :show-growth-rate="true"
+                            :enabled="shouldPoll"
+                        />
+                        <div v-else>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Total Views</div>
-                            <span
-                                v-if="isPolling"
-                                class="px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded"
-                                title="Auto-refreshing every 30 seconds"
-                            >
-                                🔄 Live
-                            </span>
-                        </div>
-                        <div class="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                            {{ formatCurrency(liveViews.total_views || campaign.total_views || 0) }}
-                        </div>
-                        <div v-if="liveViews.last_updated" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Updated: {{ new Date(liveViews.last_updated).toLocaleTimeString('id-ID') }}
+                            <div class="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                                {{ formatCurrency(campaign.total_views || 0) }}
+                            </div>
                         </div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -316,13 +316,12 @@ watch(() => props.campaign, (newCampaign) => {
 
                 <!-- Views Chart -->
                 <div v-if="campaign && viewsChartData" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
-                    <h3 class="text-lg font-semibold mb-4">Views Over Time</h3>
-                    <div class="relative h-48 sm:h-64 overflow-hidden">
-                        <canvas 
-                            ref="chartCanvas" 
-                            class="w-full h-full"
-                        ></canvas>
-                    </div>
+                    <ViewHistoryChart
+                        :tracking-data="[]"
+                        time-range="30d"
+                        :show-valid-invalid="false"
+                        :height="300"
+                    />
                 </div>
 
                 <!-- Top Performing Clips -->

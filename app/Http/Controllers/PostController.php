@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePostRequest;
 use App\Services\FeedService;
 use App\Models\Post;
+use App\Models\PostMedia;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,7 +23,7 @@ class PostController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = Post::with('user')
+        $query = Post::with(['user', 'media'])
             ->where('status', 'active')
             ->latest();
 
@@ -96,10 +99,66 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request): RedirectResponse
     {
-        $post = $request->user()->posts()->create($request->validated());
+        $validated = $request->validated();
+        
+        // Extract link preview data
+        $linkPreviewData = [];
+        if (isset($validated['link_url'])) {
+            $linkPreviewData = [
+                'link_url' => $validated['link_url'],
+                'link_preview_title' => $validated['link_preview_title'] ?? null,
+                'link_preview_description' => $validated['link_preview_description'] ?? null,
+                'link_preview_image' => $validated['link_preview_image'] ?? null,
+                'link_preview_site_name' => $validated['link_preview_site_name'] ?? null,
+            ];
+            unset($validated['link_url'], $validated['link_preview_title'], 
+                  $validated['link_preview_description'], $validated['link_preview_image'], 
+                  $validated['link_preview_site_name']);
+        }
+
+        // Remove images from validated data (we'll handle separately)
+        $images = $validated['images'] ?? [];
+        unset($validated['images']);
+
+        // Merge link preview data
+        $postData = array_merge($validated, $linkPreviewData);
+
+        // Create post
+        $post = $request->user()->posts()->create($postData);
+
+        // Handle image uploads
+        if (!empty($images)) {
+            $this->storePostImages($post, $images);
+        }
 
         // Redirect to home feed after creating post
         return redirect()->route('home')->with('success', 'Post created successfully.');
+    }
+
+    /**
+     * Store images for a post.
+     */
+    private function storePostImages(Post $post, array $images): void
+    {
+        $order = 0;
+        foreach ($images as $image) {
+            $extension = $image->getClientOriginalExtension();
+            $fileName = Str::uuid() . '_' . time() . '.' . $extension;
+            $filePath = 'posts/images/' . $post->id . '/' . $fileName;
+
+            // Store image
+            $image->storeAs('posts/images/' . $post->id, $fileName, 'public');
+
+            // Create PostMedia record
+            PostMedia::create([
+                'post_id' => $post->id,
+                'file_path' => $filePath,
+                'file_name' => $image->getClientOriginalName(),
+                'mime_type' => $image->getMimeType(),
+                'file_size' => $image->getSize(),
+                'order' => $order++,
+            ]);
+        }
     }
 
     /**
@@ -109,6 +168,7 @@ class PostController extends Controller
     {
         $post->load([
             'user',
+            'media',
             'comments' => function ($query) {
                 $query->whereNull('parent_id')
                     ->with(['user', 'replies.user'])

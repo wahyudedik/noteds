@@ -3,6 +3,10 @@ import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import ViewValidationStatus from '@/Components/Clipper/ViewValidationStatus.vue';
+import RealTimeViewCounter from '@/Components/Clipper/RealTimeViewCounter.vue';
+import ViewHistoryChart from '@/Components/Clipper/ViewHistoryChart.vue';
+import ValidationTimeline from '@/Components/Clipper/ValidationTimeline.vue';
+import FraudDetectionDetails from '@/Components/Clipper/FraudDetectionDetails.vue';
 
 const props = defineProps({
     clip: Object,
@@ -266,6 +270,22 @@ const renderChart = () => {
                             </div>
                         </div>
                         <div>
+                            <RealTimeViewCounter
+                                v-if="shouldPoll"
+                                :initial-views="clipData.total_views || 0"
+                                :endpoint="route('clipper.clips.views.live', clipData.id)"
+                                :poll-interval="30000"
+                                :show-growth-rate="true"
+                                :enabled="shouldPoll"
+                            />
+                            <div v-else>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">Total Views</div>
+                                <div class="text-lg font-semibold text-gray-900 dark:text-white mt-1">
+                                    {{ formatCurrency(clipData.total_views || 0) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Valid Views</div>
                             <div class="text-lg font-semibold text-gray-900 dark:text-white mt-1">
                                 {{ formatCurrency(clipData.valid_views) }}
@@ -350,26 +370,43 @@ const renderChart = () => {
                     </div>
                 </div>
 
-                <!-- View Tracking Chart -->
+                <!-- View Validation Status -->
+                <ViewValidationStatus
+                    v-if="validationData"
+                    :validation-data="validationData"
+                    :show-details="true"
+                    :show-timeline="true"
+                    :clip-id="clipData.id"
+                />
+
+                <!-- Fraud Detection Details -->
+                <div v-if="validationData && validationData.fraud_detected" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <FraudDetectionDetails
+                        :fraud-detected="validationData.fraud_detected"
+                        :fraud-reasons="validationData.fraud_reasons || []"
+                        :stability-score="validationData.stability_score"
+                        :clip-id="clipData.id"
+                    />
+                </div>
+
+                <!-- View History Chart -->
                 <div v-if="viewTrackingData && viewTrackingData.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <h3 class="text-lg font-semibold mb-4">View Tracking</h3>
-                    <div class="h-64">
-                        <canvas ref="chartCanvas" width="800" height="200"></canvas>
-                    </div>
-                    <div class="mt-4 space-y-2">
-                        <div
-                            v-for="track in viewTrackingData"
-                            :key="track.id"
-                            class="flex justify-between items-center text-sm"
-                        >
-                            <span class="text-gray-600 dark:text-gray-400">
-                                {{ new Date(track.tracked_at).toLocaleString() }}
-                            </span>
-                            <span class="font-semibold text-gray-900 dark:text-white">
-                                {{ formatCurrency(track.views_count) }} views
-                            </span>
-                        </div>
-                    </div>
+                    <ViewHistoryChart
+                        :tracking-data="viewTrackingData.map(track => ({
+                            tracked_at: track.tracked_at,
+                            views_count: track.views_count,
+                            is_valid: track.is_valid !== false,
+                            stability_score: track.stability_score,
+                        }))"
+                        time-range="7d"
+                        :show-valid-invalid="true"
+                        :height="300"
+                    />
+                </div>
+
+                <!-- Validation Timeline -->
+                <div v-if="validationData && validationData.validation_history && validationData.validation_history.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <ValidationTimeline :validation-history="validationData.validation_history" />
                 </div>
             </div>
         </div>

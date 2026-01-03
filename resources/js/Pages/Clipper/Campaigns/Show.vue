@@ -5,6 +5,8 @@ import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import InputError from '@/Components/InputError.vue';
 import Textarea from '@/Components/Textarea.vue';
 import ViewValidationStatus from '@/Components/Clipper/ViewValidationStatus.vue';
+import RealTimeViewCounter from '@/Components/Clipper/RealTimeViewCounter.vue';
+import ViewHistoryChart from '@/Components/Clipper/ViewHistoryChart.vue';
 
 const props = defineProps({
     campaign: Object,
@@ -372,21 +374,19 @@ watch(() => props.campaign.status, (newStatus) => {
                             </div>
                         </div>
                         <div>
-                            <div class="flex items-center gap-2">
+                            <RealTimeViewCounter
+                                v-if="shouldPoll"
+                                :initial-views="campaign.total_views || 0"
+                                :endpoint="route('clipper.campaigns.analytics.live', campaign.id)"
+                                :poll-interval="30000"
+                                :show-growth-rate="true"
+                                :enabled="shouldPoll"
+                            />
+                            <div v-else>
                                 <div class="text-sm text-gray-500 dark:text-gray-400">Total Views</div>
-                                <span
-                                    v-if="isPolling"
-                                    class="px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded"
-                                    title="Auto-refreshing every 30 seconds"
-                                >
-                                    🔄 Live
-                                </span>
-                            </div>
-                            <div class="text-xl font-semibold text-gray-900 dark:text-white">
-                                {{ formatCurrency(liveViews.total_views || campaign.total_views) }}
-                            </div>
-                            <div v-if="liveViews.last_updated" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                Updated: {{ new Date(liveViews.last_updated).toLocaleTimeString('id-ID') }}
+                                <div class="text-xl font-semibold text-gray-900 dark:text-white">
+                                    {{ formatCurrency(campaign.total_views || 0) }}
+                                </div>
                             </div>
                         </div>
                         <div>
@@ -513,7 +513,18 @@ watch(() => props.campaign.status, (newStatus) => {
                     v-if="validationData"
                     :validation-data="validationData"
                     :show-details="true"
+                    :show-timeline="false"
                 />
+
+                <!-- View History Chart -->
+                <div v-if="campaign.clips && campaign.clips.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <ViewHistoryChart
+                        :tracking-data="[]"
+                        time-range="7d"
+                        :show-valid-invalid="true"
+                        :height="300"
+                    />
+                </div>
 
                 <!-- Clips List -->
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">

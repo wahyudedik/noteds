@@ -27,6 +27,13 @@ class StorePostRequest extends FormRequest
             'purpose_type' => ['required', 'in:idea_business,ask_question,share_experience,find_partner,find_tools,validate_idea'],
             'title' => ['required', 'string', 'min:10', 'max:255'],
             'content' => ['required', 'string', 'min:50'],
+            'images' => ['nullable', 'array', 'max:10'],
+            'images.*' => ['image', 'max:2048', 'mimes:jpeg,jpg,png,gif,webp'],
+            'link_url' => ['nullable', 'url', 'max:2048'],
+            'link_preview_title' => ['nullable', 'string', 'max:255'],
+            'link_preview_description' => ['nullable', 'string', 'max:1000'],
+            'link_preview_image' => ['nullable', 'string', 'max:2048'],
+            'link_preview_site_name' => ['nullable', 'string', 'max:100'],
         ];
     }
 

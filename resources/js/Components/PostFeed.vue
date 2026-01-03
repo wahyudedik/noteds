@@ -1,8 +1,10 @@
 <script setup>
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import PostCard from '@/Components/PostCard.vue';
 import { PURPOSE_TYPE_LABELS } from '@/Utils/constants';
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue';
+
+const page = usePage();
 
 const props = defineProps({
     posts: Object,
@@ -77,8 +79,17 @@ watch(() => [props.filters, props.posts, props.userVotes, props.userBookmarks], 
     initializePosts();
 }, { deep: true });
 
+// Get current route name based on URL
+const currentRouteName = computed(() => {
+    const url = page.url;
+    if (url.startsWith('/posts') || url === '/posts') {
+        return 'posts.index';
+    }
+    return 'home';
+});
+
 const filterByPurpose = (purposeType) => {
-    router.get(route('home'), { purpose_type: purposeType || 'all' }, {
+    router.get(route(currentRouteName.value), { purpose_type: purposeType || 'all' }, {
         preserveState: true,
         preserveScroll: true,
     });
@@ -103,7 +114,7 @@ const loadMore = () => {
     };
     
     router.get(
-        route('home'),
+        route(currentRouteName.value),
         queryParams,
         {
             preserveState: true,

@@ -30,6 +30,7 @@ const form = useForm({
 });
 
 const addToCartForm = useForm({
+    product_id: props.product.id,
     quantity: 1,
 });
 
@@ -162,6 +163,7 @@ const handleCancelReview = () => {
                                     <label class="text-sm sm:text-base font-medium text-gray-900 dark:text-white">Quantity:</label>
                                     <input
                                         v-model.number="form.quantity"
+                                        @input="addToCartForm.quantity = form.quantity"
                                         type="number"
                                         min="1"
                                         :max="product.stock"

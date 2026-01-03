@@ -35,37 +35,70 @@ class PaymentController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'Order ID not found'], 200);
             }
 
-            // Handle webhook
-            $result = $this->midtransService->handleWebhook($data);
+            // Check if this is a Top-Up (order_id starts with TOPUP-)
+            // Handle Top-Up webhook separately BEFORE calling handleWebhook (which only handles Orders)
+            if (str_starts_with($orderId, 'TOPUP-')) {
+                // Handle Top-Up webhook
+                $topUpId = str_replace('TOPUP-', '', $orderId);
+                $topUp = \App\Models\TopUp::find($topUpId);
 
-            if ($result) {
-                // Check if this is a Top-Up (order_id starts with TOPUP-)
-                // Top-ups use format: TOPUP-{id}
-                if (str_starts_with($orderId, 'TOPUP-')) {
-                    // Handle Top-Up webhook
-                    $topUpId = str_replace('TOPUP-', '', $orderId);
-                    $topUp = \App\Models\TopUp::find($topUpId);
-                    
-                    if ($topUp) {
-                        // Update top-up transaction ID if available
-                        if (isset($data['transaction_id'])) {
-                            $topUp->update([
-                                'midtrans_transaction_id' => $data['transaction_id'],
-                            ]);
-                        }
-                        
+                if (!$topUp) {
+                    Log::warning("Top-up not found for order_id: {$orderId}", $data);
+                    // Always return 200 to acknowledge receipt, even on error
+                    return response()->json(['status' => 'error', 'message' => 'Top-up not found'], 200);
+                }
+
+                // Verify webhook signature for TopUp
+                if (!$this->midtransService->verifyWebhookSignature($data)) {
+                    Log::warning("Invalid webhook signature for top-up: {$orderId}");
+                    // Still return 200 to acknowledge receipt
+                    return response()->json(['status' => 'error', 'message' => 'Invalid signature'], 200);
+                }
+
+                // Update top-up transaction ID if available
+                if (isset($data['transaction_id'])) {
+                    $topUp->update([
+                        'midtrans_transaction_id' => $data['transaction_id'],
+                    ]);
+                }
+
+                $transactionStatus = $data['transaction_status'] ?? null;
+                $fraudStatus = $data['fraud_status'] ?? null;
+
+                // Handle transaction status for TopUp
+                // Check for fraudulent captures first (capture with fraud_status = deny)
+                if ($transactionStatus === 'capture' && $fraudStatus === 'deny') {
+                    // Fraudulent capture - mark as failed
+                    $topUp->markAsFailed();
+                    Log::info("Top-up payment failed due to fraud: {$orderId}, status: {$transactionStatus}, fraud_status: {$fraudStatus}");
+                } elseif ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
+                    // For capture, check fraud status (must be accept or null)
+                    // For settlement, payment is confirmed successful
+                    if ($transactionStatus === 'settlement' || ($fraudStatus === 'accept' || $fraudStatus === null)) {
                         // Process successful payment
-                        if ($data['transaction_status'] === 'settlement' || 
-                            ($data['transaction_status'] === 'capture' && ($data['fraud_status'] ?? null) === 'accept')) {
-                            $this->topUpService->processTopUpSuccess($topUp);
-                            Log::info("Top-up processed successfully: {$topUpId}");
-                        }
-                    } else {
-                        Log::warning("Top-up not found for order_id: {$orderId}");
+                        $this->topUpService->processTopUpSuccess($topUp);
+                        Log::info("Top-up processed successfully: {$topUpId}");
                     }
-                } elseif (str_starts_with($orderId, 'ORD-')) {
-                    // Handle Marketplace Order webhook
-                    // Marketplace orders use format: ORD-YYYYMMDD-XXXXXX or ORD-{uniqid}
+                } elseif ($transactionStatus === 'pending') {
+                    // Payment is pending - no action needed, just log
+                    Log::info("Top-up payment pending: {$orderId}");
+                } elseif ($transactionStatus === 'deny' || $transactionStatus === 'expire' || $transactionStatus === 'cancel') {
+                    // Payment failed
+                    $topUp->markAsFailed();
+                    Log::info("Top-up payment failed: {$orderId}, status: {$transactionStatus}");
+                }
+
+                // Always return 200 to acknowledge receipt
+                return response()->json(['status' => 'ok'], 200);
+            }
+
+            // Handle Marketplace Order webhook
+            // Marketplace orders use format: ORD-YYYYMMDD-XXXXXX or ORD-{uniqid}
+            if (str_starts_with($orderId, 'ORD-')) {
+                // Handle webhook for Order
+                $result = $this->midtransService->handleWebhook($data);
+
+                if ($result) {
                     $order = Order::where('order_number', $orderId)->first();
                     if (!$order) {
                         Log::warning("Midtrans webhook: Order not found for order_id: {$orderId}", $data);
@@ -88,7 +121,7 @@ class PaymentController extends Controller
                         $seller = $order->product->seller;
                         $this->balanceService->addBalance(
                             $seller,
-                            $order->total,
+                            (float) $order->total,
                             "Sale: Order #{$order->order_number}",
                             $order->id,
                             'sale'
@@ -113,10 +146,10 @@ class PaymentController extends Controller
                             Log::error('Failed to send new order email: ' . $e->getMessage());
                         }
                     }
-                } else {
-                    // Unknown order_id format - log for investigation
-                    Log::warning("Unknown order_id format in webhook: {$orderId}", $data);
                 }
+            } else {
+                // Unknown order_id format - log for investigation
+                Log::warning("Unknown order_id format in webhook: {$orderId}", $data);
             }
 
             // Always return 200 to acknowledge receipt
@@ -138,9 +171,9 @@ class PaymentController extends Controller
     public function recurring(Request $request)
     {
         $data = $request->all();
-        
+
         Log::info('Midtrans recurring webhook received', $data);
-        
+
         // Always return 200 to acknowledge receipt
         // TODO: Implement recurring payment handling if needed in the future
         return response()->json(['status' => 'ok', 'message' => 'Recurring notification received'], 200);
@@ -153,9 +186,9 @@ class PaymentController extends Controller
     public function payAccount(Request $request)
     {
         $data = $request->all();
-        
+
         Log::info('Midtrans pay account webhook received', $data);
-        
+
         // Always return 200 to acknowledge receipt
         // TODO: Implement pay account handling if needed in the future
         return response()->json(['status' => 'ok', 'message' => 'Pay account notification received'], 200);
