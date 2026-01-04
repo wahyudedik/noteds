@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserSetting;
+use App\Services\UserActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -11,6 +12,9 @@ use Inertia\Response;
 
 class SettingsController extends Controller
 {
+    public function __construct(
+        private UserActivityLogService $activityLogService
+    ) {}
     /**
      * Display the settings page.
      *
@@ -158,6 +162,72 @@ class SettingsController extends Controller
         ]);
 
         return back()->with('success', 'Password updated successfully.');
+    }
+
+    /**
+     * Display user activity log.
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function activityLog(Request $request): Response
+    {
+        $user = $request->user();
+
+        $filters = [
+            'activity_type' => $request->get('activity_type'),
+            'start_date' => $request->get('start_date'),
+            'end_date' => $request->get('end_date'),
+            'search' => $request->get('search'),
+        ];
+
+        $query = $this->activityLogService->getUserActivities($user, $filters);
+        $activities = $query->paginate(20)->withQueryString();
+
+        // Activity types for filter
+        $activityTypes = [
+            'login' => 'Login History',
+            'profile_change' => 'Profile Changes',
+            'security_change' => 'Security Changes',
+            'transaction' => 'Transactions',
+            'withdrawal' => 'Withdrawals',
+            'product_upload' => 'Product Uploads',
+            'product_download' => 'Product Downloads',
+        ];
+
+        return Inertia::render('Settings/ActivityLog', [
+            'activities' => $activities,
+            'activityTypes' => $activityTypes,
+            'filters' => $filters,
+        ]);
+    }
+
+    /**
+     * Export user activity log to CSV.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function exportActivityLog(Request $request)
+    {
+        $user = $request->user();
+
+        $filters = [
+            'activity_type' => $request->get('activity_type'),
+            'start_date' => $request->get('start_date'),
+            'end_date' => $request->get('end_date'),
+            'search' => $request->get('search'),
+        ];
+
+        $filename = $this->activityLogService->exportToCsv($user, $filters);
+
+        return response()->download(
+            $filename,
+            'activity_log_' . now()->format('Y-m-d_H-i-s') . '.csv',
+            [
+                'Content-Type' => 'text/csv',
+            ]
+        )->deleteFileAfterSend(true);
     }
 }
 

@@ -61,7 +61,7 @@ todos:
     status: pending
   - id: user-activity-log
     content: "Create user-facing activity log dashboard: login history, profile changes, security changes, transaction activities, withdrawal requests, with filtering, search, and export functionality."
-    status: pending
+    status: completed
   - id: support-ticket-system
     content: "Implement support ticket system: help center with FAQ categories, ticket creation and tracking, file attachments, admin response tracking, and knowledge base search."
     status: completed
@@ -852,5 +852,3 @@ Plan ini mengidentifikasi 8 area kritis yang perlu ditingkatkan untuk membuat ap
 - CDN service (Cloudflare, AWS CloudFront) untuk assets
 - Backup storage (AWS S3, DigitalOcean Spaces)
 - CI/CD hosting (GitHub Actions free tier is sufficient)
-
----

@@ -103,6 +103,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/security', [App\Http\Controllers\SettingsController::class, 'updateSecurity'])
         ->middleware('throttle:10,60')
         ->name('settings.security'); // 10 updates per hour
+    Route::get('/settings/activity-log', [App\Http\Controllers\SettingsController::class, 'activityLog'])
+        ->name('settings.activity-log');
+    Route::get('/settings/activity-log/export', [App\Http\Controllers\SettingsController::class, 'exportActivityLog'])
+        ->middleware('throttle:5,60') // 5 exports per hour
+        ->name('settings.activity-log.export');
 
     // Follow System
     Route::post('/users/{user}/follow', [App\Http\Controllers\FollowController::class, 'follow'])

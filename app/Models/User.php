@@ -310,4 +310,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(SupportTicket::class, 'assigned_to');
     }
+
+    /**
+     * Get the activity logs for the user.
+     */
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(UserActivityLog::class);
+    }
 }
