@@ -850,4 +850,3 @@ Plan ini mengidentifikasi 8 area kritis yang perlu ditingkatkan untuk membuat ap
 - Redis server untuk caching dan queues
 - Sentry/Bugsnag account untuk error tracking
 - CDN service (Cloudflare, AWS CloudFront) untuk assets
-- Backup storage (AWS S3, DigitalOcean Spaces)

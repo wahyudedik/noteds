@@ -426,6 +426,48 @@ php artisan test --coverage
 
 ## 🚢 Deployment
 
+> **💡 Troubleshooting:** Jika mengalami error 503 pada assets setelah deployment, lihat [TROUBLESHOOTING.md](TROUBLESHOOTING.md) untuk panduan lengkap.
+
+### Quick Deployment
+
+Use the provided deployment script for easy production deployments:
+
+```bash
+# Make script executable (first time only, on Linux/Mac)
+chmod +x deploy.sh
+
+# Run deployment script
+./deploy.sh
+```
+
+The script will automatically execute:
+1. `git pull origin main` - Pull latest changes
+2. `composer install --no-dev` - Install production dependencies
+3. `npm install` - Install NPM dependencies
+4. `npm run build` - Build production assets
+5. `php artisan migrate --force` - Run database migrations
+6. `php artisan optimize` - Optimize and cache application
+
+**Alternative:** You can also run the commands manually in one line:
+```bash
+git pull origin main && composer install --no-dev && npm install && npm run build && php artisan migrate --force && php artisan optimize
+```
+
+**Note:** For Windows development, use Git Bash or WSL. On production Linux servers, run the script directly.
+
+### Manual Deployment
+
+If you prefer to run commands manually:
+
+```bash
+git pull origin main
+composer install --no-dev --optimize-autoloader
+npm install
+npm run build
+php artisan migrate --force
+php artisan optimize
+```
+
 ### Production Checklist
 
 - [ ] Update `APP_ENV=production` in `.env`
@@ -437,11 +479,12 @@ php artisan test --coverage
 - [ ] Configure file storage (S3/CDN if needed)
 - [ ] Enable HTTPS/SSL
 - [ ] Set up database backups
-- [ ] Configure logging and monitoring
-- [ ] Run `php artisan config:cache`
-- [ ] Run `php artisan route:cache`
-- [ ] Run `php artisan view:cache`
-- [ ] Build production assets: `npm run build`
+- [ ] Configure logging and monitoring (Sentry)
+- [ ] Run deployment script or manual deployment commands
+- [ ] **Check Nginx rate limiting** (if using Nginx/aaPanel):
+  - [ ] Check `/www/server/panel/vhost/nginx/noteds.com.conf` for `limit_req` or `limit_conn`
+  - [ ] Increase `burst` value or disable temporarily if getting 503 errors on assets
+  - [ ] Check error logs: `tail -f /www/wwwlogs/noteds.com.error.log`
 
 ### Environment Variables (Production)
 
