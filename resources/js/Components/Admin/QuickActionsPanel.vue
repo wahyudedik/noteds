@@ -68,6 +68,13 @@ const quickActions = computed(() => [
         color: 'bg-indigo-600 hover:bg-indigo-700',
         icon: '👥',
     },
+    {
+        label: 'Support Tickets',
+        route: 'admin.support-tickets.index',
+        count: null,
+        color: 'bg-purple-600 hover:bg-purple-700',
+        icon: '🎫',
+    },
 ]);
 </script>
 

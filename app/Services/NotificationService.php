@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Withdrawal;
+use App\Models\SupportTicket;
+use App\Models\SupportTicketResponse;
 use Illuminate\Support\Facades\Notification;
 
 class NotificationService
@@ -410,6 +412,84 @@ class NotificationService
     {
         if ($order->buyer) {
             $order->buyer->notify(new \App\Notifications\PaymentFailedNotification($order, $failureReason));
+        }
+    }
+
+    /**
+     * Notify admin about new support ticket.
+     */
+    public function notifyNewSupportTicket(SupportTicket $ticket): void
+    {
+        // Ensure user relationship is loaded
+        if (!$ticket->relationLoaded('user')) {
+            $ticket->load('user');
+        }
+
+        $admins = User::where('role', 'admin')->get();
+        
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\NewSupportTicketNotification($ticket));
+        }
+    }
+
+    /**
+     * Notify user or admin about new support ticket response.
+     */
+    public function notifySupportTicketResponse(SupportTicket $ticket, SupportTicketResponse $response): void
+    {
+        // Ensure relationships are loaded
+        if (!$ticket->relationLoaded('user')) {
+            $ticket->load('user');
+        }
+        if (!$response->relationLoaded('user')) {
+            $response->load('user');
+        }
+
+        $isAdminResponse = $response->is_admin_response;
+        
+        if ($isAdminResponse) {
+            // Admin responded, notify the ticket owner (user)
+            if ($ticket->user) {
+                $ticket->user->notify(new \App\Notifications\SupportTicketResponseNotification($ticket, $response));
+            }
+        } else {
+            // User responded, notify assigned admin or all admins if not assigned
+            if ($ticket->assigned_to) {
+                $assignedAdmin = User::find($ticket->assigned_to);
+                if ($assignedAdmin) {
+                    $assignedAdmin->notify(new \App\Notifications\SupportTicketResponseNotification($ticket, $response));
+                }
+            } else {
+                // Notify all admins if no admin is assigned
+                $admins = User::where('role', 'admin')->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new \App\Notifications\SupportTicketResponseNotification($ticket, $response));
+                }
+            }
+        }
+    }
+
+    /**
+     * Notify user and admin about support ticket status update.
+     */
+    public function notifySupportTicketStatusUpdate(SupportTicket $ticket, string $oldStatus, string $newStatus): void
+    {
+        // Ensure user relationship is loaded
+        if (!$ticket->relationLoaded('user')) {
+            $ticket->load('user');
+        }
+
+        // Notify the ticket owner (user)
+        if ($ticket->user) {
+            $ticket->user->notify(new \App\Notifications\SupportTicketStatusUpdateNotification($ticket, $oldStatus, $newStatus));
+        }
+
+        // Notify assigned admin if exists
+        if ($ticket->assigned_to) {
+            $assignedAdmin = User::find($ticket->assigned_to);
+            if ($assignedAdmin) {
+                $assignedAdmin->notify(new \App\Notifications\SupportTicketStatusUpdateNotification($ticket, $oldStatus, $newStatus));
+            }
         }
     }
 }

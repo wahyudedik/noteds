@@ -460,6 +460,27 @@ Route::middleware('auth')->group(function () {
         Route::post('posts/bulk-moderate', [App\Http\Controllers\Admin\AdminPostController::class, 'bulkModerate'])
             ->middleware('throttle:10,1')
             ->name('posts.bulk-moderate');
+
+        // Support Tickets
+        Route::resource('support-tickets', App\Http\Controllers\Admin\SupportTicketController::class)
+            ->only(['index', 'show', 'destroy'])
+            ->parameters(['support-tickets' => 'ticket']);
+        Route::post('support-tickets/{ticket}/assign', [App\Http\Controllers\Admin\SupportTicketController::class, 'assign'])
+            ->middleware('throttle:20,1')
+            ->name('support-tickets.assign');
+        Route::post('support-tickets/{ticket}/status', [App\Http\Controllers\Admin\SupportTicketController::class, 'updateStatus'])
+            ->middleware('throttle:20,1')
+            ->name('support-tickets.status');
+        Route::post('support-tickets/{ticket}/priority', [App\Http\Controllers\Admin\SupportTicketController::class, 'updatePriority'])
+            ->middleware('throttle:20,1')
+            ->name('support-tickets.priority');
+        Route::post('support-tickets/{ticket}/response', [App\Http\Controllers\Admin\SupportTicketController::class, 'addResponse'])
+            ->middleware('throttle:20,1')
+            ->name('support-tickets.response');
+        // Redirect GET requests to response route back to ticket show page
+        Route::get('support-tickets/{ticket}/response', function ($ticket) {
+            return redirect()->route('admin.support-tickets.show', $ticket);
+        });
     });
 });
 
@@ -485,6 +506,22 @@ Route::get('/faq/{id}', [App\Http\Controllers\FaqController::class, 'show'])->na
 Route::get('/documentation', [App\Http\Controllers\DocumentationController::class, 'index'])->name('documentations.index');
 Route::get('/documentation/{slug}', [App\Http\Controllers\DocumentationController::class, 'show'])->name('documentations.show');
 Route::get('/documentation/search', [App\Http\Controllers\DocumentationController::class, 'search'])->name('documentations.search');
+
+// Support Tickets (User-facing)
+Route::middleware('auth')->prefix('support')->name('support.')->group(function () {
+    Route::get('/help-center', [App\Http\Controllers\Support\TicketController::class, 'helpCenter'])->name('help-center');
+    Route::get('/knowledge-base/search', [App\Http\Controllers\Support\TicketController::class, 'searchKnowledgeBase'])
+        ->middleware('throttle:30,1')
+        ->name('knowledge-base.search');
+    Route::resource('tickets', App\Http\Controllers\Support\TicketController::class)->except(['edit', 'update', 'destroy']);
+    Route::post('/tickets/{ticket}/response', [App\Http\Controllers\Support\TicketController::class, 'addResponse'])
+        ->middleware('throttle:10,5')
+        ->name('tickets.response');
+    // Redirect GET requests to response route back to ticket show page
+    Route::get('/tickets/{ticket}/response', function ($ticket) {
+        return redirect()->route('support.tickets.show', $ticket);
+    });
+});
 
 // Legal Pages (Public)
 Route::prefix('legal')->name('legal.')->group(function () {

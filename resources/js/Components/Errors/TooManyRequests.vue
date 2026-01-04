@@ -180,7 +180,7 @@ const goBack = () => {
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     Butuh bantuan? 
                     <a href="mailto:info@noteds.com" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
-                        Email Support
+                        Email Support | 
                     </a>
                     <a href="https://wa.me/6281654932383" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
                         WhatsApp Support

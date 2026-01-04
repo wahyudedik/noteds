@@ -286,4 +286,28 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->followers()->where('follower_id', $user->id)->exists();
     }
+
+    /**
+     * Get the support tickets created by the user.
+     */
+    public function supportTickets(): HasMany
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
+
+    /**
+     * Get the support ticket responses created by the user.
+     */
+    public function supportTicketResponses(): HasMany
+    {
+        return $this->hasMany(SupportTicketResponse::class);
+    }
+
+    /**
+     * Get the support tickets assigned to the user (as admin).
+     */
+    public function assignedTickets(): HasMany
+    {
+        return $this->hasMany(SupportTicket::class, 'assigned_to');
+    }
 }
