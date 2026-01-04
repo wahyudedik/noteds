@@ -23,6 +23,6 @@ export default defineConfig({
                 manualChunks: undefined, // Disable manual chunking to reduce number of files
             },
         },
-        chunkSizeWarningLimit: 1600, // Increase chunk size warning limit
+        chunkSizeWarningLimit: 2000, // Increase chunk size warning limit
     },
 });
