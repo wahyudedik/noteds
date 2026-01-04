@@ -16,8 +16,8 @@ class UserSeeder extends Seeder
         // Admin/Test User
         User::create([
             'name' => 'Admin User',
-            'email' => 'admin@noteds.com',
-            'password' => Hash::make('password'),
+            'email' => 'info@noteds.com',
+            'password' => Hash::make('Wahyu123456789@'),
             'business_name' => 'Noteds Admin',
             'business_field' => 'Technology',
             'skills' => ['Laravel', 'Vue.js', 'Business Strategy'],
@@ -48,9 +48,9 @@ class UserSeeder extends Seeder
                 'balance' => 0,
             ],
             [
-                'name' => 'Siti Nurhaliza',
-                'email' => 'siti@example.com',
-                'password' => Hash::make('password'),
+                'name' => 'Wahyu Dedik',
+                'email' => 'wdedyk@gmail.com',
+                'password' => Hash::make('Wahyu123456789@'),
                 'business_name' => 'Digital Marketing Pro',
                 'business_field' => 'Digital Marketing',
                 'skills' => ['SEO', 'Content Marketing', 'Social Media'],

@@ -16,13 +16,13 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            PostSeeder::class,
-            CommentSeeder::class,
-            VoteSeeder::class,
-            IdeaValidationSeeder::class,
-            MarketplaceSeeder::class,
-            ClipperSeeder::class,
-            PlatformSettingsSeeder::class,
+            // PostSeeder::class,
+            // CommentSeeder::class,
+            // VoteSeeder::class,
+            // IdeaValidationSeeder::class,
+            // MarketplaceSeeder::class,
+            // ClipperSeeder::class,
+            // PlatformSettingsSeeder::class,
         ]);
     }
 }

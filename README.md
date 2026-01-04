@@ -445,12 +445,13 @@ The script will automatically execute:
 2. `composer install --no-dev` - Install production dependencies
 3. `npm install` - Install NPM dependencies
 4. `npm run build` - Build production assets
-5. `php artisan migrate --force` - Run database migrations
-6. `php artisan optimize` - Optimize and cache application
+5. `php artisan storage:link --force` - Ensure storage symlink exists
+6. `php artisan migrate --force` - Run database migrations
+7. `php artisan optimize` - Optimize and cache application
 
 **Alternative:** You can also run the commands manually in one line:
 ```bash
-git pull origin main && composer install --no-dev && npm install && npm run build && php artisan migrate --force && php artisan optimize
+git pull origin main && composer install --no-dev && npm install && npm run build && php artisan storage:link --force && php artisan migrate --force && php artisan optimize
 ```
 
 **Note:** For Windows development, use Git Bash or WSL. On production Linux servers, run the script directly.

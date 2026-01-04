@@ -23,14 +23,23 @@ npm install
 echo "→ Building assets..."
 npm run build
 
-# Step 5: Run database migrations
+# Step 5: Ensure storage link exists (create if not exists)
+echo "→ Ensuring storage symlink exists..."
+php artisan storage:link --force
+
+# Step 6: Run database migrations
 echo "→ Running database migrations..."
 php artisan migrate --force
 
-# Step 6: Optimize application
+# Step 7: Optimize application
 echo "→ Optimizing application..."
 php artisan optimize
 
 echo ""
 echo "✅ Deployment completed successfully!"
+echo ""
+echo "📝 Note: If using queue workers, restart them manually:"
+echo "   sudo supervisorctl restart laravel-worker:*"
+echo "   or"
+echo "   php artisan queue:restart"
 echo ""
