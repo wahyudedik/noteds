@@ -188,7 +188,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:30,5') // 30 deletions per 5 minutes
         ->name('marketplace.cart.destroy');
     Route::post('/marketplace/cart/checkout', [App\Http\Controllers\Marketplace\OrderController::class, 'storeFromCart'])
-        ->middleware('throttle:10,1') // 10 checkouts per minute
+        ->middleware(['verified', 'throttle:10,1']) // 10 checkouts per minute
         ->name('marketplace.cart.checkout');
 
     // Purchases
@@ -237,14 +237,8 @@ Route::middleware('auth')->group(function () {
         ->name('marketplace.seller.orders.invoice');
 
     // Clipper Routes
-    Route::prefix('clipper')->name('clipper.')->group(function () {
-        // Dashboard
-        Route::get('dashboard', [App\Http\Controllers\Clipper\ClipperDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/', function () {
-            return redirect()->route('clipper.dashboard');
-        });
-
-        // Brand Registration
+    Route::prefix('clipper')->name('clipper.')->middleware(['auth'])->group(function () {
+        // Registration routes (accessible to all authenticated users)
         Route::get('brand-registration/create', [App\Http\Controllers\Clipper\BrandRegistrationController::class, 'create'])->name('brand-registration.create');
         Route::post('brand-registration', [App\Http\Controllers\Clipper\BrandRegistrationController::class, 'store'])
             ->middleware('throttle:3,60') // 3 registrations per hour
@@ -255,16 +249,24 @@ Route::middleware('auth')->group(function () {
             ->middleware('throttle:5,60') // 5 updates per hour
             ->name('brand-registration.update');
 
-        // Clipper Profile
         Route::get('profile/create', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'create'])->name('profile.create');
         Route::post('profile', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'store'])
             ->middleware('throttle:3,60') // 3 profiles per hour
             ->name('profile.store');
-        Route::get('profile', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'show'])->name('profile.show');
-        Route::get('profile/edit', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('profile', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'update'])
-            ->middleware('throttle:5,60') // 5 updates per hour
-            ->name('profile.update');
+
+        // Protected routes (require clipper or brand role)
+        Route::middleware('clipper')->group(function () {
+            // Dashboard
+            Route::get('dashboard', [App\Http\Controllers\Clipper\ClipperDashboardController::class, 'index'])->name('dashboard');
+            Route::get('/', function () {
+                return redirect()->route('clipper.dashboard');
+            });
+
+            Route::get('profile', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'show'])->name('profile.show');
+            Route::get('profile/edit', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'edit'])->name('profile.edit');
+            Route::put('profile', [App\Http\Controllers\Clipper\ClipperProfileController::class, 'update'])
+                ->middleware('throttle:5,60') // 5 updates per hour
+                ->name('profile.update');
 
         // Top Up
         Route::get('top-ups', [App\Http\Controllers\Clipper\TopUpController::class, 'index'])->name('top-ups.index');
@@ -283,6 +285,9 @@ Route::middleware('auth')->group(function () {
 
         // Campaign Analytics (must be before campaigns/{campaign} to avoid route conflict)
         Route::get('campaigns/analytics', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'index'])->name('campaigns.analytics');
+        
+        // Available Campaigns (must be before campaigns/{campaign} to avoid route conflict)
+        Route::get('campaigns/available', [App\Http\Controllers\Clipper\ClipController::class, 'availableCampaigns'])->name('campaigns.available');
 
         Route::get('campaigns/{campaign}', [App\Http\Controllers\Clipper\CampaignController::class, 'show'])->name('campaigns.show');
         Route::get('campaigns/{campaign}/edit', [App\Http\Controllers\Clipper\CampaignController::class, 'edit'])->name('campaigns.edit');
@@ -299,9 +304,8 @@ Route::middleware('auth')->group(function () {
         Route::post('campaigns/{campaign}/clips/{clip}/reject', [App\Http\Controllers\Clipper\CampaignController::class, 'rejectClip'])->name('campaigns.clips.reject');
 
         // Clips (Clipper)
-        Route::get('campaigns/available', [App\Http\Controllers\Clipper\ClipController::class, 'availableCampaigns'])->name('campaigns.available');
         Route::get('clips', [App\Http\Controllers\Clipper\ClipController::class, 'index'])->name('clips.index');
-        Route::get('clips/create', [App\Http\Controllers\Clipper\ClipController::class, 'create'])->name('clips.create');
+        Route::get('clips/create/{campaign}', [App\Http\Controllers\Clipper\ClipController::class, 'create'])->name('clips.create');
         Route::post('clips', [App\Http\Controllers\Clipper\ClipController::class, 'store'])
             ->middleware('throttle:10,5') // 10 clips per 5 minutes
             ->name('clips.store');
@@ -330,21 +334,25 @@ Route::middleware('auth')->group(function () {
         Route::get('campaigns/{campaign}/analytics/live', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getLiveViews'])->name('campaigns.analytics.live');
         Route::get('campaigns/{campaign}/analytics/validation', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getValidationDetails'])->name('campaigns.analytics.validation');
 
-        // Clipper Withdrawals
-        Route::get('withdrawals', [App\Http\Controllers\Clipper\ClipperWithdrawalController::class, 'index'])->name('withdrawals.index');
-        Route::get('withdrawals/create', [App\Http\Controllers\Clipper\ClipperWithdrawalController::class, 'create'])->name('withdrawals.create');
-        Route::post('withdrawals', [App\Http\Controllers\Clipper\ClipperWithdrawalController::class, 'store'])
-            ->middleware('throttle:3,1440') // 3 requests per 24 hours (very strict, financial operation)
-            ->name('withdrawals.store');
-        Route::get('withdrawals/{withdrawal}', [App\Http\Controllers\Clipper\ClipperWithdrawalController::class, 'show'])->name('withdrawals.show');
+            // Clipper Withdrawals (require email verification for financial operations)
+            Route::get('withdrawals', [App\Http\Controllers\Clipper\ClipperWithdrawalController::class, 'index'])->middleware('verified')->name('withdrawals.index');
+            Route::get('withdrawals/create', [App\Http\Controllers\Clipper\ClipperWithdrawalController::class, 'create'])->middleware('verified')->name('withdrawals.create');
+            Route::post('withdrawals', [App\Http\Controllers\Clipper\ClipperWithdrawalController::class, 'store'])
+                ->middleware(['verified', 'throttle:3,1440']) // 3 requests per 24 hours (very strict, financial operation)
+                ->name('withdrawals.store');
 
-        // Creator Withdrawals (for brand/creator wallet - remaining budget withdrawal)
-        Route::get('withdrawals/creator', [App\Http\Controllers\Clipper\CreatorWithdrawalController::class, 'index'])->name('withdrawals.creator.index');
-        Route::get('withdrawals/creator/create', [App\Http\Controllers\Clipper\CreatorWithdrawalController::class, 'create'])->name('withdrawals.creator.create');
-        Route::post('withdrawals/creator', [App\Http\Controllers\Clipper\CreatorWithdrawalController::class, 'store'])
-            ->middleware('throttle:3,1440') // 3 requests per 24 hours
-            ->name('withdrawals.creator.store');
-        Route::get('withdrawals/creator/{withdrawal}', [App\Http\Controllers\Clipper\CreatorWithdrawalController::class, 'show'])->name('withdrawals.creator.show');
+            // Creator Withdrawals (for brand/creator wallet - remaining budget withdrawal)
+            // Must be defined before withdrawals/{withdrawal} to avoid route conflict
+            Route::get('withdrawals/creator', [App\Http\Controllers\Clipper\CreatorWithdrawalController::class, 'index'])->middleware('verified')->name('withdrawals.creator.index');
+            Route::get('withdrawals/creator/create', [App\Http\Controllers\Clipper\CreatorWithdrawalController::class, 'create'])->middleware('verified')->name('withdrawals.creator.create');
+            Route::post('withdrawals/creator', [App\Http\Controllers\Clipper\CreatorWithdrawalController::class, 'store'])
+                ->middleware(['verified', 'throttle:3,1440']) // 3 requests per 24 hours
+                ->name('withdrawals.creator.store');
+            Route::get('withdrawals/creator/{withdrawal}', [App\Http\Controllers\Clipper\CreatorWithdrawalController::class, 'show'])->middleware('verified')->name('withdrawals.creator.show');
+
+            // Clipper withdrawal show - must be after creator routes
+            Route::get('withdrawals/{withdrawal}', [App\Http\Controllers\Clipper\ClipperWithdrawalController::class, 'show'])->middleware('verified')->name('withdrawals.show');
+        });
     });
 
     // Admin Routes
@@ -363,6 +371,20 @@ Route::middleware('auth')->group(function () {
         Route::post('/withdrawals/{withdrawal}/complete', [App\Http\Controllers\Admin\AdminWithdrawalController::class, 'complete'])
             ->middleware('throttle:20,1') // 20 actions per minute
             ->name('withdrawals.complete');
+        
+        // Refunds
+        Route::get('refunds', [App\Http\Controllers\Admin\AdminRefundController::class, 'index'])->name('refunds.index');
+        Route::get('refunds/create', [App\Http\Controllers\Admin\AdminRefundController::class, 'create'])->name('refunds.create');
+        Route::post('refunds', [App\Http\Controllers\Admin\AdminRefundController::class, 'store'])
+            ->middleware('throttle:10,1') // 10 requests per minute
+            ->name('refunds.store');
+        Route::get('refunds/{refund}', [App\Http\Controllers\Admin\AdminRefundController::class, 'show'])->name('refunds.show');
+        
+        // User Search API (for refund forms)
+        Route::get('api/users/search', [App\Http\Controllers\Admin\AdminRefundController::class, 'searchUsers'])
+            ->middleware('throttle:60,1')
+            ->name('api.users.search'); // Route name will be prefixed with 'admin.' = 'admin.api.users.search'
+        
         Route::get('products', [App\Http\Controllers\Admin\ProductModerationController::class, 'index'])->name('products.index');
         Route::put('products/{product}', [App\Http\Controllers\Admin\ProductModerationController::class, 'update'])
             ->middleware('throttle:20,1') // 20 actions per minute
@@ -421,9 +443,29 @@ Route::middleware('auth')->group(function () {
 
         // Brand Approvals
         Route::get('brand-approvals', [App\Http\Controllers\Admin\AdminBrandApprovalController::class, 'index'])->name('brand-approvals.index');
-        Route::get('brand-approvals/{registration}', [App\Http\Controllers\Admin\AdminBrandApprovalController::class, 'show'])->name('brand-approvals.show');
         Route::post('brand-approvals/{registration}/approve', [App\Http\Controllers\Admin\AdminBrandApprovalController::class, 'approve'])->name('brand-approvals.approve');
         Route::post('brand-approvals/{registration}/reject', [App\Http\Controllers\Admin\AdminBrandApprovalController::class, 'reject'])->name('brand-approvals.reject');
+        // Redirect GET requests to approve/reject routes back to show page (must be before show route)
+        Route::get('brand-approvals/{registration}/approve', function ($registration) {
+            return redirect()->route('admin.brand-approvals.show', $registration);
+        });
+        Route::get('brand-approvals/{registration}/reject', function ($registration) {
+            return redirect()->route('admin.brand-approvals.show', $registration);
+        });
+        Route::get('brand-approvals/{registration}', [App\Http\Controllers\Admin\AdminBrandApprovalController::class, 'show'])->name('brand-approvals.show');
+
+        // Clipper Approvals
+        Route::get('clipper-approvals', [App\Http\Controllers\Admin\ClipperApprovalController::class, 'index'])->name('clipper-approvals.index');
+        Route::post('clipper-approvals/{registration}/approve', [App\Http\Controllers\Admin\ClipperApprovalController::class, 'approve'])->name('clipper-approvals.approve');
+        Route::post('clipper-approvals/{registration}/reject', [App\Http\Controllers\Admin\ClipperApprovalController::class, 'reject'])->name('clipper-approvals.reject');
+        // Redirect GET requests to approve/reject routes back to show page (must be before show route)
+        Route::get('clipper-approvals/{registration}/approve', function ($registration) {
+            return redirect()->route('admin.clipper-approvals.show', $registration);
+        });
+        Route::get('clipper-approvals/{registration}/reject', function ($registration) {
+            return redirect()->route('admin.clipper-approvals.show', $registration);
+        });
+        Route::get('clipper-approvals/{registration}', [App\Http\Controllers\Admin\ClipperApprovalController::class, 'show'])->name('clipper-approvals.show');
 
         Route::prefix('wallets')->name('wallets.')->group(function () {
             Route::get('ledger', [App\Http\Controllers\Admin\AdminWalletController::class, 'viewLedger'])->name('ledger');
@@ -448,6 +490,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', App\Http\Controllers\Admin\UserManagementController::class)->only(['index', 'show', 'edit', 'update']);
         Route::post('users/{user}/ban', [App\Http\Controllers\Admin\UserManagementController::class, 'ban'])->name('users.ban');
         Route::post('users/{user}/unban', [App\Http\Controllers\Admin\UserManagementController::class, 'unban'])->name('users.unban');
+        Route::post('users/{user}/remove-clipper-role', [App\Http\Controllers\Admin\UserManagementController::class, 'removeClipperRole'])
+            ->middleware('throttle:10,60') // 10 actions per hour
+            ->name('users.remove-clipper-role');
 
         // Reports Management
         Route::resource('reports', App\Http\Controllers\Admin\ReportController::class)->only(['index', 'show', 'update']);

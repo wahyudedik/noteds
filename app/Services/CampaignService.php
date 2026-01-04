@@ -154,6 +154,18 @@ class CampaignService
                     throw $e;
                 }
                 
+                // Notify clippers about new active campaign
+                try {
+                    $notificationService = app(\App\Services\NotificationService::class);
+                    $notificationService->notifyNewCampaign($campaign);
+                } catch (Exception $e) {
+                    Log::warning('Failed to send new campaign notification', [
+                        'campaign_id' => $campaign->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                    // Don't fail the transaction for notification issues
+                }
+
                 // Invalidate cache
                 try {
                     $this->cacheService->clearCampaignCache($campaign->id, $campaign->creator_id);

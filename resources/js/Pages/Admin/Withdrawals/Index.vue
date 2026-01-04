@@ -138,7 +138,7 @@ const filterByUserType = (userType) => {
                                         : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                                 ]"
                             >
-                                Clipper Withdrawals
+                                Creator Withdrawals
                             </button>
                             <button
                                 @click="filterByUserType('creator')"
@@ -149,7 +149,7 @@ const filterByUserType = (userType) => {
                                         : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                                 ]"
                             >
-                                Creator Withdrawals
+                                Brand Withdrawals
                             </button>
                             <button
                                 @click="filterByUserType('seller')"

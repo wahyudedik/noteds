@@ -51,6 +51,11 @@ const props = defineProps({
 
 const activeTab = ref('posts');
 
+// Safe computed for profileUser to handle undefined/null
+const safeProfileUser = computed(() => {
+    return props.profileUser || {};
+});
+
 const hasBrandProfile = computed(() => {
     return !!props.brandRegistration;
 });
@@ -61,14 +66,14 @@ const hasClipperProfile = computed(() => {
 </script>
 
 <template>
-    <Head :title="(profileUser.business_name || profileUser.name) + ' - Profile'" />
+    <Head :title="(safeProfileUser?.business_name || safeProfileUser?.name || 'Profile') + ' - Profile'" />
 
     <AuthenticatedLayout>
-        <div class="px-4 py-6 lg:px-6">
+        <div v-if="safeProfileUser && Object.keys(safeProfileUser).length > 0" class="px-4 py-6 lg:px-6">
             <div class="mx-auto max-w-7xl">
                 <!-- Profile Header -->
                 <ProfileHeader 
-                    :profile-user="profileUser"
+                    :profile-user="safeProfileUser"
                     :is-own-profile="isOwnProfile"
                     :is-following="isFollowing"
                 />
@@ -78,7 +83,7 @@ const hasClipperProfile = computed(() => {
                     <Tabs 
                         :active-tab="activeTab" 
                         :is-own-profile="isOwnProfile"
-                        :profile-user="profileUser"
+                        :profile-user="safeProfileUser"
                         :has-brand-profile="hasBrandProfile"
                         :has-clipper-profile="hasClipperProfile"
                         @update:active-tab="activeTab = $event" 
@@ -106,23 +111,30 @@ const hasClipperProfile = computed(() => {
 
                         <TabAbout 
                             v-else-if="activeTab === 'about'"
-                            :profile-user="profileUser"
+                            :profile-user="safeProfileUser"
                         />
 
                         <TabBrand
                             v-else-if="activeTab === 'brand'"
-                            :profile-user="profileUser"
+                            :profile-user="safeProfileUser"
                             :brand-registration="brandRegistration"
                             :is-own-profile="isOwnProfile"
                         />
 
                         <TabClipper
                             v-else-if="activeTab === 'clipper'"
-                            :profile-user="profileUser"
+                            :profile-user="safeProfileUser"
                             :clipper-profile="clipperProfile"
                             :is-own-profile="isOwnProfile"
                         />
                     </div>
+                </div>
+            </div>
+        </div>
+        <div v-else class="px-4 py-6 lg:px-6">
+            <div class="mx-auto max-w-7xl">
+                <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                    User not found or profile is loading...
                 </div>
             </div>
         </div>

@@ -112,7 +112,7 @@ const clearFilters = () => {
                                     <span
                                         :class="[
                                             'px-2 py-1 text-xs rounded-full',
-                                            transaction.type === 'sale' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                            (transaction.type === 'sale' || transaction.type === 'deposit' || transaction.type === 'refund') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                         ]"
                                     >
                                         {{ transaction.type }}
@@ -122,9 +122,9 @@ const clearFilters = () => {
                                     {{ transaction.description }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold"
-                                    :class="transaction.type === 'sale' ? 'text-green-600' : 'text-red-600'"
+                                    :class="(transaction.type === 'sale' || transaction.type === 'deposit' || transaction.type === 'refund') ? 'text-green-600' : 'text-red-600'"
                                 >
-                                    {{ transaction.type === 'sale' ? '+' : '-' }}Rp {{ new Intl.NumberFormat('id-ID').format(transaction.amount) }}
+                                    {{ (transaction.type === 'sale' || transaction.type === 'deposit' || transaction.type === 'refund') ? '+' : '-' }}Rp {{ new Intl.NumberFormat('id-ID').format(transaction.amount) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     Rp {{ new Intl.NumberFormat('id-ID').format(transaction.balance_after) }}

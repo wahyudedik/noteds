@@ -47,6 +47,16 @@ class ClipperProfile extends Model
         'average_views' => 'integer',
     ];
 
+    protected $appends = ['platform'];
+
+    /**
+     * Get the platform attribute (alias for platform_type for compatibility).
+     */
+    public function getPlatformAttribute()
+    {
+        return $this->platform_type;
+    }
+
     /**
      * Get the user who owns this clipper profile.
      */

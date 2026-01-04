@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Clipper;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreBrandRegistrationRequest;
 use App\Services\BrandOnboardingService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,19 +22,14 @@ class BrandRegistrationController extends Controller
                 ->with('info', 'You are already registered as a brand.');
         }
 
-        return Inertia::render('Clipper/BrandRegistration/Create', [
+        return Inertia::render('Brand/Registration/Create', [
             'user' => auth()->user(),
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreBrandRegistrationRequest $request)
     {
-        $validated = $request->validate([
-            'business_name' => 'required|string|max:255',
-            'business_field' => 'required|string|max:255',
-            'website_url' => 'nullable|url|max:255',
-            'portfolio_url' => 'nullable|url|max:255',
-        ]);
+        $validated = $request->validated();
 
         try {
             $this->onboardingService->registerBrand(auth()->user(), $validated);
@@ -49,7 +45,7 @@ class BrandRegistrationController extends Controller
     {
         $user = auth()->user();
 
-        return Inertia::render('Clipper/BrandRegistration/Show', [
+        return Inertia::render('Brand/Registration/Show', [
             'user' => $user,
             'isBrand' => $user->isBrand(),
         ]);
@@ -63,8 +59,10 @@ class BrandRegistrationController extends Controller
             return redirect()->route('clipper.brand-registration.create');
         }
 
-        return Inertia::render('Clipper/BrandRegistration/Edit', [
+        // Edit uses the same Create component but with existing data
+        return Inertia::render('Brand/Registration/Create', [
             'user' => $user,
+            'isEdit' => true,
         ]);
     }
 

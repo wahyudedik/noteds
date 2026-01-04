@@ -248,6 +248,44 @@ class NotificationService
     }
 
     /**
+     * Notify user about refund/adjustment.
+     */
+    public function notifyRefundProcessed(\App\Models\Refund $refund): void
+    {
+        $user = $refund->user;
+        
+        // Create database notification
+        $user->notify(new class($refund) extends \Illuminate\Notifications\Notification {
+            use \Illuminate\Bus\Queueable;
+            
+            public function __construct(public \App\Models\Refund $refund) {}
+            
+            public function via($notifiable): array
+            {
+                return ['database'];
+            }
+            
+            public function toArray($notifiable): array
+            {
+                $walletType = $this->refund->wallet_type === 'creator' ? 'Creator Wallet' : 'Marketplace Wallet';
+                $typeLabel = $this->refund->type === 'refund' ? 'Refund' : 'Adjustment';
+                $amount = number_format($this->refund->amount, 0, ',', '.');
+                $action = $this->refund->type === 'refund' ? 'credited' : 'deducted';
+                
+                return [
+                    'type' => 'refund_processed',
+                    'refund_id' => $this->refund->id,
+                    'title' => ucfirst($this->refund->type) . ' Processed',
+                    'message' => "Your {$walletType} has been {$action} with Rp {$amount} ({$typeLabel})",
+                    'amount' => $this->refund->amount,
+                    'wallet_type' => $this->refund->wallet_type,
+                    'refund_type' => $this->refund->type,
+                ];
+            }
+        });
+    }
+
+    /**
      * Notify admin about new campaign created.
      */
     public function notifyCampaignCreated(\App\Models\Campaign $campaign): void
@@ -466,6 +504,40 @@ class NotificationService
                     $admin->notify(new \App\Notifications\SupportTicketResponseNotification($ticket, $response));
                 }
             }
+        }
+    }
+
+    /**
+     * Notify admin about new brand registration.
+     */
+    public function notifyBrandRegistration(\App\Models\BrandRegistration $registration): void
+    {
+        // Ensure relationships are loaded
+        if (!$registration->relationLoaded('user')) {
+            $registration->load('user');
+        }
+        
+        $admins = User::where('role', 'admin')->get();
+        
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\BrandRegistrationNotification($registration));
+        }
+    }
+
+    /**
+     * Notify admin about new clipper registration.
+     */
+    public function notifyClipperRegistration(\App\Models\ClipperRegistration $registration): void
+    {
+        // Ensure relationships are loaded
+        if (!$registration->relationLoaded('user')) {
+            $registration->load('user');
+        }
+        
+        $admins = User::where('role', 'admin')->get();
+        
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\ClipperRegistrationNotification($registration));
         }
     }
 

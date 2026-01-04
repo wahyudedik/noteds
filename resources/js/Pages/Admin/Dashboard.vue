@@ -56,6 +56,7 @@ const formatCurrency = (amount) => {
                     :pending-posts="stats?.pending_posts_moderation || 0"
                     :fraud-alerts="stats?.fraud_alerts_count || 0"
                     :pending-brand-approvals="stats?.pending_brand_approvals || 0"
+                    :pending-clipper-approvals="stats?.pending_clipper_approvals || 0"
                 />
 
                 <!-- Enhanced Stats Grid -->
@@ -70,8 +71,8 @@ const formatCurrency = (amount) => {
                             {{ stats?.pending_withdrawals || 0 }}
                         </p>
                         <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Clipper: {{ stats?.pending_clipper_withdrawals || 0 }} | 
-                            Creator: {{ stats?.pending_creator_withdrawals || 0 }} | 
+                            Creator: {{ stats?.pending_clipper_withdrawals || 0 }} | 
+                            Brand: {{ stats?.pending_creator_withdrawals || 0 }} | 
                             Market: {{ stats?.pending_marketplace_withdrawals || 0 }}
                         </div>
                     </Link>
@@ -327,7 +328,7 @@ const formatCurrency = (amount) => {
                                             'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                                         ]"
                                     >
-                                        {{ withdrawal.user_type === 'clipper' ? 'Clipper' : withdrawal.user_type === 'creator' ? 'Creator' : 'Marketplace' }}
+                                        {{ withdrawal.user_type === 'clipper' ? 'Creator' : withdrawal.user_type === 'creator' ? 'Brand' : 'Marketplace' }}
                                     </span>
                                 </div>
                                 <p class="text-sm text-gray-600 dark:text-gray-400">

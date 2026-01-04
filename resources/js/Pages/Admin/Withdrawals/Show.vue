@@ -1,6 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import ProofUploader from '@/Components/Withdrawal/ProofUploader.vue';
+import ProofViewer from '@/Components/Withdrawal/ProofViewer.vue';
 
 const props = defineProps({
     withdrawal: Object,
@@ -8,14 +11,32 @@ const props = defineProps({
 
 const approveForm = useForm({
     admin_notes: '',
+    transfer_proof: [],
 });
 
 const rejectForm = useForm({
     admin_notes: '',
 });
 
+const completeForm = useForm({
+    transfer_proof: [],
+});
+
+const approveProofImages = ref([]);
+const completeProofImages = ref([]);
+
 const approve = () => {
-    approveForm.post(route('admin.withdrawals.approve', props.withdrawal.id));
+    const formData = new FormData();
+    formData.append('admin_notes', approveForm.admin_notes || '');
+    
+    approveProofImages.value.forEach((image, index) => {
+        formData.append(`transfer_proof[${index}]`, image.file);
+    });
+
+    approveForm.transform(() => formData)
+        .post(route('admin.withdrawals.approve', props.withdrawal.id), {
+            forceFormData: true,
+        });
 };
 
 const reject = () => {
@@ -28,7 +49,16 @@ const reject = () => {
 
 const complete = () => {
     if (confirm('Mark this withdrawal as completed? This will deduct the balance from user account.')) {
-        router.post(route('admin.withdrawals.complete', props.withdrawal.id));
+        const formData = new FormData();
+        
+        completeProofImages.value.forEach((image, index) => {
+            formData.append(`transfer_proof[${index}]`, image.file);
+        });
+
+        completeForm.transform(() => formData)
+            .post(route('admin.withdrawals.complete', props.withdrawal.id), {
+                forceFormData: true,
+            });
     }
 };
 </script>
@@ -95,6 +125,23 @@ const complete = () => {
                         </div>
                     </div>
 
+                    <!-- Transfer Proofs (View Only) -->
+                    <div v-if="withdrawal.transfer_proof_approve_urls && withdrawal.transfer_proof_approve_urls.length > 0" class="border-t pt-6">
+                        <ProofViewer
+                            :proofs="withdrawal.transfer_proof_approve_urls"
+                            title="Transfer Proof (Approval Stage)"
+                            :uploaded-at="withdrawal.transfer_proof_approve_uploaded_at"
+                        />
+                    </div>
+
+                    <div v-if="withdrawal.transfer_proof_complete_urls && withdrawal.transfer_proof_complete_urls.length > 0" class="border-t pt-6">
+                        <ProofViewer
+                            :proofs="withdrawal.transfer_proof_complete_urls"
+                            title="Transfer Proof (Completion Stage)"
+                            :uploaded-at="withdrawal.transfer_proof_complete_uploaded_at"
+                        />
+                    </div>
+
                     <!-- Actions -->
                     <div v-if="withdrawal.status === 'pending'" class="border-t pt-6 space-y-4">
                         <h4 class="font-semibold">Actions</h4>
@@ -103,12 +150,20 @@ const complete = () => {
                             <label class="block text-sm font-medium mb-2">Admin Notes (optional for approval)</label>
                             <textarea
                                 v-model="approveForm.admin_notes"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-2"
+                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-4 dark:bg-gray-700 dark:text-white"
                             ></textarea>
+                            
+                            <ProofUploader
+                                v-model="approveProofImages"
+                                label="Transfer Proof Images (Optional)"
+                                :max-images="5"
+                                :max-size="5120"
+                            />
+                            
                             <button
                                 @click="approve"
                                 :disabled="approveForm.processing"
-                                class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                                class="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
                             >
                                 Approve
                             </button>
@@ -119,7 +174,7 @@ const complete = () => {
                             <textarea
                                 v-model="rejectForm.admin_notes"
                                 required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-2"
+                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-2 dark:bg-gray-700 dark:text-white"
                             ></textarea>
                             <button
                                 @click="reject"
@@ -131,10 +186,20 @@ const complete = () => {
                         </div>
                     </div>
 
-                    <div v-else-if="withdrawal.status === 'approved'" class="border-t pt-6">
+                    <div v-else-if="withdrawal.status === 'approved'" class="border-t pt-6 space-y-4">
+                        <h4 class="font-semibold">Complete Withdrawal</h4>
+                        
+                        <ProofUploader
+                            v-model="completeProofImages"
+                            label="Transfer Proof Images (Optional)"
+                            :max-images="5"
+                            :max-size="5120"
+                        />
+                        
                         <button
                             @click="complete"
-                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            :disabled="completeForm.processing"
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                         >
                             Mark as Completed
                         </button>

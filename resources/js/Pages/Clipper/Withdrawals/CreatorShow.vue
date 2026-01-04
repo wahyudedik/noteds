@@ -1,6 +1,7 @@
 <script setup>
 import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import ProofViewer from '@/Components/Withdrawal/ProofViewer.vue';
 
 defineProps({
     withdrawal: Object,
@@ -98,6 +99,23 @@ const formatCurrency = (amount) => {
                             <h4 class="font-semibold mb-2 text-gray-700 dark:text-gray-300">Processed By</h4>
                             <p class="text-gray-900 dark:text-white">{{ withdrawal.admin.name }}</p>
                         </div>
+                    </div>
+
+                    <!-- Transfer Proofs -->
+                    <div v-if="withdrawal.transfer_proof_approve_urls && withdrawal.transfer_proof_approve_urls.length > 0" class="border-t pt-6 mt-6">
+                        <ProofViewer
+                            :proofs="withdrawal.transfer_proof_approve_urls"
+                            title="Transfer Proof (Approval Stage)"
+                            :uploaded-at="withdrawal.transfer_proof_approve_uploaded_at"
+                        />
+                    </div>
+
+                    <div v-if="withdrawal.transfer_proof_complete_urls && withdrawal.transfer_proof_complete_urls.length > 0" class="border-t pt-6 mt-6">
+                        <ProofViewer
+                            :proofs="withdrawal.transfer_proof_complete_urls"
+                            title="Transfer Proof (Completion Stage)"
+                            :uploaded-at="withdrawal.transfer_proof_complete_uploaded_at"
+                        />
                     </div>
                 </div>
             </div>

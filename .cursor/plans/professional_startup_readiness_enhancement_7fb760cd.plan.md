@@ -52,7 +52,7 @@ todos:
     status: pending
   - id: withdrawal-proof-upload
     content: "Implement withdrawal proof of transfer feature: admin can upload transfer proof images when approving/completing withdrawals, users can view proofs in their withdrawal history. Include image validation, secure storage, and preview/download functionality."
-    status: pending
+    status: completed
   - id: transaction-receipts
     content: "Implement transaction receipts and invoices: printable receipts for all transactions, PDF invoice generation for orders, transaction export functionality, and transaction timeline with status updates."
     status: pending
@@ -844,9 +844,3 @@ Plan ini mengidentifikasi 8 area kritis yang perlu ditingkatkan untuk membuat ap
 - **Refund Management** (Phase 9.10): Complete refund workflow
 
 ---
-
-## Dependencies
-
-- Redis server untuk caching dan queues
-- Sentry/Bugsnag account untuk error tracking
-- CDN service (Cloudflare, AWS CloudFront) untuk assets

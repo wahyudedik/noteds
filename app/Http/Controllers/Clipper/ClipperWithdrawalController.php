@@ -79,8 +79,13 @@ class ClipperWithdrawalController extends Controller
 
         $withdrawal->load('admin');
 
+        // Add proof URLs to withdrawal data
+        $withdrawalData = $withdrawal->toArray();
+        $withdrawalData['transfer_proof_approve_urls'] = $withdrawal->getTransferProofApproveUrls();
+        $withdrawalData['transfer_proof_complete_urls'] = $withdrawal->getTransferProofCompleteUrls();
+
         return Inertia::render('Clipper/Withdrawals/Show', [
-            'withdrawal' => $withdrawal,
+            'withdrawal' => $withdrawalData,
         ]);
     }
 }

@@ -19,8 +19,9 @@ class EnsureUserIsClipper
 
         $user = auth()->user();
 
-        if (!$user->isClipper() && !$user->isAdmin()) {
-            abort(403, 'You must be a clipper to access this page.');
+        // Allow both brand and clipper roles (clipper middleware is for both roles)
+        if (!$user->isBrand() && !$user->isClipper() && !$user->isAdmin()) {
+            abort(403, 'You must be a brand or clipper to access this page.');
         }
 
         return $next($request);

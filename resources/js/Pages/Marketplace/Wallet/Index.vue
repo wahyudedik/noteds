@@ -157,10 +157,10 @@ const averageOrderValue = computed(() => Number(props.averageOrderValue) || 0);
                                     <p
                                         :class="[
                                             'font-semibold',
-                                            transaction.type === 'sale' ? 'text-green-600' : 'text-red-600'
+                                            (transaction.type === 'sale' || transaction.type === 'deposit' || transaction.type === 'refund') ? 'text-green-600' : 'text-red-600'
                                         ]"
                                     >
-                                        {{ transaction.type === 'sale' ? '+' : '-' }}Rp {{ new Intl.NumberFormat('id-ID').format(transaction.amount) }}
+                                        {{ (transaction.type === 'sale' || transaction.type === 'deposit' || transaction.type === 'refund') ? '+' : '-' }}Rp {{ new Intl.NumberFormat('id-ID').format(transaction.amount) }}
                                     </p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">
                                         Balance: Rp {{ new Intl.NumberFormat('id-ID').format(transaction.balance_after) }}

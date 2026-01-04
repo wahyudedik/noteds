@@ -66,6 +66,10 @@ class AdminBrandApprovalController extends Controller
             // Update user's clipper role
             $registration->user->update(['clipper_role' => 'brand']);
 
+            // Explicit create creator wallet to ensure it exists immediately after approval
+            $walletService = app(\App\Services\WalletService::class);
+            $walletService->getCreatorWallet($registration->user);
+
             // Notify user
             $this->notificationService->notifyBrandApproved($registration->user);
 

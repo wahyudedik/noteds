@@ -23,12 +23,18 @@ class DashboardController extends Controller
         $recentActivities = $this->analyticsService->getRecentActivities($user, 10);
         $purposeTypeStats = $this->analyticsService->getPurposeTypeStats($user);
 
+        // Check if user has pending registrations
+        $hasPendingBrandRegistration = $user->hasPendingBrandRegistration();
+        $hasPendingClipperRegistration = $user->hasPendingClipperRegistration();
+
         return Inertia::render('Dashboard', [
             'stats' => $stats,
             'engagement_data' => $engagementData,
             'top_posts' => $topPosts,
             'recent_activities' => $recentActivities,
             'purpose_type_stats' => $purposeTypeStats,
+            'has_pending_brand_registration' => $hasPendingBrandRegistration,
+            'has_pending_clipper_registration' => $hasPendingClipperRegistration,
         ]);
     }
 }

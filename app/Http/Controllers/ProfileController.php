@@ -45,6 +45,12 @@ class ProfileController extends Controller
     public function show(Request $request, User $user = null): Response
     {
         $profileUser = $user ?? $request->user();
+        
+        // Ensure we have a valid user
+        if (!$profileUser) {
+            abort(404, 'User not found');
+        }
+        
         $isOwnProfile = $request->user() && $request->user()->id === $profileUser->id;
 
         // Get user's posts
@@ -153,8 +159,9 @@ class ProfileController extends Controller
             $user->avatar = $avatarPath;
         }
 
-        // Fill other validated fields (exclude avatar from fillable)
-        $validated = $request->safe()->except(['avatar']);
+        // Fill other validated fields (exclude avatar and is_verified_mentor from fillable)
+        // is_verified_mentor can only be set by admin, not by user
+        $validated = $request->safe()->except(['avatar', 'is_verified_mentor']);
         $user->fill($validated);
 
         if ($user->isDirty('email')) {

@@ -6,6 +6,7 @@ use App\Models\Concerns\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Withdrawal extends Model
@@ -36,6 +37,10 @@ class Withdrawal extends Model
         'admin_notes',
         'processed_at',
         'user_type',
+        'transfer_proof_approve',
+        'transfer_proof_complete',
+        'transfer_proof_approve_uploaded_at',
+        'transfer_proof_complete_uploaded_at',
     ];
 
     protected function casts(): array
@@ -43,6 +48,10 @@ class Withdrawal extends Model
         return [
             'amount' => 'decimal:2',
             'processed_at' => 'datetime',
+            'transfer_proof_approve' => 'array',
+            'transfer_proof_complete' => 'array',
+            'transfer_proof_approve_uploaded_at' => 'datetime',
+            'transfer_proof_complete_uploaded_at' => 'datetime',
         ];
     }
 
@@ -119,5 +128,62 @@ class Withdrawal extends Model
     public function scopeForCreator($query)
     {
         return $query->where('user_type', 'creator');
+    }
+
+    /**
+     * Get transfer proof URLs for approve stage.
+     *
+     * @return array
+     */
+    public function getTransferProofApproveUrls(): array
+    {
+        if (empty($this->transfer_proof_approve)) {
+            return [];
+        }
+
+        $urls = [];
+        foreach ($this->transfer_proof_approve as $path) {
+            $urls[] = [
+                'path' => $path,
+                'url' => Storage::disk('public')->url($path),
+            ];
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Get transfer proof URLs for complete stage.
+     *
+     * @return array
+     */
+    public function getTransferProofCompleteUrls(): array
+    {
+        if (empty($this->transfer_proof_complete)) {
+            return [];
+        }
+
+        $urls = [];
+        foreach ($this->transfer_proof_complete as $path) {
+            $urls[] = [
+                'path' => $path,
+                'url' => Storage::disk('public')->url($path),
+            ];
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Get all transfer proof URLs (both approve and complete).
+     *
+     * @return array
+     */
+    public function getAllTransferProofUrls(): array
+    {
+        return [
+            'approve' => $this->getTransferProofApproveUrls(),
+            'complete' => $this->getTransferProofCompleteUrls(),
+        ];
     }
 }

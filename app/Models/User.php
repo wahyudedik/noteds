@@ -216,6 +216,42 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the brand registrations for the user.
+     */
+    public function brandRegistrations(): HasMany
+    {
+        return $this->hasMany(BrandRegistration::class);
+    }
+
+    /**
+     * Check if user has pending brand registration.
+     */
+    public function hasPendingBrandRegistration(): bool
+    {
+        return $this->brandRegistrations()
+            ->where('status', 'pending')
+            ->exists();
+    }
+
+    /**
+     * Get the clipper registrations for the user.
+     */
+    public function clipperRegistrations(): HasMany
+    {
+        return $this->hasMany(\App\Models\ClipperRegistration::class);
+    }
+
+    /**
+     * Check if user has pending clipper registration.
+     */
+    public function hasPendingClipperRegistration(): bool
+    {
+        return $this->clipperRegistrations()
+            ->where('status', 'pending')
+            ->exists();
+    }
+
+    /**
      * Get the top ups for the user.
      */
     public function topUps(): HasMany

@@ -23,6 +23,10 @@ const props = defineProps({
         type: Number,
         default: 0,
     },
+    pendingClipperApprovals: {
+        type: Number,
+        default: 0,
+    },
 });
 
 const quickActions = computed(() => [
@@ -62,6 +66,13 @@ const quickActions = computed(() => [
         icon: '🏢',
     },
     {
+        label: 'Clipper Approvals',
+        route: 'admin.clipper-approvals.index',
+        count: props.pendingClipperApprovals,
+        color: 'bg-indigo-600 hover:bg-indigo-700',
+        icon: '🎬',
+    },
+    {
         label: 'Manage Users',
         route: 'admin.users.index',
         count: null,
@@ -74,6 +85,13 @@ const quickActions = computed(() => [
         count: null,
         color: 'bg-purple-600 hover:bg-purple-700',
         icon: '🎫',
+    },
+    {
+        label: 'Refunds',
+        route: 'admin.refunds.index',
+        count: null,
+        color: 'bg-pink-600 hover:bg-pink-700',
+        icon: '💸',
     },
 ]);
 </script>

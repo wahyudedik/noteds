@@ -8,22 +8,49 @@ use Illuminate\Support\Facades\DB;
 
 class ClipperOnboardingService
 {
+    public function __construct(
+        protected NotificationService $notificationService
+    ) {}
+
     /**
-     * Register a clipper (user requests clipper role).
+     * Register a clipper (user requests clipper role - requires admin approval).
      */
     public function registerClipper(User $user, array $data): bool
     {
         return DB::transaction(function () use ($user, $data) {
-            // Update user with clipper information
+            // Check if user already has clipper role
+            if ($user->clipper_role === 'clipper') {
+                throw new \Exception('You are already registered as a clipper.');
+            }
+
+            // Check if user has pending registration
+            $pendingRegistration = \App\Models\ClipperRegistration::where('user_id', $user->id)
+                ->where('status', 'pending')
+                ->first();
+
+            if ($pendingRegistration) {
+                throw new \Exception('You already have a pending clipper registration. Please wait for admin approval.');
+            }
+
+            // Update user with clipper information (but don't set role yet - wait for approval)
             $user->update([
-                'clipper_role' => 'clipper',
                 'portfolio_url' => $data['portfolio_url'] ?? $user->portfolio_url,
                 'skills' => $data['skills'] ?? $user->skills,
+                'goals' => $data['goals'] ?? $user->goals,
+                // Keep clipper_role as null until approved
             ]);
 
-            // Create clipper wallet if not exists
-            $walletService = app(\App\Services\WalletService::class);
-            $walletService->getClipperWallet($user);
+            // Create ClipperRegistration record for admin approval
+            $registration = \App\Models\ClipperRegistration::create([
+                'user_id' => $user->id,
+                'portfolio_url' => $data['portfolio_url'] ?? null,
+                'skills' => $data['skills'] ?? null,
+                'goals' => $data['goals'] ?? null,
+                'status' => 'pending',
+            ]);
+
+            // Notify admins about new clipper registration
+            $this->notificationService->notifyClipperRegistration($registration);
 
             // Create audit log
             \App\Models\AuditLog::logAction([
@@ -32,8 +59,8 @@ class ClipperOnboardingService
                 'target_type' => 'user',
                 'target_id' => $user->id,
                 'new_value' => [
-                    'clipper_role' => 'clipper',
                     'portfolio_url' => $data['portfolio_url'] ?? null,
+                    'skills' => $data['skills'] ?? null,
                 ],
             ]);
 

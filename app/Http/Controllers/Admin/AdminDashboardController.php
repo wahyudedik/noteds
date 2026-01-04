@@ -12,6 +12,7 @@ use App\Models\Post;
 use App\Models\Campaign;
 use App\Models\Clip;
 use App\Models\BrandRegistration;
+use App\Models\ClipperRegistration;
 use App\Models\AuditLog;
 use App\Models\PlatformWallet;
 use App\Models\LedgerEntry;
@@ -95,6 +96,7 @@ class AdminDashboardController extends Controller
         $pendingClips = Clip::where('status', 'pending')->count();
         $pendingCampaigns = Campaign::where('status', 'draft')->count();
         $pendingBrandApprovals = BrandRegistration::where('status', 'pending')->count();
+        $pendingClipperApprovals = ClipperRegistration::where('status', 'pending')->count();
         $activeCampaigns = Campaign::where('status', 'active')->count();
         $totalClips = Clip::count();
         $totalCampaigns = Campaign::count();
@@ -239,6 +241,7 @@ class AdminDashboardController extends Controller
                 'pending_clips' => $pendingClips,
                 'pending_campaigns' => $pendingCampaigns,
                 'pending_brand_approvals' => $pendingBrandApprovals,
+                'pending_clipper_approvals' => $pendingClipperApprovals,
                 'active_campaigns' => $activeCampaigns,
                 'total_clips' => $totalClips,
                 'total_campaigns' => $totalCampaigns,

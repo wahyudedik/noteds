@@ -11,6 +11,8 @@ use App\Models\ClipperWallet;
 use App\Models\ClipViewTracking;
 use App\Models\TopUp;
 use App\Models\Withdrawal;
+use App\Models\ClipperRegistration;
+use App\Models\BrandRegistration;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -58,14 +60,32 @@ class ClipperSeeder extends Seeder
                     'password' => bcrypt('password'),
                     'business_name' => "Content Creator {$i}",
                     'business_field' => 'Content Creation',
-                    'clipper_role' => 'clipper',
+                    'portfolio_url' => "https://portfolio{$i}.example.com",
+                    'skills' => json_encode(['Video Editing', 'Content Creation', 'Social Media Marketing']),
+                    'goals' => json_encode(['Grow audience', 'Increase engagement']),
                     'email_verified_at' => now(),
                     'role' => 'user',
                     'balance' => 0,
+                    // Don't set clipper_role directly - let approval system handle it
                 ]
             );
             
-            if ($clipper->wasRecentlyCreated) {
+            // Create approved clipper registration for seeded users (for testing)
+            if ($clipper->wasRecentlyCreated || !$clipper->clipperRegistrations()->exists()) {
+                $clipperRegistration = ClipperRegistration::create([
+                    'id' => (string) Str::uuid(),
+                    'user_id' => $clipper->id,
+                    'portfolio_url' => "https://portfolio{$i}.example.com",
+                    'skills' => ['Video Editing', 'Content Creation', 'Social Media Marketing'],
+                    'goals' => ['Grow audience', 'Increase engagement'],
+                    'status' => 'approved',
+                    'approved_at' => now()->subDays(rand(10, 60)),
+                    'admin_id' => $admin?->id,
+                    'created_at' => now()->subDays(rand(15, 70)),
+                    'updated_at' => now()->subDays(rand(10, 60)),
+                ]);
+                
+                // Set clipper_role after approval
                 $clipper->update(['clipper_role' => 'clipper']);
             }
             
@@ -74,39 +94,29 @@ class ClipperSeeder extends Seeder
 
         // Create brand registration (approved)
         if ($admin) {
-            DB::table('brand_registrations')->insert([
-                'id' => (string) Str::uuid(),
-                'user_id' => $brandUser->id,
-                'company_name' => 'TechStart Indonesia',
-                'business_type' => 'E-commerce',
-                'website' => 'https://techstart.id',
-                'social_media' => json_encode(['instagram' => '@techstart', 'linkedin' => 'techstart']),
-                'contact_person' => 'Budi Santoso',
-                'phone' => '+6281234567890',
-                'status' => 'approved',
-                'approved_at' => now()->subDays(30),
-                'admin_id' => $admin->id,
-                'created_at' => now()->subDays(35),
-                'updated_at' => now()->subDays(30),
-            ]);
+            // Check if brand registration already exists
+            if (!$brandUser->brandRegistrations()->exists()) {
+                BrandRegistration::create([
+                    'id' => (string) Str::uuid(),
+                    'user_id' => $brandUser->id,
+                    'company_name' => 'TechStart Indonesia',
+                    'business_type' => 'E-commerce',
+                    'website' => 'https://techstart.id',
+                    'social_media' => ['instagram' => '@techstart', 'linkedin' => 'techstart'],
+                    'contact_person' => 'Budi Santoso',
+                    'phone' => '+6281234567890',
+                    'status' => 'approved',
+                    'approved_at' => now()->subDays(30),
+                    'admin_id' => $admin->id,
+                    'created_at' => now()->subDays(35),
+                    'updated_at' => now()->subDays(30),
+                ]);
+            }
         }
 
-        // Create clipper profiles
-        foreach ($clipperUsers as $index => $clipper) {
-            DB::table('clipper_profiles')->insert([
-                'id' => (string) Str::uuid(),
-                'user_id' => $clipper->id,
-                'platform_username' => "@clipper{$index}",
-                'platform_type' => ['tiktok', 'instagram', 'youtube', 'tiktok', 'instagram'][$index],
-                'follower_count' => rand(10000, 500000),
-                'average_views' => rand(5000, 100000),
-                'portfolio_url' => "https://portfolio{$index}.com",
-                'status' => 'verified',
-                'verified_at' => now()->subDays(rand(10, 60)),
-                'created_at' => now()->subDays(rand(15, 70)),
-                'updated_at' => now()->subDays(rand(10, 60)),
-            ]);
-        }
+        // Note: clipper_profiles table appears to be legacy/unused
+        // Current implementation uses User model fields (portfolio_url, skills, goals)
+        // Clipper profile data is stored in ClipperRegistration and User model
 
         // Create creator wallet for brand
         $creatorWallet = CreatorWallet::firstOrCreate(

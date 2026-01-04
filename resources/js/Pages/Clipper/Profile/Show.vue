@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import ClipperLayout from '@/Layouts/ClipperLayout.vue';
 import ProfileHeader from '@/Components/Profile/ProfileHeader.vue';
 import ClipperProfileForm from '@/Components/Clipper/ProfileForm.vue';
@@ -10,7 +10,8 @@ const page = usePage();
 const props = defineProps({
     profileUser: {
         type: Object,
-        required: true,
+        required: false,
+        default: () => null,
     },
     isOwnProfile: {
         type: Boolean,
@@ -20,6 +21,11 @@ const props = defineProps({
         type: Object,
         default: null,
     },
+});
+
+// Safe computed for profileUser to handle undefined/null
+const safeProfileUser = computed(() => {
+    return props.profileUser || {};
 });
 
 const isEditing = ref(false);
@@ -38,14 +44,14 @@ const onProfileUpdated = () => {
 </script>
 
 <template>
-    <Head :title="(profileUser.business_name || profileUser.name) + ' - Clipper Profile'" />
+    <Head :title="(safeProfileUser?.business_name || safeProfileUser?.name || 'Clipper') + ' - Clipper Profile'" />
 
     <ClipperLayout>
-        <div class="px-4 py-6 lg:px-6">
+        <div v-if="safeProfileUser && Object.keys(safeProfileUser).length > 0" class="px-4 py-6 lg:px-6">
             <div class="mx-auto max-w-7xl">
                 <!-- Profile Header -->
                 <ProfileHeader 
-                    :profile-user="profileUser"
+                    :profile-user="safeProfileUser"
                     :is-own-profile="isOwnProfile"
                 />
 
@@ -176,6 +182,13 @@ const onProfileUpdated = () => {
                             @updated="onProfileUpdated"
                         />
                     </div>
+                </div>
+            </div>
+        </div>
+        <div v-else class="px-4 py-6 lg:px-6">
+            <div class="mx-auto max-w-7xl">
+                <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                    User not found or profile is loading...
                 </div>
             </div>
         </div>

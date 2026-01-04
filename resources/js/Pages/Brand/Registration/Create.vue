@@ -112,24 +112,29 @@ const submit = () => {
                                         type="text"
                                         class="mt-1 block w-full"
                                         v-model="form.business_registration_number"
-                                        placeholder="Optional"
+                                        placeholder="Optional - Nomor NPWP atau SIUP"
+                                        maxlength="100"
                                     />
                                     <InputError class="mt-2" :message="form.errors.business_registration_number" />
                                 </div>
                             </div>
 
-                            <div>
-                                <InputLabel for="description" value="Company Description *" />
-                                <Textarea
-                                    id="description"
-                                    class="mt-1 block w-full"
-                                    v-model="form.description"
-                                    required
-                                    rows="4"
-                                    placeholder="Describe your company, brand, or business..."
-                                />
-                                <InputError class="mt-2" :message="form.errors.description" />
-                            </div>
+                                <div>
+                                    <InputLabel for="description" value="Company Description *" />
+                                    <Textarea
+                                        id="description"
+                                        class="mt-1 block w-full"
+                                        v-model="form.description"
+                                        required
+                                        rows="4"
+                                        placeholder="Describe your company, brand, or business... (minimal 20 karakter)"
+                                        maxlength="1000"
+                                    />
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        {{ form.description.length }}/1000 karakter (minimal 20 karakter)
+                                    </p>
+                                    <InputError class="mt-2" :message="form.errors.description" />
+                                </div>
                         </div>
                     </div>
 
@@ -188,7 +193,9 @@ const submit = () => {
                                         class="mt-1 block w-full"
                                         v-model="form.postal_code"
                                         required
-                                        placeholder="Postal code"
+                                        placeholder="12345 (5 digit)"
+                                        maxlength="5"
+                                        pattern="[0-9]{5}"
                                     />
                                     <InputError class="mt-2" :message="form.errors.postal_code" />
                                 </div>
@@ -231,17 +238,21 @@ const submit = () => {
                                 </div>
                             </div>
 
-                            <div>
-                                <InputLabel for="website" value="Website" />
-                                <TextInput
-                                    id="website"
-                                    type="url"
-                                    class="mt-1 block w-full"
-                                    v-model="form.website"
-                                    placeholder="https://www.example.com"
-                                />
-                                <InputError class="mt-2" :message="form.errors.website" />
-                            </div>
+                                <div>
+                                    <InputLabel for="website" value="Website (Optional)" />
+                                    <TextInput
+                                        id="website"
+                                        type="url"
+                                        class="mt-1 block w-full"
+                                        v-model="form.website"
+                                        placeholder="https://www.example.com"
+                                        maxlength="255"
+                                    />
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        Masukkan URL lengkap dengan https://
+                                    </p>
+                                    <InputError class="mt-2" :message="form.errors.website" />
+                                </div>
                         </div>
                     </div>
 
@@ -302,8 +313,12 @@ const submit = () => {
                                         class="mt-1 block w-full"
                                         v-model="form.contact_person_phone"
                                         required
-                                        placeholder="+62 xxx xxxx xxxx"
+                                        placeholder="+628123456789 atau 08123456789"
+                                        maxlength="20"
                                     />
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        Format: +62xxx atau 0xxx (9-13 digit)
+                                    </p>
                                     <InputError class="mt-2" :message="form.errors.contact_person_phone" />
                                 </div>
                             </div>

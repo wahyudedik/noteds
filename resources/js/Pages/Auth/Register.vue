@@ -136,9 +136,14 @@ const submit = () => {
                 <!-- Terms -->
                 <p class="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
                     By signing up, you agree to our
-                    <Link href="#" class="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Terms of Service</Link>
+                    <Link :href="route('legal.terms-conditions')" class="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400" target="_blank" rel="noopener">
+                        Terms of Service
+                    </Link>
                     and
-                    <Link href="#" class="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Privacy Policy</Link>
+                    <Link :href="route('legal.privacy-policy')" class="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400" target="_blank" rel="noopener">
+                        Privacy Policy
+                    </Link>
+                    .
                 </p>
             </div>
         </div>

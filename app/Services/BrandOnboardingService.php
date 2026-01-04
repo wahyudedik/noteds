@@ -18,14 +18,46 @@ class BrandOnboardingService
     public function registerBrand(User $user, array $data): bool
     {
         return DB::transaction(function () use ($user, $data) {
-            // Update user with brand information
+            // Check if user already has approved brand role
+            if ($user->clipper_role === 'brand') {
+                throw new \Exception('You are already registered as a brand.');
+            }
+
+            // Check if user has pending registration (only prevent if pending, allow if rejected)
+            $pendingRegistration = \App\Models\BrandRegistration::where('user_id', $user->id)
+                ->where('status', 'pending')
+                ->first();
+
+            if ($pendingRegistration) {
+                throw new \Exception('You already have a pending brand registration. Please wait for admin approval.');
+            }
+
+            // Update user with brand information (map form fields to user fields)
             $user->update([
-                'business_name' => $data['business_name'] ?? $user->business_name,
-                'business_field' => $data['business_field'] ?? $user->business_field,
-                'website_url' => $data['website_url'] ?? $user->website_url,
-                'portfolio_url' => $data['portfolio_url'] ?? $user->portfolio_url,
+                'business_name' => $data['company_name'] ?? $user->business_name,
+                'business_field' => $data['business_type'] ?? $user->business_field,
+                'website_url' => $data['website'] ?? $user->website_url,
                 // Keep clipper_role as null until approved
             ]);
+
+            // Map form fields to BrandRegistration fields
+            $registrationData = [
+                'company_name' => $data['company_name'] ?? null,
+                'business_type' => $data['business_type'] ?? null,
+                'website' => $data['website'] ?? null,
+                'contact_person' => $data['contact_person_name'] ?? null,
+                'phone' => $data['contact_person_phone'] ?? $data['phone'] ?? null,
+                'status' => 'pending',
+            ];
+
+            // Create BrandRegistration record for admin approval
+            $registration = \App\Models\BrandRegistration::create(array_merge(
+                $registrationData,
+                ['user_id' => $user->id]
+            ));
+
+            // Notify admins about new registration
+            $this->notificationService->notifyBrandRegistration($registration);
 
             // Create audit log
             \App\Models\AuditLog::logAction([
@@ -34,8 +66,8 @@ class BrandOnboardingService
                 'target_type' => 'user',
                 'target_id' => $user->id,
                 'new_value' => [
-                    'business_name' => $data['business_name'] ?? null,
-                    'business_field' => $data['business_field'] ?? null,
+                    'company_name' => $data['company_name'] ?? null,
+                    'business_type' => $data['business_type'] ?? null,
                 ],
             ]);
 

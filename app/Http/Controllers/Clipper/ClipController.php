@@ -74,6 +74,18 @@ class ClipController extends Controller
         $validated = $request->validated();
         $campaign = Campaign::findOrFail($validated['campaign_id']);
 
+        // Check if clipper already has a pending or approved clip for this campaign
+        $existingClip = auth()->user()->clips()
+            ->where('campaign_id', $campaign->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->first();
+
+        if ($existingClip) {
+            return back()->withErrors([
+                'error' => 'You have already submitted a clip for this campaign. Please wait for approval or rejection before submitting another.',
+            ])->withInput();
+        }
+
         try {
             $clip = $this->clipService->submitClip(
                 auth()->user(),

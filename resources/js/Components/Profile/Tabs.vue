@@ -63,7 +63,7 @@ const setActiveTab = (tabId) => {
 
 <template>
     <div class="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-        <nav class="-mb-px flex space-x-2 sm:space-x-4 lg:space-x-8 min-w-max sm:min-w-0">
+        <nav class="-mb-px flex justify-center space-x-2 sm:space-x-4 lg:space-x-8 min-w-max sm:min-w-0">
             <button
                 v-for="tab in visibleTabs"
                 :key="tab.id"

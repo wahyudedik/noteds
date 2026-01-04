@@ -236,7 +236,7 @@ const getStatusBadgeClass = (status) => {
                             <span class="font-medium text-blue-900 dark:text-blue-100">Browse Campaigns</span>
                         </Link>
                         <Link
-                            :href="route('clipper.clips.create')"
+                            :href="route('clipper.campaigns.available')"
                             class="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
                         >
                             <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

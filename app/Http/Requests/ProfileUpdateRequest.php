@@ -34,7 +34,6 @@ class ProfileUpdateRequest extends FormRequest
             'goals.*' => ['string', 'max:255'],
             'portfolio_url' => ['nullable', 'url', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:255'],
-            'is_verified_mentor' => ['nullable', 'boolean'],
         ];
     }
 }

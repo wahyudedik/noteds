@@ -186,5 +186,55 @@ class UserManagementController extends Controller
 
         return back()->with('success', 'User unbanned successfully.');
     }
+
+    /**
+     * Remove clipper role from user.
+     *
+     * @param Request $request
+     * @param User $user
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function removeClipperRole(Request $request, User $user)
+    {
+        // Prevent removing role from admins (unless they're also admins)
+        if ($user->isAdmin()) {
+            return back()->withErrors([
+                'error' => 'Cannot remove clipper role from admin users.',
+            ]);
+        }
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $oldClipperRole = $user->clipper_role;
+
+        if (!$oldClipperRole) {
+            return back()->withErrors([
+                'error' => 'User does not have a clipper role.',
+            ]);
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $validated, $oldClipperRole) {
+            // Remove clipper_role
+            $user->update([
+                'clipper_role' => null,
+            ]);
+
+            // Create audit log
+            \App\Models\AuditLog::logAction([
+                'admin_id' => auth()->id(),
+                'user_id' => $user->id,
+                'action' => 'remove_clipper_role',
+                'target_type' => 'user',
+                'target_id' => $user->id,
+                'old_value' => ['clipper_role' => $oldClipperRole],
+                'new_value' => ['clipper_role' => null],
+                'notes' => $validated['reason'] ?? null,
+            ]);
+        });
+
+        return back()->with('success', 'Clipper role removed successfully.');
+    }
 }
 

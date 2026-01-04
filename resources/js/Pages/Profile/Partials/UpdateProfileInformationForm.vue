@@ -29,7 +29,6 @@ const form = useForm({
     goals: user.goals || [],
     portfolio_url: user.portfolio_url || '',
     website_url: user.website_url || '',
-    is_verified_mentor: user.is_verified_mentor || false,
 });
 
 const avatarPreview = ref(user.avatar_url || null);
@@ -280,15 +279,6 @@ const removeGoal = (index) => {
                 <InputError class="mt-2" :message="form.errors.website_url" />
             </div>
 
-            <div class="flex items-center">
-                <Checkbox
-                    id="is_verified_mentor"
-                    v-model:checked="form.is_verified_mentor"
-                />
-                <InputLabel for="is_verified_mentor" value="Verified Mentor" class="ml-2" />
-            </div>
-
-            <InputError class="mt-2" :message="form.errors.is_verified_mentor" />
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
                 <p class="mt-2 text-sm text-gray-800 dark:text-gray-200">

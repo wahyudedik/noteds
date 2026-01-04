@@ -38,8 +38,8 @@ class ClipperProfileController extends Controller
         try {
             $this->onboardingService->registerClipper(auth()->user(), $validated);
 
-            return redirect()->route('clipper.profile.show')
-                ->with('success', 'Clipper profile created successfully.');
+            return redirect()->route('dashboard')
+                ->with('success', 'Clipper registration submitted. Please wait for admin approval.');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -48,10 +48,27 @@ class ClipperProfileController extends Controller
     public function show()
     {
         $user = auth()->user();
+        
+        // Ensure we have a valid user
+        if (!$user) {
+            abort(404, 'User not found');
+        }
+        
         $stats = $this->onboardingService->getClipperStats($user);
 
+        // Convert user to array and add avatar_url
+        $profileUserArray = $user->toArray();
+        $profileUserArray['avatar_url'] = $user->avatar_url;
+
+        // Get clipper profile if exists
+        $clipperProfile = \App\Models\ClipperProfile::where('user_id', $user->id)
+            ->where('status', 'verified')
+            ->first();
+
         return Inertia::render('Clipper/Profile/Show', [
-            'user' => $user,
+            'profileUser' => $profileUserArray,
+            'isOwnProfile' => true,
+            'clipperProfile' => $clipperProfile,
             'stats' => $stats,
             'isClipper' => $user->isClipper(),
         ]);
