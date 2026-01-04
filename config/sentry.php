@@ -64,12 +64,11 @@ return [
     |--------------------------------------------------------------------------
     |
     | Customize what data is sent to Sentry.
+    | Can be a class that implements __invoke method, or null.
+    | Note: Closure callbacks cannot be used with config caching.
     |
     */
 
-    'before_send' => function (\Sentry\Event $event): ?\Sentry\Event {
-        // Filter out sensitive data
-        return $event;
-    },
+    'before_send' => \App\Services\SentryBeforeSendCallback::class,
 ];
 
