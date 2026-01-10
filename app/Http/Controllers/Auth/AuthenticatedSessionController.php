@@ -33,7 +33,29 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Get intended URL or default to home
+        $intended = $request->session()->pull('url.intended', route('home', absolute: false));
+        
+        // Prevent redirect to post detail pages - always redirect to home after login
+        // This prevents users from being stuck on a specific post page
+        if (str_contains($intended, '/posts/')) {
+            // If intended URL is a post detail page, ignore it and go to home
+            return redirect()->route('home');
+        }
+        
+        // Ensure intended URL is not a post route with invalid ID
+        // If intended is /home, use it; otherwise check if it's a valid route
+        if ($intended === route('home', absolute: false) || str_starts_with($intended, '/home')) {
+            return redirect()->route('home');
+        }
+        
+        // If intended is dashboard, use it
+        if (str_contains($intended, '/dashboard')) {
+            return redirect()->route('dashboard');
+        }
+        
+        // Default to home
+        return redirect()->route('home');
     }
 
     /**

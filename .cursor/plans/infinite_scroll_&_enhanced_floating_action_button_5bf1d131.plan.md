@@ -241,4 +241,3 @@ const openProductModal = () => {
 - [x] Handles end of results (no more pages)
 - [x] Resets when search/filter changes
 - [x] Shows loading indicator
-- [x] Works on mobile devices

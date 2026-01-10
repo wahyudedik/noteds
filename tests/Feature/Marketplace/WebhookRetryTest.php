@@ -109,9 +109,17 @@ class WebhookRetryTest extends TestCase
     /** @test */
     public function webhook_handles_missing_order_gracefully()
     {
+        // Mock MidtransService to return true for handleWebhook (signature check passes)
+        // but order will not be found in the database
+        $midtransService = Mockery::mock(MidtransService::class);
+        $midtransService->shouldReceive('handleWebhook')
+            ->andReturn(true); // Signature verification passes
+        
+        $this->app->instance(MidtransService::class, $midtransService);
+
         Log::shouldReceive('warning')
             ->once()
-            ->with('Order not found for webhook: ORD-INVALID');
+            ->with(Mockery::pattern('/Midtrans webhook: Order not found for order_id/'), Mockery::type('array'));
 
         $webhookData = [
             'order_id' => 'ORD-INVALID',
@@ -122,7 +130,7 @@ class WebhookRetryTest extends TestCase
 
         $response = $this->postJson(route('payment.webhook'), $webhookData);
 
-        $response->assertStatus(404);
+        $response->assertStatus(200);
         $response->assertJson(['status' => 'error', 'message' => 'Order not found']);
     }
 

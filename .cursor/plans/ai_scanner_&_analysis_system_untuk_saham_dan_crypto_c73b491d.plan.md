@@ -827,5 +827,3 @@ WHATSAPP_API_KEY=
 ### Phase 6: Polish & Testing (Week 11-12)
 
 1. Add tier limits enforcement
-2. Add disclaimer dan legal compliance
-3. Performance optimization

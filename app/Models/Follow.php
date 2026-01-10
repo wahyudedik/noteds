@@ -33,6 +33,7 @@ class Follow extends Model
     protected $fillable = [
         'follower_id',
         'following_id',
+        'category_id',
     ];
 
     /**
@@ -49,5 +50,13 @@ class Follow extends Model
     public function following(): BelongsTo
     {
         return $this->belongsTo(User::class, 'following_id');
+    }
+
+    /**
+     * Get the category this follow is associated with.
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 }

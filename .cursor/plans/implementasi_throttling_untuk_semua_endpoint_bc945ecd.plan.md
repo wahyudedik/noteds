@@ -407,4 +407,3 @@ Setelah implementasi, test dengan:
 ## Notes
 
 - Throttle middleware menggunakan IP address sebagai default key
-- Untuk authenticated users, bisa menggunakan user ID untuk lebih akurat (via custom rate limiter)

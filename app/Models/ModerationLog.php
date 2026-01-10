@@ -27,6 +27,7 @@ class ModerationLog extends Model
         'user_id',
         'post_id',
         'comment_id',
+        'product_review_id',
         'moderator_id',
         'reason',
         'action',
@@ -50,5 +51,10 @@ class ModerationLog extends Model
     public function moderator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'moderator_id');
+    }
+
+    public function productReview(): BelongsTo
+    {
+        return $this->belongsTo(ProductReview::class);
     }
 }

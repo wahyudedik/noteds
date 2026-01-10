@@ -28,25 +28,27 @@ class FollowService
             throw new \Exception('You cannot follow yourself.');
         }
 
-        // Check if already following
-        $existingFollow = Follow::where('follower_id', $follower->id)
-            ->where('following_id', $following->id)
-            ->first();
+        return DB::transaction(function () use ($follower, $following) {
+            // Check if already following
+            $existingFollow = Follow::where('follower_id', $follower->id)
+                ->where('following_id', $following->id)
+                ->first();
 
-        if ($existingFollow) {
-            return $existingFollow;
-        }
+            if ($existingFollow) {
+                return $existingFollow;
+            }
 
-        // Create follow relationship
-        $follow = Follow::create([
-            'follower_id' => $follower->id,
-            'following_id' => $following->id,
-        ]);
+            // Create follow relationship
+            $follow = Follow::create([
+                'follower_id' => $follower->id,
+                'following_id' => $following->id,
+            ]);
 
-        // Notify the user being followed
-        $this->notificationService->notifyNewFollow($following, $follower);
+            // Notify the user being followed
+            $this->notificationService->notifyNewFollow($following, $follower);
 
-        return $follow;
+            return $follow;
+        });
     }
 
     /**
@@ -79,6 +81,7 @@ class FollowService
 
     /**
      * Get mutual connections between two users.
+     * Optimized to use a single query with joins instead of multiple queries and in-memory operations.
      *
      * @param User $user1
      * @param User $user2
@@ -86,16 +89,20 @@ class FollowService
      */
     public function getMutualConnections(User $user1, User $user2): \Illuminate\Support\Collection
     {
-        // Get users that both user1 and user2 are following
-        $user1Following = Follow::where('follower_id', $user1->id)
-            ->pluck('following_id');
-
-        $user2Following = Follow::where('follower_id', $user2->id)
-            ->pluck('following_id');
-
-        $mutualIds = $user1Following->intersect($user2Following);
-
-        return User::whereIn('id', $mutualIds)->get();
+        // Optimized: Use a single query with subquery to find mutual connections
+        // This avoids loading all following IDs into memory and then querying users separately
+        return User::whereIn('id', function ($query) use ($user1, $user2) {
+            // Get users that user1 is following
+            $query->select('following_id')
+                ->from('follows')
+                ->where('follower_id', $user1->id)
+                ->whereIn('following_id', function ($subQuery) use ($user2) {
+                    // Get users that user2 is also following (mutual connections)
+                    $subQuery->select('following_id')
+                        ->from('follows')
+                        ->where('follower_id', $user2->id);
+                });
+        })->get();
     }
 
     /**
@@ -103,10 +110,21 @@ class FollowService
      *
      * @param User $user
      * @param int $limit
+     * @param bool $useAISuggestions
      * @return \Illuminate\Support\Collection
      */
-    public function getFollowSuggestions(User $user, int $limit = 10): \Illuminate\Support\Collection
+    public function getFollowSuggestions(User $user, int $limit = 10, bool $useAISuggestions = true): \Illuminate\Support\Collection
     {
+        // Use AI-powered suggestions if available and enabled
+        if ($useAISuggestions && class_exists(\App\Services\FollowSuggestionService::class)) {
+            $suggestionService = app(\App\Services\FollowSuggestionService::class);
+            $suggestions = $suggestionService->getSuggestions($user, $limit);
+            
+            // Extract users from suggestions
+            return $suggestions->pluck('user');
+        }
+
+        // Fallback to basic algorithm (backward compatibility)
         // Get users that the current user is already following
         $followingIds = Follow::where('follower_id', $user->id)
             ->pluck('following_id')

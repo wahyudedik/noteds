@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Withdrawal;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketResponse;
+use App\Models\Post;
 use Illuminate\Support\Facades\Notification;
 
 class NotificationService
@@ -562,6 +563,86 @@ class NotificationService
             if ($assignedAdmin) {
                 $assignedAdmin->notify(new \App\Notifications\SupportTicketStatusUpdateNotification($ticket, $oldStatus, $newStatus));
             }
+        }
+    }
+
+    /**
+     * Notify post author when their post is reposted.
+     */
+    public function notifyPostReposted(\App\Models\Post $post, User $reposter, ?\App\Models\Repost $repost = null): void
+    {
+        // Ensure relationships are loaded
+        if (!$post->relationLoaded('user')) {
+            $post->load('user');
+        }
+
+        if ($post->user && $post->user_id !== $reposter->id) {
+            $post->user->notify(new \App\Notifications\PostRepostedNotification($post, $reposter, $repost));
+        }
+    }
+
+    /**
+     * Notify post author when their scheduled post is published.
+     */
+    public function notifyPostPublished(Post $post): void
+    {
+        // Ensure relationships are loaded
+        if (!$post->relationLoaded('user')) {
+            $post->load('user');
+        }
+
+        if ($post->user) {
+            $post->user->notify(new \App\Notifications\PostPublishedNotification($post));
+        }
+    }
+
+    /**
+     * Notify user about collaboration invitation.
+     */
+    public function notifyCollaborationInvitation(PostCollaborator $collaboration): void
+    {
+        $collaboration->load(['user', 'post.user']);
+        
+        if ($collaboration->user) {
+            $collaboration->user->notify(new \App\Notifications\CollaborationInvitationNotification($collaboration));
+        }
+    }
+
+    /**
+     * Notify post owner when collaboration is accepted.
+     */
+    public function notifyCollaborationAccepted(PostCollaborator $collaboration): void
+    {
+        $collaboration->load(['user', 'post.user']);
+        
+        if ($collaboration->post->user) {
+            $collaboration->post->user->notify(new \App\Notifications\CollaborationAcceptedNotification($collaboration));
+        }
+    }
+
+    /**
+     * Notify post owner when collaboration is rejected.
+     */
+    public function notifyCollaborationRejected(PostCollaborator $collaboration): void
+    {
+        $collaboration->load(['user', 'post.user']);
+        
+        if ($collaboration->post->user) {
+            $collaboration->post->user->notify(new \App\Notifications\CollaborationRejectedNotification($collaboration));
+        }
+    }
+
+    /**
+     * Notify post owner when post is edited by collaborator.
+     */
+    public function notifyPostEditedByCollaborator(Post $post, User $collaborator): void
+    {
+        if (!$post->relationLoaded('user')) {
+            $post->load('user');
+        }
+
+        if ($post->user && $post->user_id !== $collaborator->id) {
+            $post->user->notify(new \App\Notifications\PostEditedByCollaboratorNotification($post, $collaborator));
         }
     }
 }

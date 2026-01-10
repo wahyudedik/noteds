@@ -15,6 +15,20 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Process Midtrans webhook asynchronously via queue.
+ * 
+ * NOTE: This job class exists but is NOT currently dispatched from PaymentController.
+ * Webhook processing happens synchronously in PaymentController::webhook() instead.
+ * 
+ * This job is primarily used in tests (see tests/Feature/Marketplace/WebhookRetryTest.php).
+ * 
+ * Future Enhancement:
+ * - Could be dispatched from PaymentController::webhook() for async processing
+ * - Would enable automatic retry on transient failures
+ * - Would improve webhook response time (immediate 200 response)
+ * - Requires queue worker to be running
+ */
 class ProcessMidtransWebhook implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;

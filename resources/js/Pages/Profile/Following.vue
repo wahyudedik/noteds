@@ -14,6 +14,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    mutualConnectionsMap: {
+        type: Object,
+        default: () => ({}),
+    },
 });
 
 const followingList = ref([]);
@@ -181,8 +185,17 @@ const handleUnfollowed = (userId) => {
                                     </span>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <div class="font-medium text-gray-900 dark:text-white truncate">
-                                        {{ follow.following.business_name || follow.following.name }}
+                                    <div class="flex items-center gap-2">
+                                        <div class="font-medium text-gray-900 dark:text-white truncate">
+                                            {{ follow.following.business_name || follow.following.name }}
+                                        </div>
+                                        <span
+                                            v-if="mutualConnectionsMap[follow.following.id] > 0"
+                                            class="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 px-1.5 py-0.5 rounded"
+                                            :title="`${mutualConnectionsMap[follow.following.id]} mutual ${mutualConnectionsMap[follow.following.id] === 1 ? 'connection' : 'connections'}`"
+                                        >
+                                            {{ mutualConnectionsMap[follow.following.id] }} mutual
+                                        </span>
                                     </div>
                                     <div v-if="follow.following.business_field" class="text-sm text-gray-500 dark:text-gray-400 truncate">
                                         {{ follow.following.business_field }}

@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('bookmark_collections', function (Blueprint $table) {
+            $table->boolean('is_public')->default(false)->after('is_default');
+            $table->string('public_slug')->nullable()->unique()->after('is_public');
+            $table->json('share_settings')->nullable()->after('public_slug');
+            $table->index('public_slug');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('bookmark_collections', function (Blueprint $table) {
+            $table->dropIndex(['public_slug']);
+            $table->dropColumn(['is_public', 'public_slug', 'share_settings']);
+        });
+    }
+};

@@ -342,5 +342,3 @@ resources/js/
 - Business-relevance check
 
 ### Business Rules
-
-- Users can only vote once per post/comment

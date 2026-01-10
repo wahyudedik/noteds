@@ -2,6 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import FollowButton from '@/Components/Follow/FollowButton.vue';
+import MutualConnections from '@/Components/MutualConnections.vue';
 
 const props = defineProps({
     profileUser: {
@@ -15,6 +16,14 @@ const props = defineProps({
     isFollowing: {
         type: Boolean,
         default: false,
+    },
+    mutualConnectionsCount: {
+        type: Number,
+        default: 0,
+    },
+    mutualConnections: {
+        type: Array,
+        default: () => [],
     },
 });
 
@@ -100,6 +109,15 @@ const avatarUrl = computed(() => props.profileUser.avatar_url || null);
                     </svg>
                     Verified Mentor
                 </span>
+            </div>
+
+            <!-- Mutual Connections (only when viewing other user's profile) -->
+            <div v-if="!isOwnProfile && mutualConnectionsCount > 0" class="mb-3 sm:mb-4">
+                <MutualConnections
+                    :connections="mutualConnections"
+                    :count="mutualConnectionsCount"
+                    :target-user-id="profileUser.id"
+                />
             </div>
 
             <!-- Portfolio and Website Links -->

@@ -90,8 +90,8 @@ const getPriorityColor = (priority) => {
                     <span class="text-xl font-bold">{{ pendingWithdrawals.total }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2 text-sm mb-2">
-                    <div>Creator: {{ pendingWithdrawals.clipper }}</div>
-                    <div>Brand: {{ pendingWithdrawals.creator }}</div>
+                    <div>Clipper: {{ pendingWithdrawals.clipper }}</div>
+                    <div>Creator: {{ pendingWithdrawals.creator }}</div>
                     <div>Marketplace: {{ pendingWithdrawals.marketplace }}</div>
                 </div>
                 <Link

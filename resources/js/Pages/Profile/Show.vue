@@ -36,6 +36,14 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    mutualConnectionsCount: {
+        type: Number,
+        default: 0,
+    },
+    mutualConnections: {
+        type: Array,
+        default: () => [],
+    },
     stats: Object,
     engagement_data: Object,
     top_posts: Array,
@@ -76,6 +84,8 @@ const hasClipperProfile = computed(() => {
                     :profile-user="safeProfileUser"
                     :is-own-profile="isOwnProfile"
                     :is-following="isFollowing"
+                    :mutual-connections-count="mutualConnectionsCount"
+                    :mutual-connections="mutualConnections"
                 />
 
                 <!-- Tabs -->

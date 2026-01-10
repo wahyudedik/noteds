@@ -33,6 +33,8 @@ class Bookmark extends Model
     protected $fillable = [
         'user_id',
         'post_id',
+        'collection_id',
+        'notes',
     ];
 
     /**
@@ -49,5 +51,114 @@ class Bookmark extends Model
     public function post(): BelongsTo
     {
         return $this->belongsTo(Post::class);
+    }
+
+    /**
+     * Get the collection this bookmark belongs to.
+     */
+    public function collection(): BelongsTo
+    {
+        return $this->belongsTo(BookmarkCollection::class);
+    }
+
+    /**
+     * Get tags for this bookmark.
+     */
+    public function tags(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(BookmarkTag::class, 'bookmark_tag');
+    }
+
+    /**
+     * Move bookmark to a collection.
+     */
+    public function moveToCollection(?BookmarkCollection $collection): void
+    {
+        $this->collection_id = $collection?->id;
+        $this->save();
+    }
+
+    /**
+     * Remove bookmark from collection.
+     */
+    public function removeFromCollection(): void
+    {
+        $this->collection_id = null;
+        $this->save();
+    }
+
+    /**
+     * Add tag to bookmark.
+     */
+    public function addTag(BookmarkTag $tag): void
+    {
+        if (!$this->tags()->where('bookmark_tags.id', $tag->id)->exists()) {
+            $this->tags()->attach($tag->id);
+            $tag->incrementUsage();
+        }
+    }
+
+    /**
+     * Remove tag from bookmark.
+     */
+    public function removeTag(BookmarkTag $tag): void
+    {
+        if ($this->tags()->where('bookmark_tags.id', $tag->id)->exists()) {
+            $this->tags()->detach($tag->id);
+            $tag->decrementUsage();
+        }
+    }
+
+    /**
+     * Sync tags for bookmark.
+     */
+    public function syncTags(array $tagIds): void
+    {
+        $oldTagIds = $this->tags()->pluck('bookmark_tags.id')->toArray();
+        $removedTagIds = array_diff($oldTagIds, $tagIds);
+        $addedTagIds = array_diff($tagIds, $oldTagIds);
+
+        foreach ($removedTagIds as $tagId) {
+            $tag = BookmarkTag::find($tagId);
+            if ($tag) {
+                $tag->decrementUsage();
+            }
+        }
+
+        foreach ($addedTagIds as $tagId) {
+            $tag = BookmarkTag::find($tagId);
+            if ($tag) {
+                $tag->incrementUsage();
+            }
+        }
+
+        $this->tags()->sync($tagIds);
+    }
+
+    /**
+     * Check if bookmark has notes.
+     */
+    public function hasNotes(): bool
+    {
+        return !empty($this->notes);
+    }
+
+    /**
+     * Get notes preview (first 100 characters).
+     */
+    public function getNotesPreviewAttribute(): ?string
+    {
+        if (!$this->notes) {
+            return null;
+        }
+
+        return Str::limit(strip_tags($this->notes), 100);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'notes_updated_at' => 'datetime',
+        ];
     }
 }

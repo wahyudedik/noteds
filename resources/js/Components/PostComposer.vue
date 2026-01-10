@@ -218,22 +218,28 @@ const toggleComposer = () => {
 
                 <div>
                     <TextInput
+                        id="post-title"
+                        name="title"
                         v-model="form.title"
                         type="text"
                         class="w-full"
                         placeholder="Post title (min. 10 characters)"
                         required
+                        autocomplete="off"
                     />
                     <InputError :message="form.errors.title" />
                 </div>
 
                 <div>
                     <Textarea
+                        id="post-content"
+                        name="content"
                         v-model="form.content"
                         class="w-full"
                         rows="6"
                         placeholder="Share your thoughts... (min. 50 characters)"
                         required
+                        autocomplete="off"
                     />
                     <InputError :message="form.errors.content" />
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">

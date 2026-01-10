@@ -22,5 +22,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Register event listeners
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\PostReposted::class,
+            \App\Listeners\TrackRepostAnalyticsListener::class
+        );
     }
 }

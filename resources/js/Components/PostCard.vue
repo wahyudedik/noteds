@@ -1,11 +1,15 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import VoteButton from '@/Components/VoteButton.vue';
 import BookmarkButton from '@/Components/Bookmark/BookmarkButton.vue';
+import RepostButton from '@/Components/Repost/RepostButton.vue';
+import QuoteRepostDisplay from '@/Components/Repost/QuoteRepostDisplay.vue';
 import ReportButton from '@/Components/Report/ReportButton.vue';
 import LinkPreview from '@/Components/LinkPreview.vue';
 import ImageGallery from '@/Components/ImageGallery.vue';
+import HashtagList from '@/Components/HashtagList.vue';
+import PollDisplay from '@/Components/Poll/PollDisplay.vue';
 import { PURPOSE_TYPE_LABELS } from '@/Utils/constants';
 import { usePage } from '@inertiajs/vue3';
 
@@ -22,11 +26,34 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    isReposted: {
+        type: Boolean,
+        default: false,
+    },
+    userPollVote: {
+        type: Object,
+        default: null,
+    },
 });
 
 const page = usePage();
 const showImageGallery = ref(false);
 const selectedImageIndex = ref(0);
+
+// Get the actual post ID to use for actions (original_post_id for reposts, otherwise post.id)
+const actualPostId = computed(() => {
+    // For reposts, use original_post_id; for regular posts, use post.id
+    if (props.post.is_repost) {
+        // Handle both object and array formats
+        if (props.post.original_post_id) {
+            return props.post.original_post_id;
+        }
+        if (props.post.original_post?.id) {
+            return props.post.original_post.id;
+        }
+    }
+    return props.post.id;
+});
 
 const openImageGallery = (index) => {
     selectedImageIndex.value = index;
@@ -129,6 +156,35 @@ const getImageClass = (imageCount, index) => {
 <template>
     <article class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
         <div class="p-4 sm:p-6">
+            <!-- Repost Indicator -->
+            <div v-if="post.is_repost && post.repost_user" class="mb-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <Link
+                    :href="route('profile.show', post.repost_user.id)"
+                    class="font-medium hover:text-indigo-600 dark:hover:text-indigo-400"
+                >
+                    {{ post.repost_user.business_name || post.repost_user.name }}
+                </Link>
+                <span>{{ post.is_quote_repost ? 'quote reposted' : 'reposted' }}</span>
+                <span v-if="post.repost_comment" class="text-gray-400">• {{ post.repost_comment }}</span>
+            </div>
+            
+            <!-- Quote Repost Display -->
+            <div v-if="post.is_quote_repost && post.quote_content" class="mb-4">
+                <QuoteRepostDisplay
+                    :repost="{
+                        user: post.repost_user,
+                        quote_content: post.quote_content,
+                        is_quote_repost: true
+                    }"
+                    :original-post="post"
+                    :quote-post="post.quote_post"
+                    :display-mode="post.quote_display_mode || 'embedded'"
+                />
+            </div>
+
             <!-- Header -->
             <div class="flex items-start justify-between mb-3 sm:mb-4 gap-2">
                 <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
@@ -165,7 +221,7 @@ const getImageClass = (imageCount, index) => {
                 <div v-if="page.props.auth?.user && page.props.auth.user.id !== post.user_id">
                     <ReportButton
                         reportable-type="post"
-                        :reportable-id="post.id"
+                        :reportable-id="actualPostId"
                         variant="icon"
                         size="sm"
                     />
@@ -173,7 +229,7 @@ const getImageClass = (imageCount, index) => {
             </div>
 
             <!-- Content -->
-            <Link :href="route('posts.show', post.id)" class="block group">
+            <Link :href="route('posts.show', actualPostId)" class="block group">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
                     {{ post.title }}
                 </h3>
@@ -244,25 +300,44 @@ const getImageClass = (imageCount, index) => {
                 />
             </div>
 
+            <!-- Hashtags -->
+            <HashtagList v-if="post.hashtags && post.hashtags.length > 0" :hashtags="post.hashtags" />
+
+            <!-- Poll -->
+            <PollDisplay
+                v-if="post.poll"
+                :poll="post.poll"
+                :user-vote="userPollVote"
+                :post-id="actualPostId"
+            />
+
+
             <!-- Actions -->
             <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-2">
                     <VoteButton
-                        :post-id="post.id"
+                        :post-id="actualPostId"
                         :upvotes="post.upvotes_count"
                         :downvotes="post.downvotes_count"
                         :user-vote="userVote"
                         :can-vote="page.props.auth?.user && page.props.auth.user.id !== post.user_id"
                     />
                     <div class="flex items-center gap-3">
+                        <RepostButton
+                            v-if="page.props.auth?.user"
+                            :post-id="actualPostId"
+                            :reposts-count="post.reposts_count || 0"
+                            :is-reposted="isReposted"
+                            :can-repost="!!page.props.auth?.user"
+                        />
                         <BookmarkButton
                             v-if="page.props.auth?.user"
-                            :post-id="post.id"
+                            :post-id="actualPostId"
                             :is-bookmarked="isBookmarked"
                             :can-bookmark="!!page.props.auth?.user"
                         />
                         <Link
-                            :href="route('posts.show', post.id)"
+                            :href="route('posts.show', actualPostId)"
                             class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

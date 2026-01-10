@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Concerns\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -74,6 +75,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'balance',
         'midtrans_merchant_id',
         'clipper_role',
+        'two_factor_enabled',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
     ];
 
     /**
@@ -84,6 +89,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -100,6 +107,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'goals' => 'array',
             'is_verified_mentor' => 'boolean',
             'balance' => 'decimal:2',
+            'two_factor_enabled' => 'boolean',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 
@@ -292,11 +301,64 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get categories associated with this user.
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'user_categories')
+            ->withPivot('source', 'confidence')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get manually added categories.
+     */
+    public function manualCategories(): BelongsToMany
+    {
+        return $this->categories()
+            ->wherePivot('source', 'manual');
+    }
+
+    /**
+     * Get inferred categories.
+     */
+    public function inferredCategories(): BelongsToMany
+    {
+        return $this->categories()
+            ->wherePivot('source', 'inferred');
+    }
+
+    /**
+     * Get all categories (manual + inferred).
+     */
+    public function getAllCategories()
+    {
+        return $this->categories()->get();
+    }
+
+    /**
+     * Check if user has a specific category.
+     */
+    public function hasCategory(Category|string $category): bool
+    {
+        $categoryId = $category instanceof Category ? $category->id : $category;
+        return $this->categories()->where('categories.id', $categoryId)->exists();
+    }
+
+    /**
      * Get the bookmarks created by the user.
      */
     public function bookmarks(): HasMany
     {
         return $this->hasMany(Bookmark::class);
+    }
+
+    /**
+     * Get bookmark collections for the user.
+     */
+    public function bookmarkCollections(): HasMany
+    {
+        return $this->hasMany(BookmarkCollection::class);
     }
 
     /**
@@ -353,5 +415,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function activityLogs(): HasMany
     {
         return $this->hasMany(UserActivityLog::class);
+    }
+
+    /**
+     * Get the reposts created by the user.
+     */
+    public function reposts(): HasMany
+    {
+        return $this->hasMany(Repost::class);
     }
 }

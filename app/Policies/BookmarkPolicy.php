@@ -43,5 +43,29 @@ class BookmarkPolicy
         // Can always view own bookmarks
         return true;
     }
+
+    /**
+     * Determine if the user can view a bookmark.
+     */
+    public function view(User $user, Bookmark $bookmark): bool
+    {
+        return $user->id === $bookmark->user_id;
+    }
+
+    /**
+     * Determine if the user can update bookmark notes.
+     */
+    public function updateNotes(User $user, Bookmark $bookmark): bool
+    {
+        return $user->id === $bookmark->user_id;
+    }
+
+    /**
+     * Determine if the user can manage bookmark tags.
+     */
+    public function manageTags(User $user, Bookmark $bookmark): bool
+    {
+        return $user->id === $bookmark->user_id;
+    }
 }
 

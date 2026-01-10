@@ -335,4 +335,3 @@ Cart → Checkout → Create Multiple Orders → Payment (combined total) → Su
 ## Testing Checklist
 
 - [ ] Multi-item checkout creates multiple orders correctly
-- [ ] Cart clears after successful checkout

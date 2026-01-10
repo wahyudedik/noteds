@@ -105,8 +105,14 @@ class ProfileController extends Controller
 
         // Get following status
         $isFollowing = false;
+        $mutualConnections = null;
+        $mutualConnectionsCount = 0;
         if ($request->user() && !$isOwnProfile) {
             $isFollowing = $request->user()->following()->where('following_id', $profileUser->id)->exists();
+            // Get mutual connections
+            $followService = app(\App\Services\FollowService::class);
+            $mutualConnections = $followService->getMutualConnections($request->user(), $profileUser);
+            $mutualConnectionsCount = $mutualConnections->count();
         }
 
         // Get brand registration if exists
@@ -129,6 +135,12 @@ class ProfileController extends Controller
             'profileUser' => $profileUserArray,
             'isOwnProfile' => $isOwnProfile,
             'isFollowing' => $isFollowing,
+            'mutualConnectionsCount' => $mutualConnectionsCount,
+            'mutualConnections' => $mutualConnections ? $mutualConnections->take(5)->map(fn($u) => [
+                'id' => $u->id,
+                'name' => $u->business_name ?? $u->name,
+                'avatar_url' => $u->avatar_url,
+            ]) : [],
             'posts' => $posts,
             'userVotes' => $userVotes,
             'userBookmarks' => $userBookmarks,

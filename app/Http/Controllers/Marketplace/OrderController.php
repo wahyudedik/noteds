@@ -8,6 +8,14 @@ use App\Models\Product;
 use App\Models\CartItem;
 use App\Services\MarketplaceService;
 use App\Services\MidtransService;
+use App\Services\OrderTrackingService;
+use App\Services\OrderModificationService;
+use App\Services\BulkOrderService;
+use App\Services\OrderExportService;
+use App\Http\Requests\ModifyOrderRequest;
+use App\Http\Requests\CreateBulkOrderRequest;
+use App\Http\Requests\ExportOrdersRequest;
+use App\Events\OrderStatusUpdated;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +25,11 @@ class OrderController extends Controller
 {
     public function __construct(
         private MarketplaceService $marketplaceService,
-        private MidtransService $midtransService
+        private MidtransService $midtransService,
+        private OrderTrackingService $trackingService,
+        private OrderModificationService $modificationService,
+        private BulkOrderService $bulkOrderService,
+        private OrderExportService $exportService
     ) {}
 
     public function index(Request $request)
@@ -131,15 +143,45 @@ class OrderController extends Controller
         }
     }
 
-    public function cancel(Order $order)
+    public function cancel(Request $request, Order $order)
     {
         $this->authorize('update', $order);
 
-        if ($order->payment_status === 'paid') {
-            return back()->withErrors(['error' => 'Cannot cancel paid order']);
+        if (!$order->canBeCancelled()) {
+            return back()->withErrors(['error' => 'Cannot cancel paid or already cancelled order']);
         }
 
-        $order->update(['status' => 'cancelled']);
+        DB::transaction(function () use ($order, $request) {
+            $order->update([
+                'status' => 'cancelled',
+                'cancellation_reason' => $request->input('reason'),
+                'cancelled_by' => auth()->id(),
+                'cancelled_at' => now(),
+            ]);
+
+            // Add tracking entry
+            $tracking = $this->trackingService->addTracking(
+                $order,
+                'cancelled',
+                $order->payment_status,
+                'Order cancelled by user',
+                auth()->user()
+            );
+
+            // Broadcast event
+            event(new OrderStatusUpdated($order, $tracking));
+
+            // Restore stock if order had items
+            if ($order->isBulkOrder() && $order->items->isNotEmpty()) {
+                foreach ($order->items as $item) {
+                    if ($item->product && $item->product->stock !== null) {
+                        $item->product->increment('stock', $item->quantity);
+                    }
+                }
+            } elseif ($order->product && $order->product->stock !== null) {
+                $order->product->increment('stock', $order->quantity);
+            }
+        });
 
         return redirect()->route('marketplace.orders.index')
             ->with('success', 'Order cancelled successfully.');
@@ -243,5 +285,164 @@ class OrderController extends Controller
         ]);
 
         return $pdf->download('invoice-' . $order->order_number . '.pdf');
+    }
+
+    /**
+     * Get real-time tracking status.
+     */
+    public function track(Order $order)
+    {
+        $this->authorize('view', $order);
+
+        $latestTracking = $this->trackingService->getLatestStatus($order);
+
+        return response()->json([
+            'order' => $order->load(['product', 'items.product']),
+            'latest_status' => $latestTracking,
+            'can_be_cancelled' => $order->canBeCancelled(),
+            'can_be_modified' => $order->canBeModified(),
+        ]);
+    }
+
+    /**
+     * Get tracking timeline/history.
+     */
+    public function tracking(Order $order)
+    {
+        $this->authorize('view', $order);
+
+        $timeline = $this->trackingService->getTrackingTimeline($order);
+
+        return Inertia::render('Marketplace/Orders/Tracking', [
+            'order' => $order->load(['product', 'items.product', 'buyer']),
+            'timeline' => $timeline,
+        ]);
+    }
+
+    /**
+     * Poll for status updates (for real-time tracking).
+     */
+    public function poll(Order $order)
+    {
+        $this->authorize('view', $order);
+
+        $latestTracking = $this->trackingService->getLatestStatus($order);
+        $order->refresh();
+
+        return response()->json([
+            'status' => $order->status,
+            'payment_status' => $order->payment_status,
+            'latest_tracking' => $latestTracking,
+            'last_tracked_at' => $order->last_tracked_at?->toIso8601String(),
+        ]);
+    }
+
+    /**
+     * Modify order.
+     */
+    public function modify(ModifyOrderRequest $request, Order $order)
+    {
+        try {
+            $changes = [];
+            if ($request->has('quantity')) {
+                $changes['quantity'] = $request->quantity;
+            }
+            if ($request->has('product_id')) {
+                $changes['product_id'] = $request->product_id;
+            }
+            if ($request->has('coupon_code')) {
+                $changes['coupon_code'] = $request->coupon_code;
+            }
+
+            $order = $this->modificationService->modifyOrder(
+                $order,
+                $changes,
+                auth()->user(),
+                $request->reason
+            );
+
+            $latestTracking = $this->trackingService->getLatestStatus($order);
+            event(new OrderStatusUpdated($order, $latestTracking));
+
+            return back()->with('success', 'Order modified successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Create bulk order (single order with multiple items).
+     */
+    public function createBulkOrder(CreateBulkOrderRequest $request)
+    {
+        try {
+            if ($request->order_type === 'single') {
+                $order = $this->bulkOrderService->createBulkOrder(
+                    $request->items,
+                    auth()->user(),
+                    $request->coupon_code
+                );
+
+                // Create payment transaction
+                $payment = $this->midtransService->createTransaction($order);
+
+                if (!$payment['success']) {
+                    return back()->withErrors(['payment' => $payment['message']]);
+                }
+
+                return Inertia::render('Marketplace/Payment', [
+                    'order' => $order->load(['items.product']),
+                    'snap_token' => $payment['snap_token'],
+                ]);
+            } else {
+                // Multiple separate orders
+                $orders = $this->bulkOrderService->createMultipleOrders(
+                    $request->items,
+                    auth()->user()
+                );
+
+                return redirect()->route('marketplace.orders.index')
+                    ->with('success', count($orders) . ' order(s) created successfully. Please complete payment for each order.');
+            }
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Export order history.
+     */
+    public function exportHistory(ExportOrdersRequest $request)
+    {
+        $query = Order::where('user_id', auth()->id())
+            ->with(['product', 'items.product', 'trackingHistory']);
+
+        // Apply filters
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $orders = $query->latest()->get();
+
+        try {
+            if ($request->format === 'pdf') {
+                $filepath = $this->exportService->exportToPdf($orders, auth()->user());
+                return response()->download($filepath)->deleteFileAfterSend(true);
+            } elseif ($request->format === 'excel' || $request->format === 'csv') {
+                return $this->exportService->exportToCsv($orders, auth()->user());
+            }
+
+            return back()->withErrors(['error' => 'Invalid export format']);
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Export failed: ' . $e->getMessage()]);
+        }
     }
 }

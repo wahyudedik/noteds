@@ -71,8 +71,8 @@ const formatCurrency = (amount) => {
                             {{ stats?.pending_withdrawals || 0 }}
                         </p>
                         <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Creator: {{ stats?.pending_clipper_withdrawals || 0 }} | 
-                            Brand: {{ stats?.pending_creator_withdrawals || 0 }} | 
+                            Clipper: {{ stats?.pending_clipper_withdrawals || 0 }} | 
+                            Creator: {{ stats?.pending_creator_withdrawals || 0 }} | 
                             Market: {{ stats?.pending_marketplace_withdrawals || 0 }}
                         </div>
                     </Link>

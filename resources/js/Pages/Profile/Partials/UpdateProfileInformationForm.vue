@@ -109,6 +109,7 @@ const removeGoal = (index) => {
                     <div class="flex-1">
                         <input
                             id="avatar"
+                            name="avatar"
                             type="file"
                             accept="image/jpeg,image/jpg,image/png,image/gif"
                             @change="handleAvatarChange"

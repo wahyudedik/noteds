@@ -26,6 +26,10 @@ class Product extends Model
 
     protected $fillable = [
         'user_id',
+        'post_id',
+        'parent_product_id',
+        'variant_type',
+        'variant_value',
         'name',
         'slug',
         'description',
@@ -38,6 +42,15 @@ class Product extends Model
         'stock',
         'sales_count',
         'views_count',
+        'is_bundle',
+        'bundle_price',
+        'bundle_discount_percentage',
+        'is_subscription',
+        'subscription_interval',
+        'subscription_duration',
+        'trial_days',
+        'is_waitlist_enabled',
+        'waitlist_notify_at_stock',
     ];
 
     protected $appends = ['image_url'];
@@ -50,6 +63,14 @@ class Product extends Model
             'stock' => 'integer',
             'sales_count' => 'integer',
             'views_count' => 'integer',
+            'is_bundle' => 'boolean',
+            'bundle_price' => 'decimal:2',
+            'bundle_discount_percentage' => 'decimal:2',
+            'is_subscription' => 'boolean',
+            'subscription_duration' => 'integer',
+            'trial_days' => 'integer',
+            'is_waitlist_enabled' => 'boolean',
+            'waitlist_notify_at_stock' => 'integer',
         ];
     }
 
@@ -81,6 +102,14 @@ class Product extends Model
     }
 
     /**
+     * Get the post associated with this product (if cross-posted).
+     */
+    public function post(): BelongsTo
+    {
+        return $this->belongsTo(Post::class);
+    }
+
+    /**
      * Get the orders for the product.
      */
     public function orders(): HasMany
@@ -102,6 +131,157 @@ class Product extends Model
     public function averageRating(): float
     {
         return (float) $this->reviews()->avg('rating') ?? 0;
+    }
+
+    /**
+     * Get the parent product (for variants).
+     */
+    public function parentProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'parent_product_id');
+    }
+
+    /**
+     * Get the variants of this product.
+     */
+    public function variants(): HasMany
+    {
+        return $this->hasMany(Product::class, 'parent_product_id');
+    }
+
+    /**
+     * Get bundle items.
+     */
+    public function bundleItems(): HasMany
+    {
+        return $this->hasMany(ProductBundleItem::class, 'bundle_id');
+    }
+
+    /**
+     * Get bundles that include this product.
+     */
+    public function bundles(): HasMany
+    {
+        return $this->hasMany(ProductBundleItem::class, 'product_id')
+            ->with('bundle');
+    }
+
+    /**
+     * Get coupons for this product.
+     */
+    public function coupons(): HasMany
+    {
+        return $this->hasMany(ProductCoupon::class);
+    }
+
+    /**
+     * Get waitlist entries.
+     */
+    public function waitlists(): HasMany
+    {
+        return $this->hasMany(ProductWaitlist::class);
+    }
+
+    /**
+     * Get subscriptions for this product.
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(ProductSubscription::class);
+    }
+
+    /**
+     * Check if product is a variant.
+     */
+    public function isVariant(): bool
+    {
+        return $this->parent_product_id !== null;
+    }
+
+    /**
+     * Check if product is a bundle.
+     */
+    public function isBundle(): bool
+    {
+        return $this->is_bundle ?? false;
+    }
+
+    /**
+     * Check if product is a subscription.
+     */
+    public function isSubscription(): bool
+    {
+        return $this->is_subscription ?? false;
+    }
+
+    /**
+     * Check if product has variants.
+     */
+    public function hasVariants(): bool
+    {
+        return $this->variants()->exists();
+    }
+
+    /**
+     * Get bundle price (fixed or calculated).
+     */
+    public function getBundlePrice(): float
+    {
+        if ($this->bundle_price) {
+            return (float) $this->bundle_price;
+        }
+
+        return $this->calculateBundleTotal();
+    }
+
+    /**
+     * Calculate bundle total from items.
+     */
+    public function calculateBundleTotal(): float
+    {
+        $total = 0;
+        foreach ($this->bundleItems as $item) {
+            $total += $item->product->price * $item->quantity;
+        }
+
+        if ($this->bundle_discount_percentage) {
+            $discount = ($total * $this->bundle_discount_percentage) / 100;
+            $total -= $discount;
+        }
+
+        return $total;
+    }
+
+    /**
+     * Scope to filter variants.
+     */
+    public function scopeVariants($query)
+    {
+        return $query->whereNotNull('parent_product_id');
+    }
+
+    /**
+     * Scope to filter bundles.
+     */
+    public function scopeBundles($query)
+    {
+        return $query->where('is_bundle', true);
+    }
+
+    /**
+     * Scope to filter subscriptions.
+     */
+    public function scopeSubscriptions($query)
+    {
+        return $query->where('is_subscription', true);
+    }
+
+    /**
+     * Scope to filter products with waitlist enabled.
+     */
+    public function scopeWithWaitlist($query)
+    {
+        return $query->where('is_waitlist_enabled', true);
     }
 
     /**

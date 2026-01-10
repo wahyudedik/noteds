@@ -24,6 +24,28 @@ class PaymentController extends Controller
         private MarketplaceCommissionService $commissionService
     ) {}
 
+    /**
+     * Handle Midtrans webhook notifications.
+     * 
+     * NOTE: This handler processes webhooks SYNCHRONOUSLY in the same request cycle.
+     * All processing (signature verification, order updates, notifications, emails) 
+     * happens immediately before returning response.
+     * 
+     * Trade-offs:
+     * - Advantages: Immediate feedback, simpler debugging, no queue required
+     * - Disadvantages: Blocking response, no automatic retry on transient failures
+     * 
+     * Future Enhancement Consideration:
+     * - ProcessMidtransWebhook job exists but is not currently dispatched
+     * - Could implement async processing by dispatching job here for better reliability
+     * - Would require queue worker setup and monitoring
+     * 
+     * Always returns HTTP 200 to acknowledge receipt, even on errors.
+     * This prevents Midtrans from retrying failed webhooks indefinitely.
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function webhook(Request $request)
     {
         $data = $request->all();

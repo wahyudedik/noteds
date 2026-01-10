@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\OrderTrackingHistory;
 use Illuminate\Support\Str;
 
 class MarketplaceService
@@ -31,6 +32,14 @@ class MarketplaceService
             'total' => $total,
             'status' => 'pending',
             'payment_status' => 'pending',
+        ]);
+
+        // Add initial tracking entry
+        OrderTrackingHistory::create([
+            'order_id' => $order->id,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'message' => 'Order created',
         ]);
 
         // Notify admin about new order (optional, for monitoring)
@@ -71,6 +80,18 @@ class MarketplaceService
         // Mark order as completed if not already
         if ($order->status !== 'completed') {
             $order->markAsCompleted();
+        }
+
+        // Create subscription if product is a subscription
+        if ($order->product->is_subscription && !$order->is_subscription_order) {
+            try {
+                $subscriptionService = app(\App\Services\SubscriptionService::class);
+                $subscriptionService->createSubscription($order);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to create subscription for order: ' . $order->id, [
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
     }
 

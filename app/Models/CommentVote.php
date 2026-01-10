@@ -27,7 +27,37 @@ class CommentVote extends Model
         'user_id',
         'comment_id',
         'vote_type',
+        'reason',
     ];
+
+    /**
+     * Scope to filter by reason.
+     */
+    public function scopeWithReason($query, string $reason)
+    {
+        return $query->where('reason', $reason);
+    }
+
+    /**
+     * Scope to filter by vote type.
+     */
+    public function scopeOfType($query, string $voteType)
+    {
+        return $query->where('vote_type', $voteType);
+    }
+
+    /**
+     * Get the reason label.
+     */
+    public function getReasonLabelAttribute(): ?string
+    {
+        if (!$this->reason) {
+            return null;
+        }
+
+        $reasons = \App\Constants\VotingReasons::all();
+        return $reasons[$this->reason] ?? $this->reason;
+    }
 
     public function user(): BelongsTo
     {

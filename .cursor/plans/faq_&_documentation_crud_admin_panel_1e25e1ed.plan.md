@@ -3,41 +3,41 @@ name: FAQ & Documentation CRUD Admin Panel
 overview: Membuat sistem CRUD untuk FAQ dan Dokumentasi di admin panel, dengan halaman public untuk menampilkan FAQ dan Dokumentasi. Admin dapat membuat, mengedit, menghapus, dan mengatur status (draft/published) untuk FAQ dan Dokumentasi. Public pages akan menampilkan konten yang sudah published.
 todos:
   - id: "1"
-    content: "Create database migrations untuk faqs dan documentations tables"
-    status: "completed"
+    content: Create database migrations untuk faqs dan documentations tables
+    status: completed
   - id: "2"
-    content: "Create Models (Faq dan Documentation) dengan relationships dan scopes"
-    status: "completed"
+    content: Create Models (Faq dan Documentation) dengan relationships dan scopes
+    status: completed
   - id: "3"
-    content: "Create Admin Controllers (FaqController dan DocumentationController) dengan CRUD methods"
-    status: "completed"
+    content: Create Admin Controllers (FaqController dan DocumentationController) dengan CRUD methods
+    status: completed
   - id: "4"
-    content: "Create Public Controllers (FaqController dan DocumentationController) untuk display"
-    status: "completed"
+    content: Create Public Controllers (FaqController dan DocumentationController) untuk display
+    status: completed
   - id: "5"
-    content: "Create Admin Vue pages (Index, Create, Edit) untuk FAQs"
-    status: "completed"
+    content: Create Admin Vue pages (Index, Create, Edit) untuk FAQs
+    status: completed
   - id: "6"
-    content: "Create Admin Vue pages (Index, Create, Edit) untuk Documentations"
-    status: "completed"
+    content: Create Admin Vue pages (Index, Create, Edit) untuk Documentations
+    status: completed
   - id: "7"
-    content: "Create Public Vue pages (Index, Show) untuk FAQs"
-    status: "completed"
+    content: Create Public Vue pages (Index, Show) untuk FAQs
+    status: completed
   - id: "8"
-    content: "Create Public Vue pages (Index, Show) untuk Documentations"
-    status: "completed"
+    content: Create Public Vue pages (Index, Show) untuk Documentations
+    status: completed
   - id: "9"
-    content: "Create reusable components (FaqForm, DocumentationForm, FaqAccordion, DocumentationCard)"
-    status: "completed"
+    content: Create reusable components (FaqForm, DocumentationForm, FaqAccordion, DocumentationCard)
+    status: completed
   - id: "10"
-    content: "Add routes (admin & public) untuk FAQs dan Documentations"
-    status: "completed"
+    content: Add routes (admin & public) untuk FAQs dan Documentations
+    status: completed
   - id: "11"
-    content: "Update Welcome.vue footer dengan FAQ dan Documentation links"
-    status: "completed"
+    content: Update Welcome.vue footer dengan FAQ dan Documentation links
+    status: completed
   - id: "12"
-    content: "Update Admin Dashboard dengan quick links ke FAQ dan Documentation management"
-    status: "completed"
+    content: Update Admin Dashboard dengan quick links ke FAQ dan Documentation management
+    status: completed
 ---
 
 # FAQ & Documentation CRUD Admin Panel
@@ -352,4 +352,3 @@ Update `resources/js/Pages/Admin/Dashboard.vue` untuk menambahkan quick links ke
 8. Add routes (admin & public)
 9. Update Welcome.vue footer dengan links
 10. Update Admin Dashboard dengan quick links
-11. Add validation rules

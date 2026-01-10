@@ -2,6 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import SearchBar from '@/Components/Search/SearchBar.vue';
 import SearchResults from '@/Components/Search/SearchResults.vue';
+import PostFilters from '@/Components/Search/PostFilters.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -61,7 +62,7 @@ const applyFilters = () => {
                     <SearchBar :initial-query="query" />
                 </div>
 
-                <!-- Filters -->
+                <!-- Basic Filters -->
                 <div v-if="query" class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Type Filter -->
@@ -70,6 +71,8 @@ const applyFilters = () => {
                                 Type
                             </label>
                             <select
+                                id="search-type"
+                                name="search_type"
                                 v-model="selectedType"
                                 @change="applyFilters"
                                 class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -88,6 +91,8 @@ const applyFilters = () => {
                                 Date
                             </label>
                             <select
+                                id="search-date"
+                                name="search_date"
                                 v-model="selectedDate"
                                 @change="applyFilters"
                                 class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -106,14 +111,22 @@ const applyFilters = () => {
                                 Category
                             </label>
                             <input
+                                id="search-category"
+                                name="search_category"
                                 v-model="selectedCategory"
                                 @input="applyFilters"
                                 type="text"
                                 placeholder="Category..."
                                 class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                autocomplete="off"
                             />
                         </div>
                     </div>
+                </div>
+
+                <!-- Advanced Post Filters -->
+                <div v-if="query && (selectedType === 'all' || selectedType === 'posts')" class="mb-6">
+                    <PostFilters :filters="filters" :query="query" />
                 </div>
 
                 <!-- Search Results -->

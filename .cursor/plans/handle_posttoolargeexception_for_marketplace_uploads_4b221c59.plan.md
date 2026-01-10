@@ -144,4 +144,3 @@ MAX_IMAGE_SIZE=2048
 ## Files to Modify
 
 1. `.user.ini` or Herd/Valet PHP config - PHP upload limits
-2. `bootstrap/app.php` - Exception handler for PostTooLargeException

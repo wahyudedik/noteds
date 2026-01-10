@@ -255,5 +255,3 @@ Return success
 - Test refund (add balance) for clipper wallet
 - Test adjustment (deduct balance) for creator wallet
 - Test adjustment (deduct balance) for clipper wallet
-- Test insufficient balance scenario for adjustment
-- Test validation (invalid user, invalid amount, etc.)

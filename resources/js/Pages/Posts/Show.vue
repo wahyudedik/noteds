@@ -1,21 +1,24 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 
 // Posts/Show page - displays individual post with comments and validation
 import { PURPOSE_TYPE_LABELS } from '@/Utils/constants';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import VoteButton from '@/Components/VoteButton.vue';
 import BookmarkButton from '@/Components/Bookmark/BookmarkButton.vue';
+import RepostButton from '@/Components/Repost/RepostButton.vue';
 import ReportButton from '@/Components/Report/ReportButton.vue';
 import CommentThread from '@/Components/CommentThread.vue';
-import Textarea from '@/Components/Textarea.vue';
+import CommentRichTextEditor from '@/Components/CommentRichTextEditor.vue';
+import ImageUploader from '@/Components/ImageUploader.vue';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import IdeaValidationForm from '@/Components/IdeaValidationForm.vue';
 import ValidationResults from '@/Components/ValidationResults.vue';
 import LinkPreview from '@/Components/LinkPreview.vue';
 import ImageGallery from '@/Components/ImageGallery.vue';
+import WeightedScoreToggle from '@/Components/WeightedScoreToggle.vue';
 import { PURPOSE_TYPES } from '@/Utils/constants';
 
 const props = defineProps({
@@ -26,16 +29,40 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    isReposted: {
+        type: Boolean,
+        default: false,
+    },
     validationStats: Object,
     userValidation: Object,
 });
 
 const commentForm = useForm({
     content: '',
+    images: [],
 });
+
+const commentImages = ref([]);
 
 const showImageGallery = ref(false);
 const selectedImageIndex = ref(0);
+
+// Weighted score toggle
+const useWeighted = ref(false);
+
+// Check if current user is post author
+const isPostAuthor = computed(() => {
+    return props.auth?.user?.id === props.post?.user_id;
+});
+
+// Navigate to vote analytics
+const viewPostAnalytics = () => {
+    router.visit(route('votes.post.analytics', props.post.id));
+};
+
+const viewCommentAnalytics = (commentId) => {
+    router.visit(route('votes.comment.analytics', commentId));
+};
 
 const openImageGallery = (index) => {
     selectedImageIndex.value = index;
@@ -43,10 +70,13 @@ const openImageGallery = (index) => {
 };
 
 const submitComment = () => {
+    commentForm.images = commentImages.value.map(img => img.file);
     commentForm.post(route('comments.store', props.post.id), {
         preserveScroll: true,
+        forceFormData: true,
         onSuccess: () => {
             commentForm.reset();
+            commentImages.value = [];
         },
     });
 };
@@ -253,21 +283,45 @@ const getImageClass = (imageCount, index) => {
                             />
                         </div>
 
+
                         <div class="flex items-center justify-between mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
                             <div class="flex items-center gap-3">
                                 <VoteButton
                                     :post-id="post.id"
                                     :upvotes="post.upvotes_count"
                                     :downvotes="post.downvotes_count"
+                                    :weighted-upvotes="post.weighted_upvotes_score"
+                                    :weighted-downvotes="post.weighted_downvotes_score"
                                     :user-vote="userVote"
                                     :can-vote="auth?.user && auth.user.id !== post.user_id"
+                                    :use-weighted="useWeighted"
+                                    :is-author="isPostAuthor"
+                                    @view-analytics="viewPostAnalytics"
                                 />
+                                <div class="flex items-center gap-2">
+                                    <RepostButton
+                                        v-if="auth?.user"
+                                        :post-id="post.id"
+                                        :reposts-count="post.reposts_count || 0"
+                                        :is-reposted="isReposted"
+                                        :can-repost="!!auth?.user"
+                                    />
+                                    <Link
+                                        v-if="auth?.user && auth.user.id === post.user_id && post.reposts_count > 0"
+                                        :href="route('reposts.analytics', post.id)"
+                                        class="text-xs text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                        title="View Repost Analytics"
+                                    >
+                                        Analytics
+                                    </Link>
+                                </div>
                                 <BookmarkButton
                                     v-if="auth?.user"
                                     :post-id="post.id"
                                     :is-bookmarked="isBookmarked"
                                     :can-bookmark="!!auth?.user"
                                 />
+                                <WeightedScoreToggle v-model="useWeighted" />
                             </div>
                             <span class="text-sm text-gray-500 dark:text-gray-400">
                                 💬 {{ post.comments_count }} komentar
@@ -295,17 +349,24 @@ const getImageClass = (imageCount, index) => {
                             <!-- Comment Form -->
                             <div v-if="auth?.user" class="mb-6">
                                 <form @submit.prevent="submitComment">
-                                    <Textarea
+                                    <CommentRichTextEditor
                                         v-model="commentForm.content"
-                                        class="w-full mb-2"
-                                        rows="4"
                                         placeholder="Tulis komentar kamu di sini..."
-                                        required
                                     />
                                     <InputError :message="commentForm.errors.content" />
-                                    <PrimaryButton :disabled="commentForm.processing">
-                                        Post Komentar
-                                    </PrimaryButton>
+                                    <div class="mt-2">
+                                        <ImageUploader
+                                            v-model="commentImages"
+                                            :max-images="5"
+                                            :max-size="2048"
+                                        />
+                                    </div>
+                                    <InputError :message="commentForm.errors.images" />
+                                    <div class="mt-2">
+                                        <PrimaryButton :disabled="commentForm.processing">
+                                            Post Komentar
+                                        </PrimaryButton>
+                                    </div>
                                 </form>
                             </div>
 
@@ -316,6 +377,8 @@ const getImageClass = (imageCount, index) => {
                                     :post-id="post.id"
                                     :post-author-id="post.user_id"
                                     :auth="auth"
+                                    :use-weighted="useWeighted"
+                                    @view-comment-analytics="viewCommentAnalytics"
                                 />
                             </div>
                             <p v-else class="text-gray-500 dark:text-gray-400">

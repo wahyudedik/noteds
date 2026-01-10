@@ -22,3 +22,12 @@ Schedule::command('clipper:complete-expired-campaigns')->daily();
 // Explorer Articles Sync
 Schedule::command('articles:sync --source=rss')->dailyAt('02:00');
 Schedule::command('articles:sync --source=reddit')->everySixHours();
+
+// Post Trending Calculation
+Schedule::command('posts:calculate-trending')->hourly();
+
+// Post Analytics Aggregation (daily at 1 AM)
+Schedule::command('posts:aggregate-analytics')->dailyAt('01:00');
+
+// Publish Scheduled Posts (every minute)
+Schedule::command('posts:publish-scheduled')->everyMinute();

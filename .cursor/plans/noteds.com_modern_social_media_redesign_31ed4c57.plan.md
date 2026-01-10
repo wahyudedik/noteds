@@ -381,4 +381,5 @@ resources/js/
 │       └── Show.vue (updated - tabs)
 └── Utils/
     └── constants.js (keep existing)
+
 ```

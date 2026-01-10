@@ -120,6 +120,9 @@ class AdminRefundController extends Controller
                         null,
                         'refund'
                     );
+                    // Refresh user to get updated balance
+                    $user->refresh();
+                    $balanceAfter = $user->balance;
                 } else {
                     // Deduct balance (adjustment) - we need to manually create transaction with 'adjustment' type
                     if ($user->balance < $validated['amount']) {

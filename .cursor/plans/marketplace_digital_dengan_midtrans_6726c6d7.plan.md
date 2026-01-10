@@ -586,4 +586,3 @@ Update `database/seeders/UserSeeder.php`:
 ### Frontend Additional Components
 
 - `resources/js/Components/Marketplace/SearchBar.vue` - search products
-- `resources/js/Components/Marketplace/ProductFilter.vue` - filter sidebar

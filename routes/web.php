@@ -39,34 +39,17 @@ Route::middleware('auth')->group(function () {
         ->name('link-preview.generate'); // 30 requests per minute
 });
 
+// Image Upload API for Rich Text Editor
+Route::middleware('auth')->group(function () {
+    Route::post('/api/posts/upload-image', [App\Http\Controllers\PostController::class, 'uploadImage'])
+        ->middleware('throttle:10,1')
+        ->name('posts.upload-image'); // 10 uploads per minute
+});
+
 // Dashboard for analytics
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
-// Keep posts route for backward compatibility, but redirect to home for authenticated users
-Route::get('/posts', [App\Http\Controllers\PostController::class, 'index'])->name('posts.index');
-Route::middleware(['auth'])->group(function () {
-    Route::get('/posts/create', [App\Http\Controllers\PostController::class, 'create'])->name('posts.create');
-    Route::post('/posts', [App\Http\Controllers\PostController::class, 'store'])
-        ->middleware('throttle:10,5') // 10 posts per 5 minutes (more reasonable limit)
-        ->name('posts.store');
-    Route::get('/posts/{post}', [App\Http\Controllers\PostController::class, 'show'])->name('posts.show');
-    Route::post('/posts/{post}/vote', [App\Http\Controllers\VoteController::class, 'votePost'])
-        ->middleware('throttle:30,5') // 30 votes per 5 minutes
-        ->name('votes.post');
-    Route::post('/posts/{post}/comments', [App\Http\Controllers\CommentController::class, 'store'])
-        ->middleware('throttle:10,5') // 10 comments per 5 minutes
-        ->name('comments.store');
-    Route::post('/comments/{comment}/best-answer', [App\Http\Controllers\CommentController::class, 'markBestAnswer'])
-        ->middleware('throttle:10,5') // 10 per 5 minutes
-        ->name('comments.best-answer');
-    Route::post('/comments/{comment}/vote', [App\Http\Controllers\VoteController::class, 'voteComment'])
-        ->middleware('throttle:30,5') // 30 votes per 5 minutes
-        ->name('votes.comment');
-    Route::post('/posts/{post}/validate', [App\Http\Controllers\IdeaValidationController::class, 'store'])
-        ->middleware('throttle:5,30') // 5 validations per 30 minutes
-        ->name('idea-validations.store');
-});
-
+// Profile routes - MUST be defined before /posts/{post} to prevent route model binding issues
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])
@@ -75,8 +58,190 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->middleware('throttle:3,1440') // 3 requests per 24 hours
         ->name('profile.destroy');
-    Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
+    // Profile show route with UUID constraint to prevent conflict with /posts/{post}
+    Route::get('/profile/{user}', [ProfileController::class, 'show'])
+        ->where('user', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+        ->name('profile.show');
+});
 
+// Keep posts route for backward compatibility, but redirect to home for authenticated users
+Route::get('/posts', [App\Http\Controllers\PostController::class, 'index'])->name('posts.index');
+Route::get('/posts/trending', [App\Http\Controllers\PostController::class, 'trending'])->middleware(['auth'])->name('posts.trending');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/posts/create', [App\Http\Controllers\PostController::class, 'create'])->name('posts.create');
+    Route::post('/posts', [App\Http\Controllers\PostController::class, 'store'])
+        ->middleware('throttle:10,5') // 10 posts per 5 minutes (more reasonable limit)
+        ->name('posts.store');
+    Route::get('/posts/{post}', [App\Http\Controllers\PostController::class, 'show'])
+        ->where('post', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+        ->name('posts.show');
+    Route::post('/posts/{post}/vote', [App\Http\Controllers\VoteController::class, 'votePost'])
+        ->middleware('throttle:30,5') // 30 votes per 5 minutes
+        ->name('votes.post');
+    // Repost routes
+    Route::post('/posts/{post}/repost', [App\Http\Controllers\RepostController::class, 'store'])
+        ->middleware('throttle:30,5') // 30 reposts per 5 minutes
+        ->name('posts.repost');
+    Route::delete('/posts/{post}/repost', [App\Http\Controllers\RepostController::class, 'destroy'])
+        ->middleware('throttle:30,5') // 30 unreposts per 5 minutes
+        ->name('posts.unrepost');
+    
+    // Repost comment routes
+    Route::put('/reposts/{repost}/comment', [App\Http\Controllers\RepostController::class, 'updateComment'])
+        ->name('reposts.comment.update');
+    Route::delete('/reposts/{repost}/comment', [App\Http\Controllers\RepostController::class, 'removeComment'])
+        ->name('reposts.comment.remove');
+    
+    // Quote repost routes
+    Route::post('/posts/{post}/quote-repost', [App\Http\Controllers\RepostController::class, 'storeQuote'])
+        ->name('posts.quote-repost');
+    Route::put('/reposts/{repost}/quote', [App\Http\Controllers\RepostController::class, 'updateQuote'])
+        ->name('reposts.quote.update');
+    Route::post('/reposts/{repost}/toggle-display', [App\Http\Controllers\RepostController::class, 'toggleDisplayMode'])
+        ->name('reposts.toggle-display');
+    
+    // Repost analytics routes (author only)
+    Route::get('/posts/{post}/reposts/analytics', [App\Http\Controllers\RepostAnalyticsController::class, 'show'])
+        ->name('reposts.analytics');
+    Route::get('/posts/{post}/reposts/breakdown', [App\Http\Controllers\RepostAnalyticsController::class, 'breakdown'])
+        ->name('reposts.breakdown');
+    Route::get('/posts/{post}/reposts/timeline', [App\Http\Controllers\RepostAnalyticsController::class, 'timeline'])
+        ->name('reposts.timeline');
+    Route::get('/posts/{post}/reposts/reposters', [App\Http\Controllers\RepostAnalyticsController::class, 'reposters'])
+        ->name('reposts.reposters');
+    Route::get('/posts/{post}/reposts/engagement', [App\Http\Controllers\RepostAnalyticsController::class, 'engagement'])
+        ->name('reposts.engagement');
+    Route::get('/posts/{post}/reposts/export', [App\Http\Controllers\RepostAnalyticsController::class, 'export'])
+        ->name('reposts.export');
+    Route::post('/posts/{post}/comments', [App\Http\Controllers\CommentController::class, 'store'])
+        ->middleware('throttle:10,5') // 10 comments per 5 minutes
+        ->name('comments.store');
+    Route::post('/comments/{comment}/best-answer', [App\Http\Controllers\CommentController::class, 'markBestAnswer'])
+        ->middleware('throttle:10,5') // 10 per 5 minutes
+        ->name('comments.best-answer');
+    
+    // Comment media upload
+    Route::post('/api/comments/upload-image', [App\Http\Controllers\CommentController::class, 'uploadImage'])
+        ->middleware('throttle:10,1')
+        ->name('comments.upload-image');
+    
+    // Comment editing
+    Route::put('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'update'])
+        ->middleware('throttle:10,5')
+        ->name('comments.update');
+    Route::get('/comments/{comment}/history', [App\Http\Controllers\CommentController::class, 'history'])
+        ->middleware('auth')
+        ->name('comments.history');
+    
+    // Comment pinning
+    Route::post('/comments/{comment}/pin', [App\Http\Controllers\CommentController::class, 'pin'])
+        ->middleware('throttle:10,5')
+        ->name('comments.pin');
+    Route::post('/comments/{comment}/unpin', [App\Http\Controllers\CommentController::class, 'unpin'])
+        ->middleware('throttle:10,5')
+        ->name('comments.unpin');
+    
+    // Comment deletion
+    Route::delete('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'destroy'])
+        ->middleware('throttle:10,5')
+        ->name('comments.destroy');
+    
+    // Comment reactions
+    Route::post('/comments/{comment}/reactions', [App\Http\Controllers\CommentReactionController::class, 'react'])
+        ->middleware('throttle:30,5')
+        ->name('comments.reactions.react');
+    Route::post('/comments/{comment}/vote', [App\Http\Controllers\VoteController::class, 'voteComment'])
+        ->middleware('throttle:30,5') // 30 votes per 5 minutes
+        ->name('votes.comment');
+
+    // Vote Analytics routes (author only)
+    Route::get('/posts/{post}/votes/analytics', [App\Http\Controllers\VoteAnalyticsController::class, 'showPostVotes'])
+        ->name('votes.post.analytics');
+    Route::get('/comments/{comment}/votes/analytics', [App\Http\Controllers\VoteAnalyticsController::class, 'showCommentVotes'])
+        ->name('votes.comment.analytics');
+    Route::get('/posts/{post}/votes/voters', [App\Http\Controllers\VoteAnalyticsController::class, 'getPostVoters'])
+        ->name('votes.post.voters');
+    Route::get('/comments/{comment}/votes/voters', [App\Http\Controllers\VoteAnalyticsController::class, 'getCommentVoters'])
+        ->name('votes.comment.voters');
+
+    Route::post('/posts/{post}/validate', [App\Http\Controllers\IdeaValidationController::class, 'store'])
+        ->middleware('throttle:5,30') // 5 validations per 30 minutes
+        ->name('idea-validations.store');
+
+    // Post editing routes
+    Route::get('/posts/{post}/edit', [App\Http\Controllers\PostController::class, 'edit'])->name('posts.edit');
+    Route::put('/posts/{post}', [App\Http\Controllers\PostController::class, 'update'])
+        ->middleware('throttle:10,5')
+        ->name('posts.update');
+    Route::get('/posts/{post}/history', [App\Http\Controllers\PostController::class, 'history'])->name('posts.history');
+
+    // Post collaboration routes
+    Route::post('/posts/{post}/collaborators/invite', [App\Http\Controllers\PostCollaborationController::class, 'invite'])
+        ->middleware('throttle:10,5')
+        ->name('posts.collaborators.invite');
+    Route::post('/posts/collaborators/{collaboration}/accept', [App\Http\Controllers\PostCollaborationController::class, 'accept'])
+        ->middleware('throttle:10,5')
+        ->name('posts.collaborators.accept');
+    Route::post('/posts/collaborators/{collaboration}/reject', [App\Http\Controllers\PostCollaborationController::class, 'reject'])
+        ->middleware('throttle:10,5')
+        ->name('posts.collaborators.reject');
+    Route::delete('/posts/{post}/collaborators/{user}', [App\Http\Controllers\PostCollaborationController::class, 'remove'])
+        ->middleware('throttle:10,5')
+        ->name('posts.collaborators.remove');
+    Route::put('/posts/collaborators/{collaboration}/permissions', [App\Http\Controllers\PostCollaborationController::class, 'updatePermissions'])
+        ->middleware('throttle:10,5')
+        ->name('posts.collaborators.update-permissions');
+
+    // Draft routes
+    Route::get('/drafts', [App\Http\Controllers\PostDraftController::class, 'index'])->name('drafts.index');
+    Route::post('/drafts', [App\Http\Controllers\PostDraftController::class, 'store'])->name('drafts.store');
+    Route::put('/drafts/{draft}', [App\Http\Controllers\PostDraftController::class, 'update'])->name('drafts.update');
+    Route::delete('/drafts/{draft}', [App\Http\Controllers\PostDraftController::class, 'destroy'])->name('drafts.destroy');
+    Route::post('/drafts/{draft}/publish', [App\Http\Controllers\PostDraftController::class, 'publish'])->name('drafts.publish');
+
+    // Post Template routes
+    Route::get('/post-templates', [App\Http\Controllers\PostTemplateController::class, 'index'])->name('post-templates.index');
+    Route::post('/post-templates', [App\Http\Controllers\PostTemplateController::class, 'store'])->name('post-templates.store');
+    Route::get('/post-templates/{postTemplate}', [App\Http\Controllers\PostTemplateController::class, 'show'])->name('post-templates.show');
+    Route::put('/post-templates/{postTemplate}', [App\Http\Controllers\PostTemplateController::class, 'update'])->name('post-templates.update');
+    Route::delete('/post-templates/{postTemplate}', [App\Http\Controllers\PostTemplateController::class, 'destroy'])->name('post-templates.destroy');
+
+    // Poll routes
+    Route::post('/posts/{post}/polls/{poll}/vote', [App\Http\Controllers\PollController::class, 'vote'])
+        ->middleware('throttle:30,5')
+        ->name('polls.vote');
+    Route::get('/posts/{post}/polls/{poll}/results', [App\Http\Controllers\PollController::class, 'results'])
+        ->name('polls.results');
+
+    // Post Analytics routes
+    Route::get('/posts/{post}/analytics', [App\Http\Controllers\PostAnalyticsController::class, 'show'])->name('posts.analytics');
+    Route::get('/posts/{post}/analytics/export', [App\Http\Controllers\PostAnalyticsController::class, 'export'])->name('posts.analytics.export');
+
+    // Post Pin routes
+    Route::post('/posts/{post}/pin', [App\Http\Controllers\PostController::class, 'pin'])->name('posts.pin');
+    Route::delete('/posts/{post}/pin', [App\Http\Controllers\PostController::class, 'unpin'])->name('posts.unpin');
+
+    // Post Series routes
+    Route::get('/posts/{post}/series', [App\Http\Controllers\PostController::class, 'series'])->name('posts.series');
+    Route::post('/posts/{post}/series', [App\Http\Controllers\PostController::class, 'createSeries'])->name('posts.series.create');
+    Route::put('/posts/{post}/series/order', [App\Http\Controllers\PostController::class, 'updateSeriesOrder'])->name('posts.series.order');
+
+    // Cross-post routes
+    Route::post('/posts/{post}/cross-post', [App\Http\Controllers\PostController::class, 'crossPost'])->name('posts.cross-post');
+    Route::get('/posts/{post}/cross-posts', [App\Http\Controllers\PostController::class, 'getCrossPosts'])->name('posts.cross-posts');
+});
+
+// Hashtag routes (public)
+Route::get('/hashtags/{hashtag}', [App\Http\Controllers\HashtagController::class, 'show'])->name('hashtags.show');
+
+// Hashtag API routes
+Route::middleware('auth')->group(function () {
+    Route::get('/api/hashtags/suggestions', [App\Http\Controllers\HashtagController::class, 'suggestions'])
+        ->middleware('throttle:60,1')
+        ->name('hashtags.suggestions');
+});
+
+Route::middleware('auth')->group(function () {
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])
@@ -109,6 +274,19 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:5,60') // 5 exports per hour
         ->name('settings.activity-log.export');
 
+    // Two-Factor Authentication
+    Route::get('/settings/two-factor', [App\Http\Controllers\Settings\TwoFactorController::class, 'index'])
+        ->name('settings.two-factor');
+    Route::post('/settings/two-factor/enable', [App\Http\Controllers\Settings\TwoFactorController::class, 'enable'])
+        ->middleware('throttle:5,60') // 5 attempts per hour
+        ->name('settings.two-factor.enable');
+    Route::post('/settings/two-factor/disable', [App\Http\Controllers\Settings\TwoFactorController::class, 'disable'])
+        ->middleware('throttle:5,60') // 5 attempts per hour
+        ->name('settings.two-factor.disable');
+    Route::post('/settings/two-factor/recovery-codes', [App\Http\Controllers\Settings\TwoFactorController::class, 'regenerateRecoveryCodes'])
+        ->middleware('throttle:3,60') // 3 regenerations per hour
+        ->name('settings.two-factor.recovery-codes');
+
     // Follow System
     Route::post('/users/{user}/follow', [App\Http\Controllers\FollowController::class, 'follow'])
         ->middleware('throttle:20,5')
@@ -118,6 +296,28 @@ Route::middleware('auth')->group(function () {
         ->name('users.unfollow'); // 20 actions per 5 minutes
     Route::get('/users/{user}/followers', [App\Http\Controllers\FollowController::class, 'followers'])->name('users.followers');
     Route::get('/users/{user}/following', [App\Http\Controllers\FollowController::class, 'following'])->name('users.following');
+    
+    // User Categories
+    Route::get('/user/categories', [App\Http\Controllers\UserCategoryController::class, 'index'])
+        ->name('user.categories.index');
+    Route::post('/user/categories', [App\Http\Controllers\UserCategoryController::class, 'store'])
+        ->name('user.categories.store');
+    Route::delete('/user/categories/{category}', [App\Http\Controllers\UserCategoryController::class, 'destroy'])
+        ->name('user.categories.destroy');
+    Route::post('/user/categories/sync', [App\Http\Controllers\UserCategoryController::class, 'sync'])
+        ->name('user.categories.sync');
+    Route::post('/user/categories/refresh', [App\Http\Controllers\UserCategoryController::class, 'refresh'])
+        ->name('user.categories.refresh');
+    
+    // Follow Suggestions
+    Route::get('/follow/suggestions', [App\Http\Controllers\FollowSuggestionController::class, 'index'])
+        ->name('follow.suggestions');
+    Route::post('/follow/suggestions/refresh', [App\Http\Controllers\FollowSuggestionController::class, 'refresh'])
+        ->name('follow.suggestions.refresh');
+    
+    // Mutual Connections
+    Route::get('/users/{user}/mutual-connections', [App\Http\Controllers\MutualConnectionController::class, 'index'])
+        ->name('users.mutual-connections');
 
     // Report Content
     Route::post('/posts/{post}/report', [App\Http\Controllers\ReportController::class, 'reportPost'])
@@ -138,7 +338,69 @@ Route::middleware('auth')->group(function () {
     Route::delete('/posts/{post}/unbookmark', [App\Http\Controllers\BookmarkController::class, 'destroy'])
         ->middleware('throttle:30,5')
         ->name('posts.unbookmark'); // 30 unbookmarks per 5 minutes
+    
+    // Bookmark Notes
+    Route::put('/bookmarks/{bookmark}/notes', [App\Http\Controllers\BookmarkController::class, 'updateNotes'])
+        ->name('bookmarks.notes.update');
+    Route::get('/bookmarks/{bookmark}/notes', [App\Http\Controllers\BookmarkController::class, 'getNotes'])
+        ->name('bookmarks.notes.show');
+    
+    // Bookmark Collections
+    Route::get('/bookmarks/collections', [App\Http\Controllers\BookmarkCollectionController::class, 'index'])
+        ->name('bookmarks.collections.index');
+    Route::post('/bookmarks/collections', [App\Http\Controllers\BookmarkCollectionController::class, 'store'])
+        ->name('bookmarks.collections.store');
+    Route::put('/bookmarks/collections/{collection}', [App\Http\Controllers\BookmarkCollectionController::class, 'update'])
+        ->name('bookmarks.collections.update');
+    Route::delete('/bookmarks/collections/{collection}', [App\Http\Controllers\BookmarkCollectionController::class, 'destroy'])
+        ->name('bookmarks.collections.destroy');
+    Route::post('/bookmarks/collections/{collection}/reorder', [App\Http\Controllers\BookmarkCollectionController::class, 'reorder'])
+        ->name('bookmarks.collections.reorder');
+    Route::post('/bookmarks/collections/{collection}/move', [App\Http\Controllers\BookmarkCollectionController::class, 'move'])
+        ->name('bookmarks.collections.move');
+    
+    // Collection Sharing
+    Route::post('/bookmarks/collections/{collection}/toggle-public', [App\Http\Controllers\BookmarkCollectionShareController::class, 'togglePublic'])
+        ->name('bookmarks.collections.toggle-public');
+    Route::post('/bookmarks/collections/{collection}/generate-link', [App\Http\Controllers\BookmarkCollectionShareController::class, 'generatePublicLink'])
+        ->name('bookmarks.collections.generate-link');
+    Route::post('/bookmarks/collections/{collection}/invite', [App\Http\Controllers\BookmarkCollectionShareController::class, 'invite'])
+        ->name('bookmarks.collections.invite');
+    Route::post('/bookmarks/collections/{collection}/accept', [App\Http\Controllers\BookmarkCollectionShareController::class, 'accept'])
+        ->name('bookmarks.collections.accept');
+    Route::post('/bookmarks/collections/{collection}/reject', [App\Http\Controllers\BookmarkCollectionShareController::class, 'reject'])
+        ->name('bookmarks.collections.reject');
+    Route::delete('/bookmarks/collections/{collection}/revoke/{user}', [App\Http\Controllers\BookmarkCollectionShareController::class, 'revoke'])
+        ->name('bookmarks.collections.revoke');
+    Route::put('/bookmarks/collections/{collection}/permission/{user}', [App\Http\Controllers\BookmarkCollectionShareController::class, 'updatePermission'])
+        ->name('bookmarks.collections.update-permission');
+    
+    // Shared Collections
+    Route::get('/bookmarks/shared', [App\Http\Controllers\BookmarkCollectionShareController::class, 'sharedWithMe'])
+        ->name('bookmarks.shared');
+    
+    // Bookmark Tags
+    Route::get('/bookmarks/tags', [App\Http\Controllers\BookmarkTagController::class, 'index'])
+        ->name('bookmarks.tags.index');
+    Route::post('/bookmarks/tags', [App\Http\Controllers\BookmarkTagController::class, 'store'])
+        ->name('bookmarks.tags.store');
+    Route::put('/bookmarks/tags/{tag}', [App\Http\Controllers\BookmarkTagController::class, 'update'])
+        ->name('bookmarks.tags.update');
+    Route::delete('/bookmarks/tags/{tag}', [App\Http\Controllers\BookmarkTagController::class, 'destroy'])
+        ->name('bookmarks.tags.destroy');
+    Route::post('/bookmarks/tags/{tag}/toggle-global', [App\Http\Controllers\BookmarkTagController::class, 'toggleGlobal'])
+        ->name('bookmarks.tags.toggle-global');
+    Route::get('/bookmarks/tags/suggestions', [App\Http\Controllers\BookmarkTagController::class, 'suggestions'])
+        ->name('bookmarks.tags.suggestions');
+    Route::get('/bookmarks/tags/{tag}', [App\Http\Controllers\BookmarkTagController::class, 'show'])
+        ->name('bookmarks.tags.show');
 });
+
+// Public Collections (no auth required)
+Route::get('/bookmarks/public/{slug}', [App\Http\Controllers\BookmarkCollectionPublicController::class, 'show'])
+    ->name('bookmarks.collections.public');
+Route::get('/bookmarks/public', [App\Http\Controllers\BookmarkCollectionPublicController::class, 'index'])
+    ->name('bookmarks.collections.public.index');
 
 // Marketplace Routes
 Route::get('/marketplace', [App\Http\Controllers\Marketplace\ProductController::class, 'index'])->name('marketplace.index');
@@ -175,6 +437,32 @@ Route::middleware('auth')->group(function () {
     Route::post('/marketplace/orders/{order}/cancel', [App\Http\Controllers\Marketplace\OrderController::class, 'cancel'])
         ->middleware('throttle:5,60') // 5 cancellations per hour
         ->name('marketplace.orders.cancel');
+    
+    // Order tracking
+    Route::get('/marketplace/orders/{order}/track', [App\Http\Controllers\Marketplace\OrderController::class, 'track'])
+        ->middleware('throttle:30,1') // 30 requests per minute
+        ->name('marketplace.orders.track');
+    Route::get('/marketplace/orders/{order}/tracking', [App\Http\Controllers\Marketplace\OrderController::class, 'tracking'])
+        ->middleware('throttle:30,1')
+        ->name('marketplace.orders.tracking');
+    Route::get('/marketplace/orders/{order}/tracking/poll', [App\Http\Controllers\Marketplace\OrderController::class, 'poll'])
+        ->middleware('throttle:60,1') // 60 polls per minute (for real-time updates)
+        ->name('marketplace.orders.tracking.poll');
+    
+    // Order modification
+    Route::put('/marketplace/orders/{order}/modify', [App\Http\Controllers\Marketplace\OrderController::class, 'modify'])
+        ->middleware(['throttle:10,60']) // 10 modifications per hour
+        ->name('marketplace.orders.modify');
+    
+    // Bulk orders
+    Route::post('/marketplace/orders/bulk', [App\Http\Controllers\Marketplace\OrderController::class, 'createBulkOrder'])
+        ->middleware(['throttle:5,60']) // 5 bulk orders per hour
+        ->name('marketplace.orders.bulk.create');
+    
+    // Order export
+    Route::get('/marketplace/orders/export', [App\Http\Controllers\Marketplace\OrderController::class, 'exportHistory'])
+        ->middleware(['throttle:10,60']) // 10 exports per hour
+        ->name('marketplace.orders.export');
 
     // Cart
     Route::get('/marketplace/cart', [App\Http\Controllers\Marketplace\CartController::class, 'index'])->name('marketplace.cart');
@@ -195,6 +483,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/marketplace/purchases', [App\Http\Controllers\Marketplace\PurchasesController::class, 'index'])->name('marketplace.purchases.index');
 
     // Product Reviews
+    Route::get('/marketplace/products/{product}/reviews', [App\Http\Controllers\Marketplace\ProductReviewController::class, 'index'])
+        ->name('marketplace.products.reviews.index');
+    Route::get('/marketplace/reviews/{productReview}', [App\Http\Controllers\Marketplace\ProductReviewController::class, 'show'])
+        ->name('marketplace.reviews.show');
     Route::post('/marketplace/products/{product}/reviews', [App\Http\Controllers\Marketplace\ProductReviewController::class, 'store'])
         ->middleware('throttle:10,60') // 10 reviews per hour
         ->name('marketplace.products.reviews.store');
@@ -204,16 +496,107 @@ Route::middleware('auth')->group(function () {
     Route::delete('/marketplace/reviews/{productReview}', [App\Http\Controllers\Marketplace\ProductReviewController::class, 'destroy'])
         ->middleware('throttle:10,60')
         ->name('marketplace.reviews.destroy');
+    
+    // Review voting
+    Route::post('/marketplace/reviews/{productReview}/vote', [App\Http\Controllers\Marketplace\ProductReviewController::class, 'voteHelpful'])
+        ->middleware(['auth', 'throttle:30,1']) // 30 votes per minute
+        ->name('marketplace.reviews.vote');
+    Route::delete('/marketplace/reviews/{productReview}/vote', [App\Http\Controllers\Marketplace\ProductReviewController::class, 'removeVote'])
+        ->middleware(['auth', 'throttle:30,1'])
+        ->name('marketplace.reviews.remove-vote');
+    
+    // Review media
+    Route::post('/marketplace/reviews/{productReview}/media', [App\Http\Controllers\Marketplace\ProductReviewController::class, 'uploadMedia'])
+        ->middleware(['auth', 'throttle:10,1']) // 10 uploads per minute
+        ->name('marketplace.reviews.media.store');
+    
+    // Seller replies
+    Route::post('/marketplace/reviews/{productReview}/reply', [App\Http\Controllers\Marketplace\ProductReviewReplyController::class, 'store'])
+        ->middleware(['auth', 'throttle:10,60']) // 10 replies per hour
+        ->name('marketplace.reviews.reply.store');
+    Route::put('/marketplace/reviews/replies/{reply}', [App\Http\Controllers\Marketplace\ProductReviewReplyController::class, 'update'])
+        ->middleware(['auth', 'throttle:10,60'])
+        ->name('marketplace.reviews.reply.update');
+    Route::delete('/marketplace/reviews/replies/{reply}', [App\Http\Controllers\Marketplace\ProductReviewReplyController::class, 'destroy'])
+        ->middleware(['auth', 'throttle:10,60'])
+        ->name('marketplace.reviews.reply.destroy');
 
     // Downloads
     Route::get('/marketplace/products/{product}/download', [App\Http\Controllers\Marketplace\DownloadController::class, 'download'])
         ->middleware('throttle:20,5') // 20 downloads per 5 minutes
         ->name('marketplace.products.download');
 
+    // Product variants
+    Route::get('/marketplace/products/{product}/variants', [App\Http\Controllers\Marketplace\ProductController::class, 'variants'])
+        ->name('marketplace.products.variants');
+
+    // Product bundles
+    Route::post('/marketplace/products/bundles', [App\Http\Controllers\Marketplace\ProductController::class, 'storeBundle'])
+        ->middleware('throttle:3,60') // 3 bundles per hour
+        ->name('marketplace.products.bundles.store');
+
+    // Product comparison
+    Route::post('/marketplace/products/{product}/compare', [App\Http\Controllers\Marketplace\ProductController::class, 'addToComparison'])
+        ->middleware('throttle:30,1')
+        ->name('marketplace.products.compare.add');
+    Route::delete('/marketplace/products/{product}/compare', [App\Http\Controllers\Marketplace\ProductController::class, 'removeFromComparison'])
+        ->middleware('throttle:30,1')
+        ->name('marketplace.products.compare.remove');
+    Route::get('/marketplace/products/compare', [App\Http\Controllers\Marketplace\ProductController::class, 'getComparison'])
+        ->name('marketplace.products.compare.index');
+    Route::post('/marketplace/products/compare', [App\Http\Controllers\Marketplace\ProductController::class, 'compare'])
+        ->name('marketplace.products.compare');
+
+    // Waitlist
+    Route::post('/marketplace/products/{product}/waitlist', [App\Http\Controllers\Marketplace\ProductWaitlistController::class, 'store'])
+        ->middleware(['auth', 'throttle:10,60'])
+        ->name('marketplace.products.waitlist.store');
+    Route::delete('/marketplace/products/{product}/waitlist', [App\Http\Controllers\Marketplace\ProductWaitlistController::class, 'destroy'])
+        ->middleware(['auth', 'throttle:10,60'])
+        ->name('marketplace.products.waitlist.destroy');
+    Route::get('/marketplace/waitlist', [App\Http\Controllers\Marketplace\ProductWaitlistController::class, 'index'])
+        ->middleware('auth')
+        ->name('marketplace.waitlist.index');
+
+    // Coupons
+    Route::post('/marketplace/coupons/validate', [App\Http\Controllers\Marketplace\CouponController::class, 'validate'])
+        ->middleware(['auth', 'throttle:30,1'])
+        ->name('marketplace.coupons.validate');
+    Route::post('/marketplace/orders/{order}/coupon', [App\Http\Controllers\Marketplace\CouponController::class, 'apply'])
+        ->middleware(['auth', 'throttle:10,60'])
+        ->name('marketplace.orders.coupon.apply');
+
+    // Subscriptions
+    Route::get('/marketplace/subscriptions', [App\Http\Controllers\Marketplace\SubscriptionController::class, 'index'])
+        ->middleware('auth')
+        ->name('marketplace.subscriptions.index');
+    Route::get('/marketplace/subscriptions/{subscription}', [App\Http\Controllers\Marketplace\SubscriptionController::class, 'show'])
+        ->middleware('auth')
+        ->name('marketplace.subscriptions.show');
+    Route::post('/marketplace/subscriptions/{subscription}/cancel', [App\Http\Controllers\Marketplace\SubscriptionController::class, 'cancel'])
+        ->middleware(['auth', 'throttle:5,60'])
+        ->name('marketplace.subscriptions.cancel');
+    Route::post('/marketplace/subscriptions/{subscription}/pause', [App\Http\Controllers\Marketplace\SubscriptionController::class, 'pause'])
+        ->middleware(['auth', 'throttle:5,60'])
+        ->name('marketplace.subscriptions.pause');
+    Route::post('/marketplace/subscriptions/{subscription}/resume', [App\Http\Controllers\Marketplace\SubscriptionController::class, 'resume'])
+        ->middleware(['auth', 'throttle:5,60'])
+        ->name('marketplace.subscriptions.resume');
+
     // Wallet
     Route::get('marketplace/wallet', [App\Http\Controllers\Marketplace\WalletController::class, 'index'])->name('marketplace.wallet.index');
     Route::get('marketplace/wallet/transactions', [App\Http\Controllers\Marketplace\WalletController::class, 'transactions'])->name('marketplace.wallet.transactions');
     Route::get('marketplace/wallet/sales', [App\Http\Controllers\Marketplace\WalletController::class, 'sales'])->name('marketplace.wallet.sales');
+
+    // Transaction Receipts
+    Route::get('transactions/{transaction}/receipt', [App\Http\Controllers\Transactions\ReceiptController::class, 'downloadTransactionReceipt'])->name('transactions.receipt.download');
+    Route::get('transactions/{transaction}/receipt/view', [App\Http\Controllers\Transactions\ReceiptController::class, 'viewTransactionReceipt'])->name('transactions.receipt.view');
+    Route::get('transactions/{transaction}/timeline', [App\Http\Controllers\Transactions\ReceiptController::class, 'getTransactionTimeline'])->name('transactions.timeline');
+    Route::get('transactions/export', [App\Http\Controllers\Transactions\ReceiptController::class, 'exportTransactions'])->name('transactions.export');
+
+    // Order Receipts
+    Route::get('marketplace/orders/{order}/receipt', [App\Http\Controllers\Transactions\ReceiptController::class, 'downloadOrderReceipt'])->name('marketplace.orders.receipt.download');
+    Route::get('marketplace/orders/{order}/timeline', [App\Http\Controllers\Transactions\ReceiptController::class, 'getOrderTimeline'])->name('marketplace.orders.timeline');
 
     // Withdrawals
     Route::get('marketplace/withdrawals', [App\Http\Controllers\Marketplace\WithdrawalController::class, 'index'])->name('marketplace.withdrawals.index');
@@ -268,71 +651,71 @@ Route::middleware('auth')->group(function () {
                 ->middleware('throttle:5,60') // 5 updates per hour
                 ->name('profile.update');
 
-        // Top Up
-        Route::get('top-ups', [App\Http\Controllers\Clipper\TopUpController::class, 'index'])->name('top-ups.index');
-        Route::get('top-ups/create', [App\Http\Controllers\Clipper\TopUpController::class, 'create'])->name('top-ups.create');
-        Route::post('top-ups', [App\Http\Controllers\Clipper\TopUpController::class, 'store'])
-            ->middleware('throttle:5,60') // 5 requests per hour
-            ->name('top-ups.store');
-        Route::get('top-ups/{topUp}', [App\Http\Controllers\Clipper\TopUpController::class, 'show'])->name('top-ups.show');
+            // Top Up
+            Route::get('top-ups', [App\Http\Controllers\Clipper\TopUpController::class, 'index'])->name('top-ups.index');
+            Route::get('top-ups/create', [App\Http\Controllers\Clipper\TopUpController::class, 'create'])->name('top-ups.create');
+            Route::post('top-ups', [App\Http\Controllers\Clipper\TopUpController::class, 'store'])
+                ->middleware('throttle:5,60') // 5 requests per hour
+                ->name('top-ups.store');
+            Route::get('top-ups/{topUp}', [App\Http\Controllers\Clipper\TopUpController::class, 'show'])->name('top-ups.show');
 
-        // Campaigns (Creator)
-        Route::get('campaigns', [App\Http\Controllers\Clipper\CampaignController::class, 'index'])->name('campaigns.index');
-        Route::get('campaigns/create', [App\Http\Controllers\Clipper\CampaignController::class, 'create'])->name('campaigns.create');
-        Route::post('campaigns', [App\Http\Controllers\Clipper\CampaignController::class, 'store'])
-            ->middleware('throttle:3,60') // 3 campaigns per hour
-            ->name('campaigns.store');
+            // Campaigns (Creator)
+            Route::get('campaigns', [App\Http\Controllers\Clipper\CampaignController::class, 'index'])->name('campaigns.index');
+            Route::get('campaigns/create', [App\Http\Controllers\Clipper\CampaignController::class, 'create'])->name('campaigns.create');
+            Route::post('campaigns', [App\Http\Controllers\Clipper\CampaignController::class, 'store'])
+                ->middleware('throttle:3,60') // 3 campaigns per hour
+                ->name('campaigns.store');
 
-        // Campaign Analytics (must be before campaigns/{campaign} to avoid route conflict)
-        Route::get('campaigns/analytics', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'index'])->name('campaigns.analytics');
-        
-        // Available Campaigns (must be before campaigns/{campaign} to avoid route conflict)
-        Route::get('campaigns/available', [App\Http\Controllers\Clipper\ClipController::class, 'availableCampaigns'])->name('campaigns.available');
+            // Campaign Analytics (must be before campaigns/{campaign} to avoid route conflict)
+            Route::get('campaigns/analytics', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'index'])->name('campaigns.analytics');
 
-        Route::get('campaigns/{campaign}', [App\Http\Controllers\Clipper\CampaignController::class, 'show'])->name('campaigns.show');
-        Route::get('campaigns/{campaign}/edit', [App\Http\Controllers\Clipper\CampaignController::class, 'edit'])->name('campaigns.edit');
-        Route::put('campaigns/{campaign}', [App\Http\Controllers\Clipper\CampaignController::class, 'update'])
-            ->middleware('throttle:10,60') // 10 updates per hour
-            ->name('campaigns.update');
-        Route::delete('campaigns/{campaign}', [App\Http\Controllers\Clipper\CampaignController::class, 'destroy'])->name('campaigns.destroy');
-        Route::post('campaigns/{campaign}/activate', [App\Http\Controllers\Clipper\CampaignController::class, 'activate'])->name('campaigns.activate');
-        Route::post('campaigns/{campaign}/pause', [App\Http\Controllers\Clipper\CampaignController::class, 'pause'])->name('campaigns.pause');
-        Route::post('campaigns/{campaign}/resume', [App\Http\Controllers\Clipper\CampaignController::class, 'resume'])->name('campaigns.resume');
-        Route::post('campaigns/{campaign}/cancel', [App\Http\Controllers\Clipper\CampaignController::class, 'cancel'])->name('campaigns.cancel');
-        Route::post('campaigns/{campaign}/share', [App\Http\Controllers\Clipper\CampaignController::class, 'shareAsPost'])->name('campaigns.share');
-        Route::post('campaigns/{campaign}/clips/{clip}/approve', [App\Http\Controllers\Clipper\CampaignController::class, 'approveClip'])->name('campaigns.clips.approve');
-        Route::post('campaigns/{campaign}/clips/{clip}/reject', [App\Http\Controllers\Clipper\CampaignController::class, 'rejectClip'])->name('campaigns.clips.reject');
+            // Available Campaigns (must be before campaigns/{campaign} to avoid route conflict)
+            Route::get('campaigns/available', [App\Http\Controllers\Clipper\ClipController::class, 'availableCampaigns'])->name('campaigns.available');
 
-        // Clips (Clipper)
-        Route::get('clips', [App\Http\Controllers\Clipper\ClipController::class, 'index'])->name('clips.index');
-        Route::get('clips/create/{campaign}', [App\Http\Controllers\Clipper\ClipController::class, 'create'])->name('clips.create');
-        Route::post('clips', [App\Http\Controllers\Clipper\ClipController::class, 'store'])
-            ->middleware('throttle:10,5') // 10 clips per 5 minutes
-            ->name('clips.store');
-        Route::get('clips/{clip}', [App\Http\Controllers\Clipper\ClipController::class, 'show'])->name('clips.show');
-        Route::get('clips/{clip}/status', [App\Http\Controllers\Clipper\ClipController::class, 'status'])->name('clips.status');
-        Route::get('clips/{clip}/views/live', [App\Http\Controllers\Clipper\ClipController::class, 'getLiveViews'])->name('clips.views.live');
-        Route::get('clips/{clip}/validation', [App\Http\Controllers\Clipper\ClipController::class, 'getValidationStatus'])->name('clips.validation');
-        Route::get('clips/{clip}/validation/history', [App\Http\Controllers\Clipper\ClipController::class, 'getValidationStatus'])->name('clips.validation.history');
-        Route::get('clips/{clip}/edit', [App\Http\Controllers\Clipper\ClipController::class, 'edit'])->name('clips.edit');
-        Route::put('clips/{clip}', [App\Http\Controllers\Clipper\ClipController::class, 'update'])->name('clips.update');
-        Route::delete('clips/{clip}', [App\Http\Controllers\Clipper\ClipController::class, 'destroy'])->name('clips.destroy');
-        Route::post('clips/{clip}/track-views', [App\Http\Controllers\Clipper\ClipController::class, 'trackViews'])
-            ->middleware('throttle:10,60') // 10 requests per hour (critical, prevent abuse)
-            ->name('clips.track-views');
+            Route::get('campaigns/{campaign}', [App\Http\Controllers\Clipper\CampaignController::class, 'show'])->name('campaigns.show');
+            Route::get('campaigns/{campaign}/edit', [App\Http\Controllers\Clipper\CampaignController::class, 'edit'])->name('campaigns.edit');
+            Route::put('campaigns/{campaign}', [App\Http\Controllers\Clipper\CampaignController::class, 'update'])
+                ->middleware('throttle:10,60') // 10 updates per hour
+                ->name('campaigns.update');
+            Route::delete('campaigns/{campaign}', [App\Http\Controllers\Clipper\CampaignController::class, 'destroy'])->name('campaigns.destroy');
+            Route::post('campaigns/{campaign}/activate', [App\Http\Controllers\Clipper\CampaignController::class, 'activate'])->name('campaigns.activate');
+            Route::post('campaigns/{campaign}/pause', [App\Http\Controllers\Clipper\CampaignController::class, 'pause'])->name('campaigns.pause');
+            Route::post('campaigns/{campaign}/resume', [App\Http\Controllers\Clipper\CampaignController::class, 'resume'])->name('campaigns.resume');
+            Route::post('campaigns/{campaign}/cancel', [App\Http\Controllers\Clipper\CampaignController::class, 'cancel'])->name('campaigns.cancel');
+            Route::post('campaigns/{campaign}/share', [App\Http\Controllers\Clipper\CampaignController::class, 'shareAsPost'])->name('campaigns.share');
+            Route::post('campaigns/{campaign}/clips/{clip}/approve', [App\Http\Controllers\Clipper\CampaignController::class, 'approveClip'])->name('campaigns.clips.approve');
+            Route::post('campaigns/{campaign}/clips/{clip}/reject', [App\Http\Controllers\Clipper\CampaignController::class, 'rejectClip'])->name('campaigns.clips.reject');
 
-        // Wallets
-        Route::get('wallet/creator', [App\Http\Controllers\Clipper\CreatorWalletController::class, 'index'])->name('wallet.creator');
-        Route::get('wallet/clipper', [App\Http\Controllers\Clipper\ClipperWalletController::class, 'index'])->name('wallet.clipper');
-        Route::get('wallet/creator/history', [App\Http\Controllers\Clipper\CreatorWalletController::class, 'history'])->name('wallet.creator.history');
-        Route::get('wallet/clipper/history', [App\Http\Controllers\Clipper\ClipperWalletController::class, 'history'])->name('wallet.clipper.history');
+            // Clips (Clipper)
+            Route::get('clips', [App\Http\Controllers\Clipper\ClipController::class, 'index'])->name('clips.index');
+            Route::get('clips/create/{campaign}', [App\Http\Controllers\Clipper\ClipController::class, 'create'])->name('clips.create');
+            Route::post('clips', [App\Http\Controllers\Clipper\ClipController::class, 'store'])
+                ->middleware('throttle:10,5') // 10 clips per 5 minutes
+                ->name('clips.store');
+            Route::get('clips/{clip}', [App\Http\Controllers\Clipper\ClipController::class, 'show'])->name('clips.show');
+            Route::get('clips/{clip}/status', [App\Http\Controllers\Clipper\ClipController::class, 'status'])->name('clips.status');
+            Route::get('clips/{clip}/views/live', [App\Http\Controllers\Clipper\ClipController::class, 'getLiveViews'])->name('clips.views.live');
+            Route::get('clips/{clip}/validation', [App\Http\Controllers\Clipper\ClipController::class, 'getValidationStatus'])->name('clips.validation');
+            Route::get('clips/{clip}/validation/history', [App\Http\Controllers\Clipper\ClipController::class, 'getValidationStatus'])->name('clips.validation.history');
+            Route::get('clips/{clip}/edit', [App\Http\Controllers\Clipper\ClipController::class, 'edit'])->name('clips.edit');
+            Route::put('clips/{clip}', [App\Http\Controllers\Clipper\ClipController::class, 'update'])->name('clips.update');
+            Route::delete('clips/{clip}', [App\Http\Controllers\Clipper\ClipController::class, 'destroy'])->name('clips.destroy');
+            Route::post('clips/{clip}/track-views', [App\Http\Controllers\Clipper\ClipController::class, 'trackViews'])
+                ->middleware('throttle:10,60') // 10 requests per hour (critical, prevent abuse)
+                ->name('clips.track-views');
 
-        // Campaign Analytics - Individual Campaign (Brand Dashboard)
-        Route::get('campaigns/{campaign}/analytics', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'show'])->name('campaigns.analytics.show');
-        Route::get('campaigns/{campaign}/analytics/views-chart', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getViewsChart'])->name('campaigns.analytics.views-chart');
-        Route::get('campaigns/{campaign}/analytics/roi', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getROI'])->name('campaigns.analytics.roi');
-        Route::get('campaigns/{campaign}/analytics/live', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getLiveViews'])->name('campaigns.analytics.live');
-        Route::get('campaigns/{campaign}/analytics/validation', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getValidationDetails'])->name('campaigns.analytics.validation');
+            // Wallets
+            Route::get('wallet/creator', [App\Http\Controllers\Clipper\CreatorWalletController::class, 'index'])->name('wallet.creator');
+            Route::get('wallet/clipper', [App\Http\Controllers\Clipper\ClipperWalletController::class, 'index'])->name('wallet.clipper');
+            Route::get('wallet/creator/history', [App\Http\Controllers\Clipper\CreatorWalletController::class, 'history'])->name('wallet.creator.history');
+            Route::get('wallet/clipper/history', [App\Http\Controllers\Clipper\ClipperWalletController::class, 'history'])->name('wallet.clipper.history');
+
+            // Campaign Analytics - Individual Campaign (Brand Dashboard)
+            Route::get('campaigns/{campaign}/analytics', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'show'])->name('campaigns.analytics.show');
+            Route::get('campaigns/{campaign}/analytics/views-chart', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getViewsChart'])->name('campaigns.analytics.views-chart');
+            Route::get('campaigns/{campaign}/analytics/roi', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getROI'])->name('campaigns.analytics.roi');
+            Route::get('campaigns/{campaign}/analytics/live', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getLiveViews'])->name('campaigns.analytics.live');
+            Route::get('campaigns/{campaign}/analytics/validation', [App\Http\Controllers\Clipper\CampaignAnalyticsController::class, 'getValidationDetails'])->name('campaigns.analytics.validation');
 
             // Clipper Withdrawals (require email verification for financial operations)
             Route::get('withdrawals', [App\Http\Controllers\Clipper\ClipperWithdrawalController::class, 'index'])->middleware('verified')->name('withdrawals.index');
@@ -371,7 +754,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/withdrawals/{withdrawal}/complete', [App\Http\Controllers\Admin\AdminWithdrawalController::class, 'complete'])
             ->middleware('throttle:20,1') // 20 actions per minute
             ->name('withdrawals.complete');
-        
+
         // Refunds
         Route::get('refunds', [App\Http\Controllers\Admin\AdminRefundController::class, 'index'])->name('refunds.index');
         Route::get('refunds/create', [App\Http\Controllers\Admin\AdminRefundController::class, 'create'])->name('refunds.create');
@@ -379,12 +762,12 @@ Route::middleware('auth')->group(function () {
             ->middleware('throttle:10,1') // 10 requests per minute
             ->name('refunds.store');
         Route::get('refunds/{refund}', [App\Http\Controllers\Admin\AdminRefundController::class, 'show'])->name('refunds.show');
-        
+
         // User Search API (for refund forms)
         Route::get('api/users/search', [App\Http\Controllers\Admin\AdminRefundController::class, 'searchUsers'])
             ->middleware('throttle:60,1')
             ->name('api.users.search'); // Route name will be prefixed with 'admin.' = 'admin.api.users.search'
-        
+
         Route::get('products', [App\Http\Controllers\Admin\ProductModerationController::class, 'index'])->name('products.index');
         Route::put('products/{product}', [App\Http\Controllers\Admin\ProductModerationController::class, 'update'])
             ->middleware('throttle:20,1') // 20 actions per minute
@@ -431,7 +814,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('campaigns', App\Http\Controllers\Admin\AdminCampaignController::class)->only(['index', 'show']);
         Route::post('campaigns/{campaign}/suspend', [App\Http\Controllers\Admin\AdminCampaignController::class, 'suspend'])->name('campaigns.suspend');
         Route::get('campaigns/{campaign}/analytics', [App\Http\Controllers\Admin\AdminCampaignController::class, 'viewAnalytics'])->name('campaigns.analytics');
-        
+
         // Clips routes - fraud-alerts must come BEFORE resource route to avoid route conflict
         Route::get('clips/fraud-alerts', [App\Http\Controllers\Admin\AdminClipController::class, 'getFraudAlerts'])->name('clips.fraud-alerts');
         Route::resource('clips', App\Http\Controllers\Admin\AdminClipController::class)->only(['index', 'show']);
@@ -605,3 +988,4 @@ Route::prefix('legal')->name('legal.')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+require __DIR__ . '/health.php';

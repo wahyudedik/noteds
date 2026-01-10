@@ -34,6 +34,15 @@ class StorePostRequest extends FormRequest
             'link_preview_description' => ['nullable', 'string', 'max:1000'],
             'link_preview_image' => ['nullable', 'string', 'max:2048'],
             'link_preview_site_name' => ['nullable', 'string', 'max:100'],
+            'scheduled_at' => ['nullable', 'date', 'after:now'],
+            'publish_status' => ['nullable', 'in:draft,scheduled,published'],
+            'template_id' => ['nullable', 'exists:post_templates,id'],
+            'series_id' => ['nullable', 'exists:posts,id'],
+            'collaborators' => ['nullable', 'array'],
+            'collaborators.*.user_id' => ['required_with:collaborators', 'exists:users,id'],
+            'collaborators.*.role' => ['nullable', 'in:co_author,editor,contributor'],
+            'collaborators.*.can_edit' => ['nullable', 'boolean'],
+            'collaborators.*.can_publish' => ['nullable', 'boolean'],
         ];
     }
 

@@ -25,7 +25,7 @@ todos:
     status: pending
   - id: db-optimization
     content: Add database indexes for frequently queried columns and optimize N+1 queries. Create migration for performance indexes.
-    status: pending
+    status: completed
   - id: api-documentation
     content: Implement Laravel Scribe or Spatie API documentation for auto-generated, interactive API docs.
     status: pending
@@ -43,7 +43,7 @@ todos:
     status: pending
   - id: health-checks
     content: "Implement comprehensive health check endpoints: database connectivity, Redis connectivity, queue worker status, external API status (Midtrans, MediaStack), disk space monitoring, memory usage. Create routes/health.php and HealthController."
-    status: pending
+    status: completed
   - id: backup-strategy
     content: "Implement automated backup system: database backups (daily, weekly, monthly retention), file storage backups, backup verification, automated restore testing. Create BackupDatabase and BackupStorage commands, schedule in app/Console/Kernel.php."
     status: pending
@@ -55,10 +55,10 @@ todos:
     status: completed
   - id: transaction-receipts
     content: "Implement transaction receipts and invoices: printable receipts for all transactions, PDF invoice generation for orders, transaction export functionality, and transaction timeline with status updates."
-    status: pending
+    status: completed
   - id: two-factor-auth
     content: Implement Two-Factor Authentication (2FA) with TOTP support (Google Authenticator), backup codes, 2FA enforcement for admin accounts, and recovery process.
-    status: pending
+    status: completed
   - id: user-activity-log
     content: "Create user-facing activity log dashboard: login history, profile changes, security changes, transaction activities, withdrawal requests, with filtering, search, and export functionality."
     status: completed
@@ -839,8 +839,3 @@ Plan ini mengidentifikasi 8 area kritis yang perlu ditingkatkan untuk membuat ap
 - **Password Security** (Phase 9.8): Enhanced password requirements dan security
 
 ### Future Enhancements
-
-- **Profile Verification** (Phase 9.9): KYC untuk sellers
-- **Refund Management** (Phase 9.10): Complete refund workflow
-
----

@@ -376,5 +376,3 @@ Tidak perlu migration baru, semua data sudah ada di:
 
 - Gunakan existing components dan patterns yang sudah ada
 - Follow Laravel best practices untuk controllers
-- Use Inertia.js untuk frontend (sesuai dengan existing codebase)
-- Implement proper error handling

@@ -3,16 +3,22 @@
 namespace App\Http\Controllers\Marketplace;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProductBundleRequest;
 use App\Models\Product;
 use App\Services\FileStorageService;
+use App\Services\ProductComparisonService;
+use App\Services\BundleService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
     public function __construct(
-        private FileStorageService $fileStorageService
+        private FileStorageService $fileStorageService,
+        private ProductComparisonService $comparisonService,
+        private BundleService $bundleService
     ) {}
 
     public function index(Request $request)
@@ -230,6 +236,112 @@ class ProductController extends Controller
                 'total_sales' => $totalSales,
                 'total_earnings' => $totalEarnings,
             ],
+        ]);
+    }
+
+    /**
+     * Get product variants.
+     */
+    public function variants(Product $product)
+    {
+        $variants = $product->variants()
+            ->with('seller')
+            ->get()
+            ->groupBy('variant_type');
+
+        return response()->json([
+            'product' => $product,
+            'variants' => $variants,
+        ]);
+    }
+
+    /**
+     * Create a product bundle.
+     */
+    public function storeBundle(StoreProductBundleRequest $request)
+    {
+        $validated = $request->validated();
+        $validated['user_id'] = auth()->id();
+        $validated['is_active'] = true;
+        $validated['is_bundle'] = true;
+
+        $bundle = Product::create($validated);
+
+        // Create bundle items
+        $this->bundleService->createBundle($bundle, $request->items);
+
+        return redirect()->route('marketplace.products.show', $bundle)
+            ->with('success', 'Bundle created successfully.');
+    }
+
+    /**
+     * Add product to comparison.
+     */
+    public function addToComparison(Request $request, Product $product): JsonResponse
+    {
+        $sessionId = $request->session()->getId();
+
+        try {
+            $this->comparisonService->addToComparison($sessionId, $product);
+            return response()->json(['success' => true, 'message' => 'Product added to comparison']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
+        }
+    }
+
+    /**
+     * Remove product from comparison.
+     */
+    public function removeFromComparison(Request $request, Product $product): JsonResponse
+    {
+        $sessionId = $request->session()->getId();
+
+        try {
+            $this->comparisonService->removeFromComparison($sessionId, $product);
+            return response()->json(['success' => true, 'message' => 'Product removed from comparison']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
+        }
+    }
+
+    /**
+     * Get comparison list.
+     */
+    public function getComparison(Request $request)
+    {
+        $sessionId = $request->session()->getId();
+        $comparison = $this->comparisonService->getComparison($sessionId);
+
+        return response()->json([
+            'products' => $comparison,
+            'count' => $comparison->count(),
+        ]);
+    }
+
+    /**
+     * Compare products.
+     */
+    public function compare(Request $request)
+    {
+        $sessionId = $request->session()->getId();
+        $comparison = $this->comparisonService->getComparison($sessionId);
+        
+        $productIds = $request->input('product_ids', $comparison->pluck('id')->toArray());
+        
+        if (empty($productIds)) {
+            return redirect()->route('marketplace.index')
+                ->withErrors(['error' => 'No products to compare']);
+        }
+
+        $request->validate([
+            'product_ids' => 'nullable|array|max:4',
+            'product_ids.*' => 'required|uuid|exists:products,id',
+        ]);
+
+        $comparisonData = $this->comparisonService->compareProducts($productIds);
+
+        return Inertia::render('Marketplace/Product/Compare', [
+            'comparison' => $comparisonData,
         ]);
     }
 }

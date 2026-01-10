@@ -1909,5 +1909,3 @@ Body: { Midtrans webhook payload }
 - Clipper bisa discuss campaign di forum
 - Link campaign ke marketplace (jika relevan)
 - Integration dengan existing Post system
-
-## Dependencies

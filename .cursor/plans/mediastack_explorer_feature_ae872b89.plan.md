@@ -339,4 +339,3 @@ http://api.mediastack.com/v1/news?access_key=XXX&categories=business,technology&
 
 1. **Scheduled Job**: Fetch artikel 3x per hari (08:00, 14:00, 20:00) untuk update yang lebih fresh
 2. **Database Storage**: Semua artikel disimpan di database sebagai primary source
-3. **No Direct API Calls**: Controller hanya query dari database, tidak langsung call API
