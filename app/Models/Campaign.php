@@ -27,6 +27,7 @@ class Campaign extends Model
 
     protected $fillable = [
         'creator_id',
+        'template_id',
         'title',
         'description',
         'video_references',
@@ -37,6 +38,10 @@ class Campaign extends Model
         'status',
         'started_at',
         'ended_at',
+        'scheduled_start_at',
+        'scheduled_end_at',
+        'ab_test_enabled',
+        'ab_test_status',
         'total_views',
         'total_clips',
         'total_spent',
@@ -55,6 +60,9 @@ class Campaign extends Model
             'total_spent' => 'decimal:2',
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
+            'scheduled_start_at' => 'datetime',
+            'scheduled_end_at' => 'datetime',
+            'ab_test_enabled' => 'boolean',
         ];
     }
 
@@ -93,7 +101,14 @@ class Campaign extends Model
 
         $this->status = 'active';
         $this->started_at = now();
-        $this->ended_at = now()->addDays($this->duration_days);
+        
+        // Use scheduled_end_at if set, otherwise calculate from duration_days
+        if ($this->scheduled_end_at) {
+            $this->ended_at = $this->scheduled_end_at;
+        } else {
+            $this->ended_at = now()->addDays($this->duration_days);
+        }
+        
         return $this->save();
     }
 
@@ -202,5 +217,151 @@ class Campaign extends Model
     public function post(): HasOne
     {
         return $this->hasOne(Post::class);
+    }
+
+    /**
+     * Get the template this campaign was created from (if any).
+     */
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(CampaignTemplate::class, 'template_id');
+    }
+
+    /**
+     * Get the variants for A/B testing.
+     */
+    public function variants(): HasMany
+    {
+        return $this->hasMany(CampaignVariant::class);
+    }
+
+    /**
+     * Get active variants.
+     */
+    public function activeVariants(): HasMany
+    {
+        return $this->variants()->where('status', 'active');
+    }
+
+    /**
+     * Get winning variant.
+     */
+    public function winningVariant()
+    {
+        return $this->variants()->where('is_winner', true)->first();
+    }
+
+    /**
+     * Get the collaborators for this campaign.
+     */
+    public function collaborators(): HasMany
+    {
+        return $this->hasMany(CampaignCollaborator::class);
+    }
+
+    /**
+     * Get accepted collaborators.
+     */
+    public function acceptedCollaborators(): HasMany
+    {
+        return $this->collaborators()->where('status', 'accepted');
+    }
+
+    /**
+     * Get pending invitations.
+     */
+    public function pendingInvitations(): HasMany
+    {
+        return $this->collaborators()->where('status', 'pending');
+    }
+
+    /**
+     * Check if campaign is scheduled.
+     */
+    public function isScheduled(): bool
+    {
+        return $this->scheduled_start_at !== null;
+    }
+
+    /**
+     * Check if campaign should start now.
+     */
+    public function shouldStart(): bool
+    {
+        return $this->isScheduled() 
+            && $this->scheduled_start_at <= now() 
+            && $this->status === 'draft';
+    }
+
+    /**
+     * Check if campaign should end now.
+     */
+    public function shouldEnd(): bool
+    {
+        return $this->scheduled_end_at !== null 
+            && $this->scheduled_end_at <= now() 
+            && in_array($this->status, ['active', 'paused']);
+    }
+
+    /**
+     * Check if user is a collaborator.
+     */
+    public function isCollaborator(User $user): bool
+    {
+        return $this->collaborators()
+            ->where('user_id', $user->id)
+            ->where('status', 'accepted')
+            ->exists();
+    }
+
+    /**
+     * Check if user can edit this campaign.
+     */
+    public function canUserEdit(User $user): bool
+    {
+        if ($this->creator_id === $user->id) {
+            return true;
+        }
+
+        $collaboration = $this->collaborators()
+            ->where('user_id', $user->id)
+            ->where('status', 'accepted')
+            ->first();
+
+        return $collaboration && $collaboration->can_edit;
+    }
+
+    /**
+     * Check if user can manage budget.
+     */
+    public function canUserManageBudget(User $user): bool
+    {
+        if ($this->creator_id === $user->id) {
+            return true;
+        }
+
+        $collaboration = $this->collaborators()
+            ->where('user_id', $user->id)
+            ->where('status', 'accepted')
+            ->first();
+
+        return $collaboration && $collaboration->can_manage_budget;
+    }
+
+    /**
+     * Check if user can activate this campaign.
+     */
+    public function canUserActivate(User $user): bool
+    {
+        if ($this->creator_id === $user->id) {
+            return true;
+        }
+
+        $collaboration = $this->collaborators()
+            ->where('user_id', $user->id)
+            ->where('status', 'accepted')
+            ->first();
+
+        return $collaboration && $collaboration->can_activate;
     }
 }

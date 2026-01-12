@@ -56,6 +56,7 @@ class CampaignController extends Controller
         }
 
         $validated = $request->validate([
+            'template_id' => 'nullable|exists:campaign_templates,id',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'video_references' => 'required|array|min:1',
@@ -65,6 +66,8 @@ class CampaignController extends Controller
             'max_budget' => 'required|numeric|min:10000',
             'max_reward_per_clipper' => 'nullable|numeric|min:0',
             'duration_days' => 'required|integer|min:1|max:365',
+            'scheduled_start_at' => 'nullable|date|after:now',
+            'scheduled_end_at' => 'nullable|date|after:scheduled_start_at',
         ]);
 
         // Validate each video URL is YouTube or Google Drive
@@ -277,6 +280,85 @@ class CampaignController extends Controller
             }
 
             return back()->withErrors(['error' => 'Failed to reject clip.']);
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Setup A/B testing for a campaign.
+     */
+    public function setupABTest(Request $request, $id)
+    {
+        $campaign = auth()->user()->campaigns()
+            ->where('status', 'draft')
+            ->findOrFail($id);
+
+        $validated = $request->validate([
+            'variants' => 'required|array|min:2',
+            'variants.*.variant_name' => 'required|string|max:255',
+            'variants.*.cpm' => 'required|numeric|min:1000',
+            'variants.*.allocation_percent' => 'required|integer|min:0|max:100',
+        ]);
+
+        // Validate total allocation
+        $totalAllocation = array_sum(array_column($validated['variants'], 'allocation_percent'));
+        if ($totalAllocation > 100) {
+            return back()->withErrors(['variants' => 'Total allocation percent cannot exceed 100%.']);
+        }
+
+        try {
+            $abTestingService = app(\App\Services\CampaignABTestingService::class);
+            $variants = $abTestingService->createVariants($campaign, $validated['variants']);
+
+            return back()->with('success', 'A/B testing setup successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Get A/B test results.
+     */
+    public function getABTestResults($id)
+    {
+        $campaign = auth()->user()->campaigns()->findOrFail($id);
+
+        $abTestingService = app(\App\Services\CampaignABTestingService::class);
+        $results = $abTestingService->calculatePerformance($campaign);
+
+        return response()->json([
+            'variants' => $results,
+        ]);
+    }
+
+    /**
+     * Select winning variant and apply to campaign.
+     */
+    public function selectWinner(Request $request, $id)
+    {
+        $campaign = auth()->user()->campaigns()->findOrFail($id);
+
+        $validated = $request->validate([
+            'variant_id' => 'nullable|exists:campaign_variants,id',
+        ]);
+
+        try {
+            $abTestingService = app(\App\Services\CampaignABTestingService::class);
+
+            if (isset($validated['variant_id'])) {
+                $variant = \App\Models\CampaignVariant::findOrFail($validated['variant_id']);
+                $variant->markAsWinner();
+                $abTestingService->applyWinner($campaign);
+            } else {
+                // Auto-select winner
+                $winner = $abTestingService->determineWinner($campaign);
+                if ($winner) {
+                    $abTestingService->applyWinner($campaign);
+                }
+            }
+
+            return back()->with('success', 'Winning variant selected and applied successfully.');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }

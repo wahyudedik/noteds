@@ -52,8 +52,9 @@ class CampaignService
                 }
 
                 try {
-                    $campaign = Campaign::create([
+                    $campaignData = [
                         'creator_id' => $creator->id,
+                        'template_id' => $data['template_id'] ?? null,
                         'title' => $data['title'],
                         'description' => $data['description'],
                         'video_references' => $data['video_references'] ?? [],
@@ -62,7 +63,17 @@ class CampaignService
                         'max_reward_per_clipper' => $data['max_reward_per_clipper'] ?? null,
                         'duration_days' => $data['duration_days'],
                         'status' => 'draft',
-                    ]);
+                    ];
+
+                    // Add scheduled dates if provided
+                    if (isset($data['scheduled_start_at'])) {
+                        $campaignData['scheduled_start_at'] = $data['scheduled_start_at'];
+                    }
+                    if (isset($data['scheduled_end_at'])) {
+                        $campaignData['scheduled_end_at'] = $data['scheduled_end_at'];
+                    }
+
+                    $campaign = Campaign::create($campaignData);
                 } catch (Exception $e) {
                     Log::error('Failed to create campaign', [
                         'creator_id' => $creator->id,
@@ -135,7 +146,7 @@ class CampaignService
                     throw new Exception('Insufficient balance to activate this campaign. Please top up your wallet first.');
                 }
 
-                // Activate campaign
+                // Activate campaign (handles scheduled dates internally)
                 try {
                     $result = $campaign->activate();
                     if (!$result) {
@@ -188,6 +199,36 @@ class CampaignService
             ]);
             throw $e;
         }
+    }
+
+    /**
+     * Schedule campaign activation.
+     */
+    public function scheduleCampaign(Campaign $campaign, \DateTimeInterface $startAt, ?\DateTimeInterface $endAt = null): bool
+    {
+        // Validate scheduled dates
+        if ($startAt <= now()) {
+            throw new Exception('Scheduled start date must be in the future.');
+        }
+
+        if ($endAt && $endAt <= $startAt) {
+            throw new Exception('Scheduled end date must be after start date.');
+        }
+
+        // Calculate duration if end date is provided
+        if ($endAt) {
+            $durationDays = $startAt->diff($endAt)->days;
+        } else {
+            $durationDays = $campaign->duration_days;
+        }
+
+        $campaign->update([
+            'scheduled_start_at' => $startAt,
+            'scheduled_end_at' => $endAt,
+            'duration_days' => $durationDays,
+        ]);
+
+        return true;
     }
 
     /**

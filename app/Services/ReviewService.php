@@ -77,6 +77,17 @@ class ReviewService
 
             $review->update($data);
 
+            // Trigger seller rating recalculation on update
+            try {
+                $sellerRatingService = app(\App\Services\SellerRatingService::class);
+                $sellerRatingService->updateSellerRating($review->product->seller);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Failed to update seller rating after review update', [
+                    'review_id' => $review->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             // Upload new media files
             if (!empty($mediaFiles)) {
                 $this->uploadMedia($review, $mediaFiles);

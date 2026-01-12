@@ -25,6 +25,7 @@ class StorePostRequest extends FormRequest
     {
         return [
             'purpose_type' => ['required', 'in:idea_business,ask_question,share_experience,find_partner,find_tools,validate_idea'],
+            'business_type' => ['nullable', 'string', 'max:100'],
             'title' => ['required', 'string', 'min:10', 'max:255'],
             'content' => ['required', 'string', 'min:50'],
             'images' => ['nullable', 'array', 'max:10'],

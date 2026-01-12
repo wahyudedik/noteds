@@ -19,3 +19,18 @@ Broadcast::channel('order.{orderId}', function ($user, $orderId) {
     return $order && $order->user_id === $user->id;
 });
 
+// Stock price updates (public channel)
+Broadcast::channel('stock.{stockCode}.prices', function ($user, $stockCode) {
+    return true; // Public channel
+});
+
+// Stock signal updates (public channel)
+Broadcast::channel('stock.{stockCode}.signals', function ($user, $stockCode) {
+    return true; // Public channel
+});
+
+// User watchlist updates (private channel)
+Broadcast::channel('user.{userId}.watchlist', function ($user, $userId) {
+    return $user->id === $userId;
+});
+

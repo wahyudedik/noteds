@@ -56,7 +56,7 @@ class MentionedInPostNotification extends Notification implements ShouldQueue
             'user_id' => $this->post->user_id,
             'user_name' => $this->post->user->name ?? $this->post->user->business_name,
             'title' => 'You were mentioned in a post',
-            'message' => "{$this->post->user->name ?? $this->post->user->business_name} mentioned you in a post: {$this->post->title}",
+            'message' => ($this->post->user->name ?? $this->post->user->business_name) . ' mentioned you in a post: ' . $this->post->title,
         ];
     }
 }

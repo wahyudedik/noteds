@@ -72,14 +72,34 @@ class MarketplaceService
         // Update product sales count
         $order->product->increment('sales_count');
 
-        // Update stock if applicable
+        // Update stock if applicable using InventoryManagementService
         if ($order->product->stock !== null) {
-            $order->product->decrement('stock', $order->quantity);
+            try {
+                $inventoryService = app(\App\Services\InventoryManagementService::class);
+                $inventoryService->recordSale($order->product, $order);
+            } catch (\Exception $e) {
+                // Fallback to direct decrement if service fails
+                \Illuminate\Support\Facades\Log::error('Failed to record sale via InventoryManagementService', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
+                $order->product->decrement('stock', $order->quantity);
+            }
         }
 
         // Mark order as completed if not already
         if ($order->status !== 'completed') {
             $order->markAsCompleted();
+        }
+
+        // Update seller performance metrics
+        try {
+            $order->updateSellerPerformanceMetrics();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Failed to update seller performance metrics', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
         }
 
         // Create subscription if product is a subscription

@@ -311,4 +311,27 @@ class Order extends Model
         return $query->where('payment_status', '!=', 'paid')
             ->where('status', '!=', 'cancelled');
     }
+
+    /**
+     * Update seller performance metrics when order status changes.
+     */
+    public function updateSellerPerformanceMetrics(): void
+    {
+        // This will be implemented by service layer
+    }
+
+    /**
+     * Calculate fulfillment rating for this order.
+     */
+    public function calculateFulfillmentRating(): float
+    {
+        // Completed orders get 5 stars, cancelled get 0 stars
+        if ($this->status === 'completed' && $this->payment_status === 'paid') {
+            return 5.0;
+        } elseif ($this->status === 'cancelled') {
+            return 0.0;
+        }
+
+        return 0.0; // Pending orders don't contribute to fulfillment rating
+    }
 }

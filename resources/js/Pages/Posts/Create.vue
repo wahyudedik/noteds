@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PostPurposeSelector from '@/Components/PostPurposeSelector.vue';
+import BusinessTypeSelector from '@/Components/BusinessTypeSelector.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -8,9 +9,18 @@ import TextInput from '@/Components/TextInput.vue';
 import Textarea from '@/Components/Textarea.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { PURPOSE_TYPES } from '@/Utils/constants';
+import { ref, onMounted } from 'vue';
+
+const props = defineProps({
+    businessTypes: {
+        type: Array,
+        default: () => [],
+    },
+});
 
 const form = useForm({
     purpose_type: '',
+    business_type: null,
     title: '',
     content: '',
 });
@@ -40,6 +50,13 @@ const submit = () => {
                             <div class="space-y-6">
                                 <PostPurposeSelector v-model="form.purpose_type" />
                                 <InputError class="mt-2" :message="form.errors.purpose_type" />
+
+                                <BusinessTypeSelector
+                                    v-if="form.purpose_type && ['idea_business', 'validate_idea', 'find_tools'].includes(form.purpose_type)"
+                                    v-model="form.business_type"
+                                    :business-types="businessTypes"
+                                />
+                                <InputError class="mt-2" :message="form.errors.business_type" />
 
                                 <div>
                                     <InputLabel for="title" value="Judul" />

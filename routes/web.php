@@ -85,13 +85,13 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/posts/{post}/repost', [App\Http\Controllers\RepostController::class, 'destroy'])
         ->middleware('throttle:30,5') // 30 unreposts per 5 minutes
         ->name('posts.unrepost');
-    
+
     // Repost comment routes
     Route::put('/reposts/{repost}/comment', [App\Http\Controllers\RepostController::class, 'updateComment'])
         ->name('reposts.comment.update');
     Route::delete('/reposts/{repost}/comment', [App\Http\Controllers\RepostController::class, 'removeComment'])
         ->name('reposts.comment.remove');
-    
+
     // Quote repost routes
     Route::post('/posts/{post}/quote-repost', [App\Http\Controllers\RepostController::class, 'storeQuote'])
         ->name('posts.quote-repost');
@@ -99,7 +99,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('reposts.quote.update');
     Route::post('/reposts/{repost}/toggle-display', [App\Http\Controllers\RepostController::class, 'toggleDisplayMode'])
         ->name('reposts.toggle-display');
-    
+
     // Repost analytics routes (author only)
     Route::get('/posts/{post}/reposts/analytics', [App\Http\Controllers\RepostAnalyticsController::class, 'show'])
         ->name('reposts.analytics');
@@ -119,12 +119,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/comments/{comment}/best-answer', [App\Http\Controllers\CommentController::class, 'markBestAnswer'])
         ->middleware('throttle:10,5') // 10 per 5 minutes
         ->name('comments.best-answer');
-    
+
     // Comment media upload
     Route::post('/api/comments/upload-image', [App\Http\Controllers\CommentController::class, 'uploadImage'])
         ->middleware('throttle:10,1')
         ->name('comments.upload-image');
-    
+
     // Comment editing
     Route::put('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'update'])
         ->middleware('throttle:10,5')
@@ -132,7 +132,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/comments/{comment}/history', [App\Http\Controllers\CommentController::class, 'history'])
         ->middleware('auth')
         ->name('comments.history');
-    
+
     // Comment pinning
     Route::post('/comments/{comment}/pin', [App\Http\Controllers\CommentController::class, 'pin'])
         ->middleware('throttle:10,5')
@@ -140,12 +140,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/comments/{comment}/unpin', [App\Http\Controllers\CommentController::class, 'unpin'])
         ->middleware('throttle:10,5')
         ->name('comments.unpin');
-    
+
     // Comment deletion
     Route::delete('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'destroy'])
         ->middleware('throttle:10,5')
         ->name('comments.destroy');
-    
+
     // Comment reactions
     Route::post('/comments/{comment}/reactions', [App\Http\Controllers\CommentReactionController::class, 'react'])
         ->middleware('throttle:30,5')
@@ -296,7 +296,7 @@ Route::middleware('auth')->group(function () {
         ->name('users.unfollow'); // 20 actions per 5 minutes
     Route::get('/users/{user}/followers', [App\Http\Controllers\FollowController::class, 'followers'])->name('users.followers');
     Route::get('/users/{user}/following', [App\Http\Controllers\FollowController::class, 'following'])->name('users.following');
-    
+
     // User Categories
     Route::get('/user/categories', [App\Http\Controllers\UserCategoryController::class, 'index'])
         ->name('user.categories.index');
@@ -308,13 +308,13 @@ Route::middleware('auth')->group(function () {
         ->name('user.categories.sync');
     Route::post('/user/categories/refresh', [App\Http\Controllers\UserCategoryController::class, 'refresh'])
         ->name('user.categories.refresh');
-    
+
     // Follow Suggestions
     Route::get('/follow/suggestions', [App\Http\Controllers\FollowSuggestionController::class, 'index'])
         ->name('follow.suggestions');
     Route::post('/follow/suggestions/refresh', [App\Http\Controllers\FollowSuggestionController::class, 'refresh'])
         ->name('follow.suggestions.refresh');
-    
+
     // Mutual Connections
     Route::get('/users/{user}/mutual-connections', [App\Http\Controllers\MutualConnectionController::class, 'index'])
         ->name('users.mutual-connections');
@@ -338,13 +338,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/posts/{post}/unbookmark', [App\Http\Controllers\BookmarkController::class, 'destroy'])
         ->middleware('throttle:30,5')
         ->name('posts.unbookmark'); // 30 unbookmarks per 5 minutes
-    
+
     // Bookmark Notes
     Route::put('/bookmarks/{bookmark}/notes', [App\Http\Controllers\BookmarkController::class, 'updateNotes'])
         ->name('bookmarks.notes.update');
     Route::get('/bookmarks/{bookmark}/notes', [App\Http\Controllers\BookmarkController::class, 'getNotes'])
         ->name('bookmarks.notes.show');
-    
+
     // Bookmark Collections
     Route::get('/bookmarks/collections', [App\Http\Controllers\BookmarkCollectionController::class, 'index'])
         ->name('bookmarks.collections.index');
@@ -358,7 +358,7 @@ Route::middleware('auth')->group(function () {
         ->name('bookmarks.collections.reorder');
     Route::post('/bookmarks/collections/{collection}/move', [App\Http\Controllers\BookmarkCollectionController::class, 'move'])
         ->name('bookmarks.collections.move');
-    
+
     // Collection Sharing
     Route::post('/bookmarks/collections/{collection}/toggle-public', [App\Http\Controllers\BookmarkCollectionShareController::class, 'togglePublic'])
         ->name('bookmarks.collections.toggle-public');
@@ -374,11 +374,11 @@ Route::middleware('auth')->group(function () {
         ->name('bookmarks.collections.revoke');
     Route::put('/bookmarks/collections/{collection}/permission/{user}', [App\Http\Controllers\BookmarkCollectionShareController::class, 'updatePermission'])
         ->name('bookmarks.collections.update-permission');
-    
+
     // Shared Collections
     Route::get('/bookmarks/shared', [App\Http\Controllers\BookmarkCollectionShareController::class, 'sharedWithMe'])
         ->name('bookmarks.shared');
-    
+
     // Bookmark Tags
     Route::get('/bookmarks/tags', [App\Http\Controllers\BookmarkTagController::class, 'index'])
         ->name('bookmarks.tags.index');
@@ -437,7 +437,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/marketplace/orders/{order}/cancel', [App\Http\Controllers\Marketplace\OrderController::class, 'cancel'])
         ->middleware('throttle:5,60') // 5 cancellations per hour
         ->name('marketplace.orders.cancel');
-    
+
     // Order tracking
     Route::get('/marketplace/orders/{order}/track', [App\Http\Controllers\Marketplace\OrderController::class, 'track'])
         ->middleware('throttle:30,1') // 30 requests per minute
@@ -448,17 +448,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/marketplace/orders/{order}/tracking/poll', [App\Http\Controllers\Marketplace\OrderController::class, 'poll'])
         ->middleware('throttle:60,1') // 60 polls per minute (for real-time updates)
         ->name('marketplace.orders.tracking.poll');
-    
+
     // Order modification
     Route::put('/marketplace/orders/{order}/modify', [App\Http\Controllers\Marketplace\OrderController::class, 'modify'])
         ->middleware(['throttle:10,60']) // 10 modifications per hour
         ->name('marketplace.orders.modify');
-    
+
     // Bulk orders
     Route::post('/marketplace/orders/bulk', [App\Http\Controllers\Marketplace\OrderController::class, 'createBulkOrder'])
         ->middleware(['throttle:5,60']) // 5 bulk orders per hour
         ->name('marketplace.orders.bulk.create');
-    
+
     // Order export
     Route::get('/marketplace/orders/export', [App\Http\Controllers\Marketplace\OrderController::class, 'exportHistory'])
         ->middleware(['throttle:10,60']) // 10 exports per hour
@@ -496,7 +496,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/marketplace/reviews/{productReview}', [App\Http\Controllers\Marketplace\ProductReviewController::class, 'destroy'])
         ->middleware('throttle:10,60')
         ->name('marketplace.reviews.destroy');
-    
+
     // Review voting
     Route::post('/marketplace/reviews/{productReview}/vote', [App\Http\Controllers\Marketplace\ProductReviewController::class, 'voteHelpful'])
         ->middleware(['auth', 'throttle:30,1']) // 30 votes per minute
@@ -504,12 +504,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/marketplace/reviews/{productReview}/vote', [App\Http\Controllers\Marketplace\ProductReviewController::class, 'removeVote'])
         ->middleware(['auth', 'throttle:30,1'])
         ->name('marketplace.reviews.remove-vote');
-    
+
     // Review media
     Route::post('/marketplace/reviews/{productReview}/media', [App\Http\Controllers\Marketplace\ProductReviewController::class, 'uploadMedia'])
         ->middleware(['auth', 'throttle:10,1']) // 10 uploads per minute
         ->name('marketplace.reviews.media.store');
-    
+
     // Seller replies
     Route::post('/marketplace/reviews/{productReview}/reply', [App\Http\Controllers\Marketplace\ProductReviewReplyController::class, 'store'])
         ->middleware(['auth', 'throttle:10,60']) // 10 replies per hour
@@ -609,15 +609,69 @@ Route::middleware('auth')->group(function () {
     // Sales Analytics
     Route::get('/marketplace/sales/analytics', [App\Http\Controllers\Marketplace\SalesAnalyticsController::class, 'index'])->name('marketplace.sales.analytics');
 
-    // Seller Orders
-    Route::get('/marketplace/seller/orders', [App\Http\Controllers\Marketplace\SellerOrderController::class, 'index'])->name('marketplace.seller.orders.index');
-    Route::get('/marketplace/seller/orders/{order}', [App\Http\Controllers\Marketplace\SellerOrderController::class, 'show'])->name('marketplace.seller.orders.show');
-    Route::put('/marketplace/seller/orders/{order}/status', [App\Http\Controllers\Marketplace\SellerOrderController::class, 'updateStatus'])
-        ->middleware('throttle:10,60') // 10 updates per hour
-        ->name('marketplace.seller.orders.update-status');
-    Route::get('/marketplace/seller/orders/{order}/invoice', [App\Http\Controllers\Marketplace\SellerOrderController::class, 'downloadInvoice'])
-        ->middleware('throttle:20,5') // 20 downloads per 5 minutes
-        ->name('marketplace.seller.orders.invoice');
+    // Seller Dashboard
+    Route::prefix('marketplace/seller')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Marketplace\SellerDashboardController::class, 'index'])
+            ->name('marketplace.seller.dashboard');
+        Route::get('/dashboard/sales', [App\Http\Controllers\Marketplace\SellerDashboardController::class, 'sales'])
+            ->name('marketplace.seller.dashboard.sales');
+        Route::get('/dashboard/inventory', [App\Http\Controllers\Marketplace\SellerDashboardController::class, 'inventory'])
+            ->name('marketplace.seller.dashboard.inventory');
+        Route::get('/dashboard/performance', [App\Http\Controllers\Marketplace\SellerDashboardController::class, 'performance'])
+            ->name('marketplace.seller.dashboard.performance');
+
+        // Inventory Management
+        Route::resource('inventory', App\Http\Controllers\Marketplace\InventoryManagementController::class)
+            ->names('marketplace.seller.inventory');
+        Route::get('/inventory/{product}/history', [App\Http\Controllers\Marketplace\InventoryManagementController::class, 'getStockHistory'])
+            ->name('marketplace.seller.inventory.history');
+        Route::put('/inventory/{product}/stock', [App\Http\Controllers\Marketplace\InventoryManagementController::class, 'updateStock'])
+            ->name('marketplace.seller.inventory.stock.update');
+        Route::post('/inventory/{product}/restock', [App\Http\Controllers\Marketplace\InventoryManagementController::class, 'restock'])
+            ->name('marketplace.seller.inventory.restock');
+        Route::put('/inventory/alert-settings', [App\Http\Controllers\Marketplace\InventoryManagementController::class, 'updateAlertSettings'])
+            ->name('marketplace.seller.inventory.alert-settings');
+        Route::get('/inventory/alerts/low-stock', [App\Http\Controllers\Marketplace\InventoryManagementController::class, 'getLowStockAlerts'])
+            ->name('marketplace.seller.inventory.low-stock');
+
+        // Dynamic Pricing
+        Route::resource('pricing-rules', App\Http\Controllers\Marketplace\DynamicPricingController::class)
+            ->names('marketplace.seller.pricing-rules');
+        Route::put('/pricing-rules/{rule}/toggle', [App\Http\Controllers\Marketplace\DynamicPricingController::class, 'toggle'])
+            ->name('marketplace.seller.pricing-rules.toggle');
+        Route::get('/products/{product}/effective-price', [App\Http\Controllers\Marketplace\ProductController::class, 'getEffectivePrice'])
+            ->name('marketplace.products.effective-price');
+        Route::post('/products/{product}/pricing-preview', [App\Http\Controllers\Marketplace\DynamicPricingController::class, 'previewPrice'])
+            ->name('marketplace.seller.pricing-preview');
+
+        // Seller Verification
+        Route::get('/verification', [App\Http\Controllers\Marketplace\SellerVerificationController::class, 'show'])
+            ->name('marketplace.seller.verification');
+        Route::post('/verification/apply', [App\Http\Controllers\Marketplace\SellerVerificationController::class, 'apply'])
+            ->name('marketplace.seller.verification.apply');
+        Route::get('/verification/status', [App\Http\Controllers\Marketplace\SellerVerificationController::class, 'status'])
+            ->name('marketplace.seller.verification.status');
+
+        // Seller Orders
+        Route::get('/orders', [App\Http\Controllers\Marketplace\SellerOrderController::class, 'index'])->name('marketplace.seller.orders.index');
+        Route::get('/orders/{order}', [App\Http\Controllers\Marketplace\SellerOrderController::class, 'show'])->name('marketplace.seller.orders.show');
+        Route::put('/orders/{order}/status', [App\Http\Controllers\Marketplace\SellerOrderController::class, 'updateStatus'])
+            ->middleware('throttle:10,60') // 10 updates per hour
+            ->name('marketplace.seller.orders.update-status');
+        Route::get('/orders/{order}/invoice', [App\Http\Controllers\Marketplace\SellerOrderController::class, 'downloadInvoice'])
+            ->middleware('throttle:20,5') // 20 downloads per 5 minutes
+            ->name('marketplace.seller.orders.invoice');
+    });
+
+    // Seller Ratings (buyers can rate sellers)
+    Route::get('/sellers/{seller}/rating', [App\Http\Controllers\Marketplace\SellerRatingController::class, 'show'])
+        ->name('marketplace.sellers.rating');
+    Route::get('/orders/{order}/seller-rating/create', [App\Http\Controllers\Marketplace\SellerRatingController::class, 'create'])
+        ->name('marketplace.seller-rating.create');
+    Route::post('/orders/{order}/seller-rating', [App\Http\Controllers\Marketplace\SellerRatingController::class, 'store'])
+        ->name('marketplace.seller-rating.store');
+    Route::put('/seller-rating/{rating}', [App\Http\Controllers\Marketplace\SellerRatingController::class, 'update'])
+        ->name('marketplace.seller-rating.update');
 
     // Clipper Routes
     Route::prefix('clipper')->name('clipper.')->middleware(['auth'])->group(function () {
@@ -685,6 +739,22 @@ Route::middleware('auth')->group(function () {
             Route::post('campaigns/{campaign}/share', [App\Http\Controllers\Clipper\CampaignController::class, 'shareAsPost'])->name('campaigns.share');
             Route::post('campaigns/{campaign}/clips/{clip}/approve', [App\Http\Controllers\Clipper\CampaignController::class, 'approveClip'])->name('campaigns.clips.approve');
             Route::post('campaigns/{campaign}/clips/{clip}/reject', [App\Http\Controllers\Clipper\CampaignController::class, 'rejectClip'])->name('campaigns.clips.reject');
+
+            // Campaign Templates
+            Route::resource('campaign-templates', App\Http\Controllers\Clipper\CampaignTemplateController::class)->names('clipper.campaign-templates');
+            Route::post('campaign-templates/{campaignTemplate}/duplicate', [App\Http\Controllers\Clipper\CampaignTemplateController::class, 'duplicate'])->name('clipper.campaign-templates.duplicate');
+
+            // Campaign Collaboration
+            Route::post('campaigns/{campaign}/collaborators/invite', [App\Http\Controllers\Clipper\CampaignCollaborationController::class, 'invite'])->name('campaigns.collaborators.invite');
+            Route::post('campaigns/collaborators/{collaboration}/accept', [App\Http\Controllers\Clipper\CampaignCollaborationController::class, 'accept'])->name('campaigns.collaborators.accept');
+            Route::post('campaigns/collaborators/{collaboration}/reject', [App\Http\Controllers\Clipper\CampaignCollaborationController::class, 'reject'])->name('campaigns.collaborators.reject');
+            Route::delete('campaigns/{campaign}/collaborators/{user}', [App\Http\Controllers\Clipper\CampaignCollaborationController::class, 'remove'])->name('campaigns.collaborators.remove');
+            Route::put('campaigns/collaborators/{collaboration}/permissions', [App\Http\Controllers\Clipper\CampaignCollaborationController::class, 'updatePermissions'])->name('campaigns.collaborators.update-permissions');
+
+            // Campaign A/B Testing
+            Route::post('campaigns/{campaign}/ab-test/setup', [App\Http\Controllers\Clipper\CampaignController::class, 'setupABTest'])->name('campaigns.ab-test.setup');
+            Route::get('campaigns/{campaign}/ab-test/results', [App\Http\Controllers\Clipper\CampaignController::class, 'getABTestResults'])->name('campaigns.ab-test.results');
+            Route::post('campaigns/{campaign}/ab-test/select-winner', [App\Http\Controllers\Clipper\CampaignController::class, 'selectWinner'])->name('campaigns.ab-test.select-winner');
 
             // Clips (Clipper)
             Route::get('clips', [App\Http\Controllers\Clipper\ClipController::class, 'index'])->name('clips.index');
@@ -914,6 +984,20 @@ Route::middleware('auth')->group(function () {
         Route::get('support-tickets/{ticket}/response', function ($ticket) {
             return redirect()->route('admin.support-tickets.show', $ticket);
         });
+
+        // Seller Verifications
+        Route::resource('seller-verifications', App\Http\Controllers\Admin\AdminSellerVerificationController::class)
+            ->only(['index', 'show'])
+            ->names('seller-verifications');
+        Route::post('seller-verifications/{verification}/approve', [App\Http\Controllers\Admin\AdminSellerVerificationController::class, 'approve'])
+            ->middleware('throttle:20,1')
+            ->name('seller-verifications.approve');
+        Route::post('seller-verifications/{verification}/reject', [App\Http\Controllers\Admin\AdminSellerVerificationController::class, 'reject'])
+            ->middleware('throttle:20,1')
+            ->name('seller-verifications.reject');
+        Route::post('sellers/{seller}/verification/revoke', [App\Http\Controllers\Admin\AdminSellerVerificationController::class, 'revoke'])
+            ->middleware('throttle:20,1')
+            ->name('sellers.verification.revoke');
     });
 });
 
@@ -985,6 +1069,96 @@ Route::prefix('legal')->name('legal.')->group(function () {
     Route::post('/contact', [App\Http\Controllers\Legal\ContactController::class, 'submit'])
         ->middleware('throttle:3,60') // 3 submissions per hour
         ->name('contact.submit');
+});
+
+// Stock data
+Route::get('/stocks/dashboard', [App\Http\Controllers\StockController::class, 'dashboard'])->middleware('auth')->name('stocks.dashboard');
+Route::get('/stocks', [App\Http\Controllers\StockController::class, 'index'])->name('stocks.index');
+
+// Stock screening - MUST be before /stocks/{stock} route to avoid route conflict
+Route::get('/stocks/screening', [App\Http\Controllers\StockScreeningController::class, 'show'])->middleware('auth')->name('stocks.screening');
+
+// Watchlist - MUST be before /stocks/{stock} route to avoid route conflict
+Route::get('/stocks/watchlist', [App\Http\Controllers\StockWatchlistController::class, 'index'])
+    ->middleware('auth')
+    ->name('stocks.watchlist.index');
+Route::post('/stocks/watchlist', [App\Http\Controllers\StockWatchlistController::class, 'store'])
+    ->middleware('auth')
+    ->name('stocks.watchlist.store');
+Route::put('/stocks/watchlist/{watchlist}', [App\Http\Controllers\StockWatchlistController::class, 'update'])
+    ->middleware('auth')
+    ->name('stocks.watchlist.update');
+Route::delete('/stocks/watchlist/{watchlist}', [App\Http\Controllers\StockWatchlistController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('stocks.watchlist.destroy');
+
+// Stock detail routes - must be after specific routes
+Route::get('/stocks/{stock}', [App\Http\Controllers\StockController::class, 'show'])->name('stocks.show');
+Route::get('/stocks/{stock}/prices', [App\Http\Controllers\StockController::class, 'prices'])->name('stocks.prices');
+Route::get('/stocks/{stock}/indicators', [App\Http\Controllers\StockController::class, 'indicators'])->name('stocks.indicators');
+Route::get('/stocks/{stock}/predictions', [App\Http\Controllers\StockController::class, 'predictions'])
+    ->middleware('auth')
+    ->name('stocks.predictions');
+Route::get('/stocks/{stock}/signals', [App\Http\Controllers\StockController::class, 'signals'])->name('stocks.signals');
+
+// Stock screening API routes
+Route::post('/stocks/screen', [App\Http\Controllers\StockScreeningController::class, 'screen'])
+    ->middleware('throttle:30,1') // 30 screenings per minute
+    ->name('stocks.screen');
+Route::post('/stocks/screenings', [App\Http\Controllers\StockScreeningController::class, 'save'])
+    ->middleware(['auth', 'throttle:10,1']) // 10 saves per minute
+    ->name('stocks.screenings.save');
+Route::get('/stocks/screenings', [App\Http\Controllers\StockScreeningController::class, 'saved'])
+    ->middleware(['auth', 'throttle:60,1']) // 60 requests per minute
+    ->name('stocks.screenings.index');
+Route::get('/stocks/screenings/{screening}', [App\Http\Controllers\StockScreeningController::class, 'results'])
+    ->middleware(['auth', 'throttle:60,1']) // 60 requests per minute
+    ->name('stocks.screenings.results');
+Route::delete('/stocks/screenings/{screening}', [App\Http\Controllers\StockScreeningController::class, 'delete'])
+    ->middleware(['auth', 'throttle:10,1']) // 10 deletes per minute
+    ->name('stocks.screenings.delete');
+
+// Portfolio recommendations (premium)
+Route::get('/portfolio/generate', [App\Http\Controllers\PortfolioRecommendationController::class, 'create'])
+    ->middleware('auth')
+    ->name('portfolio.generate');
+Route::post('/portfolio/generate', [App\Http\Controllers\PortfolioRecommendationController::class, 'generate'])
+    ->middleware('auth')
+    ->name('portfolio.generate.store');
+Route::get('/portfolio/recommendations', [App\Http\Controllers\PortfolioRecommendationController::class, 'index'])
+    ->middleware('auth')
+    ->name('portfolio.index');
+Route::get('/portfolio/recommendations/{recommendation}', [App\Http\Controllers\PortfolioRecommendationController::class, 'show'])
+    ->middleware('auth')
+    ->name('portfolio.show');
+
+// Predictions (tiered access)
+Route::post('/stocks/predict', [App\Http\Controllers\StockPredictionController::class, 'predict'])
+    ->middleware('auth')
+    ->name('stocks.predict');
+Route::get('/stocks/{stock}/prediction-accuracy', [App\Http\Controllers\StockPredictionController::class, 'accuracy'])
+    ->middleware('auth')
+    ->name('stocks.prediction-accuracy');
+
+// Supplier routes
+Route::middleware('auth')->group(function () {
+    Route::get('/suppliers', [App\Http\Controllers\SupplierController::class, 'index'])->name('suppliers.index');
+    Route::get('/suppliers/create', [App\Http\Controllers\SupplierController::class, 'create'])->name('suppliers.create');
+    Route::post('/suppliers', [App\Http\Controllers\SupplierController::class, 'store'])->name('suppliers.store');
+    Route::get('/suppliers/{supplier}', [App\Http\Controllers\SupplierController::class, 'show'])->name('suppliers.show');
+    Route::get('/suppliers/{supplier}/edit', [App\Http\Controllers\SupplierController::class, 'edit'])->name('suppliers.edit');
+    Route::put('/suppliers/{supplier}', [App\Http\Controllers\SupplierController::class, 'update'])->name('suppliers.update');
+    
+    // Supplier reviews
+    Route::post('/suppliers/{supplier}/reviews', [App\Http\Controllers\SupplierReviewController::class, 'store'])->name('suppliers.reviews.store');
+    Route::put('/suppliers/{supplier}/reviews/{review}', [App\Http\Controllers\SupplierReviewController::class, 'update'])->name('suppliers.reviews.update');
+    Route::delete('/suppliers/{supplier}/reviews/{review}', [App\Http\Controllers\SupplierReviewController::class, 'destroy'])->name('suppliers.reviews.destroy');
+});
+
+// API routes
+Route::middleware('auth')->group(function () {
+    Route::get('/api/supplier-recommendations', [App\Http\Controllers\SupplierRecommendationController::class, 'index'])->name('api.supplier-recommendations');
+    Route::get('/api/suppliers/business-types', [App\Http\Controllers\SupplierController::class, 'businessTypes'])->name('api.suppliers.business-types');
 });
 
 require __DIR__ . '/auth.php';

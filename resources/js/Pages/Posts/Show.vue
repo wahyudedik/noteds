@@ -19,6 +19,7 @@ import ValidationResults from '@/Components/ValidationResults.vue';
 import LinkPreview from '@/Components/LinkPreview.vue';
 import ImageGallery from '@/Components/ImageGallery.vue';
 import WeightedScoreToggle from '@/Components/WeightedScoreToggle.vue';
+import SupplierRecommendations from '@/Components/SupplierRecommendations.vue';
 import { PURPOSE_TYPES } from '@/Utils/constants';
 
 const props = defineProps({
@@ -35,6 +36,8 @@ const props = defineProps({
     },
     validationStats: Object,
     userValidation: Object,
+    supplierRecommendations: Array,
+    businessType: String,
 });
 
 const commentForm = useForm({
@@ -339,6 +342,13 @@ const getImageClass = (imageCount, index) => {
                                 />
                             </div>
                         </div>
+
+                        <!-- Supplier Recommendations -->
+                        <SupplierRecommendations
+                            v-if="supplierRecommendations"
+                            :recommendations="supplierRecommendations"
+                            :business-type="businessType"
+                        />
 
                         <!-- Comments section -->
                         <div class="mt-6">

@@ -79,6 +79,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'two_factor_secret',
         'two_factor_recovery_codes',
         'two_factor_confirmed_at',
+        'is_verified_seller',
+        'seller_rating',
+        'low_stock_alert_threshold',
+        'low_stock_alert_enabled',
     ];
 
     /**
@@ -109,6 +113,10 @@ class User extends Authenticatable implements MustVerifyEmail
             'balance' => 'decimal:2',
             'two_factor_enabled' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
+            'is_verified_seller' => 'boolean',
+            'seller_rating' => 'decimal:2',
+            'low_stock_alert_threshold' => 'integer',
+            'low_stock_alert_enabled' => 'boolean',
         ];
     }
 
@@ -214,6 +222,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function campaigns(): HasMany
     {
         return $this->hasMany(Campaign::class, 'creator_id');
+    }
+
+    /**
+     * Get the campaign templates created by this user.
+     */
+    public function campaignTemplates(): HasMany
+    {
+        return $this->hasMany(CampaignTemplate::class);
     }
 
     /**
@@ -423,5 +439,103 @@ class User extends Authenticatable implements MustVerifyEmail
     public function reposts(): HasMany
     {
         return $this->hasMany(Repost::class);
+    }
+
+    /**
+     * Get the seller verification for this user.
+     */
+    public function sellerVerification(): HasOne
+    {
+        return $this->hasOne(SellerVerification::class);
+    }
+
+    /**
+     * Get the seller ratings received by this user.
+     */
+    public function sellerRatings(): HasMany
+    {
+        return $this->hasMany(SellerRating::class, 'seller_id');
+    }
+
+    /**
+     * Get the seller ratings given by this user.
+     */
+    public function givenSellerRatings(): HasMany
+    {
+        return $this->hasMany(SellerRating::class, 'buyer_id');
+    }
+
+    /**
+     * Get the performance metrics for this user as a seller.
+     */
+    public function performanceMetrics(): HasOne
+    {
+        return $this->hasOne(SellerPerformanceMetric::class, 'seller_id');
+    }
+
+    /**
+     * Check if user is a verified seller.
+     */
+    public function isVerifiedSeller(): bool
+    {
+        return $this->is_verified_seller ?? false;
+    }
+
+    /**
+     * Check if user can apply for verification.
+     */
+    public function canApplyForVerification(): bool
+    {
+        // Check if already verified
+        if ($this->isVerifiedSeller()) {
+            return false;
+        }
+
+        // Check if has pending application
+        if ($this->sellerVerification && $this->sellerVerification->isPending()) {
+            return false;
+        }
+
+        // Check if email is verified
+        if (config('seller.verification.require_email_verification', true) && !$this->hasVerifiedEmail()) {
+            return false;
+        }
+
+        // Check minimum products requirement
+        $minProducts = config('seller.verification.min_products_required', 1);
+        if ($this->products()->count() < $minProducts) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get seller rating (cached value).
+     */
+    public function getSellerRating(): ?float
+    {
+        return $this->seller_rating;
+    }
+
+    /**
+     * Check if user has products with low stock.
+     */
+    public function hasLowStockProducts(): bool
+    {
+        return $this->products()
+            ->whereNotNull('stock')
+            ->whereRaw('stock <= COALESCE(low_stock_threshold, ?)', [
+                $this->low_stock_alert_threshold ?? config('seller.inventory.default_low_stock_threshold', 10)
+            ])
+            ->exists();
+    }
+
+    /**
+     * Get the stock watchlists for this user.
+     */
+    public function stockWatchlists(): HasMany
+    {
+        return $this->hasMany(StockWatchlist::class);
     }
 }

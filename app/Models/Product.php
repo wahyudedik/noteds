@@ -51,6 +51,11 @@ class Product extends Model
         'trial_days',
         'is_waitlist_enabled',
         'waitlist_notify_at_stock',
+        'low_stock_threshold',
+        'stock_alert_sent_at',
+        'base_price',
+        'current_dynamic_price',
+        'pricing_rules_enabled',
     ];
 
     protected $appends = ['image_url'];
@@ -71,6 +76,11 @@ class Product extends Model
             'trial_days' => 'integer',
             'is_waitlist_enabled' => 'boolean',
             'waitlist_notify_at_stock' => 'integer',
+            'low_stock_threshold' => 'integer',
+            'stock_alert_sent_at' => 'datetime',
+            'base_price' => 'decimal:2',
+            'current_dynamic_price' => 'decimal:2',
+            'pricing_rules_enabled' => 'boolean',
         ];
     }
 
@@ -191,6 +201,30 @@ class Product extends Model
     }
 
     /**
+     * Get stock history for this product.
+     */
+    public function stockHistory(): HasMany
+    {
+        return $this->hasMany(ProductStockHistory::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get pricing rules for this product.
+     */
+    public function pricingRules(): HasMany
+    {
+        return $this->hasMany(ProductPricingRule::class)->orderBy('priority', 'desc');
+    }
+
+    /**
+     * Get active pricing rules for this product.
+     */
+    public function activePricingRules(): HasMany
+    {
+        return $this->pricingRules()->where('is_active', true);
+    }
+
+    /**
      * Check if product is a variant.
      */
     public function isVariant(): bool
@@ -298,6 +332,87 @@ class Product extends Model
     public function scopeByCategory($query, $category)
     {
         return $query->where('category', $category);
+    }
+
+    /**
+     * Update stock and record history.
+     * This method should be called by InventoryManagementService.
+     */
+    public function updateStock(int $quantity, string $type, ?string $reason = null, ?Order $order = null): void
+    {
+        // This method will be implemented by service layer
+        // to ensure proper history tracking
+    }
+
+    /**
+     * Check if product is low stock.
+     */
+    public function checkLowStock(): bool
+    {
+        if ($this->stock === null) {
+            return false; // Unlimited stock
+        }
+
+        $threshold = $this->low_stock_threshold ?? $this->seller->low_stock_alert_threshold ?? config('seller.inventory.default_low_stock_threshold', 10);
+        
+        return $this->stock <= $threshold;
+    }
+
+    /**
+     * Get effective price with dynamic pricing rules applied.
+     */
+    public function getEffectivePrice(): float
+    {
+        if (!$this->pricing_rules_enabled) {
+            return (float) ($this->base_price ?? $this->price);
+        }
+
+        // This will be implemented by DynamicPricingService
+        return (float) ($this->current_dynamic_price ?? $this->base_price ?? $this->price);
+    }
+
+    /**
+     * Apply pricing rules and update current_dynamic_price.
+     */
+    public function applyPricingRules(): ?float
+    {
+        // This will be implemented by DynamicPricingService
+        return null;
+    }
+
+    /**
+     * Check if product has low stock.
+     */
+    public function hasLowStock(): bool
+    {
+        return $this->checkLowStock();
+    }
+
+    /**
+     * Check if product can apply pricing rules.
+     */
+    public function canApplyPricingRules(): bool
+    {
+        return $this->pricing_rules_enabled && $this->activePricingRules()->exists();
+    }
+
+    /**
+     * Scope a query to only include products with low stock.
+     */
+    public function scopeLowStock($query)
+    {
+        $defaultThreshold = config('seller.inventory.default_low_stock_threshold', 10);
+        
+        return $query->whereNotNull('stock')
+            ->whereRaw('stock <= COALESCE(low_stock_threshold, ?)', [$defaultThreshold]);
+    }
+
+    /**
+     * Scope a query to only include products with dynamic pricing enabled.
+     */
+    public function scopeWithDynamicPricing($query)
+    {
+        return $query->where('pricing_rules_enabled', true);
     }
 
     /**

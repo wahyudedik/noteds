@@ -28,5 +28,25 @@ class AppServiceProvider extends ServiceProvider
             \App\Events\PostReposted::class,
             \App\Listeners\TrackRepostAnalyticsListener::class
         );
+
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\StockLowAlert::class,
+            \App\Listeners\StockLowAlertListener::class
+        );
+
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\PricingRuleApplied::class,
+            \App\Listeners\PricingRuleAppliedListener::class
+        );
+
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\SellerVerified::class,
+            \App\Listeners\SellerVerifiedListener::class
+        );
+
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\SellerRatingUpdated::class,
+            \App\Listeners\SellerRatingUpdatedListener::class
+        );
     }
 }

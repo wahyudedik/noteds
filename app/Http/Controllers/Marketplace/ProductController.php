@@ -344,4 +344,20 @@ class ProductController extends Controller
             'comparison' => $comparisonData,
         ]);
     }
+
+    /**
+     * Get current effective price (API).
+     */
+    public function getEffectivePrice(Product $product, Request $request)
+    {
+        $pricingService = app(\App\Services\DynamicPricingService::class);
+        $effectivePrice = $pricingService->calculateEffectivePrice($product);
+
+        return response()->json([
+            'product_id' => $product->id,
+            'base_price' => (float) ($product->base_price ?? $product->price),
+            'effective_price' => $effectivePrice,
+            'pricing_rules_enabled' => $product->pricing_rules_enabled,
+        ]);
+    }
 }

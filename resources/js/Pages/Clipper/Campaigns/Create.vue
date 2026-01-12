@@ -6,7 +6,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Textarea from '@/Components/Textarea.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 
 const props = defineProps({
     availableBalance: {
@@ -18,7 +18,43 @@ const props = defineProps({
 const page = usePage();
 const isBrand = computed(() => page.props.auth?.user?.clipper_role === 'brand' || page.props.auth?.user?.role === 'brand');
 
+const selectedTemplateId = ref(props.templateId || null);
+const selectedTemplate = computed(() => {
+    if (!selectedTemplateId.value) return null;
+    return [...(props.templates || []), ...(props.publicTemplates || [])].find(t => t.id === selectedTemplateId.value);
+});
+
+const loadTemplate = (template) => {
+    if (!template) {
+        selectedTemplateId.value = null;
+        return;
+    }
+    selectedTemplateId.value = template.id;
+    form.title = template.title || '';
+    form.description = template.description || '';
+    form.video_references = template.video_references || [{ url: '', title: '' }];
+    form.cpm = template.cpm || '';
+    form.max_budget = template.max_budget || '';
+    form.max_reward_per_clipper = template.max_reward_per_clipper || '';
+    form.duration_days = template.duration_days || '';
+};
+
+// Load template on mount if templateId is provided
+onMounted(() => {
+    if (props.templateId && selectedTemplate.value) {
+        loadTemplate();
+    }
+});
+
+// Watch for template selection changes
+watch(selectedTemplateId, () => {
+    if (selectedTemplateId.value) {
+        loadTemplate();
+    }
+});
+
 const form = useForm({
+    template_id: props.templateId || null,
     title: '',
     description: '',
     video_references: [{ url: '', title: '' }],
@@ -26,6 +62,8 @@ const form = useForm({
     max_budget: '',
     max_reward_per_clipper: '',
     duration_days: '',
+    scheduled_start_at: null,
+    scheduled_end_at: null,
 });
 
 const formatCurrency = (amount) => {
@@ -122,6 +160,17 @@ const submit = () => {
         };
     }).filter(ref => ref.url !== '');
     
+    // Set template_id
+    form.template_id = selectedTemplateId.value;
+    
+    // Convert datetime-local to ISO format if set
+    if (form.scheduled_start_at) {
+        form.scheduled_start_at = new Date(form.scheduled_start_at).toISOString();
+    }
+    if (form.scheduled_end_at) {
+        form.scheduled_end_at = new Date(form.scheduled_end_at).toISOString();
+    }
+    
     form.post(route('clipper.campaigns.store'), {
         preserveScroll: true,
     });
@@ -177,6 +226,32 @@ const submit = () => {
                     <div class="p-6 text-gray-900 dark:text-gray-100">
                         <form @submit.prevent="submit" v-if="isBrand">
                             <div class="space-y-6">
+                                <!-- Template Selector -->
+                                <div v-if="(templates && templates.length > 0) || (publicTemplates && publicTemplates.length > 0)">
+                                    <InputLabel for="template" value="Start from Template (Optional)" />
+                                    <select
+                                        id="template"
+                                        v-model="selectedTemplateId"
+                                        @change="loadTemplate(selectedTemplate)"
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    >
+                                        <option :value="null">Create from scratch</option>
+                                        <optgroup v-if="templates && templates.length > 0" label="My Templates">
+                                            <option v-for="template in templates" :key="template.id" :value="template.id">
+                                                {{ template.name }}
+                                            </option>
+                                        </optgroup>
+                                        <optgroup v-if="publicTemplates && publicTemplates.length > 0" label="Public Templates">
+                                            <option v-for="template in publicTemplates" :key="template.id" :value="template.id">
+                                                {{ template.name }} (Public)
+                                            </option>
+                                        </optgroup>
+                                    </select>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        Select a template to pre-fill the campaign form
+                                    </p>
+                                </div>
+
                                 <!-- Title -->
                                 <div>
                                     <InputLabel for="title" value="Campaign Title" />
@@ -408,6 +483,41 @@ const submit = () => {
                                         How long this campaign will run
                                     </p>
                                     <InputError class="mt-2" :message="form.errors.duration_days" />
+                                </div>
+
+                                <!-- Scheduling (Optional) -->
+                                <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Schedule Campaign (Optional)</h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <InputLabel for="scheduled_start_at" value="Scheduled Start Date & Time" />
+                                            <input
+                                                id="scheduled_start_at"
+                                                type="datetime-local"
+                                                v-model="form.scheduled_start_at"
+                                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                :min="new Date().toISOString().slice(0, 16)"
+                                            />
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                Campaign will automatically start at this time
+                                            </p>
+                                            <InputError class="mt-2" :message="form.errors.scheduled_start_at" />
+                                        </div>
+                                        <div>
+                                            <InputLabel for="scheduled_end_at" value="Scheduled End Date & Time (Optional)" />
+                                            <input
+                                                id="scheduled_end_at"
+                                                type="datetime-local"
+                                                v-model="form.scheduled_end_at"
+                                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                :min="form.scheduled_start_at || new Date().toISOString().slice(0, 16)"
+                                            />
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                Campaign will automatically end at this time
+                                            </p>
+                                            <InputError class="mt-2" :message="form.errors.scheduled_end_at" />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Submit Button -->

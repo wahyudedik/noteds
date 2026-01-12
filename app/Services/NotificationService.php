@@ -645,5 +645,41 @@ class NotificationService
             $post->user->notify(new \App\Notifications\PostEditedByCollaboratorNotification($post, $collaborator));
         }
     }
+
+    /**
+     * Notify user about campaign collaboration invitation.
+     */
+    public function notifyCampaignCollaborationInvitation(\App\Models\CampaignCollaborator $collaboration): void
+    {
+        $collaboration->load(['user', 'campaign.creator']);
+        
+        if ($collaboration->user) {
+            $collaboration->user->notify(new \App\Notifications\CampaignCollaborationInvitationNotification($collaboration));
+        }
+    }
+
+    /**
+     * Notify campaign owner when collaboration is accepted.
+     */
+    public function notifyCampaignCollaborationAccepted(\App\Models\CampaignCollaborator $collaboration): void
+    {
+        $collaboration->load(['user', 'campaign.creator']);
+        
+        if ($collaboration->campaign->creator) {
+            $collaboration->campaign->creator->notify(new \App\Notifications\CampaignCollaborationAcceptedNotification($collaboration));
+        }
+    }
+
+    /**
+     * Notify campaign owner when collaboration is rejected.
+     */
+    public function notifyCampaignCollaborationRejected(\App\Models\CampaignCollaborator $collaboration): void
+    {
+        $collaboration->load(['user', 'campaign.creator']);
+        
+        if ($collaboration->campaign->creator) {
+            $collaboration->campaign->creator->notify(new \App\Notifications\CampaignCollaborationRejectedNotification($collaboration));
+        }
+    }
 }
 

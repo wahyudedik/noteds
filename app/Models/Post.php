@@ -58,6 +58,7 @@ class Post extends Model
         'original_post_id',
         'is_quote_repost',
         'purpose_type',
+        'business_type',
         'title',
         'content',
         'link_url',

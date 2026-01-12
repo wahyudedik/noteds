@@ -56,7 +56,7 @@ class MentionedInCommentNotification extends Notification implements ShouldQueue
             'user_id' => $this->comment->user_id,
             'user_name' => $this->comment->user->name ?? $this->comment->user->business_name,
             'title' => 'You were mentioned in a comment',
-            'message' => "{$this->comment->user->name ?? $this->comment->user->business_name} mentioned you in a comment",
+            'message' => ($this->comment->user->name ?? $this->comment->user->business_name) . ' mentioned you in a comment',
         ];
     }
 }

@@ -12,6 +12,7 @@ use App\Services\TrendingService;
 use App\Services\PostAnalyticsService;
 use App\Services\PostSeriesService;
 use App\Services\CrossPostService;
+use App\Services\SupplierRecommendationService;
 use App\Models\Post;
 use App\Models\PostMedia;
 use Illuminate\Http\JsonResponse;
@@ -33,7 +34,8 @@ class PostController extends Controller
         private TrendingService $trendingService,
         private PostAnalyticsService $analyticsService,
         private PostSeriesService $seriesService,
-        private CrossPostService $crossPostService
+        private CrossPostService $crossPostService,
+        private SupplierRecommendationService $supplierRecommendationService
     ) {}
     /**
      * Display a listing of the resource.
@@ -264,7 +266,11 @@ class PostController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Posts/Create');
+        $businessTypes = $this->supplierRecommendationService->getBusinessTypes();
+
+        return Inertia::render('Posts/Create', [
+            'businessTypes' => $businessTypes,
+        ]);
     }
 
     /**
@@ -457,6 +463,27 @@ class PostController extends Controller
             }
         }
 
+        // Get supplier recommendations if applicable
+        $supplierRecommendations = null;
+        $detectedBusinessType = null;
+        if (in_array($post->purpose_type, ['idea_business', 'validate_idea', 'find_tools'])) {
+            // Use business_type from post if set, otherwise try to detect
+            $businessType = $post->business_type;
+            if (!$businessType) {
+                $businessType = $this->supplierRecommendationService->detectBusinessTypeFromPost($post);
+                $detectedBusinessType = $businessType;
+            }
+
+            if ($businessType) {
+                $location = $request->user()?->location ?? null; // Adjust based on user model structure
+                $supplierRecommendations = $this->supplierRecommendationService->getRecommendedSuppliers(
+                    $businessType,
+                    $location,
+                    5
+                );
+            }
+        }
+
         return Inertia::render('Posts/Show', [
             'post' => $post,
             'userVote' => $userVote,
@@ -467,6 +494,8 @@ class PostController extends Controller
             'userPollVote' => $userPollVote,
             'seriesNavigation' => $seriesNavigation,
             'collaborators' => $post->collaborators,
+            'supplierRecommendations' => $supplierRecommendations,
+            'businessType' => $post->business_type ?? $detectedBusinessType ?? null,
         ]);
     }
 
@@ -481,9 +510,12 @@ class PostController extends Controller
         }
 
         $post->load(['hashtags', 'poll.options']);
+        
+        $businessTypes = $this->supplierRecommendationService->getBusinessTypes();
 
         return Inertia::render('Posts/Edit', [
             'post' => $post,
+            'businessTypes' => $businessTypes,
         ]);
     }
 
@@ -500,6 +532,7 @@ class PostController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'min:10', 'max:255'],
             'content' => ['required', 'string', 'min:50'],
+            'business_type' => ['nullable', 'string', 'max:100'],
             'scheduled_at' => ['nullable', 'date', 'after:now'],
             'publish_status' => ['nullable', 'in:draft,scheduled,published'],
             'series_id' => ['nullable', 'exists:posts,id'],

@@ -16,6 +16,7 @@ const clipperMenuExpanded = ref(false);
 const marketplaceMenuExpanded = ref(false);
 const supportMenuExpanded = ref(false);
 const accountMenuExpanded = ref(false);
+const stocksMenuExpanded = ref(false);
 
 const navItems = [
     {
@@ -77,6 +78,14 @@ const navItems = [
         hasSubmenu: true,
     },
     {
+        name: 'Stocks',
+        route: 'stocks.dashboard',
+        icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z',
+        active: () => page.url.startsWith('/stocks') || page.url.startsWith('/portfolio'),
+        requiresAuth: true,
+        hasSubmenu: true,
+    },
+    {
         name: 'Account',
         route: 'profile.show',
         routeParams: () => page.props.auth?.user?.id,
@@ -120,6 +129,19 @@ const marketplaceSubmenuItems = computed(() => {
     }
     
     return items;
+});
+
+// Stocks submenu items
+const stocksSubmenuItems = computed(() => {
+    const user = page.props.auth?.user;
+    if (!user) return [];
+    
+    return [
+        { name: 'Dashboard', route: 'stocks.dashboard', icon: 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z' },
+        { name: 'Screening', route: 'stocks.screening', icon: 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z' },
+        { name: 'Watchlist', route: 'stocks.watchlist.index', icon: 'M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z' },
+        { name: 'Portfolio', route: 'portfolio.index', icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z' },
+    ];
 });
 
 // Account submenu items
@@ -204,6 +226,9 @@ if (page.url.startsWith('/marketplace')) {
 }
 if (page.url.startsWith('/support')) {
     supportMenuExpanded.value = true;
+}
+if (page.url.startsWith('/stocks') || page.url.startsWith('/portfolio')) {
+    stocksMenuExpanded.value = true;
 }
 if (page.url.startsWith('/profile') || page.url.startsWith('/settings') || page.url.startsWith('/bookmarks') || page.url.startsWith('/notifications')) {
     accountMenuExpanded.value = true;
@@ -425,6 +450,82 @@ if (page.url.startsWith('/profile') || page.url.startsWith('/settings') || page.
                                             const routeUrl = route(subItem.route).split('?')[0];
                                             return page.url.startsWith(routeUrl);
                                         } catch {
+                                            return page.url.includes(subItem.route.replace('.', '/'));
+                                        }
+                                    })()
+                                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                                        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700',
+                                ]"
+                            >
+                                <svg
+                                    class="h-5 w-5 flex-shrink-0"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        :d="subItem.icon"
+                                    />
+                                </svg>
+                                <span>{{ subItem.name }}</span>
+                            </Link>
+                        </div>
+                    </div>
+                    <!-- Stocks menu with submenu -->
+                    <div v-else-if="item.hasSubmenu && item.name === 'Stocks'" class="space-y-1">
+                        <button
+                            @click="stocksMenuExpanded = !stocksMenuExpanded"
+                            :class="[
+                                'group w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition',
+                                item.active()
+                                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700',
+                            ]"
+                        >
+                            <div class="flex items-center gap-3">
+                                <svg
+                                    class="h-6 w-6 flex-shrink-0"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        :d="item.icon"
+                                    />
+                                </svg>
+                                <span>{{ item.name }}</span>
+                            </div>
+                            <svg
+                                class="h-4 w-4 transition-transform"
+                                :class="{ 'rotate-180': stocksMenuExpanded }"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div v-if="stocksMenuExpanded" class="ml-4 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-3">
+                            <Link
+                                v-for="subItem in stocksSubmenuItems"
+                                :key="subItem.name"
+                                :href="subItem.routeParams ? route(subItem.route, typeof subItem.routeParams === 'function' ? subItem.routeParams() : subItem.routeParams) : route(subItem.route)"
+                                :class="[
+                                    'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
+                                    (() => {
+                                        try {
+                                            const routeUrl = subItem.routeParams 
+                                                ? route(subItem.route, typeof subItem.routeParams === 'function' ? subItem.routeParams() : subItem.routeParams).split('?')[0]
+                                                : route(subItem.route).split('?')[0];
+                                            return page.url.startsWith(routeUrl);
+                                        } catch {
+                                            // Fallback to simple URL check
                                             return page.url.includes(subItem.route.replace('.', '/'));
                                         }
                                     })()

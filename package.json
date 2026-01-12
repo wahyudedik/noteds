@@ -20,16 +20,19 @@
         "vite": "^7.0.7",
         "vue": "^3.4.0"
     },
-    "dependencies": {
-        "@tiptap/extension-code-block-lowlight": "^2.1.13",
-        "@tiptap/extension-image": "^2.1.13",
-        "@tiptap/extension-link": "^2.1.13",
-        "@tiptap/extension-mention": "^2.1.13",
-        "@tiptap/extension-youtube": "^2.1.13",
-        "@tiptap/starter-kit": "^2.1.13",
-        "@tiptap/vue-3": "^2.1.13",
-        "date-fns": "^2.30.0",
-        "lowlight": "^3.1.0",
-        "marked": "^17.0.1"
-    }
+  "dependencies": {
+    "@tiptap/extension-code-block-lowlight": "^2.1.13",
+    "@tiptap/extension-image": "^2.1.13",
+    "@tiptap/extension-link": "^2.1.13",
+    "@tiptap/extension-mention": "^2.1.13",
+    "@tiptap/extension-youtube": "^2.1.13",
+    "@tiptap/starter-kit": "^2.1.13",
+    "@tiptap/vue-3": "^2.1.13",
+    "chart.js": "^4.4.0",
+    "date-fns": "^2.30.0",
+    "lightweight-charts": "^4.1.0",
+    "lowlight": "^3.1.0",
+    "marked": "^17.0.1",
+    "vue-chartjs": "^5.2.0"
+  }
 }
