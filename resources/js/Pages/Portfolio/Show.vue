@@ -147,6 +147,7 @@ const formatMetric = (value) => {
       </div>
       </div>
     </div>
+    </div>
   </AuthenticatedLayout>
 </template>
 
