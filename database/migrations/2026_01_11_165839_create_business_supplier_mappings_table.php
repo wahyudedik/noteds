@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
             
             $table->index('business_type');
-            $table->unique(['business_type', 'supplier_category']);
+            $table->unique(['business_type', 'supplier_category'], 'bsm_business_supplier_unique');
         });
     }
 
