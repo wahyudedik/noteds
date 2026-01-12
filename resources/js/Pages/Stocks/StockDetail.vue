@@ -158,6 +158,7 @@ const addToWatchlist = async () => {
       </div>
       </div>
     </div>
+    </div>
   </AuthenticatedLayout>
 </template>
 

@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import PostCard from '@/Components/PostCard.vue';
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
     hashtag: Object,
@@ -10,7 +10,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <AppLayout>
+    <AuthenticatedLayout>
         <Head :title="`#${hashtag.name}`" />
 
         <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -56,6 +56,6 @@ const props = defineProps({
                 </div>
             </div>
         </div>
-    </AppLayout>
+    </AuthenticatedLayout>
 </template>
 
