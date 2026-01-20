@@ -358,6 +358,18 @@ class MLIntegrationService
                     }
                     
                     $model->update($updateData);
+                    
+                    // Auto-select best model if training just completed
+                    if ($status === 'active' && $model->status === 'training') {
+                        try {
+                            $this->autoSelectBestModel($model->stock->code ?? '', $model->prediction_horizon ?? 1);
+                        } catch (\Exception $e) {
+                            Log::warning('Failed to auto-select best model after training', [
+                                'model_id' => $model->id,
+                                'error' => $e->getMessage()
+                            ]);
+                        }
+                    }
                 }
                 
                 return $status;
@@ -370,6 +382,123 @@ class MLIntegrationService
         }
 
         return $model->status;
+    }
+
+    /**
+     * Auto-select best model after training completion.
+     *
+     * @param string $stockCode
+     * @param int $horizon
+     * @return MlModel|null
+     */
+    public function autoSelectBestModel(string $stockCode, int $horizon = 1): ?MlModel
+    {
+        $stock = Stock::where('code', $stockCode)->first();
+        
+        if (!$stock) {
+            Log::warning('Stock not found for auto-selection', ['stock_code' => $stockCode]);
+            return null;
+        }
+
+        try {
+            // Get all active models for this stock and horizon
+            $models = MlModel::where('stock_id', $stock->id)
+                ->where('prediction_horizon', $horizon)
+                ->where('status', 'active')
+                ->whereNotNull('metrics')
+                ->get();
+
+            if ($models->isEmpty()) {
+                Log::info('No active models found for auto-selection', [
+                    'stock_code' => $stockCode,
+                    'horizon' => $horizon
+                ]);
+                return null;
+            }
+
+            // Prepare model results for comparison
+            $modelResults = $models->map(function ($model) {
+                return [
+                    'model_id' => $model->id,
+                    'model_type' => $model->model_type,
+                    'version' => $model->model_version,
+                    'metrics' => $model->metrics ?? [],
+                    'created_at' => $model->training_completed_at?->toIso8601String()
+                ];
+            })->toArray();
+
+            // Call ML service to compare and select best
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'X-API-Key' => config('services.ml_service.api_key'),
+                ])
+                ->post(config('services.ml_service.base_url') . '/api/ml/select-best', [
+                    'stock_code' => $stockCode,
+                    'prediction_horizon' => $horizon,
+                    'model_results' => $modelResults
+                ]);
+
+            if ($response->successful()) {
+                $comparison = $response->json();
+                $bestModelIndex = $comparison['best_model_index'] ?? null;
+
+                if ($bestModelIndex !== null && isset($models[$bestModelIndex])) {
+                    $bestModel = $models[$bestModelIndex];
+
+                    // Deactivate all other models
+                    MlModel::where('stock_id', $stock->id)
+                        ->where('prediction_horizon', $horizon)
+                        ->where('id', '!=', $bestModel->id)
+                        ->update(['is_best_model' => false]);
+
+                    // Mark best model
+                    $bestModel->update(['is_best_model' => true]);
+
+                    Log::info('Best model auto-selected', [
+                        'stock_code' => $stockCode,
+                        'horizon' => $horizon,
+                        'best_model_id' => $bestModel->id,
+                        'model_type' => $bestModel->model_type
+                    ]);
+
+                    return $bestModel;
+                }
+            } else {
+                Log::warning('Failed to get best model from ML service', [
+                    'stock_code' => $stockCode,
+                    'response' => $response->body()
+                ]);
+            }
+
+            // Fallback: select model with best accuracy
+            $bestModel = $models->sortByDesc(function ($model) {
+                $metrics = $model->metrics ?? [];
+                return $metrics['accuracy'] ?? $metrics['r2'] ?? $metrics['mae'] ?? 0;
+            })->first();
+
+            if ($bestModel) {
+                MlModel::where('stock_id', $stock->id)
+                    ->where('prediction_horizon', $horizon)
+                    ->where('id', '!=', $bestModel->id)
+                    ->update(['is_best_model' => false]);
+
+                $bestModel->update(['is_best_model' => true]);
+
+                Log::info('Best model selected (fallback)', [
+                    'stock_code' => $stockCode,
+                    'best_model_id' => $bestModel->id
+                ]);
+            }
+
+            return $bestModel;
+        } catch (\Exception $e) {
+            Log::error('Error in auto-selection', [
+                'stock_code' => $stockCode,
+                'horizon' => $horizon,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
     }
 }
 

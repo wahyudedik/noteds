@@ -340,5 +340,3 @@ resources/js/
 - Minimum content length: 50 characters
 - Forbidden words/phrases list (drama, galau, etc.)
 - Business-relevance check
-
-### Business Rules

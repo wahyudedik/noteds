@@ -830,12 +830,3 @@ Plan ini mengidentifikasi 8 area kritis yang perlu ditingkatkan untuk membuat ap
 - **Two-Factor Authentication** (Phase 9.7): Security enhancement untuk protect user accounts, especially penting untuk admin dan users dengan high-value accounts.
 
 ### Important (Should Have)
-
-- **Transaction Receipts & Invoices** (Phase 9.2): Professional receipts dan invoices untuk semua transactions
-- **Order Tracking** (Phase 9.3): Status updates dan timeline untuk orders
-- **User Activity Log** (Phase 9.4): Transparansi untuk user tentang aktivitas account mereka
-- **Email Receipts** (Phase 9.5): Automated email receipts untuk transactions
-- **Support Ticket System** (Phase 9.6): Professional customer support
-- **Password Security** (Phase 9.8): Enhanced password requirements dan security
-
-### Future Enhancements

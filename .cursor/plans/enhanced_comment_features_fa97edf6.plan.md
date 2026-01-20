@@ -467,4 +467,3 @@ Route::post('/comments/{comment}/reactions', [CommentReactionController::class, 
 
 1. Rich text formatting (TipTap editor)
 2. Media attachments
-3. Comment pinning

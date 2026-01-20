@@ -254,4 +254,3 @@ Return success
 - Test refund (add balance) for creator wallet
 - Test refund (add balance) for clipper wallet
 - Test adjustment (deduct balance) for creator wallet
-- Test adjustment (deduct balance) for clipper wallet

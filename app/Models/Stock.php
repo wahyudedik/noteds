@@ -62,6 +62,14 @@ class Stock extends Model
     }
 
     /**
+     * Get the ML models for this stock.
+     */
+    public function mlModels(): HasMany
+    {
+        return $this->hasMany(MlModel::class);
+    }
+
+    /**
      * Get the signals for this stock.
      */
     public function signals(): HasMany

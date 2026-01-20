@@ -327,4 +327,3 @@ flowchart TD
 
 - Repost button harus mudah diakses tapi tidak terlalu prominent
 - Visual indicator jelas untuk post yang di-repost
-- Repost count visible tapi tidak overwhelming

@@ -289,4 +289,3 @@ Route::delete('/marketplace/reviews/replies/{reply}', [ProductReviewReplyControl
 
 - Follow existing patterns from CommentMedia, CommentVote, and ModerationService
 - Use UUIDs for all primary keys (consistent with existing codebase)
-- Use database transactions for vote counting to prevent race conditions

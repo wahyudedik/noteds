@@ -138,11 +138,41 @@ class StockPredictionController extends Controller
 
     /**
      * Check if user is premium.
+     * 
+     * Premium users have unlimited predictions.
+     * Can be determined by:
+     * - User role (admin, premium)
+     * - Subscription status
+     * - Custom premium flag
      */
     protected function isPremiumUser($user): bool
     {
-        // Implement your premium user check logic
-        return false; // TODO: Implement actual premium check
+        if (!$user) {
+            return false;
+        }
+        
+        // Check if user has premium role
+        if (method_exists($user, 'hasRole')) {
+            return $user->hasRole('premium') || $user->hasRole('admin');
+        }
+        
+        // Check role field directly
+        if (isset($user->role)) {
+            return in_array($user->role, ['premium', 'admin', 'vip']);
+        }
+        
+        // Check for premium subscription (if subscription system exists)
+        if (method_exists($user, 'hasActiveSubscription')) {
+            return $user->hasActiveSubscription('premium');
+        }
+        
+        // Check for premium flag (if exists in user model)
+        if (isset($user->is_premium)) {
+            return (bool) $user->is_premium;
+        }
+        
+        // Default: not premium
+        return false;
     }
 }
 

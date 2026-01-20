@@ -763,4 +763,3 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 - **Policies**: Create policies untuk authorization (FollowPolicy, BookmarkPolicy, ReportPolicy)
 - **Throttling**: Tambahkan throttling untuk routes baru sesuai plan throttling (follow, bookmark, report, search)
 - **Update FeedService**: Add filter untuk posts from followed users sebagai optional feature
-- **Update Post Model**: Add `bookmarkedBy()` relationship untuk query users yang bookmark post

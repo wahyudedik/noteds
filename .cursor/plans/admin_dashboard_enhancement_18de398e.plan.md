@@ -375,4 +375,3 @@ Tidak perlu migration baru, semua data sudah ada di:
 ## Technical Notes
 
 - Gunakan existing components dan patterns yang sudah ada
-- Follow Laravel best practices untuk controllers

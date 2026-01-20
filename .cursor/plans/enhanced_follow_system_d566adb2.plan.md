@@ -432,5 +432,3 @@ Route::middleware('auth')->group(function () {
 7. Follow suggestions page dengan scores
 
 ### Phase 3 (Mutual & Notifications)
-
-8. Mutual connections UI components

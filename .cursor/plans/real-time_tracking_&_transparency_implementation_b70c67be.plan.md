@@ -246,7 +246,7 @@ Yang perlu ditambahkan:
 
 - [ ] Create composable untuk reusable polling logic:
   ```javascript
-        useRealTimePolling(endpoint, options)
+            useRealTimePolling(endpoint, options)
   ```
 
 
@@ -449,5 +449,3 @@ Yang perlu ditambahkan:
 
 - [ ] Users can see view counts update in real-time (within 30 seconds)
 - [ ] View validation status is transparent and understandable
-- [ ] Fraud detection alerts are visible and actionable
-- [ ] View history charts are interactive and informative

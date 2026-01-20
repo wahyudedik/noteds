@@ -1,6 +1,6 @@
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
     notifications: {
@@ -10,15 +10,18 @@ const props = defineProps({
 
 const isOpen = ref(false);
 const dropdownRef = ref(null);
+const page = usePage();
+const localNotifications = ref([]);
 
-const notificationsList = computed(() => {
-    // Handle pagination object - extract data array if it's a pagination object
-    if (props.notifications && typeof props.notifications === 'object' && 'data' in props.notifications) {
-        return props.notifications.data || [];
+const normalizeNotifications = (notifications) => {
+    if (notifications && typeof notifications === 'object' && 'data' in notifications) {
+        return notifications.data || [];
     }
-    // Return as-is if it's already an array
-    return Array.isArray(props.notifications) ? props.notifications : [];
-});
+
+    return Array.isArray(notifications) ? notifications : [];
+};
+
+const notificationsList = computed(() => localNotifications.value);
 
 const unreadCount = computed(() => {
     return notificationsList.value.filter(n => !n.read_at).length;
@@ -182,12 +185,88 @@ const handleClickOutside = (event) => {
     }
 };
 
+const shouldPlaySound = () => {
+    const settings = page.props.settings || {};
+    const prefs = settings.notification_preferences || {};
+
+    return prefs.sound_enabled !== false;
+};
+
+const playNotificationSound = () => {
+    if (!shouldPlaySound()) {
+        return;
+    }
+
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+
+        const audioCtx = new AudioContext();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.type = 'triangle';
+        oscillator.frequency.value = 880;
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        gainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.3);
+
+        oscillator.onended = () => {
+            audioCtx.close();
+        };
+    } catch (e) {
+        // Silently ignore audio errors
+    }
+};
+
+let echoChannel = null;
+
 onMounted(() => {
+    localNotifications.value = normalizeNotifications(props.notifications);
+
+    watch(
+        () => props.notifications,
+        (newVal) => {
+            localNotifications.value = normalizeNotifications(newVal);
+        },
+        { deep: true }
+    );
+
     document.addEventListener('click', handleClickOutside);
+
+    const user = page.props.auth?.user;
+
+    if (user && window.Echo) {
+        echoChannel = window.Echo.private(`user.${user.id}.notifications`);
+
+        echoChannel.listen('.user.notification.created', (event) => {
+            if (event?.notification) {
+                localNotifications.value = [
+                    event.notification,
+                    ...localNotifications.value,
+                ];
+
+                playNotificationSound();
+            }
+        });
+    }
 });
 
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
+
+    if (echoChannel && window.Echo) {
+        const user = page.props.auth?.user;
+        window.Echo.leave(`user.${user?.id}.notifications`);
+        echoChannel = null;
+    }
 });
 </script>
 

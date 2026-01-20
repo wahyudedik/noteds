@@ -97,10 +97,10 @@ todos:
 
 - Add Midtrans configuration section to `.env.example`:
   ```javascript
-      MIDTRANS_SERVER_KEY=
-      MIDTRANS_CLIENT_KEY=
-      MIDTRANS_IS_PRODUCTION=false
-      MIDTRANS_MERCHANT_ID=
+        MIDTRANS_SERVER_KEY=
+        MIDTRANS_CLIENT_KEY=
+        MIDTRANS_IS_PRODUCTION=false
+        MIDTRANS_MERCHANT_ID=
   ```
 
 
@@ -167,4 +167,3 @@ After implementation:
 - [ ] Vite config documentation matches actual code
 - [ ] Test passes with correct expectations
 - [ ] .env.example includes Midtrans config
-- [ ] Documentation explains webhook processing approach

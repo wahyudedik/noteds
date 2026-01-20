@@ -240,4 +240,3 @@ const openProductModal = () => {
 - [x] Accumulates products correctly
 - [x] Handles end of results (no more pages)
 - [x] Resets when search/filter changes
-- [x] Shows loading indicator

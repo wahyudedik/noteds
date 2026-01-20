@@ -1184,4 +1184,3 @@ Broadcast::channel('user.{userId}.watchlist', function ($user, $userId) {
 - **Performance**: Use Redis for caching frequently accessed data (current prices, indicators, predictions). Implement database query optimization with proper indexes.
 - **Real-time Updates**: Use Laravel Broadcasting (Pusher/Echo) for real-time price updates. Polling fallback for clients without WebSocket support.
 - **Data Storage**: Consider partitioning `stock_prices` table by year for better query performance with large historical data.
-- **Rate Limiting**: Implement rate limiting for IDX API calls to avoid getting blocked. Use queues with delays between requests.

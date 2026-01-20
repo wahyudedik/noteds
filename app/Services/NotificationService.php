@@ -8,6 +8,7 @@ use App\Models\Withdrawal;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketResponse;
 use App\Models\Post;
+use App\Models\Message;
 use Illuminate\Support\Facades\Notification;
 
 class NotificationService
@@ -679,6 +680,44 @@ class NotificationService
         
         if ($collaboration->campaign->creator) {
             $collaboration->campaign->creator->notify(new \App\Notifications\CampaignCollaborationRejectedNotification($collaboration));
+        }
+    }
+
+    /**
+     * Notify user about new message.
+     */
+    public function notifyNewMessage(Message $message): void
+    {
+        // Ensure relationships are loaded
+        if (!$message->relationLoaded('conversation')) {
+            $message->load('conversation');
+        }
+        if (!$message->relationLoaded('user')) {
+            $message->load('user');
+        }
+
+        // Get all participants except the sender
+        $participants = $message->conversation->activeParticipants()
+            ->where('user_id', '!=', $message->user_id)
+            ->get();
+
+        foreach ($participants as $participant) {
+            // Check if conversation is muted
+            if ($participant->isMuted()) {
+                continue;
+            }
+
+            // Check if user is blocked
+            if ($message->user->hasBlocked($participant->user) || $participant->user->hasBlocked($message->user)) {
+                continue;
+            }
+
+            // Send notification
+            if ($message->conversation->type === 'group') {
+                $participant->user->notify(new \App\Notifications\NewGroupMessageNotification($message));
+            } else {
+                $participant->user->notify(new \App\Notifications\NewMessageNotification($message));
+            }
         }
     }
 }

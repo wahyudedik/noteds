@@ -142,5 +142,3 @@ MAX_IMAGE_SIZE=2048
 - Clear error messages for users
 
 ## Files to Modify
-
-1. `.user.ini` or Herd/Valet PHP config - PHP upload limits

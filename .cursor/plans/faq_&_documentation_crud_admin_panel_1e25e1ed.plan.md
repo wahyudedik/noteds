@@ -351,4 +351,3 @@ Update `resources/js/Pages/Admin/Dashboard.vue` untuk menambahkan quick links ke
 7. Create reusable components (Forms, Cards, Accordion)
 8. Add routes (admin & public)
 9. Update Welcome.vue footer dengan links
-10. Update Admin Dashboard dengan quick links

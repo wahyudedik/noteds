@@ -65,16 +65,16 @@ Analisis menyeluruh menunjukkan beberapa gap penting dalam flow clipper yang per
 - **File:** `app/Http/Controllers/Clipper/ClipController.php` (UPDATE)
 - Add `edit($id)` method:
   ```php
-                  public function edit($id)
-                  {
-                      $clip = auth()->user()->clips()
-                          ->where('status', 'pending')
-                          ->findOrFail($id);
-                      
-                      return Inertia::render('Clipper/Clips/Edit', [
-                          'clip' => $clip->load('campaign'),
-                      ]);
-                  }
+                    public function edit($id)
+                    {
+                        $clip = auth()->user()->clips()
+                            ->where('status', 'pending')
+                            ->findOrFail($id);
+                        
+                        return Inertia::render('Clipper/Clips/Edit', [
+                            'clip' => $clip->load('campaign'),
+                        ]);
+                    }
   ```
 
 
@@ -82,23 +82,23 @@ Analisis menyeluruh menunjukkan beberapa gap penting dalam flow clipper yang per
 
 - Add `update(Request $request, $id)` method:
   ```php
-                  public function update(Request $request, $id)
-                  {
-                      $clip = auth()->user()->clips()
-                          ->where('status', 'pending')
-                          ->findOrFail($id);
-                      
-                      $validated = $request->validate([
-                          'content_url' => 'required|url',
-                          'platform' => 'required|in:tiktok,instagram,youtube,other',
-                          'platform_content_id' => 'nullable|string|max:255',
-                      ]);
-                      
-                      $clip->update($validated);
-                      
-                      return redirect()->route('clipper.clips.show', $clip)
-                          ->with('success', 'Clip updated successfully.');
-                  }
+                    public function update(Request $request, $id)
+                    {
+                        $clip = auth()->user()->clips()
+                            ->where('status', 'pending')
+                            ->findOrFail($id);
+                        
+                        $validated = $request->validate([
+                            'content_url' => 'required|url',
+                            'platform' => 'required|in:tiktok,instagram,youtube,other',
+                            'platform_content_id' => 'nullable|string|max:255',
+                        ]);
+                        
+                        $clip->update($validated);
+                        
+                        return redirect()->route('clipper.clips.show', $clip)
+                            ->with('success', 'Clip updated successfully.');
+                    }
   ```
 
 
@@ -161,21 +161,21 @@ Analisis menyeluruh menunjukkan beberapa gap penting dalam flow clipper yang per
 - **File:** `app/Services/ClipService.php` (UPDATE)
 - Update `approveClip` method:
   ```php
-                  // Setelah clip approve berhasil
-                  if ($result) {
-                      // Immediately trigger transfer
-                      $autoTransferService = app(\App\Services\AutoTransferService::class);
-                      try {
-                          $autoTransferService->transferRewardToClipper($clip);
-                      } catch (\Exception $e) {
-                          // Log error, but don't fail approval
-                          Log::error('Auto transfer failed after approval', [
-                              'clip_id' => $clip->id,
-                              'error' => $e->getMessage(),
-                          ]);
-                          // Clip tetap approved, transfer akan retry via scheduled job
-                      }
-                  }
+                    // Setelah clip approve berhasil
+                    if ($result) {
+                        // Immediately trigger transfer
+                        $autoTransferService = app(\App\Services\AutoTransferService::class);
+                        try {
+                            $autoTransferService->transferRewardToClipper($clip);
+                        } catch (\Exception $e) {
+                            // Log error, but don't fail approval
+                            Log::error('Auto transfer failed after approval', [
+                                'clip_id' => $clip->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                            // Clip tetap approved, transfer akan retry via scheduled job
+                        }
+                    }
   ```
 
 
@@ -199,20 +199,20 @@ Analisis menyeluruh menunjukkan beberapa gap penting dalam flow clipper yang per
 - **File:** `app/Models/Campaign.php` (UPDATE)
 - Add `resume()` method:
   ```php
-                  public function resume(): bool
-                  {
-                      if ($this->status !== 'paused') {
-                          return false;
-                      }
-                      
-                      // Check if campaign masih dalam duration
-                      if ($this->ended_at && $this->ended_at < now()) {
-                          return false; // Already expired
-                      }
-                      
-                      $this->status = 'active';
-                      return $this->save();
-                  }
+                    public function resume(): bool
+                    {
+                        if ($this->status !== 'paused') {
+                            return false;
+                        }
+                        
+                        // Check if campaign masih dalam duration
+                        if ($this->ended_at && $this->ended_at < now()) {
+                            return false; // Already expired
+                        }
+                        
+                        $this->status = 'active';
+                        return $this->save();
+                    }
   ```
 
 
@@ -255,31 +255,31 @@ Analisis menyeluruh menunjukkan beberapa gap penting dalam flow clipper yang per
 - **File:** `app/Http/Controllers/Clipper/ClipController.php` (UPDATE)
 - Improve `trackViews` method atau create new endpoint:
   ```php
-                  public function status($id)
-                  {
-                      $clip = auth()->user()->clips()
-                          ->with(['campaign', 'viewTrackings' => function($q) {
-                              $q->latest('tracked_at')->limit(10);
-                          }])
-                          ->findOrFail($id);
-                      
-                      // Calculate current reward estimate
-                      $rewardService = app(\App\Services\RewardCalculationService::class);
-                      $estimatedReward = $rewardService->estimateReward(
-                          $clip, 
-                          $clip->valid_views ?? 0
-                      );
-                      
-                      return response()->json([
-                          'clip' => $clip,
-                          'valid_views' => $clip->valid_views,
-                          'pending_reward' => $clip->pending_reward,
-                          'approved_reward' => $clip->approved_reward,
-                          'estimated_reward' => $estimatedReward,
-                          'tracking' => $clip->viewTrackings,
-                          'status' => $clip->status,
-                      ]);
-                  }
+                    public function status($id)
+                    {
+                        $clip = auth()->user()->clips()
+                            ->with(['campaign', 'viewTrackings' => function($q) {
+                                $q->latest('tracked_at')->limit(10);
+                            }])
+                            ->findOrFail($id);
+                        
+                        // Calculate current reward estimate
+                        $rewardService = app(\App\Services\RewardCalculationService::class);
+                        $estimatedReward = $rewardService->estimateReward(
+                            $clip, 
+                            $clip->valid_views ?? 0
+                        );
+                        
+                        return response()->json([
+                            'clip' => $clip,
+                            'valid_views' => $clip->valid_views,
+                            'pending_reward' => $clip->pending_reward,
+                            'approved_reward' => $clip->approved_reward,
+                            'estimated_reward' => $estimatedReward,
+                            'tracking' => $clip->viewTrackings,
+                            'status' => $clip->status,
+                        ]);
+                    }
   ```
 
 
@@ -294,21 +294,21 @@ Analisis menyeluruh menunjukkan beberapa gap penting dalam flow clipper yang per
 - **File:** `resources/js/Pages/Clipper/Clips/Show.vue` (UPDATE)
 - Add polling mechanism untuk pending/approved clips:
   ```javascript
-                  const pollInterval = ref(null);
-                  
-                  onMounted(() => {
-                      if (['pending', 'approved'].includes(clip.value.status)) {
-                          pollInterval.value = setInterval(() => {
-                              router.reload({ only: ['clip'] });
-                          }, 30000); // Every 30 seconds
-                      }
-                  });
-                  
-                  onUnmounted(() => {
-                      if (pollInterval.value) {
-                          clearInterval(pollInterval.value);
-                      }
-                  });
+                    const pollInterval = ref(null);
+                    
+                    onMounted(() => {
+                        if (['pending', 'approved'].includes(clip.value.status)) {
+                            pollInterval.value = setInterval(() => {
+                                router.reload({ only: ['clip'] });
+                            }, 30000); // Every 30 seconds
+                        }
+                    });
+                    
+                    onUnmounted(() => {
+                        if (pollInterval.value) {
+                            clearInterval(pollInterval.value);
+                        }
+                    });
   ```
 
 
@@ -526,4 +526,3 @@ Analisis menyeluruh menunjukkan beberapa gap penting dalam flow clipper yang per
 
 4. Immediate Auto Transfer
 5. Campaign Resume
-6. Clipper Dashboard

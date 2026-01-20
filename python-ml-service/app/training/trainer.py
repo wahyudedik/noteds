@@ -3,7 +3,7 @@ Model trainer for training ML models
 """
 import os
 import uuid
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, Callable
 import numpy as np
 import pandas as pd
 import logging
@@ -14,6 +14,9 @@ from app.models.transformer_model import TransformerModel
 from app.models.cnn_lstm_model import CNNLSTMModel
 from app.data.data_preprocessor import DataPreprocessor
 from app.data.feature_engineering import FeatureEngineering
+from app.data.data_quality import DataQualityChecker
+from app.training.progress_callback import TrainingProgressCallback
+from app.training.keras_progress_callback import ProgressTrackingCallback
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +34,7 @@ class ModelTrainer:
         self.model_storage_path = model_storage_path
         os.makedirs(model_storage_path, exist_ok=True)
         self.preprocessor = DataPreprocessor()
+        self.quality_checker = DataQualityChecker()
     
     def prepare_data(
         self,
@@ -122,7 +126,9 @@ class ModelTrainer:
         sequence_length: int = 60,
         prediction_horizon: int = 1,
         epochs: int = 100,
-        batch_size: int = 32
+        batch_size: int = 32,
+        model_id: Optional[str] = None,
+        progress_update_callback: Optional[Callable] = None
     ) -> Dict[str, Any]:
         """
         Train a model
@@ -142,6 +148,16 @@ class ModelTrainer:
         """
         if hyperparameters is None:
             hyperparameters = {}
+        
+        # Check data quality
+        quality_result = self.quality_checker.check_data_quality(data, target_column='close')
+        if not quality_result['passed']:
+            error_msg = "Data quality check failed: " + "; ".join(quality_result.get('errors', []))
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+        
+        if quality_result.get('warnings'):
+            logger.warning(f"Data quality warnings: {quality_result['warnings']}")
         
         # Prepare data
         prepared_data = self.prepare_data(
@@ -180,7 +196,20 @@ class ModelTrainer:
         # Build model
         model.build()
         
+        # Setup progress tracking
+        progress_callback = None
+        custom_callbacks = []
+        
+        if model_id and progress_update_callback:
+            progress_callback = TrainingProgressCallback(
+                model_id=model_id,
+                total_epochs=epochs,
+                update_callback=progress_update_callback
+            )
+            custom_callbacks.append(ProgressTrackingCallback(progress_callback))
+        
         # Train model
+        # Pass callbacks - model will merge with defaults if needed
         history = model.train(
             prepared_data['X_train'],
             prepared_data['y_train'],
@@ -188,8 +217,15 @@ class ModelTrainer:
             prepared_data['y_val'],
             epochs=epochs,
             batch_size=batch_size,
-            verbose=1
+            verbose=1,
+            callbacks=custom_callbacks if custom_callbacks else None
         )
+        
+        # Store final progress if available
+        if progress_callback:
+            final_progress = progress_callback.get_final_progress()
+            if progress_update_callback:
+                progress_update_callback(final_progress)
         
         # Evaluate on test set
         test_metrics = model.evaluate(

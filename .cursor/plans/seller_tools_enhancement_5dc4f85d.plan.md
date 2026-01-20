@@ -1142,4 +1142,3 @@ return [
 - Test pricing rule expiration (time-based rules)
 - Test verification document upload and storage
 - Test rating breakdown calculations
-- Test fulfillment rate calculation with cancelled orders

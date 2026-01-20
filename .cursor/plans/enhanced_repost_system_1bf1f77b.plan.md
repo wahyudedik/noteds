@@ -497,4 +497,3 @@ Route::middleware('auth')->group(function () {
 12. Create analytics controller
 13. Build analytics UI components
 14. Add analytics page
-15. Implement tracking jobs

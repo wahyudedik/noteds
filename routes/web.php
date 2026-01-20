@@ -1140,6 +1140,24 @@ Route::get('/stocks/{stock}/prediction-accuracy', [App\Http\Controllers\StockPre
     ->middleware('auth')
     ->name('stocks.prediction-accuracy');
 
+// ML Model Management
+Route::middleware('auth')->prefix('api/ml/models')->group(function () {
+    Route::get('/', [App\Http\Controllers\MLModelController::class, 'index'])->name('ml.models.index');
+    Route::get('/{model}', [App\Http\Controllers\MLModelController::class, 'show'])->name('ml.models.show');
+    Route::put('/{model}/activate', [App\Http\Controllers\MLModelController::class, 'activate'])->name('ml.models.activate');
+    Route::put('/{model}/deactivate', [App\Http\Controllers\MLModelController::class, 'deactivate'])->name('ml.models.deactivate');
+    Route::delete('/{model}', [App\Http\Controllers\MLModelController::class, 'destroy'])->name('ml.models.destroy');
+    Route::get('/stock/{stock}', [App\Http\Controllers\MLModelController::class, 'getStockModels'])->name('ml.models.stock');
+    Route::get('/stock/{stock}/compare', [App\Http\Controllers\MLModelController::class, 'compare'])->name('ml.models.compare');
+});
+
+// ML Dashboard
+Route::middleware('auth')->prefix('api/ml/dashboard')->group(function () {
+    Route::get('/metrics', [App\Http\Controllers\MLDashboardController::class, 'metrics'])->name('ml.dashboard.metrics');
+    Route::get('/accuracy-over-time', [App\Http\Controllers\MLDashboardController::class, 'accuracyOverTime'])->name('ml.dashboard.accuracy');
+    Route::get('/model-comparison', [App\Http\Controllers\MLDashboardController::class, 'modelComparison'])->name('ml.dashboard.comparison');
+});
+
 // Supplier routes
 Route::middleware('auth')->group(function () {
     Route::get('/suppliers', [App\Http\Controllers\SupplierController::class, 'index'])->name('suppliers.index');
@@ -1159,6 +1177,75 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/api/supplier-recommendations', [App\Http\Controllers\SupplierRecommendationController::class, 'index'])->name('api.supplier-recommendations');
     Route::get('/api/suppliers/business-types', [App\Http\Controllers\SupplierController::class, 'businessTypes'])->name('api.suppliers.business-types');
+});
+
+// Messaging Routes
+Route::middleware('auth')->prefix('messaging')->name('messaging.')->group(function () {
+    // Conversations
+    Route::get('/', [App\Http\Controllers\Messaging\ConversationController::class, 'index'])->name('index');
+    Route::get('/conversations/create', [App\Http\Controllers\Messaging\ConversationController::class, 'create'])->name('conversations.create');
+    Route::get('/conversations', [App\Http\Controllers\Messaging\ConversationController::class, 'index'])->name('conversations.index');
+    Route::post('/conversations', [App\Http\Controllers\Messaging\ConversationController::class, 'store'])
+        ->middleware('throttle:10,1') // 10 conversations per minute
+        ->name('conversations.store');
+    Route::get('/conversations/{conversation}', [App\Http\Controllers\Messaging\ConversationController::class, 'show'])->name('conversations.show');
+    Route::post('/conversations/{conversation}/participants', [App\Http\Controllers\Messaging\ConversationController::class, 'addParticipant'])
+        ->middleware('throttle:10,1')
+        ->name('conversations.participants.add');
+    Route::delete('/conversations/{conversation}/participants/{user}', [App\Http\Controllers\Messaging\ConversationController::class, 'removeParticipant'])
+        ->middleware('throttle:10,1')
+        ->name('conversations.participants.remove');
+    Route::post('/conversations/{conversation}/archive', [App\Http\Controllers\Messaging\ConversationController::class, 'archive'])
+        ->middleware('throttle:10,1')
+        ->name('conversations.archive');
+    Route::post('/conversations/{conversation}/unarchive', [App\Http\Controllers\Messaging\ConversationController::class, 'unarchive'])
+        ->middleware('throttle:10,1')
+        ->name('conversations.unarchive');
+    Route::post('/conversations/{conversation}/mute', [App\Http\Controllers\Messaging\ConversationController::class, 'mute'])
+        ->middleware('throttle:10,1')
+        ->name('conversations.mute');
+    Route::post('/conversations/{conversation}/unmute', [App\Http\Controllers\Messaging\ConversationController::class, 'unmute'])
+        ->middleware('throttle:10,1')
+        ->name('conversations.unmute');
+
+    // Messages
+    Route::get('/conversations/{conversation}/messages', [App\Http\Controllers\Messaging\MessageController::class, 'index'])
+        ->middleware('throttle:60,1') // 60 requests per minute
+        ->name('messages.index');
+    Route::post('/conversations/{conversation}/messages', [App\Http\Controllers\Messaging\MessageController::class, 'store'])
+        ->middleware('throttle:30,1') // 30 messages per minute
+        ->name('messages.store');
+    Route::put('/messages/{message}', [App\Http\Controllers\Messaging\MessageController::class, 'update'])
+        ->middleware('throttle:30,1')
+        ->name('messages.update');
+    Route::delete('/messages/{message}', [App\Http\Controllers\Messaging\MessageController::class, 'destroy'])
+        ->middleware('throttle:30,1')
+        ->name('messages.destroy');
+    Route::post('/messages/{message}/read', [App\Http\Controllers\Messaging\MessageController::class, 'markAsRead'])
+        ->middleware('throttle:60,1')
+        ->name('messages.read');
+    Route::post('/conversations/{conversation}/read', [App\Http\Controllers\Messaging\MessageController::class, 'markConversationAsRead'])
+        ->middleware('throttle:60,1')
+        ->name('conversations.read');
+    Route::get('/conversations/{conversation}/search', [App\Http\Controllers\Messaging\MessageController::class, 'search'])
+        ->middleware('throttle:30,1') // 30 searches per minute
+        ->name('messages.search');
+
+    // Typing Indicators
+    Route::post('/conversations/{conversation}/typing', [App\Http\Controllers\Messaging\TypingIndicatorController::class, 'typing'])
+        ->middleware('throttle:60,1') // 60 typing indicators per minute
+        ->name('typing.start');
+    Route::post('/conversations/{conversation}/typing/stop', [App\Http\Controllers\Messaging\TypingIndicatorController::class, 'stopTyping'])
+        ->middleware('throttle:60,1')
+        ->name('typing.stop');
+
+    // Block Users
+    Route::post('/users/{user}/block', [App\Http\Controllers\Messaging\BlockController::class, 'store'])
+        ->middleware('throttle:10,60') // 10 blocks per hour
+        ->name('users.block');
+    Route::delete('/users/{user}/block', [App\Http\Controllers\Messaging\BlockController::class, 'destroy'])
+        ->middleware('throttle:10,60')
+        ->name('users.unblock');
 });
 
 require __DIR__ . '/auth.php';

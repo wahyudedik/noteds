@@ -292,4 +292,3 @@ Items berikut dari PRODUCTION_REVIEW_REPORT.md adalah enhancements/future featur
 - Password strength indicator
 - 2FA implementation
 - Transaction receipts/invoices
-- User refund request system

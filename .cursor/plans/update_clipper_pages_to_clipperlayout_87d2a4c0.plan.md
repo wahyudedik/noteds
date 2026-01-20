@@ -127,11 +127,11 @@ Untuk setiap file, lakukan perubahan berikut:
 
 1. **Update import statement:**
    ```javascript
-            // Before
-            import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-            
-            // After
-            import ClipperLayout from '@/Layouts/ClipperLayout.vue';
+               // Before
+               import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+               
+               // After
+               import ClipperLayout from '@/Layouts/ClipperLayout.vue';
    ```
 
 
@@ -139,21 +139,21 @@ Untuk setiap file, lakukan perubahan berikut:
 
 2. **Update component usage:**
    ```vue
-            <!-- Before -->
-            <AuthenticatedLayout>
-                <template #header>
-                    <!-- header content -->
-                </template>
-                <!-- page content -->
-            </AuthenticatedLayout>
-            
-            <!-- After -->
-            <ClipperLayout>
-                <template #header>
-                    <!-- header content (unchanged) -->
-                </template>
-                <!-- page content (unchanged) -->
-            </ClipperLayout>
+               <!-- Before -->
+               <AuthenticatedLayout>
+                   <template #header>
+                       <!-- header content -->
+                   </template>
+                   <!-- page content -->
+               </AuthenticatedLayout>
+               
+               <!-- After -->
+               <ClipperLayout>
+                   <template #header>
+                       <!-- header content (unchanged) -->
+                   </template>
+                   <!-- page content (unchanged) -->
+               </ClipperLayout>
    ```
 
 
@@ -169,5 +169,3 @@ Untuk setiap file, lakukan perubahan berikut:
 ## Testing
 
 Setelah update, verifikasi:
-
-- Navigation tabs muncul dengan benar di semua halaman

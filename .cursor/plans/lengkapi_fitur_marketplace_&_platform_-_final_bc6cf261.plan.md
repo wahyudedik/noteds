@@ -333,5 +333,3 @@ Cart → Checkout → Create Multiple Orders → Payment (combined total) → Su
 3. `GET /marketplace/seller/orders/{order}/invoice` - Download invoice (seller)
 
 ## Testing Checklist
-
-- [ ] Multi-item checkout creates multiple orders correctly

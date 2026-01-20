@@ -405,5 +405,3 @@ Setelah implementasi, test dengan:
 - **Admin dashboard access**: Internal use, tidak perlu throttle
 
 ## Notes
-
-- Throttle middleware menggunakan IP address sebagai default key

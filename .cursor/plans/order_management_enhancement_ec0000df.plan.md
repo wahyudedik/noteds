@@ -362,4 +362,3 @@ Route::get('/marketplace/orders/export', [OrderController::class, 'exportHistory
 - Real-time tracking uses Laravel Broadcasting (Pusher/Echo compatible)
 - Polling endpoint for fallback when WebSocket unavailable
 - Export files stored in `storage/app/exports/orders/`
-- Auto-cleanup of export files via scheduled task

@@ -584,5 +584,3 @@ Update `database/seeders/UserSeeder.php`:
 - Track notification read status
 
 ### Frontend Additional Components
-
-- `resources/js/Components/Marketplace/SearchBar.vue` - search products

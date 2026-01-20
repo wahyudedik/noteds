@@ -65,23 +65,65 @@ class CheckPredictionAccuracyJob implements ShouldQueue
     protected function checkAccuracyForStock(Stock $stock): void
     {
         try {
-            // Get predictions where target_date has passed and we have actual prices
+            // Get predictions where target_date has passed
             $predictions = StockPrediction::where('stock_id', $stock->id)
                 ->where('target_date', '<=', Carbon::today())
-                ->whereNull('prediction_error')
-                ->whereNotNull('actual_price')
+                ->whereNull('actual_price') // Only process predictions without actual price yet
                 ->get();
 
+            $updatedCount = 0;
+            
             foreach ($predictions as $prediction) {
-                $error = $prediction->calculateError();
-                if ($error !== null) {
-                    Log::info('Prediction accuracy calculated', [
+                // Get actual price for target_date
+                $targetDate = Carbon::parse($prediction->target_date);
+                $actualPrice = $stock->getPriceAt($targetDate);
+                
+                if ($actualPrice) {
+                    // Update prediction with actual price
+                    $prediction->update([
+                        'actual_price' => $actualPrice->close,
+                    ]);
+                    
+                    // Calculate error and accuracy
+                    $error = $prediction->calculateError();
+                    $accuracy = $prediction->getPredictionAccuracy();
+                    
+                    $updatedCount++;
+                    
+                    Log::info('Prediction accuracy updated', [
                         'stock_code' => $stock->code,
                         'prediction_id' => $prediction->id,
+                        'target_date' => $targetDate->format('Y-m-d'),
+                        'predicted_price' => $prediction->predicted_price,
+                        'actual_price' => $actualPrice->close,
                         'error' => $error,
-                        'accuracy' => $prediction->getPredictionAccuracy(),
+                        'accuracy' => $accuracy,
+                    ]);
+                } else {
+                    Log::warning('Actual price not found for prediction', [
+                        'stock_code' => $stock->code,
+                        'prediction_id' => $prediction->id,
+                        'target_date' => $targetDate->format('Y-m-d'),
                     ]);
                 }
+            }
+            
+            // Also recalculate accuracy for predictions that already have actual_price
+            $existingPredictions = StockPrediction::where('stock_id', $stock->id)
+                ->where('target_date', '<=', Carbon::today())
+                ->whereNotNull('actual_price')
+                ->whereNull('prediction_error')
+                ->get();
+            
+            foreach ($existingPredictions as $prediction) {
+                $prediction->calculateError();
+            }
+            
+            if ($updatedCount > 0) {
+                Log::info('Prediction accuracy check completed', [
+                    'stock_code' => $stock->code,
+                    'updated_count' => $updatedCount,
+                ]);
             }
         } catch (\Exception $e) {
             Log::error('Error checking accuracy for stock', [

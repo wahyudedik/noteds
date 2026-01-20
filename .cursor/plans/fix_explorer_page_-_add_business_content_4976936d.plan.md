@@ -258,4 +258,3 @@ composer require guzzlehttp/guzzle (already installed)
 
 - **RSS Feeds**: Completely free, no API key needed
 - **Reddit API**: Free for public data, rate limit: 60 requests/minute
-- **NewsAPI**: Requires API key, free tier limited

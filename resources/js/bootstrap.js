@@ -10,3 +10,7 @@ if (token) {
 } else {
     console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
 }
+
+// Initialize Laravel Echo for real-time features
+import Echo from './Utils/echo';
+window.Echo = Echo;

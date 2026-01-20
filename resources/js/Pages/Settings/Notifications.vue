@@ -9,12 +9,15 @@ const settings = page.props.settings || {};
 const notificationPreferences = settings.notification_preferences || {};
 
 const form = useForm({
-    email_notifications: notificationPreferences.email_notifications !== undefined ? notificationPreferences.email_notifications : true,
-    in_app_notifications: notificationPreferences.in_app_notifications !== undefined ? notificationPreferences.in_app_notifications : true,
-    new_comment_notifications: notificationPreferences.new_comment_notifications !== undefined ? notificationPreferences.new_comment_notifications : true,
-    new_follow_notifications: notificationPreferences.new_follow_notifications !== undefined ? notificationPreferences.new_follow_notifications : true,
-    order_notifications: notificationPreferences.order_notifications !== undefined ? notificationPreferences.order_notifications : true,
-    withdrawal_notifications: notificationPreferences.withdrawal_notifications !== undefined ? notificationPreferences.withdrawal_notifications : true,
+    notification_preferences: {
+        email_notifications: notificationPreferences.email_notifications !== undefined ? notificationPreferences.email_notifications : true,
+        in_app_notifications: notificationPreferences.in_app_notifications !== undefined ? notificationPreferences.in_app_notifications : true,
+        new_comment_notifications: notificationPreferences.new_comment_notifications !== undefined ? notificationPreferences.new_comment_notifications : true,
+        new_follow_notifications: notificationPreferences.new_follow_notifications !== undefined ? notificationPreferences.new_follow_notifications : true,
+        order_notifications: notificationPreferences.order_notifications !== undefined ? notificationPreferences.order_notifications : true,
+        withdrawal_notifications: notificationPreferences.withdrawal_notifications !== undefined ? notificationPreferences.withdrawal_notifications : true,
+        sound_enabled: notificationPreferences.sound_enabled !== undefined ? notificationPreferences.sound_enabled : true,
+    },
 });
 
 const submit = () => {
@@ -51,7 +54,7 @@ const submit = () => {
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
-                                v-model="form.email_notifications"
+                                v-model="form.notification_preferences.email_notifications"
                                 class="sr-only peer"
                             />
                             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
@@ -70,7 +73,7 @@ const submit = () => {
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
-                                v-model="form.in_app_notifications"
+                                v-model="form.notification_preferences.in_app_notifications"
                                 class="sr-only peer"
                             />
                             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
@@ -94,8 +97,8 @@ const submit = () => {
                             <div class="ml-4">
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input
-                                        type="checkbox"
-                                        v-model="form.new_comment_notifications"
+                                type="checkbox"
+                                v-model="form.notification_preferences.new_comment_notifications"
                                         class="sr-only peer"
                                     />
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
@@ -113,8 +116,8 @@ const submit = () => {
                             <div class="ml-4">
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input
-                                        type="checkbox"
-                                        v-model="form.new_follow_notifications"
+                                type="checkbox"
+                                v-model="form.notification_preferences.new_follow_notifications"
                                         class="sr-only peer"
                                     />
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
@@ -132,8 +135,8 @@ const submit = () => {
                             <div class="ml-4">
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input
-                                        type="checkbox"
-                                        v-model="form.order_notifications"
+                                type="checkbox"
+                                v-model="form.notification_preferences.order_notifications"
                                         class="sr-only peer"
                                     />
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
@@ -151,8 +154,27 @@ const submit = () => {
                             <div class="ml-4">
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input
-                                        type="checkbox"
-                                        v-model="form.withdrawal_notifications"
+                                type="checkbox"
+                                v-model="form.notification_preferences.withdrawal_notifications"
+                                class="sr-only peer"
+                            />
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <InputLabel for="sound_enabled" value="Sound Alerts" />
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            Play a short sound when new in-app notifications arrive.
+                        </p>
+                    </div>
+                    <div class="ml-4">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                v-model="form.notification_preferences.sound_enabled"
                                         class="sr-only peer"
                                     />
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>

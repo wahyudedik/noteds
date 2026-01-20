@@ -353,9 +353,9 @@ Plan ini akan melakukan verifikasi menyeluruh terhadap implementasi payment gate
 
 1. **Test Webhook dengan curl:**
    ```bash
-                           curl -X POST https://noteds.com/payment/webhook \
-                             -H "Content-Type: application/json" \
-                             -d '{"order_id":"ORD-20260101-123456","transaction_status":"settlement",...}'
+                              curl -X POST https://noteds.com/payment/webhook \
+                                -H "Content-Type: application/json" \
+                                -d '{"order_id":"ORD-20260101-123456","transaction_status":"settlement",...}'
    ```
 
 
@@ -363,7 +363,7 @@ Plan ini akan melakukan verifikasi menyeluruh terhadap implementasi payment gate
 
 2. **Check Logs:**
    ```bash
-                           tail -f storage/logs/laravel.log | grep -i midtrans
+                              tail -f storage/logs/laravel.log | grep -i midtrans
    ```
 
 
@@ -376,9 +376,10 @@ Plan ini akan melakukan verifikasi menyeluruh terhadap implementasi payment gate
 
 4. **Verify Environment:**
    ```bash
-                           php artisan tinker
-                           >>> config('midtrans.server_key')
-                           >>> config('midtrans.is_production')
+                              php artisan tinker
+                              >>> config('midtrans.server_key')
+                              >>> config('midtrans.is_production')
+                           
                         
                      
                   

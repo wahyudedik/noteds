@@ -125,16 +125,16 @@ This plan addresses all 17 remaining bugs in the social features bug report. Aft
 - **Issue**: Gets all following IDs into memory, then queries users separately
 - **Fix**: Optimize using a single query with joins:
   ```php
-      return User::whereIn('id', function($query) use ($user1, $user2) {
-          $query->select('following_id')
-              ->from('follows')
-              ->where('follower_id', $user1->id)
-              ->whereIn('following_id', function($q) use ($user2) {
-                  $q->select('following_id')
-                    ->from('follows')
-                    ->where('follower_id', $user2->id);
-              });
-      })->get();
+        return User::whereIn('id', function($query) use ($user1, $user2) {
+            $query->select('following_id')
+                ->from('follows')
+                ->where('follower_id', $user1->id)
+                ->whereIn('following_id', function($q) use ($user2) {
+                    $q->select('following_id')
+                      ->from('follows')
+                      ->where('follower_id', $user2->id);
+                });
+        })->get();
   ```
 
 
@@ -198,4 +198,3 @@ This plan addresses all 17 remaining bugs in the social features bug report. Aft
 - Test comment deletion with replies to ensure cascading works
 - Test authorization on all controller methods
 - Test vote operations under concurrent load
-- Test bookmark operations with collections

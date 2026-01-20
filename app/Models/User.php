@@ -538,4 +538,76 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(StockWatchlist::class);
     }
+
+    /**
+     * Get conversations where user is a participant.
+     */
+    public function conversations(): BelongsToMany
+    {
+        return $this->belongsToMany(Conversation::class, 'conversation_participants')
+            ->withPivot(['role', 'joined_at', 'left_at', 'last_read_at', 'muted_until', 'archived_at'])
+            ->withTimestamps()
+            ->whereNull('conversation_participants.left_at')
+            ->orderBy('conversations.last_message_at', 'desc');
+    }
+
+    /**
+     * Get conversation participants for this user.
+     */
+    public function conversationParticipants(): HasMany
+    {
+        return $this->hasMany(ConversationParticipant::class);
+    }
+
+    /**
+     * Get messages sent by this user.
+     */
+    public function sentMessages(): HasMany
+    {
+        return $this->hasMany(Message::class);
+    }
+
+    /**
+     * Get read receipts for this user.
+     */
+    public function readReceipts(): HasMany
+    {
+        return $this->hasMany(ReadReceipt::class);
+    }
+
+    /**
+     * Get users blocked by this user.
+     */
+    public function blockedUsers(): HasMany
+    {
+        return $this->hasMany(BlockedUser::class, 'user_id');
+    }
+
+    /**
+     * Get users who blocked this user.
+     */
+    public function blockedByUsers(): HasMany
+    {
+        return $this->hasMany(BlockedUser::class, 'blocked_user_id');
+    }
+
+    /**
+     * Check if user is blocked by another user.
+     */
+    public function isBlockedBy(User $user): bool
+    {
+        return $this->blockedByUsers()
+            ->where('user_id', $user->id)
+            ->exists();
+    }
+
+    /**
+     * Check if user has blocked another user.
+     */
+    public function hasBlocked(User $user): bool
+    {
+        return $this->blockedUsers()
+            ->where('blocked_user_id', $user->id)
+            ->exists();
+    }
 }
