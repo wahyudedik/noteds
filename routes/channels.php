@@ -77,3 +77,8 @@ Broadcast::channel('user.{userId}.conversations', function ($user, $userId) {
     return $user->id === $userId;
 });
 
+// Group events & invites notifications (public to group members)
+Broadcast::channel('group.{groupId}', function ($user, $groupId) {
+    return \App\Models\GroupMember::where('group_id', $groupId)->where('user_id', $user->id)->exists();
+});
+

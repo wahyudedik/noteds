@@ -1250,3 +1250,41 @@ Route::middleware('auth')->prefix('messaging')->name('messaging.')->group(functi
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/health.php';
+
+// Groups / Communities
+Route::middleware('auth')->prefix('groups')->name('groups.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Community\GroupController::class, 'index'])->name('index');
+    Route::post('/', [App\Http\Controllers\Community\GroupController::class, 'store'])->name('store');
+    Route::get('/{slug}', [App\Http\Controllers\Community\GroupController::class, 'show'])->name('show');
+    Route::post('/{slug}/join', [App\Http\Controllers\Community\GroupController::class, 'join'])->name('join');
+    Route::post('/{slug}/leave', [App\Http\Controllers\Community\GroupController::class, 'leave'])->name('leave');
+    Route::post('/{slug}/members/{member}/approve', [App\Http\Controllers\Community\GroupController::class, 'approve'])->name('members.approve');
+    Route::put('/{slug}/members/{member}/role', [App\Http\Controllers\Community\GroupController::class, 'changeRole'])->name('members.role');
+
+    Route::get('/{slug}/posts', [App\Http\Controllers\Community\GroupPostController::class, 'index'])->name('posts.index');
+    Route::post('/{slug}/posts', [App\Http\Controllers\Community\GroupPostController::class, 'store'])->name('posts.store');
+    Route::put('/{slug}/posts/{post}', [App\Http\Controllers\Community\GroupPostController::class, 'update'])->name('posts.update');
+    Route::delete('/{slug}/posts/{post}', [App\Http\Controllers\Community\GroupPostController::class, 'destroy'])->name('posts.destroy');
+
+    Route::get('/{slug}/invites', [App\Http\Controllers\Community\GroupInviteController::class, 'index'])->name('invites.index');
+    Route::post('/{slug}/invites/email', [App\Http\Controllers\Community\GroupInviteController::class, 'createEmail'])->name('invites.email');
+    Route::post('/{slug}/invites/link', [App\Http\Controllers\Community\GroupInviteController::class, 'createLink'])->name('invites.link');
+    Route::get('/invites/{token}', [App\Http\Controllers\Community\GroupInviteController::class, 'show'])->name('invites.show');
+    Route::post('/invites/{token}/accept', [App\Http\Controllers\Community\GroupInviteController::class, 'accept'])->name('invites.accept');
+    Route::post('/invites/{token}/decline', [App\Http\Controllers\Community\GroupInviteController::class, 'decline'])->name('invites.decline');
+
+    Route::get('/{slug}/events', [App\Http\Controllers\Community\GroupEventController::class, 'index'])->name('events.index');
+    Route::post('/{slug}/events', [App\Http\Controllers\Community\GroupEventController::class, 'store'])->name('events.store');
+    Route::get('/{slug}/events/{event}', [App\Http\Controllers\Community\GroupEventController::class, 'show'])->name('events.show');
+    Route::put('/{slug}/events/{event}', [App\Http\Controllers\Community\GroupEventController::class, 'update'])->name('events.update');
+    Route::delete('/{slug}/events/{event}', [App\Http\Controllers\Community\GroupEventController::class, 'destroy'])->name('events.destroy');
+    Route::post('/{slug}/events/{event}/rsvp', [App\Http\Controllers\Community\GroupEventController::class, 'rsvp'])->name('events.rsvp');
+    Route::get('/{slug}/events/calendar', [App\Http\Controllers\Community\GroupEventController::class, 'calendar'])->name('events.calendar');
+    Route::get('/{slug}/analytics', [App\Http\Controllers\Community\GroupAnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('/{slug}/analytics/export/csv', [App\Http\Controllers\Community\GroupAnalyticsController::class, 'exportCsv'])->name('analytics.export.csv');
+    Route::get('/{slug}/analytics/export/pdf', [App\Http\Controllers\Community\GroupAnalyticsController::class, 'exportPdf'])->name('analytics.export.pdf');
+});
+
+// Email tracking
+Route::get('/email/open/{invite}', [App\Http\Controllers\EmailTrackingController::class, 'open'])->name('email.open');
+Route::get('/email/click/{invite}', [App\Http\Controllers\EmailTrackingController::class, 'click'])->name('email.click');

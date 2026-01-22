@@ -128,17 +128,23 @@ Dokumen ini menganalisis fitur-fitur yang masih kurang dari platform Noteds.com 
 ---
 
 #### 3. **Groups / Communities**
-**Status:** ❌ Tidak Ada
+**Status:** � Undangan + Events + Notifikasi Real-time Ditambahkan
 **Deskripsi:** Fitur untuk membuat dan bergabung dengan grup/komunitas berdasarkan minat
-**Fitur yang Diperlukan:**
+**Implementasi Awal:**
 - Create groups dengan privacy settings (public/private/secret)
-- Group membership management
-- Group posts & discussions
-- Group events
-- Group analytics
+- Group membership management (join/leave, approve, ubah role)
+- Group posts & discussions (buat, edit, hapus)
 - Group roles (admin, moderator, member)
 - Group discovery & search
-- Invite members
+ - Invite members via email atau link (status: pending/accepted/declined, token, expiry)
+ - Group events dengan CRUD, detail, RSVP, status
+ - Email undangan dengan template responsif, ICS attachment, queue, tracking open/click
+ - Notifikasi real-time untuk undangan dan perubahan event
+**Masih Dibutuhkan:**
+- Group events
+- Integrasi kalender dua arah (Google/Outlook)
+- Dashboard analytics lebih kaya (demografi, partisipasi mendalam)
+- Tampilan kalender lebih kaya (mingguan/harian, drag-and-drop penuh, recurring)
 
 **Impact:** Tinggi - meningkatkan community engagement
 
