@@ -5,6 +5,7 @@ import SearchResults from '@/Components/Search/SearchResults.vue';
 import PostFilters from '@/Components/Search/PostFilters.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
     query: {
@@ -24,11 +25,20 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    savedSearches: {
+        type: Array,
+        default: () => [],
+    },
+    history: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const selectedType = ref(props.filters?.type || 'all');
 const selectedDate = ref(props.filters?.date || '');
 const selectedCategory = ref(props.filters?.category || '');
+const savedName = ref('');
 
 const applyFilters = () => {
     router.get(route('search.index'), {
@@ -40,6 +50,48 @@ const applyFilters = () => {
         preserveState: true,
         preserveScroll: true,
     });
+};
+
+const loadSavedSearch = (saved) => {
+    router.get(route('search.index'), {
+        q: saved.query || props.query,
+        ...(saved.filters || {}),
+    }, {
+        preserveState: false,
+        preserveScroll: false,
+    });
+};
+
+const saveCurrentSearch = async () => {
+    if (!savedName.value.trim()) return;
+    const payload = {
+        name: savedName.value.trim(),
+        q: props.query || '',
+        filters: props.filters || {},
+    };
+    await axios.post(route('search.saved.create'), payload);
+    router.reload({ only: ['savedSearches'] });
+    savedName.value = '';
+};
+
+const executeHistory = (item) => {
+    router.get(route('search.index'), {
+        q: item.query,
+        ...(item.filters || {}),
+    }, {
+        preserveState: false,
+        preserveScroll: false,
+    });
+};
+
+const deleteSaved = async (id) => {
+    await axios.delete(route('search.saved.delete', id));
+    router.reload({ only: ['savedSearches'] });
+};
+
+const deleteHistoryItem = async (id) => {
+    await axios.delete(route('search.history.delete', id));
+    router.reload({ only: ['history'] });
 };
 </script>
 
@@ -129,6 +181,75 @@ const applyFilters = () => {
                     <PostFilters :filters="filters" :query="query" />
                 </div>
 
+                <!-- Saved Searches & History -->
+                <div v-if="query" class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Saved Searches</h3>
+                        </div>
+                        <div class="flex gap-2 mb-3">
+                            <input
+                                v-model="savedName"
+                                type="text"
+                                placeholder="Name this search..."
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                            <button
+                                @click="saveCurrentSearch"
+                                class="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            >
+                                Save
+                            </button>
+                        </div>
+                        <div v-if="savedSearches.length > 0" class="space-y-2">
+                            <div
+                                v-for="saved in savedSearches"
+                                :key="saved.id"
+                                class="flex items-center justify-between"
+                            >
+                                <button
+                                    @click="loadSavedSearch(saved)"
+                                    class="text-sm text-blue-600 dark:text-blue-400 hover:underline truncate"
+                                >
+                                    {{ saved.name }}
+                                </button>
+                                <button
+                                    @click="deleteSaved(saved.id)"
+                                    class="text-xs text-red-600 dark:text-red-400 hover:underline"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                        <div v-else class="text-sm text-gray-600 dark:text-gray-400">No saved searches</div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Search History</h3>
+                        <div v-if="history.length > 0" class="space-y-2">
+                            <div
+                                v-for="item in history"
+                                :key="item.id"
+                                class="flex items-center justify-between"
+                            >
+                                <button
+                                    @click="executeHistory(item)"
+                                    class="text-sm text-blue-600 dark:text-blue-400 hover:underline truncate"
+                                >
+                                    {{ item.query }}
+                                </button>
+                                <button
+                                    @click="deleteHistoryItem(item.id)"
+                                    class="text-xs text-red-600 dark:text-red-400 hover:underline"
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                        <div v-else class="text-sm text-gray-600 dark:text-gray-400">No history</div>
+                    </div>
+                </div>
+
                 <!-- Search Results -->
                 <div v-if="query">
                     <SearchResults :results="results" :query="query" />
@@ -160,4 +281,3 @@ const applyFilters = () => {
         </div>
     </AuthenticatedLayout>
 </template>
-

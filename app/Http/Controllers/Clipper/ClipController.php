@@ -53,7 +53,7 @@ class ClipController extends Controller
 
     public function create($campaignId)
     {
-        if (!auth()->user()->isClipper()) {
+        if (!auth()->user()->isClipper() && !auth()->user()->isAdmin()) {
             return redirect()->route('clipper.profile.create')
                 ->with('error', 'You must set up your clipper profile first to submit clips.');
         }
@@ -67,7 +67,7 @@ class ClipController extends Controller
 
     public function store(StoreClipRequest $request)
     {
-        if (!auth()->user()->isClipper()) {
+        if (!auth()->user()->isClipper() && !auth()->user()->isAdmin()) {
             return back()->withErrors(['error' => 'You must be a registered clipper to submit clips.']);
         }
 

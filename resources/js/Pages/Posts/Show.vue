@@ -21,6 +21,8 @@ import ImageGallery from '@/Components/ImageGallery.vue';
 import WeightedScoreToggle from '@/Components/WeightedScoreToggle.vue';
 import SupplierRecommendations from '@/Components/SupplierRecommendations.vue';
 import { PURPOSE_TYPES } from '@/Utils/constants';
+import RelatedPosts from '@/Components/Recommendations/RelatedPosts.vue';
+import YouMightLike from '@/Components/Recommendations/YouMightLike.vue';
 
 const props = defineProps({
     post: Object,
@@ -349,6 +351,15 @@ const getImageClass = (imageCount, index) => {
                             :recommendations="supplierRecommendations"
                             :business-type="businessType"
                         />
+
+                        <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <div>
+                                <RelatedPosts :post-id="post.id" />
+                            </div>
+                            <div>
+                                <YouMightLike />
+                            </div>
+                        </div>
 
                         <!-- Comments section -->
                         <div class="mt-6">

@@ -31,6 +31,8 @@ Schedule::command('posts:aggregate-analytics')->dailyAt('01:00');
 
 // Publish Scheduled Posts (every minute)
 Schedule::command('posts:publish-scheduled')->everyMinute();
+// Notify before publish (every minute, 30 minutes ahead)
+Schedule::job(new \App\Jobs\NotifyBeforePublish(30))->everyMinute();
 
 // Campaign Scheduling Commands
 Schedule::command('campaigns:activate-scheduled')->everyMinute();
@@ -75,6 +77,11 @@ Schedule::command('ml:check-accuracy')->dailyAt('18:00')
 // Expire old signals
 Schedule::command('signals:expire')->hourly();
 
+// Stories cleanup (remove expired stories)
+Schedule::command('stories:cleanup-expired')->everyFiveMinutes();
+
+// Events reminders (send every 5 minutes)
+Schedule::command('events:send-reminders')->everyFiveMinutes();
 // Select best models (weekly, Sunday)
 Schedule::command('ml:select-best-models')->weeklyOn(0, '2:00')
     ->timezone('Asia/Jakarta');

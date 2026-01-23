@@ -36,6 +36,7 @@ class StorePostRequest extends FormRequest
             'link_preview_image' => ['nullable', 'string', 'max:2048'],
             'link_preview_site_name' => ['nullable', 'string', 'max:100'],
             'scheduled_at' => ['nullable', 'date', 'after:now'],
+            'timezone' => ['nullable', 'timezone'],
             'publish_status' => ['nullable', 'in:draft,scheduled,published'],
             'template_id' => ['nullable', 'exists:post_templates,id'],
             'series_id' => ['nullable', 'exists:posts,id'],

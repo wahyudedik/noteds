@@ -316,6 +316,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Follow::class, 'following_id');
     }
 
+    public function organizedEvents(): HasMany
+    {
+        return $this->hasMany(Event::class, 'user_id');
+    }
+
+    public function eventInvitations(): HasMany
+    {
+        return $this->hasMany(EventInvitation::class);
+    }
+
     /**
      * Get categories associated with this user.
      */

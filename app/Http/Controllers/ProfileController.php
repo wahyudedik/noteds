@@ -149,6 +149,12 @@ class ProfileController extends Controller
             'stats' => $stats,
             'engagement_data' => $engagementData,
             'top_posts' => $topPosts,
+            'verifications' => \App\Models\UserVerification::where('user_id', $profileUser->id)->with('type')->get()->map(fn($v) => [
+                'type' => $v->type?->name,
+                'slug' => $v->type?->slug,
+                'icon' => $v->type?->badge_icon,
+                'verified_at' => $v->verified_at,
+            ]),
         ]);
     }
 

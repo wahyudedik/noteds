@@ -1,0 +1,17 @@
+{
+  "influencer": {
+    "min_followers": 1000,
+    "min_engagement_rate": 1.5,
+    "window_days": 30
+  },
+  "business": {
+    "min_followers": 100,
+    "min_engagement_rate": 1.0,
+    "window_days": 30
+  },
+  "expert": {
+    "min_followers": 100,
+    "min_engagement_rate": 1.0,
+    "window_days": 30
+  }
+}

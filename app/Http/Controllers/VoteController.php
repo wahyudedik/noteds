@@ -94,6 +94,12 @@ class VoteController extends Controller
             // Update weighted scores inside transaction to ensure consistency
             // If weighted score calculation fails, the entire transaction will roll back
             $this->voteWeightService->updatePostWeightedScores($post);
+
+            if ($newVoteType === 'upvote' && ($oldVoteType === null || $oldVoteType === 'downvote')) {
+                app(\App\Services\GamificationService::class)->awardAction($request->user(), 'upvote', [
+                    'post_id' => $post->id,
+                ]);
+            }
         });
 
         return back();
@@ -174,6 +180,12 @@ class VoteController extends Controller
             // Update weighted scores inside transaction to ensure consistency
             // If weighted score calculation fails, the entire transaction will roll back
             $this->voteWeightService->updateCommentWeightedScores($comment);
+
+            if ($newVoteType === 'upvote' && ($oldVoteType === null || $oldVoteType === 'downvote')) {
+                app(\App\Services\GamificationService::class)->awardAction($request->user(), 'upvote', [
+                    'comment_id' => $comment->id,
+                ]);
+            }
         });
 
         return back();

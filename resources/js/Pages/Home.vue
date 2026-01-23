@@ -7,6 +7,9 @@ import TrendingTopics from '@/Components/Widgets/TrendingTopics.vue';
 import SuggestedUsers from '@/Components/Widgets/SuggestedUsers.vue';
 import QuickStats from '@/Components/Widgets/QuickStats.vue';
 import { Head, usePage } from '@inertiajs/vue3';
+import YouMightLike from '@/Components/Recommendations/YouMightLike.vue';
+import TrendingContent from '@/Components/Recommendations/TrendingContent.vue';
+import SimilarUsers from '@/Components/Recommendations/SimilarUsers.vue';
 
 const page = usePage();
 
@@ -62,6 +65,18 @@ defineProps({
                             <!-- Suggested Users Widget -->
                             <SidebarWidget title="Suggested Users" v-if="suggestedUsers && suggestedUsers.length > 0">
                                 <SuggestedUsers :users="suggestedUsers" />
+                            </SidebarWidget>
+
+                            <SidebarWidget title="You Might Like">
+                                <YouMightLike />
+                            </SidebarWidget>
+
+                            <SidebarWidget title="Trending Content">
+                                <TrendingContent />
+                            </SidebarWidget>
+
+                            <SidebarWidget title="Similar Users">
+                                <SimilarUsers />
                             </SidebarWidget>
                         </div>
                     </div>

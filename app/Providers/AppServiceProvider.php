@@ -6,6 +6,7 @@ use App\Listeners\BroadcastUserNotification;
 use Illuminate\Notifications\Events\NotificationSending;
 use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -82,5 +83,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Broadcast database notifications in real-time for in-app updates
         Event::listen(NotificationSent::class, BroadcastUserNotification::class);
+
+        Event::listen(Login::class, function (Login $event) {
+            app(\App\Services\GamificationService::class)->awardDailyLogin($event->user);
+        });
     }
 }

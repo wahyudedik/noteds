@@ -3,6 +3,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PostFeed from '@/Components/PostFeed.vue';
 import PostComposer from '@/Components/PostComposer.vue';
 import { Head, usePage } from '@inertiajs/vue3';
+import SidebarWidget from '@/Components/SidebarWidget.vue';
+import YouMightLike from '@/Components/Recommendations/YouMightLike.vue';
+import TrendingContent from '@/Components/Recommendations/TrendingContent.vue';
+import SimilarUsers from '@/Components/Recommendations/SimilarUsers.vue';
 
 const page = usePage();
 
@@ -47,8 +51,16 @@ defineProps({
 
                     <!-- Right Sidebar (optional, can be empty or add widgets) -->
                     <div class="lg:col-span-4 hidden lg:block order-1 lg:order-2">
-                        <div class="sticky top-4">
-                            <!-- Empty sidebar or add widgets here if needed -->
+                        <div class="sticky top-4 space-y-6">
+                            <SidebarWidget title="You Might Like">
+                                <YouMightLike />
+                            </SidebarWidget>
+                            <SidebarWidget title="Trending">
+                                <TrendingContent />
+                            </SidebarWidget>
+                            <SidebarWidget title="Similar Users">
+                                <SimilarUsers />
+                            </SidebarWidget>
                         </div>
                     </div>
                 </div>

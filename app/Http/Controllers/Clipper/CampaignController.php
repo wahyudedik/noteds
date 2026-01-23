@@ -36,7 +36,7 @@ class CampaignController extends Controller
 
     public function create()
     {
-        if (!auth()->user()->isBrand()) {
+        if (!auth()->user()->isBrand() && !auth()->user()->isAdmin()) {
             return redirect()->route('clipper.brand-registration.create')
                 ->with('error', 'You must register as a brand first to create campaigns.');
         }
@@ -51,7 +51,7 @@ class CampaignController extends Controller
 
     public function store(Request $request)
     {
-        if (!auth()->user()->isBrand()) {
+        if (!auth()->user()->isBrand() && !auth()->user()->isAdmin()) {
             return back()->withErrors(['error' => 'You must be a registered brand to create campaigns.']);
         }
 

@@ -53,6 +53,11 @@ class RepostController extends Controller
             if ($post->user_id !== $request->user()->id && $post->user) {
                 $this->notificationService->notifyPostReposted($post, $request->user());
             }
+
+            app(\App\Services\GamificationService::class)->awardAction($request->user(), 'repost', [
+                'post_id' => $post->id,
+                'repost_id' => $repost->id,
+            ]);
         });
 
         return back()->with('success', 'Post reposted successfully.');

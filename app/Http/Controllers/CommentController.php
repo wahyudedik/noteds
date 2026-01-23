@@ -72,6 +72,11 @@ class CommentController extends Controller
             if (!empty($mentionUsernames)) {
                 $this->mentionService->processCommentMentions($comment, $mentionUsernames);
             }
+
+            app(\App\Services\GamificationService::class)->awardAction($request->user(), 'comment_create', [
+                'post_id' => $post->id,
+                'comment_id' => $comment->id,
+            ]);
         });
 
         return back();

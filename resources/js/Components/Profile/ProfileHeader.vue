@@ -39,6 +39,7 @@ const displaySubtitle = computed(() => {
 
 const avatarInitial = computed(() => displayName.value.charAt(0).toUpperCase());
 const avatarUrl = computed(() => props.profileUser.avatar_url || null);
+const verifications = computed(() => page.props.verifications || []);
 </script>
 
 <template>
@@ -110,6 +111,13 @@ const avatarUrl = computed(() => props.profileUser.avatar_url || null);
                     Verified Mentor
                 </span>
             </div>
+            <!-- Verification Badges -->
+            <div v-if="verifications.length" class="mb-3 sm:mb-4 flex flex-wrap items-center gap-2 justify-center sm:justify-start">
+                <span v-for="v in verifications" :key="v.slug" class="inline-flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    <span v-if="v.icon">{{ v.icon }}</span>
+                    <span class="capitalize">{{ v.type }}</span>
+                </span>
+            </div>
 
             <!-- Mutual Connections (only when viewing other user's profile) -->
             <div v-if="!isOwnProfile && mutualConnectionsCount > 0" class="mb-3 sm:mb-4">
@@ -144,4 +152,3 @@ const avatarUrl = computed(() => props.profileUser.avatar_url || null);
         </div>
     </div>
 </template>
-

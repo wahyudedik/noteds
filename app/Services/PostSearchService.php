@@ -61,15 +61,28 @@ class PostSearchService
             }, $hashtagNames))->pluck('id');
 
             if ($hashtagIds->isNotEmpty()) {
-                $postsQuery->whereHas('hashtags', function ($q) use ($hashtagIds) {
-                    $q->whereIn('hashtags.id', $hashtagIds);
-                });
+                $match = $filters['hashtags_match'] ?? 'any';
+                if ($match === 'all') {
+                    foreach ($hashtagIds as $hid) {
+                        $postsQuery->whereHas('hashtags', function ($q) use ($hid) {
+                            $q->where('hashtags.id', $hid);
+                        });
+                    }
+                } else {
+                    $postsQuery->whereHas('hashtags', function ($q) use ($hashtagIds) {
+                        $q->whereIn('hashtags.id', $hashtagIds);
+                    });
+                }
             }
         }
 
         // Purpose type filter
         if (!empty($filters['purpose_type']) && $filters['purpose_type'] !== 'all') {
             $postsQuery->where('purpose_type', $filters['purpose_type']);
+        }
+
+        if (!empty($filters['publish_status'])) {
+            $postsQuery->where('publish_status', $filters['publish_status']);
         }
 
         // Engagement filter

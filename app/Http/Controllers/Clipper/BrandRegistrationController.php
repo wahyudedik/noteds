@@ -17,7 +17,7 @@ class BrandRegistrationController extends Controller
     public function create()
     {
         // Check if user already has brand role
-        if (auth()->user()->isBrand()) {
+        if (auth()->user()->isBrand() || auth()->user()->isAdmin()) {
             return redirect()->route('clipper.campaigns.index')
                 ->with('info', 'You are already registered as a brand.');
         }
@@ -47,7 +47,7 @@ class BrandRegistrationController extends Controller
 
         return Inertia::render('Brand/Registration/Show', [
             'user' => $user,
-            'isBrand' => $user->isBrand(),
+            'isBrand' => $user->isBrand() || $user->isAdmin(),
         ]);
     }
 
@@ -55,7 +55,7 @@ class BrandRegistrationController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->isBrand()) {
+        if (!$user->isBrand() && !$user->isAdmin()) {
             return redirect()->route('clipper.brand-registration.create');
         }
 

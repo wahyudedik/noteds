@@ -120,6 +120,13 @@ class GroupInviteController extends Controller
         $invite->increment('click_count');
         $invite->last_clicked_at = now();
         $invite->save();
+
+        if ($invite->inviter) {
+            app(\App\Services\GamificationService::class)->awardAction($invite->inviter, 'invite_accepted', [
+                'group_invite_id' => $invite->id,
+                'group_id' => $group->id,
+            ]);
+        }
         return redirect()->route('groups.show', $group->slug)->with('success', 'Joined group.');
     }
 

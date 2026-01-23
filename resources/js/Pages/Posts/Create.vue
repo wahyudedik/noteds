@@ -23,6 +23,8 @@ const form = useForm({
     business_type: null,
     title: '',
     content: '',
+    scheduled_at: null,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 });
 
 const submit = () => {
@@ -89,6 +91,10 @@ const submit = () => {
                                 </div>
 
                                 <div class="flex items-center justify-end gap-4">
+                                    <div class="flex items-center gap-2 mr-auto">
+                                        <label class="text-sm text-gray-700 dark:text-gray-300">Schedule</label>
+                                        <input type="datetime-local" v-model="form.scheduled_at" class="px-2 py-1 border rounded" />
+                                    </div>
                                     <PrimaryButton :disabled="form.processing">
                                         Publish
                                     </PrimaryButton>
@@ -101,4 +107,3 @@ const submit = () => {
         </div>
     </AuthenticatedLayout>
 </template>
-

@@ -23,8 +23,10 @@ const localFilters = ref({
     date_to: props.filters?.date_to || '',
     author: props.filters?.author || '',
     hashtags: props.filters?.hashtags || '',
+    hashtags_match: props.filters?.hashtags_match || 'any',
     purpose_type: props.filters?.purpose_type || 'all',
     min_engagement: props.filters?.min_engagement || '',
+    publish_status: props.filters?.publish_status || '',
     sort_by: props.filters?.sort_by || 'latest',
 });
 
@@ -194,6 +196,19 @@ watch(localFilters, () => {
                 </p>
             </div>
 
+            <!-- Hashtags Match -->
+            <div>
+                <InputLabel for="hashtags_match" value="Hashtags Match" />
+                <select
+                    id="hashtags_match"
+                    v-model="localFilters.hashtags_match"
+                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                >
+                    <option value="any">Match Any</option>
+                    <option value="all">Match All</option>
+                </select>
+            </div>
+
             <!-- Min Engagement -->
             <div>
                 <InputLabel for="min_engagement" value="Minimum Engagement" />
@@ -208,6 +223,20 @@ watch(localFilters, () => {
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Minimum total engagement (votes + comments + reposts)
                 </p>
+            </div>
+
+            <!-- Publish Status -->
+            <div>
+                <InputLabel for="publish_status" value="Status" />
+                <select
+                    id="publish_status"
+                    v-model="localFilters.publish_status"
+                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                >
+                    <option value="">Any</option>
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                </select>
             </div>
         </div>
 

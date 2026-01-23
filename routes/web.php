@@ -24,14 +24,105 @@ Route::get('/home', [App\Http\Controllers\PostController::class, 'index'])
 
 // Global Search
 Route::middleware('auth')->group(function () {
+    Route::get('/calendar', [App\Http\Controllers\CalendarController::class, 'index'])->name('calendar.index');
+    Route::get('/api/calendar/events', [App\Http\Controllers\CalendarController::class, 'events'])->name('calendar.events.index');
+    Route::post('/api/calendar/events', [App\Http\Controllers\CalendarController::class, 'store'])->name('calendar.events.store');
+    Route::put('/api/calendar/events/{event}', [App\Http\Controllers\CalendarController::class, 'update'])->name('calendar.events.update');
+    Route::get('/api/calendar/export', [App\Http\Controllers\CalendarController::class, 'export'])->name('calendar.export');
+
+    Route::get('/api/gamification/leaderboard', [App\Http\Controllers\GamificationController::class, 'leaderboard'])->name('gamification.leaderboard');
+    Route::get('/api/gamification/me', [App\Http\Controllers\GamificationController::class, 'me'])->name('gamification.me');
+    Route::get('/gamification', [App\Http\Controllers\GamificationController::class, 'overview'])->name('gamification.overview');
+
+    // Scheduling
+    Route::get('/api/scheduling/calendar', [App\Http\Controllers\SchedulingController::class, 'calendar'])->name('scheduling.calendar');
+    Route::put('/api/scheduling/posts/{post}/schedule', [App\Http\Controllers\SchedulingController::class, 'updatePostSchedule'])->name('scheduling.posts.update');
+    Route::post('/api/scheduling/bulk', [App\Http\Controllers\SchedulingController::class, 'bulk'])->name('scheduling.bulk');
+    Route::get('/api/scheduling/{type}/{id}/recurrence', [App\Http\Controllers\SchedulingController::class, 'getRecurrence'])->name('scheduling.recurrence.get');
+    Route::post('/api/scheduling/{type}/{id}/recurrence', [App\Http\Controllers\SchedulingController::class, 'saveRecurrence'])->name('scheduling.recurrence.save');
+    Route::get('/scheduling/recurrence', function () {
+        return \Inertia\Inertia::render('Scheduling/RecurrenceEditorPage');
+    })->name('scheduling.recurrence.page');
+
+    // User Analytics Dashboard
+    Route::get('/analytics', [App\Http\Controllers\UserAnalyticsController::class, 'dashboard'])->name('analytics.dashboard');
+    Route::get('/api/analytics/overview', [App\Http\Controllers\UserAnalyticsController::class, 'overview'])->name('analytics.overview');
+    Route::get('/api/analytics/competitors', [App\Http\Controllers\UserAnalyticsController::class, 'competitors'])->name('analytics.competitors');
+    Route::get('/api/analytics/export', [App\Http\Controllers\UserAnalyticsController::class, 'export'])->name('analytics.export');
+
+    // User Verification
+    Route::get('/verification', [App\Http\Controllers\VerificationController::class, 'requestPage'])->name('verification.request');
+    Route::post('/api/verification/requests', [App\Http\Controllers\VerificationController::class, 'submit'])->name('verification.submit');
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/admin/verification', [App\Http\Controllers\Admin\VerificationAdminController::class, 'dashboard'])->name('admin.verification.dashboard');
+        Route::post('/admin/verification/{verificationRequest}/approve', [App\Http\Controllers\Admin\VerificationAdminController::class, 'approve'])->name('admin.verification.approve');
+        Route::post('/admin/verification/{verificationRequest}/reject', [App\Http\Controllers\Admin\VerificationAdminController::class, 'reject'])->name('admin.verification.reject');
+    });
+
+    // Recommendations
+    Route::get('/api/recommendations/feed', [App\Http\Controllers\RecommendationController::class, 'feed'])->name('recommendations.feed');
+    Route::get('/api/recommendations/posts/{post}/related', [App\Http\Controllers\RecommendationController::class, 'related'])->name('recommendations.related');
+    Route::get('/api/recommendations/users/similar', [App\Http\Controllers\RecommendationController::class, 'similarUsers'])->name('recommendations.similar_users');
+    Route::get('/api/recommendations/trending', [App\Http\Controllers\RecommendationController::class, 'trending'])->name('recommendations.trending');
+
+    // Admin Gamification
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/admin/gamification', [App\Http\Controllers\Admin\GamificationAdminController::class, 'dashboard'])->name('admin.gamification.dashboard');
+        Route::get('/admin/gamification/configs', [App\Http\Controllers\Admin\GamificationAdminController::class, 'listConfigs'])->name('admin.gamification.configs');
+        Route::put('/admin/gamification/configs/{key}', [App\Http\Controllers\Admin\GamificationAdminController::class, 'updateConfig'])->name('admin.gamification.configs.update');
+        Route::get('/admin/gamification/export', [App\Http\Controllers\Admin\GamificationAdminController::class, 'export'])->name('admin.gamification.export');
+    });
     Route::get('/search', [App\Http\Controllers\SearchController::class, 'index'])
         ->middleware('throttle:30,1')
         ->name('search.index'); // 30 searches per minute
     Route::get('/search/suggestions', [App\Http\Controllers\SearchController::class, 'suggestions'])
         ->middleware('throttle:60,1')
         ->name('search.suggestions'); // 60 suggestions per minute
+    Route::post('/search/saved', [App\Http\Controllers\SearchController::class, 'saved'])
+        ->middleware('throttle:30,1')
+        ->name('search.saved.create');
+    Route::get('/search/saved', [App\Http\Controllers\SearchController::class, 'listSaved'])
+        ->middleware('throttle:60,1')
+        ->name('search.saved.list');
+    Route::delete('/search/saved/{savedSearch}', [App\Http\Controllers\SearchController::class, 'deleteSaved'])
+        ->middleware('throttle:60,1')
+        ->name('search.saved.delete');
+    Route::get('/search/history', [App\Http\Controllers\SearchController::class, 'history'])
+        ->middleware('throttle:60,1')
+        ->name('search.history');
+    Route::delete('/search/history/{historyItem}', [App\Http\Controllers\SearchController::class, 'deleteHistoryItem'])
+        ->middleware('throttle:60,1')
+        ->name('search.history.delete');
+
+    // Events
+    Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index');
+    Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('events.store');
+    Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'show'])->name('events.show');
+    Route::put('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])
+        ->middleware('throttle:30,1')
+        ->name('events.update');
+    Route::delete('/events/{event}', [App\Http\Controllers\EventController::class, 'destroy'])
+        ->middleware('throttle:30,1')
+        ->name('events.destroy');
+    Route::post('/events/{event}/invite', [App\Http\Controllers\EventController::class, 'invite'])
+        ->middleware('throttle:60,1')
+        ->name('events.invite');
+    Route::post('/events/{event}/rsvp', [App\Http\Controllers\EventController::class, 'rsvp'])
+        ->middleware('throttle:60,1')
+        ->name('events.rsvp');
+    Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])
+        ->middleware('throttle:60,1')
+        ->name('events.calendar');
+    Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])
+        ->middleware('throttle:60,1')
+        ->name('events.search');
 });
 
+// Public share
+Route::get('/events/share/{token}', [App\Http\Controllers\EventController::class, 'share'])
+    ->name('events.share');
 // Link Preview API
 Route::middleware('auth')->group(function () {
     Route::post('/api/link-preview', [App\Http\Controllers\LinkPreviewController::class, 'generate'])
@@ -68,6 +159,30 @@ Route::middleware('auth')->group(function () {
 Route::get('/posts', [App\Http\Controllers\PostController::class, 'index'])->name('posts.index');
 Route::get('/posts/trending', [App\Http\Controllers\PostController::class, 'trending'])->middleware(['auth'])->name('posts.trending');
 Route::middleware(['auth'])->group(function () {
+    Route::get('/stories', [App\Http\Controllers\StoryController::class, 'index'])->name('stories.index');
+    Route::post('/stories', [App\Http\Controllers\StoryController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('stories.store');
+    Route::get('/stories/{story}', [App\Http\Controllers\StoryController::class, 'show'])
+        ->where('story', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+        ->name('stories.show');
+    Route::post('/stories/{story}/view', [App\Http\Controllers\StoryController::class, 'trackView'])
+        ->middleware('throttle:60,1')
+        ->name('stories.view');
+    Route::post('/stories/{story}/react', [App\Http\Controllers\StoryController::class, 'react'])
+        ->middleware('throttle:60,1')
+        ->name('stories.react');
+    Route::get('/stories/following', [App\Http\Controllers\StoryController::class, 'following'])
+        ->middleware('throttle:60,1')
+        ->name('stories.following');
+    Route::post('/stories/highlights', [App\Http\Controllers\StoryController::class, 'createHighlight'])
+        ->middleware('throttle:10,1')
+        ->name('stories.highlights.create');
+    Route::post('/stories/{story}/highlights/{highlight}', [App\Http\Controllers\StoryController::class, 'addToHighlight'])
+        ->middleware('throttle:30,5')
+        ->name('stories.highlights.add');
+    Route::get('/stories/analytics', [App\Http\Controllers\StoryController::class, 'analytics'])
+        ->name('stories.analytics');
     Route::get('/posts/create', [App\Http\Controllers\PostController::class, 'create'])->name('posts.create');
     Route::post('/posts', [App\Http\Controllers\PostController::class, 'store'])
         ->middleware('throttle:10,5') // 10 posts per 5 minutes (more reasonable limit)
@@ -811,6 +926,8 @@ Route::middleware('auth')->group(function () {
     // Admin Routes
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/search-analytics', [App\Http\Controllers\Admin\SearchAnalyticsController::class, 'index'])->name('search.analytics');
+        Route::get('/search-analytics/export', [App\Http\Controllers\Admin\SearchAnalyticsController::class, 'export'])->name('search.analytics.export');
         Route::resource('withdrawals', App\Http\Controllers\Admin\AdminWithdrawalController::class)->names([
             'index' => 'withdrawals.index',
             'show' => 'withdrawals.show',

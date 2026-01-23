@@ -13,7 +13,9 @@ return new class extends Migration
     public function up(): void
     {
         // Add 'refund' and 'adjustment' to transactions.type enum
-        DB::statement("ALTER TABLE transactions MODIFY COLUMN type ENUM('sale', 'withdrawal', 'deposit', 'refund', 'adjustment') NOT NULL");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE transactions MODIFY COLUMN type ENUM('sale', 'withdrawal', 'deposit', 'refund', 'adjustment') NOT NULL");
+        }
     }
 
     /**
@@ -22,6 +24,8 @@ return new class extends Migration
     public function down(): void
     {
         // Revert back to original enum values
-        DB::statement("ALTER TABLE transactions MODIFY COLUMN type ENUM('sale', 'withdrawal', 'deposit') NOT NULL");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE transactions MODIFY COLUMN type ENUM('sale', 'withdrawal', 'deposit') NOT NULL");
+        }
     }
 };

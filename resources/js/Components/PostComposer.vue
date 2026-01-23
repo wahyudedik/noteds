@@ -27,6 +27,8 @@ const form = useForm({
     link_preview_description: null,
     link_preview_image: null,
     link_preview_site_name: null,
+    scheduled_at: null,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 });
 
 // Debounce function
@@ -263,7 +265,11 @@ const toggleComposer = () => {
                     Generating link preview...
                 </div>
 
-                <div class="flex justify-end gap-3">
+                <div class="flex items-center justify-end gap-3">
+                    <div class="mr-auto flex items-center gap-2">
+                        <label class="text-sm text-gray-700 dark:text-gray-300">Schedule</label>
+                        <input type="datetime-local" v-model="form.scheduled_at" class="px-2 py-1 border rounded" />
+                    </div>
                     <button
                         type="button"
                         @click="toggleComposer"

@@ -1,20 +1,27 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
-import PostCard from '@/Components/PostCard.vue';
+import { Link, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
     results: {
         type: Object,
         default: () => ({
-            posts: [],
-            users: [],
-            products: [],
-            articles: [],
+            posts: null,
+            users: null,
+            products: null,
+            articles: null,
         }),
     },
     query: {
         type: String,
         default: '',
+    },
+    pagination: {
+        type: Object,
+        default: () => ({
+            posts: null, users: null, products: null, articles: null,
+            per_page_options: [10, 20, 50, 100],
+        }),
     },
 });
 
@@ -25,18 +32,72 @@ const formatDate = (date) => {
         day: 'numeric',
     });
 };
+
+const availableTabs = computed(() => {
+    const tabs = [];
+    if (props.results.posts?.data?.length) tabs.push('Posts');
+    if (props.results.users?.data?.length) tabs.push('Users');
+    if (props.results.products?.data?.length) tabs.push('Products');
+    if (props.results.articles?.data?.length) tabs.push('Articles');
+    return tabs.length ? tabs : ['Posts','Users','Products','Articles'];
+});
+const selectedTab = ref(availableTabs.value[0]);
+
+const getData = (type) => {
+    const key = type.toLowerCase();
+    return props.results[key]?.data || [];
+};
+const getMeta = (type) => {
+    const key = type.toLowerCase();
+    return props.pagination[key] || null;
+};
+const getPerPage = (type) => getMeta(type)?.per_page || 20;
+
+const changePage = (type, page) => {
+    const paramName = `${type.toLowerCase()}_page`;
+    const perName = `${type.toLowerCase()}_per_page`;
+    router.get(route('search.index'), {
+        q: props.query,
+        [paramName]: page,
+        [perName]: getPerPage(type),
+    }, { preserveState: true, preserveScroll: true });
+};
+const changePerPage = (type, per) => {
+    const paramName = `${type.toLowerCase()}_page`;
+    const perName = `${type.toLowerCase()}_per_page`;
+    router.get(route('search.index'), {
+        q: props.query,
+        [paramName]: 1,
+        [perName]: per,
+    }, { preserveState: true, preserveScroll: true });
+};
 </script>
 
 <template>
     <div class="space-y-8">
+        <!-- Tabs -->
+        <div class="flex items-center gap-3">
+            <button
+                v-for="tab in availableTabs"
+                :key="tab"
+                @click="selectedTab = tab"
+                :class="[
+                    'px-3 py-1.5 rounded-md text-sm',
+                    selectedTab === tab ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300'
+                ]"
+            >
+                {{ tab }}
+            </button>
+        </div>
+
         <!-- Posts Results -->
-        <div v-if="results.posts && results.posts.length > 0">
+        <div v-if="selectedTab === 'Posts'">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Posts ({{ results.posts.length }})
+                Posts ({{ getMeta('Posts')?.total ?? 0 }})
             </h3>
             <div class="space-y-4">
                 <div
-                    v-for="post in results.posts"
+                    v-for="post in getData('Posts')"
                     :key="post.id"
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow"
                 >
@@ -60,16 +121,41 @@ const formatDate = (date) => {
                     </Link>
                 </div>
             </div>
+            <!-- Pagination controls -->
+            <div class="mt-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Per page:</span>
+                    <select :value="getPerPage('Posts')" @change="changePerPage('Posts', parseInt($event.target.value))"
+                            class="px-2 py-1 border rounded-md dark:bg-gray-700 dark:text-white">
+                        <option v-for="opt in pagination.per_page_options" :key="opt" :value="opt">{{ opt }}</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button
+                        class="px-3 py-1.5 border rounded-md"
+                        :disabled="(getMeta('Posts')?.current_page ?? 1) <= 1"
+                        @click="changePage('Posts', (getMeta('Posts')?.current_page ?? 1) - 1)"
+                    >Previous</button>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                        Page {{ getMeta('Posts')?.current_page ?? 1 }} / {{ getMeta('Posts')?.last_page ?? 1 }}
+                    </span>
+                    <button
+                        class="px-3 py-1.5 border rounded-md"
+                        :disabled="(getMeta('Posts')?.current_page ?? 1) >= (getMeta('Posts')?.last_page ?? 1)"
+                        @click="changePage('Posts', (getMeta('Posts')?.current_page ?? 1) + 1)"
+                    >Next</button>
+                </div>
+            </div>
         </div>
 
         <!-- Users Results -->
-        <div v-if="results.users && results.users.length > 0">
+        <div v-if="selectedTab === 'Users'">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Users ({{ results.users.length }})
+                Users ({{ getMeta('Users')?.total ?? 0 }})
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Link
-                    v-for="user in results.users"
+                    v-for="user in getData('Users')"
                     :key="user.id"
                     :href="route('profile.show', user.id)"
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow"
@@ -97,16 +183,36 @@ const formatDate = (date) => {
                     </div>
                 </Link>
             </div>
+            <div class="mt-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Per page:</span>
+                    <select :value="getPerPage('Users')" @change="changePerPage('Users', parseInt($event.target.value))"
+                            class="px-2 py-1 border rounded-md dark:bg-gray-700 dark:text-white">
+                        <option v-for="opt in pagination.per_page_options" :key="opt" :value="opt">{{ opt }}</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="px-3 py-1.5 border rounded-md"
+                            :disabled="(getMeta('Users')?.current_page ?? 1) <= 1"
+                            @click="changePage('Users', (getMeta('Users')?.current_page ?? 1) - 1)">Previous</button>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                        Page {{ getMeta('Users')?.current_page ?? 1 }} / {{ getMeta('Users')?.last_page ?? 1 }}
+                    </span>
+                    <button class="px-3 py-1.5 border rounded-md"
+                            :disabled="(getMeta('Users')?.current_page ?? 1) >= (getMeta('Users')?.last_page ?? 1)"
+                            @click="changePage('Users', (getMeta('Users')?.current_page ?? 1) + 1)">Next</button>
+                </div>
+            </div>
         </div>
 
         <!-- Products Results -->
-        <div v-if="results.products && results.products.length > 0">
+        <div v-if="selectedTab === 'Products'">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Products ({{ results.products.length }})
+                Products ({{ getMeta('Products')?.total ?? 0 }})
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Link
-                    v-for="product in results.products"
+                    v-for="product in getData('Products')"
                     :key="product.id"
                     :href="route('marketplace.products.show', product.id)"
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow"
@@ -132,16 +238,36 @@ const formatDate = (date) => {
                     </div>
                 </Link>
             </div>
+            <div class="mt-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Per page:</span>
+                    <select :value="getPerPage('Products')" @change="changePerPage('Products', parseInt($event.target.value))"
+                            class="px-2 py-1 border rounded-md dark:bg-gray-700 dark:text-white">
+                        <option v-for="opt in pagination.per_page_options" :key="opt" :value="opt">{{ opt }}</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="px-3 py-1.5 border rounded-md"
+                            :disabled="(getMeta('Products')?.current_page ?? 1) <= 1"
+                            @click="changePage('Products', (getMeta('Products')?.current_page ?? 1) - 1)">Previous</button>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                        Page {{ getMeta('Products')?.current_page ?? 1 }} / {{ getMeta('Products')?.last_page ?? 1 }}
+                    </span>
+                    <button class="px-3 py-1.5 border rounded-md"
+                            :disabled="(getMeta('Products')?.current_page ?? 1) >= (getMeta('Products')?.last_page ?? 1)"
+                            @click="changePage('Products', (getMeta('Products')?.current_page ?? 1) + 1)">Next</button>
+                </div>
+            </div>
         </div>
 
         <!-- Articles Results -->
-        <div v-if="results.articles && results.articles.length > 0">
+        <div v-if="selectedTab === 'Articles'">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Articles ({{ results.articles.length }})
+                Articles ({{ getMeta('Articles')?.total ?? 0 }})
             </h3>
             <div class="space-y-4">
                 <Link
-                    v-for="article in results.articles"
+                    v-for="article in getData('Articles')"
                     :key="article.id"
                     :href="route('explorer.show', article.id)"
                     class="block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow"
@@ -158,15 +284,35 @@ const formatDate = (date) => {
                     </div>
                 </Link>
             </div>
+            <div class="mt-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Per page:</span>
+                    <select :value="getPerPage('Articles')" @change="changePerPage('Articles', parseInt($event.target.value))"
+                            class="px-2 py-1 border rounded-md dark:bg-gray-700 dark:text-white">
+                        <option v-for="opt in pagination.per_page_options" :key="opt" :value="opt">{{ opt }}</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="px-3 py-1.5 border rounded-md"
+                            :disabled="(getMeta('Articles')?.current_page ?? 1) <= 1"
+                            @click="changePage('Articles', (getMeta('Articles')?.current_page ?? 1) - 1)">Previous</button>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                        Page {{ getMeta('Articles')?.current_page ?? 1 }} / {{ getMeta('Articles')?.last_page ?? 1 }}
+                    </span>
+                    <button class="px-3 py-1.5 border rounded-md"
+                            :disabled="(getMeta('Articles')?.current_page ?? 1) >= (getMeta('Articles')?.last_page ?? 1)"
+                            @click="changePage('Articles', (getMeta('Articles')?.current_page ?? 1) + 1)">Next</button>
+                </div>
+            </div>
         </div>
 
         <!-- No Results -->
         <div
             v-if="
-                (!results.posts || results.posts.length === 0) &&
-                (!results.users || results.users.length === 0) &&
-                (!results.products || results.products.length === 0) &&
-                (!results.articles || results.articles.length === 0)
+                (!props.results.posts?.data || props.results.posts.data.length === 0) &&
+                (!props.results.users?.data || props.results.users.data.length === 0) &&
+                (!props.results.products?.data || props.results.products.data.length === 0) &&
+                (!props.results.articles?.data || props.results.articles.data.length === 0)
             "
             class="text-center py-12"
         >

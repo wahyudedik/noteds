@@ -343,6 +343,10 @@ class PostController extends Controller
             }
         }
 
+        app(\App\Services\GamificationService::class)->awardAction($request->user(), 'post_create', [
+            'post_id' => $post->id,
+        ]);
+
         // Redirect to home feed after creating post
         // Use route helper to ensure proper route resolution
         // Don't redirect to the newly created post - stay on home feed

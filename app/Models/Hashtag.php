@@ -40,4 +40,10 @@ class Hashtag extends Model
         return $this->belongsToMany(Post::class, 'post_hashtag')
             ->withTimestamps();
     }
+
+    public function stories(): BelongsToMany
+    {
+        return $this->belongsToMany(Story::class, 'story_hashtag')
+            ->withTimestamps();
+    }
 }

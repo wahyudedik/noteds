@@ -18,7 +18,9 @@ return new class extends Migration
             ->update(['wallet_type' => 'marketplace']);
         
         // Then change wallet_type enum from ['creator', 'clipper'] to ['creator', 'marketplace']
-        DB::statement("ALTER TABLE refunds MODIFY COLUMN wallet_type ENUM('creator', 'marketplace') NOT NULL");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE refunds MODIFY COLUMN wallet_type ENUM('creator', 'marketplace') NOT NULL");
+        }
     }
 
     /**
@@ -27,6 +29,8 @@ return new class extends Migration
     public function down(): void
     {
         // Revert back to ['creator', 'clipper']
-        DB::statement("ALTER TABLE refunds MODIFY COLUMN wallet_type ENUM('creator', 'clipper') NOT NULL");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE refunds MODIFY COLUMN wallet_type ENUM('creator', 'clipper') NOT NULL");
+        }
     }
 };

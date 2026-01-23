@@ -3,6 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import ArticleCard from '@/Components/Explorer/ArticleCard.vue';
 import SearchBar from '@/Components/Explorer/SearchBar.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
+import YouMightLike from '@/Components/Recommendations/YouMightLike.vue';
+import TrendingContent from '@/Components/Recommendations/TrendingContent.vue';
 
 const props = defineProps({
     articles: Object,
@@ -71,6 +73,10 @@ const changeCategory = (category) => {
                                     {{ category }}
                                 </button>
                             </div>
+                        </div>
+                        <div class="mt-4 space-y-4">
+                            <TrendingContent />
+                            <YouMightLike />
                         </div>
                     </aside>
 
