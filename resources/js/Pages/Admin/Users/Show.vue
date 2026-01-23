@@ -55,6 +55,19 @@ const removeClipperRole = () => {
         onSuccess: () => {
             showRemoveRoleModal.value = false;
             removeRoleForm.reset();
+            window.__toast?.add({ title: 'Role', message: 'Role removed', type: 'success' });
+        },
+    });
+};
+const showGrantRoleModal = ref(false);
+const grantRoleType = ref('clipper');
+const grantRole = () => {
+    const routeName = grantRoleType.value === 'brand' ? 'admin.users.grant-brand-role' : 'admin.users.grant-clipper-role';
+    router.post(route(routeName, props.user.id), {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            showGrantRoleModal.value = false;
+            window.__toast?.add({ title: 'Role', message: 'Role granted', type: 'success' });
         },
     });
 };
@@ -188,6 +201,17 @@ const formatDate = (date) => {
                                         class="px-3 py-1.5 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                                     >
                                         Remove Role
+                                    </button>
+                                </div>
+                            </div>
+                            <div v-else class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">Clipper Role</div>
+                                <div class="flex items-center gap-2">
+                                    <button @click="grantRoleType = 'clipper'; showGrantRoleModal = true" class="px-3 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                                        Grant Creator
+                                    </button>
+                                    <button @click="grantRoleType = 'brand'; showGrantRoleModal = true" class="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                        Grant Brand
                                     </button>
                                 </div>
                             </div>
@@ -409,6 +433,38 @@ const formatDate = (date) => {
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grant Role Confirmation Modal -->
+        <div
+            v-if="showGrantRoleModal"
+            class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+            @click.self="showGrantRoleModal = false"
+        >
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+                <div class="mt-3">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Grant Role</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Berikan role <span class="font-semibold capitalize">{{ grantRoleType }}</span> untuk user ini?
+                    </p>
+                    <div class="flex justify-end gap-3">
+                        <button
+                            type="button"
+                            @click="showGrantRoleModal = false"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 dark:bg-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="button"
+                            @click="grantRole"
+                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+                        >
+                            Konfirmasi
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

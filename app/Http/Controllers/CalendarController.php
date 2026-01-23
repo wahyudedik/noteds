@@ -12,7 +12,7 @@ class CalendarController extends Controller
 {
     public function index(Request $request)
     {
-        $categories = \App\Models\Category::active()->ordered()->get(['id','name','display_icon']);
+        $categories = \App\Models\Category::active()->ordered()->get(['id','name','icon']);
         return Inertia::render('Calendar/CalendarView', [
             'categories' => $categories,
         ]);

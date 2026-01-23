@@ -117,11 +117,12 @@ class RecommendationService
         })->toArray();
     }
 
-    public function trending(int $limit = 20): array
+    public function trending(int $limit = 20, int $windowDays = 7): array
     {
-        $cacheKey = "reco:trending";
-        return Cache::remember($cacheKey, 120, function () use ($limit) {
-            $from = Carbon::now()->subDays(7)->toDateString();
+        $windowDays = max(1, min($windowDays, 90));
+        $cacheKey = "reco:trending:{$windowDays}";
+        return Cache::remember($cacheKey, 120, function () use ($limit, $windowDays) {
+            $from = Carbon::now()->subDays($windowDays)->toDateString();
             $pa = PostAnalytics::where('date', '>=', $from)->get()->groupBy('post_id');
             $scores = [];
             foreach ($pa as $pid => $rows) {

@@ -21,7 +21,7 @@ class MessageService
     /**
      * Send a message to a conversation.
      */
-    public function sendMessage(Conversation $conversation, User $user, ?string $content = null, array $attachments = [], ?string $replyToId = null): Message
+    public function sendMessage(Conversation $conversation, User $user, ?string $content = null, array $attachments = [], ?string $replyToId = null, array $metas = []): Message
     {
         // Check if user is participant
         if (!$conversation->hasParticipant($user)) {
@@ -65,7 +65,7 @@ class MessageService
             return $file !== null;
         });
 
-        return DB::transaction(function () use ($conversation, $user, $content, $attachments, $replyToId, $type) {
+        return DB::transaction(function () use ($conversation, $user, $content, $attachments, $replyToId, $type, $metas) {
             // Create message
             $message = Message::create([
                 'conversation_id' => $conversation->id,
@@ -77,7 +77,7 @@ class MessageService
 
             // Handle attachments
             if (!empty($attachments)) {
-                $this->mediaService->storeMedia($message, $attachments);
+                $this->mediaService->storeMedia($message, $attachments, $metas);
             }
 
             // Update conversation last_message_at
@@ -93,6 +93,17 @@ class MessageService
 
             return $message->load(['user', 'media', 'replyTo']);
         });
+    }
+
+    /**
+     * Send a voice message with metadata.
+     */
+    public function sendVoice(Conversation $conversation, User $user, UploadedFile $audio, int $duration, ?string $replyToId = null, array $meta = []): Message
+    {
+        if ($duration > 120) {
+            throw new \Exception('Voice message exceeds maximum duration.');
+        }
+        return $this->sendMessage($conversation, $user, null, [$audio], $replyToId, [array_merge($meta, ['duration' => $duration])]);
     }
 
     /**

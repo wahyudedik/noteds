@@ -1,6 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { useFeatureGate } from '@/Composables/useFeatureGate';
 
 const props = defineProps({
     pendingWithdrawals: {
@@ -97,7 +98,7 @@ const quickActions = computed(() => [
 </script>
 
 <template>
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div v-if="useFeatureGate().can('admin')" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Quick Actions</h3>
         
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">

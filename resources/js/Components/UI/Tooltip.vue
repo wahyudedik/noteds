@@ -23,7 +23,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <span class="relative inline-flex" ref="triggerEl"
+  <span class="relative inline-flex rm-target-tooltip" ref="triggerEl"
         @mouseenter="open=true" @mouseleave="open=false"
         @focusin="open=true" @focusout="open=false"
         role="button" tabindex="0" aria-describedby="tooltip"

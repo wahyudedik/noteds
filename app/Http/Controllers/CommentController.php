@@ -30,6 +30,19 @@ class CommentController extends Controller
             return back()->withErrors(['comment' => 'You cannot comment on this post.']);
         }
 
+        // Privacy: who can comment
+        $author = $post->user;
+        $viewer = $request->user();
+        $perm = $author->settings?->privacy_settings['comments_permission'] ?? 'everyone';
+        if ($viewer && $viewer->id !== $author->id) {
+            if ($perm === 'none') {
+                return back()->withErrors(['comment' => 'Comments are disabled by the author.']);
+            }
+            if ($perm === 'followers' && !$viewer->isFollowing($author)) {
+                return back()->withErrors(['comment' => 'Only followers can comment on this post.']);
+            }
+        }
+
         $validated = $request->validate([
             'content' => ['required', 'string', 'min:10'],
             'parent_id' => [
@@ -46,13 +59,61 @@ class CommentController extends Controller
             ],
             'images' => ['nullable', 'array', 'max:5'],
             'images.*' => ['image', 'max:2048', 'mimes:jpeg,jpg,png,gif,webp'],
+            'attachments' => ['nullable', 'array', 'max:5'],
+            'attachments.*' => [
+                'file',
+                'max:10240', // 10MB
+                function ($attribute, $value, $fail) {
+                    $allowArchives = (bool)config('comments.allow_archives');
+                    $allowed = [
+                        'application/pdf',
+                        'application/msword',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'application/vnd.ms-excel',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/vnd.ms-powerpoint',
+                        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                        'text/plain',
+                        'text/csv',
+                        'image/jpeg',
+                        'image/png',
+                        'image/gif',
+                        'image/webp',
+                    ];
+                    if ($allowArchives) {
+                        $allowed = array_merge($allowed, [
+                            'application/zip',
+                            'application/x-zip-compressed',
+                            'application/x-rar-compressed',
+                            'application/vnd.rar',
+                        ]);
+                    }
+                    if (!in_array(strtolower($value->getClientMimeType()), array_map('strtolower', $allowed))) {
+                        $fail('This file type is not allowed.');
+                    }
+                }
+            ],
         ]);
 
         $comment = null;
         $images = $validated['images'] ?? [];
+        $attachments = $validated['attachments'] ?? [];
         unset($validated['images']);
+        unset($validated['attachments']);
 
-        DB::transaction(function () use ($request, $post, $validated, $images, &$comment) {
+        // Aggregate size limit for attachments
+        if (!empty($attachments)) {
+            $totalKb = 0;
+            foreach ($attachments as $f) {
+                $totalKb += ($f->getSize() / 1024);
+            }
+            $limitKb = (int) config('comments.max_attachment_total_kb', 25600);
+            if ($totalKb > $limitKb) {
+                return back()->withErrors(['attachments' => 'Total size of attachments exceeds the limit of ' . $limitKb . 'KB.']);
+            }
+        }
+
+        DB::transaction(function () use ($request, $post, $validated, $images, $attachments, &$comment) {
             $comment = Comment::create([
                 'user_id' => $request->user()->id,
                 'post_id' => $post->id,
@@ -65,6 +126,10 @@ class CommentController extends Controller
             // Handle image uploads
             if (!empty($images)) {
                 $this->storeCommentImages($comment, $images);
+            }
+            // Handle attachments uploads (docs & images not added above)
+            if (!empty($attachments)) {
+                $this->storeCommentAttachments($comment, $attachments);
             }
 
             // Process mentions
@@ -162,6 +227,34 @@ class CommentController extends Controller
                 'file_size' => $image->getSize(),
                 'order' => $order++,
             ]);
+        }
+    }
+
+    /**
+     * Store attachments (documents or other whitelisted files) for a comment.
+     */
+    private function storeCommentAttachments(Comment $comment, array $attachments): void
+    {
+        $order = (\App\Models\CommentMedia::where('comment_id', $comment->id)->max('order') ?? -1) + 1;
+        foreach ($attachments as $file) {
+            $extension = $file->getClientOriginalExtension();
+            $fileName = Str::uuid() . '_' . time() . '.' . $extension;
+            $dir = 'comments/attachments/' . $comment->id;
+            $filePath = $dir . '/' . $fileName;
+            $file->storeAs($dir, $fileName, 'public');
+            CommentMedia::create([
+                'comment_id' => $comment->id,
+                'file_path' => $filePath,
+                'file_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+                'order' => $order++,
+            ]);
+            // Dispatch thumbnail job for PDFs
+            if (config('comments.pdf_thumbnails') && strtolower($file->getClientMimeType()) === 'application/pdf') {
+                $thumbPath = str_replace('comments/attachments/', 'comments/thumbnails/', preg_replace('/\.pdf$/i', '.png', $filePath));
+                \App\Jobs\GeneratePdfThumbnail::dispatch($filePath, $thumbPath)->onQueue('default');
+            }
         }
     }
 

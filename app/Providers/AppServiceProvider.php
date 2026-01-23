@@ -6,9 +6,11 @@ use App\Listeners\BroadcastUserNotification;
 use Illuminate\Notifications\Events\NotificationSending;
 use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+        Gate::policy(\App\Models\AnalyticsEvent::class, \App\Policies\AnalyticsEventPolicy::class);
 
         // Register domain event listeners
         Event::listen(
@@ -83,6 +86,20 @@ class AppServiceProvider extends ServiceProvider
 
         // Broadcast database notifications in real-time for in-app updates
         Event::listen(NotificationSent::class, BroadcastUserNotification::class);
+        Event::listen(NotificationSent::class, function (NotificationSent $event) {
+            try {
+                $type = method_exists($event->notification, 'toArray')
+                    ? ($event->notification->toArray($event->notifiable)['type'] ?? get_class($event->notification))
+                    : get_class($event->notification);
+                Log::info('Notification sent', [
+                    'channel' => $event->channel,
+                    'type' => $type,
+                    'notifiable_id' => method_exists($event->notifiable, 'getKey') ? $event->notifiable->getKey() : null,
+                ]);
+            } catch (\Throwable $e) {
+                // ignore logging failures
+            }
+        });
 
         Event::listen(Login::class, function (Login $event) {
             app(\App\Services\GamificationService::class)->awardDailyLogin($event->user);

@@ -1,6 +1,16 @@
 <template>
   <div>
     <h1>{{ group.name }}</h1>
+    <div v-if="sharePlacement.groups.enabled && sharePlacement.groups.position === 'below_title'" class="mt-2 mb-4">
+      <SocialShareButtons
+        :url="route('groups.show', group.slug)"
+        :title="group.name"
+        :description="group.description || ''"
+        :hashtags="[]"
+        share-type="groups"
+        :share-id="group.id"
+      />
+    </div>
     <p>{{ group.description }}</p>
     <div>
       <button @click="join">Gabung</button>
@@ -34,6 +44,8 @@
 <script>
 import { router } from '@inertiajs/vue3'
 import InviteModal from '../../Components/Groups/InviteModal.vue'
+import SocialShareButtons from '../../Components/Social/SocialShareButtons.vue'
+import { sharePlacement } from '@/config/sharePlacement'
 export default {
   props: { group: Object, members: Array, posts: Object },
   mounted() {
@@ -48,7 +60,7 @@ export default {
   data() {
     return { title: '', content: '', visibility: 'members', openInvite: false }
   },
-  components: { InviteModal },
+  components: { InviteModal, SocialShareButtons },
   methods: {
     join() {
       router.post(route('groups.join', this.group.slug))

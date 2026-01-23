@@ -47,15 +47,19 @@ class IdeaValidationSeeder extends Seeder
 
                 $risks = $this->getRisks($isLayak);
 
-                IdeaValidation::create([
-                    'post_id' => $post->id,
-                    'user_id' => $user->id,
-                    'validation_status' => $validationStatus,
-                    'estimated_capital' => $estimatedCapital,
-                    'estimated_bep' => $estimatedBep,
-                    'feedback' => $feedback,
-                    'risks' => $risks,
-                ]);
+                \Illuminate\Support\Facades\DB::table('idea_validations')->updateOrInsert(
+                    ['post_id' => $post->id, 'user_id' => $user->id],
+                    [
+                        'id' => (string) \Illuminate\Support\Str::uuid(),
+                        'validation_status' => $validationStatus,
+                        'estimated_capital' => $estimatedCapital,
+                        'estimated_bep' => $estimatedBep,
+                        'feedback' => $feedback,
+                        'risks' => json_encode($risks),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
             }
         }
     }

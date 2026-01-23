@@ -6,6 +6,7 @@
                 :key="message.id"
                 :message="message"
                 :conversation="conversation"
+                :autoPlayEnabled="autoPlayEnabled"
             />
         </div>
         <div v-else class="text-center text-gray-500 py-8">
@@ -24,6 +25,10 @@ const props = defineProps({
         default: () => [],
     },
     conversation: Object,
+    autoPlayEnabled: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const messageListRef = ref(null);

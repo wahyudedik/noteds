@@ -11,9 +11,10 @@ const page = usePage();
 const user = computed(() => page.props.auth?.user);
 const isClipper = computed(() => user.value?.clipper_role === 'clipper' || user.value?.role === 'clipper');
 const isBrand = computed(() => user.value?.clipper_role === 'brand' || user.value?.role === 'brand');
+const isAdmin = computed(() => user.value?.role === 'admin' || user.value?.is_admin === true);
 const hasPendingBrandRegistration = computed(() => page.props.has_pending_brand_registration ?? false);
 const hasPendingClipperRegistration = computed(() => page.props.has_pending_clipper_registration ?? false);
-const showOnboarding = computed(() => !isClipper.value && !isBrand.value && !hasPendingBrandRegistration.value && !hasPendingClipperRegistration.value);
+const showOnboarding = computed(() => !isAdmin.value && !isClipper.value && !isBrand.value && !hasPendingBrandRegistration.value && !hasPendingClipperRegistration.value);
 
 defineProps({
     stats: {

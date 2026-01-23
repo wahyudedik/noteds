@@ -223,7 +223,7 @@ onUnmounted(() => {
             @click.self="close"
         >
             <!-- Backdrop -->
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-70 transition-opacity"></div>
 
             <!-- Modal Container -->
             <div class="relative flex min-h-full items-center justify-center p-4 w-full">

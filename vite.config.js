@@ -7,6 +7,7 @@ export default defineConfig({
         laravel({
             input: 'resources/js/app.js',
             refresh: true,
+            valetTls: false,
         }),
         vue({
             template: {
@@ -17,6 +18,17 @@ export default defineConfig({
             },
         }),
     ],
+    server: {
+        host: true,
+        port: 5176,
+        strictPort: true,
+        cors: true,
+        hmr: {
+            protocol: 'ws',
+            host: 'localhost',
+            port: 5176,
+        },
+    },
     build: {
         rollupOptions: {
             output: {

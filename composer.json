@@ -16,7 +16,8 @@
         "midtrans/midtrans-php": "^2.6",
         "pragmarx/google2fa": "^9.0",
         "pusher/pusher-php-server": "^7.2",
-        "tightenco/ziggy": "^2.0"
+        "tightenco/ziggy": "^2.0",
+        "twilio/sdk": "^8.10"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -56,6 +57,10 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
+        ],
+        "test:parallel": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --parallel --recreate-databases"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

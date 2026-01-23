@@ -5,6 +5,9 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import { initTheme } from './Utils/theme';
+import { initA11y } from './Utils/accessibility';
+import { runAxeIfDev } from './Utils/axeRunner';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -16,6 +19,8 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
+        initTheme();
+        initA11y();
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
@@ -24,4 +29,6 @@ createInertiaApp({
     progress: {
         color: '#4B5563',
     },
+}).then(() => {
+    runAxeIfDev();
 });

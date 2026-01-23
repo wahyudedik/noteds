@@ -58,6 +58,34 @@ const navItems = [
         active: () => page.url.startsWith('/explorer'),
     },
     {
+        name: 'Messaging',
+        route: 'messaging.conversations.index',
+        icon: 'M4 4h16v12H5.17L4 17.17V4zm3 3h10M7 9h8',
+        active: () => page.url.startsWith('/messaging'),
+        requiresAuth: true,
+    },
+    {
+        name: 'Streams',
+        route: 'streams.index',
+        icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
+        active: () => page.url.startsWith('/streams'),
+        requiresAuth: true,
+    },
+    {
+        name: 'Calendar',
+        route: 'calendar.index',
+        icon: 'M3 13h8V3H3v10zm10 8h8V11h-8v10M7 8h10',
+        active: () => page.url.startsWith('/calendar') || page.url.includes('/events/calendar'),
+        requiresAuth: true,
+    },
+    {
+        name: 'Analytics',
+        route: 'analytics.dashboard',
+        icon: 'M3 13h8V3H3v10m10 8h8V11h-8v10',
+        active: () => page.url.startsWith('/analytics'),
+        requiresAuth: true,
+    },
+    {
         name: 'Clipper',
         route: 'clipper.campaigns.index',
         icon: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z',
@@ -65,7 +93,7 @@ const navItems = [
         requiresAuth: true,
         showIf: () => {
             const user = page.props.auth?.user;
-            return user?.clipper_role === 'brand' || user?.clipper_role === 'clipper' || user?.role === 'brand' || user?.role === 'clipper';
+            return !!user && (user.role === 'admin' || user?.clipper_role === 'brand' || user?.clipper_role === 'clipper' || user?.role === 'brand' || user?.role === 'clipper');
         },
         hasSubmenu: true,
     },
@@ -109,8 +137,10 @@ const adminNavItems = [
 // Marketplace submenu items
 const marketplaceSubmenuItems = computed(() => {
     const user = page.props.auth?.user;
+    const isSeller = !!user && (user.role === 'seller' || user?.seller_role === 'seller' || (Array.isArray(user?.roles) && user.roles.includes('seller')) || user.role === 'admin');
     const items = [
         { name: 'Browse Products', route: 'marketplace.index', icon: 'M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z' },
+        { name: 'Cart', route: 'marketplace.cart', icon: 'M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25', badgeCount: page.props.cart_count || 0 },
     ];
     
     if (user) {
@@ -120,12 +150,14 @@ const marketplaceSubmenuItems = computed(() => {
         );
         
         // Seller items
-        items.push(
-            { name: 'My Products', route: 'marketplace.products.my-products', icon: 'M16.5 9.4l-4.5-2.6-4.5 2.6M4 10v6a2 2 0 002 2h12a2 2 0 002-2v-6M12 4l8 4.5v7a4 4 0 01-4 4H8a4 4 0 01-4-4v-7L12 4z' },
-            { name: 'My Sales', route: 'marketplace.seller.orders.index', icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z' },
-            { name: 'My Wallet', route: 'marketplace.wallet.index', icon: 'M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-            { name: 'Withdrawals', route: 'marketplace.withdrawals.index', icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z' }
-        );
+        if (isSeller) {
+            items.push(
+                { name: 'My Products', route: 'marketplace.products.my-products', icon: 'M16.5 9.4l-4.5-2.6-4.5 2.6M4 10v6a2 2 0 002 2h12a2 2 0 002-2v-6M12 4l8 4.5v7a4 4 0 01-4 4H8a4 4 0 01-4-4v-7L12 4z' },
+                { name: 'My Sales', route: 'marketplace.seller.orders.index', icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z' },
+                { name: 'My Wallet', route: 'marketplace.wallet.index', icon: 'M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+                { name: 'Withdrawals', route: 'marketplace.withdrawals.index', icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z' }
+            );
+        }
     }
     
     return items;
@@ -171,6 +203,7 @@ const clipperSubmenuItems = computed(() => {
     const user = page.props.auth?.user;
     const isBrand = user?.clipper_role === 'brand' || user?.role === 'brand';
     const isClipper = user?.clipper_role === 'clipper' || user?.role === 'clipper';
+    const isAdmin = user?.role === 'admin';
     
     const items = [];
     
@@ -196,6 +229,14 @@ const clipperSubmenuItems = computed(() => {
     items.push(
         { name: 'Profile', route: 'clipper.profile.show', icon: 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z' }
     );
+
+    // If user is admin (or authenticated) but not yet brand/clipper, show registration shortcuts
+    if (user && (isAdmin || (!isBrand && !isClipper))) {
+        items.unshift(
+            { name: 'Register as Clipper', route: 'clipper.profile.create', icon: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z' },
+            { name: 'Register as Brand', route: 'clipper.brand-registration.create', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' }
+        );
+    }
     
     return items;
 });
@@ -321,7 +362,13 @@ if (page.url.startsWith('/profile') || page.url.startsWith('/settings') || page.
                                         :d="subItem.icon"
                                     />
                                 </svg>
-                                <span>{{ subItem.name }}</span>
+                                <span class="flex-1">{{ subItem.name }}</span>
+                                <span
+                                    v-if="subItem.badgeCount && subItem.badgeCount > 0"
+                                    class="ml-auto inline-flex items-center justify-center rounded-full bg-indigo-600 text-white text-xs px-1.5 py-0.5"
+                                >
+                                    {{ subItem.badgeCount }}
+                                </span>
                             </Link>
                         </div>
                     </div>

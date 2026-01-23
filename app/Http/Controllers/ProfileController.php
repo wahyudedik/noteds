@@ -31,6 +31,7 @@ class ProfileController extends Controller
         $user = $request->user();
         $userArray = $user->toArray();
         $userArray['avatar_url'] = $user->avatar_url;
+        $userArray['header_image_url'] = $user->header_image_url;
 
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
@@ -42,7 +43,7 @@ class ProfileController extends Controller
     /**
      * Display the user's profile.
      */
-    public function show(Request $request, User $user = null): Response
+    public function show(Request $request, User $user = null): \Inertia\Response|\Illuminate\Http\RedirectResponse
     {
         $profileUser = $user ?? $request->user();
         
@@ -53,12 +54,36 @@ class ProfileController extends Controller
         
         $isOwnProfile = $request->user() && $request->user()->id === $profileUser->id;
 
+        // Privacy: profile visibility
+        $viewer = $request->user();
+        $vis = $profileUser->settings?->privacy_settings['profile_visibility'] ?? ($profileUser->settings?->profile_visibility ? 'public' : 'private');
+        if (!$isOwnProfile) {
+            if ($vis === 'private') {
+                return redirect()->route('home')->withErrors(['error' => 'Profil ini bersifat privat.']);
+            }
+            if ($vis === 'followers' && (!$viewer || !$viewer->isFollowing($profileUser))) {
+                return redirect()->route('home')->withErrors(['error' => 'Profil ini hanya untuk followers.']);
+            }
+        }
+
         // Get user's posts
-        $posts = \App\Models\Post::where('user_id', $profileUser->id)
+        $postsQuery = \App\Models\Post::where('user_id', $profileUser->id)
             ->where('status', 'active')
             ->with('user')
-            ->latest()
-            ->get();
+            ->latest();
+        // Privacy: activity visibility (controls showing posts list)
+        $activityVis = $profileUser->settings?->privacy_settings['activity_visibility'] ?? 'public';
+        if (!$isOwnProfile) {
+            if ($activityVis === 'private') {
+                $posts = collect([]);
+            } elseif ($activityVis === 'followers') {
+                $posts = ($viewer && $viewer->isFollowing($profileUser)) ? $postsQuery->get() : collect([]);
+            } else {
+                $posts = $postsQuery->get();
+            }
+        } else {
+            $posts = $postsQuery->get();
+        }
 
         // Get user votes and bookmarks for posts
         $userVotes = [];
@@ -102,6 +127,7 @@ class ProfileController extends Controller
         // Add avatar_url to profileUser
         $profileUserArray = $profileUser->toArray();
         $profileUserArray['avatar_url'] = $profileUser->avatar_url;
+        $profileUserArray['header_image_url'] = $profileUser->header_image_url;
 
         // Get following status
         $isFollowing = false;
@@ -155,6 +181,9 @@ class ProfileController extends Controller
                 'icon' => $v->type?->badge_icon,
                 'verified_at' => $v->verified_at,
             ]),
+            'privacy' => [
+                'messaging_permission' => $profileUser->settings?->privacy_settings['messaging_permission'] ?? 'everyone',
+            ],
         ]);
     }
 
@@ -175,6 +204,14 @@ class ProfileController extends Controller
             // Store new avatar
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
             $user->avatar = $avatarPath;
+        }
+        // Handle header image upload
+        if ($request->hasFile('header_image')) {
+            if ($user->header_image && Storage::disk('public')->exists($user->header_image)) {
+                Storage::disk('public')->delete($user->header_image);
+            }
+            $headerPath = $request->file('header_image')->store('headers', 'public');
+            $user->header_image = $headerPath;
         }
 
         // Fill other validated fields (exclude avatar and is_verified_mentor from fillable)

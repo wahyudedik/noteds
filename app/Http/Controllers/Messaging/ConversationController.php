@@ -71,6 +71,14 @@ class ConversationController extends Controller
         try {
             if ($validated['type'] === 'direct') {
                 $otherUser = User::findOrFail($validated['user_id']);
+                // Privacy: who can message
+                $perm = $otherUser->settings?->privacy_settings['messaging_permission'] ?? 'everyone';
+                if ($perm === 'none' && $user->id !== $otherUser->id) {
+                    throw new \Exception('This user does not accept messages.');
+                }
+                if ($perm === 'followers' && $user->id !== $otherUser->id && !$user->isFollowing($otherUser)) {
+                    throw new \Exception('Only followers can message this user.');
+                }
                 $conversation = $this->conversationService->createDirectConversation($user, $otherUser);
             } else {
                 $conversation = $this->conversationService->createGroupConversation(
@@ -143,9 +151,11 @@ class ConversationController extends Controller
             ]);
         }
 
+        $autoPlay = (bool) ($user->settings?->auto_play_enabled ?? false);
         return Inertia::render('Messaging/Conversation', [
             'conversation' => $conversation,
             'messages' => $messages,
+            'autoPlayEnabled' => $autoPlay,
         ]);
     }
 

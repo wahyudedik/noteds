@@ -6,6 +6,14 @@ import RecentActivitiesWidget from '@/Components/Admin/RecentActivitiesWidget.vu
 import QuickActionsPanel from '@/Components/Admin/QuickActionsPanel.vue';
 import PendingItemsSummary from '@/Components/Admin/PendingItemsSummary.vue';
 import AnalyticsCharts from '@/Components/Admin/AnalyticsCharts.vue';
+import { ref, onMounted } from 'vue';
+
+const a11y = ref({ score: 0, top_rules: [], reports: 0 });
+const loadA11y = async () => {
+    const res = await fetch(route('admin.a11y.summary'), { credentials: 'include', headers: { 'Accept': 'application/json' } });
+    if (res.ok) a11y.value = await res.json();
+};
+onMounted(loadA11y);
 
 const props = defineProps({
     stats: Object,
@@ -33,6 +41,15 @@ const formatCurrency = (amount) => {
 
         <div class="px-4 py-6 lg:px-6">
             <div class="mx-auto max-w-7xl space-y-6">
+                <div v-if="a11y.score && a11y.score < 80" class="rounded-md border border-yellow-300 bg-yellow-50 p-4 text-yellow-800">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-semibold">Accessibility Alert</p>
+                            <p class="text-sm">Score: {{ a11y.score }}. Perlu perbaikan aksesibilitas. Lihat laporan untuk detail.</p>
+                        </div>
+                        <Link :href="route('admin.a11y.reports.page')" class="px-3 py-2 bg-yellow-600 text-white rounded">Lihat Laporan</Link>
+                    </div>
+                </div>
                 <!-- Pending Items Summary -->
                 <PendingItemsSummary
                     :pending-withdrawals="{
@@ -118,6 +135,23 @@ const formatCurrency = (amount) => {
                             Avg/Order: Rp {{ formatCurrency(stats?.average_commission_per_order || 0) }}
                         </div>
                     </Link>
+
+                    <!-- Accessibility Summary -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                        <h3 class="text-sm font-medium text-gray-500 mb-2">Accessibility Score</h3>
+                        <p class="text-3xl font-bold" :class="a11y.score >= 90 ? 'text-green-600' : (a11y.score >= 75 ? 'text-yellow-600' : 'text-red-600')">
+                            {{ a11y.score }}
+                        </p>
+                        <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            Reports analyzed: {{ a11y.reports }}
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-xs font-semibold">Top Rules</div>
+                            <ul class="text-xs text-gray-600 dark:text-gray-300 list-disc ml-4">
+                                <li v-for="r in a11y.top_rules" :key="r.rule">{{ r.rule }} ({{ r.count }})</li>
+                            </ul>
+                        </div>
+                    </div>
 
                     <!-- Products -->
                     <Link

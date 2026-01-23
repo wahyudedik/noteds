@@ -136,6 +136,30 @@ class SettingsController extends Controller
     }
 
     /**
+     * Update playback auto-play preference.
+     */
+    public function updatePlayback(Request $request)
+    {
+        $user = $request->user();
+        $validated = $request->validate([
+            'auto_play_enabled' => ['required', 'boolean'],
+        ]);
+        $settings = $user->settings ?? UserSetting::create([
+            'user_id' => $user->id,
+            'notification_preferences' => [],
+            'privacy_settings' => [],
+            'email_preferences' => [],
+            'profile_visibility' => true,
+            'search_visibility' => true,
+            'auto_play_enabled' => false,
+        ]);
+        $settings->update([
+            'auto_play_enabled' => (bool) $validated['auto_play_enabled'],
+        ]);
+        return back()->with('success', 'Playback preference updated.');
+    }
+
+    /**
      * Update security settings.
      *
      * @param Request $request

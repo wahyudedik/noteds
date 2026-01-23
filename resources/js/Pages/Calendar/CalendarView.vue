@@ -53,17 +53,27 @@ const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() ==
 
 const fetchEvents = async () => {
   loading.value = true;
+  const isUUID = (s) => typeof s === 'string' && /^[0-9a-fA-F-]{36}$/.test(s);
+  const safeCategoryIds = Array.isArray(filters.value.category_ids)
+    ? filters.value.category_ids.filter(isUUID)
+    : [];
   const params = {
     from: formatISO(startEndRange.value.from),
     to: formatISO(startEndRange.value.to),
-    include_invited: filters.value.include_invited,
+    include_invited: !!filters.value.include_invited,
     q: filters.value.q || undefined,
     status: filters.value.status || undefined,
-    category_ids: (filters.value.category_ids && filters.value.category_ids.length) ? filters.value.category_ids : undefined,
+    category_ids: safeCategoryIds.length ? safeCategoryIds : undefined,
   };
-  const res = await axios.get(route('calendar.events.index'), { params });
-  events.value = res.data.data || res.data;
-  loading.value = false;
+  try {
+    const res = await axios.get(route('calendar.events.index'), { params });
+    events.value = res.data.data || res.data;
+  } catch (e) {
+    events.value = [];
+    console.warn('Failed to fetch calendar events', e);
+  } finally {
+    loading.value = false;
+  }
 };
 
 const prev = () => {

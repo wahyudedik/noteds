@@ -33,6 +33,12 @@ class ProcessMidtransWebhook implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 5;
+    public function backoff(): array
+    {
+        return [60, 300, 900, 1800];
+    }
+
     public function __construct(
         private array $webhookData
     ) {}
@@ -96,6 +102,37 @@ class ProcessMidtransWebhook implements ShouldQueue
                 'exception' => $e,
             ]);
             throw $e;
+        }
+    }
+
+    public function failed(\Throwable $e): void
+    {
+        Log::critical('ProcessMidtransWebhook permanently failed', [
+            'webhook_data' => $this->webhookData,
+            'exception' => $e->getMessage(),
+        ]);
+
+        try {
+            $admins = \App\Models\User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new class($this->webhookData, $e) extends \Illuminate\Notifications\Notification {
+                    use \Illuminate\Bus\Queueable;
+                    public function __construct(private array $data, private \Throwable $e) {}
+                    public function via($notifiable): array { return ['database']; }
+                    public function toArray($notifiable): array {
+                        return [
+                            'type' => 'webhook_failed',
+                            'title' => 'Webhook Order Failed',
+                            'message' => 'Order webhook processing failed permanently. Check logs.',
+                            'order_id' => $this->data['order_id'] ?? null,
+                            'transaction_status' => $this->data['transaction_status'] ?? null,
+                            'error' => $this->e->getMessage(),
+                        ];
+                    }
+                });
+            }
+        } catch (\Exception $notifyEx) {
+            Log::error('Failed to notify admins about webhook failure: ' . $notifyEx->getMessage());
         }
     }
 }

@@ -29,14 +29,14 @@ Broadcast::channel('order.{orderId}', function ($user, $orderId) {
     return $order && $order->user_id === $user->id;
 });
 
-// Stock price updates (public channel)
+// Stock price updates (authenticated users)
 Broadcast::channel('stock.{stockCode}.prices', function ($user, $stockCode) {
-    return true; // Public channel
+    return (bool) $user;
 });
 
-// Stock signal updates (public channel)
+// Stock signal updates (authenticated users)
 Broadcast::channel('stock.{stockCode}.signals', function ($user, $stockCode) {
-    return true; // Public channel
+    return (bool) $user;
 });
 
 // User watchlist updates (private channel)
@@ -47,7 +47,7 @@ Broadcast::channel('user.{userId}.watchlist', function ($user, $userId) {
 // Conversation channel - check if user is participant and not blocked
 Broadcast::channel('conversation.{conversationId}', function ($user, $conversationId) {
     $conversation = \App\Models\Conversation::find($conversationId);
-    
+
     if (!$conversation) {
         return false;
     }
@@ -82,3 +82,7 @@ Broadcast::channel('group.{groupId}', function ($user, $groupId) {
     return \App\Models\GroupMember::where('group_id', $groupId)->where('user_id', $user->id)->exists();
 });
 
+// Live stream chat (public read, requires auth)
+Broadcast::channel('livestream.{streamId}', function ($user, $streamId) {
+    return (bool) $user; // any authenticated user can listen
+});

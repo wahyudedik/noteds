@@ -24,7 +24,7 @@
                 {{ message.content }}
             </div>
 
-            <MessageMedia v-if="message.media && message.media.length > 0" :media="message.media" />
+            <MessageMedia v-if="message.media && message.media.length > 0" :media="message.media" :autoPlayEnabled="autoPlayEnabled" :createdAt="message.created_at" />
 
             <div class="flex items-center justify-end space-x-2 mt-1 text-xs opacity-75">
                 <span>{{ formatTime(message.created_at) }}</span>
@@ -44,6 +44,10 @@ import ReadReceipt from './ReadReceipt.vue';
 const props = defineProps({
     message: Object,
     conversation: Object,
+    autoPlayEnabled: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const page = usePage();

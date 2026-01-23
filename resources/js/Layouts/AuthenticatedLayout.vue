@@ -4,6 +4,8 @@ import SidebarNav from '@/Components/SidebarNav.vue';
 import TopBar from '@/Components/TopBar.vue';
 import BottomNav from '@/Components/BottomNav.vue';
 import FloatingActionButton from '@/Components/FloatingActionButton.vue';
+import { announce } from '@/Utils/accessibility';
+import CookieConsent from '@/Components/Common/CookieConsent.vue';
 
 const sidebarOpen = ref(false);
 
@@ -13,7 +15,10 @@ const toggleSidebar = () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-indigo-600 text-white px-3 py-2 rounded">
+            Skip to content
+        </a>
         <!-- Sidebar (Desktop) / Drawer (Mobile) -->
         <SidebarNav :show="sidebarOpen" />
 
@@ -40,7 +45,7 @@ const toggleSidebar = () => {
             </header>
 
             <!-- Page Content -->
-            <main class="pb-16 lg:pb-0">
+            <main id="main-content" class="pb-16 lg:pb-0" tabindex="-1">
                 <slot />
             </main>
         </div>
@@ -48,6 +53,9 @@ const toggleSidebar = () => {
         <!-- Bottom Navigation (Mobile only) -->
         <BottomNav />
 
+        <!-- ARIA live region -->
+        <div id="aria-live" aria-live="polite" class="sr-only"></div>
+        <CookieConsent />
         <!-- Floating Action Button -->
         <FloatingActionButton />
     </div>

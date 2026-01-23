@@ -8,7 +8,7 @@ defineProps({
 </script>
 
 <template>
-    <div class="h-64 flex items-end justify-between space-x-2">
+    <div class="h-64 flex items-end justify-between space-x-2 rm-target-chart">
         <div
             v-for="(item, index) in data"
             :key="index"

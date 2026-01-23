@@ -38,11 +38,10 @@ class VoteSeeder extends Seeder
                 // 80% upvote, 20% downvote
                 $voteType = rand(1, 10) <= 8 ? 'upvote' : 'downvote';
 
-                PostVote::create([
-                    'user_id' => $user->id,
-                    'post_id' => $post->id,
-                    'vote_type' => $voteType,
-                ]);
+                \Illuminate\Support\Facades\DB::table('post_votes')->updateOrInsert(
+                    ['user_id' => $user->id, 'post_id' => $post->id],
+                    ['id' => (string) \Illuminate\Support\Str::uuid(), 'vote_type' => $voteType, 'created_at' => now(), 'updated_at' => now()]
+                );
 
                 if ($voteType === 'upvote') {
                     $upvotes++;
@@ -75,11 +74,10 @@ class VoteSeeder extends Seeder
                 // 85% upvote, 15% downvote
                 $voteType = rand(1, 20) <= 17 ? 'upvote' : 'downvote';
 
-                CommentVote::create([
-                    'user_id' => $user->id,
-                    'comment_id' => $comment->id,
-                    'vote_type' => $voteType,
-                ]);
+                \Illuminate\Support\Facades\DB::table('comment_votes')->updateOrInsert(
+                    ['user_id' => $user->id, 'comment_id' => $comment->id],
+                    ['id' => (string) \Illuminate\Support\Str::uuid(), 'vote_type' => $voteType, 'created_at' => now(), 'updated_at' => now()]
+                );
 
                 if ($voteType === 'upvote') {
                     $upvotes++;

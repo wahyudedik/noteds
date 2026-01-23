@@ -8,9 +8,12 @@
                 class="max-w-full rounded-lg cursor-pointer"
                 @click="openImage(item.url)"
             />
-            <div v-else-if="item.mime_type.startsWith('audio/')" class="flex items-center space-x-2 p-2 bg-black bg-opacity-20 rounded">
-                <button @click="playAudio(item)" class="text-2xl">▶️</button>
-                <span class="text-sm">{{ formatDuration(item.duration) }}</span>
+            <div v-else-if="item.mime_type.startsWith('audio/') || item.is_encrypted" class="space-y-2 p-2 bg-black bg-opacity-20 rounded">
+                <audio ref="audioRefs[item.id]" :src="getAudioSrc(item)" controls class="w-full"></audio>
+                <AudioWaveform :audio="audioRefs[item.id]" :waveform="item.waveform || []" />
+                <div class="flex items-center justify-between">
+                  <span class="text-xs">{{ formatDuration(item.duration) }}</span>
+                </div>
             </div>
             <a
                 v-else
@@ -26,17 +29,69 @@
 </template>
 
 <script setup>
-defineProps({
+import { reactive, onMounted } from 'vue';
+import AudioWaveform from './AudioWaveform.vue';
+import { importKeyFromBase64, decryptArrayBuffer } from '@/Utils/encryption';
+
+const props = defineProps({
     media: Array,
+    autoPlayEnabled: { type: Boolean, default: false },
+    createdAt: String,
 });
+
+const audioRefs = reactive({});
 
 const openImage = (url) => {
     window.open(url, '_blank');
 };
 
-const playAudio = (item) => {
-    const audio = new Audio(item.url);
-    audio.play();
+// native controls are used
+
+onMounted(() => {
+    if (!props.autoPlayEnabled) return;
+    const now = Date.now();
+    const created = props.createdAt ? new Date(props.createdAt).getTime() : 0;
+    const isRecent = created && (now - created) < 5000;
+    if (!isRecent) return;
+    // Find first audio
+    const audioIds = Object.keys(audioRefs);
+    for (const id of audioIds) {
+        const audio = audioRefs[id];
+        if (audio && typeof audio.play === 'function') {
+            // Optional: battery check
+            try {
+                if (navigator.getBattery) {
+                    navigator.getBattery().then(b => {
+                        if (b.level < 0.2) return;
+                        audio.play();
+                    });
+                } else {
+                    audio.play();
+                }
+            } catch (e) {}
+            break;
+        }
+    }
+});
+
+const getAudioSrc = (item) => {
+    if (item.is_encrypted && window.__conversationKey && crypto?.subtle) {
+        // fetch and decrypt, return blob URL
+        const keyPromise = importKeyFromBase64(window.__conversationKey);
+        fetch(item.url)
+            .then(r => r.arrayBuffer())
+            .then(async buf => {
+                const key = await keyPromise;
+                const pt = await decryptArrayBuffer(buf, key);
+                const blob = new Blob([pt], { type: 'audio/webm' });
+                const url = URL.createObjectURL(blob);
+                const audio = audioRefs[item.id];
+                if (audio) audio.src = url;
+            })
+            .catch(() => {});
+        return '';
+    }
+    return item.url;
 };
 
 const formatDuration = (seconds) => {

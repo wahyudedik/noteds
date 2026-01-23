@@ -11,7 +11,7 @@ import RepostButton from '@/Components/Repost/RepostButton.vue';
 import ReportButton from '@/Components/Report/ReportButton.vue';
 import CommentThread from '@/Components/CommentThread.vue';
 import CommentRichTextEditor from '@/Components/CommentRichTextEditor.vue';
-import ImageUploader from '@/Components/ImageUploader.vue';
+import FileUploader from '@/Components/FileUploader.vue';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import IdeaValidationForm from '@/Components/IdeaValidationForm.vue';
@@ -23,6 +23,7 @@ import SupplierRecommendations from '@/Components/SupplierRecommendations.vue';
 import { PURPOSE_TYPES } from '@/Utils/constants';
 import RelatedPosts from '@/Components/Recommendations/RelatedPosts.vue';
 import YouMightLike from '@/Components/Recommendations/YouMightLike.vue';
+import SocialShareButtons from '@/Components/Social/SocialShareButtons.vue';
 
 const props = defineProps({
     post: Object,
@@ -44,10 +45,10 @@ const props = defineProps({
 
 const commentForm = useForm({
     content: '',
-    images: [],
+    attachments: [],
 });
 
-const commentImages = ref([]);
+const commentAttachments = ref([]);
 
 const showImageGallery = ref(false);
 const selectedImageIndex = ref(0);
@@ -75,16 +76,20 @@ const openImageGallery = (index) => {
 };
 
 const submitComment = () => {
-    commentForm.images = commentImages.value.map(img => img.file);
+    commentForm.attachments = commentAttachments.value.map(f => f.file);
     commentForm.post(route('comments.store', props.post.id), {
         preserveScroll: true,
         forceFormData: true,
         onSuccess: () => {
             commentForm.reset();
-            commentImages.value = [];
+            commentAttachments.value = [];
         },
     });
 };
+// UI reinforcement: permissions from server
+const canComment = computed(() => {
+    return (props.permissions?.can_comment ?? true) === true;
+});
 
 // Get image URL with fallback
 const getImageUrl = (media) => {
@@ -165,7 +170,16 @@ const getImageClass = (imageCount, index) => {
 </script>
 
 <template>
-    <Head :title="post.title" />
+    <Head :title="post.title">
+        <meta name="description" :content="post.excerpt || ''" />
+        <meta property="og:title" :content="post.title" />
+        <meta property="og:description" :content="post.excerpt || ''" />
+        <meta property="og:url" :content="route('posts.show', post.id)" />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" :content="post.title" />
+        <meta name="twitter:description" :content="post.excerpt || ''" />
+    </Head>
 
     <AuthenticatedLayout>
         <template #header>
@@ -298,7 +312,8 @@ const getImageClass = (imageCount, index) => {
                                     :weighted-upvotes="post.weighted_upvotes_score"
                                     :weighted-downvotes="post.weighted_downvotes_score"
                                     :user-vote="userVote"
-                                    :can-vote="auth?.user && auth.user.id !== post.user_id"
+                                    :can-vote="props.permissions?.can_vote"
+                                    :disabled-reason="props.restrictions?.vote || ''"
                                     :use-weighted="useWeighted"
                                     :is-author="isPostAuthor"
                                     @view-analytics="viewPostAnalytics"
@@ -309,7 +324,8 @@ const getImageClass = (imageCount, index) => {
                                         :post-id="post.id"
                                         :reposts-count="post.reposts_count || 0"
                                         :is-reposted="isReposted"
-                                        :can-repost="!!auth?.user"
+                                        :can-repost="props.permissions?.can_repost"
+                                        :disabled-reason="props.restrictions?.repost || ''"
                                     />
                                     <Link
                                         v-if="auth?.user && auth.user.id === post.user_id && post.reposts_count > 0"
@@ -324,13 +340,25 @@ const getImageClass = (imageCount, index) => {
                                     v-if="auth?.user"
                                     :post-id="post.id"
                                     :is-bookmarked="isBookmarked"
-                                    :can-bookmark="!!auth?.user"
+                                        :can-bookmark="props.permissions?.can_bookmark"
+                                        :disabled-reason="props.restrictions?.bookmark || ''"
                                 />
                                 <WeightedScoreToggle v-model="useWeighted" />
                             </div>
                             <span class="text-sm text-gray-500 dark:text-gray-400">
                                 💬 {{ post.comments_count }} komentar
                             </span>
+                        </div>
+
+                        <div class="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+                            <SocialShareButtons
+                                :url="route('posts.show', post.id)"
+                                :title="post.title"
+                                :description="post.excerpt || ''"
+                                :hashtags="post.hashtags?.map(h => h.name) || []"
+                                share-type="posts"
+                                :share-id="post.id"
+                            />
                         </div>
 
                         <!-- Idea Validation Section -->
@@ -369,22 +397,26 @@ const getImageClass = (imageCount, index) => {
 
                             <!-- Comment Form -->
                             <div v-if="auth?.user" class="mb-6">
+                                <div v-if="!canComment" class="mb-3 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-yellow-800">
+                                    Komentar dinonaktifkan atau hanya untuk followers sesuai pengaturan privasi penulis.
+                                </div>
                                 <form @submit.prevent="submitComment">
                                     <CommentRichTextEditor
                                         v-model="commentForm.content"
                                         placeholder="Tulis komentar kamu di sini..."
+                                        :disabled="!canComment"
                                     />
                                     <InputError :message="commentForm.errors.content" />
                                     <div class="mt-2">
-                                        <ImageUploader
-                                            v-model="commentImages"
-                                            :max-images="5"
-                                            :max-size="2048"
+                                        <FileUploader
+                                            v-model="commentAttachments"
+                                            :max-files="5"
+                                            :max-size-kb="10240"
                                         />
                                     </div>
-                                    <InputError :message="commentForm.errors.images" />
+                                    <InputError :message="commentForm.errors.attachments" />
                                     <div class="mt-2">
-                                        <PrimaryButton :disabled="commentForm.processing">
+                                        <PrimaryButton :disabled="commentForm.processing || !canComment">
                                             Post Komentar
                                         </PrimaryButton>
                                     </div>

@@ -2,160 +2,104 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Models\UserSetting;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
-    { 
-        // Admin/Test User
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'info@noteds.com',
-            'password' => Hash::make('Wahyu123456789@'),
-            'business_name' => 'Noteds Admin',
-            'business_field' => 'Technology',
-            'skills' => ['Laravel', 'Vue.js', 'Business Strategy'],
-            'goals' => ['Build a successful platform', 'Help entrepreneurs'],
-            'portfolio_url' => 'https://noteds.com',
-            'website_url' => 'https://noteds.com',
-            'is_verified_mentor' => true,
-            'email_verified_at' => now(),
-            'role' => 'admin',
-            'balance' => 0,
-        ]);
+    {
+        $admin = User::firstOrCreate(
+            ['email' => 'info@noteds.com'],
+            [
+                'name' => 'Admin Noteds',
+                'password' => bcrypt('Wahyu123456789@'),
+                'business_name' => null,
+                'business_field' => 'General',
+                'skills' => ['admin'],
+                'goals' => [],
+                'role' => 'admin',
+            ]
+        );
+        if (!$admin->email_verified_at) {
+            $admin->email_verified_at = now();
+            $admin->save();
+        }
+        UserSetting::firstOrCreate(
+            ['user_id' => $admin->id],
+            [
+                'notification_preferences' => [],
+                'privacy_settings' => [
+                    'posts_visibility' => 'public',
+                    'comments_permission' => 'everyone',
+                    'messaging_permission' => 'everyone',
+                    'profile_visibility' => 'public',
+                    'activity_visibility' => 'public',
+                    'sharing' => ['analytics' => true, 'marketing' => false, 'recommendations' => true],
+                ],
+                'email_preferences' => [],
+                'profile_visibility' => true,
+                'search_visibility' => true,
+                'auto_play_enabled' => false,
+            ]
+        );
 
-        // Sample Business Users
-        $users = [
-            [
-                'name' => 'Budi Santoso',
-                'email' => 'budi@example.com',
-                'password' => Hash::make('password'),
-                'business_name' => 'TechStart Indonesia',
-                'business_field' => 'Software Development',
-                'skills' => ['PHP', 'JavaScript', 'Project Management'],
-                'goals' => ['Scale business', 'Find tech partners'],
-                'portfolio_url' => 'https://techstart.id',
-                'website_url' => 'https://techstart.id',
-                'is_verified_mentor' => false,
-                'email_verified_at' => now(),
-                'role' => 'user',
-                'balance' => 0,
-            ],
-            [
-                'name' => 'Wahyu Dedik',
-                'email' => 'wdedyk@gmail.com',
-                'password' => Hash::make('Wahyu123456789@'),
-                'business_name' => 'Digital Marketing Pro',
-                'business_field' => 'Digital Marketing',
-                'skills' => ['SEO', 'Content Marketing', 'Social Media'],
-                'goals' => ['Grow client base', 'Share knowledge'],
-                'portfolio_url' => 'https://digitalmarketingpro.com',
-                'website_url' => 'https://digitalmarketingpro.com',
-                'is_verified_mentor' => true,
-                'email_verified_at' => now(),
-                'role' => 'user',
-                'balance' => 0,
-            ],
-            [
-                'name' => 'Ahmad Fauzi',
-                'email' => 'ahmad@example.com',
-                'password' => Hash::make('password'),
-                'business_name' => 'E-Commerce Solutions',
-                'business_field' => 'E-Commerce',
-                'skills' => ['E-Commerce', 'Logistics', 'Customer Service'],
-                'goals' => ['Expand to new markets', 'Improve operations'],
-                'portfolio_url' => null,
-                'website_url' => 'https://ecommercesolutions.id',
-                'is_verified_mentor' => false,
-                'email_verified_at' => now(),
-                'role' => 'user',
-                'balance' => 0,
-            ],
-            [
-                'name' => 'Dewi Sartika',
-                'email' => 'dewi@example.com',
-                'password' => Hash::make('password'),
-                'business_name' => 'Creative Agency',
-                'business_field' => 'Creative Services',
-                'skills' => ['Design', 'Branding', 'Creative Strategy'],
-                'goals' => ['Win awards', 'Build portfolio'],
-                'portfolio_url' => 'https://creativeagency.com',
-                'website_url' => 'https://creativeagency.com',
-                'is_verified_mentor' => false,
-                'email_verified_at' => now(),
-                'role' => 'user',
-                'balance' => 0,
-            ],
-            [
-                'name' => 'Rizki Pratama',
-                'email' => 'rizki@example.com',
-                'password' => Hash::make('password'),
-                'business_name' => 'FinTech Startup',
-                'business_field' => 'Financial Technology',
-                'skills' => ['FinTech', 'Blockchain', 'Payment Systems'],
-                'goals' => ['Get funding', 'Launch product'],
-                'portfolio_url' => null,
-                'website_url' => null,
-                'is_verified_mentor' => false,
-                'email_verified_at' => now(),
-                'role' => 'user',
-                'balance' => 0,
-            ],
-            [
-                'name' => 'Maya Indira',
-                'email' => 'maya@example.com',
-                'password' => Hash::make('password'),
-                'business_name' => 'HealthTech Solutions',
-                'business_field' => 'Healthcare Technology',
-                'skills' => ['Healthcare', 'Technology', 'Business Development'],
-                'goals' => ['Improve healthcare access', 'Scale platform'],
-                'portfolio_url' => 'https://healthtech.id',
-                'website_url' => 'https://healthtech.id',
-                'is_verified_mentor' => true,
-                'email_verified_at' => now(),
-                'role' => 'user',
-                'balance' => 0,
-            ],
-            [
-                'name' => 'Andi Wijaya',
-                'email' => 'andi@example.com',
-                'password' => Hash::make('password'),
-                'business_name' => 'Food & Beverage Co',
-                'business_field' => 'Food & Beverage',
-                'skills' => ['F&B Operations', 'Marketing', 'Supply Chain'],
-                'goals' => ['Open new branches', 'Franchise model'],
-                'portfolio_url' => null,
-                'website_url' => null,
-                'is_verified_mentor' => false,
-                'email_verified_at' => now(),
-                'role' => 'user',
-                'balance' => 0,
-            ],
-            [
-                'name' => 'Lina Kurniawan',
-                'email' => 'lina@example.com',
-                'password' => Hash::make('password'),
-                'business_name' => 'Education Platform',
-                'business_field' => 'Education Technology',
-                'skills' => ['EdTech', 'Curriculum Development', 'Online Learning'],
-                'goals' => ['Reach more students', 'Improve platform'],
-                'portfolio_url' => 'https://edtechplatform.com',
-                'website_url' => 'https://edtechplatform.com',
-                'is_verified_mentor' => false,
-                'email_verified_at' => now(),
-                'role' => 'user',
-                'balance' => 0,
-            ],
-        ];
+        $count = 15;
+        for ($i = 1; $i <= $count; $i++) {
+            $name = "User {$i}";
+            $email = "user{$i}@example.test";
+            $user = User::firstOrCreate(
+                ['email' => $email],
+                [
+                    'name' => $name,
+                    'password' => bcrypt('password123'),
+                    'business_name' => $i % 2 === 0 ? "Biz {$i}" : null,
+                    'business_field' => $i % 3 === 0 ? "Technology" : "General",
+                    'skills' => $i % 2 === 0 ? ['javascript', 'laravel'] : ['marketing', 'design'],
+                    'goals' => ['grow_network', 'learn'],
+                    'role' => $i === 1 ? 'admin' : 'user',
+                ]
+            );
 
-        foreach ($users as $userData) {
-            User::create($userData);
+            UserSetting::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'notification_preferences' => [],
+                    'privacy_settings' => [
+                        'posts_visibility' => $i % 5 === 0 ? 'followers' : 'public',
+                        'comments_permission' => $i % 7 === 0 ? 'followers' : 'everyone',
+                        'messaging_permission' => $i % 11 === 0 ? 'none' : 'everyone',
+                        'profile_visibility' => $i % 9 === 0 ? 'followers' : 'public',
+                        'activity_visibility' => 'public',
+                        'sharing' => ['analytics' => true, 'marketing' => false, 'recommendations' => true],
+                    ],
+                    'email_preferences' => [],
+                    'profile_visibility' => true,
+                    'search_visibility' => true,
+                    'auto_play_enabled' => false,
+                ]
+            );
+        }
+
+        // Follows
+        $users = User::pluck('id')->all();
+        foreach ($users as $follower) {
+            foreach (array_slice($users, 0, rand(3, 6)) as $followee) {
+                if ($follower === $followee) continue;
+                $exists = DB::table('follows')->where('follower_id', $follower)->where('following_id', $followee)->exists();
+                if (!$exists) {
+                    DB::table('follows')->insert([
+                        'id' => (string) \Illuminate\Support\Str::uuid(),
+                        'follower_id' => $follower,
+                        'following_id' => $followee,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
         }
     }
 }

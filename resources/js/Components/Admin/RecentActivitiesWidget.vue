@@ -1,5 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
+import { useFeatureGate } from '@/Composables/useFeatureGate';
 
 const props = defineProps({
     activities: {
@@ -7,6 +8,8 @@ const props = defineProps({
         default: () => [],
     },
 });
+const { can } = useFeatureGate();
+const allowed = can('admin');
 
 const getActionLabel = (action) => {
     const labels = {
@@ -93,7 +96,7 @@ const formatDate = (date) => {
 </script>
 
 <template>
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div v-if="allowed" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Activities</h3>
         </div>

@@ -35,7 +35,8 @@ class PostController extends Controller
         private PostAnalyticsService $analyticsService,
         private PostSeriesService $seriesService,
         private CrossPostService $crossPostService,
-        private SupplierRecommendationService $supplierRecommendationService
+        private SupplierRecommendationService $supplierRecommendationService,
+        private \App\Services\PostRankingService $rankingService
     ) {}
     /**
      * Display a listing of the resource.
@@ -116,6 +117,30 @@ class PostController extends Controller
         $allPosts = $posts->concat($repostPosts)
             ->sortByDesc('created_at')
             ->values();
+
+        // Privacy filter: respect author's posts_visibility setting
+        $viewer = $request->user();
+        $allPosts = $allPosts->filter(function ($item) use ($viewer) {
+            $author = is_object($item) ? ($item->user ?? null) : ($item['user'] ?? null);
+            if (!$author) return false;
+            // normalize to model
+            if (is_array($author)) {
+                $authorModel = \App\Models\User::find($author['id'] ?? null);
+            } else {
+                $authorModel = $author;
+            }
+            if (!$authorModel) return false;
+            $vis = $authorModel->settings?->privacy_settings['posts_visibility'] ?? 'public';
+            if ($vis === 'public') return true;
+            if ($viewer && $viewer->id === $authorModel->id) return true;
+            if ($vis === 'followers') {
+                return $viewer ? $viewer->isFollowing($authorModel) : false;
+            }
+            if ($vis === 'private') {
+                return false;
+            }
+            return true;
+        })->values();
 
         // Paginate manually since we have a collection
         $perPage = 15;
@@ -395,6 +420,17 @@ class PostController extends Controller
             abort(404, 'Post not found.');
         }
 
+        // Enforce post visibility per author's settings
+        $author = $post->user;
+        $viewer = $request->user();
+        $vis = $author->settings?->privacy_settings['posts_visibility'] ?? 'public';
+        if ($vis === 'private' && (!$viewer || $viewer->id !== $author->id)) {
+            abort(403, 'This post is private.');
+        }
+        if ($vis === 'followers' && (!$viewer || ($viewer->id !== $author->id && !$viewer->isFollowing($author)))) {
+            abort(403, 'This post is only visible to followers.');
+        }
+
         // Track view (only for non-owners)
         if ($request->user() && $post->user_id !== $request->user()->id) {
             $this->analyticsService->trackView($post);
@@ -423,8 +459,8 @@ class PostController extends Controller
                     ])
                     ->orderBy('is_pinned', 'desc')
                     ->orderBy('is_best_answer', 'desc')
-                    ->orderBy('upvotes_count', 'desc')
-                    ->orderBy('created_at', 'asc');
+                    ->orderBy('created_at', 'desc')
+                    ->orderBy('upvotes_count', 'desc');
             },
         ]);
 
@@ -488,6 +524,59 @@ class PostController extends Controller
             }
         }
 
+        // Permissions for UI reinforcement
+        $commentPolicy = $author->settings?->privacy_settings['comments_permission'] ?? 'everyone';
+        $canComment = true;
+        if ($request->user() && $request->user()->id !== $author->id) {
+            if ($commentPolicy === 'none') {
+                $canComment = false;
+            } elseif ($commentPolicy === 'followers' && !$request->user()->isFollowing($author)) {
+                $canComment = false;
+            }
+        }
+        if (!$request->user()) {
+            // guests cannot comment if not everyone
+            $canComment = ($commentPolicy === 'everyone');
+        }
+        // vote/repost/bookmark permissions aligned with post visibility
+        $canVote = $request->user() && $request->user()->id !== $author->id;
+        $canRepost = (bool) $request->user();
+        $canBookmark = (bool) $request->user();
+        $isOwner = $request->user() && $request->user()->id === $author->id;
+        $isFollower = $request->user() ? $request->user()->isFollowing($author) : false;
+        if ($vis === 'followers') {
+            $isAllowedViewer = $request->user() && ($isOwner || $isFollower);
+            $canVote = $canVote && $isAllowedViewer;
+            $canRepost = $canRepost && $isAllowedViewer;
+            $canBookmark = $canBookmark && $isAllowedViewer;
+        } elseif ($vis === 'private') {
+            $canVote = false;
+            $canRepost = $isOwner; // allow owner workflow only
+            $canBookmark = $isOwner;
+        }
+        // Reasons for disabled actions
+        $voteReason = null;
+        if (!$canVote) {
+            if ($isOwner) $voteReason = 'Tidak dapat vote pada post sendiri';
+            elseif ($vis === 'private') $voteReason = 'Post privat: vote tidak tersedia';
+            elseif ($vis === 'followers' && !$isFollower) $voteReason = 'Hanya followers yang dapat vote';
+            else $voteReason = 'Interaksi tidak diizinkan';
+        }
+        $repostReason = null;
+        if (!$canRepost) {
+            if (!$request->user()) $repostReason = 'Masuk untuk repost';
+            elseif ($vis === 'private' && !$isOwner) $repostReason = 'Post privat: tidak dapat repost';
+            elseif ($vis === 'followers' && !$isFollower) $repostReason = 'Hanya followers yang dapat repost';
+            else $repostReason = 'Interaksi tidak diizinkan';
+        }
+        $bookmarkReason = null;
+        if (!$canBookmark) {
+            if (!$request->user()) $bookmarkReason = 'Masuk untuk bookmark';
+            elseif ($vis === 'private' && !$isOwner) $bookmarkReason = 'Post privat: tidak dapat bookmark';
+            elseif ($vis === 'followers' && !$isFollower) $bookmarkReason = 'Hanya followers yang dapat bookmark';
+            else $bookmarkReason = 'Interaksi tidak diizinkan';
+        }
+
         return Inertia::render('Posts/Show', [
             'post' => $post,
             'userVote' => $userVote,
@@ -500,6 +589,19 @@ class PostController extends Controller
             'collaborators' => $post->collaborators,
             'supplierRecommendations' => $supplierRecommendations,
             'businessType' => $post->business_type ?? $detectedBusinessType ?? null,
+            'permissions' => [
+                'can_comment' => $canComment,
+                'comments_policy' => $commentPolicy,
+                'posts_visibility' => $vis,
+                'can_vote' => $canVote,
+                'can_repost' => $canRepost,
+                'can_bookmark' => $canBookmark,
+            ],
+            'restrictions' => [
+                'vote' => $voteReason,
+                'repost' => $repostReason,
+                'bookmark' => $bookmarkReason,
+            ],
         ]);
     }
 
@@ -580,6 +682,22 @@ class PostController extends Controller
     {
         $limit = $request->input('limit', 20);
         $posts = $this->trendingService->getTrendingPosts($limit);
+        // Privacy filter
+        $viewer = $request->user();
+        $posts = $posts->filter(function ($post) use ($viewer) {
+            $author = $post->user;
+            if (!$author) return false;
+            $vis = $author->settings?->privacy_settings['posts_visibility'] ?? 'public';
+            if ($vis === 'public') return true;
+            if ($viewer && $viewer->id === $author->id) return true;
+            if ($vis === 'followers') {
+                return $viewer ? $viewer->isFollowing($author) : false;
+            }
+            if ($vis === 'private') {
+                return false;
+            }
+            return true;
+        })->values();
 
         // Get user votes, bookmarks, reposts, and poll votes for each post if authenticated
         $userVotes = [];
@@ -633,6 +751,46 @@ class PostController extends Controller
             'userBookmarks' => $userBookmarks,
             'userReposts' => $userReposts,
             'userPollVotes' => $userPollVotes,
+        ]);
+    }
+
+    public function top(Request $request): Response
+    {
+        $period = $request->input('period', 'week');
+        $metric = $request->input('metric', 'engagement');
+        $perPage = 15;
+        $purposeType = $request->input('purpose_type', 'all');
+        $posts = $this->rankingService->getTopPosts($period, $metric, $perPage, $purposeType);
+
+        $viewer = $request->user();
+        $posts = $posts->through(function ($post) use ($viewer) {
+            $author = $post->user;
+            if (!$author) return null;
+            $vis = $author->settings?->privacy_settings['posts_visibility'] ?? 'public';
+            if ($vis === 'public') return $post;
+            if ($viewer && $viewer->id === $author->id) return $post;
+            if ($vis === 'followers' && $viewer && $viewer->isFollowing($author)) return $post;
+            return null;
+        })->filter();
+
+        $userVotes = [];
+        $userBookmarks = [];
+        if ($request->user()) {
+            $postIds = $posts->pluck('id')->toArray();
+            $votes = \App\Models\PostVote::where('user_id', $request->user()->id)->whereIn('post_id', $postIds)->get()->keyBy('post_id');
+            $bookmarks = \App\Models\Bookmark::where('user_id', $request->user()->id)->whereIn('post_id', $postIds)->pluck('post_id')->toArray();
+            foreach ($postIds as $postId) {
+                $userVotes[$postId] = $votes[$postId]->vote_type ?? null;
+                $userBookmarks[$postId] = in_array($postId, $bookmarks);
+            }
+        }
+
+        return Inertia::render('Posts/Index', [
+            'posts' => $posts,
+            'filters' => array_merge($request->only(['purpose_type']), ['sort' => 'top', 'period' => $period, 'metric' => $metric]),
+            'userVotes' => $userVotes,
+            'userBookmarks' => $userBookmarks,
+            'userReposts' => [],
         ]);
     }
 

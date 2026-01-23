@@ -23,6 +23,15 @@ class DatabaseSeeder extends Seeder
             MarketplaceSeeder::class,
             ClipperSeeder::class,
             PlatformSettingsSeeder::class,
+            HashtagSeeder::class,
+            BookmarkSeeder::class,
+            RepostSeeder::class,
+            GDPRSeeder::class,
+            UserBlockSeeder::class,
+            ProductSeeder::class,
+            ConversationSeeder::class,
+            TrendingSeeder::class,
+            NotificationSeeder::class,
         ]);
     }
 }

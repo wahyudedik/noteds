@@ -207,10 +207,10 @@ const filterByUserType = (userType) => {
                                     <span
                                         :class="[
                                             'px-2 py-1 text-xs rounded-full',
-                                            withdrawal.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                            withdrawal.status === 'approved' ? 'bg-blue-100 text-blue-800' :
-                                            withdrawal.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                                            'bg-yellow-100 text-yellow-800'
+                                            withdrawal.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                            withdrawal.status === 'approved' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                            withdrawal.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                                            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                                         ]"
                                     >
                                         {{ withdrawal.status }}

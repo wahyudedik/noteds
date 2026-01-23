@@ -3,12 +3,14 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import CreatePostModal from '@/Components/CreatePostModal.vue';
 import CreateProductModal from '@/Components/CreateProductModal.vue';
+import { useFeatureGate } from '@/Composables/useFeatureGate';
 
 const page = usePage();
 const isMenuOpen = ref(false);
 const showPostModal = ref(false);
 const showProductModal = ref(false);
 const menuRef = ref(null);
+const { can } = useFeatureGate();
 
 const isBrand = computed(() => {
     const user = page.props.auth?.user;
@@ -112,6 +114,7 @@ onUnmounted(() => {
 
                 <!-- Add Product Button -->
                 <button
+                    v-if="can('marketplace.seller')"
                     @click.stop="openProductModal"
                     class="flex items-center gap-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border border-gray-200 dark:border-gray-700 min-w-[160px]"
                     aria-label="Add Product"

@@ -19,6 +19,10 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+    disabledReason: {
+        type: String,
+        default: '',
+    },
 });
 
 const page = usePage();
@@ -126,7 +130,7 @@ const toggleRepost = () => {
             localIsReposted && 'text-indigo-600 dark:text-indigo-400',
             !canRepost && 'opacity-50 cursor-not-allowed'
         ]"
-        :title="localIsReposted ? 'Remove repost' : 'Repost this post'"
+        :title="!canRepost ? (disabledReason || 'Repost tidak diizinkan') : (localIsReposted ? 'Remove repost' : 'Repost this post')"
     >
         <svg
             class="w-5 h-5"

@@ -4,6 +4,8 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Checkbox from '@/Components/Checkbox.vue';
+import { setTheme, getStoredTheme, systemPrefersDark } from '@/Utils/theme';
+import { ref } from 'vue';
 
 const page = usePage();
 const settings = page.props.settings || {};
@@ -11,8 +13,37 @@ const settings = page.props.settings || {};
 const form = useForm({
     profile_visibility: settings.profile_visibility !== undefined ? settings.profile_visibility : true,
     search_visibility: settings.search_visibility !== undefined ? settings.search_visibility : true,
-    privacy_settings: settings.privacy_settings || {},
+    privacy_settings: {
+        posts_visibility: 'public',
+        comments_permission: 'everyone',
+        messaging_permission: 'everyone',
+        profile_visibility: 'public',
+        activity_visibility: 'public',
+        sharing: {
+            analytics: true,
+            marketing: false,
+            recommendations: true,
+        },
+        theme: 'system',
+        ...(settings.privacy_settings || {}),
+        sharing: {
+            analytics: true,
+            marketing: false,
+            recommendations: true,
+            ...((settings.privacy_settings && settings.privacy_settings.sharing) || {}),
+        },
+    },
 });
+const themeMode = {
+    get value() {
+        const s = getStoredTheme();
+        return s ? s : (systemPrefersDark() ? 'dark' : 'light');
+    },
+    set value(v) {
+        setTheme(v);
+        form.privacy_settings = { ...(form.privacy_settings || {}), theme: v };
+    }
+};
 
 const submit = () => {
     form.post(route('settings.privacy'), {
@@ -21,6 +52,36 @@ const submit = () => {
             // Success handled by Inertia
         },
     });
+};
+const exporting = ref(false);
+const deleting = ref(false);
+const exportData = async () => {
+    exporting.value = true;
+    try {
+        const res = await fetch(route('gdpr.export'), { credentials: 'include', headers: { 'Accept': 'application/json' } });
+        const data = await res.json();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'noteds-user-data.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } finally {
+        exporting.value = false;
+    }
+};
+const deleteAccount = async () => {
+    if (!confirm('Penghapusan akun akan permanen. Lanjutkan?')) return;
+    deleting.value = true;
+    try {
+        await fetch(route('gdpr.delete'), { method: 'POST', credentials: 'include', headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]')?.getAttribute('content') || '' } });
+        window.location.href = '/';
+    } finally {
+        deleting.value = false;
+    }
 };
 </script>
 
@@ -78,6 +139,23 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.search_visibility" />
             </div>
 
+            <div class="space-y-2">
+                <InputLabel for="theme_pref" value="Theme Preference" />
+                <select
+                    id="theme_pref"
+                    :value="themeMode.value"
+                    @change="themeMode.value = $event.target.value"
+                    class="border rounded px-3 py-2 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-100"
+                >
+                    <option value="system">System</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Preferensi tema akan disinkronkan sebagai bagian dari pengaturan privasi.
+                </p>
+            </div>
+
             <div class="flex items-center gap-4">
                 <PrimaryButton :disabled="form.processing">Save Changes</PrimaryButton>
                 <Transition
@@ -93,6 +171,70 @@ const submit = () => {
                         Saved.
                     </p>
                 </Transition>
+            </div>
+
+            <div class="mt-8 border-t pt-6">
+                <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 mb-2">GDPR</h3>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button @click="exportData" :disabled="exporting" class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 disabled:opacity-50 text-sm">Export My Data</button>
+                    <button @click="deleteAccount" :disabled="deleting" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 text-sm">Delete My Account</button>
+                </div>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Ekspor data dalam JSON dan penghapusan akun permanen sesuai GDPR.</p>
+            </div>
+
+            <div class="mt-8 border-t pt-6">
+                <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 mb-2">Advanced Privacy</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Who can see my posts</label>
+                        <select v-model="form.privacy_settings.posts_visibility" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:text-white text-sm">
+                            <option value="public">Public</option>
+                            <option value="followers">Followers</option>
+                            <option value="private">Only Me</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Who can comment on my posts</label>
+                        <select v-model="form.privacy_settings.comments_permission" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:text-white text-sm">
+                            <option value="everyone">Everyone</option>
+                            <option value="followers">Followers</option>
+                            <option value="none">No one</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Who can message me</label>
+                        <select v-model="form.privacy_settings.messaging_permission" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:text-white text-sm">
+                            <option value="everyone">Everyone</option>
+                            <option value="followers">Followers</option>
+                            <option value="none">No one</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Profile visibility</label>
+                        <select v-model="form.privacy_settings.profile_visibility" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:text-white text-sm">
+                            <option value="public">Public</option>
+                            <option value="followers">Followers</option>
+                            <option value="private">Only Me</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Activity visibility</label>
+                        <select v-model="form.privacy_settings.activity_visibility" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:text-white text-sm">
+                            <option value="public">Public</option>
+                            <option value="followers">Followers</option>
+                            <option value="private">Only Me</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data sharing preferences</label>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center gap-2"><input type="checkbox" v-model="form.privacy_settings.sharing.analytics" /> Analytics</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" v-model="form.privacy_settings.sharing.marketing" /> Marketing</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" v-model="form.privacy_settings.sharing.recommendations" /> Personalized recommendations</label>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Kontrol granular untuk visibilitas dan interaksi sesuai preferensi Anda.</p>
             </div>
         </form>
     </div>

@@ -30,6 +30,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'not_banned' => \App\Http\Middleware\EnsureUserNotBanned::class,
             'rate_limit.view_tracking' => \App\Http\Middleware\RateLimitViewTracking::class,
             'rate_limit.clipper_api' => \App\Http\Middleware\RateLimitClipperApi::class,
+            'verify.midtrans' => \App\Http\Middleware\VerifyMidtransSource::class,
+            'block.viewer.export' => \App\Http\Middleware\BlockViewerExport::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

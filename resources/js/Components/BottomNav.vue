@@ -25,13 +25,17 @@ const navItems = [
         active: () => page.url.startsWith('/profile'),
     },
 ];
+const filteredNavItems = navItems.filter(i => {
+  if (i.name === 'Profile') return !!page.props.auth?.user
+  return true
+})
 </script>
 
 <template>
     <nav class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 lg:hidden">
         <div class="grid h-16 grid-cols-3 gap-1">
             <Link
-                v-for="item in navItems"
+                v-for="item in filteredNavItems"
                 :key="item.name"
                 :href="item.routeParams ? route(item.route, item.routeParams()) : route(item.route)"
                 :class="[

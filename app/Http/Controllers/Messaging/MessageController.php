@@ -12,6 +12,8 @@ use App\Services\MessageService;
 use App\Services\TypingIndicatorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use App\Jobs\TranscribeVoiceMessage;
 
 class MessageController extends Controller
 {
@@ -80,6 +82,59 @@ class MessageController extends Controller
             return response()->json([
                 'message' => $e->getMessage(),
             ], 400);
+        }
+    }
+
+    /**
+     * Upload voice message with duration and metadata.
+     */
+    public function storeVoice(Request $request, Conversation $conversation): JsonResponse
+    {
+        $user = $request->user();
+        if (!$conversation->hasParticipant($user)) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
+        $request->validate([
+            'voice' => 'required|file|mimetypes:audio/webm,audio/ogg,audio/mpeg,audio/wav|max:20480',
+            'duration' => 'required|integer|min:1|max:120',
+            'reply_to_id' => 'nullable|string',
+            'audio_codec' => 'nullable|string',
+            'sample_rate' => 'nullable|integer',
+            'bitrate' => 'nullable|integer',
+            'channels' => 'nullable|integer|min:1|max:8',
+            'waveform' => 'nullable|array',
+            'encrypted' => 'nullable|boolean',
+        ]);
+        try {
+            /** @var UploadedFile $audio */
+            $audio = $request->file('voice');
+            $duration = (int) $request->input('duration');
+            $waveform = $request->input('waveform');
+            if (is_string($waveform)) {
+                try { $waveform = json_decode($waveform, true); } catch (\Throwable $e) { $waveform = null; }
+            }
+            $meta = [
+                'audio_codec' => $request->input('audio_codec'),
+                'sample_rate' => $request->input('sample_rate'),
+                'bitrate' => $request->input('bitrate'),
+                'channels' => $request->input('channels'),
+                'waveform' => $waveform,
+                'is_encrypted' => (bool) $request->boolean('encrypted'),
+            ];
+            $message = $this->messageService->sendVoice(
+                $conversation,
+                $user,
+                $audio,
+                $duration,
+                $request->input('reply_to_id'),
+                $meta
+            );
+            if (config('transcription.provider') !== 'none' && $message->media && count($message->media) > 0) {
+                dispatch(new TranscribeVoiceMessage($message->media[0]->id));
+            }
+            return response()->json(['message' => $message], 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 

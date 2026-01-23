@@ -1,12 +1,13 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { router, useForm } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ReportButton from '@/Components/Report/ReportButton.vue';
 import CommentRichTextEditor from '@/Components/CommentRichTextEditor.vue';
 import CommentReactions from '@/Components/CommentReactions.vue';
-import ImageUploader from '@/Components/ImageUploader.vue';
+import FileUploader from '@/Components/FileUploader.vue';
 import VoteReasonSelector from '@/Components/VoteReasonSelector.vue';
 import { Link } from '@inertiajs/vue3';
 
@@ -28,7 +29,7 @@ const editingComment = ref(null);
 const replyForms = ref({});
 const editForms = ref({});
 const showEditHistory = ref({});
-const images = ref({});
+const attachments = ref({});
 
 // Vote reason selector state
 const showVoteReasonSelector = ref(false);
@@ -122,22 +123,22 @@ const startReply = (commentId) => {
         replyForms.value[commentId] = useForm({
             content: '',
             parent_id: commentId,
-            images: [],
+            attachments: [],
         });
-        images.value[commentId] = [];
+        attachments.value[commentId] = [];
     }
 };
 
 const submitReply = (commentId) => {
     const form = replyForms.value[commentId];
-    form.images = images.value[commentId]?.map(img => img.file) || [];
+    form.attachments = attachments.value[commentId]?.map(f => f.file) || [];
     form.post(route('comments.store', props.postId), {
         preserveScroll: true,
         forceFormData: true,
         onSuccess: () => {
             replyingTo.value = null;
             form.reset();
-            images.value[commentId] = [];
+            attachments.value[commentId] = [];
         },
     });
 };
@@ -147,7 +148,7 @@ const cancelReply = (commentId) => {
     if (replyForms.value[commentId]) {
         replyForms.value[commentId].reset();
     }
-    images.value[commentId] = [];
+    attachments.value[commentId] = [];
 };
 
 const startEdit = (comment) => {
@@ -221,6 +222,50 @@ const toggleEditHistory = async (commentId) => {
 const isPostAuthor = computed(() => {
     return props.auth?.user?.id === props.postAuthorId;
 });
+const page = usePage();
+const blockedIds = computed(() => {
+    const v = page.props.blocked_user_ids || [];
+    return Array.isArray(v) ? v : Object.values(v);
+});
+const filteredComments = computed(() => {
+    const base = Array.isArray(props.comments) ? props.comments : [];
+    return base
+        .filter(c => !blockedIds.value.includes(c.user_id))
+        .map(c => ({
+            ...c,
+            replies: (c.replies || []).filter(r => !blockedIds.value.includes(r.user_id)),
+        }));
+});
+
+const iconFor = (mime, name) => {
+    const ext = (name || '').toLowerCase();
+    if ((mime || '').startsWith('image/')) return 'image';
+    if (ext.endsWith('.pdf')) return 'pdf';
+    if (ext.endsWith('.doc') || ext.endsWith('.docx')) return 'word';
+    if (ext.endsWith('.xls') || ext.endsWith('.xlsx') || ext.endsWith('.csv')) return 'excel';
+    if (ext.endsWith('.ppt') || ext.endsWith('.pptx')) return 'ppt';
+    if (ext.endsWith('.txt')) return 'txt';
+    if (ext.endsWith('.zip') || ext.endsWith('.rar')) return 'archive';
+    return 'file';
+};
+const iconSvg = (type) => {
+    switch (type) {
+        case 'pdf': return 'M7 7v10a2 2 0 002 2h6a2 2 0 002-2V7m-8 0V5a2 2 0 012-2h2a2 2 0 012 2v2';
+        case 'word': return 'M4 4h16v16H4z M7 7h10v10H7z';
+        case 'excel': return 'M4 4h16v16H4z M8 8l8 8M16 8l-8 8';
+        case 'ppt': return 'M12 7a5 5 0 110 10 5 5 0 010-10M7 7h10v10H7z';
+        case 'txt': return 'M6 4h12v16H6z M8 8h8M8 12h8M8 16h8';
+        case 'archive': return 'M6 4h12v16H6z M12 4v16M9 7h6M9 11h6M9 15h6';
+        default: return 'M7 7v10a2 2 0 002 2h6a2 2 0 002-2V7m-8 0V5a2 2 0 012-2h2a2 2 0 012 2v2';
+    }
+};
+const sizeText = (n) => {
+    if (!n && n !== 0) return '';
+    const kb = n / 1024;
+    if (kb < 1024) return `${Math.round(kb)} KB`;
+    const mb = kb / 1024;
+    return `${mb.toFixed(1)} MB`;
+};
 
 const formatDate = (date) => {
     if (!date) return '';
@@ -237,7 +282,7 @@ const formatDate = (date) => {
 <template>
     <div class="space-y-4">
         <div
-            v-for="comment in comments"
+            v-for="comment in filteredComments"
             :key="comment.id"
             :class="[
                 'border rounded-lg p-4',
@@ -371,14 +416,34 @@ const formatDate = (date) => {
                 <!-- Comment Media -->
                 <div v-if="comment.media && comment.media.length > 0" class="mb-3">
                     <div class="grid grid-cols-2 gap-2">
-                        <img
-                            v-for="media in comment.media"
-                            :key="media.id"
-                            :src="media.url"
-                            :alt="media.file_name"
-                            class="rounded-lg max-w-full h-auto object-cover cursor-pointer hover:opacity-90"
-                            @click="window.open(media.url, '_blank')"
-                        />
+                        <template v-for="media in comment.media" :key="media.id">
+                            <img
+                                v-if="media.mime_type?.startsWith('image/')"
+                                :src="media.url"
+                                :alt="media.file_name"
+                                class="rounded-lg max-w-full h-auto object-cover cursor-pointer hover:opacity-90"
+                                @click="window.open(media.url, '_blank')"
+                            />
+                            <a
+                                v-else
+                                :href="media.url"
+                                target="_blank"
+                                rel="noopener"
+                                class="flex items-center gap-2 rounded-md border border-gray-200 dark:border-gray-700 p-2 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                            >
+                                <img
+                                    v-if="media.thumbnail_url"
+                                    :src="media.thumbnail_url"
+                                    :alt="media.file_name"
+                                    class="w-10 h-10 object-cover rounded"
+                                />
+                                <svg class="w-5 h-5 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="iconSvg(iconFor(media.mime_type, media.file_name))" />
+                                </svg>
+                                <span class="text-xs text-gray-700 dark:text-gray-300 truncate">{{ media.file_name }}</span>
+                                <span class="text-[10px] text-gray-500 dark:text-gray-400 ml-auto">{{ sizeText(media.file_size) }}</span>
+                            </a>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -457,12 +522,13 @@ const formatDate = (date) => {
                     />
                     <InputError :message="replyForms[comment.id].errors.content" />
                     <div class="mt-2">
-                        <ImageUploader
-                            v-model="images[comment.id]"
-                            :max-images="5"
-                            :max-size="2048"
+                        <FileUploader
+                            v-model="attachments[comment.id]"
+                            :max-files="5"
+                            :max-size-kb="10240"
                         />
                     </div>
+                    <InputError :message="replyForms[comment.id].errors.attachments" />
                     <div class="flex gap-2 mt-2">
                         <PrimaryButton type="submit" :disabled="replyForms[comment.id].processing">
                             Post Reply
@@ -500,15 +566,35 @@ const formatDate = (date) => {
                         class="text-sm text-gray-700 dark:text-gray-300 prose prose-sm max-w-none"
                         v-html="reply.content"
                     ></div>
-                    <div v-if="reply.media && reply.media.length > 0" class="mt-2">
-                        <img
-                            v-for="media in reply.media"
-                            :key="media.id"
-                            :src="media.url"
-                            :alt="media.file_name"
-                            class="rounded-lg max-w-xs h-auto object-cover cursor-pointer hover:opacity-90"
-                            @click="window.open(media.url, '_blank')"
-                        />
+                    <div v-if="reply.media && reply.media.length > 0" class="mt-2 grid grid-cols-2 gap-2">
+                        <template v-for="media in reply.media" :key="media.id">
+                            <img
+                                v-if="media.mime_type?.startsWith('image/')"
+                                :src="media.url"
+                                :alt="media.file_name"
+                                class="rounded-lg max-w-xs h-auto object-cover cursor-pointer hover:opacity-90"
+                                @click="window.open(media.url, '_blank')"
+                            />
+                            <a
+                                v-else
+                                :href="media.url"
+                                target="_blank"
+                                rel="noopener"
+                                class="flex items-center gap-2 rounded-md border border-gray-200 dark:border-gray-700 p-2 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                            >
+                                <img
+                                    v-if="media.thumbnail_url"
+                                    :src="media.thumbnail_url"
+                                    :alt="media.file_name"
+                                    class="w-10 h-10 object-cover rounded"
+                                />
+                                <svg class="w-5 h-5 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="iconSvg(iconFor(media.mime_type, media.file_name))" />
+                                </svg>
+                                <span class="text-xs text-gray-700 dark:text-gray-300 truncate">{{ media.file_name }}</span>
+                                <span class="text-[10px] text-gray-500 dark:text-gray-400 ml-auto">{{ sizeText(media.file_size) }}</span>
+                            </a>
+                        </template>
                     </div>
                 </div>
             </div>

@@ -49,6 +49,73 @@ const getNotificationIcon = (notification) => {
     return icons[type] || 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9';
 };
 
+const getNotificationTitle = (notification) => {
+    const type = getNotificationType(notification);
+    const labels = {
+        'new_comment': 'Komentar Baru',
+        'new_follow': 'Pengikut Baru',
+        'content_reported': 'Konten Dilaporkan',
+        'report_resolved': 'Laporan Diselesaikan',
+        'new_campaign': 'Kampanye Baru',
+        'clip_approved': 'Clip Disetujui',
+        'reward_received': 'Reward Diterima',
+        'campaign_ended': 'Kampanye Berakhir',
+        'brand_approved': 'Brand Disetujui',
+        'brand_rejected': 'Brand Ditolak',
+        'new_order': 'Pesanan Baru',
+        'withdrawal_status': 'Status Penarikan',
+        'post_moderated': 'Post Dimoderasi',
+        'post_restored': 'Post Dipulihkan',
+        'campaign_created': 'Kampanye Dibuat',
+        'clip_submitted': 'Clip Dikirim',
+        'product_created': 'Produk Dibuat',
+        'fraud_detected': 'Kecurangan Terdeteksi',
+        'order_created': 'Order Dibuat',
+        'campaign_suspended': 'Kampanye Ditangguhkan',
+        'product_approved': 'Produk Disetujui',
+        'product_rejected': 'Produk Ditolak',
+        'order_cancelled': 'Order Dibatalkan',
+        'payment_failed': 'Pembayaran Gagal',
+        'clip_rejected': 'Clip Ditolak',
+        'view_validated': 'View Terverifikasi',
+        'default': 'Notifikasi',
+    };
+    return props.notification.data?.title || labels[type] || labels.default;
+};
+const getTitle = (n) => {
+    const d = n.data || {};
+    if (d.title) return d.title;
+    const type = getNotificationType(n);
+    switch (type) {
+        case 'new_order':
+            return `Pesanan Baru${d.order_number ? ' #' + d.order_number : ''}`;
+        case 'order_status_update':
+            return `Status Order Diperbarui${d.order_number ? ' #' + d.order_number : ''}`;
+        case 'payment_failed':
+            return 'Pembayaran Gagal';
+        case 'withdrawal_status':
+            return 'Status Penarikan';
+        case 'product_approved':
+            return 'Produk Disetujui';
+        case 'product_rejected':
+            return 'Produk Ditolak';
+        case 'support_ticket_response':
+            return `Balasan Tiket${d.ticket_number ? ' #' + d.ticket_number : ''}`;
+        case 'new_campaign':
+            return 'Kampanye Baru';
+        case 'clip_approved':
+            return 'Clip Disetujui';
+        case 'clip_rejected':
+            return 'Clip Ditolak';
+        case 'post_moderated':
+            return 'Post Dimoderasi';
+        case 'post_restored':
+            return 'Post Dipulihkan';
+        default:
+            return getNotificationTitle(n);
+    }
+};
+
 const getNotificationColor = (notification) => {
     const type = getNotificationType(notification);
     const colors = {
@@ -90,8 +157,81 @@ const markAsRead = (notification) => {
     
     router.post(route('notifications.read', notification.id), {}, {
         preserveScroll: true,
-        only: ['notifications'],
     });
+};
+
+const getPreview = (n) => {
+    const d = n.data || {};
+    if (d.preview && typeof d.preview === 'object') {
+        return d.preview;
+    }
+    if (d.post_id) {
+        return {
+            heading: `Post #${d.post_id}`,
+            title: d.post_title || d.title || '',
+            text: d.post_excerpt || d.message || d.body || '',
+        };
+    }
+    if (d.order_id) {
+        return {
+            heading: `Order #${d.order_number || d.order_id}`,
+            title: d.title || 'Order',
+            text: d.message || '',
+        };
+    }
+    return null;
+};
+
+const getPreviewList = (n) => {
+    const d = n.data || {};
+    if (Array.isArray(d.preview_list)) {
+        return d.preview_list.map((item) => ({
+            heading: item.heading || '',
+            title: item.title || '',
+            text: item.text || '',
+        }));
+    }
+    if (Array.isArray(d.list)) {
+        return d.list.map((item) => ({
+            heading: item.heading || '',
+            title: item.title || '',
+            text: item.text || '',
+        }));
+    }
+    return null;
+};
+
+const getMessage = (n) => {
+    const d = n.data || {};
+    const type = getNotificationType(n);
+    if (d.message || d.body) return d.message || d.body;
+    switch (type) {
+        case 'new_order':
+            return `Order #${d.order_number || d.order_id} untuk ${d.product_name || ''}`;
+        case 'order_status_update':
+            return `Order #${d.order_number || d.order_id} → ${d.status || ''}`;
+        case 'payment_failed':
+            return `Pembayaran gagal untuk Order #${d.order_number || d.order_id}`;
+        case 'withdrawal_status':
+            return `Penarikan ${d.status || ''}`;
+        case 'product_approved':
+            return `Produk disetujui`;
+        case 'product_rejected':
+            return `Produk ditolak${d.reason ? `: ${d.reason}` : ''}`;
+        case 'new_campaign':
+            return `Kampanye baru tersedia`;
+        case 'clip_approved':
+            return `Clip disetujui`;
+        case 'clip_rejected':
+            return `Clip ditolak`;
+        case 'support_ticket_response':
+            return `Balasan tiket #${d.ticket_number || d.ticket_id}`;
+        case 'post_moderated':
+        case 'post_restored':
+            return `Perubahan pada post #${d.post_id}`;
+        default:
+            return '';
+    }
 };
 </script>
 
@@ -99,16 +239,16 @@ const markAsRead = (notification) => {
     <div
         @click="markAsRead(notification)"
         :class="[
-            'bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4 cursor-pointer hover:shadow-md transition-all',
+            'bg-white dark:bg-gray-800 rounded-xl border p-4 cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-700',
             notification.read_at 
                 ? 'border-gray-200 dark:border-gray-700' 
-                : 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20'
+                : 'border-indigo-300 dark:border-indigo-700'
         ]"
     >
         <div class="flex gap-4">
             <!-- Icon -->
-            <div :class="['flex-shrink-0', getNotificationColor(notification)]">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div :class="['flex-shrink-0 h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center', getNotificationColor(notification)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getNotificationIcon(notification)" />
                 </svg>
             </div>
@@ -117,19 +257,54 @@ const markAsRead = (notification) => {
             <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-2">
                     <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">
-                            {{ notification.data?.title || 'Notification' }}
+                        <p :class="['text-sm', notification.read_at ? 'font-medium' : 'font-semibold', 'text-gray-900 dark:text-white']">
+                            {{ getTitle(notification) }}
                         </p>
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            {{ notification.data?.message || notification.data?.body || '' }}
+                        <p class="mt-1 text-sm leading-5 text-gray-700 dark:text-gray-300 line-clamp-2">
+                            {{ getMessage(notification) }}
                         </p>
                     </div>
                     <div class="flex-shrink-0">
-                        <span v-if="!notification.read_at" class="inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
+                        <span v-if="!notification.read_at" class="inline-block w-2 h-2 bg-indigo-600 rounded-full"></span>
                     </div>
                 </div>
                 <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
                     {{ formatDate(notification.created_at) }}
+                </div>
+
+                <div v-if="getPreview(notification) || getPreviewList(notification)" class="mt-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <template v-if="getPreviewList(notification)">
+                            <div
+                                v-for="(item, idx) in getPreviewList(notification)"
+                                :key="idx"
+                                class="p-3 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition dark:bg-gray-800 dark:border-gray-700"
+                            >
+                                <div class="text-xs text-gray-600 dark:text-gray-300 mb-1">
+                                    {{ item.heading }}
+                                </div>
+                                <div class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1">
+                                    {{ item.title }}
+                                </div>
+                                <div class="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
+                                    {{ item.text }}
+                                </div>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <div class="p-3 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition dark:bg-gray-800 dark:border-gray-700">
+                                <div class="text-xs text-gray-600 dark:text-gray-300 mb-1">
+                                    {{ getPreview(notification).heading }}
+                                </div>
+                                <div class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1">
+                                    {{ getPreview(notification).title }}
+                                </div>
+                                <div class="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
+                                    {{ getPreview(notification).text }}
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>

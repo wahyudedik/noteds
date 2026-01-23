@@ -1,3 +1,96 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Theme transitions and base color-scheme */
+html {
+  color-scheme: light dark;
+}
+body, .min-h-screen {
+  transition-property: background-color, color, border-color, box-shadow, fill, stroke;
+  transition-duration: 300ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* High contrast mode overrides (opt-in via html.hc) */
+html.hc body { background: #ffffff; color: #000000; }
+html.hc a { color: #0000EE; text-decoration: underline; }
+html.hc button { border-color: #000000; }
+html.hc .border { border-color: #000000 !important; }
+html.hc .text-gray-400, html.hc .text-gray-500 { color: #000000 !important; }
+html.hc .bg-gray-800, html.hc .bg-gray-700 { background-color: #111827 !important; }
+html.hc .bg-white { background-color: #ffffff !important; }
+html.hc .hover\:bg-gray-100:hover { background-color: #e5e7eb !important; }
+html.hc .dark\:text-gray-200 { color: #ffffff !important; }
+
+/* Reduce Motion levels */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+html.rm-light * { transition-duration: 150ms !important; }
+html.rm-medium * { transition-duration: 50ms !important; animation-duration: 50ms !important; }
+html.rm-full * { transition-duration: 0ms !important; animation: none !important; }
+
+/* Keyboard Navigation Hints */
+html.kn :focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+
+/* Component-specific: Feed */
+html.rm-feed-light .rm-target-feed * { transition-duration: 150ms !important; }
+html.rm-feed-medium .rm-target-feed * { transition-duration: 50ms !important; animation-duration: 50ms !important; }
+html.rm-feed-full .rm-target-feed * { transition-duration: 0ms !important; animation: none !important; }
+
+/* Component-specific: Modal */
+html.rm-modal-light .rm-target-modal * { transition-duration: 150ms !important; }
+html.rm-modal-medium .rm-target-modal * { transition-duration: 50ms !important; animation-duration: 50ms !important; }
+html.rm-modal-full .rm-target-modal * { transition-duration: 0ms !important; animation: none !important; }
+
+/* Component-specific: Tooltip */
+html.rm-tooltip-light .rm-target-tooltip * { transition-duration: 150ms !important; }
+html.rm-tooltip-medium .rm-target-tooltip * { transition-duration: 50ms !important; animation-duration: 50ms !important; }
+html.rm-tooltip-full .rm-target-tooltip * { transition-duration: 0ms !important; animation: none !important; }
+
+/* Component-specific: Chart */
+html.rm-chart-light .rm-target-chart * { transition-duration: 150ms !important; }
+html.rm-chart-medium .rm-target-chart * { transition-duration: 50ms !important; animation-duration: 50ms !important; }
+html.rm-chart-full .rm-target-chart * { transition-duration: 0ms !important; animation: none !important; }
+
+/* Scrollbar styling (light/dark) */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 9999px;
+  border: 2px solid #f3f4f6;
+}
+html.dark::-webkit-scrollbar-track,
+body.dark::-webkit-scrollbar-track,
+html.dark body::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+html.dark::-webkit-scrollbar-thumb,
+body.dark::-webkit-scrollbar-thumb,
+html.dark body::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+  border: 2px solid #0f172a;
+}
+
+/* Dark-mode safety overrides for common Tailwind utilities without explicit dark: variants */
+.dark .text-gray-900, .dark .text-gray-800 { color: #e5e7eb !important; }
+.dark .text-gray-700 { color: #cbd5e1 !important; }
+.dark .bg-white { background-color: #1f2937 !important; } /* gray-800 */
+.dark .border-gray-200 { border-color: #374151 !important; } /* gray-700 */
+.dark .ring-gray-200 { --tw-ring-color: #374151 !important; }
+.dark .shadow { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.6), 0 1px 1px -1px rgb(0 0 0 / 0.8) !important; }
+.dark ::placeholder { color: #9ca3af !important; }
+.dark [class*="hover:bg-gray-100"]:hover { background-color: #374151 !important; }
+.dark [class*="focus:bg-gray-100"]:focus { background-color: #374151 !important; }
+.dark svg { color: #cbd5e1; }

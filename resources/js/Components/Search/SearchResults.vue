@@ -1,5 +1,5 @@
 <script setup>
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
 const props = defineProps({
@@ -45,7 +45,15 @@ const selectedTab = ref(availableTabs.value[0]);
 
 const getData = (type) => {
     const key = type.toLowerCase();
-    return props.results[key]?.data || [];
+    const arr = props.results[key]?.data || [];
+    if (key === 'posts' || key === 'users') {
+        const page = usePage();
+        const ids = page.props.blocked_user_ids || [];
+        const blocked = Array.isArray(ids) ? ids : Object.values(ids);
+        if (key === 'posts') return arr.filter(p => !blocked.includes(p.user?.id || p.user_id));
+        if (key === 'users') return arr.filter(u => !blocked.includes(u.id));
+    }
+    return arr;
 };
 const getMeta = (type) => {
     const key = type.toLowerCase();

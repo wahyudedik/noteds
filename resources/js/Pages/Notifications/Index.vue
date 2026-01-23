@@ -15,7 +15,7 @@ const hasMorePages = ref(true);
 const isLoading = ref(false);
 const sentinelRef = ref(null);
 const observerInstance = ref(null);
-const selectedType = ref(props.filters?.type || 'all');
+const selectedCategory = ref(props.filters?.category || 'all');
 
 // Initialize notifications list from props
 const initializeNotifications = () => {
@@ -60,9 +60,9 @@ watch(() => [props.filters, props.notifications], () => {
     initializeNotifications();
 }, { deep: true });
 
-const filterByType = (type) => {
-    selectedType.value = type || 'all';
-    router.get(route('notifications.index'), { type: type || 'all' }, {
+const filterByCategory = (category) => {
+    selectedCategory.value = category || 'all';
+    router.get(route('notifications.index'), { category: category || 'all' }, {
         preserveState: true,
         preserveScroll: true,
     });
@@ -76,7 +76,7 @@ const loadMore = () => {
     const nextPage = currentPage.value + 1;
     const queryParams = {
         page: nextPage,
-        type: selectedType.value !== 'all' ? selectedType.value : null,
+        category: selectedCategory.value !== 'all' ? selectedCategory.value : null,
     };
     
     router.get(
@@ -114,13 +114,13 @@ const loadMore = () => {
 
         <div class="px-4 py-6 lg:px-6">
             <div class="mx-auto max-w-4xl">
-                <!-- Type Filters -->
+                <!-- Category Filters -->
                 <div class="mb-6 flex flex-wrap gap-2">
                     <button
-                        @click="filterByType('all')"
+                        @click="filterByCategory('all')"
                         :class="[
                             'px-4 py-2 rounded-lg transition-colors text-sm',
-                            selectedType === 'all' 
+                            selectedCategory === 'all' 
                                 ? 'bg-blue-600 text-white' 
                                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                         ]"
@@ -128,10 +128,54 @@ const loadMore = () => {
                         All
                     </button>
                     <button
-                        @click="filterByType('new_campaign')"
+                        @click="filterByCategory('payments')"
                         :class="[
                             'px-4 py-2 rounded-lg transition-colors text-sm',
-                            selectedType === 'new_campaign' 
+                            selectedCategory === 'payments' 
+                                ? 'bg-blue-600 text-white' 
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                        ]"
+                    >
+                        Payments
+                    </button>
+                    <button
+                        @click="filterByCategory('orders')"
+                        :class="[
+                            'px-4 py-2 rounded-lg transition-colors text-sm',
+                            selectedCategory === 'orders' 
+                                ? 'bg-blue-600 text-white' 
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                        ]"
+                    >
+                        Orders
+                    </button>
+                    <button
+                        @click="filterByCategory('withdrawals')"
+                        :class="[
+                            'px-4 py-2 rounded-lg transition-colors text-sm',
+                            selectedCategory === 'withdrawals' 
+                                ? 'bg-blue-600 text-white' 
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                        ]"
+                    >
+                        Withdrawals
+                    </button>
+                    <button
+                        @click="filterByCategory('products')"
+                        :class="[
+                            'px-4 py-2 rounded-lg transition-colors text-sm',
+                            selectedCategory === 'products' 
+                                ? 'bg-blue-600 text-white' 
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                        ]"
+                    >
+                        Products
+                    </button>
+                    <button
+                        @click="filterByCategory('campaigns')"
+                        :class="[
+                            'px-4 py-2 rounded-lg transition-colors text-sm',
+                            selectedCategory === 'campaigns' 
                                 ? 'bg-blue-600 text-white' 
                                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                         ]"
@@ -139,10 +183,10 @@ const loadMore = () => {
                         Campaigns
                     </button>
                     <button
-                        @click="filterByType('clip_approved')"
+                        @click="filterByCategory('clips')"
                         :class="[
                             'px-4 py-2 rounded-lg transition-colors text-sm',
-                            selectedType === 'clip_approved' 
+                            selectedCategory === 'clips' 
                                 ? 'bg-blue-600 text-white' 
                                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                         ]"
@@ -150,15 +194,26 @@ const loadMore = () => {
                         Clips
                     </button>
                     <button
-                        @click="filterByType('brand_approved')"
+                        @click="filterByCategory('brand')"
                         :class="[
                             'px-4 py-2 rounded-lg transition-colors text-sm',
-                            selectedType === 'brand_approved' 
+                            selectedCategory === 'brand' 
                                 ? 'bg-blue-600 text-white' 
                                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                         ]"
                     >
                         Brand
+                    </button>
+                    <button
+                        @click="filterByCategory('support')"
+                        :class="[
+                            'px-4 py-2 rounded-lg transition-colors text-sm',
+                            selectedCategory === 'support' 
+                                ? 'bg-blue-600 text-white' 
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                        ]"
+                    >
+                        Support
                     </button>
                 </div>
 

@@ -42,15 +42,17 @@ const handleReported = () => {
         <button
             @click="openModal"
             :class="[
-                'inline-flex items-center text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors',
-                variant === 'icon' ? 'p-1' : 'px-2 py-1 rounded-md text-sm',
+                'inline-flex items-center justify-center transition-colors focus:outline-none',
+                variant === 'icon'
+                    ? 'h-8 w-8 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+                    : 'px-2 py-1 rounded-md text-sm text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400',
                 size === 'sm' && variant === 'text' ? 'text-xs' : '',
                 size === 'lg' && variant === 'text' ? 'text-base' : '',
             ]"
             :title="'Report ' + reportableType"
         >
             <svg
-                class="h-4 w-4"
+                class="h-4 w-4 transform translate-y-px"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

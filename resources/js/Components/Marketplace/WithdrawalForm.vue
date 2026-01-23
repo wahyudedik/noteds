@@ -1,6 +1,7 @@
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import { useFeatureGate } from '@/Composables/useFeatureGate';
 
 const props = defineProps({
     balance: {
@@ -19,6 +20,8 @@ const form = useForm({
 });
 
 const isBankTransfer = computed(() => form.method === 'bank_transfer');
+const { can } = useFeatureGate();
+const allowed = can('marketplace.seller');
 
 const submit = () => {
     form.post(route('marketplace.withdrawals.store'));
@@ -26,7 +29,7 @@ const submit = () => {
 </script>
 
 <template>
-    <form @submit.prevent="submit" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <form v-if="allowed" @submit.prevent="submit" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div class="space-y-4">
             <div>
                 <label class="block text-sm font-medium mb-2">Amount (Rp) *</label>

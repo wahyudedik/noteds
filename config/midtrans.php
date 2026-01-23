@@ -14,5 +14,7 @@ return [
     'client_key' => env('MIDTRANS_CLIENT_KEY', ''),
     'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
     'merchant_id' => env('MIDTRANS_MERCHANT_ID', ''),
+    'allowed_ips' => explode(',', env('MIDTRANS_ALLOWED_IPS', '')), // comma separated
+    'callback_token' => env('MIDTRANS_CALLBACK_TOKEN', ''),
 ];
 

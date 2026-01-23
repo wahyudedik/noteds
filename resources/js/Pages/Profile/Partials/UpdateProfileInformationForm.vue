@@ -23,6 +23,7 @@ const form = useForm({
     name: user.name,
     email: user.email,
     avatar: null,
+    header_image: null,
     business_name: user.business_name || '',
     business_field: user.business_field || '',
     skills: user.skills || [],
@@ -32,6 +33,7 @@ const form = useForm({
 });
 
 const avatarPreview = ref(user.avatar_url || null);
+const headerPreview = ref(user.header_image_url || null);
 
 const handleAvatarChange = (event) => {
     const file = event.target.files[0];
@@ -41,6 +43,17 @@ const handleAvatarChange = (event) => {
         const reader = new FileReader();
         reader.onload = (e) => {
             avatarPreview.value = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+};
+const handleHeaderChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        form.header_image = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            headerPreview.value = e.target.result;
         };
         reader.readAsDataURL(file);
     }
@@ -70,6 +83,8 @@ const addGoal = () => {
 const removeGoal = (index) => {
     form.goals.splice(index, 1);
 };
+
+const resendCooldown = ref(0);
 </script>
 
 <template>
@@ -91,6 +106,29 @@ const removeGoal = (index) => {
             })"
             class="mt-6 space-y-6"
         >
+            <!-- Header Image Upload -->
+            <div>
+                <InputLabel for="header_image" value="Cover Image" />
+                <div class="mt-2">
+                    <div class="relative h-32 rounded-lg overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700">
+                        <div v-if="headerPreview" class="absolute inset-0">
+                            <img :src="headerPreview" alt="Header preview" class="w-full h-full object-cover" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                        </div>
+                        <div v-else class="absolute inset-0 bg-gradient-to-r from-indigo-500 via-fuchsia-600 to-violet-700"></div>
+                        <label for="header_image" class="absolute right-3 top-3 inline-flex items-center justify-center h-9 w-9 rounded-full bg-white/90 hover:bg-white text-gray-700 shadow cursor-pointer">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2m-8 8l8-8 4 4-8 8H7v-4z" />
+                            </svg>
+                        </label>
+                        <input id="header_image" name="header_image" type="file" accept="image/jpeg,image/jpg,image/png,image/gif" class="sr-only" @change="handleHeaderChange" />
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        PNG, JPG, GIF up to 4MB
+                    </p>
+                </div>
+                <InputError class="mt-2" :message="form.errors.header_image" />
+            </div>
             <!-- Avatar Upload -->
             <div>
                 <InputLabel for="avatar" value="Profile Photo" />
@@ -288,9 +326,13 @@ const removeGoal = (index) => {
                         :href="route('verification.send')"
                         method="post"
                         as="button"
-                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                        :class="[
+                            'rounded-md text-sm underline focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                            resendCooldown > 0 ? 'pointer-events-none opacity-50 text-gray-400 dark:text-gray-500' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800'
+                        ]"
+                        @click="() => { if (resendCooldown === 0) { resendCooldown = 60; const t = setInterval(() => { resendCooldown--; if (resendCooldown <= 0) clearInterval(t); }, 1000); } }"
                     >
-                        Click here to re-send the verification email.
+                        {{ resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Click here to re-send the verification email.' }}
                     </Link>
                 </p>
 

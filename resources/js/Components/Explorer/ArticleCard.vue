@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import SocialShareButtons from '@/Components/Social/SocialShareButtons.vue';
 
 const props = defineProps({
     article: {
@@ -17,6 +18,18 @@ const formattedDate = computed(() => {
         day: 'numeric',
     }).format(date);
 });
+
+const btoaSafe = (s) => {
+    try {
+        if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
+            return window.btoa(String(s));
+        }
+        if (typeof Buffer !== 'undefined') {
+            return Buffer.from(String(s)).toString('base64');
+        }
+    } catch {}
+    return String(s);
+};
 </script>
 
 <template>
@@ -58,6 +71,16 @@ const formattedDate = computed(() => {
                 <span class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">
                     {{ article.category }}
                 </span>
+            </div>
+            <div class="mt-3">
+                <SocialShareButtons
+                    :url="article.url"
+                    :title="article.title"
+                    :description="article.description || ''"
+                    :hashtags="[]"
+                    share-type="external"
+                    :share-id="btoaSafe(article.url)"
+                />
             </div>
         </div>
     </a>

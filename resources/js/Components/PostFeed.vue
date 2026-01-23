@@ -1,6 +1,8 @@
 <script setup>
 import { Link, router, usePage } from '@inertiajs/vue3';
+import axios from 'axios';
 import PostCard from '@/Components/PostCard.vue';
+import SkeletonPostCard from '@/Components/SkeletonPostCard.vue';
 import { PURPOSE_TYPE_LABELS } from '@/Utils/constants';
 import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue';
 
@@ -72,6 +74,15 @@ onMounted(() => {
             observerInstance.value.observe(sentinelRef.value);
         }
     });
+    
+    // Restore last selected purpose filter from localStorage
+    try {
+        const saved = localStorage.getItem('feed_purpose_type');
+        const current = props.filters?.purpose_type || 'all';
+        if (saved && saved !== current) {
+            filterByPurpose(saved);
+        }
+    } catch {}
 });
 
 onUnmounted(() => {
@@ -94,12 +105,42 @@ const currentRouteName = computed(() => {
     return 'home';
 });
 
-const filterByPurpose = (purposeType) => {
-    router.get(route(currentRouteName.value), { purpose_type: purposeType || 'all' }, {
+const sortMode = ref((props.filters?.sort || 'latest'));
+const period = ref((props.filters?.period || 'week'));
+const metric = ref((props.filters?.metric || 'engagement'));
+let lastSortMode = sortMode.value;
+
+const filterByPurpose = async (purposeType) => {
+    const next = purposeType || 'all';
+    try { localStorage.setItem('feed_purpose_type', next); } catch {}
+    const baseRoute = sortMode.value === 'top' ? 'posts.top' : currentRouteName.value;
+    const params = sortMode.value === 'top'
+        ? { purpose_type: next, period: period.value, metric: metric.value }
+        : { purpose_type: next };
+    try {
+        const payload = {
+            previous_sort: lastSortMode,
+            new_sort: sortMode.value,
+            period: period.value,
+            metric: metric.value,
+            route: baseRoute,
+        };
+        lastSortMode = sortMode.value;
+        await axios.post(route('analytics.events.store'), { type: 'feed_sort_change', payload });
+    } catch {}
+    router.get(route(baseRoute), params, {
         preserveState: true,
         preserveScroll: true,
     });
 };
+
+const blockedIds = computed(() => {
+    const v = page.props.blocked_user_ids || [];
+    return Array.isArray(v) ? v : Object.values(v);
+});
+const visiblePosts = computed(() => {
+    return postsList.value.filter(p => !blockedIds.value.includes(p.user_id));
+});
 
 const loadMore = () => {
     if (isLoading.value || !hasMorePages.value) return;
@@ -158,9 +199,9 @@ const loadMore = () => {
 </script>
 
 <template>
-    <div>
+    <div class="rm-target-feed">
         <!-- Filters -->
-        <div class="mb-4 flex flex-wrap gap-2">
+        <div class="mb-4 flex flex-wrap gap-2 items-center">
             <button
                 @click="filterByPurpose('all')"
                 :class="[
@@ -185,12 +226,38 @@ const loadMore = () => {
             >
                 {{ label }}
             </button>
+            <div class="ml-auto flex items-center gap-2">
+                <label class="text-xs text-gray-500 dark:text-gray-400">Sort</label>
+                <select v-model="sortMode" @change="filterByPurpose(filters?.purpose_type)" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+                    <option value="latest">Latest</option>
+                    <option value="top">Top</option>
+                </select>
+                <div v-if="sortMode==='top'" class="flex items-center gap-2">
+                    <select v-model="period" @change="filterByPurpose(filters?.purpose_type)" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+                        <option value="day">24h</option>
+                        <option value="week">7d</option>
+                        <option value="month">30d</option>
+                        <option value="year">1y</option>
+                        <option value="all">All-time</option>
+                    </select>
+                    <select v-model="metric" @change="filterByPurpose(filters?.purpose_type)" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+                        <option value="engagement">Engagement</option>
+                        <option value="upvotes">Upvotes</option>
+                        <option value="mixed">Mixed</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <!-- Posts List -->
-        <div class="space-y-4">
+    <div class="space-y-4">
+            <div v-if="postsList.length===0 && isLoading" class="space-y-4">
+                <SkeletonPostCard />
+                <SkeletonPostCard />
+                <SkeletonPostCard />
+            </div>
             <PostCard
-                v-for="post in postsList"
+                v-for="post in visiblePosts"
                 :key="post.id"
                 :post="post"
                 :user-vote="userVotesList[post.id] || null"
@@ -199,7 +266,7 @@ const loadMore = () => {
             />
 
             <!-- Empty State -->
-            <div v-if="postsList.length === 0" class="text-center py-12">
+            <div v-if="visiblePosts.length === 0" class="text-center py-12">
                 <p class="text-gray-500 dark:text-gray-400">
                     No posts found. Be the first to share!
                 </p>
@@ -207,7 +274,7 @@ const loadMore = () => {
         </div>
 
         <!-- Loading indicator -->
-        <div v-if="isLoading" class="mt-6 text-center py-8">
+        <div v-if="isLoading && postsList.length>0" class="mt-6 text-center py-8">
             <div class="inline-flex items-center space-x-2 text-gray-500">
                 <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

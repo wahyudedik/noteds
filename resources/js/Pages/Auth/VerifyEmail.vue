@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, onUnmounted } from 'vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
@@ -13,9 +13,29 @@ const props = defineProps({
 
 const form = useForm({});
 
-const submit = () => {
-    form.post(route('verification.send'));
+const cooldown = ref(0);
+let timer = null;
+const startCooldown = () => {
+    cooldown.value = 60;
+    timer = setInterval(() => {
+        cooldown.value--;
+        if (cooldown.value <= 0 && timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+    }, 1000);
 };
+const submit = () => {
+    form.post(route('verification.send'), {
+        onSuccess: startCooldown,
+    });
+};
+onUnmounted(() => {
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
+    }
+});
 
 const verificationLinkSent = computed(
     () => props.status === 'verification-link-sent',
@@ -58,10 +78,10 @@ const verificationLinkSent = computed(
                         <form @submit.prevent="submit" class="space-y-4">
                             <PrimaryButton
                                 class="w-full"
-                                :class="{ 'opacity-25': form.processing }"
-                                :disabled="form.processing"
+                                :class="{ 'opacity-50': form.processing || cooldown > 0 }"
+                                :disabled="form.processing || cooldown > 0"
                             >
-                                {{ form.processing ? 'Sending...' : 'Resend Verification Email' }}
+                                {{ form.processing ? 'Sending...' : (cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend Verification Email') }}
                             </PrimaryButton>
                         </form>
 

@@ -40,6 +40,17 @@ class MessageMedia extends Model
         'thumbnail_path',
         'duration',
         'order',
+        'transcript',
+        'transcript_language',
+        'audio_codec',
+        'sample_rate',
+        'bitrate',
+        'channels',
+        'waveform',
+        'is_transcribed',
+        'transcription_confidence',
+        'amplitude_stats',
+        'is_encrypted',
     ];
 
     protected $appends = ['url', 'thumbnail_url'];
@@ -50,6 +61,11 @@ class MessageMedia extends Model
             'file_size' => 'integer',
             'duration' => 'integer',
             'order' => 'integer',
+            'waveform' => 'array',
+            'amplitude_stats' => 'array',
+            'is_transcribed' => 'boolean',
+            'transcription_confidence' => 'float',
+            'is_encrypted' => 'boolean',
         ];
     }
 

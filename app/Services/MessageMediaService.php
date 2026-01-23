@@ -13,7 +13,7 @@ class MessageMediaService
     /**
      * Store media files for a message.
      */
-    public function storeMedia(Message $message, array $files): array
+    public function storeMedia(Message $message, array $files, array $metas = []): array
     {
         $storedMedia = [];
         $order = 0;
@@ -23,7 +23,8 @@ class MessageMediaService
                 continue;
             }
 
-            $media = $this->storeSingleMedia($message, $file, $order);
+            $meta = $metas[$order] ?? [];
+            $media = $this->storeSingleMedia($message, $file, $order, $meta);
             $storedMedia[] = $media;
             $order++;
         }
@@ -34,11 +35,11 @@ class MessageMediaService
     /**
      * Store a single media file.
      */
-    public function storeSingleMedia(Message $message, UploadedFile $file, int $order = 0): MessageMedia
+    public function storeSingleMedia(Message $message, UploadedFile $file, int $order = 0, array $meta = []): MessageMedia
     {
         $conversationId = $message->conversation_id;
         $directory = "messages/{$conversationId}";
-        
+
         // Generate unique filename
         $extension = $file->getClientOriginalExtension();
         $filename = time() . '_' . uniqid() . '.' . $extension;
@@ -60,7 +61,7 @@ class MessageMediaService
             }
         }
 
-        return MessageMedia::create([
+        $payload = [
             'message_id' => $message->id,
             'file_path' => $filePath,
             'file_name' => $file->getClientOriginalName(),
@@ -68,7 +69,36 @@ class MessageMediaService
             'file_size' => $file->getSize(),
             'thumbnail_path' => $thumbnailPath,
             'order' => $order,
-        ]);
+        ];
+        if (isset($meta['duration'])) {
+            $payload['duration'] = (int) $meta['duration'];
+        }
+        if (isset($meta['audio_codec'])) {
+            $payload['audio_codec'] = (string) $meta['audio_codec'];
+        }
+        if (isset($meta['sample_rate'])) {
+            $payload['sample_rate'] = (int) $meta['sample_rate'];
+        }
+        if (isset($meta['bitrate'])) {
+            $payload['bitrate'] = (int) $meta['bitrate'];
+        }
+        if (isset($meta['channels'])) {
+            $payload['channels'] = (int) $meta['channels'];
+        }
+        if (isset($meta['waveform'])) {
+            $payload['waveform'] = $meta['waveform'];
+        }
+
+        $media = MessageMedia::create($payload);
+        if (str_starts_with($mimeType, 'audio/') && empty($payload['waveform'])) {
+            if (class_exists('\App\Jobs\WaveformGeneratorJob')) {
+                try {
+                    dispatch(new \App\Jobs\WaveformGeneratorJob($media->id));
+                } catch (\Throwable $e) {
+                }
+            }
+        }
+        return $media;
     }
 
     /**
@@ -77,7 +107,7 @@ class MessageMediaService
     protected function createThumbnail(string $filePath, string $directory): string
     {
         $fullPath = Storage::disk('public')->path($filePath);
-        
+
         $thumbnail = Image::make($fullPath)
             ->resize(300, 300, function ($constraint) {
                 $constraint->aspectRatio();
@@ -111,4 +141,3 @@ class MessageMediaService
         $media->delete();
     }
 }
-

@@ -217,7 +217,7 @@ watch(() => [props.userGrowthTrends, props.salesTrends, props.postTrends], () =>
 <template>
     <div class="analytics-charts space-y-6">
         <!-- User Growth Chart -->
-        <div v-if="userGrowthTrends.labels.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div v-if="userGrowthTrends.labels.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 rm-target-chart">
             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">User Growth</h3>
             <div class="relative h-48">
                 <canvas ref="userGrowthCanvas" class="w-full h-full"></canvas>
@@ -225,7 +225,7 @@ watch(() => [props.userGrowthTrends, props.salesTrends, props.postTrends], () =>
         </div>
 
         <!-- Sales Chart -->
-        <div v-if="salesTrends.labels.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div v-if="salesTrends.labels.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 rm-target-chart">
             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Sales Trends</h3>
             <div class="relative h-48">
                 <canvas ref="salesCanvas" class="w-full h-full"></canvas>
@@ -233,7 +233,7 @@ watch(() => [props.userGrowthTrends, props.salesTrends, props.postTrends], () =>
         </div>
 
         <!-- Post Creation Chart -->
-        <div v-if="postTrends.labels.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div v-if="postTrends.labels.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 rm-target-chart">
             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Post Creation Trends</h3>
             <div class="relative h-48">
                 <canvas ref="postCanvas" class="w-full h-full"></canvas>

@@ -71,6 +71,12 @@ const hasBrandProfile = computed(() => {
 const hasClipperProfile = computed(() => {
     return !!props.clipperProfile;
 });
+const page = usePage();
+const isBlockedByMe = computed(() => {
+    const ids = page.props.blocked_user_ids || [];
+    const targetId = safeProfileUser.value?.id;
+    return !!targetId && (Array.isArray(ids) ? ids.includes(targetId) : Object.values(ids).includes(targetId));
+});
 </script>
 
 <template>
@@ -79,6 +85,9 @@ const hasClipperProfile = computed(() => {
     <AuthenticatedLayout>
         <div v-if="safeProfileUser && Object.keys(safeProfileUser).length > 0" class="px-4 py-6 lg:px-6">
             <div class="mx-auto max-w-7xl">
+                <div v-if="isBlockedByMe" class="mb-3 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-yellow-800">
+                    You blocked this user. Unblock dari Settings → Safety untuk melihat semua konten.
+                </div>
                 <!-- Profile Header -->
                 <ProfileHeader 
                     :profile-user="safeProfileUser"

@@ -15,6 +15,10 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+    disabledReason: {
+        type: String,
+        default: '',
+    },
 });
 
 // Local state for optimistic update
@@ -74,7 +78,7 @@ const toggleBookmark = () => {
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600',
             !canBookmark && 'opacity-50 cursor-not-allowed'
         ]"
-        :title="localIsBookmarked ? 'Remove bookmark' : 'Bookmark this post'"
+        :title="!canBookmark ? (disabledReason || 'Bookmark tidak diizinkan') : (localIsBookmarked ? 'Remove bookmark' : 'Bookmark this post')"
     >
         <svg
             v-if="localIsBookmarked"

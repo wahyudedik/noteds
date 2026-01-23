@@ -21,11 +21,28 @@ class NotificationController extends Controller
 
         $query = $user->notifications();
 
-        // Filter by type if provided
-        // Frontend uses values like 'new_campaign', 'clip_approved', 'brand_approved'
-        // These are stored in the data->type field, not the type column
+        // Filter by single type OR category (multiple types)
         if ($request->has('type') && $request->type && $request->type !== 'all') {
             $query->whereJsonContains('data->type', $request->type);
+        } elseif ($request->has('category') && $request->category && $request->category !== 'all') {
+            $categories = [
+                'payments' => ['payment_failed', 'order_status_update'],
+                'orders' => ['new_order', 'order_created', 'order_cancelled'],
+                'withdrawals' => ['withdrawal_status', 'withdrawal_request'],
+                'products' => ['product_approved', 'product_rejected', 'product_created'],
+                'support' => ['new_support_ticket', 'support_ticket_response', 'support_ticket_status_update'],
+                'campaigns' => ['new_campaign', 'campaign_created', 'campaign_ended', 'campaign_suspended'],
+                'clips' => ['clip_submitted', 'clip_approved', 'clip_rejected', 'view_validated', 'fraud_detected'],
+                'brand' => ['brand_approved', 'brand_rejected'],
+            ];
+            $types = $categories[$request->category] ?? [];
+            if (!empty($types)) {
+                $query->where(function ($q) use ($types) {
+                    foreach ($types as $t) {
+                        $q->orWhereJsonContains('data->type', $t);
+                    }
+                });
+            }
         }
 
         // Filter by read/unread
@@ -45,7 +62,7 @@ class NotificationController extends Controller
         return Inertia::render('Notifications/Index', [
             'notifications' => $notifications,
             'unreadCount' => $unreadCount,
-            'filters' => $request->only(['type', 'read']),
+            'filters' => $request->only(['type', 'category', 'read']),
         ]);
     }
 

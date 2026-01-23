@@ -5,6 +5,7 @@ import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Textarea from '@/Components/Textarea.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import { useFeatureGate } from '@/Composables/useFeatureGate';
 
 const props = defineProps({
     show: {
@@ -18,6 +19,8 @@ const emit = defineEmits(['close']);
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 const nameInput = ref(null);
+const { can } = useFeatureGate();
+const allowed = can('marketplace.seller');
 
 const form = useForm({
     name: '',
@@ -139,12 +142,12 @@ onUnmounted(() => {
         leave-to-class="opacity-0"
     >
         <div
-            v-if="show"
+            v-if="show && allowed"
             class="fixed inset-0 z-[9999] overflow-y-auto"
             @click.self="close"
         >
             <!-- Backdrop -->
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-70 transition-opacity"></div>
 
             <!-- Modal Container -->
             <div class="relative flex min-h-full items-center justify-center p-4 w-full">

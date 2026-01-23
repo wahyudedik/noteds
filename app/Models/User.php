@@ -48,7 +48,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        
+
         if (!isset($this->attributes['id'])) {
             $this->attributes['id'] = (string) Str::uuid();
         }
@@ -64,6 +64,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'avatar',
+        'header_image',
         'business_name',
         'business_field',
         'skills',
@@ -144,6 +145,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'admin';
     }
 
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
     /**
      * Get the products created by the user (as seller).
      */
@@ -198,6 +204,20 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return asset('storage/' . $this->avatar);
+    }
+
+    /**
+     * Get the header image URL.
+     */
+    public function getHeaderImageUrlAttribute(): ?string
+    {
+        if (!$this->header_image) {
+            return null;
+        }
+        if (str_starts_with($this->header_image, 'http')) {
+            return $this->header_image;
+        }
+        return asset('storage/' . $this->header_image);
     }
 
     /**

@@ -34,7 +34,16 @@ class RecommendationController extends Controller
     public function trending(Request $request, RecommendationService $service)
     {
         $limit = (int)($request->input('limit', 20));
-        $data = $service->trending($limit);
+        $period = $request->input('period');
+        $days = (int)($request->input('days', 0));
+        $window = 7;
+        if (in_array($period, ['today', 'week', 'month'])) {
+            $window = $period === 'today' ? 1 : ($period === 'week' ? 7 : 30);
+        }
+        if ($days > 0) {
+            $window = $days;
+        }
+        $data = $service->trending($limit, $window);
         return response()->json(['data' => $data]);
     }
 }

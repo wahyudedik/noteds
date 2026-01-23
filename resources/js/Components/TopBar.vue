@@ -5,6 +5,7 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NotificationBell from '@/Components/Notifications/NotificationBell.vue';
 import SearchBar from '@/Components/Search/SearchBar.vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import { toggleTheme } from '@/Utils/theme';
 
 const page = usePage();
 const showingProfileDropdown = ref(false);
@@ -26,7 +27,8 @@ const notifications = computed(() => {
             <!-- Mobile Menu Button -->
             <button
                 @click="$emit('toggle-sidebar')"
-                class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 lg:hidden"
+                class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 lg:hidden focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                aria-label="Toggle sidebar"
             >
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -35,21 +37,33 @@ const notifications = computed(() => {
 
             <!-- Search Bar (Desktop) -->
             <div class="hidden flex-1 max-w-xl lg:block lg:ml-4">
-                <SearchBar placeholder="Search posts, users..." />
+                <SearchBar placeholder="Search posts, users..." aria-label="Global search" />
             </div>
 
             <!-- Search Bar (Mobile) -->
             <div class="flex-1 max-w-xl lg:hidden ml-4">
-                <SearchBar placeholder="Search..." />
+                <SearchBar placeholder="Search..." aria-label="Global search" />
             </div>
 
             <!-- Right Side Actions -->
             <div v-if="page.props.auth?.user" class="flex items-center gap-4">
+                <!-- Theme Toggle -->
+                <button
+                    class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
+                    title="Toggle theme"
+                    @click="toggleTheme()"
+                    aria-label="Toggle theme"
+                >
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 7a5 5 0 100 10 5 5 0 000-10z" />
+                    </svg>
+                </button>
                 <!-- Cart Icon -->
                 <Link
                     :href="route('marketplace.cart')"
                     class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
                     title="Shopping Cart"
+                    aria-label="Shopping cart"
                 >
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />

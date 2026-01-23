@@ -40,6 +40,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    disabledReason: {
+        type: String,
+        default: '',
+    },
 });
 
 const emit = defineEmits(['viewAnalytics']);
@@ -145,6 +149,7 @@ const viewAnalytics = () => {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600',
                 !canVote && 'opacity-50 cursor-not-allowed'
             ]"
+            :title="!canVote ? (disabledReason || 'Vote tidak diizinkan') : 'Upvote'"
         >
             👍 {{ formatNumber(displayUpvotes) }}
         </button>
@@ -158,6 +163,7 @@ const viewAnalytics = () => {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600',
                 !canVote && 'opacity-50 cursor-not-allowed'
             ]"
+            :title="!canVote ? (disabledReason || 'Vote tidak diizinkan') : 'Downvote'"
         >
             👎 {{ formatNumber(displayDownvotes) }}
         </button>

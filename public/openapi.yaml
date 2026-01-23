@@ -1,0 +1,82 @@
+openapi: 3.0.3
+info:
+  title: Noteds API
+  version: 1.0.0
+paths:
+  /posts/top:
+    get:
+      summary: Get ranked top posts
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [day, week, month, quarter, year, all]
+          description: Time window for ranking
+        - in: query
+          name: metric
+          schema:
+            type: string
+            enum: [engagement, upvotes, mixed]
+          description: Ranking metric
+        - in: query
+          name: purpose_type
+          schema:
+            type: string
+            enum: [all, idea_business, validate_idea, find_tools]
+          description: Filter by purpose type
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: Pagination page
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    data:
+                      - id: "uuid"
+                        title: "Example"
+                        user: { id: "uuid", name: "Alice" }
+                    links: { next: "/posts/top?page=2" }
+        '400':
+          description: Bad request
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+  /api/user/preferences/trending-period:
+    get:
+      summary: Get user trending period preference
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Save user trending period preference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                period:
+                  type: string
+                  enum: [today, day, week, month, quarter, year, all]
+             examples:
+               setWeek:
+                 value: { period: "week" }
+      responses:
+        '200':
+          description: Saved
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error

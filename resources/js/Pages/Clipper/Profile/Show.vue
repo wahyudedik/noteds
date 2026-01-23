@@ -67,7 +67,7 @@ const onProfileUpdated = () => {
                                 <button
                                     v-if="isOwnProfile"
                                     @click="startEdit"
-                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all shadow-sm"
                                 >
                                     Edit Profile
                                 </button>
@@ -167,7 +167,7 @@ const onProfileUpdated = () => {
                                 <button
                                     v-if="isOwnProfile"
                                     @click="startEdit"
-                                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-sm"
                                 >
                                     Setup Profile
                                 </button>

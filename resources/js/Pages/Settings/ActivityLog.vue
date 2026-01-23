@@ -145,18 +145,18 @@ const formatDate = (dateString) => {
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Search
                     </label>
-                    <div class="flex gap-2">
+                    <div class="flex flex-col sm:flex-row gap-2">
                         <input
                             v-model="filterForm.search"
                             type="text"
                             placeholder="Search activities..."
                             @keyup.enter="applyFilters"
-                            class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white text-sm"
+                            class="w-full sm:flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white text-sm"
                         />
                         <button
                             @click="applyFilters"
                             :disabled="isLoading"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 text-sm"
+                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 text-sm w-full sm:w-auto"
                         >
                             Search
                         </button>

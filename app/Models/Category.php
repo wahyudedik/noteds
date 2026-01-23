@@ -37,6 +37,8 @@ class Category extends Model
         'sort_order',
     ];
 
+    protected $appends = ['display_icon'];
+
     protected function casts(): array
     {
         return [

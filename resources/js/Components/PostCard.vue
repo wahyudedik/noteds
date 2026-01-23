@@ -6,6 +6,7 @@ import BookmarkButton from '@/Components/Bookmark/BookmarkButton.vue';
 import RepostButton from '@/Components/Repost/RepostButton.vue';
 import QuoteRepostDisplay from '@/Components/Repost/QuoteRepostDisplay.vue';
 import ReportButton from '@/Components/Report/ReportButton.vue';
+import Dropdown from '@/Components/Dropdown.vue';
 import LinkPreview from '@/Components/LinkPreview.vue';
 import ImageGallery from '@/Components/ImageGallery.vue';
 import HashtagList from '@/Components/HashtagList.vue';
@@ -219,12 +220,47 @@ const getImageClass = (imageCount, index) => {
                     </div>
                 </div>
                 <div v-if="page.props.auth?.user && page.props.auth.user.id !== post.user_id">
-                    <ReportButton
-                        reportable-type="post"
-                        :reportable-id="actualPostId"
-                        variant="icon"
-                        size="sm"
-                    />
+                    <Dropdown align="right" width="48">
+                        <template #trigger>
+                            <button
+                                class="inline-flex items-center justify-center h-8 w-8 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                                aria-label="Post actions"
+                                title="Actions"
+                            >
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <circle cx="12" cy="6" r="1.5" />
+                                    <circle cx="12" cy="12" r="1.5" />
+                                    <circle cx="12" cy="18" r="1.5" />
+                                </svg>
+                            </button>
+                        </template>
+                        <template #content>
+                            <div class="py-1 bg-white dark:bg-gray-700 rounded-md">
+                                <div class="px-1">
+                                    <ReportButton
+                                        reportable-type="post"
+                                        :reportable-id="actualPostId"
+                                        variant="text"
+                                        size="sm"
+                                    />
+                                </div>
+                                <button
+                                    v-if="!(page.props.blocked_user_ids || []).includes(post.user_id)"
+                                    @click.prevent="router.post(route('user.block', post.user.id))"
+                                    class="flex w-full items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md dark:text-gray-200 dark:hover:bg-gray-600"
+                                >
+                                    Block user
+                                </button>
+                                <button
+                                    v-else
+                                    @click.prevent="router.delete(route('user.unblock', post.user.id))"
+                                    class="flex w-full items-center px-3 py-2 text-sm text-red-700 hover:bg-red-100 rounded-md dark:text-red-200 dark:hover:bg-red-800/40"
+                                >
+                                    Unblock user
+                                </button>
+                            </div>
+                        </template>
+                    </Dropdown>
                 </div>
             </div>
 

@@ -40,7 +40,7 @@ class CommentMedia extends Model
         'order',
     ];
 
-    protected $appends = ['url'];
+    protected $appends = ['url', 'thumbnail_url'];
 
     protected function casts(): array
     {
@@ -61,5 +61,23 @@ class CommentMedia extends Model
     public function getUrlAttribute(): string
     {
         return Storage::disk('public')->url($this->file_path);
+    }
+
+    /**
+     * Optional thumbnail URL: for images use the same; for PDFs try companion thumbnail if available.
+     */
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        if (str_starts_with($this->mime_type ?? '', 'image/')) {
+            return $this->url;
+        }
+        if (($this->mime_type ?? '') === 'application/pdf' && config('comments.pdf_thumbnails')) {
+            $thumbPath = preg_replace('/\.pdf$/i', '.png', $this->file_path);
+            $thumbPath = str_replace('comments/attachments/', 'comments/thumbnails/', $thumbPath);
+            if (Storage::disk('public')->exists($thumbPath)) {
+                return Storage::disk('public')->url($thumbPath);
+            }
+        }
+        return null;
     }
 }

@@ -65,6 +65,27 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/recommendations/users/similar', [App\Http\Controllers\RecommendationController::class, 'similarUsers'])->name('recommendations.similar_users');
     Route::get('/api/recommendations/trending', [App\Http\Controllers\RecommendationController::class, 'trending'])->name('recommendations.trending');
 
+    // Share Analytics
+    Route::post('/api/share/{type}/{id}/track', [App\Http\Controllers\ShareAnalyticsController::class, 'track'])->name('share.track');
+
+    // Live Streams
+    Route::get('/streams', [App\Http\Controllers\LiveStreamController::class, 'index'])->name('streams.index');
+    Route::get('/streams/{liveStream}', [App\Http\Controllers\LiveStreamController::class, 'show'])->name('streams.show');
+    Route::middleware('auth')->group(function () {
+        Route::post('/streams', [App\Http\Controllers\LiveStreamController::class, 'store'])->name('streams.store');
+        Route::post('/streams/{liveStream}/start', [App\Http\Controllers\LiveStreamController::class, 'start'])->name('streams.start');
+        Route::post('/streams/{liveStream}/end', [App\Http\Controllers\LiveStreamController::class, 'end'])->name('streams.end');
+        Route::post('/api/streams/{liveStream}/chat', [App\Http\Controllers\StreamChatController::class, 'store'])->name('streams.chat.store');
+
+        Route::get('/admin/streaming/providers', [App\Http\Controllers\Admin\StreamingProviderController::class, 'index'])->name('admin.streaming.providers.index');
+        Route::post('/admin/streaming/providers', [App\Http\Controllers\Admin\StreamingProviderController::class, 'store'])->name('admin.streaming.providers.store');
+        Route::put('/admin/streaming/providers/{streamingProvider}', [App\Http\Controllers\Admin\StreamingProviderController::class, 'update'])->name('admin.streaming.providers.update');
+        Route::delete('/admin/streaming/providers/{streamingProvider}', [App\Http\Controllers\Admin\StreamingProviderController::class, 'destroy'])->name('admin.streaming.providers.destroy');
+        Route::post('/api/users/{user}/block', [App\Http\Controllers\UserBlockController::class, 'block'])->name('user.block');
+        Route::delete('/api/users/{user}/block', [App\Http\Controllers\UserBlockController::class, 'unblock'])->name('user.unblock');
+        Route::get('/api/users/blocked', [App\Http\Controllers\UserBlockController::class, 'list'])->name('user.blocked.list');
+    });
+
     // Admin Gamification
     Route::middleware(['admin'])->group(function () {
         Route::get('/admin/gamification', [App\Http\Controllers\Admin\GamificationAdminController::class, 'dashboard'])->name('admin.gamification.dashboard');
@@ -151,10 +172,19 @@ Route::middleware('auth')->group(function () {
         ->name('profile.destroy');
     // Profile show route with UUID constraint to prevent conflict with /posts/{post}
     Route::get('/profile/{user}', [ProfileController::class, 'show'])
+        ->middleware(App\Http\Middleware\PreventBlockedProfileAccess::class)
         ->where('user', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
         ->name('profile.show');
 });
 
+// Explore Trending
+Route::middleware(['auth'])->group(function () {
+    Route::get('/trending', [App\Http\Controllers\TrendingController::class, 'index'])->name('explore.trending');
+    Route::get('/api/recommendations/feed', [App\Http\Controllers\RecommendationsController::class, 'feed'])
+        ->name('recommendations.feed');
+    Route::get('/api/recommendations/users/similar', [App\Http\Controllers\RecommendationsController::class, 'similarUsers'])
+        ->name('recommendations.similar_users');
+});
 // Keep posts route for backward compatibility, but redirect to home for authenticated users
 Route::get('/posts', [App\Http\Controllers\PostController::class, 'index'])->name('posts.index');
 Route::get('/posts/trending', [App\Http\Controllers\PostController::class, 'trending'])->middleware(['auth'])->name('posts.trending');
@@ -340,6 +370,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/posts/{post}/series', [App\Http\Controllers\PostController::class, 'series'])->name('posts.series');
     Route::post('/posts/{post}/series', [App\Http\Controllers\PostController::class, 'createSeries'])->name('posts.series.create');
     Route::put('/posts/{post}/series/order', [App\Http\Controllers\PostController::class, 'updateSeriesOrder'])->name('posts.series.order');
+    Route::get('/posts/top', [App\Http\Controllers\PostController::class, 'top'])->name('posts.top');
 
     // Cross-post routes
     Route::post('/posts/{post}/cross-post', [App\Http\Controllers\PostController::class, 'crossPost'])->name('posts.cross-post');
@@ -354,9 +385,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/hashtags/suggestions', [App\Http\Controllers\HashtagController::class, 'suggestions'])
         ->middleware('throttle:60,1')
         ->name('hashtags.suggestions');
+    Route::get('/api/user/preferences/trending-period', [App\Http\Controllers\UserPreferenceController::class, 'getTrendingPeriod'])->name('user.preferences.trending.get');
+    Route::post('/api/user/preferences/trending-period', [App\Http\Controllers\UserPreferenceController::class, 'saveTrendingPeriod'])->name('user.preferences.trending.save');
 });
 
 Route::middleware('auth')->group(function () {
+    // Messaging Voice Upload
+    Route::post('/api/messaging/conversations/{conversation}/messages/voice', [App\Http\Controllers\Messaging\MessageController::class, 'storeVoice'])
+        ->middleware('throttle:10,1')
+        ->name('messaging.messages.voice.store');
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])
@@ -365,9 +402,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])
         ->middleware('throttle:10,1')
         ->name('notifications.read-all'); // 10 actions per minute
+    Route::get('/docs/api', function () { return view('docs.api'); })->name('docs.api');
     Route::delete('/notifications/{notification}', [App\Http\Controllers\NotificationController::class, 'destroy'])
         ->middleware('throttle:60,1')
         ->name('notifications.destroy'); // 60 deletions per minute
+    Route::post('/api/analytics/events', [App\Http\Controllers\AnalyticsController::class, 'store'])->name('analytics.events.store');
+    Route::get('/analytics/dashboard', [App\Http\Controllers\AnalyticsController::class, 'dashboard'])->name('analytics.dashboard');
+    Route::get('/analytics/events/export', [App\Http\Controllers\AnalyticsController::class, 'export'])->middleware('block.viewer.export')->name('analytics.events.export');
+    Route::get('/benchmarks', [App\Http\Controllers\BenchmarkController::class, 'index'])->name('benchmarks.index');
+    Route::get('/api/benchmarks/top', [App\Http\Controllers\BenchmarkController::class, 'data'])->name('benchmarks.top.data');
+    Route::get('/benchmarks/compare', fn () => Inertia\Inertia::render('Benchmarks/Compare'))->name('benchmarks.compare');
 
     // Settings
     Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
@@ -380,6 +424,67 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/notifications', [App\Http\Controllers\SettingsController::class, 'updateNotifications'])
         ->middleware('throttle:10,60')
         ->name('settings.notifications'); // 10 updates per hour
+    Route::post('/settings/playback', [App\Http\Controllers\SettingsController::class, 'updatePlayback'])
+        ->middleware('throttle:10,60')
+        ->name('settings.playback');
+
+    // Secure conversation key API (Sanctum/session)
+    Route::middleware(['throttle:10,1'])->group(function () {
+        Route::get('/api/secure/conversations/{conversation}/key', [App\Http\Controllers\Messaging\ConversationKeyController::class, 'fetch'])
+            ->name('secure.conversations.key.fetch');
+        Route::post('/api/secure/conversations/{conversation}/key/rotate', [App\Http\Controllers\Messaging\ConversationKeyController::class, 'rotate'])
+            ->name('secure.conversations.key.rotate');
+    });
+
+    // Calls API
+    Route::middleware(['throttle:60,1'])->group(function () {
+        Route::post('/api/messaging/conversations/{conversation}/calls/start', [App\Http\Controllers\Messaging\CallController::class, 'start'])
+            ->name('calls.start');
+        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/join', [App\Http\Controllers\Messaging\CallController::class, 'join'])
+            ->name('calls.join');
+        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/leave', [App\Http\Controllers\Messaging\CallController::class, 'leave'])
+            ->name('calls.leave');
+        Route::post('/api/messaging/conversations/{conversation}/calls/signal', [App\Http\Controllers\Messaging\CallController::class, 'signal'])
+            ->name('calls.signal');
+        Route::get('/api/messaging/conversations/{conversation}/calls/active', [App\Http\Controllers\Messaging\CallController::class, 'active'])
+            ->name('calls.active');
+        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/mute-all', [App\Http\Controllers\Messaging\CallController::class, 'muteAll'])
+            ->name('calls.mute_all');
+        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/kick/{userId}', [App\Http\Controllers\Messaging\CallController::class, 'kick'])
+            ->name('calls.kick');
+        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/metrics', [App\Http\Controllers\Messaging\CallController::class, 'metrics'])
+            ->name('calls.metrics');
+        Route::get('/api/messaging/conversations/{conversation}/calls/{session}/metrics', [App\Http\Controllers\Messaging\CallController::class, 'listMetrics'])
+            ->name('calls.metrics.list');
+        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/permissions/{userId}', [App\Http\Controllers\Messaging\CallController::class, 'setPermission'])
+            ->name('calls.permissions');
+        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/recordings', [App\Http\Controllers\Messaging\CallController::class, 'uploadRecording'])
+            ->name('calls.recordings');
+    });
+
+    Route::get('/api/rtc/ice', [App\Http\Controllers\RtcController::class, 'ice'])
+        ->middleware('throttle:20,1')
+        ->name('rtc.ice');
+    Route::post('/api/logs', [App\Http\Controllers\LogsController::class, 'store'])
+        ->middleware('throttle:120,1')
+        ->name('logs.store');
+    Route::get('/api/logs', [App\Http\Controllers\LogsController::class, 'index'])
+        ->middleware('throttle:60,1')
+        ->name('logs.index');
+
+    // SFU config & tokens
+    Route::get('/api/rtc/sfu/config', [App\Http\Controllers\SfuController::class, 'config'])
+        ->middleware('throttle:20,1')
+        ->name('rtc.sfu.config');
+    Route::post('/api/rtc/sfu/token', [App\Http\Controllers\SfuController::class, 'token'])
+        ->middleware('throttle:60,1')
+        ->name('rtc.sfu.token');
+    Route::post('/api/rtc/sfu/record/start', [App\Http\Controllers\SfuController::class, 'recordingStart'])
+        ->middleware('throttle:60,1')
+        ->name('rtc.sfu.record.start');
+    Route::post('/api/rtc/sfu/record/stop', [App\Http\Controllers\SfuController::class, 'recordingStop'])
+        ->middleware('throttle:60,1')
+        ->name('rtc.sfu.record.stop');
     Route::post('/settings/security', [App\Http\Controllers\SettingsController::class, 'updateSecurity'])
         ->middleware('throttle:10,60')
         ->name('settings.security'); // 10 updates per hour
@@ -429,6 +534,136 @@ Route::middleware('auth')->group(function () {
         ->name('follow.suggestions');
     Route::post('/follow/suggestions/refresh', [App\Http\Controllers\FollowSuggestionController::class, 'refresh'])
         ->name('follow.suggestions.refresh');
+
+    Route::get('/newsletter/subscribe', function () {
+        return \Inertia\Inertia::render('Newsletter/Subscribe');
+    })->name('newsletter.subscribe.page');
+    Route::get('/admin/newsletter/subscribers', [App\Http\Controllers\NewsletterAdminController::class, 'subscribersPage'])
+        ->middleware('admin')
+        ->name('admin.newsletter.subscribers.page');
+    Route::get('/admin/newsletter/editor', function () {
+        return \Inertia\Inertia::render('Newsletter/TemplateEditor');
+    })->middleware('admin')->name('admin.newsletter.editor.page');
+    Route::get('/admin/newsletter/analytics', function () {
+        return \Inertia\Inertia::render('Newsletter/AdminAnalytics');
+    })->middleware('admin')->name('admin.newsletter.analytics.page');
+    Route::get('/admin/newsletter/suppression', function () {
+        return \Inertia\Inertia::render('Newsletter/SuppressionAdmin');
+    })->middleware('admin')->name('admin.newsletter.suppression.page');
+    Route::get('/admin/newsletter/segmentation', function () {
+        return \Inertia\Inertia::render('Newsletter/Segmentation');
+    })->middleware('admin')->name('admin.newsletter.segmentation.page');
+    Route::get('/admin/newsletter/providers/status', function () {
+        return \Inertia\Inertia::render('Newsletter/ProviderStatus');
+    })->middleware('admin')->name('admin.newsletter.providers.status.page');
+    Route::get('/admin/newsletter/clients', function () {
+        return \Inertia\Inertia::render('Newsletter/AdminClients');
+    })->middleware('admin')->name('admin.newsletter.clients.page');
+    Route::get('/admin/newsletter/dashboard', function () {
+        return \Inertia\Inertia::render('Newsletter/AdminDashboard');
+    })->middleware('admin')->name('admin.newsletter.dashboard.page');
+    Route::get('/admin/a11y/reports', function () {
+        return \Inertia\Inertia::render('Admin/A11yReports');
+    })->middleware('admin')->name('admin.a11y.reports.page');
+    Route::get('/api/admin/newsletter/subscribers', [App\Http\Controllers\NewsletterAdminController::class, 'listSubscribers'])
+        ->middleware('admin')
+        ->name('admin.newsletter.subscribers.index');
+    Route::post('/api/admin/newsletter/templates', [App\Http\Controllers\NewsletterAdminController::class, 'saveTemplate'])
+        ->middleware('admin')
+        ->name('admin.newsletter.templates.store');
+    Route::get('/api/admin/newsletter/categories', [App\Http\Controllers\NewsletterAdminController::class, 'categories'])
+        ->middleware('admin')
+        ->name('admin.newsletter.categories.index');
+    Route::post('/api/admin/newsletter/categories', [App\Http\Controllers\NewsletterAdminController::class, 'saveCategory'])
+        ->middleware('admin')
+        ->name('admin.newsletter.categories.store');
+    Route::get('/api/admin/newsletter/clients', [App\Http\Controllers\NewsletterAdminController::class, 'clientsIndex'])
+        ->middleware('admin')
+        ->name('admin.newsletter.clients.index');
+    Route::post('/api/admin/newsletter/clients', [App\Http\Controllers\NewsletterAdminController::class, 'clientsSave'])
+        ->middleware('admin')
+        ->name('admin.newsletter.clients.save');
+    Route::post('/api/admin/newsletter/campaigns', [App\Http\Controllers\NewsletterAdminController::class, 'createCampaign'])
+        ->middleware('admin')
+        ->name('admin.newsletter.campaigns.store');
+    Route::post('/api/admin/newsletter/campaigns/{campaign}/send', [App\Http\Controllers\NewsletterAdminController::class, 'sendCampaign'])
+        ->middleware('admin')
+        ->name('admin.newsletter.campaigns.send');
+    Route::get('/api/admin/newsletter/suppression', [App\Http\Controllers\NewsletterAdminController::class, 'suppressionIndex'])
+        ->middleware('admin')
+        ->name('admin.newsletter.suppression.index');
+    Route::post('/api/admin/newsletter/suppression', [App\Http\Controllers\NewsletterAdminController::class, 'suppressionStore'])
+        ->middleware('admin')
+        ->name('admin.newsletter.suppression.store');
+    Route::delete('/api/admin/newsletter/suppression/{id}', [App\Http\Controllers\NewsletterAdminController::class, 'suppressionDelete'])
+        ->middleware('admin')
+        ->name('admin.newsletter.suppression.delete');
+    Route::get('/api/admin/newsletter/analytics/overview', [App\Http\Controllers\NewsletterAnalyticsController::class, 'overview'])
+        ->middleware('admin')
+        ->name('admin.newsletter.analytics.overview');
+    Route::get('/api/admin/newsletter/analytics/export/csv', [App\Http\Controllers\NewsletterAnalyticsController::class, 'exportCsv'])
+        ->middleware('admin')
+        ->name('admin.newsletter.analytics.export.csv');
+    Route::get('/api/admin/newsletter/analytics/export/pdf', [App\Http\Controllers\NewsletterAnalyticsController::class, 'exportPdf'])
+        ->middleware('admin')
+        ->name('admin.newsletter.analytics.export.pdf');
+
+    Route::get('/api/admin/newsletter/providers', [App\Http\Controllers\NewsletterProviderController::class, 'config'])
+        ->middleware('admin')
+        ->name('admin.newsletter.providers.index');
+    Route::post('/api/admin/newsletter/providers', [App\Http\Controllers\NewsletterProviderController::class, 'save'])
+        ->middleware('admin')
+        ->name('admin.newsletter.providers.save');
+    Route::get('/api/admin/newsletter/providers/test', [App\Http\Controllers\NewsletterProviderController::class, 'test'])
+        ->middleware('admin')
+        ->name('admin.newsletter.providers.test');
+    Route::get('/api/admin/newsletter/providers/status', [App\Http\Controllers\NewsletterProviderController::class, 'status'])
+        ->middleware('admin')
+        ->name('admin.newsletter.providers.status');
+    Route::get('/api/admin/newsletter/webhooks/logs', [App\Http\Controllers\NewsletterProviderController::class, 'logs'])
+        ->middleware('admin')
+        ->name('admin.newsletter.webhooks.logs');
+    Route::post('/api/admin/newsletter/providers/resync', [App\Http\Controllers\NewsletterProviderController::class, 'resync'])
+        ->middleware('admin')
+        ->name('admin.newsletter.providers.resync');
+
+    Route::middleware('auth')->group(function () {
+        Route::get('/api/user/a11y/preferences', [App\Http\Controllers\AccessibilityPreferencesController::class, 'get'])->name('user.a11y.preferences.get');
+        Route::post('/api/user/a11y/preferences', [App\Http\Controllers\AccessibilityPreferencesController::class, 'save'])->name('user.a11y.preferences.save');
+        Route::get('/api/gdpr/export', [App\Http\Controllers\GDPRController::class, 'export'])->name('gdpr.export');
+        Route::post('/api/gdpr/delete', [App\Http\Controllers\GDPRController::class, 'deleteAccount'])->name('gdpr.delete');
+        Route::post('/api/gdpr/consent', [App\Http\Controllers\GDPRController::class, 'saveConsent'])->name('gdpr.consent');
+        Route::get('/api/gdpr/consent', [App\Http\Controllers\GDPRController::class, 'getConsent'])->name('gdpr.consent.get');
+    });
+    Route::post('/api/a11y/report', [App\Http\Controllers\AccessibilityPreferencesController::class, 'report'])
+        ->middleware('throttle:30,1')
+        ->name('a11y.report');
+    Route::get('/api/admin/a11y/reports', [App\Http\Controllers\AccessibilityPreferencesController::class, 'adminReports'])
+        ->middleware('admin')
+        ->name('admin.a11y.reports.index');
+    Route::get('/api/admin/a11y/summary', [App\Http\Controllers\AccessibilityPreferencesController::class, 'adminSummary'])
+        ->middleware('admin')
+        ->name('admin.a11y.summary');
+    Route::post('/api/admin/newsletter/segmentation/estimate', [App\Http\Controllers\NewsletterSegmentationController::class, 'estimate'])
+        ->middleware('admin')
+        ->name('admin.newsletter.segmentation.estimate');
+
+    Route::post('/webhooks/sendgrid', [App\Http\Controllers\NewsletterProviderController::class, 'webhookSendgrid'])->name('webhooks.sendgrid');
+    Route::post('/webhooks/mailgun', [App\Http\Controllers\NewsletterProviderController::class, 'webhookMailgun'])->name('webhooks.mailgun');
+    Route::post('/webhooks/ses', [App\Http\Controllers\NewsletterProviderController::class, 'webhookSes'])->name('webhooks.ses');
+    Route::post('/api/newsletter/subscribe', [App\Http\Controllers\NewsletterController::class, 'subscribe'])
+        ->middleware('throttle:10,1')
+        ->name('newsletter.subscribe');
+    Route::get('/newsletter/confirm', [App\Http\Controllers\NewsletterController::class, 'confirm'])
+        ->name('newsletter.confirm');
+    Route::get('/newsletter/unsubscribe', [App\Http\Controllers\NewsletterController::class, 'unsubscribe'])
+        ->name('newsletter.unsubscribe');
+    Route::post('/api/newsletter/preferences', [App\Http\Controllers\NewsletterController::class, 'preferences'])
+        ->name('newsletter.preferences');
+    Route::get('/newsletter/pixel', [App\Http\Controllers\NewsletterController::class, 'pixel'])
+        ->name('newsletter.pixel');
+    Route::get('/newsletter/click', [App\Http\Controllers\NewsletterController::class, 'click'])
+        ->name('newsletter.click');
 
     // Mutual Connections
     Route::get('/users/{user}/mutual-connections', [App\Http\Controllers\MutualConnectionController::class, 'index'])
@@ -1063,6 +1298,12 @@ Route::middleware('auth')->group(function () {
         Route::post('users/{user}/remove-clipper-role', [App\Http\Controllers\Admin\UserManagementController::class, 'removeClipperRole'])
             ->middleware('throttle:10,60') // 10 actions per hour
             ->name('users.remove-clipper-role');
+        Route::post('users/{user}/grant-clipper-role', [App\Http\Controllers\Admin\UserManagementController::class, 'grantClipperRole'])
+            ->middleware('throttle:10,60')
+            ->name('users.grant-clipper-role');
+        Route::post('users/{user}/grant-brand-role', [App\Http\Controllers\Admin\UserManagementController::class, 'grantBrandRole'])
+            ->middleware('throttle:10,60')
+            ->name('users.grant-brand-role');
 
         // Reports Management
         Route::resource('reports', App\Http\Controllers\Admin\ReportController::class)->only(['index', 'show', 'update']);
@@ -1120,9 +1361,15 @@ Route::middleware('auth')->group(function () {
 
 // Payment Webhooks (no auth required, CSRF excluded)
 // Single webhook endpoint handles both marketplace orders and top-ups
-Route::post('/payment/webhook', [App\Http\Controllers\PaymentController::class, 'webhook'])->name('payment.webhook');
-Route::post('/payment/recurring', [App\Http\Controllers\PaymentController::class, 'recurring'])->name('payment.recurring');
-Route::post('/payment/pay-account', [App\Http\Controllers\PaymentController::class, 'payAccount'])->name('payment.pay-account');
+Route::post('/payment/webhook', [App\Http\Controllers\PaymentController::class, 'webhook'])
+    ->middleware('verify.midtrans')
+    ->name('payment.webhook');
+Route::post('/payment/recurring', [App\Http\Controllers\PaymentController::class, 'recurring'])
+    ->middleware('verify.midtrans')
+    ->name('payment.recurring');
+Route::post('/payment/pay-account', [App\Http\Controllers\PaymentController::class, 'payAccount'])
+    ->middleware('verify.midtrans')
+    ->name('payment.pay-account');
 
 // Explorer Routes
 Route::middleware('auth')->group(function () {
@@ -1140,6 +1387,12 @@ Route::get('/faq/{id}', [App\Http\Controllers\FaqController::class, 'show'])->na
 Route::get('/documentation', [App\Http\Controllers\DocumentationController::class, 'index'])->name('documentations.index');
 Route::get('/documentation/{slug}', [App\Http\Controllers\DocumentationController::class, 'show'])->name('documentations.show');
 Route::get('/documentation/search', [App\Http\Controllers\DocumentationController::class, 'search'])->name('documentations.search');
+Route::get('/documentation/theme-guide', function () {
+    return \Inertia\Inertia::render('Documentations/ThemeGuide');
+})->name('documentations.theme-guide');
+Route::get('/documentation/accessibility-guide', function () {
+    return \Inertia\Inertia::render('Documentations/AccessibilityGuide');
+})->name('documentations.accessibility-guide');
 
 // Support Tickets (User-facing)
 Route::middleware('auth')->prefix('support')->name('support.')->group(function () {

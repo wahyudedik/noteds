@@ -37,6 +37,7 @@ class UserSetting extends Model
         'email_preferences',
         'profile_visibility',
         'search_visibility',
+        'auto_play_enabled',
     ];
 
     protected function casts(): array
@@ -47,6 +48,7 @@ class UserSetting extends Model
             'email_preferences' => 'array',
             'profile_visibility' => 'boolean',
             'search_visibility' => 'boolean',
+            'auto_play_enabled' => 'boolean',
         ];
     }
 
