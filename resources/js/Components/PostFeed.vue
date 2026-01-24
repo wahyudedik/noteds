@@ -142,6 +142,20 @@ const visiblePosts = computed(() => {
     return postsList.value.filter(p => !blockedIds.value.includes(p.user_id));
 });
 
+const getCurrentPurpose = () => props.filters?.purpose_type || 'all';
+const setSort = (mode) => {
+    sortMode.value = mode;
+    filterByPurpose(getCurrentPurpose());
+};
+const setPeriodTab = (p) => {
+    period.value = p;
+    filterByPurpose(getCurrentPurpose());
+};
+const setMetricTab = (m) => {
+    metric.value = m;
+    filterByPurpose(getCurrentPurpose());
+};
+
 const loadMore = () => {
     if (isLoading.value || !hasMorePages.value) return;
     
@@ -226,25 +240,58 @@ const loadMore = () => {
             >
                 {{ label }}
             </button>
-            <div class="ml-auto flex items-center gap-2">
-                <label class="text-xs text-gray-500 dark:text-gray-400">Sort</label>
-                <select v-model="sortMode" @change="filterByPurpose(filters?.purpose_type)" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
-                    <option value="latest">Latest</option>
-                    <option value="top">Top</option>
-                </select>
-                <div v-if="sortMode==='top'" class="flex items-center gap-2">
-                    <select v-model="period" @change="filterByPurpose(filters?.purpose_type)" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
-                        <option value="day">24h</option>
-                        <option value="week">7d</option>
-                        <option value="month">30d</option>
-                        <option value="year">1y</option>
-                        <option value="all">All-time</option>
-                    </select>
-                    <select v-model="metric" @change="filterByPurpose(filters?.purpose_type)" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
-                        <option value="engagement">Engagement</option>
-                        <option value="upvotes">Upvotes</option>
-                        <option value="mixed">Mixed</option>
-                    </select>
+            <div class="w-full mt-2">
+                <div class="flex flex-col gap-2">
+                    <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-0.5" role="tablist" aria-label="Sort">
+                        <button
+                            :aria-selected="sortMode==='latest'"
+                            role="tab"
+                            @click="setSort('latest')"
+                            :class="[
+                                'px-3 py-1.5 text-sm rounded-md transition-colors',
+                                sortMode==='latest' ? 'bg-indigo-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ]"
+                        >Latest</button>
+                        <button
+                            :aria-selected="sortMode==='top'"
+                            role="tab"
+                            @click="setSort('top')"
+                            :class="[
+                                'px-3 py-1.5 text-sm rounded-md transition-colors',
+                                sortMode==='top' ? 'bg-indigo-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ]"
+                        >Top</button>
+                    </div>
+                    <div v-if="sortMode==='top'" class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-0.5 overflow-x-auto" role="tablist" aria-label="Period">
+                        <button
+                            v-for="p in ['day','week','month','year','all']"
+                            :key="p"
+                            :aria-selected="period===p"
+                            role="tab"
+                            @click="setPeriodTab(p)"
+                            :class="[
+                                'px-3 py-1.5 text-sm rounded-md transition-colors',
+                                period===p ? 'bg-indigo-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ]"
+                        >
+                            {{ p==='day'?'24h':p==='week'?'7d':p==='month'?'30d':p==='year'?'1y':'All-time' }}
+                        </button>
+                    </div>
+                    <div v-if="sortMode==='top'" class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-0.5 overflow-x-auto flex-wrap" role="tablist" aria-label="Metric">
+                        <button
+                            v-for="m in ['engagement','upvotes','mixed']"
+                            :key="m"
+                            :aria-selected="metric===m"
+                            role="tab"
+                            @click="setMetricTab(m)"
+                            :class="[
+                                'px-3 py-1.5 text-sm rounded-md transition-colors',
+                                metric===m ? 'bg-indigo-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ]"
+                        >
+                            {{ m==='engagement'?'Engagement':m==='upvotes'?'Upvotes':'Mixed' }}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

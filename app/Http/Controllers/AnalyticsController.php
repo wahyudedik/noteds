@@ -16,7 +16,7 @@ class AnalyticsController extends Controller
             'payload' => 'nullable|array',
         ]);
         try {
-            if (\Illuminate\Support\Facades\Gate::allows('create', \App\Models\AnalyticsEvent::class)) {
+            if ($request->user() && \Illuminate\Support\Facades\Gate::allows('create', \App\Models\AnalyticsEvent::class)) {
                 AnalyticsEvent::create([
                     'user_id' => $request->user()?->id,
                     'type' => $validated['type'],

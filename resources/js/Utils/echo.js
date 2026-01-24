@@ -22,7 +22,6 @@ if (key && key !== 'your_real_pusher_key') {
     });
 } else {
     window.Echo = null;
-    console.warn('Pusher not configured; real-time features disabled in dev.');
 }
 
 export default window.Echo;
