@@ -62,4 +62,9 @@ return [
         'timeout' => env('ML_SERVICE_TIMEOUT', 300), // 5 minutes for training
     ],
 
+    'football_data' => [
+        'key' => env('FOOTBALL_DATA_API_KEY'),
+        'base_url' => 'https://api.football-data.org/v4',
+    ],
+
 ];

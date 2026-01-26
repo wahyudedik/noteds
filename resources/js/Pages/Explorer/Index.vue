@@ -2,6 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import ArticleCard from '@/Components/Explorer/ArticleCard.vue';
 import SearchBar from '@/Components/Explorer/SearchBar.vue';
+import LiveScoreWidget from '@/Components/Explorer/LiveScoreWidget.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SocialShareButtons from '@/Components/Social/SocialShareButtons.vue';
 import { sharePlacement } from '@/config/sharePlacement';
@@ -92,6 +93,7 @@ const btoaSafe = (s) => {
                             </div>
                         </div>
                         <div class="mt-4 space-y-4">
+                            <LiveScoreWidget />
                             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="text-sm font-semibold text-gray-900 dark:text-white">Trending</div>

@@ -402,7 +402,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])
         ->middleware('throttle:10,1')
         ->name('notifications.read-all'); // 10 actions per minute
-    Route::get('/docs/api', function () { return view('docs.api'); })->name('docs.api');
+    Route::get('/docs/api', function () {
+        return view('docs.api');
+    })->name('docs.api');
     Route::delete('/notifications/{notification}', [App\Http\Controllers\NotificationController::class, 'destroy'])
         ->middleware('throttle:60,1')
         ->name('notifications.destroy'); // 60 deletions per minute
@@ -411,7 +413,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/analytics/events/export', [App\Http\Controllers\AnalyticsController::class, 'export'])->middleware('block.viewer.export')->name('analytics.events.export');
     Route::get('/benchmarks', [App\Http\Controllers\BenchmarkController::class, 'index'])->name('benchmarks.index');
     Route::get('/api/benchmarks/top', [App\Http\Controllers\BenchmarkController::class, 'data'])->name('benchmarks.top.data');
-    Route::get('/benchmarks/compare', fn () => Inertia\Inertia::render('Benchmarks/Compare'))->name('benchmarks.compare');
+    Route::get('/benchmarks/compare', fn() => Inertia\Inertia::render('Benchmarks/Compare'))->name('benchmarks.compare');
 
     // Settings
     Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
@@ -1374,6 +1376,8 @@ Route::post('/payment/pay-account', [App\Http\Controllers\PaymentController::cla
 // Explorer Routes
 Route::middleware('auth')->group(function () {
     Route::get('/explorer', [App\Http\Controllers\ExplorerController::class, 'index'])->name('explorer.index');
+    Route::get('/explorer/livescore', [App\Http\Controllers\LiveScoreController::class, 'index'])->name('explorer.livescore');
+    Route::get('/explorer/livescore/data', [App\Http\Controllers\LiveScoreController::class, 'getLiveScores'])->name('explorer.livescore.data');
     Route::get('/explorer/search', [App\Http\Controllers\ExplorerController::class, 'search'])
         ->middleware('throttle:30,1') // 30 searches per minute
         ->name('explorer.search');
@@ -1536,7 +1540,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/suppliers/{supplier}', [App\Http\Controllers\SupplierController::class, 'show'])->name('suppliers.show');
     Route::get('/suppliers/{supplier}/edit', [App\Http\Controllers\SupplierController::class, 'edit'])->name('suppliers.edit');
     Route::put('/suppliers/{supplier}', [App\Http\Controllers\SupplierController::class, 'update'])->name('suppliers.update');
-    
+
     // Supplier reviews
     Route::post('/suppliers/{supplier}/reviews', [App\Http\Controllers\SupplierReviewController::class, 'store'])->name('suppliers.reviews.store');
     Route::put('/suppliers/{supplier}/reviews/{review}', [App\Http\Controllers\SupplierReviewController::class, 'update'])->name('suppliers.reviews.update');
