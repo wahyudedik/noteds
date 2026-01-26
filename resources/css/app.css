@@ -54,33 +54,48 @@ html.rm-chart-light .rm-target-chart * { transition-duration: 150ms !important; 
 html.rm-chart-medium .rm-target-chart * { transition-duration: 50ms !important; animation-duration: 50ms !important; }
 html.rm-chart-full .rm-target-chart * { transition-duration: 0ms !important; animation: none !important; }
 
-/* Scrollbar styling (light/dark) */
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+/* Global Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
-html::-webkit-scrollbar-track,
-body::-webkit-scrollbar-track {
-  background: #f3f4f6;
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
 }
-html::-webkit-scrollbar-thumb,
-body::-webkit-scrollbar-thumb {
-  background: #9ca3af;
+
+/* Thumb */
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* gray-300 */
   border-radius: 9999px;
-  border: 2px solid #f3f4f6;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
-html.dark::-webkit-scrollbar-track,
-body.dark::-webkit-scrollbar-track,
-html.dark body::-webkit-scrollbar-track {
-  background: #0f172a;
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6366f1; /* indigo-500 */
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
-html.dark::-webkit-scrollbar-thumb,
-body.dark::-webkit-scrollbar-thumb,
-html.dark body::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 9999px;
-  border: 2px solid #0f172a;
+
+/* Dark mode overrides */
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569; /* slate-600 */
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6366f1; /* indigo-500 */
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.dark * {
+  scrollbar-color: #475569 transparent;
 }
 
 /* Dark-mode safety overrides for common Tailwind utilities without explicit dark: variants */

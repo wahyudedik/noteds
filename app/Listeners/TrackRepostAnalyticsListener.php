@@ -13,7 +13,7 @@ class TrackRepostAnalyticsListener
     public function handle(PostReposted $event): void
     {
         // Dispatch job to track analytics
-        TrackRepostAnalytics::dispatch($event);
+        TrackRepostAnalytics::dispatch($event->repost);
     }
 }
 

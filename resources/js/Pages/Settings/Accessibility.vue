@@ -1,85 +1,114 @@
 <template>
-  <div>
-    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Accessibility</h3>
-    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Pengaturan untuk meningkatkan aksesibilitas aplikasi.</p>
-    <div class="space-y-4">
-      <div>
-        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Reduce Motion</label>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Kurangi animasi yang tidak esensial.</p>
-        <div class="flex items-center gap-2">
-          <select v-model="reduceMotion" @change="applyReduceMotionLevel" class="border rounded px-3 py-2 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-100">
-            <option value="off">Off</option>
-            <option value="system">System</option>
-            <option value="light">Ringan</option>
-            <option value="medium">Sedang</option>
-            <option value="full">Lengkap</option>
-          </select>
-          <span class="text-xs text-gray-500 dark:text-gray-400">Level: {{ reduceMotion }}</span>
-        </div>
-      </div>
+  <div class="space-y-8">
+    <!-- Header -->
+    <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+      <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">Accessibility</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Sesuaikan tampilan dan perilaku aplikasi untuk kenyamanan Anda.
+      </p>
+    </div>
+
+    <!-- Main Preferences -->
+    <div class="space-y-6">
+      <!-- High Contrast Mode -->
       <div class="flex items-center justify-between">
-        <div>
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Keyboard Navigation Hints</label>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Tampilkan indikator fokus dan petunjuk keyboard.</p>
+        <div class="flex-1 pr-4">
+          <label class="text-sm font-medium text-gray-900 dark:text-gray-100">High Contrast Mode</label>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Meningkatkan perbedaan warna untuk keterbacaan yang lebih baik.</p>
         </div>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" class="sr-only peer" :checked="keyboardHints" @change="toggleHints" aria-label="Keyboard navigation hints" />
-          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-300 dark:after:border-gray-600 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-        </label>
-      </div>
-      <div class="flex items-center justify-between">
-        <div>
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">High Contrast Mode</label>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Meningkatkan kontras warna untuk keterbacaan.</p>
-        </div>
-        <label class="relative inline-flex items-center cursor-pointer">
+        <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
           <input type="checkbox" class="sr-only peer" :checked="hc" @change="toggleHc" aria-label="High contrast mode" />
           <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-300 dark:after:border-gray-600 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
         </label>
       </div>
-      <div>
-        <label for="fontScale" class="text-sm font-medium text-gray-700 dark:text-gray-300">Font Size</label>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Sesuaikan ukuran font hingga 200%.</p>
-        <input id="fontScale" type="range" min="100" max="200" step="5" :value="fontScale" @input="setScale($event.target.value)" class="w-full" aria-valuemin="100" aria-valuemax="200" :aria-valuenow="fontScale" aria-label="Font size percentage" />
-        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Current: {{ fontScale }}%</div>
-      </div>
-      <div>
-        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Feed Animations</label>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Kontrol granular untuk animasi feed.</p>
-        <select v-model="feedLevel" @change="applyFeedLevel" class="border rounded px-3 py-2 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-100">
-          <option value="off">Default</option>
-          <option value="light">Ringan</option>
-          <option value="medium">Sedang</option>
-          <option value="full">Lengkap</option>
-        </select>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div>
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Modal Animations</label>
-          <select v-model="modalLevel" @change="applyModalLevel" class="mt-1 border rounded px-3 py-2 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-100">
-            <option value="off">Default</option>
-            <option value="light">Ringan</option>
-            <option value="medium">Sedang</option>
-            <option value="full">Lengkap</option>
-          </select>
+
+      <!-- Keyboard Navigation Hints -->
+      <div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-6">
+        <div class="flex-1 pr-4">
+          <label class="text-sm font-medium text-gray-900 dark:text-gray-100">Keyboard Navigation Hints</label>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tampilkan indikator fokus visual dan petunjuk pintasan keyboard.</p>
         </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Tooltip Animations</label>
-          <select v-model="tooltipLevel" @change="applyTooltipLevel" class="mt-1 border rounded px-3 py-2 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-100">
-            <option value="off">Default</option>
-            <option value="light">Ringan</option>
-            <option value="medium">Sedang</option>
-            <option value="full">Lengkap</option>
-          </select>
+        <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+          <input type="checkbox" class="sr-only peer" :checked="keyboardHints" @change="toggleHints" aria-label="Keyboard navigation hints" />
+          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-300 dark:after:border-gray-600 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+        </label>
+      </div>
+
+      <!-- Font Size -->
+      <div class="border-t border-gray-100 dark:border-gray-800 pt-6">
+        <div class="flex items-center justify-between mb-2">
+          <label for="fontScale" class="text-sm font-medium text-gray-900 dark:text-gray-100">Font Size Scaling</label>
+          <span class="text-xs font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-600 dark:text-gray-300">{{ fontScale }}%</span>
         </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Chart Animations</label>
-          <select v-model="chartLevel" @change="applyChartLevel" class="mt-1 border rounded px-3 py-2 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-100">
-            <option value="off">Default</option>
-            <option value="light">Ringan</option>
-            <option value="medium">Sedang</option>
-            <option value="full">Lengkap</option>
-          </select>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Sesuaikan ukuran teks aplikasi (100% - 200%).</p>
+        <div class="flex items-center gap-4">
+           <span class="text-xs text-gray-500">A</span>
+           <input id="fontScale" type="range" min="100" max="200" step="5" :value="fontScale" @input="setScale($event.target.value)" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-indigo-600" aria-label="Font size percentage" />
+           <span class="text-lg text-gray-900 dark:text-gray-100 font-bold">A</span>
+        </div>
+      </div>
+      
+      <!-- Motion Settings -->
+      <div class="border-t border-gray-100 dark:border-gray-800 pt-6">
+        <div class="flex items-center justify-between mb-4">
+           <div>
+             <label class="text-sm font-medium text-gray-900 dark:text-gray-100">Global Motion</label>
+             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Mengurangi intensitas animasi di seluruh aplikasi.</p>
+           </div>
+           <select v-model="reduceMotion" @change="applyReduceMotionLevel" class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <option value="off">Off</option>
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="medium">Medium</option>
+              <option value="full">Full</option>
+           </select>
+        </div>
+
+        <!-- Granular Controls -->
+        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-4">
+          <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">Granular Animation Controls</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Feed -->
+            <div class="flex items-center justify-between">
+              <label class="text-sm text-gray-700 dark:text-gray-300">Feed Items</label>
+              <select v-model="feedLevel" @change="applyFeedLevel" class="block w-28 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs dark:bg-gray-700 dark:border-gray-600 dark:text-white h-8 py-1">
+                <option value="off">Default</option>
+                <option value="light">Light</option>
+                <option value="medium">Medium</option>
+                <option value="full">Full</option>
+              </select>
+            </div>
+            <!-- Modal -->
+            <div class="flex items-center justify-between">
+              <label class="text-sm text-gray-700 dark:text-gray-300">Modals</label>
+              <select v-model="modalLevel" @change="applyModalLevel" class="block w-28 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs dark:bg-gray-700 dark:border-gray-600 dark:text-white h-8 py-1">
+                <option value="off">Default</option>
+                <option value="light">Light</option>
+                <option value="medium">Medium</option>
+                <option value="full">Full</option>
+              </select>
+            </div>
+            <!-- Tooltip -->
+            <div class="flex items-center justify-between">
+              <label class="text-sm text-gray-700 dark:text-gray-300">Tooltips</label>
+              <select v-model="tooltipLevel" @change="applyTooltipLevel" class="block w-28 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs dark:bg-gray-700 dark:border-gray-600 dark:text-white h-8 py-1">
+                <option value="off">Default</option>
+                <option value="light">Light</option>
+                <option value="medium">Medium</option>
+                <option value="full">Full</option>
+              </select>
+            </div>
+            <!-- Chart -->
+            <div class="flex items-center justify-between">
+              <label class="text-sm text-gray-700 dark:text-gray-300">Charts</label>
+              <select v-model="chartLevel" @change="applyChartLevel" class="block w-28 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs dark:bg-gray-700 dark:border-gray-600 dark:text-white h-8 py-1">
+                <option value="off">Default</option>
+                <option value="light">Light</option>
+                <option value="medium">Medium</option>
+                <option value="full">Full</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
     </div>

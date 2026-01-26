@@ -285,7 +285,7 @@ const formatDate = (date) => {
             v-for="comment in filteredComments"
             :key="comment.id"
             :class="[
-                'border rounded-lg p-4',
+                'border rounded-lg p-4 sm:p-6',
                 comment.is_pinned
                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                     : comment.is_best_answer
@@ -549,7 +549,7 @@ const formatDate = (date) => {
                 <div
                     v-for="reply in comment.replies"
                     :key="reply.id"
-                    class="border rounded p-3 bg-gray-50 dark:bg-gray-800"
+                    class="border rounded p-3 bg-gray-50 dark:bg-gray-900"
                 >
                     <div class="flex items-center gap-2 mb-2">
                         <Link

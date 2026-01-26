@@ -9,6 +9,7 @@ use App\Services\RewardCalculationService;
 use App\Services\RetryService;
 use App\Services\ClipperLoggingService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class AutoTransferService

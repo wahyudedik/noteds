@@ -27,6 +27,10 @@ const getNotificationType = (notification) => {
     if (type.includes('BrandRejected')) return 'brand_rejected';
     if (type.includes('NewOrder')) return 'new_order';
     if (type.includes('WithdrawalStatus')) return 'withdrawal_status';
+    if (type.includes('PostReposted')) return 'post_reposted';
+    if (type.includes('MentionedInComment')) return 'mentioned_in_comment';
+    if (type.includes('MentionedInPost')) return 'mentioned_in_post';
+    if (type.includes('PointsAwarded')) return 'points_awarded';
     return 'default';
 };
 
@@ -45,6 +49,10 @@ const getNotificationIcon = (notification) => {
         'brand_rejected': 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z',
         'new_order': 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z',
         'withdrawal_status': 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1',
+        'post_reposted': 'M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z',
+        'mentioned_in_comment': 'M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z',
+        'mentioned_in_post': 'M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a5.5 5.5 0 01-5.5 5.5',
+        'points_awarded': 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
     };
     return icons[type] || 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9';
 };
@@ -78,6 +86,10 @@ const getNotificationTitle = (notification) => {
         'payment_failed': 'Pembayaran Gagal',
         'clip_rejected': 'Clip Ditolak',
         'view_validated': 'View Terverifikasi',
+        'post_reposted': 'Post Direpost',
+        'mentioned_in_comment': 'Mention di Komentar',
+        'mentioned_in_post': 'Mention di Post',
+        'points_awarded': 'Poin Diterima',
         'default': 'Notifikasi',
     };
     return props.notification.data?.title || labels[type] || labels.default;
@@ -131,6 +143,10 @@ const getNotificationColor = (notification) => {
         'brand_rejected': 'text-red-600 dark:text-red-400',
         'new_order': 'text-indigo-600 dark:text-indigo-400',
         'withdrawal_status': 'text-purple-600 dark:text-purple-400',
+        'post_reposted': 'text-green-600 dark:text-green-400',
+        'mentioned_in_comment': 'text-blue-600 dark:text-blue-400',
+        'mentioned_in_post': 'text-blue-600 dark:text-blue-400',
+        'points_awarded': 'text-yellow-600 dark:text-yellow-400',
     };
     return colors[type] || 'text-gray-600 dark:text-gray-400';
 };
@@ -206,6 +222,18 @@ const getMessage = (n) => {
     const type = getNotificationType(n);
     if (d.message || d.body) return d.message || d.body;
     switch (type) {
+        case 'new_follow':
+            return `${d.follower_name || 'Seseorang'} mulai mengikuti Anda`;
+        case 'new_comment':
+            return `${d.user_name || 'Seseorang'} mengomentari post Anda`;
+        case 'post_reposted':
+            return `${d.reposter_name || 'Seseorang'} merepost postingan Anda`;
+        case 'mentioned_in_comment':
+            return `${d.user_name || 'Seseorang'} menyebut Anda dalam komentar`;
+        case 'mentioned_in_post':
+            return `${d.user_name || 'Seseorang'} menyebut Anda dalam postingan`;
+        case 'points_awarded':
+            return `Anda mendapatkan ${d.points || 0} poin`;
         case 'new_order':
             return `Order #${d.order_number || d.order_id} untuk ${d.product_name || ''}`;
         case 'order_status_update':

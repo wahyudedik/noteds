@@ -92,7 +92,7 @@ class UserSeeder extends Seeder
                 $exists = DB::table('follows')->where('follower_id', $follower)->where('following_id', $followee)->exists();
                 if (!$exists) {
                     DB::table('follows')->insert([
-                        'id' => (string) \Illuminate\Support\Str::uuid(),
+                        'id' => (string) Str::uuid(),
                         'follower_id' => $follower,
                         'following_id' => $followee,
                         'created_at' => now(),
