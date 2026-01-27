@@ -42,6 +42,9 @@ class Campaign extends Model
         'scheduled_end_at',
         'ab_test_enabled',
         'ab_test_status',
+        'payout_strategy',
+        'per_account_view_target',
+        'global_target_views',
         'total_views',
         'total_clips',
         'total_spent',
@@ -63,6 +66,9 @@ class Campaign extends Model
             'scheduled_start_at' => 'datetime',
             'scheduled_end_at' => 'datetime',
             'ab_test_enabled' => 'boolean',
+            'payout_strategy' => 'string',
+            'per_account_view_target' => 'integer',
+            'global_target_views' => 'integer',
         ];
     }
 
@@ -101,14 +107,14 @@ class Campaign extends Model
 
         $this->status = 'active';
         $this->started_at = now();
-        
+
         // Use scheduled_end_at if set, otherwise calculate from duration_days
         if ($this->scheduled_end_at) {
             $this->ended_at = $this->scheduled_end_at;
         } else {
             $this->ended_at = now()->addDays($this->duration_days);
         }
-        
+
         return $this->save();
     }
 
@@ -288,8 +294,8 @@ class Campaign extends Model
      */
     public function shouldStart(): bool
     {
-        return $this->isScheduled() 
-            && $this->scheduled_start_at <= now() 
+        return $this->isScheduled()
+            && $this->scheduled_start_at <= now()
             && $this->status === 'draft';
     }
 
@@ -298,8 +304,8 @@ class Campaign extends Model
      */
     public function shouldEnd(): bool
     {
-        return $this->scheduled_end_at !== null 
-            && $this->scheduled_end_at <= now() 
+        return $this->scheduled_end_at !== null
+            && $this->scheduled_end_at <= now()
             && in_array($this->status, ['active', 'paused']);
     }
 

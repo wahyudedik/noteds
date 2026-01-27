@@ -9,6 +9,8 @@ use App\Services\ClipService;
 use App\Models\Clip;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CampaignController extends Controller
 {
@@ -20,7 +22,7 @@ class CampaignController extends Controller
 
     public function index(Request $request)
     {
-        $query = auth()->user()->campaigns()->with('wallet');
+        $query = Auth::user()->campaigns()->with('wallet');
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -36,13 +38,13 @@ class CampaignController extends Controller
 
     public function create()
     {
-        if (!auth()->user()->isBrand() && !auth()->user()->isAdmin()) {
+        if (!Auth::user()->isBrand() && !Auth::user()->isAdmin()) {
             return redirect()->route('clipper.brand-registration.create')
                 ->with('error', 'You must register as a brand first to create campaigns.');
         }
 
         $walletService = app(\App\Services\WalletService::class);
-        $creatorWallet = $walletService->getCreatorWallet(auth()->user());
+        $creatorWallet = $walletService->getCreatorWallet(Auth::user());
 
         return Inertia::render('Clipper/Campaigns/Create', [
             'availableBalance' => (float) ($creatorWallet->balance_available ?? 0),
@@ -51,7 +53,7 @@ class CampaignController extends Controller
 
     public function store(Request $request)
     {
-        if (!auth()->user()->isBrand() && !auth()->user()->isAdmin()) {
+        if (!Auth::user()->isBrand() && !Auth::user()->isAdmin()) {
             return back()->withErrors(['error' => 'You must be a registered brand to create campaigns.']);
         }
 
@@ -68,6 +70,9 @@ class CampaignController extends Controller
             'duration_days' => 'required|integer|min:1|max:365',
             'scheduled_start_at' => 'nullable|date|after:now',
             'scheduled_end_at' => 'nullable|date|after:scheduled_start_at',
+            'payout_strategy' => 'nullable|in:cpm,multi_equal_split,single_winner',
+            'per_account_view_target' => 'nullable|integer|min:1',
+            'global_target_views' => 'nullable|integer|min:1',
         ]);
 
         // Validate each video URL is YouTube or Google Drive
@@ -84,16 +89,16 @@ class CampaignController extends Controller
 
         // Check wallet balance
         $walletService = app(\App\Services\WalletService::class);
-        $creatorWallet = $walletService->getCreatorWallet(auth()->user());
+        $creatorWallet = $walletService->getCreatorWallet(Auth::user());
         if ($creatorWallet->balance_available < $validated['max_budget']) {
             return back()->withErrors([
-                'max_budget' => 'Insufficient wallet balance. Available balance: Rp ' . number_format($creatorWallet->balance_available, 0, ',', '.') . '. Please top up your wallet first.',
+                'max_budget' => 'Insufficient wallet balance. Available balance: Rp ' . number_format((float) $creatorWallet->balance_available, 0, ',', '.') . '. Please top up your wallet first.',
             ])->withInput();
         }
 
         try {
             $campaign = $this->campaignService->createCampaign(
-                auth()->user(),
+                Auth::user(),
                 $validated
             );
 
@@ -106,12 +111,12 @@ class CampaignController extends Controller
 
     public function show($id)
     {
-        $campaign = auth()->user()->campaigns()
+        $campaign = Auth::user()->campaigns()
             ->with(['wallet', 'clips.clipper'])
             ->findOrFail($id);
 
         $walletService = app(\App\Services\WalletService::class);
-        $creatorWallet = $walletService->getCreatorWallet(auth()->user());
+        $creatorWallet = $walletService->getCreatorWallet(Auth::user());
 
         return Inertia::render('Clipper/Campaigns/Show', [
             'campaign' => $campaign,
@@ -121,7 +126,7 @@ class CampaignController extends Controller
 
     public function edit($id)
     {
-        $campaign = auth()->user()->campaigns()
+        $campaign = Auth::user()->campaigns()
             ->where('status', 'draft')
             ->findOrFail($id);
 
@@ -132,7 +137,7 @@ class CampaignController extends Controller
 
     public function update(Request $request, $id)
     {
-        $campaign = auth()->user()->campaigns()
+        $campaign = Auth::user()->campaigns()
             ->where('status', 'draft')
             ->findOrFail($id);
 
@@ -153,16 +158,16 @@ class CampaignController extends Controller
 
     public function activate($id)
     {
-        $campaign = auth()->user()->campaigns()
+        $campaign = Auth::user()->campaigns()
             ->where('status', 'draft')
             ->findOrFail($id);
 
         // Check wallet balance
         $walletService = app(\App\Services\WalletService::class);
-        $creatorWallet = $walletService->getCreatorWallet(auth()->user());
+        $creatorWallet = $walletService->getCreatorWallet(Auth::user());
         if ($creatorWallet->balance_available < $campaign->max_budget) {
             return back()->withErrors([
-                'error' => 'Insufficient wallet balance. Available balance: Rp ' . number_format($creatorWallet->balance_available, 0, ',', '.') . '. Campaign budget required: Rp ' . number_format($campaign->max_budget, 0, ',', '.') . '. Please top up your wallet first.',
+                'error' => 'Insufficient wallet balance. Available balance: Rp ' . number_format((float) $creatorWallet->balance_available, 0, ',', '.') . '. Campaign budget required: Rp ' . number_format((float) $campaign->max_budget, 0, ',', '.') . '. Please top up your wallet first.',
             ]);
         }
 
@@ -176,7 +181,7 @@ class CampaignController extends Controller
 
     public function pause($id)
     {
-        $campaign = auth()->user()->campaigns()
+        $campaign = Auth::user()->campaigns()
             ->where('status', 'active')
             ->findOrFail($id);
 
@@ -187,7 +192,7 @@ class CampaignController extends Controller
 
     public function resume($id)
     {
-        $campaign = auth()->user()->campaigns()
+        $campaign = Auth::user()->campaigns()
             ->where('status', 'paused')
             ->findOrFail($id);
 
@@ -200,7 +205,7 @@ class CampaignController extends Controller
 
     public function cancel($id)
     {
-        $campaign = auth()->user()->campaigns()
+        $campaign = Auth::user()->campaigns()
             ->whereNotIn('status', ['completed', 'cancelled'])
             ->findOrFail($id);
 
@@ -214,9 +219,141 @@ class CampaignController extends Controller
         return back()->with('success', 'Campaign cancelled successfully.');
     }
 
+    /**
+     * Manually complete a campaign (brand dashboard).
+     * Triggers payout distribution per strategy and finalizes the campaign.
+     */
+    public function complete(Request $request, $id)
+    {
+        $campaign = Auth::user()->campaigns()
+            ->whereIn('status', ['active', 'paused'])
+            ->findOrFail($id);
+
+        try {
+            $validated = $request->validate([
+                'manual_winner_user_id' => 'nullable|exists:users,id',
+                'override_global_target_views' => 'nullable|integer|min:1',
+                'override_per_account_view_target' => 'nullable|integer|min:1',
+                'min_total_valid_views' => 'nullable|integer|min:1',
+                'min_avg_stability_score' => 'nullable|numeric|min:0|max:1',
+                'min_validation_rate' => 'nullable|numeric|min:0|max:1',
+                'min_composite_score' => 'nullable|numeric|min:0',
+                'weight_views' => 'nullable|numeric|min:0|max:1',
+                'weight_stability' => 'nullable|numeric|min:0|max:1',
+                'weight_validation' => 'nullable|numeric|min:0|max:1',
+                'force_manual_winner' => 'nullable|boolean',
+            ]);
+            $options = $validated;
+            $result = $this->campaignService->completeCampaign($campaign, $options);
+            if (!$result) {
+                return back()->withErrors(['error' => 'Failed to complete campaign. Please try again.']);
+            }
+
+            try {
+                \App\Models\AuditLog::logAction([
+                    'admin_id' => Auth::id(),
+                    'action' => 'complete_campaign',
+                    'target_type' => 'campaign',
+                    'target_id' => $campaign->id,
+                    'new_value' => [
+                        'status' => 'completed',
+                        'payout_strategy' => $campaign->payout_strategy ?? 'cpm',
+                    ],
+                ]);
+            } catch (\Exception $e) {
+                Log::warning('Failed to create audit log for manual campaign completion', [
+                    'campaign_id' => $campaign->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            try {
+                $notificationService = app(\App\Services\NotificationService::class);
+                if (method_exists($notificationService, 'notifyCampaignCompleted')) {
+                    $notificationService->notifyCampaignCompleted($campaign);
+                }
+            } catch (\Exception $e) {
+                Log::warning('Failed to send campaign completed notification', [
+                    'campaign_id' => $campaign->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            return back()->with('success', 'Campaign completed successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API endpoint to complete a campaign (brand/admin only).
+     */
+    public function completeApi(Request $request, $id)
+    {
+        $campaign = Auth::user()->campaigns()
+            ->whereIn('status', ['active', 'paused'])
+            ->findOrFail($id);
+
+        try {
+            $validated = $request->validate([
+                'manual_winner_user_id' => 'nullable|exists:users,id',
+                'override_global_target_views' => 'nullable|integer|min:1',
+                'override_per_account_view_target' => 'nullable|integer|min:1',
+                'min_total_valid_views' => 'nullable|integer|min:1',
+                'min_avg_stability_score' => 'nullable|numeric|min:0|max:1',
+                'min_validation_rate' => 'nullable|numeric|min:0|max:1',
+                'weight_views' => 'nullable|numeric|min:0|max:1',
+                'weight_stability' => 'nullable|numeric|min:0|max:1',
+                'weight_validation' => 'nullable|numeric|min:0|max:1',
+                'force_manual_winner' => 'nullable|boolean',
+            ]);
+
+            $result = $this->campaignService->completeCampaign($campaign, $validated);
+            if (!$result) {
+                return response()->json(['message' => 'Failed to complete campaign'], 422);
+            }
+
+            try {
+                \App\Models\AuditLog::logAction([
+                    'admin_id' => Auth::id(),
+                    'action' => 'complete_campaign_api',
+                    'target_type' => 'campaign',
+                    'target_id' => $campaign->id,
+                    'new_value' => [
+                        'status' => 'completed',
+                        'payout_strategy' => $campaign->payout_strategy ?? 'cpm',
+                    ],
+                ]);
+            } catch (\Exception $e) {
+                Log::warning('Failed to create audit log for API campaign completion', [
+                    'campaign_id' => $campaign->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            try {
+                $notificationService = app(\App\Services\NotificationService::class);
+                if (method_exists($notificationService, 'notifyCampaignCompleted')) {
+                    $notificationService->notifyCampaignCompleted($campaign);
+                }
+            } catch (\Exception $e) {
+                Log::warning('Failed to send campaign completed notification (API)', [
+                    'campaign_id' => $campaign->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Campaign completed successfully',
+                'campaign' => $campaign->fresh(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
     public function shareAsPost(Request $request, $id)
     {
-        $campaign = auth()->user()->campaigns()->findOrFail($id);
+        $campaign = Auth::user()->campaigns()->findOrFail($id);
 
         $validated = $request->validate([
             'message' => 'nullable|string|max:500',
@@ -240,7 +377,7 @@ class CampaignController extends Controller
      */
     public function approveClip(Request $request, $campaignId, $clipId)
     {
-        $campaign = auth()->user()->campaigns()->findOrFail($campaignId);
+        $campaign = Auth::user()->campaigns()->findOrFail($campaignId);
         $clip = $campaign->clips()->findOrFail($clipId);
 
         if ($clip->status !== 'pending') {
@@ -248,7 +385,7 @@ class CampaignController extends Controller
         }
 
         try {
-            if ($this->clipService->approveClip($clip, auth()->user())) {
+            if ($this->clipService->approveClip($clip, Auth::user())) {
                 return back()->with('success', 'Clip approved successfully.');
             }
 
@@ -263,7 +400,7 @@ class CampaignController extends Controller
      */
     public function rejectClip(Request $request, $campaignId, $clipId)
     {
-        $campaign = auth()->user()->campaigns()->findOrFail($campaignId);
+        $campaign = Auth::user()->campaigns()->findOrFail($campaignId);
         $clip = $campaign->clips()->findOrFail($clipId);
 
         if ($clip->status !== 'pending') {
@@ -275,7 +412,7 @@ class CampaignController extends Controller
         ]);
 
         try {
-            if ($this->clipService->rejectClip($clip, $validated['reason'], auth()->user())) {
+            if ($this->clipService->rejectClip($clip, $validated['reason'], Auth::user())) {
                 return back()->with('success', 'Clip rejected successfully.');
             }
 
@@ -290,7 +427,7 @@ class CampaignController extends Controller
      */
     public function setupABTest(Request $request, $id)
     {
-        $campaign = auth()->user()->campaigns()
+        $campaign = Auth::user()->campaigns()
             ->where('status', 'draft')
             ->findOrFail($id);
 
@@ -322,7 +459,7 @@ class CampaignController extends Controller
      */
     public function getABTestResults($id)
     {
-        $campaign = auth()->user()->campaigns()->findOrFail($id);
+        $campaign = Auth::user()->campaigns()->findOrFail($id);
 
         $abTestingService = app(\App\Services\CampaignABTestingService::class);
         $results = $abTestingService->calculatePerformance($campaign);

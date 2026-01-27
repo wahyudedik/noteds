@@ -64,6 +64,9 @@ const form = useForm({
     duration_days: '',
     scheduled_start_at: null,
     scheduled_end_at: null,
+    payout_strategy: 'cpm',
+    per_account_view_target: null,
+    global_target_views: null,
 });
 
 const formatCurrency = (amount) => {
@@ -407,6 +410,58 @@ const submit = () => {
                                     </p>
                                     <InputError class="mt-2" :message="form.errors.cpm" />
                                 </div>
+
+                        <!-- Payout Strategy -->
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                            <InputLabel for="payout_strategy" value="Payout Strategy" />
+                            <select
+                                id="payout_strategy"
+                                v-model="form.payout_strategy"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                                <option value="cpm">CPM (per 1000 views)</option>
+                                <option value="multi_equal_split">Equal Split by Accounts Reaching Target</option>
+                                <option value="single_winner">Single Winner (full budget)</option>
+                            </select>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Determines how budget is distributed to clippers
+                            </p>
+                            <InputError class="mt-2" :message="form.errors.payout_strategy" />
+                        </div>
+
+                        <!-- Equal Split Config -->
+                        <div v-if="form.payout_strategy === 'multi_equal_split'">
+                            <InputLabel for="per_account_view_target" value="Per-Account View Target" />
+                            <TextInput
+                                id="per_account_view_target"
+                                type="number"
+                                min="1"
+                                class="mt-1 block w-full"
+                                v-model="form.per_account_view_target"
+                                placeholder="e.g., 1000"
+                            />
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Budget will be split equally among accounts that reach this target
+                            </p>
+                            <InputError class="mt-2" :message="form.errors.per_account_view_target" />
+                        </div>
+
+                        <!-- Single Winner Config -->
+                        <div v-if="form.payout_strategy === 'single_winner'">
+                            <InputLabel for="global_target_views" value="Global Target Views (Optional)" />
+                            <TextInput
+                                id="global_target_views"
+                                type="number"
+                                min="1"
+                                class="mt-1 block w-full"
+                                v-model="form.global_target_views"
+                                placeholder="e.g., 1000000"
+                            />
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                If set, only accounts meeting this target can win. Otherwise, highest views wins.
+                            </p>
+                            <InputError class="mt-2" :message="form.errors.global_target_views" />
+                        </div>
 
                                 <!-- Available Balance Info -->
                                 <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">

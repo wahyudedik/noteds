@@ -63,6 +63,9 @@ class CampaignService
                         'max_reward_per_clipper' => $data['max_reward_per_clipper'] ?? null,
                         'duration_days' => $data['duration_days'],
                         'status' => 'draft',
+                        'payout_strategy' => $data['payout_strategy'] ?? 'cpm',
+                        'per_account_view_target' => $data['per_account_view_target'] ?? null,
+                        'global_target_views' => $data['global_target_views'] ?? null,
                     ];
 
                     // Add scheduled dates if provided
@@ -119,7 +122,7 @@ class CampaignService
                 }
 
                 if (!$campaign->canActivate()) {
-                    $statusMessage = match($campaign->status) {
+                    $statusMessage = match ($campaign->status) {
                         'active' => 'This campaign is already active.',
                         'completed' => 'This campaign has been completed and cannot be activated again.',
                         'cancelled' => 'This campaign has been cancelled and cannot be activated.',
@@ -164,7 +167,7 @@ class CampaignService
                     }
                     throw $e;
                 }
-                
+
                 // Notify clippers about new active campaign
                 try {
                     $notificationService = app(\App\Services\NotificationService::class);
@@ -188,7 +191,7 @@ class CampaignService
                     ]);
                     // Don't fail the transaction for cache issues
                 }
-                
+
                 return $result;
             });
         } catch (Exception $e) {
@@ -246,7 +249,7 @@ class CampaignService
             }
 
             $result = $campaign->pause();
-            
+
             if ($result) {
                 try {
                     $this->cacheService->clearCampaignCache($campaign->id, $campaign->creator_id);
@@ -258,7 +261,7 @@ class CampaignService
                     ]);
                 }
             }
-            
+
             return $result;
         } catch (Exception $e) {
             Log::error('Campaign pause failed', [
@@ -295,7 +298,7 @@ class CampaignService
             }
 
             $result = $campaign->resume();
-            
+
             if ($result) {
                 try {
                     $this->cacheService->clearCampaignCache($campaign->id, $campaign->creator_id);
@@ -307,7 +310,7 @@ class CampaignService
                     ]);
                 }
             }
-            
+
             return $result;
         } catch (Exception $e) {
             Log::error('Campaign resume failed', [
@@ -321,12 +324,60 @@ class CampaignService
     /**
      * Complete campaign (refund remaining budget).
      */
-    public function completeCampaign(Campaign $campaign): bool
+    public function completeCampaign(Campaign $campaign, array $options = []): bool
     {
         try {
-            return DB::transaction(function () use ($campaign) {
+            return DB::transaction(function () use ($campaign, $options) {
                 if (!$campaign || !$campaign->exists) {
                     throw new Exception('Campaign not found. The campaign may have been deleted.');
+                }
+
+                // Perform payout distribution based on strategy before refunding remaining budget
+                try {
+                    $strategy = $campaign->payout_strategy ?? 'cpm';
+                    if ($strategy === 'multi_equal_split') {
+                        $distributionService = app(\App\Services\CampaignPayoutDistributionService::class);
+                        $distributionService->distributeEqualSplit(
+                            $campaign,
+                            $options['override_per_account_view_target'] ?? null,
+                            [
+                                'min_total_valid_views' => $options['min_total_valid_views'] ?? null,
+                                'min_avg_stability_score' => $options['min_avg_stability_score'] ?? null,
+                                'min_validation_rate' => $options['min_validation_rate'] ?? null,
+                                'min_composite_score' => $options['min_composite_score'] ?? null,
+                            ],
+                            [
+                                'weight_views' => $options['weight_views'] ?? null,
+                                'weight_stability' => $options['weight_stability'] ?? null,
+                                'weight_validation' => $options['weight_validation'] ?? null,
+                            ]
+                        );
+                    } elseif ($strategy === 'single_winner') {
+                        $distributionService = app(\App\Services\CampaignPayoutDistributionService::class);
+                        $distributionService->distributeSingleWinner(
+                            $campaign,
+                            $options['override_global_target_views'] ?? null,
+                            $options['manual_winner_user_id'] ?? null,
+                            [
+                                'min_total_valid_views' => $options['min_total_valid_views'] ?? null,
+                                'min_avg_stability_score' => $options['min_avg_stability_score'] ?? null,
+                                'min_validation_rate' => $options['min_validation_rate'] ?? null,
+                            ],
+                            [
+                                'weight_views' => $options['weight_views'] ?? null,
+                                'weight_stability' => $options['weight_stability'] ?? null,
+                                'weight_validation' => $options['weight_validation'] ?? null,
+                            ],
+                            (bool) ($options['force_manual_winner'] ?? false)
+                        );
+                    }
+                } catch (Exception $e) {
+                    Log::error('Failed to perform payout distribution before completion', [
+                        'campaign_id' => $campaign->id,
+                        'strategy' => $campaign->payout_strategy ?? 'cpm',
+                        'error' => $e->getMessage(),
+                    ]);
+                    // Continue to refund remaining budget even if distribution fails
                 }
 
                 try {
@@ -378,11 +429,11 @@ class CampaignService
 
         $campaignUrl = route('clipper.campaigns.show', $campaign);
         $message = $customMessage ?? "I've created a new campaign: {$campaign->title}. Check it out and submit your clips!";
-        
+
         $content = "{$message}\n\n";
         $content .= "📊 Campaign Details:\n";
-        $content .= "• CPM: Rp " . number_format($campaign->cpm, 0, ',', '.') . " per 1000 views\n";
-        $content .= "• Budget: Rp " . number_format($campaign->max_budget, 0, ',', '.') . "\n";
+        $content .= "• CPM: Rp " . number_format((float) $campaign->cpm, 0, ',', '.') . " per 1000 views\n";
+        $content .= "• Budget: Rp " . number_format((float) $campaign->max_budget, 0, ',', '.') . "\n";
         $content .= "• Duration: {$campaign->duration_days} days\n\n";
         $content .= "View campaign: {$campaignUrl}";
 
@@ -398,4 +449,3 @@ class CampaignService
         return $post;
     }
 }
-

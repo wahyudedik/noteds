@@ -4,9 +4,10 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    if (auth()->check()) {
+    if (Auth::check()) {
         return redirect()->route('home');
     }
     return Inertia::render('Welcome', [
@@ -1088,6 +1089,7 @@ Route::middleware('auth')->group(function () {
             Route::post('campaigns/{campaign}/pause', [App\Http\Controllers\Clipper\CampaignController::class, 'pause'])->name('campaigns.pause');
             Route::post('campaigns/{campaign}/resume', [App\Http\Controllers\Clipper\CampaignController::class, 'resume'])->name('campaigns.resume');
             Route::post('campaigns/{campaign}/cancel', [App\Http\Controllers\Clipper\CampaignController::class, 'cancel'])->name('campaigns.cancel');
+            Route::post('campaigns/{campaign}/complete', [App\Http\Controllers\Clipper\CampaignController::class, 'complete'])->name('campaigns.complete');
             Route::post('campaigns/{campaign}/share', [App\Http\Controllers\Clipper\CampaignController::class, 'shareAsPost'])->name('campaigns.share');
             Route::post('campaigns/{campaign}/clips/{clip}/approve', [App\Http\Controllers\Clipper\CampaignController::class, 'approveClip'])->name('campaigns.clips.approve');
             Route::post('campaigns/{campaign}/clips/{clip}/reject', [App\Http\Controllers\Clipper\CampaignController::class, 'rejectClip'])->name('campaigns.clips.reject');
@@ -1551,6 +1553,10 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/api/supplier-recommendations', [App\Http\Controllers\SupplierRecommendationController::class, 'index'])->name('api.supplier-recommendations');
     Route::get('/api/suppliers/business-types', [App\Http\Controllers\SupplierController::class, 'businessTypes'])->name('api.suppliers.business-types');
+    // Clipper Campaign manual completion API (brand/admin only)
+    Route::post('/api/campaigns/{campaign}/complete', [App\Http\Controllers\Clipper\CampaignController::class, 'completeApi'])
+        ->middleware('clipper')
+        ->name('api.campaigns.complete');
 });
 
 // Messaging Routes

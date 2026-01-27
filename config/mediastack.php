@@ -11,10 +11,15 @@ return [
     */
 
     'api_key' => env('MEDIASTACK_API_KEY'),
-    
-    'api_endpoint' => env('MEDIASTACK_API_ENDPOINT', 'http://api.mediastack.com/v1/news'),
+
+    'api_endpoint' => env('MEDIASTACK_API_ENDPOINT', 'https://api.mediastack.com/v1/news'),
 
     'is_production' => env('MEDIASTACK_IS_PRODUCTION', false),
+    'verify_ssl' => env('MEDIASTACK_VERIFY_SSL', true),
+    'supports_multi_language' => env('MEDIASTACK_SUPPORTS_MULTI_LANGUAGE', false),
+    'request_delay_ms' => env('MEDIASTACK_REQUEST_DELAY_MS', 500),
+    'retry_times' => env('MEDIASTACK_RETRY_TIMES', 3),
+    'retry_sleep_ms' => env('MEDIASTACK_RETRY_SLEEP_MS', 1000),
 
     /*
     |--------------------------------------------------------------------------
@@ -22,16 +27,17 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'default_categories' => [
+    'allowed_categories' => [
         'business',
         'technology',
-        'entrepreneurship',
-        'innovation',
-        'leadership',
-        'productivity',
-        'finance',
-        'marketing',
+        'sports',
+        'health',
+        'science',
+        'entertainment',
+        'general',
+        'other',
     ],
+    'default_categories' => env('MEDIASTACK_DEFAULT_CATEGORIES', ['general', 'other']),
 
     'default_language' => env('MEDIASTACK_DEFAULT_LANGUAGE', 'id'),
 
@@ -67,4 +73,3 @@ return [
         '20:00',
     ],
 ];
-

@@ -80,10 +80,27 @@ const canCancel = computed(() => {
     return ['draft', 'active', 'paused'].includes(props.campaign.status);
 });
 
+const canComplete = computed(() => {
+    return ['active', 'paused'].includes(props.campaign.status);
+});
+
 const activateForm = useForm({});
 const pauseForm = useForm({});
 const resumeForm = useForm({});
 const cancelForm = useForm({});
+const completeForm = useForm({});
+const showCompleteOptions = ref(false);
+const manualWinnerUserId = ref(null);
+const overrideGlobalTargetViews = ref(null);
+const overridePerAccountViewTarget = ref(null);
+const minTotalValidViews = ref(null);
+const minAvgStabilityScore = ref(null);
+const minValidationRate = ref(null);
+const weightViews = ref(1);
+const weightStability = ref(0);
+const weightValidation = ref(0);
+const forceManualWinner = ref(false);
+const minCompositeScore = ref(null);
 
 const rejectingClipId = ref(null);
 const rejectForm = useForm({
@@ -150,6 +167,29 @@ const cancel = () => {
             preserveScroll: true,
         });
     }
+};
+
+const complete = () => {
+    if (!confirm('Completing will distribute prizes immediately based on payout strategy and end the campaign. Proceed?')) {
+        return;
+    }
+    const payload = {
+        manual_winner_user_id: manualWinnerUserId.value || null,
+        override_global_target_views: overrideGlobalTargetViews.value || null,
+        override_per_account_view_target: overridePerAccountViewTarget.value || null,
+        min_total_valid_views: minTotalValidViews.value || null,
+        min_avg_stability_score: minAvgStabilityScore.value || null,
+        min_validation_rate: minValidationRate.value || null,
+        weight_views: weightViews.value ?? null,
+        weight_stability: weightStability.value ?? null,
+        weight_validation: weightValidation.value ?? null,
+        force_manual_winner: forceManualWinner.value ? 1 : 0,
+        min_composite_score: minCompositeScore.value ?? null,
+    };
+    completeForm.post(route('clipper.campaigns.complete', props.campaign.id), {
+        preserveScroll: true,
+        data: payload,
+    });
 };
 
 // Real-time view tracking
@@ -498,6 +538,21 @@ watch(() => props.campaign.status, (newStatus) => {
                         >
                             Cancel Campaign
                         </button>
+                        <button
+                            v-if="canComplete"
+                            @click="complete"
+                            :disabled="completeForm.processing"
+                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                        >
+                            Complete Campaign
+                        </button>
+                        <button
+                            v-if="canComplete"
+                            @click="showCompleteOptions = !showCompleteOptions"
+                            class="px-4 py-2 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors"
+                        >
+                            Advanced Options
+                        </button>
                         <Link
                             v-if="campaign.status === 'active'"
                             :href="route('clipper.campaigns.analytics.show', campaign.id)"
@@ -505,6 +560,178 @@ watch(() => props.campaign.status, (newStatus) => {
                         >
                             View Analytics
                         </Link>
+                    </div>
+                </div>
+                <!-- Advanced Completion Options -->
+                <div v-if="showCompleteOptions" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Completion Options</h3>
+                    <!-- Single Winner Options -->
+                    <div v-if="campaign.payout_strategy === 'single_winner'" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Manual Winner (optional)
+                            </label>
+                            <select
+                                v-model="manualWinnerUserId"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                                <option :value="null">Auto-select highest views</option>
+                                <option
+                                    v-for="clip in (campaign.clips || []).filter(c => c.status === 'approved')"
+                                    :key="clip.clipper.id"
+                                    :value="clip.clipper.id"
+                                >
+                                    {{ clip.clipper.name }} — {{ formatCurrency(clip.valid_views) }} views
+                                </option>
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Choose a manual winner or leave as auto-select (highest total approved views).
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input
+                                id="force_manual_winner"
+                                type="checkbox"
+                                v-model="forceManualWinner"
+                                class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <label for="force_manual_winner" class="text-sm text-gray-700 dark:text-gray-300">
+                                Force Manual Winner (ignore filters and thresholds)
+                            </label>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Override Global Target Views (optional)
+                            </label>
+                            <input
+                                type="number"
+                                min="1"
+                                v-model="overrideGlobalTargetViews"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                placeholder="e.g., 1000000"
+                            />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                If set, winner must meet this threshold; otherwise, highest views wins.
+                            </p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Weight: Views (0–1)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max="1"
+                                    v-model="weightViews"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    placeholder="e.g., 1.0"
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Weight: Stability (0–1)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max="1"
+                                    v-model="weightStability"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    placeholder="e.g., 0.5"
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Weight: Validation Rate (0–1)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max="1"
+                                    v-model="weightValidation"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    placeholder="e.g., 0.5"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Equal Split Options -->
+                    <div v-if="campaign.payout_strategy === 'multi_equal_split'" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Override Per-Account View Target (optional)
+                            </label>
+                            <input
+                                type="number"
+                                min="1"
+                                v-model="overridePerAccountViewTarget"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                placeholder="e.g., 1000"
+                            />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Budget will be split equally among accounts that reach this target.
+                            </p>
+                        </div>
+                    </div>
+                    <!-- Common Filters -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Min Total Valid Views (optional)
+                            </label>
+                            <input
+                                type="number"
+                                min="1"
+                                v-model="minTotalValidViews"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                placeholder="e.g., 5000"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Min Avg Stability Score (0–1)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="1"
+                                v-model="minAvgStabilityScore"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                placeholder="e.g., 0.75"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Min Validation Rate (0–1)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="1"
+                                v-model="minValidationRate"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                placeholder="e.g., 0.6"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Min Composite Score (0–∞)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                v-model="minCompositeScore"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                placeholder="e.g., 0.5"
+                            />
+                        </div>
                     </div>
                 </div>
 

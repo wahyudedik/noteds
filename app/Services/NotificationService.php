@@ -19,7 +19,7 @@ class NotificationService
     public function notifyNewOrder(Order $order): void
     {
         $seller = $order->product->seller;
-        
+
         $seller->notify(new \App\Notifications\NewOrderNotification($order));
     }
 
@@ -29,7 +29,7 @@ class NotificationService
     public function notifyWithdrawalRequest(Withdrawal $withdrawal): void
     {
         $admins = User::where('role', 'admin')->get();
-        
+
         foreach ($admins as $admin) {
             $admin->notify(new \App\Notifications\WithdrawalRequestNotification($withdrawal));
         }
@@ -52,14 +52,14 @@ class NotificationService
             // Create database notification
             $order->buyer->notify(new class($order) extends \Illuminate\Notifications\Notification {
                 use \Illuminate\Bus\Queueable;
-                
+
                 public function __construct(public Order $order) {}
-                
+
                 public function via($notifiable): array
                 {
                     return ['database'];
                 }
-                
+
                 public function toArray($notifiable): array
                 {
                     return [
@@ -90,7 +90,7 @@ class NotificationService
     {
         // Notify clippers about new campaign
         $clippers = \App\Models\User::where('clipper_role', 'clipper')->get();
-        
+
         foreach ($clippers as $clipper) {
             $clipper->notify(new \App\Notifications\NewCampaignNotification($campaign));
         }
@@ -129,6 +129,60 @@ class NotificationService
     }
 
     /**
+     * Notify brand about campaign completed (manual or automatic).
+     */
+    public function notifyCampaignCompleted(\App\Models\Campaign $campaign): void
+    {
+        // Ensure relationships are loaded
+        if (!$campaign->relationLoaded('creator')) {
+            $campaign->load('creator');
+        }
+        if ($campaign->creator) {
+            // Send database notification (anonymous class)
+            $campaign->creator->notify(new class($campaign) extends \Illuminate\Notifications\Notification {
+                use \Illuminate\Bus\Queueable;
+                public function __construct(public \App\Models\Campaign $campaign) {}
+                public function via($notifiable): array
+                {
+                    return ['database'];
+                }
+                public function toArray($notifiable): array
+                {
+                    return [
+                        'type' => 'campaign_completed',
+                        'campaign_id' => $this->campaign->id,
+                        'title' => "Campaign Completed: {$this->campaign->title}",
+                        'message' => "Kampanye '{$this->campaign->title}' telah diselesaikan.",
+                        'total_views' => $this->campaign->total_views,
+                        'total_clips' => $this->campaign->total_clips,
+                        'total_spent' => $this->campaign->total_spent,
+                        'payout_strategy' => $this->campaign->payout_strategy,
+                    ];
+                }
+            });
+            // Optional: try sending email; ignore errors
+            try {
+                if (method_exists(\Illuminate\Support\Facades\Mail::class, 'to') && $campaign->creator->email) {
+                    \Illuminate\Support\Facades\Mail::to($campaign->creator->email)
+                        ->send(new class($campaign) extends \Illuminate\Mail\Mailable {
+                            use \Illuminate\Bus\Queueable, \Illuminate\Queue\SerializesModels;
+                            public function __construct(public \App\Models\Campaign $campaign) {}
+                            public function build()
+                            {
+                                return $this->subject('Campaign Completed - ' . config('app.name'))
+                                    ->view('emails.campaign-completed')
+                                    ->with([
+                                        'campaign' => $this->campaign,
+                                    ]);
+                            }
+                        });
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Failed to send campaign completed email: ' . $e->getMessage());
+            }
+        }
+    }
+    /**
      * Notify brand about registration approval.
      */
     public function notifyBrandApproved(\App\Models\User $user): void
@@ -146,7 +200,24 @@ class NotificationService
 
         // Don't notify if user commented on their own post
         if ($postAuthor->id !== $comment->user_id) {
-            $postAuthor->notify(new \App\Notifications\NewCommentNotification($comment));
+            $postAuthor->notify(new class($comment) extends \Illuminate\Notifications\Notification {
+                use \Illuminate\Bus\Queueable;
+                public function __construct(public \App\Models\Comment $comment) {}
+                public function via($notifiable): array
+                {
+                    return ['database'];
+                }
+                public function toArray($notifiable): array
+                {
+                    return [
+                        'type' => 'new_comment',
+                        'comment_id' => $this->comment->id,
+                        'post_id' => $this->comment->post_id,
+                        'title' => 'New Comment',
+                        'message' => 'Your post received a new comment.',
+                    ];
+                }
+            });
         }
     }
 
@@ -185,7 +256,26 @@ class NotificationService
     public function notifyReportResolved(\App\Models\ContentReport $report): void
     {
         $reporter = $report->user;
-        $reporter->notify(new \App\Notifications\ReportResolvedNotification($report));
+        if ($reporter) {
+            $reporter->notify(new class($report) extends \Illuminate\Notifications\Notification {
+                use \Illuminate\Bus\Queueable;
+                public function __construct(public \App\Models\ContentReport $report) {}
+                public function via($notifiable): array
+                {
+                    return ['database'];
+                }
+                public function toArray($notifiable): array
+                {
+                    return [
+                        'type' => 'report_resolved',
+                        'report_id' => $this->report->id,
+                        'title' => 'Report Resolved',
+                        'message' => 'Your content report has been resolved.',
+                        'status' => $this->report->status ?? 'resolved',
+                    ];
+                }
+            });
+        }
     }
 
     /**
@@ -202,26 +292,26 @@ class NotificationService
     public function notifyTopUpSuccess(\App\Models\TopUp $topUp): void
     {
         $user = $topUp->user;
-        
+
         // Create database notification
         $user->notify(new class($topUp) extends \Illuminate\Notifications\Notification {
             use \Illuminate\Bus\Queueable;
-            
+
             public function __construct(public \App\Models\TopUp $topUp) {}
-            
+
             public function via($notifiable): array
             {
                 return ['database'];
             }
-            
+
             public function toArray($notifiable): array
             {
                 return [
                     'type' => 'topup_success',
                     'top_up_id' => $this->topUp->id,
                     'title' => 'Top Up Successful',
-                    'message' => 'Your wallet has been topped up with Rp ' . number_format($this->topUp->amount, 0, ',', '.'),
-                    'amount' => $this->topUp->amount,
+                    'message' => 'Your wallet has been topped up with Rp ' . number_format((float) $this->topUp->amount, 0, ',', '.'),
+                    'amount' => (float) $this->topUp->amount,
                 ];
             }
         });
@@ -240,7 +330,7 @@ class NotificationService
                             ->view('emails.topup-success')
                             ->with([
                                 'topUp' => $this->topUp,
-                                'amount' => number_format($this->topUp->amount, 0, ',', '.'),
+                                'amount' => number_format((float) $this->topUp->amount, 0, ',', '.'),
                             ]);
                     }
                 });
@@ -255,25 +345,25 @@ class NotificationService
     public function notifyRefundProcessed(\App\Models\Refund $refund): void
     {
         $user = $refund->user;
-        
+
         // Create database notification
         $user->notify(new class($refund) extends \Illuminate\Notifications\Notification {
             use \Illuminate\Bus\Queueable;
-            
+
             public function __construct(public \App\Models\Refund $refund) {}
-            
+
             public function via($notifiable): array
             {
                 return ['database'];
             }
-            
+
             public function toArray($notifiable): array
             {
                 $walletType = $this->refund->wallet_type === 'creator' ? 'Creator Wallet' : 'Marketplace Wallet';
                 $typeLabel = $this->refund->type === 'refund' ? 'Refund' : 'Adjustment';
-                $amount = number_format($this->refund->amount, 0, ',', '.');
+                $amount = number_format((float) $this->refund->amount, 0, ',', '.');
                 $action = $this->refund->type === 'refund' ? 'credited' : 'deducted';
-                
+
                 return [
                     'type' => 'refund_processed',
                     'refund_id' => $this->refund->id,
@@ -296,9 +386,9 @@ class NotificationService
         if (!$campaign->relationLoaded('creator')) {
             $campaign->load('creator');
         }
-        
+
         $admins = User::where('role', 'admin')->get();
-        
+
         foreach ($admins as $admin) {
             $admin->notify(new \App\Notifications\CampaignCreatedNotification($campaign));
         }
@@ -316,9 +406,9 @@ class NotificationService
         if (!$clip->relationLoaded('campaign')) {
             $clip->load('campaign');
         }
-        
+
         $admins = User::where('role', 'admin')->get();
-        
+
         foreach ($admins as $admin) {
             $admin->notify(new \App\Notifications\ClipSubmittedNotification($clip));
         }
@@ -333,9 +423,9 @@ class NotificationService
         if (!$product->relationLoaded('seller')) {
             $product->load('seller');
         }
-        
+
         $admins = User::where('role', 'admin')->get();
-        
+
         foreach ($admins as $admin) {
             $admin->notify(new \App\Notifications\ProductCreatedNotification($product));
         }
@@ -353,9 +443,9 @@ class NotificationService
         if (!$clip->relationLoaded('campaign')) {
             $clip->load('campaign');
         }
-        
+
         $admins = User::where('role', 'admin')->get();
-        
+
         foreach ($admins as $admin) {
             $admin->notify(new \App\Notifications\FraudDetectedNotification($clip, $reason, $stabilityScore));
         }
@@ -376,9 +466,9 @@ class NotificationService
         if ($order->product && !$order->product->relationLoaded('seller')) {
             $order->product->load('seller');
         }
-        
+
         $admins = User::where('role', 'admin')->get();
-        
+
         foreach ($admins as $admin) {
             $admin->notify(new \App\Notifications\OrderCreatedNotification($order));
         }
@@ -393,7 +483,7 @@ class NotificationService
         if (!$campaign->relationLoaded('creator')) {
             $campaign->load('creator');
         }
-        
+
         if ($campaign->creator) {
             $campaign->creator->notify(new \App\Notifications\CampaignSuspendedNotification($campaign, $reason));
         }
@@ -408,7 +498,7 @@ class NotificationService
         if (!$product->relationLoaded('seller')) {
             $product->load('seller');
         }
-        
+
         if ($product->seller) {
             $product->seller->notify(new \App\Notifications\ProductApprovedNotification($product));
         }
@@ -423,7 +513,7 @@ class NotificationService
         if (!$product->relationLoaded('seller')) {
             $product->load('seller');
         }
-        
+
         if ($product->seller) {
             $product->seller->notify(new \App\Notifications\ProductRejectedNotification($product, $reason));
         }
@@ -438,7 +528,7 @@ class NotificationService
         if ($order->buyer) {
             $order->buyer->notify(new \App\Notifications\OrderCancelledNotification($order, $reason));
         }
-        
+
         // Notify seller
         if ($order->product && $order->product->seller) {
             $order->product->seller->notify(new \App\Notifications\OrderCancelledNotification($order, $reason));
@@ -466,7 +556,7 @@ class NotificationService
         }
 
         $admins = User::where('role', 'admin')->get();
-        
+
         foreach ($admins as $admin) {
             $admin->notify(new \App\Notifications\NewSupportTicketNotification($ticket));
         }
@@ -486,7 +576,7 @@ class NotificationService
         }
 
         $isAdminResponse = $response->is_admin_response;
-        
+
         if ($isAdminResponse) {
             // Admin responded, notify the ticket owner (user)
             if ($ticket->user) {
@@ -518,9 +608,9 @@ class NotificationService
         if (!$registration->relationLoaded('user')) {
             $registration->load('user');
         }
-        
+
         $admins = User::where('role', 'admin')->get();
-        
+
         foreach ($admins as $admin) {
             $admin->notify(new \App\Notifications\BrandRegistrationNotification($registration));
         }
@@ -535,9 +625,9 @@ class NotificationService
         if (!$registration->relationLoaded('user')) {
             $registration->load('user');
         }
-        
+
         $admins = User::where('role', 'admin')->get();
-        
+
         foreach ($admins as $admin) {
             $admin->notify(new \App\Notifications\ClipperRegistrationNotification($registration));
         }
@@ -600,10 +690,10 @@ class NotificationService
     /**
      * Notify user about collaboration invitation.
      */
-    public function notifyCollaborationInvitation(PostCollaborator $collaboration): void
+    public function notifyCollaborationInvitation(\App\Models\PostCollaborator $collaboration): void
     {
         $collaboration->load(['user', 'post.user']);
-        
+
         if ($collaboration->user) {
             $collaboration->user->notify(new \App\Notifications\CollaborationInvitationNotification($collaboration));
         }
@@ -612,10 +702,10 @@ class NotificationService
     /**
      * Notify post owner when collaboration is accepted.
      */
-    public function notifyCollaborationAccepted(PostCollaborator $collaboration): void
+    public function notifyCollaborationAccepted(\App\Models\PostCollaborator $collaboration): void
     {
         $collaboration->load(['user', 'post.user']);
-        
+
         if ($collaboration->post->user) {
             $collaboration->post->user->notify(new \App\Notifications\CollaborationAcceptedNotification($collaboration));
         }
@@ -624,10 +714,10 @@ class NotificationService
     /**
      * Notify post owner when collaboration is rejected.
      */
-    public function notifyCollaborationRejected(PostCollaborator $collaboration): void
+    public function notifyCollaborationRejected(\App\Models\PostCollaborator $collaboration): void
     {
         $collaboration->load(['user', 'post.user']);
-        
+
         if ($collaboration->post->user) {
             $collaboration->post->user->notify(new \App\Notifications\CollaborationRejectedNotification($collaboration));
         }
@@ -653,7 +743,7 @@ class NotificationService
     public function notifyCampaignCollaborationInvitation(\App\Models\CampaignCollaborator $collaboration): void
     {
         $collaboration->load(['user', 'campaign.creator']);
-        
+
         if ($collaboration->user) {
             $collaboration->user->notify(new \App\Notifications\CampaignCollaborationInvitationNotification($collaboration));
         }
@@ -665,7 +755,7 @@ class NotificationService
     public function notifyCampaignCollaborationAccepted(\App\Models\CampaignCollaborator $collaboration): void
     {
         $collaboration->load(['user', 'campaign.creator']);
-        
+
         if ($collaboration->campaign->creator) {
             $collaboration->campaign->creator->notify(new \App\Notifications\CampaignCollaborationAcceptedNotification($collaboration));
         }
@@ -677,7 +767,7 @@ class NotificationService
     public function notifyCampaignCollaborationRejected(\App\Models\CampaignCollaborator $collaboration): void
     {
         $collaboration->load(['user', 'campaign.creator']);
-        
+
         if ($collaboration->campaign->creator) {
             $collaboration->campaign->creator->notify(new \App\Notifications\CampaignCollaborationRejectedNotification($collaboration));
         }
@@ -721,4 +811,3 @@ class NotificationService
         }
     }
 }
-

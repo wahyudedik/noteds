@@ -8,6 +8,13 @@ return [
     'auto_transfer_interval_minutes' => env('CLIPPER_AUTO_TRANSFER_INTERVAL_MINUTES', 15),
     'validate_url_accessibility' => env('CLIPPER_VALIDATE_URL_ACCESSIBILITY', false),
 
+    // Global default weights for composite scoring (0..1 range)
+    'weights' => [
+        'views' => (float) env('CLIPPER_WEIGHT_VIEWS', 1.0),
+        'stability' => (float) env('CLIPPER_WEIGHT_STABILITY', 0.0),
+        'validation' => (float) env('CLIPPER_WEIGHT_VALIDATION', 0.0),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Platform API Configuration
@@ -54,4 +61,3 @@ return [
         ],
     ],
 ];
-

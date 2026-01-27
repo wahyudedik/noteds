@@ -17,8 +17,8 @@ class MediaStackService
 
     public function __construct()
     {
-        $this->apiKey = config('mediastack.api_key');
-        $this->apiEndpoint = config('mediastack.api_endpoint');
+        $this->apiKey = (string) config('mediastack.api_key');
+        $this->apiEndpoint = (string) config('mediastack.api_endpoint');
         $this->cacheDuration = config('mediastack.cache_duration', 480); // 8 hours in minutes
         $this->articleFreshness = config('mediastack.article_freshness', 8); // 8 hours
     }
@@ -76,8 +76,19 @@ class MediaStackService
     protected function trackApiUsage(): void
     {
         $monthKey = 'mediastack_api_usage_' . Carbon::now()->format('Y-m');
-        $currentUsage = Cache::get($monthKey, 0);
-        Cache::put($monthKey, $currentUsage + 1, now()->endOfMonth());
+        $lock = Cache::lock($monthKey . '_lock', 5);
+        try {
+            $lock->block(5);
+            $currentUsage = Cache::get($monthKey, 0);
+            Cache::put($monthKey, $currentUsage + 1, now()->endOfMonth());
+            // Store timestamp log (append)
+            $tsKey = $monthKey . '_timestamps';
+            $timestamps = Cache::get($tsKey, []);
+            $timestamps[] = Carbon::now()->toIso8601String();
+            Cache::put($tsKey, $timestamps, now()->endOfMonth());
+        } finally {
+            optional($lock)->release();
+        }
     }
 
     /**
@@ -111,6 +122,11 @@ class MediaStackService
     public function fetchAndStoreArticles(array $params = []): array
     {
         try {
+            // Validate API key
+            if (!$this->isApiKeyValid()) {
+                Log::warning('API key tidak ditemukan, melewatkan pengambilan artikel');
+                return [];
+            }
             // Check usage limit before making request
             if ($this->isUsageLimitReached()) {
                 Log::warning('MediaStack API usage limit reached', [
@@ -120,47 +136,60 @@ class MediaStackService
                 return [];
             }
 
-            $categories = $params['categories'] ?? config('mediastack.default_categories');
+            $categories = $this->sanitizeCategories($params['categories'] ?? config('mediastack.default_categories'));
             $language = $params['language'] ?? config('mediastack.default_language', 'id');
             $limit = $params['limit'] ?? config('mediastack.default_limit', 100);
             $keywords = $params['keywords'] ?? null;
 
-            // Build API request
-            $queryParams = [
+            // Build base query params
+            $baseParams = [
                 'access_key' => $this->apiKey,
                 'categories' => is_array($categories) ? implode(',', $categories) : $categories,
-                'languages' => $language,
                 'limit' => $limit,
             ];
-
             if ($keywords) {
-                $queryParams['keywords'] = $keywords;
+                $baseParams['keywords'] = $keywords;
             }
 
-            // Make API request
-            $response = Http::timeout(30)->get($this->apiEndpoint, $queryParams);
+            $supportsMulti = (bool) config('mediastack.supports_multi_language', false);
+            $languages = $supportsMulti ? $language : (is_string($language) ? explode(',', $language) : (array) $language);
+            $languages = array_values(array_filter(array_map('trim', is_array($languages) ? $languages : [$languages])));
 
-            // Track API usage (only on successful request)
-            if ($response->successful()) {
-                $this->trackApiUsage();
+            $articles = [];
+            if ($supportsMulti) {
+                $queryParams = $baseParams + ['languages' => $language];
+                $response = $this->performRequest($queryParams);
+                if (!$response) {
+                    return [];
+                }
+                $data = $response->json();
+                if (isset($data['data']) && is_array($data['data'])) {
+                    $articles = array_merge($articles, $data['data']);
+                }
+            } else {
+                foreach ($languages as $lang) {
+                    $queryParams = $baseParams + ['languages' => $lang];
+                    $response = $this->performRequest($queryParams);
+                    if (!$response) {
+                        continue;
+                    }
+                    $data = $response->json();
+                    if (isset($data['data']) && is_array($data['data'])) {
+                        $articles = array_merge($articles, $data['data']);
+                    }
+                    // Rate limiting delay
+                    $delayMs = (int) config('mediastack.request_delay_ms', 500);
+                    if ($delayMs > 0) {
+                        usleep($delayMs * 1000);
+                    }
+                }
             }
 
-            if (!$response->successful()) {
-                Log::error('MediaStack API request failed', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                ]);
+            if (empty($articles)) {
+                Log::warning('MediaStack API returned no articles', ['languages' => $languages]);
                 return [];
             }
 
-            $data = $response->json();
-
-            if (!isset($data['data']) || !is_array($data['data'])) {
-                Log::warning('MediaStack API returned invalid data', ['data' => $data]);
-                return [];
-            }
-
-            $articles = $data['data'];
             $storedArticles = $this->storeArticles($articles);
 
             Log::info('MediaStack articles fetched and stored', [
@@ -262,7 +291,7 @@ class MediaStackService
     {
         // Check if database has fresh articles
         $query = Article::query();
-        
+
         if ($category) {
             $query->byCategory($category);
         }
@@ -283,7 +312,79 @@ class MediaStackService
      */
     public function getCategories(): array
     {
-        return config('mediastack.default_categories', []);
+        return $this->sanitizeCategories(config('mediastack.default_categories', []));
+    }
+
+    protected function isApiKeyValid(): bool
+    {
+        $key = $this->apiKey;
+        if (empty($key)) {
+            return false;
+        }
+        $len = strlen($key);
+        if ($len < 32 || $len > 256) {
+            Log::warning('MediaStack API key length invalid');
+            return false;
+        }
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $key)) {
+            Log::warning('MediaStack API key contains invalid characters');
+            return false;
+        }
+        return true;
+    }
+
+    protected function sanitizeCategories($categories): array
+    {
+        $allowed = config('mediastack.allowed_categories', []);
+        $list = is_array($categories) ? $categories : explode(',', (string) $categories);
+        $list = array_values(array_filter(array_map('trim', $list)));
+        $valid = array_values(array_intersect($list, $allowed));
+        if (empty($valid)) {
+            Log::warning('MediaStack categories invalid, falling back to default', ['requested' => $list]);
+            $valid = config('mediastack.default_categories', $allowed);
+        }
+        return $valid;
+    }
+
+    protected function performRequest(array $queryParams): ?\Illuminate\Http\Client\Response
+    {
+        $timeout = 30;
+        $verify = (bool) config('mediastack.verify_ssl', true);
+        $maxTries = (int) config('mediastack.retry_times', 3);
+        $baseSleepMs = (int) config('mediastack.retry_sleep_ms', 1000);
+
+        $lastResponse = null;
+        for ($attempt = 1; $attempt <= $maxTries; $attempt++) {
+            $response = Http::withOptions(['verify' => $verify])
+                ->timeout($timeout)
+                ->get($this->apiEndpoint, $queryParams);
+
+            $lastResponse = $response;
+            if ($response->successful()) {
+                $this->trackApiUsage();
+                return $response;
+            }
+
+            $status = $response->status();
+            if ($status === 429) {
+                $retryAfter = (int) ($response->header('Retry-After') ?? 1);
+                usleep(max(1, $retryAfter) * 1000 * 1000);
+                continue;
+            }
+
+            if (in_array($status, [500, 502, 503, 504], true)) {
+                $sleepMs = (int) ($baseSleepMs * pow(2, ($attempt - 1)));
+                usleep($sleepMs * 1000);
+                continue;
+            }
+
+            break;
+        }
+
+        Log::error('MediaStack API request failed after retries', [
+            'status' => $lastResponse ? $lastResponse->status() : null,
+            'body' => $lastResponse ? $lastResponse->body() : null,
+        ]);
+        throw new \RuntimeException('MediaStack request failed after retries');
     }
 }
-

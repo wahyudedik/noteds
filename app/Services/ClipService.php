@@ -39,7 +39,7 @@ class ClipService
 
                 // Check if campaign is available
                 if ($campaign->status !== 'active') {
-                    $statusMessage = match($campaign->status) {
+                    $statusMessage = match ($campaign->status) {
                         'draft' => 'This campaign is still in draft and not yet active.',
                         'paused' => 'This campaign is currently paused and not accepting submissions.',
                         'completed' => 'This campaign has been completed and is no longer accepting submissions.',
@@ -172,20 +172,24 @@ class ClipService
                     throw new Exception('Cannot approve clip. The campaign has no remaining budget.');
                 }
 
-                try {
-                    // Calculate reward based on valid views
-                    $validViews = $clip->valid_views ?? 0;
-                    $reward = $this->rewardCalculationService->calculateReward($clip, $validViews);
-
-                    // Update clip with reward
-                    $clip->pending_reward = $reward;
-                    $clip->approved_reward = $reward;
-                } catch (Exception $e) {
-                    Log::error('Failed to calculate reward for clip approval', [
-                        'clip_id' => $clip->id,
-                        'error' => $e->getMessage(),
-                    ]);
-                    throw new Exception('Failed to calculate reward. Please try again or contact support.');
+                // Calculate reward only for CPM strategy
+                if (($clip->campaign->payout_strategy ?? 'cpm') === 'cpm') {
+                    try {
+                        $validViews = $clip->valid_views ?? 0;
+                        $reward = (float) $this->rewardCalculationService->calculateReward($clip, $validViews);
+                        $clip->pending_reward = $reward;
+                        $clip->approved_reward = $reward;
+                    } catch (Exception $e) {
+                        Log::error('Failed to calculate reward for clip approval', [
+                            'clip_id' => $clip->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                        throw new Exception('Failed to calculate reward. Please try again or contact support.');
+                    }
+                } else {
+                    // For non-CPM strategies, approval does not assign per-clip reward
+                    $clip->pending_reward = 0;
+                    $clip->approved_reward = 0;
                 }
 
                 // Approve clip
@@ -228,28 +232,26 @@ class ClipService
                     // Don't fail the transaction for notification issues
                 }
 
-                // Immediately trigger auto transfer
-                try {
-                    $autoTransferService = app(\App\Services\AutoTransferService::class);
-                    $transferResult = $autoTransferService->transferRewardToClipper($clip);
-                    
-                    if (!$transferResult) {
-                        // Transfer failed, log but don't fail approval
-                        Log::warning('Auto transfer failed after clip approval', [
+                // Immediately trigger auto transfer only for CPM strategy
+                if (($clip->campaign->payout_strategy ?? 'cpm') === 'cpm') {
+                    try {
+                        $autoTransferService = app(\App\Services\AutoTransferService::class);
+                        $transferResult = $autoTransferService->transferRewardToClipper($clip);
+
+                        if (!$transferResult) {
+                            Log::warning('Auto transfer failed after clip approval', [
+                                'clip_id' => $clip->id,
+                                'clip_status' => $clip->status,
+                                'approved_reward' => $clip->approved_reward,
+                            ]);
+                        }
+                    } catch (Exception $e) {
+                        Log::error('Auto transfer exception after clip approval', [
                             'clip_id' => $clip->id,
-                            'clip_status' => $clip->status,
-                            'approved_reward' => $clip->approved_reward,
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
                         ]);
-                        // Clip tetap approved, transfer akan retry via scheduled job
                     }
-                } catch (Exception $e) {
-                    // Log error, but don't fail approval
-                    Log::error('Auto transfer exception after clip approval', [
-                        'clip_id' => $clip->id,
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                    ]);
-                    // Clip tetap approved, transfer akan retry via scheduled job
                 }
 
                 // Invalidate cache
@@ -364,4 +366,3 @@ class ClipService
         }
     }
 }
-
