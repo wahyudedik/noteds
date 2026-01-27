@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/scheduling/{type}/{id}/recurrence', [App\Http\Controllers\SchedulingController::class, 'getRecurrence'])->name('scheduling.recurrence.get');
     Route::post('/api/scheduling/{type}/{id}/recurrence', [App\Http\Controllers\SchedulingController::class, 'saveRecurrence'])->name('scheduling.recurrence.save');
     Route::get('/scheduling/recurrence', function () {
-        return \Inertia\Inertia::render('Scheduling/RecurrenceEditorPage');
+        return Inertia::render('Scheduling/RecurrenceEditorPage');
     })->name('scheduling.recurrence.page');
 
     // User Analytics Dashboard
@@ -413,7 +413,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/analytics/events/export', [App\Http\Controllers\AnalyticsController::class, 'export'])->middleware('block.viewer.export')->name('analytics.events.export');
     Route::get('/benchmarks', [App\Http\Controllers\BenchmarkController::class, 'index'])->name('benchmarks.index');
     Route::get('/api/benchmarks/top', [App\Http\Controllers\BenchmarkController::class, 'data'])->name('benchmarks.top.data');
-    Route::get('/benchmarks/compare', fn() => Inertia\Inertia::render('Benchmarks/Compare'))->name('benchmarks.compare');
+    Route::get('/benchmarks/compare', fn() => Inertia::render('Benchmarks/Compare'))->name('benchmarks.compare');
 
     // Settings
     Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
@@ -538,34 +538,34 @@ Route::middleware('auth')->group(function () {
         ->name('follow.suggestions.refresh');
 
     Route::get('/newsletter/subscribe', function () {
-        return \Inertia\Inertia::render('Newsletter/Subscribe');
+        return Inertia::render('Newsletter/Subscribe');
     })->name('newsletter.subscribe.page');
     Route::get('/admin/newsletter/subscribers', [App\Http\Controllers\NewsletterAdminController::class, 'subscribersPage'])
         ->middleware('admin')
         ->name('admin.newsletter.subscribers.page');
     Route::get('/admin/newsletter/editor', function () {
-        return \Inertia\Inertia::render('Newsletter/TemplateEditor');
+        return Inertia::render('Newsletter/TemplateEditor');
     })->middleware('admin')->name('admin.newsletter.editor.page');
     Route::get('/admin/newsletter/analytics', function () {
-        return \Inertia\Inertia::render('Newsletter/AdminAnalytics');
+        return Inertia::render('Newsletter/AdminAnalytics');
     })->middleware('admin')->name('admin.newsletter.analytics.page');
     Route::get('/admin/newsletter/suppression', function () {
-        return \Inertia\Inertia::render('Newsletter/SuppressionAdmin');
+        return Inertia::render('Newsletter/SuppressionAdmin');
     })->middleware('admin')->name('admin.newsletter.suppression.page');
     Route::get('/admin/newsletter/segmentation', function () {
-        return \Inertia\Inertia::render('Newsletter/Segmentation');
+        return Inertia::render('Newsletter/Segmentation');
     })->middleware('admin')->name('admin.newsletter.segmentation.page');
     Route::get('/admin/newsletter/providers/status', function () {
-        return \Inertia\Inertia::render('Newsletter/ProviderStatus');
+        return Inertia::render('Newsletter/ProviderStatus');
     })->middleware('admin')->name('admin.newsletter.providers.status.page');
     Route::get('/admin/newsletter/clients', function () {
-        return \Inertia\Inertia::render('Newsletter/AdminClients');
+        return Inertia::render('Newsletter/AdminClients');
     })->middleware('admin')->name('admin.newsletter.clients.page');
     Route::get('/admin/newsletter/dashboard', function () {
-        return \Inertia\Inertia::render('Newsletter/AdminDashboard');
+        return Inertia::render('Newsletter/AdminDashboard');
     })->middleware('admin')->name('admin.newsletter.dashboard.page');
     Route::get('/admin/a11y/reports', function () {
-        return \Inertia\Inertia::render('Admin/A11yReports');
+        return Inertia::render('Admin/A11yReports');
     })->middleware('admin')->name('admin.a11y.reports.page');
     Route::get('/api/admin/newsletter/subscribers', [App\Http\Controllers\NewsletterAdminController::class, 'listSubscribers'])
         ->middleware('admin')
@@ -1392,10 +1392,10 @@ Route::get('/documentation', [App\Http\Controllers\DocumentationController::clas
 Route::get('/documentation/{slug}', [App\Http\Controllers\DocumentationController::class, 'show'])->name('documentations.show');
 Route::get('/documentation/search', [App\Http\Controllers\DocumentationController::class, 'search'])->name('documentations.search');
 Route::get('/documentation/theme-guide', function () {
-    return \Inertia\Inertia::render('Documentations/ThemeGuide');
+    return Inertia::render('Documentations/ThemeGuide');
 })->name('documentations.theme-guide');
 Route::get('/documentation/accessibility-guide', function () {
-    return \Inertia\Inertia::render('Documentations/AccessibilityGuide');
+    return Inertia::render('Documentations/AccessibilityGuide');
 })->name('documentations.accessibility-guide');
 
 // Support Tickets (User-facing)

@@ -39,9 +39,10 @@ class FetchMediaStackArticles extends Command
         }
 
         try {
+            // Fetch for both English and Indonesian as requested for Explorer feature
             $articles = $mediaStackService->fetchAndStoreArticles([
                 'categories' => config('mediastack.default_categories'),
-                'language' => config('mediastack.default_language', 'id'),
+                'language' => 'en,id', // Support both languages
                 'limit' => config('mediastack.default_limit', 100),
             ]);
 
