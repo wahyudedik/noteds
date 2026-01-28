@@ -322,7 +322,7 @@ class MediaStackService
             return false;
         }
         $len = strlen($key);
-        if ($len < 32 || $len > 256) {
+        if ($len < 24 || $len > 256) {
             Log::warning('MediaStack API key length invalid');
             return false;
         }
