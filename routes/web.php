@@ -410,7 +410,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:60,1')
         ->name('notifications.destroy'); // 60 deletions per minute
     Route::post('/api/analytics/events', [App\Http\Controllers\AnalyticsController::class, 'store'])->name('analytics.events.store');
-    Route::get('/analytics/dashboard', [App\Http\Controllers\AnalyticsController::class, 'dashboard'])->name('analytics.dashboard');
+    Route::get('/analytics/dashboard', [App\Http\Controllers\AnalyticsController::class, 'dashboard'])->name('analytics.events.dashboard');
     Route::get('/analytics/events/export', [App\Http\Controllers\AnalyticsController::class, 'export'])->middleware('block.viewer.export')->name('analytics.events.export');
     Route::get('/benchmarks', [App\Http\Controllers\BenchmarkController::class, 'index'])->name('benchmarks.index');
     Route::get('/api/benchmarks/top', [App\Http\Controllers\BenchmarkController::class, 'data'])->name('benchmarks.top.data');
