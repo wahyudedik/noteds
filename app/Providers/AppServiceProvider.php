@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Listeners\BroadcastUserNotification;
 use Illuminate\Notifications\Events\NotificationSending;
 use Illuminate\Notifications\Events\NotificationSent;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Events\Login;
@@ -103,6 +105,36 @@ class AppServiceProvider extends ServiceProvider
 
         Event::listen(Login::class, function (Login $event) {
             app(\App\Services\GamificationService::class)->awardDailyLogin($event->user);
+        });
+
+        RateLimiter::for('analytics', function ($request) {
+            $user = $request->user();
+            $role = $user?->role ?? 'free';
+            $base = config('ratelimit.analytics.per_minute');
+            $overrides = config("ratelimit.role_overrides.$role.analytics.per_minute");
+            $dyn = \Illuminate\Support\Facades\Cache::get('rate_limit:analytics');
+            $limit = ($dyn['limit'] ?? null) ?: ($overrides ?: $base);
+            return Limit::perMinute($limit)->by($user?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('chat', function ($request) {
+            $user = $request->user();
+            $role = $user?->role ?? 'free';
+            $base = config('ratelimit.chat.per_minute');
+            $overrides = config("ratelimit.role_overrides.$role.chat.per_minute");
+            $dyn = \Illuminate\Support\Facades\Cache::get('rate_limit:chat');
+            $limit = ($dyn['limit'] ?? null) ?: ($overrides ?: $base);
+            return Limit::perMinute($limit)->by($user?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('search', function ($request) {
+            $user = $request->user();
+            $role = $user?->role ?? 'free';
+            $base = config('ratelimit.search.per_minute');
+            $overrides = config("ratelimit.role_overrides.$role.search.per_minute");
+            $dyn = \Illuminate\Support\Facades\Cache::get('rate_limit:search');
+            $limit = ($dyn['limit'] ?? null) ?: ($overrides ?: $base);
+            return Limit::perMinute($limit)->by($user?->id ?: $request->ip());
         });
     }
 }

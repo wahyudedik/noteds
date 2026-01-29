@@ -14,8 +14,5 @@ class StreamAnalytics extends Model
         'live_stream_id', 'views_count', 'chat_count', 'duration_seconds',
     ];
 
-    public function stream(): BelongsTo
-    {
-        return $this->belongsTo(LiveStream::class, 'live_stream_id');
-    }
+    // stream relation removed after Streams feature deprecation
 }

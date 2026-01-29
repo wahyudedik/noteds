@@ -1,0 +1,14 @@
+{
+  "whitelist": [
+    "@mycompany/internal-*"
+  ],
+  "blacklist": [
+    "deprecated-lib",
+    "event-stream@3.3.6"
+  ],
+  "criticalRingfence": [
+    "webpack",
+    "typescript",
+    "react"
+  ]
+}

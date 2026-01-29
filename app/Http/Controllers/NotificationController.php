@@ -77,14 +77,30 @@ class NotificationController extends Controller
     {
         $user = $request->user();
         $notification = $user->notifications()->findOrFail($id);
-        
+
         // Get redirect URL before marking as read
         $redirectUrl = $this->getRedirectUrl($notification, $user);
-        
+
         // Mark notification as read
         $notification->markAsRead();
 
         // Redirect to the appropriate URL
+        return redirect($redirectUrl);
+    }
+
+    /**
+     * Signed GET fallback to mark a notification as read.
+     *
+     * @param Request $request
+     * @param string $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function readSigned(Request $request, string $id)
+    {
+        $user = $request->user();
+        $notification = $user->notifications()->findOrFail($id);
+        $redirectUrl = $this->getRedirectUrl($notification, $user);
+        $notification->markAsRead();
         return redirect($redirectUrl);
     }
 
@@ -150,29 +166,29 @@ class NotificationController extends Controller
         try {
             return match ($type) {
                 // Support Tickets
-                'new_support_ticket' => $user->isAdmin() 
+                'new_support_ticket' => $user->isAdmin()
                     ? route('admin.support-tickets.show', $data['ticket_id'] ?? '')
                     : route('notifications.index'),
-                
+
                 'support_ticket_response' => ($data['is_admin_response'] ?? false)
                     ? route('support.tickets.show', $data['ticket_id'] ?? '')
                     : route('admin.support-tickets.show', $data['ticket_id'] ?? ''),
-                
+
                 'support_ticket_status_update' => $user->isAdmin()
                     ? route('admin.support-tickets.show', $data['ticket_id'] ?? '')
                     : route('support.tickets.show', $data['ticket_id'] ?? ''),
-                
+
                 // Clips
                 'clip_approved' => route('clipper.clips.show', $data['clip_id'] ?? ''),
                 'clip_rejected' => route('clipper.clips.show', $data['clip_id'] ?? ''),
                 'clip_submitted' => route('admin.clips.show', $data['clip_id'] ?? ''),
                 'view_validated' => route('clipper.clips.show', $data['clip_id'] ?? ''),
                 'fraud_detected' => route('admin.clips.show', $data['clip_id'] ?? ''),
-                
+
                 // Brand
                 'brand_approved' => route('clipper.brand-registration.show'),
                 'brand_rejected' => route('clipper.brand-registration.show'),
-                
+
                 // Campaigns
                 'new_campaign' => route('clipper.campaigns.available'),
                 'campaign_created' => route('admin.campaigns.show', $data['campaign_id'] ?? ''),
@@ -180,43 +196,43 @@ class NotificationController extends Controller
                 'campaign_suspended' => $user->isAdmin()
                     ? route('admin.campaigns.show', $data['campaign_id'] ?? '')
                     : route('clipper.campaigns.show', $data['campaign_id'] ?? ''),
-                
+
                 // Orders
                 'new_order' => route('marketplace.seller.orders.show', $data['order_id'] ?? ''), // Always sent to seller
-                
+
                 'order_created' => $user->isAdmin()
                     ? route('notifications.index') // No admin.orders.show route exists
                     : route('marketplace.orders.show', $data['order_id'] ?? ''),
-                
+
                 'order_cancelled' => ($data['role'] ?? '') === 'seller'
                     ? route('marketplace.seller.orders.show', $data['order_id'] ?? '')
                     : route('marketplace.orders.show', $data['order_id'] ?? ''),
-                
+
                 'order_status_update' => route('marketplace.orders.show', $data['order_id'] ?? ''),
                 'payment_failed' => route('marketplace.orders.show', $data['order_id'] ?? ''),
-                
+
                 // Withdrawals
                 'withdrawal_status' => $this->getWithdrawalRoute($data, $user),
                 'withdrawal_request' => route('admin.withdrawals.show', $data['withdrawal_id'] ?? ''),
-                
+
                 // Products
                 'product_approved' => route('marketplace.products.show', $data['product_id'] ?? ''),
                 'product_rejected' => route('marketplace.products.show', $data['product_id'] ?? ''),
                 'product_created' => route('admin.products.index'), // No show route, use index
-                
+
                 // Posts
                 'post_moderated' => route('posts.show', $data['post_id'] ?? ''),
                 'post_restored' => route('posts.show', $data['post_id'] ?? ''),
-                
+
                 // Reports
                 'content_reported' => route('admin.reports.show', $data['report_id'] ?? ''),
-                
+
                 // Rewards & Wallet
                 'reward_received' => route('clipper.wallet.clipper'),
-                
+
                 // Top Up
                 'topup_success' => route('clipper.top-ups.show', $data['top_up_id'] ?? ''),
-                
+
                 // Default fallback
                 default => route('notifications.index'),
             };
@@ -236,7 +252,7 @@ class NotificationController extends Controller
     private function getWithdrawalRoute(array $data, $user): string
     {
         $withdrawalId = $data['withdrawal_id'] ?? null;
-        
+
         if (!$withdrawalId) {
             return route('notifications.index');
         }
@@ -244,7 +260,7 @@ class NotificationController extends Controller
         // Try to load the withdrawal to determine type
         try {
             $withdrawal = \App\Models\Withdrawal::find($withdrawalId);
-            
+
             if (!$withdrawal) {
                 return route('notifications.index');
             }
@@ -262,10 +278,9 @@ class NotificationController extends Controller
             if ($user->products()->exists()) {
                 return route('marketplace.withdrawals.show', $withdrawalId);
             }
-            
+
             // Otherwise, try clipper withdrawal
             return route('clipper.withdrawals.show', $withdrawalId);
         }
     }
 }
-

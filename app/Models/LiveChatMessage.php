@@ -14,10 +14,7 @@ class LiveChatMessage extends Model
         'live_stream_id', 'user_id', 'content',
     ];
 
-    public function stream(): BelongsTo
-    {
-        return $this->belongsTo(LiveStream::class, 'live_stream_id');
-    }
+    // stream relation removed after Streams feature deprecation
 
     public function user(): BelongsTo
     {

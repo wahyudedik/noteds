@@ -1,0 +1,55 @@
+name: Messaging Load Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      conversations:
+        description: Number of conversations
+        required: false
+        default: "1000"
+      messages:
+        description: Messages per conversation
+        required: false
+        default: "10"
+
+jobs:
+  load-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: noteds_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, pdo_mysql, xml, curl, dom, fileinfo, redis
+          coverage: none
+      - name: Install Composer deps
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Copy testing env
+        run: |
+          cp .env.example .env.testing
+          sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env.testing
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env.testing
+          sed -i 's/^DB_PORT=.*/DB_PORT=3306/' .env.testing
+          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=noteds_test/' .env.testing
+          sed -i 's/^DB_USERNAME=.*/DB_USERNAME=root/' .env.testing
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=root/' .env.testing
+      - name: Prepare DB
+        run: php artisan db:test:prepare
+      - name: Run load test
+        run: php artisan messaging:load-test --conversations=${{ github.event.inputs.conversations }} --messages=${{ github.event.inputs.messages }}

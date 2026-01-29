@@ -13,7 +13,8 @@ use App\Http\Controllers\HealthController;
 |
 */
 
-Route::get('/health', [HealthController::class, 'check'])->name('health.check');
-Route::get('/health/live', [HealthController::class, 'live'])->name('health.live');
-Route::get('/health/ready', [HealthController::class, 'ready'])->name('health.ready');
+Route::get('/health', [HealthController::class, 'check'])->middleware(\App\Http\Middleware\HealthLatencyMiddleware::class)->name('health.check');
+Route::get('/health/live', [HealthController::class, 'live'])->middleware(\App\Http\Middleware\HealthLatencyMiddleware::class)->name('health.live');
+Route::get('/health/ready', [HealthController::class, 'ready'])->middleware(\App\Http\Middleware\HealthLatencyMiddleware::class)->name('health.ready');
+Route::get('/health/alert-config', [HealthController::class, 'alertConfig'])->name('health.alert.config');
 

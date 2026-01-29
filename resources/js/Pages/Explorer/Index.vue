@@ -7,15 +7,14 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import SocialShareButtons from '@/Components/Social/SocialShareButtons.vue';
 import { sharePlacement } from '@/config/sharePlacement';
 import YouMightLike from '@/Components/Recommendations/YouMightLike.vue';
-import TrendingContent from '@/Components/Recommendations/TrendingContent.vue';
-import { ref } from 'vue';
+ 
 
 const props = defineProps({
     articles: Object,
     filters: Object,
     categories: Array,
 });
-const period = ref('week');
+ 
 
 const changeCategory = (category) => {
     router.get(route('explorer.index'), { 
@@ -94,26 +93,7 @@ const btoaSafe = (s) => {
                         </div>
                         <div class="mt-4 space-y-4">
                             <LiveScoreWidget />
-                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div class="text-sm font-semibold text-gray-900 dark:text-white">Trending</div>
-                                    <div class="flex gap-1">
-                                        <button
-                                          @click="period = 'today'"
-                                          :class="['px-2 py-1 text-xs rounded', period === 'today' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300']"
-                                        >Today</button>
-                                        <button
-                                          @click="period = 'week'"
-                                          :class="['px-2 py-1 text-xs rounded', period === 'week' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300']"
-                                        >7d</button>
-                                        <button
-                                          @click="period = 'month'"
-                                          :class="['px-2 py-1 text-xs rounded', period === 'month' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300']"
-                                        >30d</button>
-                                    </div>
-                                </div>
-                                <TrendingContent :period="period" />
-                            </div>
+ 
                             <YouMightLike />
                             <div v-if="sharePlacement.explorer.enabled && sharePlacement.explorer.position === 'sidebar'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-3">
                                 <div class="text-sm font-semibold mb-2">Bagikan Explorer</div>

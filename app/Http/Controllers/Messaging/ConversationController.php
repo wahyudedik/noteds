@@ -29,12 +29,33 @@ class ConversationController extends Controller
     {
         $user = $request->user();
         
-        $conversations = $user->conversations()
-            ->with(['activeParticipants.user', 'messages' => function ($query) {
-                $query->latest()->limit(1)->with(['user', 'media']);
-            }])
-            ->orderBy('last_message_at', 'desc')
-            ->paginate(20);
+        $t0 = microtime(true);
+        $page = (int) ($request->get('page', 1));
+        $cacheKey = "conv:list:{$user->id}:{$page}";
+        $conversations = \Illuminate\Support\Facades\Cache::remember($cacheKey, 10, function () use ($user) {
+            return $user->conversations()
+                ->with(['activeParticipants.user', 'messages' => function ($query) {
+                    $query->latest()->limit(1)->with(['user', 'media']);
+                }])
+                ->orderBy('last_message_at', 'desc')
+                ->paginate(20);
+        });
+        $elapsed = (microtime(true) - $t0) * 1000;
+        try {
+            \Illuminate\Support\Facades\Redis::incrbyfloat('metrics:messaging:conversations.index:sum_ms', $elapsed);
+            \Illuminate\Support\Facades\Redis::incr('metrics:messaging:conversations.index:count');
+            \Illuminate\Support\Facades\Redis::zadd('metrics:latency:messaging.conversations.index:samples', [ (int) floor(microtime(true)) => $elapsed ]);
+            \Illuminate\Support\Facades\Redis::zremrangebyscore('metrics:latency:messaging.conversations.index:samples', 0, (int) floor(microtime(true)) - 3600);
+        } catch (\Throwable $e) {
+            $sum = (float) \Illuminate\Support\Facades\Cache::get('metrics:messaging:conversations.index:sum_ms', 0);
+            $cnt = (int) \Illuminate\Support\Facades\Cache::get('metrics:messaging:conversations.index:count', 0);
+            \Illuminate\Support\Facades\Cache::put('metrics:messaging:conversations.index:sum_ms', $sum + $elapsed, 600);
+            \Illuminate\Support\Facades\Cache::put('metrics:messaging:conversations.index:count', $cnt + 1, 600);
+            $samples = \Illuminate\Support\Facades\Cache::get('metrics:latency:messaging.conversations.index:samples', []);
+            $samples[] = ['ts' => time(), 'ms' => $elapsed];
+            $samples = array_filter($samples, fn($x) => ($x['ts'] ?? 0) >= time() - 3600);
+            \Illuminate\Support\Facades\Cache::put('metrics:latency:messaging.conversations.index:samples', $samples, 600);
+        }
 
         // Add unread counts and display info
         foreach ($conversations as $conversation) {
@@ -125,6 +146,7 @@ class ConversationController extends Controller
     {
         $user = $request->user();
 
+        $t0 = microtime(true);
         // Check if user is participant
         if (!$conversation->hasParticipant($user)) {
             abort(403, 'You are not a participant of this conversation.');
@@ -138,11 +160,29 @@ class ConversationController extends Controller
         // Add display info
         $conversation->display_name = $conversation->getDisplayName($user);
         $conversation->display_avatar = $conversation->getDisplayAvatar($user);
+        $participant = $conversation->participants()->where('user_id', $user->id)->first();
+        $lastReadAt = $participant?->last_read_at?->toIso8601String();
         
         $messages = $conversation->messages()
             ->with(['user', 'media', 'replyTo.user', 'readReceipts.user'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
+        $elapsed = (microtime(true) - $t0) * 1000;
+        try {
+            \Illuminate\Support\Facades\Redis::incrbyfloat('metrics:messaging:conversations.show:sum_ms', $elapsed);
+            \Illuminate\Support\Facades\Redis::incr('metrics:messaging:conversations.show:count');
+            \Illuminate\Support\Facades\Redis::zadd('metrics:latency:messaging.conversations.show:samples', [ (int) floor(microtime(true)) => $elapsed ]);
+            \Illuminate\Support\Facades\Redis::zremrangebyscore('metrics:latency:messaging.conversations.show:samples', 0, (int) floor(microtime(true)) - 3600);
+        } catch (\Throwable $e) {
+            $sum = (float) \Illuminate\Support\Facades\Cache::get('metrics:messaging:conversations.show:sum_ms', 0);
+            $cnt = (int) \Illuminate\Support\Facades\Cache::get('metrics:messaging:conversations.show:count', 0);
+            \Illuminate\Support\Facades\Cache::put('metrics:messaging:conversations.show:sum_ms', $sum + $elapsed, 600);
+            \Illuminate\Support\Facades\Cache::put('metrics:messaging:conversations.show:count', $cnt + 1, 600);
+            $samples = \Illuminate\Support\Facades\Cache::get('metrics:latency:messaging.conversations.show:samples', []);
+            $samples[] = ['ts' => time(), 'ms' => $elapsed];
+            $samples = array_filter($samples, fn($x) => ($x['ts'] ?? 0) >= time() - 3600);
+            \Illuminate\Support\Facades\Cache::put('metrics:latency:messaging.conversations.show:samples', $samples, 600);
+        }
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -151,10 +191,29 @@ class ConversationController extends Controller
             ]);
         }
 
+        // Sidebar conversations list
+        $page = (int) ($request->get('page', 1));
+        $cacheKey = "conv:list:{$user->id}:{$page}";
+        $conversations = \Illuminate\Support\Facades\Cache::remember($cacheKey, 10, function () use ($user) {
+            return $user->conversations()
+                ->with(['activeParticipants.user', 'messages' => function ($query) {
+                    $query->latest()->limit(1)->with(['user', 'media']);
+                }])
+                ->orderBy('last_message_at', 'desc')
+                ->paginate(20);
+        });
+        foreach ($conversations as $c) {
+            $c->unread_count = $c->getUnreadCount($user);
+            $c->display_name = $c->getDisplayName($user);
+            $c->display_avatar = $c->getDisplayAvatar($user);
+        }
+
         $autoPlay = (bool) ($user->settings?->auto_play_enabled ?? false);
         return Inertia::render('Messaging/Conversation', [
             'conversation' => $conversation,
             'messages' => $messages,
+            'conversations' => $conversations,
+            'lastReadAt' => $lastReadAt,
             'autoPlayEnabled' => $autoPlay,
         ]);
     }

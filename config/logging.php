@@ -143,6 +143,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'rate_limit' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/rate_limit.log'),
+            'level' => 'warning',
+            'days' => 14,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

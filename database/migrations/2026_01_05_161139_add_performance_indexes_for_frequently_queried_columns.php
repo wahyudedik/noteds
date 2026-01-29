@@ -13,15 +13,33 @@ return new class extends Migration
     private function indexExists(string $table, string $indexName): bool
     {
         $connection = Schema::getConnection();
-        $database = $connection->getDatabaseName();
-        
-        $result = DB::select(
-            "SELECT COUNT(*) as count FROM information_schema.statistics 
-             WHERE table_schema = ? AND table_name = ? AND index_name = ?",
-            [$database, $table, $indexName]
-        );
-        
-        return $result[0]->count > 0;
+        $driver = $connection->getDriverName();
+        if ($driver === 'mysql') {
+            $database = $connection->getDatabaseName();
+            $result = DB::select(
+                "SELECT COUNT(*) as count FROM information_schema.statistics 
+                 WHERE table_schema = ? AND table_name = ? AND index_name = ?",
+                [$database, $table, $indexName]
+            );
+            return !empty($result) && (int)$result[0]->count > 0;
+        }
+        if ($driver === 'pgsql') {
+            $result = DB::select(
+                "SELECT COUNT(*) as count FROM pg_indexes 
+                 WHERE schemaname = ANY (current_schemas(false)) AND tablename = ? AND indexname = ?",
+                [$table, $indexName]
+            );
+            return !empty($result) && (int)$result[0]->count > 0;
+        }
+        if ($driver === 'sqlite') {
+            $result = DB::select(
+                "SELECT COUNT(*) as count FROM sqlite_master 
+                 WHERE type = 'index' AND tbl_name = ? AND name = ?",
+                [$table, $indexName]
+            );
+            return !empty($result) && (int)$result[0]->count > 0;
+        }
+        return false;
     }
 
     /**

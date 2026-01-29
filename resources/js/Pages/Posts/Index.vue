@@ -5,8 +5,7 @@ import PostComposer from '@/Components/PostComposer.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import SidebarWidget from '@/Components/SidebarWidget.vue';
 import YouMightLike from '@/Components/Recommendations/YouMightLike.vue';
-import TrendingContent from '@/Components/Recommendations/TrendingContent.vue';
-import SimilarUsers from '@/Components/Recommendations/SimilarUsers.vue';
+ 
 
 const page = usePage();
 
@@ -55,12 +54,7 @@ defineProps({
                             <SidebarWidget title="You Might Like">
                                 <YouMightLike />
                             </SidebarWidget>
-                            <SidebarWidget title="Trending">
-                                <TrendingContent />
-                            </SidebarWidget>
-                            <SidebarWidget title="Similar Users">
-                                <SimilarUsers />
-                            </SidebarWidget>
+ 
                         </div>
                     </div>
                 </div>

@@ -18,8 +18,5 @@ class StreamLog extends Model
         'context' => 'array',
     ];
 
-    public function stream(): BelongsTo
-    {
-        return $this->belongsTo(LiveStream::class, 'live_stream_id');
-    }
+    // stream relation removed after Streams feature deprecation
 }

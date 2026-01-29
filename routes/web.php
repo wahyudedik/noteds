@@ -25,18 +25,21 @@ Route::get('/home', [App\Http\Controllers\PostController::class, 'index'])
 
 // Global Search
 Route::middleware('auth')->group(function () {
-    Route::get('/calendar', [App\Http\Controllers\CalendarController::class, 'index'])->name('calendar.index');
-    Route::get('/api/calendar/events', [App\Http\Controllers\CalendarController::class, 'events'])->name('calendar.events.index');
-    Route::post('/api/calendar/events', [App\Http\Controllers\CalendarController::class, 'store'])->name('calendar.events.store');
-    Route::put('/api/calendar/events/{event}', [App\Http\Controllers\CalendarController::class, 'update'])->name('calendar.events.update');
-    Route::get('/api/calendar/export', [App\Http\Controllers\CalendarController::class, 'export'])->name('calendar.export');
+    Route::any('/calendar/{any?}', function () {
+        return response()->json(['message' => 'Calendar feature has been removed'], 410);
+    })->where('any', '.*')->name('calendar.index');
+    Route::any('/api/calendar/{any?}', function () {
+        return response()->json(['message' => 'Calendar feature has been removed'], 410);
+    })->where('any', '.*')->name('calendar.api.removed');
 
     Route::get('/api/gamification/leaderboard', [App\Http\Controllers\GamificationController::class, 'leaderboard'])->name('gamification.leaderboard');
     Route::get('/api/gamification/me', [App\Http\Controllers\GamificationController::class, 'me'])->name('gamification.me');
     Route::get('/gamification', [App\Http\Controllers\GamificationController::class, 'overview'])->name('gamification.overview');
 
     // Scheduling
-    Route::get('/api/scheduling/calendar', [App\Http\Controllers\SchedulingController::class, 'calendar'])->name('scheduling.calendar');
+    Route::any('/api/scheduling/calendar', function () {
+        return response()->json(['message' => 'Calendar feature has been removed'], 410);
+    })->name('scheduling.calendar');
     Route::put('/api/scheduling/posts/{post}/schedule', [App\Http\Controllers\SchedulingController::class, 'updatePostSchedule'])->name('scheduling.posts.update');
     Route::post('/api/scheduling/bulk', [App\Http\Controllers\SchedulingController::class, 'bulk'])->name('scheduling.bulk');
     Route::get('/api/scheduling/{type}/{id}/recurrence', [App\Http\Controllers\SchedulingController::class, 'getRecurrence'])->name('scheduling.recurrence.get');
@@ -45,11 +48,19 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Scheduling/RecurrenceEditorPage');
     })->name('scheduling.recurrence.page');
 
-    // User Analytics Dashboard
-    Route::get('/analytics', [App\Http\Controllers\UserAnalyticsController::class, 'dashboard'])->name('analytics.dashboard');
-    Route::get('/api/analytics/overview', [App\Http\Controllers\UserAnalyticsController::class, 'overview'])->name('analytics.overview');
-    Route::get('/api/analytics/competitors', [App\Http\Controllers\UserAnalyticsController::class, 'competitors'])->name('analytics.competitors');
-    Route::get('/api/analytics/export', [App\Http\Controllers\UserAnalyticsController::class, 'export'])->name('analytics.export');
+    // User Analytics Dashboard - removed
+    Route::any('/analytics', function () {
+        return response()->json(['message' => 'Analytics feature has been removed'], 410);
+    })->name('analytics.dashboard');
+    Route::any('/api/analytics/overview', function () {
+        return response()->json(['message' => 'Analytics feature has been removed'], 410);
+    })->name('analytics.overview');
+    Route::any('/api/analytics/competitors', function () {
+        return response()->json(['message' => 'Analytics feature has been removed'], 410);
+    })->name('analytics.competitors');
+    Route::any('/api/analytics/export', function () {
+        return response()->json(['message' => 'Analytics feature has been removed'], 410);
+    })->name('analytics.export');
 
     // User Verification
     Route::get('/verification', [App\Http\Controllers\VerificationController::class, 'requestPage'])->name('verification.request');
@@ -70,13 +81,22 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/share/{type}/{id}/track', [App\Http\Controllers\ShareAnalyticsController::class, 'track'])->name('share.track');
 
     // Live Streams
-    Route::get('/streams', [App\Http\Controllers\LiveStreamController::class, 'index'])->name('streams.index');
-    Route::get('/streams/{liveStream}', [App\Http\Controllers\LiveStreamController::class, 'show'])->name('streams.show');
+    Route::any('/streams/{any?}', function ($any = null) {
+        return response()->json(['message' => 'Streams feature has been removed'], 410);
+    })->where('any', '.*')->name('streams.index');
     Route::middleware('auth')->group(function () {
-        Route::post('/streams', [App\Http\Controllers\LiveStreamController::class, 'store'])->name('streams.store');
-        Route::post('/streams/{liveStream}/start', [App\Http\Controllers\LiveStreamController::class, 'start'])->name('streams.start');
-        Route::post('/streams/{liveStream}/end', [App\Http\Controllers\LiveStreamController::class, 'end'])->name('streams.end');
-        Route::post('/api/streams/{liveStream}/chat', [App\Http\Controllers\StreamChatController::class, 'store'])->name('streams.chat.store');
+        Route::post('/streams', function () {
+            return response()->json(['message' => 'Streams feature has been removed'], 410);
+        })->name('streams.store');
+        Route::post('/streams/{liveStream}/start', function ($liveStream) {
+            return response()->json(['message' => 'Streams feature has been removed'], 410);
+        })->name('streams.start');
+        Route::post('/streams/{liveStream}/end', function ($liveStream) {
+            return response()->json(['message' => 'Streams feature has been removed'], 410);
+        })->name('streams.end');
+        Route::post('/api/streams/{liveStream}/chat', function ($liveStream) {
+            return response()->json(['message' => 'Streams feature has been removed'], 410);
+        })->name('streams.chat.store');
 
         Route::get('/admin/streaming/providers', [App\Http\Controllers\Admin\StreamingProviderController::class, 'index'])->name('admin.streaming.providers.index');
         Route::post('/admin/streaming/providers', [App\Http\Controllers\Admin\StreamingProviderController::class, 'store'])->name('admin.streaming.providers.store');
@@ -93,12 +113,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/gamification/configs', [App\Http\Controllers\Admin\GamificationAdminController::class, 'listConfigs'])->name('admin.gamification.configs');
         Route::put('/admin/gamification/configs/{key}', [App\Http\Controllers\Admin\GamificationAdminController::class, 'updateConfig'])->name('admin.gamification.configs.update');
         Route::get('/admin/gamification/export', [App\Http\Controllers\Admin\GamificationAdminController::class, 'export'])->name('admin.gamification.export');
+        Route::get('/admin/rate-limit/metrics', [App\Http\Controllers\Admin\RateLimitDashboardController::class, 'metrics'])->name('admin.rate-limit.metrics');
+        Route::get('/admin/rate-limit', function () {
+            return Inertia::render('Admin/RateLimitDashboard');
+        })->name('admin.rate-limit.dashboard');
     });
     Route::get('/search', [App\Http\Controllers\SearchController::class, 'index'])
-        ->middleware('throttle:30,1')
+        ->middleware('throttle:60,1')
         ->name('search.index'); // 30 searches per minute
     Route::get('/search/suggestions', [App\Http\Controllers\SearchController::class, 'suggestions'])
-        ->middleware('throttle:60,1')
+        ->middleware('throttle:search')
         ->name('search.suggestions'); // 60 suggestions per minute
     Route::post('/search/saved', [App\Http\Controllers\SearchController::class, 'saved'])
         ->middleware('throttle:30,1')
@@ -121,11 +145,15 @@ Route::middleware('auth')->group(function () {
     Route::post('/events', [App\Http\Controllers\EventController::class, 'store'])
         ->middleware('throttle:30,1')
         ->name('events.store');
-    Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'show'])->name('events.show');
+    Route::get('/events/{event}', [App\Http\Controllers\EventController::class, 'show'])
+        ->where('event', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+        ->name('events.show');
     Route::put('/events/{event}', [App\Http\Controllers\EventController::class, 'update'])
+        ->where('event', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
         ->middleware('throttle:30,1')
         ->name('events.update');
     Route::delete('/events/{event}', [App\Http\Controllers\EventController::class, 'destroy'])
+        ->where('event', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
         ->middleware('throttle:30,1')
         ->name('events.destroy');
     Route::post('/events/{event}/invite', [App\Http\Controllers\EventController::class, 'invite'])
@@ -134,9 +162,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/events/{event}/rsvp', [App\Http\Controllers\EventController::class, 'rsvp'])
         ->middleware('throttle:60,1')
         ->name('events.rsvp');
-    Route::get('/events/calendar', [App\Http\Controllers\EventController::class, 'calendar'])
-        ->middleware('throttle:60,1')
-        ->name('events.calendar');
+    Route::any('/events/calendar', function () {
+        return response()->json(['message' => 'Calendar feature has been removed'], 410);
+    })->middleware('throttle:60,1')->name('events.calendar');
     Route::get('/events/search', [App\Http\Controllers\EventController::class, 'search'])
         ->middleware('throttle:60,1')
         ->name('events.search');
@@ -222,7 +250,7 @@ Route::middleware(['auth'])->group(function () {
         ->where('post', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
         ->name('posts.show');
     Route::post('/posts/{post}/vote', [App\Http\Controllers\VoteController::class, 'votePost'])
-        ->middleware('throttle:30,5') // 30 votes per 5 minutes
+        ->middleware('throttle:90,5') // 30 votes per 5 minutes
         ->name('votes.post');
     // Repost routes
     Route::post('/posts/{post}/repost', [App\Http\Controllers\RepostController::class, 'store'])
@@ -260,10 +288,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/posts/{post}/reposts/export', [App\Http\Controllers\RepostAnalyticsController::class, 'export'])
         ->name('reposts.export');
     Route::post('/posts/{post}/comments', [App\Http\Controllers\CommentController::class, 'store'])
-        ->middleware('throttle:10,5') // 10 comments per 5 minutes
+        ->middleware('throttle:30,5') // 10 comments per 5 minutes
         ->name('comments.store');
     Route::post('/comments/{comment}/best-answer', [App\Http\Controllers\CommentController::class, 'markBestAnswer'])
-        ->middleware('throttle:10,5') // 10 per 5 minutes
+        ->middleware('throttle:20,5') // 10 per 5 minutes
         ->name('comments.best-answer');
 
     // Comment media upload
@@ -273,7 +301,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Comment editing
     Route::put('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'update'])
-        ->middleware('throttle:10,5')
+        ->middleware('throttle:30,5')
         ->name('comments.update');
     Route::get('/comments/{comment}/history', [App\Http\Controllers\CommentController::class, 'history'])
         ->middleware('auth')
@@ -281,15 +309,15 @@ Route::middleware(['auth'])->group(function () {
 
     // Comment pinning
     Route::post('/comments/{comment}/pin', [App\Http\Controllers\CommentController::class, 'pin'])
-        ->middleware('throttle:10,5')
+        ->middleware('throttle:20,5')
         ->name('comments.pin');
     Route::post('/comments/{comment}/unpin', [App\Http\Controllers\CommentController::class, 'unpin'])
-        ->middleware('throttle:10,5')
+        ->middleware('throttle:20,5')
         ->name('comments.unpin');
 
     // Comment deletion
     Route::delete('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'destroy'])
-        ->middleware('throttle:10,5')
+        ->middleware('throttle:20,5')
         ->name('comments.destroy');
 
     // Comment reactions
@@ -409,9 +437,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/notifications/{notification}', [App\Http\Controllers\NotificationController::class, 'destroy'])
         ->middleware('throttle:60,1')
         ->name('notifications.destroy'); // 60 deletions per minute
-    Route::post('/api/analytics/events', [App\Http\Controllers\AnalyticsController::class, 'store'])->name('analytics.events.store');
+    Route::post('/api/analytics/events', [App\Http\Controllers\AnalyticsController::class, 'store'])->middleware('throttle:analytics')->name('analytics.events.store');
     Route::get('/analytics/dashboard', [App\Http\Controllers\AnalyticsController::class, 'dashboard'])->name('analytics.events.dashboard');
     Route::get('/analytics/events/export', [App\Http\Controllers\AnalyticsController::class, 'export'])->middleware('block.viewer.export')->name('analytics.events.export');
+    Route::get('/notifications/{notification}/read', [App\Http\Controllers\NotificationController::class, 'readSigned'])
+        ->middleware(['auth'])
+        ->name('notifications.read.get');
     Route::get('/benchmarks', [App\Http\Controllers\BenchmarkController::class, 'index'])->name('benchmarks.index');
     Route::get('/api/benchmarks/top', [App\Http\Controllers\BenchmarkController::class, 'data'])->name('benchmarks.top.data');
     Route::get('/benchmarks/compare', fn() => Inertia::render('Benchmarks/Compare'))->name('benchmarks.compare');
@@ -1588,6 +1619,11 @@ Route::middleware('auth')->prefix('messaging')->name('messaging.')->group(functi
         ->middleware('throttle:10,1')
         ->name('conversations.unmute');
 
+    // UX Prototype
+    Route::get('/prototype', function () {
+        return Inertia::render('Messaging/UXPrototype');
+    })->name('prototype');
+
     // Messages
     Route::get('/conversations/{conversation}/messages', [App\Http\Controllers\Messaging\MessageController::class, 'index'])
         ->middleware('throttle:60,1') // 60 requests per minute
@@ -1655,11 +1691,19 @@ Route::middleware('auth')->prefix('groups')->name('groups.')->group(function () 
 
     Route::get('/{slug}/events', [App\Http\Controllers\Community\GroupEventController::class, 'index'])->name('events.index');
     Route::post('/{slug}/events', [App\Http\Controllers\Community\GroupEventController::class, 'store'])->name('events.store');
-    Route::get('/{slug}/events/{event}', [App\Http\Controllers\Community\GroupEventController::class, 'show'])->name('events.show');
-    Route::put('/{slug}/events/{event}', [App\Http\Controllers\Community\GroupEventController::class, 'update'])->name('events.update');
-    Route::delete('/{slug}/events/{event}', [App\Http\Controllers\Community\GroupEventController::class, 'destroy'])->name('events.destroy');
+    Route::get('/{slug}/events/{event}', [App\Http\Controllers\Community\GroupEventController::class, 'show'])
+        ->where('event', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+        ->name('events.show');
+    Route::put('/{slug}/events/{event}', [App\Http\Controllers\Community\GroupEventController::class, 'update'])
+        ->where('event', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+        ->name('events.update');
+    Route::delete('/{slug}/events/{event}', [App\Http\Controllers\Community\GroupEventController::class, 'destroy'])
+        ->where('event', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+        ->name('events.destroy');
     Route::post('/{slug}/events/{event}/rsvp', [App\Http\Controllers\Community\GroupEventController::class, 'rsvp'])->name('events.rsvp');
-    Route::get('/{slug}/events/calendar', [App\Http\Controllers\Community\GroupEventController::class, 'calendar'])->name('events.calendar');
+    Route::any('/{slug}/events/calendar', function ($slug) {
+        return response()->json(['message' => 'Calendar feature has been removed'], 410);
+    })->name('events.calendar');
     Route::get('/{slug}/analytics', [App\Http\Controllers\Community\GroupAnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/{slug}/analytics/export/csv', [App\Http\Controllers\Community\GroupAnalyticsController::class, 'exportCsv'])->name('analytics.export.csv');
     Route::get('/{slug}/analytics/export/pdf', [App\Http\Controllers\Community\GroupAnalyticsController::class, 'exportPdf'])->name('analytics.export.pdf');

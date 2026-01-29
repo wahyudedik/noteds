@@ -7,11 +7,18 @@
         ]"
     >
         <div class="flex items-center space-x-3">
-            <img
-                :src="conversation.display_avatar || '/default-avatar.png'"
-                :alt="conversation.display_name"
-                class="w-12 h-12 rounded-full"
-            />
+            <template v-if="conversation.display_avatar">
+                <img
+                    :src="conversation.display_avatar"
+                    :alt="conversation.display_name"
+                    class="w-12 h-12 rounded-full object-cover"
+                />
+            </template>
+            <template v-else>
+                <div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
+                    {{ initials }}
+                </div>
+            </template>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center justify-between">
                     <p class="text-sm font-medium text-gray-900 truncate">
@@ -73,5 +80,12 @@ const formatTime = (date) => {
     if (minutes < 1440) return `${Math.floor(minutes / 60)}h ago`;
     return d.toLocaleDateString();
 };
+
+const initials = computed(() => {
+    const name = (props.conversation?.display_name || '').trim();
+    if (!name) return '?';
+    const parts = name.split(/\s+/).slice(0, 2);
+    return parts.map(p => p[0]?.toUpperCase()).join('');
+});
 </script>
 

@@ -267,12 +267,12 @@ const toggleDropdown = () => {
     isOpen.value = !isOpen.value;
 };
 
-const markAsRead = (notification) => {
+const markAsRead = async (notification) => {
     if (notification.read_at) return;
-    
-    router.post(route('notifications.read', notification.id), {}, {
-        preserveScroll: true,
-    });
+    try {
+        await window.axios.post(route('notifications.read', notification.id), {});
+        notification.read_at = new Date().toISOString();
+    } catch {}
 };
 
 const handleClickOutside = (event) => {

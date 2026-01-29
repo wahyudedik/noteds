@@ -34,10 +34,35 @@ class MessageController extends Controller
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
-        $messages = $conversation->messages()
+        $t0 = microtime(true);
+        $limit = max(1, min(50, (int) $request->get('limit', 20)));
+        $before = $request->get('before');
+        $query = $conversation->messages()
             ->with(['user', 'media', 'replyTo.user', 'readReceipts.user'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->orderBy('created_at', 'desc');
+        if ($before) {
+            try {
+                $dt = \Illuminate\Support\Carbon::parse($before);
+                $query->where('created_at', '<', $dt);
+            } catch (\Throwable $e) {}
+        }
+        $messages = $query->paginate($limit);
+        $elapsed = (microtime(true) - $t0) * 1000;
+        try {
+            \Illuminate\Support\Facades\Redis::incrbyfloat('metrics:messaging:messages.index:sum_ms', $elapsed);
+            \Illuminate\Support\Facades\Redis::incr('metrics:messaging:messages.index:count');
+            \Illuminate\Support\Facades\Redis::zadd('metrics:latency:messaging.messages.index:samples', [ (int) floor(microtime(true)) => $elapsed ]);
+            \Illuminate\Support\Facades\Redis::zremrangebyscore('metrics:latency:messaging.messages.index:samples', 0, (int) floor(microtime(true)) - 3600);
+        } catch (\Throwable $e) {
+            $sum = (float) \Illuminate\Support\Facades\Cache::get('metrics:messaging:messages.index:sum_ms', 0);
+            $cnt = (int) \Illuminate\Support\Facades\Cache::get('metrics:messaging:messages.index:count', 0);
+            \Illuminate\Support\Facades\Cache::put('metrics:messaging:messages.index:sum_ms', $sum + $elapsed, 600);
+            \Illuminate\Support\Facades\Cache::put('metrics:messaging:messages.index:count', $cnt + 1, 600);
+            $samples = \Illuminate\Support\Facades\Cache::get('metrics:latency:messaging.messages.index:samples', []);
+            $samples[] = ['ts' => time(), 'ms' => $elapsed];
+            $samples = array_filter($samples, fn($x) => ($x['ts'] ?? 0) >= time() - 3600);
+            \Illuminate\Support\Facades\Cache::put('metrics:latency:messaging.messages.index:samples', $samples, 600);
+        }
 
         return response()->json($messages);
     }
@@ -51,6 +76,7 @@ class MessageController extends Controller
         $validated = $request->validated();
 
         try {
+            $t0 = microtime(true);
             // Stop typing indicator
             $this->typingIndicatorService->removeTyping($conversation, $user);
             broadcast(new TypingStopped($conversation, $user))->toOthers();
@@ -74,6 +100,22 @@ class MessageController extends Controller
                 $attachments,
                 $validated['reply_to_id'] ?? null
             );
+            $elapsed = (microtime(true) - $t0) * 1000;
+            try {
+                \Illuminate\Support\Facades\Redis::incrbyfloat('metrics:messaging:messages.store:sum_ms', $elapsed);
+                \Illuminate\Support\Facades\Redis::incr('metrics:messaging:messages.store:count');
+                \Illuminate\Support\Facades\Redis::zadd('metrics:latency:messaging.messages.store:samples', [ (int) floor(microtime(true)) => $elapsed ]);
+                \Illuminate\Support\Facades\Redis::zremrangebyscore('metrics:latency:messaging.messages.store:samples', 0, (int) floor(microtime(true)) - 3600);
+            } catch (\Throwable $e) {
+                $sum = (float) \Illuminate\Support\Facades\Cache::get('metrics:messaging:messages.store:sum_ms', 0);
+                $cnt = (int) \Illuminate\Support\Facades\Cache::get('metrics:messaging:messages.store:count', 0);
+                \Illuminate\Support\Facades\Cache::put('metrics:messaging:messages.store:sum_ms', $sum + $elapsed, 600);
+                \Illuminate\Support\Facades\Cache::put('metrics:messaging:messages.store:count', $cnt + 1, 600);
+                $samples = \Illuminate\Support\Facades\Cache::get('metrics:latency:messaging.messages.store:samples', []);
+                $samples[] = ['ts' => time(), 'ms' => $elapsed];
+                $samples = array_filter($samples, fn($x) => ($x['ts'] ?? 0) >= time() - 3600);
+                \Illuminate\Support\Facades\Cache::put('metrics:latency:messaging.messages.store:samples', $samples, 600);
+            }
 
             return response()->json([
                 'message' => $message,

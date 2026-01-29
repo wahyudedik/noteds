@@ -41,6 +41,12 @@ const loadMore = () => {
         preserveScroll: true,
     });
 };
+function getInitials(user) {
+    const base = (user?.business_name || user?.name || '').trim();
+    if (!base) return '?';
+    const parts = base.split(/\s+/).slice(0, 2);
+    return parts.map(p => p[0]?.toUpperCase()).join('');
+}
 </script>
 
 <template>
@@ -80,11 +86,18 @@ const loadMore = () => {
                             :href="route('profile.show', repost.user?.id)"
                             class="flex-shrink-0"
                         >
-                            <img
-                                :src="repost.user?.avatar || '/default-avatar.png'"
-                                :alt="repost.user?.name"
-                                class="w-10 h-10 rounded-full"
-                            />
+                            <template v-if="repost.user?.avatar">
+                                <img
+                                    :src="repost.user?.avatar"
+                                    :alt="repost.user?.name"
+                                    class="w-10 h-10 rounded-full object-cover"
+                                />
+                            </template>
+                            <template v-else>
+                                <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-semibold">
+                                    {{ getInitials(repost.user) }}
+                                </div>
+                            </template>
                         </Link>
                         <div class="flex-1 min-w-0">
                             <Link

@@ -19,10 +19,7 @@ class StreamingProvider extends Model
         'active' => 'boolean',
     ];
 
-    public function streams(): HasMany
-    {
-        return $this->hasMany(LiveStream::class);
-    }
+    // streams relation removed after Streams feature deprecation
 
     public function getConfigAttribute($value)
     {

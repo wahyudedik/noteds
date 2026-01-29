@@ -21,6 +21,6 @@ class NotificationLog extends Model
 
     public function stream(): BelongsTo
     {
-        return $this->belongsTo(LiveStream::class, 'live_stream_id');
+        return $this->belongsTo(User::class, 'live_stream_id'); // deprecated: placeholder to avoid missing class
     }
 }

@@ -81,6 +81,13 @@ const quickActions = computed(() => [
         icon: '👥',
     },
     {
+        label: 'Rate Limit Dashboard',
+        route: 'admin.rate-limit.dashboard',
+        count: null,
+        color: 'bg-indigo-600 hover:bg-indigo-700',
+        icon: '📈',
+    },
+    {
         label: 'Support Tickets',
         route: 'admin.support-tickets.index',
         count: null,
