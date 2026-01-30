@@ -97,18 +97,7 @@ const canMessage = computed(() => {
                                 :can-follow="!!page.props.auth?.user"
                                 size="md"
                             />
-                            <Link
-                                v-if="!isOwnProfile && page.props.auth?.user"
-                                :href="route('messaging.conversations.create')"
-                                :aria-disabled="!canMessage"
-                                :class="[
-                                    'px-4 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all shadow-sm whitespace-nowrap',
-                                    canMessage ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                ]"
-                                :title="canMessage ? 'Kirim pesan' : 'Penerima tidak mengizinkan DM sesuai privasi'"
-                            >
-                                Message
-                            </Link>
+                            <!-- Messaging removed -->
                             <Link
                                 v-if="isOwnProfile"
                                 :href="route('profile.edit')"

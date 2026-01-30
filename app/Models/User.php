@@ -569,41 +569,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(StockWatchlist::class);
     }
 
-    /**
-     * Get conversations where user is a participant.
-     */
-    public function conversations(): BelongsToMany
-    {
-        return $this->belongsToMany(Conversation::class, 'conversation_participants')
-            ->withPivot(['role', 'joined_at', 'left_at', 'last_read_at', 'muted_until', 'archived_at'])
-            ->withTimestamps()
-            ->whereNull('conversation_participants.left_at')
-            ->orderBy('conversations.last_message_at', 'desc');
-    }
-
-    /**
-     * Get conversation participants for this user.
-     */
-    public function conversationParticipants(): HasMany
-    {
-        return $this->hasMany(ConversationParticipant::class);
-    }
-
-    /**
-     * Get messages sent by this user.
-     */
-    public function sentMessages(): HasMany
-    {
-        return $this->hasMany(Message::class);
-    }
-
-    /**
-     * Get read receipts for this user.
-     */
-    public function readReceipts(): HasMany
-    {
-        return $this->hasMany(ReadReceipt::class);
-    }
+    
 
     /**
      * Get users blocked by this user.
