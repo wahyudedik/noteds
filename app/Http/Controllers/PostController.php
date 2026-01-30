@@ -54,65 +54,8 @@ class PostController extends Controller
 
         $posts = $query->latest()->get();
 
-        // Query reposts with original post relationship loaded
-        $repostsQuery = \App\Models\Repost::with([
-            'post' => function ($query) {
-                $query->with(['user', 'media', 'hashtags', 'poll.options'])->where('status', 'active');
-            },
-            'user'
-        ])->whereHas('post', function ($query) use ($request) {
-            $query->where('status', 'active');
-            if ($request->has('purpose_type') && $request->purpose_type !== 'all') {
-                $query->where('purpose_type', $request->purpose_type);
-            }
-        })->latest();
-
-        $reposts = $repostsQuery->get();
-
-        // Transform reposts into post-like objects with original post data
-        $repostPosts = $reposts->map(function ($repost) {
-            if (!$repost->post) {
-                return null;
-            }
-
-            // Create a post-like object using original post data
-            $originalPost = $repost->post;
-
-            // Convert to array to ensure all relationships and attributes are properly serialized
-            $repostPostArray = $originalPost->toArray();
-
-            // Use repost ID as unique identifier to avoid conflicts with original post
-            $repostPostArray['id'] = 'repost_' . $repost->id;
-
-            // Set repost-specific data (ensure these are included in serialization)
-            $repostPostArray['is_repost'] = true;
-            $repostPostArray['repost_id'] = $repost->id;
-            $repostPostArray['repost_user'] = $repost->user ? $repost->user->toArray() : null;
-            $repostPostArray['repost_created_at'] = $repost->created_at?->toDateTimeString();
-            $repostPostArray['original_post_id'] = $originalPost->id; // Store original post ID for reference
-            $repostPostArray['created_at'] = $repost->created_at?->toDateTimeString(); // Use repost timestamp for sorting
-            
-            // Add quote repost data if applicable
-            if ($repost->is_quote_repost) {
-                $repostPostArray['is_quote_repost'] = true;
-                $repostPostArray['quote_content'] = $repost->quote_content;
-                $repostPostArray['quote_display_mode'] = $repost->display_mode;
-                if ($repost->quote_post_id) {
-                    $quotePost = Post::with(['user', 'media', 'hashtags'])->find($repost->quote_post_id);
-                    if ($quotePost) {
-                        $repostPostArray['quote_post'] = $quotePost->toArray();
-                    }
-                }
-            }
-            
-            // Add comment if exists
-            if ($repost->comment) {
-                $repostPostArray['repost_comment'] = $repost->comment;
-            }
-
-            // Convert back to object for consistency with regular posts
-            return (object) $repostPostArray;
-        })->filter();
+        // Fetch and transform reposts
+        $repostPosts = $this->fetchAndTransformReposts($request);
 
         // Merge regular posts and repost posts, then sort by created_at
         $allPosts = $posts->concat($repostPosts)
@@ -121,27 +64,7 @@ class PostController extends Controller
 
         // Privacy filter: respect author's posts_visibility setting
         $viewer = $request->user();
-        $allPosts = $allPosts->filter(function ($item) use ($viewer) {
-            $author = is_object($item) ? ($item->user ?? null) : ($item['user'] ?? null);
-            if (!$author) return false;
-            // normalize to model
-            if (is_array($author)) {
-                $authorModel = \App\Models\User::find($author['id'] ?? null);
-            } else {
-                $authorModel = $author;
-            }
-            if (!$authorModel) return false;
-            $vis = $authorModel->settings?->privacy_settings['posts_visibility'] ?? 'public';
-            if ($vis === 'public') return true;
-            if ($viewer && $viewer->id === $authorModel->id) return true;
-            if ($vis === 'followers') {
-                return $viewer ? $viewer->isFollowing($authorModel) : false;
-            }
-            if ($vis === 'private') {
-                return false;
-            }
-            return true;
-        })->values();
+        $allPosts = $this->filterVisiblePosts($allPosts, $viewer);
 
         // Paginate manually since we have a collection
         $perPage = 15;
@@ -158,161 +81,29 @@ class PostController extends Controller
         );
 
         // Get user vote, bookmarks, reposts, and poll votes for each post if authenticated
-        $userVotes = [];
-        $userBookmarks = [];
-        $userReposts = [];
-        $userPollVotes = [];
-        if ($request->user()) {
-            $postIds = $paginatedPosts->pluck('id')->toArray();
-            $originalPostIds = [];
-
-            // Collect original post IDs from both regular posts and reposts
-            foreach ($paginatedPosts as $post) {
-                // Check if post is a repost (can be object with is_repost property or array)
-                $isRepost = is_object($post)
-                    ? (property_exists($post, 'is_repost') && $post->is_repost)
-                    : (isset($post['is_repost']) && $post['is_repost']);
-
-                if ($isRepost) {
-                    // Get original post ID from repost
-                    $originalPostId = is_object($post)
-                        ? ($post->original_post_id ?? ($post->original_post->id ?? null))
-                        : ($post['original_post_id'] ?? ($post['original_post']['id'] ?? null));
-
-                    if ($originalPostId) {
-                        $originalPostIds[] = $originalPostId;
-                    }
-                } else {
-                    $postId = is_object($post) ? $post->id : $post['id'];
-                    $originalPostIds[] = $postId;
-                }
-            }
-            $originalPostIds = array_unique($originalPostIds);
-
-            // Get votes for original posts
-            $votes = \App\Models\PostVote::where('user_id', $request->user()->id)
-                ->whereIn('post_id', $originalPostIds)
-                ->get()
-                ->keyBy('post_id');
-
-            // Get bookmarks
-            $bookmarks = \App\Models\Bookmark::where('user_id', $request->user()->id)
-                ->whereIn('post_id', $originalPostIds)
-                ->pluck('post_id')
-                ->toArray();
-
-            // Get reposts (for original posts)
-            $userRepostRecords = \App\Models\Repost::where('user_id', $request->user()->id)
-                ->whereIn('post_id', $originalPostIds)
-                ->pluck('post_id')
-                ->toArray();
-
-            // Get poll votes
-            $polls = \App\Models\Poll::whereIn('post_id', $originalPostIds)->pluck('id');
-            if ($polls->isNotEmpty()) {
-                $pollVotes = \App\Models\PollVote::where('user_id', $request->user()->id)
-                    ->whereIn('poll_id', $polls)
-                    ->get()
-                    ->keyBy('poll_id');
-            } else {
-                $pollVotes = collect();
-            }
-
-            foreach ($paginatedPosts as $post) {
-                // Handle both object and array formats
-                $postId = is_object($post) ? $post->id : $post['id'];
-
-                // Check if post is a repost
-                $isRepost = is_object($post)
-                    ? (property_exists($post, 'is_repost') && $post->is_repost)
-                    : (isset($post['is_repost']) && $post['is_repost']);
-
-                // For reposts, use original post ID; for regular posts, use post ID
-                if ($isRepost) {
-                    $originalPostId = is_object($post)
-                        ? ($post->original_post_id ?? ($post->original_post->id ?? $postId))
-                        : ($post['original_post_id'] ?? ($post['original_post']['id'] ?? $postId));
-                } else {
-                    $originalPostId = $postId;
-                }
-
-                // Votes and bookmarks are based on original post
-                $vote = $votes->get($originalPostId);
-                $userVotes[$postId] = $vote ? $vote->vote_type : null;
-
-                $userBookmarks[$postId] = in_array($originalPostId, $bookmarks);
-
-                // Reposts are based on original post
-                $userReposts[$postId] = in_array($originalPostId, $userRepostRecords);
-
-                // Poll votes
-                $postModel = is_object($post) && isset($post->id)
-                    ? Post::find($originalPostId)
-                    : Post::find($originalPostId);
-                if ($postModel && $postModel->poll) {
-                    $pollVote = $pollVotes->get($postModel->poll->id);
-                    $userPollVotes[$postId] = $pollVote ? $pollVote->toArray() : null;
-                } else {
-                    $userPollVotes[$postId] = null;
-                }
-            }
-        }
+        $interactions = $this->getUserInteractions($paginatedPosts, $viewer);
 
         // Check if this is home route or posts.index route
         if ($request->routeIs('home')) {
             $trending = $this->feedService->getTrendingTopics(7, 5);
             $suggestedUsers = $this->feedService->getSuggestedUsers(30, 5);
             $quickStats = $this->feedService->getQuickStats($request->user());
+            $shareDraft = $this->getShareDraft($request);
 
-            // Optional share-to-post draft from product_id + UTM
-            $shareDraft = null;
-            $productId = $request->query('product_id');
-            if ($productId && \Illuminate\Support\Str::isUuid($productId)) {
-                $product = Product::find($productId);
-                if ($product) {
-                    $base = config('app.url');
-                    $utm = http_build_query([
-                        'utm_source' => $request->query('utm_source', 'noteds_home'),
-                        'utm_medium' => $request->query('utm_medium', 'social'),
-                        'utm_campaign' => $request->query('utm_campaign', 'project_post'),
-                        'utm_product' => $product->id,
-                    ]);
-                    $productUrl = "{$base}" . route('marketplace.products.show', $product->id, false) . "?{$utm}";
-                    $shareDraft = [
-                        'openComposer' => true,
-                        'title' => $product->name,
-                        'content' => ($product->description ? \Illuminate\Support\Str::limit($product->description, 180) : '') . "\n\n" . $productUrl,
-                        'link_url' => $productUrl,
-                        'link_preview_title' => $product->name,
-                        'link_preview_description' => \Illuminate\Support\Str::limit($product->description ?? '', 160),
-                        'link_preview_image' => $product->image_webp_url ?? $product->image_url ?? null,
-                        'link_preview_site_name' => config('app.name'),
-                    ];
-                }
-            }
-
-            return Inertia::render('Home', [
+            return Inertia::render('Home', array_merge([
                 'posts' => $paginatedPosts,
                 'filters' => $request->only(['purpose_type']),
                 'trending' => $trending,
                 'suggestedUsers' => $suggestedUsers,
                 'quickStats' => $quickStats,
-                'userVotes' => $userVotes,
-                'userBookmarks' => $userBookmarks,
-                'userReposts' => $userReposts,
-                'userPollVotes' => $userPollVotes,
                 'shareDraft' => $shareDraft,
-            ]);
+            ], $interactions));
         }
 
-        return Inertia::render('Posts/Index', [
+        return Inertia::render('Posts/Index', array_merge([
             'posts' => $paginatedPosts,
             'filters' => $request->only(['purpose_type']),
-            'userVotes' => $userVotes,
-            'userBookmarks' => $userBookmarks,
-            'userReposts' => $userReposts,
-            'userPollVotes' => $userPollVotes,
-        ]);
+        ], $interactions));
     }
 
     /**
@@ -440,7 +231,7 @@ class PostController extends Controller
     {
         // Extra safety check: ensure post ID is valid UUID
         // This should not happen with UUID constraint on route, but adding extra safety
-        if (!\Illuminate\Support\Str::isUuid($post->id)) {
+        if (!Str::isUuid($post->id)) {
             abort(404, 'Post not found.');
         }
 
@@ -645,7 +436,7 @@ class PostController extends Controller
         }
 
         $post->load(['hashtags', 'poll.options']);
-        
+
         $businessTypes = $this->supplierRecommendationService->getBusinessTypes();
 
         return Inertia::render('Posts/Edit', [
@@ -792,7 +583,9 @@ class PostController extends Controller
         $posts = $this->rankingService->getTopPosts($period, $metric, $perPage, $purposeType);
 
         $viewer = $request->user();
-        $posts = $posts->through(function ($post) use ($viewer) {
+
+        // Filter visible posts using collection to avoid undefined method errors on Paginator contract
+        $filteredItems = collect($posts->items())->map(function ($post) use ($viewer) {
             $author = $post->user;
             if (!$author) return null;
             $vis = $author->settings?->privacy_settings['posts_visibility'] ?? 'public';
@@ -800,12 +593,17 @@ class PostController extends Controller
             if ($viewer && $viewer->id === $author->id) return $post;
             if ($vis === 'followers' && $viewer && $viewer->isFollowing($author)) return $post;
             return null;
-        })->filter();
+        })->filter()->values();
+
+        // Update the paginator's collection if it supports it
+        if ($posts instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+            $posts->setCollection($filteredItems);
+        }
 
         $userVotes = [];
         $userBookmarks = [];
         if ($request->user()) {
-            $postIds = $posts->pluck('id')->toArray();
+            $postIds = $filteredItems->pluck('id')->toArray();
             $votes = \App\Models\PostVote::where('user_id', $request->user()->id)->whereIn('post_id', $postIds)->get()->keyBy('post_id');
             $bookmarks = \App\Models\Bookmark::where('user_id', $request->user()->id)->whereIn('post_id', $postIds)->pluck('post_id')->toArray();
             foreach ($postIds as $postId) {
@@ -959,7 +757,7 @@ class PostController extends Controller
     /**
      * Get cross-posts for a post.
      */
-    public function getCrossPosts(Request $request, Post $post): Response
+    public function getCrossPosts(Request $request, Post $post): JsonResponse
     {
         $products = $this->crossPostService->getCrossPostedProducts($post);
         $campaigns = $this->crossPostService->getCrossPostedCampaigns($post);
@@ -989,5 +787,233 @@ class PostController extends Controller
             'url' => Storage::url($filePath),
             'path' => $filePath,
         ]);
+    }
+
+    private function fetchAndTransformReposts(Request $request): \Illuminate\Support\Collection
+    {
+        // Query reposts with original post relationship loaded
+        $repostsQuery = \App\Models\Repost::with([
+            'post' => function ($query) {
+                $query->with(['user', 'media', 'hashtags', 'poll.options'])->where('status', 'active');
+            },
+            'user'
+        ])->whereHas('post', function ($query) use ($request) {
+            $query->where('status', 'active');
+            if ($request->has('purpose_type') && $request->purpose_type !== 'all') {
+                $query->where('purpose_type', $request->purpose_type);
+            }
+        })->latest();
+
+        $reposts = $repostsQuery->get();
+
+        // Transform reposts into post-like objects with original post data
+        return $reposts->map(function ($repost) {
+            if (!$repost->post) {
+                return null;
+            }
+
+            // Create a post-like object using original post data
+            $originalPost = $repost->post;
+
+            // Convert to array to ensure all relationships and attributes are properly serialized
+            $repostPostArray = $originalPost->toArray();
+
+            // Use repost ID as unique identifier to avoid conflicts with original post
+            $repostPostArray['id'] = 'repost_' . $repost->id;
+
+            // Set repost-specific data (ensure these are included in serialization)
+            $repostPostArray['is_repost'] = true;
+            $repostPostArray['repost_id'] = $repost->id;
+            $repostPostArray['repost_user'] = $repost->user ? $repost->user->toArray() : null;
+            $repostPostArray['repost_created_at'] = $repost->created_at?->toDateTimeString();
+            $repostPostArray['original_post_id'] = $originalPost->id; // Store original post ID for reference
+            $repostPostArray['created_at'] = $repost->created_at?->toDateTimeString(); // Use repost timestamp for sorting
+
+            // Add quote repost data if applicable
+            if ($repost->is_quote_repost) {
+                $repostPostArray['is_quote_repost'] = true;
+                $repostPostArray['quote_content'] = $repost->quote_content;
+                $repostPostArray['quote_display_mode'] = $repost->display_mode;
+                if ($repost->quote_post_id) {
+                    $quotePost = Post::with(['user', 'media', 'hashtags'])->find($repost->quote_post_id);
+                    if ($quotePost) {
+                        $repostPostArray['quote_post'] = $quotePost->toArray();
+                    }
+                }
+            }
+
+            // Add comment if exists
+            if ($repost->comment) {
+                $repostPostArray['repost_comment'] = $repost->comment;
+            }
+
+            // Convert back to object for consistency with regular posts
+            return (object) $repostPostArray;
+        })->filter();
+    }
+
+    private function filterVisiblePosts(\Illuminate\Support\Collection $posts, ?\App\Models\User $viewer): \Illuminate\Support\Collection
+    {
+        return $posts->filter(function ($item) use ($viewer) {
+            $author = is_object($item) ? ($item->user ?? null) : ($item['user'] ?? null);
+            if (!$author) return false;
+            // normalize to model
+            if (is_array($author)) {
+                $authorModel = \App\Models\User::find($author['id'] ?? null);
+            } else {
+                $authorModel = $author;
+            }
+            if (!$authorModel) return false;
+            $vis = $authorModel->settings?->privacy_settings['posts_visibility'] ?? 'public';
+            if ($vis === 'public') return true;
+            if ($viewer && $viewer->id === $authorModel->id) return true;
+            if ($vis === 'followers') {
+                return $viewer ? $viewer->isFollowing($authorModel) : false;
+            }
+            if ($vis === 'private') {
+                return false;
+            }
+            return true;
+        })->values();
+    }
+
+    private function getUserInteractions($paginatedPosts, ?\App\Models\User $user): array
+    {
+        $userVotes = [];
+        $userBookmarks = [];
+        $userReposts = [];
+        $userPollVotes = [];
+
+        if ($user) {
+            $originalPostIds = [];
+
+            // Collect original post IDs from both regular posts and reposts
+            foreach ($paginatedPosts as $post) {
+                // Check if post is a repost (can be object with is_repost property or array)
+                $isRepost = is_object($post)
+                    ? (property_exists($post, 'is_repost') && $post->is_repost)
+                    : (isset($post['is_repost']) && $post['is_repost']);
+
+                if ($isRepost) {
+                    // Get original post ID from repost
+                    $originalPostId = is_object($post)
+                        ? ($post->original_post_id ?? ($post->original_post->id ?? null))
+                        : ($post['original_post_id'] ?? ($post['original_post']['id'] ?? null));
+
+                    if ($originalPostId) {
+                        $originalPostIds[] = $originalPostId;
+                    }
+                } else {
+                    $postId = is_object($post) ? $post->id : $post['id'];
+                    $originalPostIds[] = $postId;
+                }
+            }
+            $originalPostIds = array_unique($originalPostIds);
+
+            // Get votes for original posts
+            $votes = \App\Models\PostVote::where('user_id', $user->id)
+                ->whereIn('post_id', $originalPostIds)
+                ->get()
+                ->keyBy('post_id');
+
+            // Get bookmarks
+            $bookmarks = \App\Models\Bookmark::where('user_id', $user->id)
+                ->whereIn('post_id', $originalPostIds)
+                ->pluck('post_id')
+                ->toArray();
+
+            // Get reposts (for original posts)
+            $userRepostRecords = \App\Models\Repost::where('user_id', $user->id)
+                ->whereIn('post_id', $originalPostIds)
+                ->pluck('post_id')
+                ->toArray();
+
+            // Get poll votes
+            $polls = \App\Models\Poll::whereIn('post_id', $originalPostIds)->pluck('id');
+            if ($polls->isNotEmpty()) {
+                $pollVotes = \App\Models\PollVote::where('user_id', $user->id)
+                    ->whereIn('poll_id', $polls)
+                    ->get()
+                    ->keyBy('poll_id');
+            } else {
+                $pollVotes = collect();
+            }
+
+            foreach ($paginatedPosts as $post) {
+                // Handle both object and array formats
+                $postId = is_object($post) ? $post->id : $post['id'];
+
+                // Check if post is a repost
+                $isRepost = is_object($post)
+                    ? (property_exists($post, 'is_repost') && $post->is_repost)
+                    : (isset($post['is_repost']) && $post['is_repost']);
+
+                // For reposts, use original post ID; for regular posts, use post ID
+                if ($isRepost) {
+                    $originalPostId = is_object($post)
+                        ? ($post->original_post_id ?? ($post->original_post->id ?? $postId))
+                        : ($post['original_post_id'] ?? ($post['original_post']['id'] ?? $postId));
+                } else {
+                    $originalPostId = $postId;
+                }
+
+                // Votes and bookmarks are based on original post
+                $vote = $votes->get($originalPostId);
+                $userVotes[$postId] = $vote ? $vote->vote_type : null;
+
+                $userBookmarks[$postId] = in_array($originalPostId, $bookmarks);
+
+                // Reposts are based on original post
+                $userReposts[$postId] = in_array($originalPostId, $userRepostRecords);
+
+                // Poll votes
+                $postModel = is_object($post) && isset($post->id)
+                    ? Post::find($originalPostId)
+                    : Post::find($originalPostId);
+                if ($postModel && $postModel->poll) {
+                    $pollVote = $pollVotes->get($postModel->poll->id);
+                    $userPollVotes[$postId] = $pollVote ? $pollVote->toArray() : null;
+                } else {
+                    $userPollVotes[$postId] = null;
+                }
+            }
+        }
+
+        return [
+            'userVotes' => $userVotes,
+            'userBookmarks' => $userBookmarks,
+            'userReposts' => $userReposts,
+            'userPollVotes' => $userPollVotes,
+        ];
+    }
+
+    private function getShareDraft(Request $request): ?array
+    {
+        $shareDraft = null;
+        $productId = $request->query('product_id');
+        if ($productId && Str::isUuid($productId)) {
+            $product = Product::find($productId);
+            if ($product) {
+                $base = config('app.url');
+                $utm = http_build_query([
+                    'utm_source' => $request->query('utm_source', 'noteds_home'),
+                    'utm_medium' => $request->query('utm_medium', 'social'),
+                    'utm_campaign' => $request->query('utm_campaign', 'project_post'),
+                    'utm_product' => $product->id,
+                ]);
+                $productUrl = "{$base}" . route('marketplace.products.show', $product->id, false) . "?{$utm}";
+                $shareDraft = [
+                    'openComposer' => true,
+                    'title' => $product->name,
+                    'content' => ($product->description ? Str::limit($product->description, 180) : '') . "\n\n" . $productUrl,
+                    'link_url' => $productUrl,
+                    'link_preview_title' => $product->name,
+                    'link_preview_description' => Str::limit($product->description ?? '', 160),
+                    'link_preview_image' => $product->image_webp_url ?? $product->image_url ?? null,
+                    'link_preview_site_name' => config('app.name'),
+                ];
+            }
+        }
+        return $shareDraft;
     }
 }

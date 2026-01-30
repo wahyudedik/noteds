@@ -419,10 +419,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    // Messaging Voice Upload
-    Route::post('/api/messaging/conversations/{conversation}/messages/voice', [App\Http\Controllers\Messaging\MessageController::class, 'storeVoice'])
-        ->middleware('throttle:10,1')
-        ->name('messaging.messages.voice.store');
+    // Messaging Voice Upload - Removed
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])
@@ -462,39 +459,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:10,60')
         ->name('settings.playback');
 
-    // Secure conversation key API (Sanctum/session)
-    Route::middleware(['throttle:10,1'])->group(function () {
-        Route::get('/api/secure/conversations/{conversation}/key', [App\Http\Controllers\Messaging\ConversationKeyController::class, 'fetch'])
-            ->name('secure.conversations.key.fetch');
-        Route::post('/api/secure/conversations/{conversation}/key/rotate', [App\Http\Controllers\Messaging\ConversationKeyController::class, 'rotate'])
-            ->name('secure.conversations.key.rotate');
-    });
+    // Secure conversation key API - Removed
 
-    // Calls API
-    Route::middleware(['throttle:60,1'])->group(function () {
-        Route::post('/api/messaging/conversations/{conversation}/calls/start', [App\Http\Controllers\Messaging\CallController::class, 'start'])
-            ->name('calls.start');
-        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/join', [App\Http\Controllers\Messaging\CallController::class, 'join'])
-            ->name('calls.join');
-        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/leave', [App\Http\Controllers\Messaging\CallController::class, 'leave'])
-            ->name('calls.leave');
-        Route::post('/api/messaging/conversations/{conversation}/calls/signal', [App\Http\Controllers\Messaging\CallController::class, 'signal'])
-            ->name('calls.signal');
-        Route::get('/api/messaging/conversations/{conversation}/calls/active', [App\Http\Controllers\Messaging\CallController::class, 'active'])
-            ->name('calls.active');
-        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/mute-all', [App\Http\Controllers\Messaging\CallController::class, 'muteAll'])
-            ->name('calls.mute_all');
-        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/kick/{userId}', [App\Http\Controllers\Messaging\CallController::class, 'kick'])
-            ->name('calls.kick');
-        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/metrics', [App\Http\Controllers\Messaging\CallController::class, 'metrics'])
-            ->name('calls.metrics');
-        Route::get('/api/messaging/conversations/{conversation}/calls/{session}/metrics', [App\Http\Controllers\Messaging\CallController::class, 'listMetrics'])
-            ->name('calls.metrics.list');
-        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/permissions/{userId}', [App\Http\Controllers\Messaging\CallController::class, 'setPermission'])
-            ->name('calls.permissions');
-        Route::post('/api/messaging/conversations/{conversation}/calls/{session}/recordings', [App\Http\Controllers\Messaging\CallController::class, 'uploadRecording'])
-            ->name('calls.recordings');
-    });
+    // Calls API - Removed
+    // Route::middleware(['throttle:60,1'])->group(function () { ... });
 
     Route::get('/api/rtc/ice', [App\Http\Controllers\RtcController::class, 'ice'])
         ->middleware('throttle:20,1')

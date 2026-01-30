@@ -26,7 +26,6 @@ class HealthController extends Controller
             'mediastack' => $this->checkMediaStack(),
             'disk' => $this->checkDiskSpace(),
             'memory' => $this->checkMemory(),
-            'messaging_latency' => $this->checkMessagingLatency(),
         ];
 
         $allHealthy = collect($checks)->every(fn($check) => $check['status'] === 'healthy');
@@ -340,65 +339,6 @@ class HealthController extends Controller
                 'error' => $e->getMessage(),
             ];
         }
-    }
-
-    protected function checkMessagingLatency(): array
-    {
-        try {
-            $keys = [
-                'conversations.index',
-                'conversations.show',
-                'messages.index',
-                'messages.store',
-            ];
-            $result = [];
-            foreach ($keys as $k) {
-                $sum = null;
-                $cnt = null;
-                try {
-                    $sum = \Illuminate\Support\Facades\Redis::get("metrics:messaging:{$k}:sum_ms");
-                    $cnt = \Illuminate\Support\Facades\Redis::get("metrics:messaging:{$k}:count");
-                } catch (\Throwable $e) {
-                    $sum = \Illuminate\Support\Facades\Cache::get("metrics:messaging:{$k}:sum_ms", 0);
-                    $cnt = \Illuminate\Support\Facades\Cache::get("metrics:messaging:{$k}:count", 0);
-                }
-                $sum = (float) ($sum ?: 0);
-                $cnt = (int) ($cnt ?: 0);
-                $avg = $cnt > 0 ? round($sum / $cnt, 2) : 0.0;
-                $result[$k] = ['avg_ms' => $avg, 'count' => $cnt];
-            }
-            return [
-                'status' => 'healthy',
-                'endpoints' => $result,
-            ];
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Messaging latency check failed: ' . $e->getMessage());
-            return [
-                'status' => 'unhealthy',
-                'error' => $e->getMessage(),
-            ];
-        }
-    }
-
-    public function alertConfig(): array
-    {
-        $env = config('app.env');
-        $critical = (int) (env('ALERT_LATENCY_THRESHOLD_MS') ?: ($env === 'production' ? 500 : 1000));
-        $warning = (int) round($critical * 0.8);
-        $cbMinutes = (int) (env('ALERT_CIRCUIT_BREAKER_MINUTES') ?: 15);
-        $rateHour = (int) (env('ALERT_RATE_LIMIT_PER_HOUR') ?: 5);
-        return [
-            'env' => $env,
-            'critical_ms' => $critical,
-            'warning_ms' => $warning,
-            'circuit_breaker_minutes' => $cbMinutes,
-            'rate_limit_per_hour' => $rateHour,
-            'slack_webhook' => !!env('SLACK_WEBHOOK_URL'),
-            'email_to' => env('ALERT_EMAIL_TO'),
-            'email_from' => env('ALERT_EMAIL_FROM'),
-            'window_minutes' => 5,
-            'evaluation_interval_seconds' => 30,
-        ];
     }
 
     /**

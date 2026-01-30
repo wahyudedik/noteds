@@ -20,10 +20,6 @@ class HealthLatencyMonitor extends Command
         $windowSec = 300; // 5 minutes
         $now = time();
         $services = [
-            'messaging.conversations.index',
-            'messaging.conversations.show',
-            'messaging.messages.index',
-            'messaging.messages.store',
             'health.check',
             'health.live',
             'health.ready',
@@ -48,13 +44,18 @@ class HealthLatencyMonitor extends Command
         try {
             $key = "metrics:latency:{$svc}:samples";
             $rows = Redis::zrangebyscore($key, $from, $to, ['WITHSCORES' => true]);
-            $sum = 0.0; $cnt = 0;
-            foreach ($rows as $ms) { $sum += (float) $ms; $cnt++; }
+            $sum = 0.0;
+            $cnt = 0;
+            foreach ($rows as $ms) {
+                $sum += (float) $ms;
+                $cnt++;
+            }
             return $cnt > 0 ? round($sum / $cnt, 2) : 0.0;
         } catch (\Throwable $e) {
             $key = "metrics:latency:{$svc}:samples";
             $arr = Cache::get($key, []);
-            $sum = 0.0; $cnt = 0;
+            $sum = 0.0;
+            $cnt = 0;
             foreach ($arr as $row) {
                 $ts = (int) ($row['ts'] ?? 0);
                 if ($ts >= $from && $ts <= $to) {
@@ -117,13 +118,19 @@ class HealthLatencyMonitor extends Command
         try {
             $text = sprintf(
                 ":rotating_light: [%s] Latency %s avg=%.2fms threshold=%d at %s\nDashboard: %s",
-                $payload['service'], strtoupper($payload['level']), $payload['avg_ms'], $payload['threshold'], $payload['timestamp'], $payload['dashboard']
+                $payload['service'],
+                strtoupper($payload['level']),
+                $payload['avg_ms'],
+                $payload['threshold'],
+                $payload['timestamp'],
+                $payload['dashboard']
             );
             $body = json_encode(['text' => $text]);
             $u = new \GuzzleHttp\Psr7\Uri($url);
             $client = new \GuzzleHttp\Client();
             $client->post($u, ['headers' => ['Content-Type' => 'application/json'], 'body' => $body, 'timeout' => 5]);
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
     }
 
     protected function notifyEmail(array $payload): void
@@ -135,11 +142,17 @@ class HealthLatencyMonitor extends Command
             $subject = sprintf('[%s] Latency %s alert', $payload['service'], strtoupper($payload['level']));
             $text = sprintf(
                 "Service: %s\nLevel: %s\nAverage: %.2f ms\nThreshold: %d ms\nTime: %s\nDashboard: %s",
-                $payload['service'], $payload['level'], $payload['avg_ms'], $payload['threshold'], $payload['timestamp'], $payload['dashboard']
+                $payload['service'],
+                $payload['level'],
+                $payload['avg_ms'],
+                $payload['threshold'],
+                $payload['timestamp'],
+                $payload['dashboard']
             );
             \Illuminate\Support\Facades\Mail::raw($text, function ($message) use ($to, $from, $subject) {
                 $message->to($to)->from($from)->subject($subject);
             });
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
     }
 }
