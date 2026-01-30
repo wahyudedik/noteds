@@ -1,5 +1,5 @@
 <template>
-  <MessagingLayout>
+  <AuthenticatedLayout>
     <div class="p-6">
       <h1 class="text-xl font-bold mb-2">Preferensi Email</h1>
       <div class="space-y-2">
@@ -15,12 +15,12 @@
         <button class="px-3 py-2 bg-blue-600 text-white rounded" @click="save">Simpan</button>
       </div>
     </div>
-  </MessagingLayout>
+  </AuthenticatedLayout>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import MessagingLayout from '@/Layouts/MessagingLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const email = ref('');
 const frequency = ref('medium');

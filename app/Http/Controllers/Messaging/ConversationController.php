@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\ConversationService;
 use App\Services\MessageService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -78,13 +79,63 @@ class ConversationController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Messaging/NewConversation');
+        $user = auth()->user();
+        // Frequent contacts with ranking (message count, last interaction)
+        $freqRows = \DB::table('conversation_participants as cp')
+            ->where('cp.user_id', $user->id)
+            ->whereNull('cp.left_at')
+            ->join('conversation_participants as cp2', 'cp2.conversation_id', '=', 'cp.conversation_id')
+            ->where('cp2.user_id', '!=', $user->id)
+            ->whereNull('cp2.left_at')
+            ->join('conversations', 'conversations.id', '=', 'cp.conversation_id')
+            ->leftJoin('messages', 'messages.conversation_id', '=', 'conversations.id')
+            ->groupBy('cp2.user_id')
+            ->select('cp2.user_id', \DB::raw('COUNT(messages.id) as msg_count'), \DB::raw('MAX(conversations.last_message_at) as last_interaction'))
+            ->orderByDesc('msg_count')
+            ->orderByDesc('last_interaction')
+            ->limit(10)
+            ->get();
+        $frequentUserIds = collect($freqRows)->pluck('user_id')->toArray();
+        $frequentUsersBase = \App\Models\User::whereIn('id', $frequentUserIds)->get(['id','name','business_name','email','avatar']);
+
+        // Following suggestions
+        $followingIds = $user->following()->pluck('following_id')->toArray();
+        $followingUsers = \App\Models\User::whereIn('id', $followingIds)->limit(10)->get(['id','name','business_name','email','avatar']);
+
+        return Inertia::render('Messaging/NewConversation', [
+            'suggestions' => [
+                'frequent' => $frequentUsersBase->map(function ($u) use ($freqRows) {
+                    $rank = collect($freqRows)->firstWhere('user_id', $u->id);
+                    return [
+                        'id' => $u->id,
+                        'name' => $u->name,
+                        'business_name' => $u->business_name,
+                        'email' => $u->email,
+                        'avatar_url' => $u->avatar_url,
+                        'msg_count' => (int) ($rank->msg_count ?? 0),
+                        'last_interaction' => $rank->last_interaction ?? null,
+                    ];
+                })->sortByDesc('msg_count')->values(),
+                'following' => $followingUsers->map(function ($u) use ($user) {
+                    $perm = $u->settings?->privacy_settings['messaging_permission'] ?? 'everyone';
+                    return [
+                        'id' => $u->id,
+                        'name' => $u->name,
+                        'business_name' => $u->business_name,
+                        'email' => $u->email,
+                        'avatar_url' => $u->avatar_url,
+                        'messaging_permission' => $perm,
+                        'is_following' => $user->isFollowing($u),
+                    ];
+                })->values(),
+            ],
+        ]);
     }
 
     /**
      * Store a newly created conversation.
      */
-    public function store(StoreConversationRequest $request): JsonResponse|Response
+    public function store(StoreConversationRequest $request): JsonResponse|Response|RedirectResponse
     {
         $user = $request->user();
         $validated = $request->validated();
@@ -137,6 +188,47 @@ class ConversationController extends Controller
             
             return back()->withErrors(['error' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Search users for messaging
+     */
+    public function searchUsers(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = $request->user();
+        $q = trim((string) $request->get('q', ''));
+        if ($q === '') {
+            return response()->json(['data' => []]);
+        }
+        $blockedIds = $user->blockedUsers()->pluck('blocked_user_id')->toArray();
+        $blockedByIds = $user->blockedByUsers()->pluck('user_id')->toArray();
+        $query = \App\Models\User::query()
+            ->where('id', '!=', $user->id)
+            ->whereNotIn('id', $blockedIds)
+            ->whereNotIn('id', $blockedByIds)
+            ->where(function ($sub) use ($q) {
+                $sub->where('name', 'like', '%' . $q . '%')
+                    ->orWhere('business_name', 'like', '%' . $q . '%')
+                    ->orWhere('email', 'like', '%' . $q . '%');
+                if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'username')) {
+                    $sub->orWhere('username', 'like', '%' . $q . '%');
+                }
+            })
+            ->orderByRaw("CASE WHEN name LIKE ? THEN 0 WHEN business_name LIKE ? THEN 1 ELSE 2 END", ["$q%","$q%"]);
+        $results = $query->limit(10)->get(['id','name','business_name','email','avatar']);
+        $data = $results->map(function ($u) use ($user) {
+            return [
+                'id' => $u->id,
+                'name' => $u->name,
+                'business_name' => $u->business_name,
+                'email' => $u->email,
+                'avatar_url' => $u->avatar_url,
+                'is_following' => $user->isFollowing($u),
+                'is_followed_by' => $user->isFollowedBy($u),
+                'messaging_permission' => $u->settings?->privacy_settings['messaging_permission'] ?? 'everyone',
+            ];
+        })->values();
+        return response()->json(['data' => $data]);
     }
 
     /**

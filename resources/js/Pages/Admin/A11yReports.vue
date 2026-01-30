@@ -1,5 +1,5 @@
 <template>
-  <MessagingLayout>
+  <AuthenticatedLayout>
     <div class="p-6">
       <h1 class="text-xl font-bold mb-2">Accessibility Reports</h1>
       <div class="flex gap-2 items-end mb-3">
@@ -49,12 +49,12 @@
         </table>
       </div>
     </div>
-  </MessagingLayout>
+  </AuthenticatedLayout>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import MessagingLayout from '@/Layouts/MessagingLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Chart from 'chart.js/auto';
 
 const reports = ref([]);

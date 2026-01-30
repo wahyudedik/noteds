@@ -1,5 +1,5 @@
 <template>
-  <MessagingLayout>
+  <AuthenticatedLayout>
     <div class="p-6">
       <h1 class="text-xl font-bold mb-2">Editor Template</h1>
       <div class="grid grid-cols-3 gap-4">
@@ -64,13 +64,13 @@
         </div>
       </div>
     </div>
-  </MessagingLayout>
+  </AuthenticatedLayout>
   <ToastContainer />
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import MessagingLayout from '@/Layouts/MessagingLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import ToastContainer from '@/Components/Common/ToastContainer.vue';
 
 const dragging = ref(null);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePostRequest;
+use App\Models\Product;
 use App\Services\FeedService;
 use App\Services\HashtagService;
 use App\Services\MentionService;
@@ -263,6 +264,33 @@ class PostController extends Controller
             $suggestedUsers = $this->feedService->getSuggestedUsers(30, 5);
             $quickStats = $this->feedService->getQuickStats($request->user());
 
+            // Optional share-to-post draft from product_id + UTM
+            $shareDraft = null;
+            $productId = $request->query('product_id');
+            if ($productId && \Illuminate\Support\Str::isUuid($productId)) {
+                $product = Product::find($productId);
+                if ($product) {
+                    $base = config('app.url');
+                    $utm = http_build_query([
+                        'utm_source' => $request->query('utm_source', 'noteds_home'),
+                        'utm_medium' => $request->query('utm_medium', 'social'),
+                        'utm_campaign' => $request->query('utm_campaign', 'project_post'),
+                        'utm_product' => $product->id,
+                    ]);
+                    $productUrl = "{$base}" . route('marketplace.products.show', $product->id, false) . "?{$utm}";
+                    $shareDraft = [
+                        'openComposer' => true,
+                        'title' => $product->name,
+                        'content' => ($product->description ? \Illuminate\Support\Str::limit($product->description, 180) : '') . "\n\n" . $productUrl,
+                        'link_url' => $productUrl,
+                        'link_preview_title' => $product->name,
+                        'link_preview_description' => \Illuminate\Support\Str::limit($product->description ?? '', 160),
+                        'link_preview_image' => $product->image_webp_url ?? $product->image_url ?? null,
+                        'link_preview_site_name' => config('app.name'),
+                    ];
+                }
+            }
+
             return Inertia::render('Home', [
                 'posts' => $paginatedPosts,
                 'filters' => $request->only(['purpose_type']),
@@ -273,6 +301,7 @@ class PostController extends Controller
                 'userBookmarks' => $userBookmarks,
                 'userReposts' => $userReposts,
                 'userPollVotes' => $userPollVotes,
+                'shareDraft' => $shareDraft,
             ]);
         }
 

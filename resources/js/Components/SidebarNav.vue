@@ -57,13 +57,7 @@ const navItems = [
         icon: 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z',
         active: () => page.url.startsWith('/explorer'),
     },
-    {
-        name: 'Messaging',
-        route: 'messaging.conversations.index',
-        icon: 'M4 4h16v12H5.17L4 17.17V4zm3 3h10M7 9h8',
-        active: () => page.url.startsWith('/messaging'),
-        requiresAuth: true,
-    },
+    // Messaging removed
     {
         name: 'Clipper',
         route: 'clipper.campaigns.index',

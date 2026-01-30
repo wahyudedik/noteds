@@ -1,5 +1,5 @@
 <template>
-  <MessagingLayout>
+  <AuthenticatedLayout>
     <div class="p-6">
       <h1 class="text-xl font-bold mb-2">Dashboard Newsletter</h1>
       <div class="grid grid-cols-2 gap-4">
@@ -28,12 +28,12 @@
         </div>
       </div>
     </div>
-  </MessagingLayout>
+  </AuthenticatedLayout>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import MessagingLayout from '@/Layouts/MessagingLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const status = ref([]);
 const overview = ref({ open_rate: 0, click_rate: 0, unsubscribe_count: 0 });

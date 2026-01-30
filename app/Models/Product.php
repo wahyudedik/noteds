@@ -36,6 +36,7 @@ class Product extends Model
         'price',
         'category',
         'image',
+        'image_webp',
         'file_download',
         'license_key',
         'is_active',
@@ -58,7 +59,7 @@ class Product extends Model
         'pricing_rules_enabled',
     ];
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_url', 'image_webp_url'];
 
     protected function casts(): array
     {
@@ -429,5 +430,12 @@ class Product extends Model
         }
 
         return asset('storage/' . $this->image);
+    }
+
+    public function getImageWebpUrlAttribute(): ?string
+    {
+        if (!$this->image_webp) return null;
+        if (str_starts_with($this->image_webp, 'http')) return $this->image_webp;
+        return asset('storage/' . $this->image_webp);
     }
 }

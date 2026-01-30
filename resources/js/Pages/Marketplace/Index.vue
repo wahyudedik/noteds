@@ -20,6 +20,7 @@ const hasMorePages = ref(true);
 const isLoading = ref(false);
 const sentinelRef = ref(null);
 const observerInstance = ref(null);
+const initialLoading = ref(true);
 
 // Initialize products list from props
 const initializeProducts = () => {
@@ -33,6 +34,7 @@ const initializeProducts = () => {
 // Initialize on mount
 onMounted(() => {
     initializeProducts();
+    initialLoading.value = false;
     
     // Setup Intersection Observer after next tick to ensure sentinelRef is mounted
     nextTick(() => {
@@ -95,6 +97,8 @@ const loadMore = () => {
         }
     );
 };
+
+// Simple rendering without virtualization
 </script>
 
 <template>
@@ -133,7 +137,16 @@ const loadMore = () => {
                             </Link>
                         </div>
 
-                        <div v-if="productsList.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                        <div v-if="initialLoading" class="space-y-4">
+                            <div class="animate-pulse grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                                <div v-for="i in 6" :key="'s-'+i" class="rounded-lg border p-4">
+                                    <div class="w-full h-40 bg-gray-200 rounded mb-3"></div>
+                                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else-if="productsList.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             <ProductCard
                                 v-for="product in productsList"
                                 :key="product.id"

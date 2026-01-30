@@ -1,5 +1,5 @@
 <template>
-  <MessagingLayout>
+  <AuthenticatedLayout>
     <div class="p-6">
       <h1 class="text-xl font-bold mb-2">Suppression List</h1>
       <div class="flex gap-2 mb-2">
@@ -19,12 +19,12 @@
         </table>
       </div>
     </div>
-  </MessagingLayout>
+  </AuthenticatedLayout>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import MessagingLayout from '@/Layouts/MessagingLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const email = ref('');
 const rows = ref([]);

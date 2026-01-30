@@ -25,6 +25,14 @@ const props = defineProps({
 
 const page = usePage();
 const editingReview = ref(null);
+const origin = (typeof window !== 'undefined' && window.location) ? window.location.origin : '';
+const ogUrl = computed(() => {
+    const rel = route('marketplace.products.show', props.product.id);
+    return origin ? (origin + rel) : rel;
+});
+const ogImage = computed(() => {
+    return props.product.image_webp_url || props.product.image_url || (origin ? origin + '/images/placeholder.png' : '/images/placeholder.png');
+});
 
 const form = useForm({
     quantity: 1,
@@ -73,7 +81,20 @@ const handleCancelReview = () => {
 </script>
 
 <template>
-    <Head :title="product.name" />
+    <Head :title="product.name">
+        <meta name="description" :content="(product.description || '').slice(0, 160)" />
+        <meta property="og:title" :content="product.name" />
+        <meta property="og:description" :content="(product.description || '').slice(0, 160)" />
+        <meta property="og:type" content="product" />
+        <meta property="og:image" :content="ogImage" />
+        <meta property="og:url" :content="ogUrl" />
+        <meta property="product:price:amount" :content="product.price" />
+        <meta property="product:price:currency" content="IDR" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" :content="product.name" />
+        <meta name="twitter:description" :content="(product.description || '').slice(0, 160)" />
+        <meta name="twitter:image" :content="ogImage" />
+    </Head>
 
     <AuthenticatedLayout>
         <div class="px-4 sm:px-6 py-4 sm:py-6">
@@ -90,8 +111,8 @@ const handleCancelReview = () => {
                     <!-- Product Image -->
                     <div class="aspect-w-16 aspect-h-9 bg-gray-100 dark:bg-gray-700">
                         <img
-                            v-if="product.image_url || product.image"
-                            :src="product.image_url || product.image"
+                            v-if="product.image_webp_url || product.image_url || product.image"
+                            :src="product.image_webp_url || product.image_url || product.image"
                             :alt="product.name"
                             class="w-full h-48 sm:h-64 lg:h-80 object-cover"
                             @error="$event.target.src = '/images/placeholder.png'"

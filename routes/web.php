@@ -799,7 +799,9 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:3,60') // 3 products per hour
         ->name('marketplace.products.store');
     Route::get('marketplace/products/{product}', [App\Http\Controllers\Marketplace\ProductController::class, 'show'])->name('marketplace.products.show');
+    Route::get('marketplace/products/{product}/share-content', [App\Http\Controllers\Marketplace\ProductController::class, 'shareContent'])->name('marketplace.products.share-content');
     Route::post('marketplace/products/{product}/share', [App\Http\Controllers\Marketplace\ProductController::class, 'trackShare'])->name('marketplace.products.share');
+    Route::post('marketplace/conversions', [App\Http\Controllers\Marketplace\ConversionController::class, 'store'])->name('marketplace.conversions.store');
     Route::get('marketplace/products/{product}/edit', [App\Http\Controllers\Marketplace\ProductController::class, 'edit'])->name('marketplace.products.edit');
     Route::put('marketplace/products/{product}', [App\Http\Controllers\Marketplace\ProductController::class, 'update'])
         ->middleware('throttle:10,60') // 10 updates per hour
@@ -1590,78 +1592,14 @@ Route::middleware('auth')->group(function () {
         ->name('api.campaigns.complete');
 });
 
-// Messaging Routes
+// Messaging Routes deprecated: legacy redirect + gone
 Route::middleware('auth')->prefix('messaging')->name('messaging.')->group(function () {
-    // Conversations
-    Route::get('/', [App\Http\Controllers\Messaging\ConversationController::class, 'index'])->name('index');
-    Route::get('/conversations/create', [App\Http\Controllers\Messaging\ConversationController::class, 'create'])->name('conversations.create');
-    Route::get('/conversations', [App\Http\Controllers\Messaging\ConversationController::class, 'index'])->name('conversations.index');
-    Route::post('/conversations', [App\Http\Controllers\Messaging\ConversationController::class, 'store'])
-        ->middleware('throttle:10,1') // 10 conversations per minute
-        ->name('conversations.store');
-    Route::get('/conversations/{conversation}', [App\Http\Controllers\Messaging\ConversationController::class, 'show'])->name('conversations.show');
-    Route::post('/conversations/{conversation}/participants', [App\Http\Controllers\Messaging\ConversationController::class, 'addParticipant'])
-        ->middleware('throttle:10,1')
-        ->name('conversations.participants.add');
-    Route::delete('/conversations/{conversation}/participants/{user}', [App\Http\Controllers\Messaging\ConversationController::class, 'removeParticipant'])
-        ->middleware('throttle:10,1')
-        ->name('conversations.participants.remove');
-    Route::post('/conversations/{conversation}/archive', [App\Http\Controllers\Messaging\ConversationController::class, 'archive'])
-        ->middleware('throttle:10,1')
-        ->name('conversations.archive');
-    Route::post('/conversations/{conversation}/unarchive', [App\Http\Controllers\Messaging\ConversationController::class, 'unarchive'])
-        ->middleware('throttle:10,1')
-        ->name('conversations.unarchive');
-    Route::post('/conversations/{conversation}/mute', [App\Http\Controllers\Messaging\ConversationController::class, 'mute'])
-        ->middleware('throttle:10,1')
-        ->name('conversations.mute');
-    Route::post('/conversations/{conversation}/unmute', [App\Http\Controllers\Messaging\ConversationController::class, 'unmute'])
-        ->middleware('throttle:10,1')
-        ->name('conversations.unmute');
-
-    // UX Prototype
-    Route::get('/prototype', function () {
-        return Inertia::render('Messaging/UXPrototype');
-    })->name('prototype');
-
-    // Messages
-    Route::get('/conversations/{conversation}/messages', [App\Http\Controllers\Messaging\MessageController::class, 'index'])
-        ->middleware('throttle:60,1') // 60 requests per minute
-        ->name('messages.index');
-    Route::post('/conversations/{conversation}/messages', [App\Http\Controllers\Messaging\MessageController::class, 'store'])
-        ->middleware('throttle:30,1') // 30 messages per minute
-        ->name('messages.store');
-    Route::put('/messages/{message}', [App\Http\Controllers\Messaging\MessageController::class, 'update'])
-        ->middleware('throttle:30,1')
-        ->name('messages.update');
-    Route::delete('/messages/{message}', [App\Http\Controllers\Messaging\MessageController::class, 'destroy'])
-        ->middleware('throttle:30,1')
-        ->name('messages.destroy');
-    Route::post('/messages/{message}/read', [App\Http\Controllers\Messaging\MessageController::class, 'markAsRead'])
-        ->middleware('throttle:60,1')
-        ->name('messages.read');
-    Route::post('/conversations/{conversation}/read', [App\Http\Controllers\Messaging\MessageController::class, 'markConversationAsRead'])
-        ->middleware('throttle:60,1')
-        ->name('conversations.read');
-    Route::get('/conversations/{conversation}/search', [App\Http\Controllers\Messaging\MessageController::class, 'search'])
-        ->middleware('throttle:30,1') // 30 searches per minute
-        ->name('messages.search');
-
-    // Typing Indicators
-    Route::post('/conversations/{conversation}/typing', [App\Http\Controllers\Messaging\TypingIndicatorController::class, 'typing'])
-        ->middleware('throttle:60,1') // 60 typing indicators per minute
-        ->name('typing.start');
-    Route::post('/conversations/{conversation}/typing/stop', [App\Http\Controllers\Messaging\TypingIndicatorController::class, 'stopTyping'])
-        ->middleware('throttle:60,1')
-        ->name('typing.stop');
-
-    // Block Users
-    Route::post('/users/{user}/block', [App\Http\Controllers\Messaging\BlockController::class, 'store'])
-        ->middleware('throttle:10,60') // 10 blocks per hour
-        ->name('users.block');
-    Route::delete('/users/{user}/block', [App\Http\Controllers\Messaging\BlockController::class, 'destroy'])
-        ->middleware('throttle:10,60')
-        ->name('users.unblock');
+    Route::get('/', function () {
+        return redirect()->route('home');
+    })->name('index');
+    Route::any('/{any}', function () {
+        abort(410, 'Messaging conversations feature has been removed');
+    })->where('any', '.*');
 });
 
 require __DIR__ . '/auth.php';

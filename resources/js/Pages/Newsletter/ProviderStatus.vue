@@ -1,5 +1,5 @@
 <template>
-  <MessagingLayout>
+  <AuthenticatedLayout>
     <div class="p-6">
       <h1 class="text-xl font-bold mb-2">Status Provider</h1>
       <div class="border rounded p-2 mb-4">
@@ -38,13 +38,13 @@
         </table>
       </div>
     </div>
-  </MessagingLayout>
+  </AuthenticatedLayout>
   <ToastContainer />
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import MessagingLayout from '@/Layouts/MessagingLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import ToastContainer from '@/Components/Common/ToastContainer.vue';
 
 const status = ref([]);

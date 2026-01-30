@@ -21,6 +21,7 @@ defineProps({
     userVotes: Object,
     userBookmarks: Object,
     auth: Object,
+    shareDraft: Object,
 });
 </script>
 
@@ -36,7 +37,7 @@ defineProps({
                     <div class="lg:col-span-8 order-2 lg:order-1">
                         <!-- Post Composer -->
                         <div class="mb-4 sm:mb-6">
-                            <PostComposer v-if="page.props.auth?.user" />
+                            <PostComposer v-if="page.props.auth?.user" :share-draft="shareDraft" />
                         </div>
 
                         <!-- Post Feed -->

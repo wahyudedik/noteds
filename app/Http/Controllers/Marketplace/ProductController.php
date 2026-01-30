@@ -23,20 +23,27 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $query = Product::with('seller')->active();
+        $page = (int) ($request->get('page', 1));
+        $search = (string) ($request->get('search', ''));
+        $category = (string) ($request->get('category', ''));
+        $version = (int) (\Illuminate\Support\Facades\Cache::get('mk:products:index:v', 1));
+        $cacheKey = "mk:products:index:v{$version}:p{$page}:s:" . md5($search) . ":c:{$category}";
+        $products = \Illuminate\Support\Facades\Cache::remember($cacheKey, 20, function () use ($request) {
+            $query = Product::with('seller')->active();
 
-        if ($request->has('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
-            });
-        }
+            if ($request->has('search')) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->search . '%')
+                      ->orWhere('description', 'like', '%' . $request->search . '%');
+                });
+            }
 
-        if ($request->has('category')) {
-            $query->where('category', $request->category);
-        }
+            if ($request->has('category')) {
+                $query->where('category', $request->category);
+            }
 
-        $products = $query->latest()->paginate(12);
+            return $query->latest()->paginate(12);
+        });
 
         return Inertia::render('Marketplace/Index', [
             'products' => $products,
@@ -58,27 +65,61 @@ class ProductController extends Controller
         }
 
         // Get paginated reviews
-        $reviews = $product->reviews()
-            ->with('user')
-            ->latest()
-            ->paginate(10);
+        $page = (int) ($request->get('page', 1));
+        $pver = (int) (\Illuminate\Support\Facades\Cache::get("mk:product:{$product->id}:v", 1));
+        $cacheKey = "mk:products:{$product->id}:v{$pver}:reviews:p{$page}";
+        $reviews = \Illuminate\Support\Facades\Cache::remember($cacheKey, 30, function () use ($product) {
+            return $product->reviews()
+                ->with('user')
+                ->latest()
+                ->paginate(10);
+        });
+        $avgKey = "mk:products:{$product->id}:v{$pver}:avg_rating";
+        $countKey = "mk:products:{$product->id}:v{$pver}:reviews_count";
+        $averageRating = \Illuminate\Support\Facades\Cache::remember($avgKey, 60, fn() => $product->averageRating());
+        $reviewsCount = \Illuminate\Support\Facades\Cache::remember($countKey, 60, fn() => $product->reviews()->count());
 
         return Inertia::render('Marketplace/Product/Show', [
             'product' => $product,
-            'averageRating' => $product->averageRating(),
-            'reviewsCount' => $product->reviews()->count(),
+            'averageRating' => $averageRating,
+            'reviewsCount' => $reviewsCount,
             'reviews' => $reviews,
             'hasPurchased' => $hasPurchased,
         ]);
     }
 
     /**
+     * Generate shareable content (API).
+     */
+    public function shareContent(Product $product, Request $request): JsonResponse
+    {
+        $base = config('app.url');
+        $platform = (string) $request->get('platform', 'generic');
+        $utm = http_build_query([
+            'utm_source' => $platform,
+            'utm_medium' => 'social',
+            'utm_campaign' => 'marketplace_share',
+            'utm_product' => $product->id,
+        ]);
+        $shareUrl = "{$base}" . route('marketplace.products.show', $product->id, false) . "?{$utm}";
+        $image = $product->image_url ?: ($product->image ? asset('storage/' . $product->image) : asset('/images/placeholder.png'));
+        return response()->json([
+            'title' => $product->name,
+            'description' => mb_substr($product->description ?? '', 0, 160),
+            'image' => $image,
+            'price' => (float) $product->price,
+            'currency' => 'IDR',
+            'url' => $shareUrl,
+        ]);
+    }
+    
+    /**
      * Track product share (for analytics).
      */
     public function trackShare(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'platform' => 'required|string|in:whatsapp,facebook,twitter,linkedin,telegram,email,copy_link',
+            'platform' => 'required|string|in:whatsapp,facebook,twitter,linkedin,telegram,email,copy_link,instagram,tiktok,noteds_home',
         ]);
 
         // Optional: Track share analytics
@@ -113,10 +154,24 @@ class ProductController extends Controller
         $validated['is_active'] = true;
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('products/images', 'public');
+            $path = $request->file('image')->store('products/images', 'public');
+            $validated['image'] = $path;
+            try {
+                $optimizer = app(\App\Services\ImageOptimizer::class);
+                $absolute = storage_path('app/public/' . $path);
+                $optimizer->optimize($absolute, $request->file('image')->getMimeType());
+                $webp = $optimizer->convertToWebp($absolute, $request->file('image')->getMimeType());
+                if ($webp) {
+                    $validated['image_webp'] = str_replace(storage_path('app/public/'), '', $webp);
+                }
+            } catch (\Throwable $e) {}
         }
 
         $product = Product::create($validated);
+        try {
+            \Illuminate\Support\Facades\Cache::put('mk:products:index:v', time(), 86400);
+            \Illuminate\Support\Facades\Cache::put("mk:product:{$product->id}:v", time(), 86400);
+        } catch (\Throwable $e) {}
 
         if ($request->hasFile('file_download')) {
             $filePath = $this->fileStorageService->uploadProductFile(
@@ -174,7 +229,17 @@ class ProductController extends Controller
             if ($product->image) {
                 Storage::disk('public')->delete($product->image);
             }
-            $validated['image'] = $request->file('image')->store('products/images', 'public');
+            $path = $request->file('image')->store('products/images', 'public');
+            $validated['image'] = $path;
+            try {
+                $optimizer = app(\App\Services\ImageOptimizer::class);
+                $absolute = storage_path('app/public/' . $path);
+                $optimizer->optimize($absolute, $request->file('image')->getMimeType());
+                $webp = $optimizer->convertToWebp($absolute, $request->file('image')->getMimeType());
+                if ($webp) {
+                    $validated['image_webp'] = str_replace(storage_path('app/public/'), '', $webp);
+                }
+            } catch (\Throwable $e) {}
         }
 
         if ($request->hasFile('file_download')) {
@@ -187,6 +252,10 @@ class ProductController extends Controller
         }
 
         $product->update($validated);
+        try {
+            \Illuminate\Support\Facades\Cache::put('mk:products:index:v', time(), 86400);
+            \Illuminate\Support\Facades\Cache::put("mk:product:{$product->id}:v", time(), 86400);
+        } catch (\Throwable $e) {}
 
         return redirect()->route('marketplace.products.show', $product)
             ->with('success', 'Product updated successfully.');
@@ -203,6 +272,9 @@ class ProductController extends Controller
         $this->fileStorageService->deleteProductFile($product);
 
         $product->delete();
+        try {
+            \Illuminate\Support\Facades\Cache::put('mk:products:index:v', time(), 86400);
+        } catch (\Throwable $e) {}
 
         return redirect()->route('marketplace.index')
             ->with('success', 'Product deleted successfully.');

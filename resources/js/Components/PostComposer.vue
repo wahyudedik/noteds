@@ -65,6 +65,37 @@ watch(() => form.content, debounce((newContent) => {
     }
 }, 1000));
 
+// Props: optional shareDraft
+const props = defineProps({
+    shareDraft: {
+        type: Object,
+        default: null,
+    },
+});
+
+// Prefill if shareDraft provided
+const prefillFromShareDraft = async () => {
+    if (!props.shareDraft) return;
+    showComposer.value = true;
+    form.title = props.shareDraft.title || '';
+    form.content = props.shareDraft.content || '';
+    form.link_url = props.shareDraft.link_url || null;
+    form.link_preview_title = props.shareDraft.link_preview_title || null;
+    form.link_preview_description = props.shareDraft.link_preview_description || null;
+    form.link_preview_image = props.shareDraft.link_preview_image || null;
+    form.link_preview_site_name = props.shareDraft.link_preview_site_name || null;
+    if (form.link_url) {
+        await generateLinkPreview(form.link_url);
+    }
+};
+
+if (page.props.shareDraft && !props.shareDraft) {
+    // Safety if passed via page props only
+    props.shareDraft = page.props.shareDraft;
+}
+
+prefillFromShareDraft();
+
 // Generate link preview
 const generateLinkPreview = async (url) => {
     if (!url) return;

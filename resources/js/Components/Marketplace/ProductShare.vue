@@ -36,41 +36,65 @@ const shareWithDescription = computed(() => {
     return `${shareText.value}\n\n${desc}${desc.length >= 100 ? '...' : ''}\n\n${productUrl.value}`;
 });
 
+const withUtm = (platform) => {
+    const params = new URLSearchParams({
+        utm_source: platform,
+        utm_medium: 'social',
+        utm_campaign: 'marketplace_share',
+        utm_product: props.product.id,
+    });
+    const url = new URL(productUrl.value);
+    url.search = params.toString();
+    return url.toString();
+};
+
 const shareWhatsApp = () => {
-    const url = `https://wa.me/?text=${encodeURIComponent(shareWithDescription.value)}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(shareWithDescription.value + '\n' + withUtm('whatsapp'))}`;
     window.open(url, '_blank', 'width=600,height=400');
     trackShare('whatsapp');
 };
 
 const shareFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl.value)}`;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(withUtm('facebook'))}`;
     window.open(url, '_blank', 'width=600,height=400');
     trackShare('facebook');
 };
 
 const shareTwitter = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText.value)}&url=${encodeURIComponent(productUrl.value)}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText.value)}&url=${encodeURIComponent(withUtm('twitter'))}`;
     window.open(url, '_blank', 'width=600,height=400');
     trackShare('twitter');
 };
 
 const shareLinkedIn = () => {
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(productUrl.value)}`;
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(withUtm('linkedin'))}`;
     window.open(url, '_blank', 'width=600,height=400');
     trackShare('linkedin');
 };
 
 const shareTelegram = () => {
-    const url = `https://t.me/share/url?url=${encodeURIComponent(productUrl.value)}&text=${encodeURIComponent(shareText.value)}`;
+    const url = `https://t.me/share/url?url=${encodeURIComponent(withUtm('telegram'))}&text=${encodeURIComponent(shareText.value)}`;
     window.open(url, '_blank', 'width=600,height=400');
     trackShare('telegram');
 };
 
 const shareEmail = () => {
     const subject = encodeURIComponent(`Check out: ${props.product.name}`);
-    const body = encodeURIComponent(`${shareWithDescription.value}`);
+    const body = encodeURIComponent(`${shareWithDescription.value}\n${withUtm('email')}`);
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
     trackShare('email');
+};
+
+const shareInstagram = () => {
+    copyToClipboard();
+    window.open(withUtm('instagram'), '_blank');
+    trackShare('instagram');
+};
+
+const shareTikTok = () => {
+    copyToClipboard();
+    window.open(withUtm('tiktok'), '_blank');
+    trackShare('tiktok');
 };
 
 const copyToClipboard = async () => {
@@ -141,6 +165,21 @@ onUnmounted(() => {
         window.removeEventListener('click', handleClickOutside);
     }
 });
+
+const shareNotedsHome = () => {
+    const base = window.location.origin;
+    const params = new URLSearchParams({
+        utm_source: 'noteds_home',
+        utm_medium: 'social',
+        utm_campaign: 'project_post',
+        utm_product: props.product.id,
+        product_id: props.product.id,
+    });
+    const url = `${base}/home?${params.toString()}`;
+    copyToClipboard();
+    window.open(url, '_blank');
+    trackShare('noteds_home');
+};
 </script>
 
 <template>
@@ -192,6 +231,16 @@ onUnmounted(() => {
                 </div>
 
                 <div class="py-1">
+                    <!-- Noteds Home -->
+                    <button
+                        @click="shareNotedsHome"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                    >
+                        <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 3l8 7-1.5 1.5L18 10.5V20h-5v-5H11v5H6v-9.5L5.5 11.5 4 10l8-7z"/>
+                        </svg>
+                        <span>Noteds Home</span>
+                    </button>
                     <!-- WhatsApp -->
                     <button
                         @click="shareWhatsApp"
@@ -256,6 +305,28 @@ onUnmounted(() => {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         <span>Email</span>
+                    </button>
+
+                    <!-- Instagram -->
+                    <button
+                        @click="shareInstagram"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors"
+                    >
+                        <svg class="w-5 h-5 text-pink-600 dark:text-pink-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm5.5-3a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/>
+                        </svg>
+                        <span>Instagram</span>
+                    </button>
+
+                    <!-- TikTok -->
+                    <button
+                        @click="shareTikTok"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                        <svg class="w-5 h-5 text-gray-900 dark:text-gray-100" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M16.636 3.133c.71.55 1.57.955 2.525 1.082V7.35c-1.695-.21-3.273-.897-4.545-1.95v7.753c0 3.135-2.543 5.677-5.677 5.677-1.07 0-2.076-.305-2.927-.833l.01-.01c1.39-.59 2.364-1.97 2.364-3.565 0-2.144-1.737-3.881-3.881-3.881-.472 0-.922.082-1.34.234v-3.32c.433-.074.876-.113 1.326-.113 3.133 0 5.676 2.543 5.676 5.677 0 .196-.01.39-.03.58 1.02-.99 1.656-2.356 1.656-3.873V3h2.843z"/>
+                        </svg>
+                        <span>TikTok</span>
                     </button>
 
                     <!-- Copy Link -->

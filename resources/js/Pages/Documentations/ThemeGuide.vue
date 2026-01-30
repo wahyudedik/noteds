@@ -1,5 +1,5 @@
 <template>
-  <MessagingLayout>
+  <AuthenticatedLayout>
     <div class="p-6">
       <h1 class="text-2xl font-bold mb-4">Style Guide: Theme Colors</h1>
       <p class="text-gray-600 dark:text-gray-400 mb-4">Palet warna untuk mode terang dan gelap termasuk kode HEX/RGB/HSL dan contoh penerapan.</p>
@@ -75,11 +75,11 @@
         <p class="text-sm text-gray-600 dark:text-gray-400">Kontras warna dipilih untuk memenuhi WCAG 2.1 AA pada teks utama dan tombol.</p>
       </div>
     </div>
-  </MessagingLayout>
+  </AuthenticatedLayout>
 </template>
 
 <script setup>
-import MessagingLayout from '@/Layouts/MessagingLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 const luminance = (hex) => {
   const rgb = hex.replace('#','').match(/.{1,2}/g).map(x => parseInt(x,16)/255).map(v => v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4));
   return 0.2126*rgb[0] + 0.7152*rgb[1] + 0.0722*rgb[2];

@@ -1,5 +1,5 @@
 <template>
-  <MessagingLayout>
+  <AuthenticatedLayout>
     <div class="p-6">
       <h1 class="text-xl font-bold mb-2">Klien Newsletter</h1>
       <div class="grid grid-cols-2 gap-4">
@@ -34,13 +34,13 @@
         </div>
       </div>
     </div>
-  </MessagingLayout>
+  </AuthenticatedLayout>
   <ToastContainer />
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import MessagingLayout from '@/Layouts/MessagingLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import ToastContainer from '@/Components/Common/ToastContainer.vue';
 
 const clients = ref([]);

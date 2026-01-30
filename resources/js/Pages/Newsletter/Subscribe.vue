@@ -1,5 +1,5 @@
 <template>
-  <MessagingLayout>
+  <AuthenticatedLayout>
     <div class="p-6">
       <h1 class="text-xl font-bold mb-2">Berlangganan Newsletter</h1>
       <form class="space-y-2" @submit.prevent="submit">
@@ -9,13 +9,13 @@
       </form>
       <div class="mt-2 text-sm text-gray-600" v-if="message">{{ message }}</div>
     </div>
-  </MessagingLayout>
+  </AuthenticatedLayout>
   <ToastContainer />
   </template>
 
 <script setup>
 import { ref } from 'vue';
-import MessagingLayout from '@/Layouts/MessagingLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import ToastContainer from '@/Components/Common/ToastContainer.vue';
 
 const name = ref('');

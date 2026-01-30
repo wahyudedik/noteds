@@ -1,5 +1,5 @@
 <template>
-  <MessagingLayout>
+  <AuthenticatedLayout>
     <div class="p-6">
       <h1 class="text-2xl font-bold mb-4">Accessibility Guide (WCAG 2.1 AA)</h1>
       <p class="text-gray-600 dark:text-gray-400 mb-4">Pedoman dan checklist untuk pengembang/pengujian aksesibilitas.</p>
@@ -41,9 +41,9 @@
         </section>
       </div>
     </div>
-  </MessagingLayout>
+  </AuthenticatedLayout>
 </template>
 
 <script setup>
-import MessagingLayout from '@/Layouts/MessagingLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 </script>
