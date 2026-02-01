@@ -124,8 +124,11 @@ class StockSignal extends Model
     /**
      * Scope a query to only include latest signals.
      */
-    public function scopeLatest($query)
+    public function scopeLatest($query, $column = null)
     {
+        if ($column) {
+            return $query->orderBy($column, 'desc');
+        }
         return $query->orderBy('signal_date', 'desc')
             ->orderBy('created_at', 'desc');
     }

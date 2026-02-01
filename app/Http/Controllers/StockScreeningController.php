@@ -52,69 +52,82 @@ class StockScreeningController extends Controller
         try {
             $filters = $request->validated();
             $user = $request->user();
-            
-            // Remove limit from filters (it's not a screening filter)
-            $limit = $filters['limit'] ?? null;
+            $page = max(1, (int) ($request->input('page', 1)));
+            $perPage = min(max(1, (int) ($request->input('per_page', $filters['limit'] ?? 20))), 100);
+
+            // Remove limit from filters (handled via per_page)
             unset($filters['limit']);
-            
-            // Run screening
-            $results = $this->screeningService->screen($filters, $user);
-            
-            // Apply limit if specified (in addition to tiered access limits)
-            if ($limit !== null && $limit > 0) {
-                $results = $results->take($limit);
-            }
-            
-            // Prepare response data
-            $responseData = $results->map(function ($stock) {
+
+            // Cache key based on filters and pagination
+            $cacheKey = 'stocks:screening:' . md5(json_encode([$filters, $user?->id, $page, $perPage]));
+
+            $responseData = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addSeconds(60), function () use ($filters, $user, $page, $perPage) {
+                // Run screening
+                $results = $this->screeningService->screen($filters, $user);
+
+                // Paginate in-memory results
+                $total = $results->count();
+                $items = $results->slice(($page - 1) * $perPage, $perPage)->values();
+
+                // Prepare response data
+                $data = $items->map(function ($stock) {
                 $latestPrice = $stock->getLatestPrice();
                 $latestIndicator = $stock->technicalIndicators()->latest('date')->first();
                 $latestSignal = $stock->signals()->active()->latest('signal_date')->first();
                 $latestPrediction = $stock->predictions()->latest('prediction_date')->first();
-                
+                    return [
+                        'id' => $stock->id,
+                        'code' => $stock->code,
+                        'name' => $stock->name,
+                        'sector' => $stock->sector,
+                        'sub_sector' => $stock->sub_sector,
+                        'category' => $stock->category,
+                        'market_cap' => $stock->market_cap,
+                        'current_price' => $latestPrice ? (float) $latestPrice->close : null,
+                        'price_change' => $latestPrice ? $latestPrice->getPriceChange() : null,
+                        'price_change_percent' => $latestPrice ? $latestPrice->calculateReturns() : null,
+                        'volume' => $latestPrice ? $latestPrice->volume : null,
+                        'value' => $latestPrice ? (float) $latestPrice->value : null,
+                        'rsi' => $latestIndicator ? $latestIndicator->rsi : null,
+                        'macd' => $latestIndicator ? [
+                            'macd' => $latestIndicator->macd,
+                            'signal' => $latestIndicator->macd_signal,
+                            'histogram' => $latestIndicator->macd_histogram,
+                        ] : null,
+                        'signal' => $latestSignal ? [
+                            'type' => $latestSignal->signal_type,
+                            'strength' => (float) $latestSignal->signal_strength,
+                            'risk_level' => $latestSignal->risk_level,
+                            'reason' => $latestSignal->reason,
+                            'price_target' => $latestSignal->price_target,
+                            'stop_loss' => $latestSignal->stop_loss,
+                            'take_profit' => $latestSignal->take_profit,
+                        ] : null,
+                        'prediction' => $latestPrediction ? [
+                            'predicted_price' => (float) $latestPrediction->predicted_price,
+                            'confidence' => (float) $latestPrediction->confidence_score,
+                            'horizon' => $latestPrediction->prediction_horizon,
+                            'lower_bound' => $latestPrediction->lower_bound,
+                            'upper_bound' => $latestPrediction->upper_bound,
+                        ] : null,
+                    ];
+                })->values();
+
                 return [
-                    'id' => $stock->id,
-                    'code' => $stock->code,
-                    'name' => $stock->name,
-                    'sector' => $stock->sector,
-                    'sub_sector' => $stock->sub_sector,
-                    'category' => $stock->category,
-                    'market_cap' => $stock->market_cap,
-                    'current_price' => $latestPrice ? (float) $latestPrice->close : null,
-                    'price_change' => $latestPrice ? $latestPrice->getPriceChange() : null,
-                    'price_change_percent' => $latestPrice ? $latestPrice->calculateReturns() : null,
-                    'volume' => $latestPrice ? $latestPrice->volume : null,
-                    'value' => $latestPrice ? (float) $latestPrice->value : null,
-                    'rsi' => $latestIndicator ? $latestIndicator->rsi : null,
-                    'macd' => $latestIndicator ? [
-                        'macd' => $latestIndicator->macd,
-                        'signal' => $latestIndicator->macd_signal,
-                        'histogram' => $latestIndicator->macd_histogram,
-                    ] : null,
-                    'signal' => $latestSignal ? [
-                        'type' => $latestSignal->signal_type,
-                        'strength' => (float) $latestSignal->signal_strength,
-                        'risk_level' => $latestSignal->risk_level,
-                        'reason' => $latestSignal->reason,
-                        'price_target' => $latestSignal->price_target,
-                        'stop_loss' => $latestSignal->stop_loss,
-                        'take_profit' => $latestSignal->take_profit,
-                    ] : null,
-                    'prediction' => $latestPrediction ? [
-                        'predicted_price' => (float) $latestPrediction->predicted_price,
-                        'confidence' => (float) $latestPrediction->confidence_score,
-                        'horizon' => $latestPrediction->prediction_horizon,
-                        'lower_bound' => $latestPrediction->lower_bound,
-                        'upper_bound' => $latestPrediction->upper_bound,
-                    ] : null,
+                    'data' => $data,
+                    'total' => $total,
                 ];
-            })->values();
-            
+            });
+
             return response()->json([
                 'success' => true,
-                'data' => $responseData,
-                'count' => $responseData->count(),
+                'data' => collect($responseData['data']),
+                'count' => $responseData['total'],
                 'filters' => $filters,
+                'pagination' => [
+                    'page' => $page,
+                    'per_page' => $perPage,
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Stock screening failed', [
@@ -122,7 +135,7 @@ class StockScreeningController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to screen stocks: ' . $e->getMessage(),

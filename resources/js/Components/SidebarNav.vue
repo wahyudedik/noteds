@@ -57,6 +57,13 @@ const navItems = [
         icon: 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z',
         active: () => page.url.startsWith('/explorer'),
     },
+    {
+        name: 'Plugins',
+        route: 'plugins.index',
+        icon: 'M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25',
+        active: () => page.url.startsWith('/plugins'),
+        requiresAuth: true,
+    },
     // Messaging removed
     {
         name: 'Clipper',

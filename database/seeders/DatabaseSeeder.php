@@ -29,9 +29,9 @@ class DatabaseSeeder extends Seeder
             GDPRSeeder::class,
             UserBlockSeeder::class,
             ProductSeeder::class,
-            ConversationSeeder::class,
             TrendingSeeder::class,
             NotificationSeeder::class,
+            PluginSeeder::class,
         ]);
     }
 }

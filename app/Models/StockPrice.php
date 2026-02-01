@@ -84,8 +84,11 @@ class StockPrice extends Model
     /**
      * Scope a query to only include latest prices.
      */
-    public function scopeLatest($query)
+    public function scopeLatest($query, $column = null)
     {
+        if ($column) {
+            return $query->orderBy($column, 'desc');
+        }
         return $query->orderBy('date', 'desc')
             ->orderBy('timestamp', 'desc');
     }

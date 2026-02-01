@@ -25,8 +25,8 @@ class StockScreeningService
      */
     public function screen(array $filters, ?User $user = null): Collection
     {
-        // Start with all active stocks
-        $stocks = Stock::active()->with(['prices', 'technicalIndicators', 'signals', 'predictions']);
+        // Start with all active stocks (defer relation loads for latest-only access)
+        $stocks = Stock::active();
 
         // Apply all filters
         $stocks = $this->applyFilters($stocks, $filters);
@@ -128,12 +128,12 @@ class StockScreeningService
         }
 
         return $query->whereExists(function ($subQuery) use ($min, $max) {
-            $subQuery->select(\DB::raw(1))
+            $subQuery->select(DB::raw(1))
                 ->from('stock_prices as sp')
                 ->whereColumn('sp.stock_id', 'stocks.id')
                 ->where('sp.is_intraday', false)
                 ->where('sp.date', function ($dateQuery) {
-                    $dateQuery->select(\DB::raw('MAX(date)'))
+                    $dateQuery->select(DB::raw('MAX(date)'))
                         ->from('stock_prices as sp2')
                         ->whereColumn('sp2.stock_id', 'stocks.id')
                         ->where('sp2.is_intraday', false);
@@ -158,12 +158,12 @@ class StockScreeningService
     public function filterByVolume($query, int $minVolume)
     {
         return $query->whereExists(function ($subQuery) use ($minVolume) {
-            $subQuery->select(\DB::raw(1))
+            $subQuery->select(DB::raw(1))
                 ->from('stock_prices as sp')
                 ->whereColumn('sp.stock_id', 'stocks.id')
                 ->where('sp.is_intraday', false)
                 ->where('sp.date', function ($dateQuery) {
-                    $dateQuery->select(\DB::raw('MAX(date)'))
+                    $dateQuery->select(DB::raw('MAX(date)'))
                         ->from('stock_prices as sp2')
                         ->whereColumn('sp2.stock_id', 'stocks.id')
                         ->where('sp2.is_intraday', false);
@@ -211,11 +211,11 @@ class StockScreeningService
         }
 
         return $query->whereExists(function ($subQuery) use ($minRSI, $maxRSI) {
-            $subQuery->select(\DB::raw(1))
+            $subQuery->select(DB::raw(1))
                 ->from('stock_technical_indicators as sti')
                 ->whereColumn('sti.stock_id', 'stocks.id')
                 ->where('sti.date', function ($dateQuery) {
-                    $dateQuery->select(\DB::raw('MAX(date)'))
+                    $dateQuery->select(DB::raw('MAX(date)'))
                         ->from('stock_technical_indicators as sti2')
                         ->whereColumn('sti2.stock_id', 'stocks.id');
                 })
@@ -240,11 +240,11 @@ class StockScreeningService
     public function filterByMACD($query, bool $bullish = true)
     {
         return $query->whereExists(function ($subQuery) use ($bullish) {
-            $subQuery->select(\DB::raw(1))
+            $subQuery->select(DB::raw(1))
                 ->from('stock_technical_indicators as sti')
                 ->whereColumn('sti.stock_id', 'stocks.id')
                 ->where('sti.date', function ($dateQuery) {
-                    $dateQuery->select(\DB::raw('MAX(date)'))
+                    $dateQuery->select(DB::raw('MAX(date)'))
                         ->from('stock_technical_indicators as sti2')
                         ->whereColumn('sti2.stock_id', 'stocks.id');
                 })

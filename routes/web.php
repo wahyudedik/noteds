@@ -117,6 +117,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/rate-limit', function () {
             return Inertia::render('Admin/RateLimitDashboard');
         })->name('admin.rate-limit.dashboard');
+        // Plugin Management
+        Route::get('/admin/plugins', [App\Http\Controllers\Admin\PluginController::class, 'index'])->name('admin.plugins.index');
+        Route::post('/admin/plugins/upload', [App\Http\Controllers\Admin\PluginController::class, 'upload'])->name('admin.plugins.upload');
+        Route::post('/admin/plugins/install', [App\Http\Controllers\Admin\PluginController::class, 'install'])->name('admin.plugins.install');
+        Route::post('/admin/plugins/{plugin}/activate', [App\Http\Controllers\Admin\PluginController::class, 'activate'])->name('admin.plugins.activate');
+        Route::post('/admin/plugins/{plugin}/deactivate', [App\Http\Controllers\Admin\PluginController::class, 'deactivate'])->name('admin.plugins.deactivate');
+        Route::get('/admin/plugins/{plugin}', [App\Http\Controllers\Admin\PluginController::class, 'show'])->name('admin.plugins.show');
+        Route::post('/admin/plugins/{plugin}/rollback', [App\Http\Controllers\Admin\PluginController::class, 'rollback'])->name('admin.plugins.rollback');
+        Route::put('/admin/plugins/{plugin}/config', [App\Http\Controllers\Admin\PluginController::class, 'updateConfig'])->name('admin.plugins.config.update');
     });
     Route::get('/search', [App\Http\Controllers\SearchController::class, 'index'])
         ->middleware('throttle:60,1')
@@ -139,6 +148,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/search/history/{historyItem}', [App\Http\Controllers\SearchController::class, 'deleteHistoryItem'])
         ->middleware('throttle:60,1')
         ->name('search.history.delete');
+
+    // Plugins catalog for users
+    Route::get('/plugins', [App\Http\Controllers\PluginsController::class, 'index'])
+        ->middleware(['auth'])
+        ->name('plugins.index');
 
     // Events
     Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index');
@@ -913,7 +927,7 @@ Route::middleware('auth')->group(function () {
         ->name('marketplace.waitlist.index');
 
     // Coupons
-    Route::post('/marketplace/coupons/validate', [App\Http\Controllers\Marketplace\CouponController::class, 'validate'])
+    Route::post('/marketplace/coupons/validate', [App\Http\Controllers\Marketplace\CouponController::class, 'validateCouponRequest'])
         ->middleware(['auth', 'throttle:30,1'])
         ->name('marketplace.coupons.validate');
     Route::post('/marketplace/orders/{order}/coupon', [App\Http\Controllers\Marketplace\CouponController::class, 'apply'])
@@ -1568,6 +1582,14 @@ Route::middleware('auth')->prefix('messaging')->name('messaging.')->group(functi
     Route::any('/{any}', function () {
         abort(410, 'Messaging conversations feature has been removed');
     })->where('any', '.*');
+});
+
+// API Gateway (stocks)
+Route::middleware(['auth', 'throttle:120,1'])->prefix('api/gateway')->name('api.gateway.')->group(function () {
+    Route::get('/stocks/dashboard', [App\Http\Controllers\Api\GatewayController::class, 'stocksDashboard'])->name('stocks.dashboard');
+    Route::post('/stocks/screening', [App\Http\Controllers\Api\GatewayController::class, 'stocksScreening'])->name('stocks.screening');
+    Route::get('/stocks/watchlist', [App\Http\Controllers\Api\GatewayController::class, 'stocksWatchlist'])->name('stocks.watchlist');
+    Route::get('/portfolio/recommendations', [App\Http\Controllers\Api\GatewayController::class, 'portfolioRecommendations'])->name('portfolio.recommendations');
 });
 
 require __DIR__ . '/auth.php';

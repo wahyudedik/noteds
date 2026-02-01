@@ -17,6 +17,7 @@ class StockWatchlistController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
+        $perPage = (int) $request->input('per_page', 20);
 
         $watchlist = StockWatchlist::where('user_id', $user->id)
             ->with(['stock' => function ($q) {
@@ -25,7 +26,7 @@ class StockWatchlistController extends Controller
                 }]);
             }])
             ->latest()
-            ->get();
+            ->paginate($perPage);
 
         return Inertia::render('Stocks/Watchlist', [
             'watchlist' => $watchlist,

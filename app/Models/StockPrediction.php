@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
 
+/**
+ * @property string|float|null $prediction_error
+ */
 class StockPrediction extends Model
 {
     use HasFactory, HasUuid;
@@ -72,7 +75,7 @@ class StockPrediction extends Model
         }
 
         $error = abs($this->actual_price - $this->predicted_price);
-        $this->prediction_error = $error;
+        $this->prediction_error = number_format($error, 4, '.', '');
         $this->save();
 
         return $error;
@@ -109,8 +112,11 @@ class StockPrediction extends Model
     /**
      * Scope a query to only include latest predictions.
      */
-    public function scopeLatest($query)
+    public function scopeLatest($query, $column = null)
     {
+        if ($column) {
+            return $query->orderBy($column, 'desc');
+        }
         return $query->orderBy('prediction_date', 'desc')
             ->orderBy('target_date', 'desc');
     }
@@ -139,4 +145,3 @@ class StockPrediction extends Model
         return $query->whereNotNull('actual_price');
     }
 }
-

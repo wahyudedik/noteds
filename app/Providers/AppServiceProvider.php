@@ -31,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
         Gate::policy(\App\Models\AnalyticsEvent::class, \App\Policies\AnalyticsEventPolicy::class);
+        \App\Models\StockPrice::observe(\App\Observers\StockPriceObserver::class);
 
         // Register domain event listeners
         Event::listen(

@@ -5,9 +5,21 @@ import { defineProps } from 'vue';
 
 const props = defineProps({
   watchlist: {
-    type: Array,
-    default: () => [],
+    type: Object,
+    default: () => ({ data: [], links: [], meta: {} }),
   },
+});
+import Echo from '@/Utils/echo.js';
+import { onMounted, ref } from 'vue';
+const livePrices = ref({});
+onMounted(() => {
+  if (!Echo) return;
+  const codes = (props.watchlist?.data || []).map(i => i.stock?.code).filter(Boolean);
+  codes.forEach(code => {
+    Echo.channel(`stock.${code}.prices`).listen('.price.updated', (payload) => {
+      livePrices.value[code] = payload.close;
+    });
+  });
 });
 
 const formatPrice = (price) => {
@@ -47,7 +59,7 @@ const formatPrice = (price) => {
     <!-- Watchlist -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
       <h2 class="text-xl font-bold mb-4">My Watchlist</h2>
-      <div v-if="watchlist.length === 0" class="text-gray-500">
+      <div v-if="(watchlist?.data?.length || 0) === 0" class="text-gray-500">
         No stocks in watchlist. <Link :href="route('stocks.index')" class="text-blue-600">Browse stocks</Link>
       </div>
       <div v-else class="overflow-x-auto">
@@ -62,10 +74,10 @@ const formatPrice = (price) => {
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="item in watchlist" :key="item.id">
+            <tr v-for="item in watchlist.data" :key="item.id">
               <td class="px-4 py-3 whitespace-nowrap font-medium">{{ item.stock?.code }}</td>
               <td class="px-4 py-3 whitespace-nowrap">{{ item.stock?.name }}</td>
-              <td class="px-4 py-3 whitespace-nowrap">{{ formatPrice(item.stock?.prices?.[0]?.close) }}</td>
+              <td class="px-4 py-3 whitespace-nowrap">{{ formatPrice(livePrices[item.stock?.code] ?? item.stock?.prices?.[0]?.close) }}</td>
               <td class="px-4 py-3 whitespace-nowrap">-</td>
               <td class="px-4 py-3 whitespace-nowrap">
                 <Link :href="route('stocks.show', item.stock?.id)" class="text-blue-600 hover:underline">View</Link>
@@ -73,6 +85,23 @@ const formatPrice = (price) => {
             </tr>
           </tbody>
         </table>
+        <div class="px-4 py-3 bg-gray-50 border-t flex items-center justify-between">
+          <div class="text-sm text-gray-500">
+            Halaman {{ watchlist?.meta?.current_page }} dari {{ watchlist?.meta?.last_page }}
+          </div>
+          <div class="space-x-2">
+            <Link
+              v-if="watchlist?.links?.prev"
+              :href="watchlist.links.prev"
+              class="px-3 py-1 bg-white border rounded text-sm"
+            >Sebelumnya</Link>
+            <Link
+              v-if="watchlist?.links?.next"
+              :href="watchlist.links.next"
+              class="px-3 py-1 bg-white border rounded text-sm"
+            >Berikutnya</Link>
+          </div>
+        </div>
       </div>
     </div>
 

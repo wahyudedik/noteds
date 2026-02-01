@@ -21,7 +21,8 @@ class StockController extends Controller
     public function dashboard(Request $request): Response
     {
         $user = $request->user();
-        
+        $perPage = (int) $request->input('per_page', 10);
+        $page = (int) $request->input('page', 1);
         // Get user watchlist
         $watchlist = collect([]);
         if ($user) {
@@ -30,23 +31,27 @@ class StockController extends Controller
                     $q->latest('date')->limit(1);
                 }])
                 ->latest()
-                ->get();
+                ->paginate($perPage, ['*'], 'page', $page);
         }
         
-        // Get recent predictions (last 5)
-        $recentPredictions = StockPrediction::query()
-            ->with(['stock', 'mlModel'])
-            ->latest('prediction_date')
-            ->limit(5)
-            ->get();
+        // Get recent predictions (cache 60s)
+        $recentPredictions = \Illuminate\Support\Facades\Cache::remember('stocks:dashboard:recent_predictions', now()->addSeconds(60), function () {
+            return StockPrediction::query()
+                ->with(['stock', 'mlModel'])
+                ->latest('prediction_date')
+                ->limit(5)
+                ->get();
+        });
         
-        // Get active signals (last 10)
-        $activeSignals = StockSignal::query()
-            ->with(['stock'])
-            ->active()
-            ->latest('signal_date')
-            ->limit(10)
-            ->get();
+        // Get active signals (cache 60s)
+        $activeSignals = \Illuminate\Support\Facades\Cache::remember('stocks:dashboard:active_signals', now()->addSeconds(60), function () {
+            return StockSignal::query()
+                ->with(['stock'])
+                ->active()
+                ->latest('signal_date')
+                ->limit(10)
+                ->get();
+        });
         
         return Inertia::render('Stocks/StockDashboard', [
             'watchlist' => $watchlist,

@@ -95,9 +95,9 @@ class PortfolioRecommendation extends Model
     /**
      * Scope a query to only include latest recommendations.
      */
-    public function scopeLatest($query)
+    public function scopeLatest($query, $column = 'generated_at')
     {
-        return $query->orderBy('generated_at', 'desc');
+        return $query->orderBy($column, 'desc');
     }
 
     /**
@@ -116,4 +116,3 @@ class PortfolioRecommendation extends Model
         return $query->where('user_id', $userId);
     }
 }
-

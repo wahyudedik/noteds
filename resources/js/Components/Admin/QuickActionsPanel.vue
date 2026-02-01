@@ -101,6 +101,13 @@ const quickActions = computed(() => [
         color: 'bg-pink-600 hover:bg-pink-700',
         icon: '💸',
     },
+    {
+        label: 'Manage Plugins',
+        route: 'admin.plugins.index',
+        count: null,
+        color: 'bg-teal-600 hover:bg-teal-700',
+        icon: '🧩',
+    },
 ]);
 </script>
 
