@@ -31,19 +31,15 @@ class HandleInertiaRequests extends Middleware
     {
         $user = $request->user();
         $userArray = null;
-        $cartCount = 0;
         $shouldLoadNotifications = false;
         
         if ($user) {
             $userArray = $user->toArray();
             $userArray['avatar_url'] = $user->avatar_url;
             
-            // Get cart count
-            $cartCount = \App\Models\CartItem::where('user_id', $user->id)->count();
             $shouldLoadNotifications = $request->routeIs('home') 
                 || $request->routeIs('dashboard') 
-                || $request->routeIs('notifications.*') 
-                || $request->routeIs('marketplace.*');
+                || $request->routeIs('notifications.*');
         }
 
         return [
@@ -52,12 +48,9 @@ class HandleInertiaRequests extends Middleware
                 'user' => $userArray,
             ],
             'settings' => $user ? $user->settings : null,
-            'midtrans_client_key' => config('midtrans.client_key'),
-            'midtrans_is_production' => config('midtrans.is_production'),
             'notifications' => $shouldLoadNotifications && $user
                 ? $user->unreadNotifications()->latest()->limit(10)->get()
                 : [],
-            'cart_count' => $cartCount,
             'blocked_user_ids' => $user 
                 ? \Illuminate\Support\Facades\DB::table('user_blocks')->where('blocker_id', $user->id)->pluck('blocked_id')
                 : [],

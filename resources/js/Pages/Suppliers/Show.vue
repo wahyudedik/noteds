@@ -11,7 +11,6 @@ import TextInput from '@/Components/TextInput.vue';
 const props = defineProps({
     supplier: Object,
     reviews: Object,
-    products: Array,
     stats: Object,
     auth: Object,
 });
@@ -134,38 +133,15 @@ const formatRating = (rating) => {
                     </div>
 
                     <!-- Stats -->
-                    <div class="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div class="text-center">
                             <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ stats.total_reviews }}</div>
                             <div class="text-sm text-gray-600 dark:text-gray-400">Review</div>
                         </div>
                         <div class="text-center">
-                            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ stats.total_orders }}</div>
-                            <div class="text-sm text-gray-600 dark:text-gray-400">Order</div>
-                        </div>
-                        <div class="text-center">
                             <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ stats.total_views }}</div>
                             <div class="text-sm text-gray-600 dark:text-gray-400">Dilihat</div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Products -->
-                <div v-if="products && products.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Produk dari Supplier Ini</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Link
-                            v-for="product in products"
-                            :key="product.id"
-                            :href="route('marketplace.product.show', product.id)"
-                            class="border rounded-lg p-4 hover:shadow-md transition"
-                        >
-                            <h4 class="font-semibold text-gray-900 dark:text-gray-100">{{ product.name }}</h4>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">{{ product.description }}</p>
-                            <p class="text-lg font-bold text-indigo-600 dark:text-indigo-400 mt-2">
-                                Rp {{ Number(product.price).toLocaleString('id-ID') }}
-                            </p>
-                        </Link>
                     </div>
                 </div>
 

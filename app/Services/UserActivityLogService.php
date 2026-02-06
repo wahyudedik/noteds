@@ -106,93 +106,6 @@ class UserActivityLogService
     }
 
     /**
-     * Log a transaction activity.
-     */
-    public function logTransaction(
-        User $user,
-        string $action,
-        string $transactionId,
-        ?array $metadata = null,
-        ?Request $request = null
-    ): UserActivityLog {
-        return $this->log(
-            $user->id,
-            'transaction',
-            $action,
-            "Transaction {$action}: {$transactionId}",
-            array_merge([
-                'transaction_id' => $transactionId,
-            ], $metadata ?? []),
-            $request
-        );
-    }
-
-    /**
-     * Log a withdrawal request.
-     */
-    public function logWithdrawal(
-        User $user,
-        string $action,
-        string $withdrawalId,
-        ?array $metadata = null,
-        ?Request $request = null
-    ): UserActivityLog {
-        return $this->log(
-            $user->id,
-            'withdrawal',
-            $action,
-            "Withdrawal {$action}: {$withdrawalId}",
-            array_merge([
-                'withdrawal_id' => $withdrawalId,
-            ], $metadata ?? []),
-            $request
-        );
-    }
-
-    /**
-     * Log a product upload.
-     */
-    public function logProductUpload(
-        User $user,
-        string $productId,
-        ?array $metadata = null,
-        ?Request $request = null
-    ): UserActivityLog {
-        return $this->log(
-            $user->id,
-            'product_upload',
-            'product_uploaded',
-            "Product uploaded: {$productId}",
-            array_merge([
-                'product_id' => $productId,
-            ], $metadata ?? []),
-            $request
-        );
-    }
-
-    /**
-     * Log a product download.
-     */
-    public function logProductDownload(
-        User $user,
-        string $productId,
-        string $orderId,
-        ?Request $request = null
-    ): UserActivityLog {
-        return $this->log(
-            $user->id,
-            'product_download',
-            'product_downloaded',
-            "Product downloaded: {$productId}",
-            [
-                'product_id' => $productId,
-                'order_id' => $orderId,
-            ],
-            $request
-        );
-    }
-
-    /**
      * Get user activity logs with filters.
      */
     public function getUserActivities(
@@ -275,22 +188,6 @@ class UserActivityLogService
             'security_change' => [
                 'password_changed' => 'Password changed',
                 'email_changed' => 'Email address changed',
-            ],
-            'transaction' => [
-                'transaction_created' => 'Transaction created',
-                'transaction_completed' => 'Transaction completed',
-            ],
-            'withdrawal' => [
-                'withdrawal_requested' => 'Withdrawal requested',
-                'withdrawal_approved' => 'Withdrawal approved',
-                'withdrawal_completed' => 'Withdrawal completed',
-                'withdrawal_rejected' => 'Withdrawal rejected',
-            ],
-            'product_upload' => [
-                'product_uploaded' => 'Product uploaded',
-            ],
-            'product_download' => [
-                'product_downloaded' => 'Product downloaded',
             ],
         ];
 

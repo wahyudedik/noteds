@@ -50,18 +50,6 @@ return [
         'app_secret' => env('INSTAGRAM_APP_SECRET'),
     ],
 
-    'idx_api' => [
-        'base_url' => env('IDX_API_BASE_URL', 'https://www.idx.co.id'),
-        'api_key' => env('IDX_API_KEY'),
-        'timeout' => env('IDX_API_TIMEOUT', 30),
-    ],
-
-    'ml_service' => [
-        'base_url' => env('ML_SERVICE_BASE_URL', 'http://localhost:8001'),
-        'api_key' => env('ML_SERVICE_API_KEY'),
-        'timeout' => env('ML_SERVICE_TIMEOUT', 300), // 5 minutes for training
-    ],
-
     'football_data' => [
         'key' => env('FOOTBALL_DATA_API_KEY'),
         'base_url' => 'https://api.football-data.org/v4',

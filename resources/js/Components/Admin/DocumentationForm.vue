@@ -28,8 +28,6 @@ const form = useForm({
 
 const categories = [
     { value: 'getting-started', label: 'Getting Started' },
-    { value: 'marketplace', label: 'Marketplace' },
-    { value: 'clipper', label: 'Clipper' },
     { value: 'api', label: 'API' },
 ];
 

@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Order;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -22,26 +21,6 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 // User-specific notifications channel
 Broadcast::channel('user.{userId}.notifications', function ($user, $userId) {
     return (string) $user->id === (string) $userId;
-});
-
-Broadcast::channel('order.{orderId}', function ($user, $orderId) {
-    $order = Order::find($orderId);
-    return $order && $order->user_id === $user->id;
-});
-
-// Stock price updates (authenticated users)
-Broadcast::channel('stock.{stockCode}.prices', function ($user, $stockCode) {
-    return (bool) $user;
-});
-
-// Stock signal updates (authenticated users)
-Broadcast::channel('stock.{stockCode}.signals', function ($user, $stockCode) {
-    return (bool) $user;
-});
-
-// User watchlist updates (private channel)
-Broadcast::channel('user.{userId}.watchlist', function ($user, $userId) {
-    return $user->id === $userId;
 });
 
 // Conversation channel - check if user is participant and not blocked

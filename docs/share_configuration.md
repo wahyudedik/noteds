@@ -18,9 +18,8 @@ export const sharePlacement = {
 
 ## Tipe Konten & Endpoint Tracking
 - Komponen: `SocialShareButtons.vue`
-- Prop `shareType` menentukan tipe: `posts`, `groups`, `products`, `stories`, `external`
+- Prop `shareType` menentukan tipe: `posts`, `groups`, `stories`, `external`
 - Tracking:
-  - `products`: mencoba route marketplace `marketplace.products.share`, fallback ke generik `share.track`
   - `posts`, `groups`, `stories`: generik `share.track` (polymorphic)
   - `external`: generik `share.track` (disimpan sebagai `shareable_type='external'`)
 

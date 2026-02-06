@@ -8,7 +8,6 @@ const props = defineProps({
         default: () => ({
             posts: null,
             users: null,
-            products: null,
             articles: null,
         }),
     },
@@ -19,7 +18,7 @@ const props = defineProps({
     pagination: {
         type: Object,
         default: () => ({
-            posts: null, users: null, products: null, articles: null,
+            posts: null, users: null, articles: null,
             per_page_options: [10, 20, 50, 100],
         }),
     },
@@ -37,9 +36,8 @@ const availableTabs = computed(() => {
     const tabs = [];
     if (props.results.posts?.data?.length) tabs.push('Posts');
     if (props.results.users?.data?.length) tabs.push('Users');
-    if (props.results.products?.data?.length) tabs.push('Products');
     if (props.results.articles?.data?.length) tabs.push('Articles');
-    return tabs.length ? tabs : ['Posts','Users','Products','Articles'];
+    return tabs.length ? tabs : ['Posts','Users','Articles'];
 });
 const selectedTab = ref(availableTabs.value[0]);
 
@@ -213,61 +211,6 @@ const changePerPage = (type, per) => {
             </div>
         </div>
 
-        <!-- Products Results -->
-        <div v-if="selectedTab === 'Products'">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Products ({{ getMeta('Products')?.total ?? 0 }})
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Link
-                    v-for="product in getData('Products')"
-                    :key="product.id"
-                    :href="route('marketplace.products.show', product.id)"
-                    class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow"
-                >
-                    <img
-                        v-if="product.image"
-                        :src="product.image"
-                        :alt="product.name"
-                        class="w-full h-48 object-cover"
-                    />
-                    <div class="p-4">
-                        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2">
-                            {{ product.name }}
-                        </h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
-                            {{ product.description }}
-                        </p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                Rp {{ new Intl.NumberFormat('id-ID').format(product.price) }}
-                            </span>
-                        </div>
-                    </div>
-                </Link>
-            </div>
-            <div class="mt-4 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-600 dark:text-gray-400">Per page:</span>
-                    <select :value="getPerPage('Products')" @change="changePerPage('Products', parseInt($event.target.value))"
-                            class="px-2 py-1 border rounded-md dark:bg-gray-700 dark:text-white">
-                        <option v-for="opt in pagination.per_page_options" :key="opt" :value="opt">{{ opt }}</option>
-                    </select>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button class="px-3 py-1.5 border rounded-md"
-                            :disabled="(getMeta('Products')?.current_page ?? 1) <= 1"
-                            @click="changePage('Products', (getMeta('Products')?.current_page ?? 1) - 1)">Previous</button>
-                    <span class="text-sm text-gray-700 dark:text-gray-300">
-                        Page {{ getMeta('Products')?.current_page ?? 1 }} / {{ getMeta('Products')?.last_page ?? 1 }}
-                    </span>
-                    <button class="px-3 py-1.5 border rounded-md"
-                            :disabled="(getMeta('Products')?.current_page ?? 1) >= (getMeta('Products')?.last_page ?? 1)"
-                            @click="changePage('Products', (getMeta('Products')?.current_page ?? 1) + 1)">Next</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Articles Results -->
         <div v-if="selectedTab === 'Articles'">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -319,7 +262,6 @@ const changePerPage = (type, per) => {
             v-if="
                 (!props.results.posts?.data || props.results.posts.data.length === 0) &&
                 (!props.results.users?.data || props.results.users.data.length === 0) &&
-                (!props.results.products?.data || props.results.products.data.length === 0) &&
                 (!props.results.articles?.data || props.results.articles.data.length === 0)
             "
             class="text-center py-12"
@@ -346,4 +288,3 @@ const changePerPage = (type, per) => {
         </div>
     </div>
 </template>
-

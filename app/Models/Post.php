@@ -54,7 +54,6 @@ class Post extends Model
 
     protected $fillable = [
         'user_id',
-        'campaign_id',
         'original_post_id',
         'is_quote_repost',
         'purpose_type',
@@ -158,14 +157,6 @@ class Post extends Model
     public function scopeOrderBySimpleScore($query, string $direction = 'desc')
     {
         return $query->orderByRaw('(upvotes_count - downvotes_count) ' . $direction);
-    }
-
-    /**
-     * Get the campaign associated with this post (if shared from campaign).
-     */
-    public function campaign(): BelongsTo
-    {
-        return $this->belongsTo(\App\Models\Campaign::class);
     }
 
     /**

@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\BusinessSupplierMapping;
 use App\Models\Post;
 use App\Models\Supplier;
-use App\Models\Product;
 use Illuminate\Support\Collection;
 
 class SupplierRecommendationService
@@ -41,17 +40,6 @@ class SupplierRecommendationService
                 ->limit($limit)
                 ->get();
 
-            // Also get products from existing sellers that match the category
-            $products = Product::where('category', $map->supplier_category)
-                ->where('is_active', true)
-                ->with(['seller'])
-                ->has('seller')
-                ->orderBy('sales_count', 'desc')
-                ->orderBy('views_count', 'desc')
-                ->limit($limit)
-                ->get();
-
-            // Combine suppliers and products (grouped by seller)
             $combinedSuppliers = collect();
 
             // Add registered suppliers
@@ -73,39 +61,6 @@ class SupplierRecommendationService
                     ],
                     'contact_info' => $supplier->contact_info,
                 ]);
-            }
-
-            // Add products from sellers (as suppliers)
-            foreach ($products as $product) {
-                if (!$product->seller) {
-                    continue;
-                }
-                
-                // Check if seller already added as registered supplier
-                $exists = $combinedSuppliers->contains(function ($item) use ($product) {
-                    return isset($item['seller_profile']['id']) && $item['seller_profile']['id'] === $product->seller->id;
-                });
-
-                if (!$exists) {
-                    $combinedSuppliers->push([
-                        'type' => 'product_based',
-                        'id' => $product->id,
-                        'name' => $product->seller->business_name ?? $product->seller->name,
-                        'description' => $product->description,
-                        'location' => null, // Adjust based on your user model
-                        'rating' => $product->averageRating() ?? 0,
-                        'review_count' => $product->reviews()->count(),
-                        'specialties' => [],
-                        'min_order' => null,
-                        'seller_profile' => [
-                            'id' => $product->seller->id,
-                            'name' => $product->seller->name,
-                            'business_name' => $product->seller->business_name,
-                        ],
-                        'product_id' => $product->id,
-                        'product_name' => $product->name,
-                    ]);
-                }
             }
 
             // Sort combined by rating and review count
@@ -200,4 +155,3 @@ class SupplierRecommendationService
             });
     }
 }
-

@@ -24,7 +24,7 @@ class Bookmark extends Model
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        
+
         if (!isset($this->attributes['id'])) {
             $this->attributes['id'] = (string) Str::uuid();
         }
@@ -66,7 +66,9 @@ class Bookmark extends Model
      */
     public function tags(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(BookmarkTag::class, 'bookmark_tag');
+        return $this->belongsToMany(BookmarkTag::class, 'bookmark_tag', 'bookmark_id', 'tag_id')
+            ->withPivot('id')
+            ->withTimestamps();
     }
 
     /**
@@ -93,7 +95,7 @@ class Bookmark extends Model
     public function addTag(BookmarkTag $tag): void
     {
         if (!$this->tags()->where('bookmark_tags.id', $tag->id)->exists()) {
-            $this->tags()->attach($tag->id);
+            $this->tags()->attach($tag->id, ['id' => (string) Str::uuid()]);
             $tag->incrementUsage();
         }
     }
@@ -132,7 +134,13 @@ class Bookmark extends Model
             }
         }
 
-        $this->tags()->sync($tagIds);
+        if (!empty($removedTagIds)) {
+            $this->tags()->detach($removedTagIds);
+        }
+
+        foreach ($addedTagIds as $tagId) {
+            $this->tags()->attach($tagId, ['id' => (string) Str::uuid()]);
+        }
     }
 
     /**

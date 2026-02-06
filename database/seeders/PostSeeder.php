@@ -19,9 +19,9 @@ class PostSeeder extends Seeder
             'Tips Marketing Organik untuk Produk Digital',
             'Mencari Partner untuk Proyek SaaS',
             'Tool Rekomendasi untuk Workflow Desain',
-            'Validasi Ide: Marketplace Lokal'
+            'Validasi Ide: Ekosistem UMKM'
         ];
-        $purposes = ['idea_business','share_experience','ask_question','find_partner','find_tools','validate_idea'];
+        $purposes = ['idea_business', 'share_experience', 'ask_question', 'find_partner', 'find_tools', 'validate_idea'];
 
         foreach (range(1, 40) as $i) {
             $user = $users->random();
@@ -30,7 +30,7 @@ class PostSeeder extends Seeder
                 [
                     'purpose_type' => $purposes[$i % count($purposes)],
                     'business_type' => $i % 3 === 0 ? 'Technology' : 'General',
-                    'content' => 'Konten dummy untuk pengujian fitur. ' . str_repeat('Inspirasi bisnis. ', rand(3,6)),
+                    'content' => 'Konten dummy untuk pengujian fitur. ' . str_repeat('Inspirasi bisnis. ', rand(3, 6)),
                     'upvotes_count' => rand(0, 50),
                     'downvotes_count' => rand(0, 20),
                     'comments_count' => rand(0, 30),

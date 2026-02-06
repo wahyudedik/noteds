@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Post;
 use App\Models\User;
-use App\Models\Product;
 use App\Models\Article;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -12,7 +11,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class SearchService
 {
     /**
-     * Perform global search across posts, users, products, and articles.
+     * Perform global search across posts, users, and articles.
      *
      * @param string $query
      * @param array $filters
@@ -24,7 +23,6 @@ class SearchService
         $results = [
             'posts' => collect(),
             'users' => collect(),
-            'products' => collect(),
             'articles' => collect(),
         ];
 
@@ -40,11 +38,6 @@ class SearchService
         // Search users
         if ($type === 'all' || $type === 'users') {
             $results['users'] = $this->searchUsers($query, $perPage);
-        }
-
-        // Search products
-        if ($type === 'all' || $type === 'products') {
-            $results['products'] = $this->searchProducts($query, $category, $perPage);
         }
 
         // Search articles
@@ -106,30 +99,6 @@ class SearchService
     }
 
     /**
-     * Search products.
-     *
-     * @param string $query
-     * @param string|null $category
-     * @param int $perPage
-     * @return LengthAwarePaginator
-     */
-    public function searchProducts(string $query, ?string $category = null, int $perPage = 15): LengthAwarePaginator
-    {
-        $productsQuery = Product::with('seller')
-            ->active()
-            ->where(function ($q) use ($query) {
-                $q->where('name', 'like', '%' . $query . '%')
-                    ->orWhere('description', 'like', '%' . $query . '%');
-            });
-
-        if ($category) {
-            $productsQuery->where('category', $category);
-        }
-
-        return $productsQuery->latest()->paginate($perPage);
-    }
-
-    /**
      * Search articles.
      *
      * @param string $query
@@ -180,7 +149,7 @@ class SearchService
     public function getSuggestions(string $query, int $limit = 10, ?\App\Models\User $user = null): array
     {
         $suggestions = [];
-        $perTypeLimit = max(3, ceil($limit / 3)); // At least 3 per type
+        $perTypeLimit = max(3, ceil($limit / 2)); // At least 3 per type
 
         // Post titles
         $postTitles = Post::where('status', 'active')
@@ -206,14 +175,6 @@ class SearchService
                 $suggestions[] = $user->name;
             }
         }
-
-        // Product names
-        $productNames = Product::active()
-            ->where('name', 'like', '%' . $query . '%')
-            ->limit($perTypeLimit)
-            ->pluck('name')
-            ->toArray();
-        $suggestions = array_merge($suggestions, $productNames);
 
         if ($user) {
             $history = \App\Models\SearchHistory::where('user_id', $user->id)

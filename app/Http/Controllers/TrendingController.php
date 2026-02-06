@@ -88,40 +88,12 @@ class TrendingController extends Controller
                 return $uArray;
             });
 
-        // Trending products: most sold in period (OrderItem)
-        $products = \App\Models\OrderItem::whereHas('order', function ($q) use ($days) {
-                $q->where('created_at', '>=', now()->subDays($days));
-            })
-            ->select('product_id', \Illuminate\Support\Facades\DB::raw('sum(quantity) as sold_qty'))
-            ->groupBy('product_id')
-            ->orderByDesc('sold_qty')
-            ->limit(20)
-            ->get()
-            ->map(function ($row) {
-                $p = \App\Models\Product::with('seller')->find($row->product_id);
-                if (!$p) return null;
-                return [
-                    'id' => $p->id,
-                    'name' => $p->name,
-                    'image' => $p->image,
-                    'image_url' => $p->image_url ?? null,
-                    'price' => $p->price,
-                    'sold_qty' => (int) $row->sold_qty,
-                    'seller' => [
-                        'id' => $p->seller?->id,
-                        'name' => $p->seller?->business_name ?? $p->seller?->name,
-                        'avatar_url' => $p->seller?->avatar_url,
-                    ],
-                ];
-            })->filter()->values();
-
         return Inertia::render('Explore/Trending', [
             'period' => $period,
             'posts' => $posts,
             'hashtags' => $hashtags,
             'topics' => $topics,
             'users' => $users,
-            'products' => $products,
         ]);
     }
 }

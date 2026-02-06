@@ -43,35 +43,6 @@ const unbanUser = () => {
     }
 };
 
-const removeRoleForm = useForm({
-    reason: '',
-});
-
-const showRemoveRoleModal = ref(false);
-
-const removeClipperRole = () => {
-    removeRoleForm.post(route('admin.users.remove-clipper-role', props.user.id), {
-        preserveScroll: true,
-        onSuccess: () => {
-            showRemoveRoleModal.value = false;
-            removeRoleForm.reset();
-            window.__toast?.add({ title: 'Role', message: 'Role removed', type: 'success' });
-        },
-    });
-};
-const showGrantRoleModal = ref(false);
-const grantRoleType = ref('clipper');
-const grantRole = () => {
-    const routeName = grantRoleType.value === 'brand' ? 'admin.users.grant-brand-role' : 'admin.users.grant-clipper-role';
-    router.post(route(routeName, props.user.id), {}, {
-        preserveScroll: true,
-        onSuccess: () => {
-            showGrantRoleModal.value = false;
-            window.__toast?.add({ title: 'Role', message: 'Role granted', type: 'success' });
-        },
-    });
-};
-
 const formatDate = (date) => {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('id-ID', {
@@ -139,17 +110,6 @@ const formatDate = (date) => {
                                                 {{ user.role }}
                                             </span>
                                             <span
-                                                v-if="user.clipper_role"
-                                                :class="[
-                                                    'px-2 py-1 text-xs font-medium rounded-full',
-                                                    user.clipper_role === 'brand'
-                                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                                                        : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200'
-                                                ]"
-                                            >
-                                                {{ user.clipper_role === 'brand' ? 'Brand' : 'Creator' }}
-                                            </span>
-                                            <span
                                                 v-if="user.is_banned"
                                                 class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
                                             >
@@ -175,45 +135,11 @@ const formatDate = (date) => {
                                     <div class="text-sm text-gray-500 dark:text-gray-400">Comments</div>
                                     <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ user.comments_count || 0 }}</div>
                                 </div>
-                                <div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">Products</div>
-                                    <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ user.products_count || 0 }}</div>
-                                </div>
-                                <div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">Orders</div>
-                                    <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ user.orders_count || 0 }}</div>
-                                </div>
                             </div>
 
                             <div v-if="user.business_field" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <div class="text-sm text-gray-500 dark:text-gray-400">Business Field</div>
                                 <div class="text-base text-gray-900 dark:text-white">{{ user.business_field }}</div>
-                            </div>
-
-                            <div v-if="user.clipper_role" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <div class="text-sm text-gray-500 dark:text-gray-400">Clipper Role</div>
-                                <div class="flex items-center justify-between">
-                                    <div class="text-base text-gray-900 dark:text-white capitalize">
-                                        {{ user.clipper_role === 'brand' ? 'Brand' : 'Creator' }}
-                                    </div>
-                                    <button
-                                        @click="showRemoveRoleModal = true"
-                                        class="px-3 py-1.5 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                                    >
-                                        Remove Role
-                                    </button>
-                                </div>
-                            </div>
-                            <div v-else class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <div class="text-sm text-gray-500 dark:text-gray-400">Clipper Role</div>
-                                <div class="flex items-center gap-2">
-                                    <button @click="grantRoleType = 'clipper'; showGrantRoleModal = true" class="px-3 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                                        Grant Creator
-                                    </button>
-                                    <button @click="grantRoleType = 'brand'; showGrantRoleModal = true" class="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                        Grant Brand
-                                    </button>
-                                </div>
                             </div>
 
                             <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -384,87 +310,6 @@ const formatDate = (date) => {
                             </button>
                         </div>
                     </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Remove Clipper Role Modal -->
-        <div
-            v-if="showRemoveRoleModal"
-            class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
-            @click.self="showRemoveRoleModal = false"
-        >
-            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
-                <div class="mt-3">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Remove Clipper Role</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        Are you sure you want to remove the clipper role from this user? This will revoke their access to clipper/brand features.
-                    </p>
-                    <form @submit.prevent="removeClipperRole">
-                        <div class="mb-4">
-                            <label for="remove-role-reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Reason (Recommended)
-                            </label>
-                            <textarea
-                                id="remove-role-reason"
-                                v-model="removeRoleForm.reason"
-                                rows="3"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                                placeholder="Enter reason for removing the role..."
-                            ></textarea>
-                            <div v-if="removeRoleForm.errors.reason" class="mt-1 text-sm text-red-600">
-                                {{ removeRoleForm.errors.reason }}
-                            </div>
-                        </div>
-                        <div class="flex justify-end gap-3">
-                            <button
-                                type="button"
-                                @click="showRemoveRoleModal = false"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 dark:bg-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                :disabled="removeRoleForm.processing"
-                                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50"
-                            >
-                                {{ removeRoleForm.processing ? 'Removing...' : 'Remove Role' }}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Grant Role Confirmation Modal -->
-        <div
-            v-if="showGrantRoleModal"
-            class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
-            @click.self="showGrantRoleModal = false"
-        >
-            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
-                <div class="mt-3">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Grant Role</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        Berikan role <span class="font-semibold capitalize">{{ grantRoleType }}</span> untuk user ini?
-                    </p>
-                    <div class="flex justify-end gap-3">
-                        <button
-                            type="button"
-                            @click="showGrantRoleModal = false"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 dark:bg-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="button"
-                            @click="grantRole"
-                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
-                        >
-                            Konfirmasi
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>

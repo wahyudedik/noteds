@@ -31,7 +31,7 @@ const Layout = isAuthenticated ? AuthenticatedLayout : GuestLayout;
                         <li><strong>"Platform"</strong> mengacu pada website Noteds dan semua layanannya</li>
                         <li><strong>"Pengguna"</strong> adalah individu yang mengakses atau menggunakan platform</li>
                         <li><strong>"Konten"</strong> adalah semua informasi, data, teks, gambar, atau materi lainnya yang diposting di platform</li>
-                        <li><strong>"Layanan"</strong> mencakup Forum, Marketplace Digital, dan Clipper System</li>
+                        <li><strong>"Layanan"</strong> mencakup fitur sosial, komunitas, dan dukungan yang tersedia di platform</li>
                     </ul>
                 </section>
 
@@ -63,7 +63,7 @@ const Layout = isAuthenticated ? AuthenticatedLayout : GuestLayout;
                         <li>Menyebarkan virus, malware, atau kode berbahaya</li>
                         <li>Melakukan peretasan atau mencoba mengakses data pengguna lain</li>
                         <li>Mem posting konten yang mengandung ujaran kebencian, diskriminasi, atau pornografi</li>
-                        <li>Menyalahgunakan fitur Marketplace atau Clipper System untuk tujuan ilegal</li>
+                        <li>Menyalahgunakan fitur platform untuk tujuan ilegal</li>
                     </ul>
 
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">4.2 Konten yang Diizinkan</h3>
@@ -89,41 +89,6 @@ const Layout = isAuthenticated ? AuthenticatedLayout : GuestLayout;
                 </section>
 
                 <section class="mb-8">
-                    <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">6. Marketplace Digital</h2>
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">6.1 Penjual</h3>
-                    <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
-                        <li>Penjual bertanggung jawab atas keakuratan deskripsi produk</li>
-                        <li>Produk digital harus legal dan tidak melanggar hak cipta</li>
-                        <li>Penjual harus memproses pesanan sesuai dengan yang dijanjikan</li>
-                    </ul>
-
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">6.2 Pembeli</h3>
-                    <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
-                        <li>Pembeli bertanggung jawab untuk memverifikasi produk sebelum membeli</li>
-                        <li>Pembayaran dilakukan melalui Midtrans dan mengikuti kebijakan mereka</li>
-                        <li>Refund mengikuti <Link :href="route('legal.refund-policy')" class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400">Kebijakan Pengembalian</Link> kami</li>
-                    </ul>
-                </section>
-
-                <section class="mb-8">
-                    <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">7. Clipper System</h2>
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">7.1 Brand/Influencer</h3>
-                    <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
-                        <li>Brand bertanggung jawab untuk menyediakan budget yang cukup untuk campaign</li>
-                        <li>Campaign harus mematuhi hukum dan regulasi yang berlaku</li>
-                        <li>Budget yang sudah di-lock tidak dapat dikembalikan kecuali campaign dibatalkan</li>
-                    </ul>
-
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">7.2 Clipper</h3>
-                    <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
-                        <li>Clipper bertanggung jawab untuk submit konten yang original dan sesuai dengan campaign</li>
-                        <li>Konten yang di-submit tidak boleh melanggar hak cipta atau hak pihak ketiga</li>
-                        <li>Reward akan dibayarkan setelah validasi views dan approval</li>
-                        <li>Clipper tidak dapat menarik reward yang masih dalam status pending</li>
-                    </ul>
-                </section>
-
-                <section class="mb-8">
                     <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">8. Batasan Tanggung Jawab</h2>
                     <p class="text-gray-700 dark:text-gray-300 mb-4">
                         Noteds menyediakan platform "sebagaimana adanya". Kami tidak menjamin bahwa platform akan selalu tersedia, bebas dari kesalahan, atau aman sepenuhnya.
@@ -134,7 +99,7 @@ const Layout = isAuthenticated ? AuthenticatedLayout : GuestLayout;
                     <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
                         <li>Kerugian langsung atau tidak langsung akibat penggunaan platform</li>
                         <li>Konten yang diposting oleh pengguna lain</li>
-                        <li>Transaksi antara pengguna di Marketplace atau Clipper System</li>
+                        <li>Interaksi atau kesepakatan di luar platform</li>
                         <li>Kehilangan data atau gangguan layanan</li>
                     </ul>
                 </section>

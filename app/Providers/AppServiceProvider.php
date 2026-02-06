@@ -31,32 +31,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
         Gate::policy(\App\Models\AnalyticsEvent::class, \App\Policies\AnalyticsEventPolicy::class);
-        \App\Models\StockPrice::observe(\App\Observers\StockPriceObserver::class);
 
         // Register domain event listeners
         Event::listen(
             \App\Events\PostReposted::class,
             \App\Listeners\TrackRepostAnalyticsListener::class
-        );
-
-        Event::listen(
-            \App\Events\StockLowAlert::class,
-            \App\Listeners\StockLowAlertListener::class
-        );
-
-        Event::listen(
-            \App\Events\PricingRuleApplied::class,
-            \App\Listeners\PricingRuleAppliedListener::class
-        );
-
-        Event::listen(
-            \App\Events\SellerVerified::class,
-            \App\Listeners\SellerVerifiedListener::class
-        );
-
-        Event::listen(
-            \App\Events\SellerRatingUpdated::class,
-            \App\Listeners\SellerRatingUpdatedListener::class
         );
 
         // Respect basic notification preferences when sending

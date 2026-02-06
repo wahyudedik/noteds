@@ -17,8 +17,8 @@ class SearchAnalyticsController extends Controller
         $request->validate([
             'date_from' => 'nullable|date',
             'date_to' => 'nullable|date|after_or_equal:date_from',
-            'type' => 'nullable|in:all,posts,users,products,articles',
-            'segment' => 'nullable|in:all,user,admin,brand,clipper',
+            'type' => 'nullable|in:all,posts,users,articles',
+            'segment' => 'nullable|in:all,user,admin',
             'period' => 'nullable|in:daily,weekly,monthly',
         ]);
 
@@ -42,13 +42,7 @@ class SearchAnalyticsController extends Controller
                         $q->where('role', 'admin');
                         break;
                     case 'user':
-                        $q->where('role', 'user')->whereNull('clipper_role');
-                        break;
-                    case 'brand':
-                        $q->where('clipper_role', 'brand');
-                        break;
-                    case 'clipper':
-                        $q->where('clipper_role', 'clipper');
+                        $q->where('role', 'user');
                         break;
                 }
             });

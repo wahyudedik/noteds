@@ -20,14 +20,14 @@ Optional:
 Example:
 ```json
 {
-  "name": "Stock Signals",
-  "slug": "stock-signals",
+  "name": "Content Insights",
+  "slug": "content-insights",
   "version": "1.0.0",
   "type": "web",
   "author": "Example Dev",
-  "description": "Signals and alerts for stocks",
+  "description": "Insights and utilities for content moderation and analytics",
   "permissions": ["routes", "notifications"],
-  "dependencies": { "core-market": "^1.0" }
+  "dependencies": { "core-analytics": "^1.0" }
 }
 ```
 
@@ -74,4 +74,3 @@ Measure operation:
 - Dependency checks ensure compatible versions
 - Activation requires successful validation; permissions are reviewed
 - Logs capture errors and performance for monitoring
-

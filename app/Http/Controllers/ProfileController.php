@@ -7,8 +7,6 @@ use App\Services\AnalyticsService;
 use App\Models\Post;
 use App\Models\PostVote;
 use App\Models\User;
-use App\Models\BrandRegistration;
-use App\Models\ClipperProfile;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -141,22 +139,6 @@ class ProfileController extends Controller
             $mutualConnectionsCount = $mutualConnections->count();
         }
 
-        // Get brand registration if exists
-        $brandRegistration = null;
-        if ($profileUser->clipper_role === 'brand' || $profileUser->role === 'brand') {
-            $brandRegistration = BrandRegistration::where('user_id', $profileUser->id)
-                ->where('status', 'approved')
-                ->first();
-        }
-
-        // Get clipper profile if exists
-        $clipperProfile = null;
-        if ($profileUser->clipper_role === 'clipper' || $profileUser->role === 'clipper') {
-            $clipperProfile = ClipperProfile::where('user_id', $profileUser->id)
-                ->where('status', 'verified')
-                ->first();
-        }
-
         return Inertia::render('Profile/Show', [
             'profileUser' => $profileUserArray,
             'isOwnProfile' => $isOwnProfile,
@@ -170,8 +152,6 @@ class ProfileController extends Controller
             'posts' => $posts,
             'userVotes' => $userVotes,
             'userBookmarks' => $userBookmarks,
-            'brandRegistration' => $brandRegistration,
-            'clipperProfile' => $clipperProfile,
             'stats' => $stats,
             'engagement_data' => $engagementData,
             'top_posts' => $topPosts,

@@ -15,8 +15,23 @@ class PostTopCachingTest extends TestCase
     public function test_cache_invalidation_by_flush_reflects_updated_scores()
     {
         Cache::flush();
-        $p1 = Post::factory()->recent()->create(['upvotes_count' => 10, 'comments_count' => 1, 'reposts_count' => 0]);
-        $p2 = Post::factory()->recent()->create(['upvotes_count' => 5, 'comments_count' => 1, 'reposts_count' => 0]);
+        $createdAt = now()->subHour();
+        $p1 = Post::factory()->create([
+            'upvotes_count' => 10,
+            'downvotes_count' => 0,
+            'comments_count' => 1,
+            'reposts_count' => 0,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+        ]);
+        $p2 = Post::factory()->create([
+            'upvotes_count' => 5,
+            'downvotes_count' => 0,
+            'comments_count' => 1,
+            'reposts_count' => 0,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+        ]);
         $svc = app(PostRankingService::class);
         $first = $svc->getTopPosts('day', 'upvotes', 15);
         $topId = $first->pluck('id')->first();

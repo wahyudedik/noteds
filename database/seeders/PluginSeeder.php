@@ -13,14 +13,14 @@ class PluginSeeder extends Seeder
     {
         // Web plugin example
         $webManifest = [
-            'name' => 'Stock Signals',
-            'slug' => 'stock-signals',
+            'name' => 'Content Insights',
+            'slug' => 'content-insights',
             'version' => '1.0.0',
             'type' => 'web',
             'author' => 'Noteds',
-            'description' => 'Signals and alerts for stocks',
+            'description' => 'Insights and utilities for content moderation and analytics',
             'permissions' => ['routes', 'notifications'],
-            'dependencies' => ['core-market' => '^1.0'],
+            'dependencies' => ['core-analytics' => '^1.0'],
         ];
 
         $webPlugin = Plugin::firstOrCreate(
@@ -55,7 +55,7 @@ class PluginSeeder extends Seeder
         PluginLog::create([
             'plugin_id' => $webPlugin->id,
             'level' => 'info',
-            'message' => 'Seeded web plugin: Stock Signals',
+            'message' => 'Seeded web plugin: Content Insights',
             'context' => ['version' => $webManifest['version']],
             'duration_ms' => 0.500,
         ]);

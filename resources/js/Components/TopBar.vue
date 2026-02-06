@@ -8,7 +8,6 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { toggleTheme } from '@/Utils/theme';
 
 const page = usePage();
-const showingProfileDropdown = ref(false);
 
 const notifications = computed(() => {
     const notificationsData = page.props.notifications || [];
@@ -58,23 +57,6 @@ const notifications = computed(() => {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 7a5 5 0 100 10 5 5 0 000-10z" />
                     </svg>
                 </button>
-                <!-- Cart Icon -->
-                <Link
-                    :href="route('marketplace.cart')"
-                    class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                    title="Shopping Cart"
-                    aria-label="Shopping cart"
-                >
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    <span
-                        v-if="page.props.cart_count > 0"
-                        class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
-                    >
-                        {{ page.props.cart_count > 99 ? '99+' : page.props.cart_count }}
-                    </span>
-                </Link>
 
                 <!-- Notification Bell -->
                 <NotificationBell :notifications="notifications" />
@@ -119,15 +101,6 @@ const notifications = computed(() => {
                             <DropdownLink :href="route('dashboard')">
                                 Dashboard
                             </DropdownLink>
-                            <DropdownLink 
-                                v-if="page.props.auth?.user?.clipper_role === 'brand' || page.props.auth?.user?.clipper_role === 'clipper' || page.props.auth?.user?.role === 'brand' || page.props.auth?.user?.role === 'clipper'"
-                                :href="route('clipper.campaigns.index')"
-                            >
-                                Clipper
-                            </DropdownLink>
-                            <DropdownLink :href="route('marketplace.index')">
-                                Marketplace
-                            </DropdownLink>
                             <DropdownLink :href="route('settings.index')">
                                 Settings
                             </DropdownLink>
@@ -165,15 +138,6 @@ const notifications = computed(() => {
                             </DropdownLink>
                             <DropdownLink :href="route('dashboard')">
                                 Dashboard
-                            </DropdownLink>
-                            <DropdownLink 
-                                v-if="page.props.auth?.user?.clipper_role === 'brand' || page.props.auth?.user?.clipper_role === 'clipper' || page.props.auth?.user?.role === 'brand' || page.props.auth?.user?.role === 'clipper'"
-                                :href="route('clipper.campaigns.index')"
-                            >
-                                Clipper
-                            </DropdownLink>
-                            <DropdownLink :href="route('marketplace.index')">
-                                Marketplace
                             </DropdownLink>
                             <DropdownLink :href="route('settings.index')">
                                 Settings

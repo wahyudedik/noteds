@@ -140,12 +140,6 @@ Schedule::command('mediastack:fetch')->dailyAt('08:00');
 Schedule::command('mediastack:fetch')->dailyAt('14:00');
 Schedule::command('mediastack:fetch')->dailyAt('20:00');
 
-// Clipper System
-Schedule::command('clipper:track-views')->everySixHours();
-Schedule::command('clipper:validate-pending-clips')->hourly();
-Schedule::command('clipper:auto-transfer-rewards')->everyFifteenMinutes();
-Schedule::command('clipper:complete-expired-campaigns')->daily();
-
 // Explorer Articles
 Schedule::command('articles:sync --source=rss')->dailyAt('02:00');
 Schedule::command('articles:sync --source=reddit')->everySixHours();

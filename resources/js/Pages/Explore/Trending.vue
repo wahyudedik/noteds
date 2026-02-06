@@ -11,7 +11,6 @@ const props = defineProps({
   hashtags: { type: Array, default: () => [] },
   topics: { type: Array, default: () => [] },
   users: { type: Array, default: () => [] },
-  products: { type: Array, default: () => [] },
 });
 
 const tabs = [
@@ -19,7 +18,6 @@ const tabs = [
   { id: 'hashtags', label: 'Hashtags' },
   { id: 'topics', label: 'Topics' },
   { id: 'users', label: 'Users' },
-  { id: 'products', label: 'Products' },
 ];
 const activeTab = ref('posts');
 const periods = [
@@ -143,25 +141,6 @@ const changePeriod = (p) => {
               <p v-if="props.users.length === 0" class="text-sm text-gray-500 dark:text-gray-400 mt-2">Tidak ada user trending untuk periode ini.</p>
             </div>
 
-            <div v-else-if="activeTab === 'products'">
-              <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Link
-                  v-for="p in props.products"
-                  :key="p.id"
-                  :href="route('marketplace.products.show', p.id)"
-                  class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow transition bg-white dark:bg-gray-800"
-                  :title="`${p.sold_qty} sold ${props.period}`"
-                >
-                  <img v-if="p.image_url || p.image" :src="p.image_url || p.image" :alt="p.name" class="w-full h-40 object-cover" />
-                  <div class="p-4">
-                    <div class="font-semibold text-gray-900 dark:text-gray-100">{{ p.name }}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Rp {{ new Intl.NumberFormat('id-ID').format(p.price) }}</div>
-                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ p.sold_qty }} sold</div>
-                  </div>
-                </Link>
-              </div>
-              <p v-if="props.products.length === 0" class="text-sm text-gray-500 dark:text-gray-400 mt-2">Tidak ada produk trending untuk periode ini.</p>
-            </div>
           </div>
         </div>
       </div>

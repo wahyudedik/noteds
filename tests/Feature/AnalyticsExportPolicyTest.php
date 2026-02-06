@@ -18,7 +18,7 @@ class AnalyticsExportPolicyTest extends TestCase
         AnalyticsEvent::factory()->count(3)->create();
         $resp = $this->get('/analytics/events/export');
         $resp->assertStatus(200);
-        $resp->assertHeader('Content-Type', 'text/csv');
+        $resp->assertHeader('Content-Type', 'text/csv; charset=utf-8');
     }
 
     public function test_analyst_can_export()

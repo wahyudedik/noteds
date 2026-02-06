@@ -35,8 +35,7 @@ const Layout = isAuthenticated ? AuthenticatedLayout : GuestLayout;
                         <li>Nama, alamat email, dan kata sandi saat registrasi</li>
                         <li>Informasi profil bisnis (nama bisnis, bidang usaha, skills, goals)</li>
                         <li>Konten yang Anda posting (posts, komentar, validasi ide)</li>
-                        <li>Informasi transaksi (untuk Marketplace dan Clipper System)</li>
-                        <li>Informasi pembayaran (melalui Midtrans, dienkripsi dan tidak disimpan oleh kami)</li>
+                        <li>Informasi yang Anda kirim melalui formulir dukungan atau kontak</li>
                     </ul>
 
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">2.2 Informasi yang Dikumpulkan Otomatis</h3>
@@ -53,7 +52,6 @@ const Layout = isAuthenticated ? AuthenticatedLayout : GuestLayout;
                     <p class="text-gray-700 dark:text-gray-300 mb-4">Kami menggunakan informasi yang dikumpulkan untuk:</p>
                     <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
                         <li>Menyediakan dan meningkatkan layanan platform</li>
-                        <li>Memproses transaksi dan pembayaran</li>
                         <li>Mengirim notifikasi penting terkait akun dan layanan</li>
                         <li>Menganalisis penggunaan platform untuk perbaikan</li>
                         <li>Mencegah penipuan dan penyalahgunaan</li>

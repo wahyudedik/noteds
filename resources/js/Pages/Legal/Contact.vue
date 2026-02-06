@@ -137,8 +137,6 @@ const submit = () => {
                                 <option value="general">Pertanyaan Umum</option>
                                 <option value="account">Masalah Akun</option>
                                 <option value="technical">Masalah Teknis</option>
-                                <option value="marketplace">Marketplace</option>
-                                <option value="clipper">Clipper System</option>
                                 <option value="business">Pertanyaan Bisnis</option>
                                 <option value="legal">Pertanyaan Legal</option>
                                 <option value="other">Lainnya</option>

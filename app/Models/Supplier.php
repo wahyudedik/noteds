@@ -78,15 +78,6 @@ class Supplier extends Model
     }
 
     /**
-     * Get products from this supplier's seller (if any match the category).
-     */
-    public function products(): HasMany
-    {
-        return $this->hasMany(Product::class, 'user_id', 'user_id')
-            ->where('category', $this->supplier_category);
-    }
-
-    /**
      * Update supplier rating from reviews.
      */
     public function updateRating(): void

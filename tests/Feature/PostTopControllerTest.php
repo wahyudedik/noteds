@@ -11,12 +11,18 @@ class PostTopControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_can_access_top_posts()
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAs(User::factory()->create());
+    }
+
+    public function test_user_can_access_top_posts()
     {
         Post::factory()->recent()->count(5)->create();
         $resp = $this->get('/posts/top?period=week&metric=engagement');
         $resp->assertStatus(200);
-        $resp->assertSee('Posts/Index'); // Inertia component name
+        $resp->assertSee('Posts\\/Index'); // Inertia component name
     }
 
     public function test_period_and_metric_parameters_affect_results()

@@ -70,7 +70,6 @@ const exportPdf = () => {
                                 <option value="all">All</option>
                                 <option value="posts">Posts</option>
                                 <option value="users">Users</option>
-                                <option value="products">Products</option>
                                 <option value="articles">Articles</option>
                             </select>
                         </div>
@@ -81,8 +80,6 @@ const exportPdf = () => {
                                 <option value="all">All</option>
                                 <option value="user">User</option>
                                 <option value="admin">Admin</option>
-                                <option value="brand">Brand</option>
-                                <option value="clipper">Clipper</option>
                             </select>
                         </div>
                         <div>

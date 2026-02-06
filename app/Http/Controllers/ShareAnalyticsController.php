@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\Group;
-use App\Models\Product;
 use App\Models\Story;
 use App\Models\ShareAnalytics;
 use Illuminate\Http\Request;
@@ -50,7 +49,6 @@ class ShareAnalyticsController extends Controller
         return match ($type) {
             'posts' => Post::class,
             'groups' => Group::class,
-            'products' => Product::class,
             'stories' => Story::class,
             default => null,
         };

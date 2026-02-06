@@ -81,11 +81,9 @@ class UserNotificationPreferencesTest extends TestCase
 
         Event::assertDispatched(UserNotificationCreated::class, function (UserNotificationCreated $event) use ($user) {
             $this->assertInstanceOf(PrivateChannel::class, $event->broadcastOn());
-            $this->assertSame('user.' . $user->id . '.notifications', $event->broadcastOn()->name);
+            $this->assertSame('private-user.' . $user->id . '.notifications', $event->broadcastOn()->name);
 
             return $event->playSound === false;
         });
     }
 }
-
-

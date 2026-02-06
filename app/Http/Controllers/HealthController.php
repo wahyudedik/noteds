@@ -22,7 +22,6 @@ class HealthController extends Controller
             'redis' => $this->checkRedis(),
             'queue' => $this->checkQueue(),
             'cache' => $this->checkCache(),
-            'midtrans' => $this->checkMidtrans(),
             'mediastack' => $this->checkMediaStack(),
             'disk' => $this->checkDiskSpace(),
             'memory' => $this->checkMemory(),
@@ -200,38 +199,6 @@ class HealthController extends Controller
             ];
         } catch (\Exception $e) {
             Log::warning('Cache health check failed: ' . $e->getMessage());
-            return [
-                'status' => 'unhealthy',
-                'error' => $e->getMessage(),
-            ];
-        }
-    }
-
-    /**
-     * Check Midtrans API status.
-     */
-    protected function checkMidtrans(): array
-    {
-        try {
-            $serverKey = config('midtrans.server_key');
-            $isProduction = config('midtrans.is_production', false);
-
-            if (empty($serverKey)) {
-                return [
-                    'status' => 'unhealthy',
-                    'error' => 'Midtrans server key not configured',
-                ];
-            }
-
-            // For health check, we'll just verify configuration is present
-            // Actual API calls would be too expensive for frequent health checks
-            return [
-                'status' => 'healthy',
-                'mode' => $isProduction ? 'production' : 'sandbox',
-                'configured' => true,
-            ];
-        } catch (\Exception $e) {
-            Log::warning('Midtrans health check failed: ' . $e->getMessage());
             return [
                 'status' => 'unhealthy',
                 'error' => $e->getMessage(),

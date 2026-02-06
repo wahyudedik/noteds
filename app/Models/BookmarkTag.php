@@ -71,7 +71,9 @@ class BookmarkTag extends Model
      */
     public function bookmarks(): BelongsToMany
     {
-        return $this->belongsToMany(Bookmark::class, 'bookmark_tag');
+        return $this->belongsToMany(Bookmark::class, 'bookmark_tag', 'tag_id', 'bookmark_id')
+            ->withPivot('id')
+            ->withTimestamps();
     }
 
     /**
@@ -147,7 +149,7 @@ class BookmarkTag extends Model
 
         return $query->where(function ($q) use ($user) {
             $q->where('is_global', true)
-              ->orWhere('user_id', $user->id);
+                ->orWhere('user_id', $user->id);
         });
     }
 }

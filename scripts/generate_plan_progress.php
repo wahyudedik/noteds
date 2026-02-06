@@ -1,12 +1,14 @@
 <?php
 $plansDir = __DIR__ . '/../.cursor/plans';
 $files = glob($plansDir . '/*.plan.md');
-function countBoxes($content) {
+function countBoxes($content)
+{
     $checked = preg_match_all('/- \[x\]/i', $content, $m);
     $unchecked = preg_match_all('/- \[ \]/', $content, $m2);
     return [$checked, $unchecked];
 }
-function evidenceFor($filename) {
+function evidenceFor($filename)
+{
     $f = strtolower(basename($filename));
     $ev = [];
     $add = function ($arr) use (&$ev) {
@@ -14,27 +16,6 @@ function evidenceFor($filename) {
             $ev[] = $x;
         }
     };
-    if (strpos($f, 'payment') !== false || strpos($f, 'midtrans') !== false) {
-        $add([
-            '[web.php](file:///d:/PROJECT/LARAVEL/noteds/routes/web.php#L1005-L1010)',
-            '[PaymentController.php](file:///d:/PROJECT/LARAVEL/noteds/app/Http/Controllers/PaymentController.php)',
-            '[MidtransService.php](file:///d:/PROJECT/LARAVEL/noteds/app/Services/MidtransService.php)',
-            '[ProcessMidtransWebhook.php](file:///d:/PROJECT/LARAVEL/noteds/app/Jobs/ProcessMidtransWebhook.php)',
-            '[Transaction.php](file:///d:/PROJECT/LARAVEL/noteds/app/Models/Transaction.php)',
-            '[config/midtrans.php](file:///d:/PROJECT/LARAVEL/noteds/config/midtrans.php)',
-            '[PAYMENT_GATEWAY_VERIFICATION_REPORT.md](file:///d:/PROJECT/LARAVEL/noteds/PAYMENT_GATEWAY_VERIFICATION_REPORT.md)',
-        ]);
-    }
-    if (strpos($f, 'clipper') !== false) {
-        $add([
-            '[web.php](file:///d:/PROJECT/LARAVEL/noteds/routes/web.php#L705-L786)',
-            '[ClipController.php](file:///d:/PROJECT/LARAVEL/noteds/app/Http/Controllers/Clipper/ClipController.php)',
-            '[ClipService.php](file:///d:/PROJECT/LARAVEL/noteds/app/Services/ClipService.php)',
-            '[Clip.php](file:///d:/PROJECT/LARAVEL/noteds/app/Models/Clip.php)',
-            '[create_clips_table](file:///d:/PROJECT/LARAVEL/noteds/database/migrations/2025_12_30_130550_create_clips_table.php)',
-            '[Components/Clipper](file:///d:/PROJECT/LARAVEL/noteds/resources/js/Components/Clipper)',
-        ]);
-    }
     if (strpos($f, 'infinite_scroll') !== false || strpos($f, 'floating_action_button') !== false) {
         $add([
             '[PostFeed.vue](file:///d:/PROJECT/LARAVEL/noteds/resources/js/Components/PostFeed.vue)',
@@ -100,8 +81,7 @@ function evidenceFor($filename) {
     }
     if (strpos($f, 'throttling') !== false || strpos($f, 'rate') !== false) {
         $add([
-            '[RateLimitClipperApi.php](file:///d:/PROJECT/LARAVEL/noteds/app/Http/Middleware/RateLimitClipperApi.php)',
-            '[RateLimitViewTracking.php](file:///d:/PROJECT/LARAVEL/noteds/app/Http/Middleware/RateLimitViewTracking.php)',
+            '[RateLimiter.md](file:///d:/PROJECT/LARAVEL/noteds/docs/RateLimiter.md)',
         ]);
     }
     if (strpos($f, 'faq') !== false || strpos($f, 'documentation') !== false || strpos($f, 'docs') !== false) {
@@ -110,15 +90,6 @@ function evidenceFor($filename) {
             '[Admin/DocumentationController.php](file:///d:/PROJECT/LARAVEL/noteds/app/Http/Controllers/Admin/DocumentationController.php)',
             '[Pages/Admin/Faqs](file:///d:/PROJECT/LARAVEL/noteds/resources/js/Pages/Admin/Faqs)',
             '[Pages/Admin/Documentations](file:///d:/PROJECT/LARAVEL/noteds/resources/js/Pages/Admin/Documentations)',
-        ]);
-    }
-    if (strpos($f, 'marketplace') !== false || strpos($f, 'seller') !== false || strpos($f, 'escrow') !== false || strpos($f, 'refund') !== false) {
-        $add([
-            '[MarketplaceService.php](file:///d:/PROJECT/LARAVEL/noteds/app/Services/MarketplaceService.php)',
-            '[EscrowService.php](file:///d:/PROJECT/LARAVEL/noteds/app/Services/EscrowService.php)',
-            '[OrderController.php](file:///d:/PROJECT/LARAVEL/noteds/app/Http/Controllers/Marketplace/OrderController.php)',
-            '[Refund.php](file:///d:/PROJECT/LARAVEL/noteds/app/Models/Refund.php)',
-            '[Pages/Marketplace](file:///d:/PROJECT/LARAVEL/noteds/resources/js/Pages/Marketplace)',
         ]);
     }
     return $ev;

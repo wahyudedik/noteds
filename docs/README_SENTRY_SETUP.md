@@ -17,7 +17,6 @@ php artisan vendor:publish --provider="Sentry\Laravel\ServiceProvider"
 SENTRY_LARAVEL_DSN=https://your-sentry-dsn@sentry.io/project-id
 SENTRY_RELEASE=your-app-version
 SENTRY_TRACES_SAMPLE_RATE=0.1
-SENTRY_CLIPPER_SAMPLE_RATE=1.0
 ``` 
 
 ## Configuration
@@ -28,14 +27,7 @@ The Sentry configuration file is located at `config/sentry.php`.
 
 Sentry will automatically capture:
 - All exceptions and errors
-- Failed transfers (with retry mechanism)
-- View tracking API errors
-- Payment gateway errors
 - Database connection errors
-
-## Clipper-Specific Tracking
-
-Clipper system errors are tracked with 100% sample rate by default (configurable via `SENTRY_CLIPPER_SAMPLE_RATE`).
 
 ## Monitoring
 

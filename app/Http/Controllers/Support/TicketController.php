@@ -134,9 +134,6 @@ class TicketController extends Controller
         $categories = [
             'general' => 'General Inquiry',
             'account' => 'Account Issues',
-            'marketplace' => 'Marketplace',
-            'clipper' => 'Clipper/Campaign',
-            'payment' => 'Payment & Billing',
             'technical' => 'Technical Support',
             'other' => 'Other',
         ];

@@ -213,10 +213,6 @@ class SettingsController extends Controller
             'login' => 'Login History',
             'profile_change' => 'Profile Changes',
             'security_change' => 'Security Changes',
-            'transaction' => 'Transactions',
-            'withdrawal' => 'Withdrawals',
-            'product_upload' => 'Product Uploads',
-            'product_download' => 'Product Downloads',
         ];
 
         return Inertia::render('Settings/ActivityLog', [

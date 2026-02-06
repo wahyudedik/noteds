@@ -26,8 +26,6 @@ const form = useForm({
 
 const categories = [
     { value: 'general', label: 'General' },
-    { value: 'marketplace', label: 'Marketplace' },
-    { value: 'clipper', label: 'Clipper' },
     { value: 'account', label: 'Account' },
 ];
 

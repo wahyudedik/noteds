@@ -67,7 +67,6 @@ const Layout = isAuthenticated ? AuthenticatedLayout : GuestLayout;
                     </p>
                     <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
                         <li><strong>Google Analytics:</strong> Untuk menganalisis penggunaan platform</li>
-                        <li><strong>Midtrans:</strong> Untuk memproses pembayaran (jika menggunakan fitur Marketplace atau Clipper)</li>
                         <li><strong>Layanan Autentikasi:</strong> Untuk keamanan login</li>
                     </ul>
                     <p class="text-gray-700 dark:text-gray-300">
@@ -118,7 +117,6 @@ const Layout = isAuthenticated ? AuthenticatedLayout : GuestLayout;
                     <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4 space-y-2">
                         <li>Fitur login dan autentikasi</li>
                         <li>Preferensi pengguna yang disimpan</li>
-                        <li>Fitur Marketplace dan Clipper System</li>
                         <li>Personalisasi konten</li>
                     </ul>
                 </section>

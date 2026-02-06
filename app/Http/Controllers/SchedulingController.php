@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use App\Models\ProductReleaseSchedule;
-use App\Models\Campaign;
 use App\Models\RecurrenceRule;
 use App\Services\RecurrenceService;
 use Illuminate\Http\Request;
@@ -26,12 +24,6 @@ class SchedulingController extends Controller
         $posts = Post::where('publish_status', 'scheduled')
             ->whereBetween('scheduled_at', [$from, $to])
             ->get(['id','title','scheduled_at','user_id']);
-        $campaigns = Campaign::whereNotNull('scheduled_at')
-            ->whereBetween('scheduled_at', [$from, $to])
-            ->get(['id','name','scheduled_at','user_id']);
-        $products = ProductReleaseSchedule::where('status', 'scheduled')
-            ->whereBetween('scheduled_at', [$from, $to])
-            ->get(['id','product_id','scheduled_at','timezone']);
 
         $items = [];
         foreach ($posts as $p) {
@@ -40,22 +32,6 @@ class SchedulingController extends Controller
                 'id' => $p->id,
                 'title' => $p->title,
                 'scheduled_at' => Carbon::parse($p->scheduled_at)->tz($tz)->toIso8601String(),
-            ];
-        }
-        foreach ($campaigns as $c) {
-            $items[] = [
-                'type' => 'campaign',
-                'id' => $c->id,
-                'title' => $c->name,
-                'scheduled_at' => Carbon::parse($c->scheduled_at)->tz($tz)->toIso8601String(),
-            ];
-        }
-        foreach ($products as $r) {
-            $items[] = [
-                'type' => 'product_release',
-                'id' => $r->id,
-                'title' => 'Product Release ' . $r->product_id,
-                'scheduled_at' => Carbon::parse($r->scheduled_at)->tz($tz)->toIso8601String(),
             ];
         }
 
@@ -82,8 +58,6 @@ class SchedulingController extends Controller
     {
         return match ($type) {
             \App\Models\Post::class => 'post',
-            \App\Models\Campaign::class => 'campaign',
-            \App\Models\ProductReleaseSchedule::class => 'product_release',
             default => 'unknown',
         };
     }
@@ -93,14 +67,6 @@ class SchedulingController extends Controller
         if ($rule->scheduleable_type === \App\Models\Post::class) {
             $p = Post::find($rule->scheduleable_id);
             return $p?->title ?? 'Post';
-        }
-        if ($rule->scheduleable_type === \App\Models\Campaign::class) {
-            $c = Campaign::find($rule->scheduleable_id);
-            return $c?->name ?? 'Campaign';
-        }
-        if ($rule->scheduleable_type === \App\Models\ProductReleaseSchedule::class) {
-            $r = ProductReleaseSchedule::find($rule->scheduleable_id);
-            return 'Product Release ' . ($r?->product_id ?? '');
         }
         return 'Scheduled';
     }
@@ -154,7 +120,7 @@ class SchedulingController extends Controller
     public function bulk(Request $request)
     {
         $data = $request->validate([
-            'type' => 'required|in:post,campaign,product_release',
+            'type' => 'required|in:post',
             'ids' => 'required|array|min:1',
             'ids.*' => 'string',
             'from' => 'required|date',
@@ -189,30 +155,6 @@ class SchedulingController extends Controller
                     'updated_at' => now(),
                 ]);
                 $this->detectConflicts('post', $current, $id, true);
-            } elseif ($data['type'] === 'campaign') {
-                Campaign::where('id', $id)->update(['scheduled_at' => $current]);
-                \DB::table('scheduling_audits')->insert([
-                    'scheduleable_type' => Campaign::class,
-                    'scheduleable_id' => $id,
-                    'user_id' => $request->user()->id,
-                    'action' => 'update',
-                    'meta' => json_encode(['bulk' => true]),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-                $this->detectConflicts('campaign', $current, $id, true);
-            } else {
-                ProductReleaseSchedule::where('id', $id)->update(['scheduled_at' => $current, 'status' => 'scheduled']);
-                \DB::table('scheduling_audits')->insert([
-                    'scheduleable_type' => ProductReleaseSchedule::class,
-                    'scheduleable_id' => $id,
-                    'user_id' => $request->user()->id,
-                    'action' => 'update',
-                    'meta' => json_encode(['bulk' => true]),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-                $this->detectConflicts('product_release', $current, $id, true);
             }
             if ($strategy === 'hourly') {
                 $current = $current->copy()->addHour();
@@ -230,21 +172,10 @@ class SchedulingController extends Controller
         $windowStart = $scheduledAtUtc->copy()->subMinutes(5);
         $windowEnd = $scheduledAtUtc->copy()->addMinutes(5);
         $conflicts = [];
-        if ($type === 'post') {
-            $conflicts = Post::where('publish_status', 'scheduled')
-                ->whereBetween('scheduled_at', [$windowStart, $windowEnd])
-                ->where('id', '!=', $selfId)
-                ->pluck('id')->toArray();
-        } elseif ($type === 'campaign') {
-            $conflicts = Campaign::whereBetween('scheduled_at', [$windowStart, $windowEnd])
-                ->where('id', '!=', $selfId)
-                ->pluck('id')->toArray();
-        } else {
-            $conflicts = ProductReleaseSchedule::where('status', 'scheduled')
-                ->whereBetween('scheduled_at', [$windowStart, $windowEnd])
-                ->where('id', '!=', $selfId)
-                ->pluck('id')->toArray();
-        }
+        $conflicts = Post::where('publish_status', 'scheduled')
+            ->whereBetween('scheduled_at', [$windowStart, $windowEnd])
+            ->where('id', '!=', $selfId)
+            ->pluck('id')->toArray();
         if ($log && !empty($conflicts)) {
             \DB::table('scheduling_audits')->insert([
                 'scheduleable_type' => $this->reverseMapType($type),
@@ -263,8 +194,6 @@ class SchedulingController extends Controller
     {
         return match ($type) {
             'post' => \App\Models\Post::class,
-            'campaign' => \App\Models\Campaign::class,
-            'product_release' => \App\Models\ProductReleaseSchedule::class,
             default => \App\Models\Post::class,
         };
     }

@@ -1,6 +1,6 @@
 # Noteds.com
 
-> A business-focused social network platform for entrepreneurs, creators, and professionals to share ideas, validate business concepts, collaborate, and monetize digital products.
+> A business-focused social network platform for entrepreneurs, creators, and professionals to share ideas, validate business concepts, and collaborate.
 
 [![Laravel](https://img.shields.io/badge/Laravel-12.x-red.svg)](https://laravel.com)
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.x-green.svg)](https://vuejs.org)
@@ -26,14 +26,13 @@
 
 ## 🎯 Overview
 
-Noteds.com is a modern business-focused social networking platform built with Laravel and Vue.js. Unlike traditional social media, Noteds focuses on business networking, idea validation, knowledge sharing, and digital product marketplace.
+Noteds.com is a modern business-focused social networking platform built with Laravel and Vue.js. Unlike traditional social media, Noteds focuses on business networking, idea validation, and knowledge sharing.
 
 ### Core Philosophy
 
 - **Business-Focused**: Designed for entrepreneurs, creators, and professionals
 - **Purpose-Driven Content**: Posts categorized by purpose (ideas, questions, experiences, partnerships, tools, validations)
 - **Community Validation**: Built-in idea validation system with expert feedback
-- **Monetization**: Integrated marketplace for digital products
 - **Knowledge Sharing**: Threaded discussions with voting and best answer features
 
 ## ✨ Features
@@ -48,17 +47,7 @@ Noteds.com is a modern business-focused social networking platform built with La
 - **Idea Validation**: Expert validation system with capital estimation, BEP analysis, and risk assessment
 - **Business Profiles**: Extended user profiles with business information, skills, goals, and portfolio
 - **Content Moderation**: Automatic content filtering and moderation system
-- **User Roles**: Admin, Brand/Creator, Clipper, and regular user roles
-
-#### Marketplace
-- **Digital Products**: Upload and sell digital products (courses, templates, software, etc.)
-- **Payment Integration**: Midtrans payment gateway integration
-- **Order Management**: Complete order lifecycle (pending → paid → completed)
-- **License Keys**: Automatic license key generation for digital products
-- **File Downloads**: Secure file download system for purchased products
-- **Withdrawal System**: Creator wallet with withdrawal requests and admin approval
-- **Sales Analytics**: Comprehensive sales analytics dashboard for sellers
-- **Product Moderation**: Admin moderation for marketplace products
+- **User Roles**: Admin and regular user roles
 
 #### Explorer (News Integration)
 - **MediaStack Integration**: News articles from MediaStack API
@@ -83,8 +72,6 @@ Noteds.com is a modern business-focused social networking platform built with La
 - **Bookmarks**: Save posts for later reading
 - **Admin User Management**: User banning, role management, and moderation tools
 - **FAQ & Documentation**: Admin-managed FAQ and documentation system
-- **Clipper System**: Content clipping system with escrow wallet for campaigns
-
 ## 🛠 Tech Stack
 
 ### Backend
@@ -103,7 +90,6 @@ Noteds.com is a modern business-focused social networking platform built with La
 - **Forms**: @tailwindcss/forms
 
 ### Third-Party Integrations
-- **Payment Gateway**: Midtrans (Indonesia)
 - **News API**: MediaStack API
 - **Email**: Laravel Mail (SMTP)
 
@@ -119,7 +105,6 @@ Noteds.com is a modern business-focused social networking platform built with La
 - Node.js 18+ and NPM
 - MySQL 8.0+ or PostgreSQL 13+
 - Web server (Apache/Nginx) or PHP built-in server
-- Midtrans account (for payment gateway)
 - MediaStack API key (for news explorer)
 
 ## 🚀 Installation
@@ -166,12 +151,6 @@ DB_PORT=3306
 DB_DATABASE=noteds
 DB_USERNAME=root
 DB_PASSWORD=
-
-# Midtrans Configuration
-MIDTRANS_SERVER_KEY=your_server_key
-MIDTRANS_CLIENT_KEY=your_client_key
-MIDTRANS_IS_PRODUCTION=false
-MIDTRANS_MERCHANT_ID=
 
 # MediaStack Configuration
 MEDIASTACK_API_KEY=your_api_key
@@ -221,18 +200,9 @@ The application will be available at `http://localhost:8000`
 
 ## ⚙️ Configuration
 
-### Midtrans Payment Gateway
-
-See [MARKETPLACE_SETUP.md](MARKETPLACE_SETUP.md) for detailed Midtrans configuration:
-
-- Sandbox setup for development
-- Production setup
-- Webhook configuration
-- Testing payment cards
-
 ### File Upload Limits
 
-The platform supports file uploads up to **50MB** for digital products. Configure PHP settings:
+The platform supports file uploads up to **50MB** for media. Configure PHP settings:
 
 **`.user.ini`** (in project root):
 ```ini
@@ -314,30 +284,6 @@ For posts with `validate_idea` purpose, experts can provide:
 
 Results are aggregated and displayed with approval percentages.
 
-### Marketplace
-
-#### For Sellers (Creators/Brands)
-
-- Upload digital products (up to 50MB)
-- Set pricing and product details
-- Track sales and analytics
-- Request withdrawals (minimum 50,000)
-- Manage product inventory
-
-#### For Buyers
-
-- Browse and search products
-- Purchase with Midtrans payment gateway
-- Download purchased products
-- Automatic license key generation
-- Order history
-
-#### For Admins
-
-- Approve/reject withdrawal requests
-- Moderate products
-- Manage marketplace settings
-
 ### Content Moderation
 
 - **Automatic Filtering**: Forbidden words/phrases detection
@@ -348,8 +294,6 @@ Results are aggregated and displayed with approval percentages.
 ### User Roles
 
 - **Admin**: Full platform access, moderation, analytics
-- **Brand/Creator**: Can sell products, extended profile features
-- **Clipper**: Content clipping system (planned)
 - **User**: Standard user with posting, commenting, voting
 
 ## 💻 Development
@@ -474,8 +418,6 @@ php artisan optimize
 - [ ] Update `APP_ENV=production` in `.env`
 - [ ] Set `APP_DEBUG=false`
 - [ ] Configure production database
-- [ ] Set up Midtrans production credentials
-- [ ] Configure webhook URLs in Midtrans dashboard
 - [ ] Set up queue workers (Supervisor/systemd)
 - [ ] Configure file storage (S3/CDN if needed)
 - [ ] Enable HTTPS/SSL
@@ -494,10 +436,6 @@ APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://noteds.com
 
-MIDTRANS_IS_PRODUCTION=true
-MIDTRANS_SERVER_KEY=your_production_server_key
-MIDTRANS_CLIENT_KEY=your_production_client_key
-
 QUEUE_CONNECTION=redis  # or database
 REDIS_HOST=127.0.0.1
 REDIS_PASSWORD=null
@@ -506,21 +444,17 @@ REDIS_PORT=6379
 
 ## 📚 Documentation
 
-- [Marketplace Setup Guide](MARKETPLACE_SETUP.md) - Complete guide for marketplace configuration
 - [Development Plans](.cursor/plans/) - Detailed implementation plans for features
 
 ### Available Plans
 
 - `noteds.com_mvp_development_c95b8414.plan.md` - MVP core features
-- `marketplace_digital_dengan_midtrans_6726c6d7.plan.md` - Marketplace implementation
 - `mediastack_explorer_feature_ae872b89.plan.md` - News explorer feature
 - `fitur_lengkap_untuk_platform_noteds.com_1ad05aae.plan.md` - Additional features
 - `implementasi_throttling_untuk_semua_endpoint_bc945ecd.plan.md` - Rate limiting
 - `noteds.com_modern_social_media_redesign_31ed4c57.plan.md` - UI/UX redesign
 - `infinite_scroll_&_enhanced_floating_action_button_5bf1d131.plan.md` - UX improvements
-- `fitur_clipper_dengan_sistem_escrow_da1c8797.plan.md` - Clipper system (planned)
 - `faq_&_documentation_crud_admin_panel_1e25e1ed.plan.md` - FAQ system (planned)
-- `handle_posttoolargeexception_for_marketplace_uploads_4b221c59.plan.md` - File upload handling
 
 ## 🤝 Contributing
 
@@ -549,7 +483,6 @@ This project is open-sourced software licensed under the [MIT license](LICENSE).
 - [Laravel](https://laravel.com) - The PHP Framework
 - [Vue.js](https://vuejs.org) - The Progressive JavaScript Framework
 - [Inertia.js](https://inertiajs.com) - The Modern Monolith
-- [Midtrans](https://midtrans.com) - Payment Gateway
 - [MediaStack](https://mediastack.com) - News API
 - [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS Framework
 
@@ -560,4 +493,3 @@ For support, email support@noteds.com or open an issue in the repository.
 ---
 
 **Built with ❤️ for the business community**
-

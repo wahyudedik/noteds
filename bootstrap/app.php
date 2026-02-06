@@ -12,11 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Replace default CSRF middleware with custom one
-        $middleware->validateCsrfTokens(except: [
-            'payment/webhook',
-            'payment/recurring',
-            'payment/pay-account',
-        ]);
+        $middleware->validateCsrfTokens(except: []);
 
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
@@ -25,12 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
-            'creator' => \App\Http\Middleware\EnsureUserIsCreator::class,
-            'clipper' => \App\Http\Middleware\EnsureUserIsClipper::class,
             'not_banned' => \App\Http\Middleware\EnsureUserNotBanned::class,
-            'rate_limit.view_tracking' => \App\Http\Middleware\RateLimitViewTracking::class,
-            'rate_limit.clipper_api' => \App\Http\Middleware\RateLimitClipperApi::class,
-            'verify.midtrans' => \App\Http\Middleware\VerifyMidtransSource::class,
             'block.viewer.export' => \App\Http\Middleware\BlockViewerExport::class,
         ]);
     })

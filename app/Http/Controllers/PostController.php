@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePostRequest;
-use App\Models\Product;
 use App\Services\FeedService;
 use App\Services\HashtagService;
 use App\Services\MentionService;
@@ -12,7 +11,6 @@ use App\Services\PostEditService;
 use App\Services\TrendingService;
 use App\Services\PostAnalyticsService;
 use App\Services\PostSeriesService;
-use App\Services\CrossPostService;
 use App\Services\SupplierRecommendationService;
 use App\Models\Post;
 use App\Models\PostMedia;
@@ -35,7 +33,6 @@ class PostController extends Controller
         private TrendingService $trendingService,
         private PostAnalyticsService $analyticsService,
         private PostSeriesService $seriesService,
-        private CrossPostService $crossPostService,
         private SupplierRecommendationService $supplierRecommendationService,
         private \App\Services\PostRankingService $rankingService
     ) {}
@@ -727,48 +724,6 @@ class PostController extends Controller
     }
 
     /**
-     * Cross-post a post to marketplace or clipper.
-     */
-    public function crossPost(Request $request, Post $post): RedirectResponse
-    {
-        if ($post->user_id !== $request->user()->id) {
-            abort(403);
-        }
-
-        $request->validate([
-            'destination' => 'required|in:marketplace,clipper',
-            'product_data' => 'required_if:destination,marketplace|array',
-            'product_data.price' => 'required_if:destination,marketplace|numeric|min:0',
-            'product_data.name' => 'required_if:destination,marketplace|string|max:255',
-            'campaign_id' => 'required_if:destination,clipper|uuid|exists:campaigns,id',
-        ]);
-
-        if ($request->destination === 'marketplace') {
-            $product = $this->crossPostService->crossPostToMarketplace($post, $request->product_data);
-            return redirect()->route('marketplace.products.show', $product)
-                ->with('success', 'Post cross-posted to marketplace successfully.');
-        } else {
-            $campaign = \App\Models\Campaign::findOrFail($request->campaign_id);
-            $this->crossPostService->crossPostToClipper($post, $campaign);
-            return redirect()->back()->with('success', 'Post cross-posted to clipper successfully.');
-        }
-    }
-
-    /**
-     * Get cross-posts for a post.
-     */
-    public function getCrossPosts(Request $request, Post $post): JsonResponse
-    {
-        $products = $this->crossPostService->getCrossPostedProducts($post);
-        $campaigns = $this->crossPostService->getCrossPostedCampaigns($post);
-
-        return response()->json([
-            'products' => $products,
-            'campaigns' => $campaigns,
-        ]);
-    }
-
-    /**
      * Upload image for inline insertion in rich text editor.
      */
     public function uploadImage(Request $request): JsonResponse
@@ -989,31 +944,6 @@ class PostController extends Controller
 
     private function getShareDraft(Request $request): ?array
     {
-        $shareDraft = null;
-        $productId = $request->query('product_id');
-        if ($productId && Str::isUuid($productId)) {
-            $product = Product::find($productId);
-            if ($product) {
-                $base = config('app.url');
-                $utm = http_build_query([
-                    'utm_source' => $request->query('utm_source', 'noteds_home'),
-                    'utm_medium' => $request->query('utm_medium', 'social'),
-                    'utm_campaign' => $request->query('utm_campaign', 'project_post'),
-                    'utm_product' => $product->id,
-                ]);
-                $productUrl = "{$base}" . route('marketplace.products.show', $product->id, false) . "?{$utm}";
-                $shareDraft = [
-                    'openComposer' => true,
-                    'title' => $product->name,
-                    'content' => ($product->description ? Str::limit($product->description, 180) : '') . "\n\n" . $productUrl,
-                    'link_url' => $productUrl,
-                    'link_preview_title' => $product->name,
-                    'link_preview_description' => Str::limit($product->description ?? '', 160),
-                    'link_preview_image' => $product->image_webp_url ?? $product->image_url ?? null,
-                    'link_preview_site_name' => config('app.name'),
-                ];
-            }
-        }
-        return $shareDraft;
+        return null;
     }
 }

@@ -69,7 +69,13 @@ class BookmarkTagService
             }
         }
 
-        $bookmark->tags()->sync($tagIds);
+        if (!empty($removedTagIds)) {
+            $bookmark->tags()->detach($removedTagIds);
+        }
+
+        foreach ($addedTagIds as $tagId) {
+            $bookmark->tags()->attach($tagId, ['id' => (string) Str::uuid()]);
+        }
     }
 
     /**
@@ -100,4 +106,3 @@ class BookmarkTagService
         $tag->decrementUsage();
     }
 }
-

@@ -48,18 +48,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Clipper System Sample Rate
-    |--------------------------------------------------------------------------
-    |
-    | Sample rate for clipper-specific errors (transfers, view tracking, etc.)
-    | 1.0 = 100% (all errors tracked)
-    |
-    */
-
-    'clipper_sample_rate' => env('SENTRY_CLIPPER_SAMPLE_RATE', 1.0),
-
-    /*
-    |--------------------------------------------------------------------------
     | Before Send Callback
     |--------------------------------------------------------------------------
     |
@@ -71,4 +59,3 @@ return [
 
     'before_send' => \App\Services\SentryBeforeSendCallback::class,
 ];
-

@@ -14,14 +14,6 @@ const props = defineProps({
         type: Object,
         default: null,
     },
-    hasBrandProfile: {
-        type: Boolean,
-        default: false,
-    },
-    hasClipperProfile: {
-        type: Boolean,
-        default: false,
-    },
 });
 
 const emit = defineEmits(['update:activeTab']);
@@ -32,21 +24,8 @@ const baseTabs = [
     { id: 'about', label: 'About', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
 ];
 
-const brandTab = { id: 'brand', label: 'Brand', icon: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z' };
-const clipperTab = { id: 'clipper', label: 'Clipper', icon: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z' };
-
 const visibleTabs = computed(() => {
     let tabs = [...baseTabs];
-    
-    // Add Brand tab if user has brand profile
-    if (props.hasBrandProfile) {
-        tabs.push(brandTab);
-    }
-    
-    // Add Clipper tab if user has clipper profile
-    if (props.hasClipperProfile) {
-        tabs.push(clipperTab);
-    }
     
     // Filter analytics for non-own profile
     if (!props.isOwnProfile) {

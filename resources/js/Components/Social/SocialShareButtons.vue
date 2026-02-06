@@ -29,14 +29,6 @@ const openWindow = (link) => {
 
 const track = async (platform) => {
   try {
-    if (props.shareType === 'products' && props.shareId) {
-      try {
-        await axios.post(route('marketplace.products.share', props.shareId), { platform, url: props.url });
-        return;
-      } catch (e) {
-        // fallback to generic
-      }
-    }
     await axios.post(route('share.track', { type: props.shareType, id: props.shareId }), { platform, url: props.url });
   } catch (_) {}
 };

@@ -127,14 +127,6 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
-        'clipper' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/clipper.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 30,
-            'replace_placeholders' => true,
-        ],
-
         'financial' => [
             'driver' => 'daily',
             'path' => storage_path('logs/financial.log'),

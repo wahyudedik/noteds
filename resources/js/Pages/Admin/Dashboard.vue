@@ -1,10 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import ClipperSystemWidget from '@/Components/Admin/ClipperSystemWidget.vue';
 import RecentActivitiesWidget from '@/Components/Admin/RecentActivitiesWidget.vue';
-import QuickActionsPanel from '@/Components/Admin/QuickActionsPanel.vue';
-import PendingItemsSummary from '@/Components/Admin/PendingItemsSummary.vue';
 import AnalyticsCharts from '@/Components/Admin/AnalyticsCharts.vue';
 import { ref, onMounted } from 'vue';
 
@@ -17,16 +14,11 @@ onMounted(loadA11y);
 
 const props = defineProps({
     stats: Object,
-    recent_withdrawals: Array,
     recent_reports: Array,
     recent_users: Array,
     recent_activities: Array,
     analytics: Object,
 });
-
-const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('id-ID').format(amount || 0);
-};
 </script>
 
 <template>
@@ -50,50 +42,8 @@ const formatCurrency = (amount) => {
                         <Link :href="route('admin.a11y.reports.page')" class="px-3 py-2 bg-yellow-600 text-white rounded">Lihat Laporan</Link>
                     </div>
                 </div>
-                <!-- Pending Items Summary -->
-                <PendingItemsSummary
-                    :pending-withdrawals="{
-                        clipper: stats?.pending_clipper_withdrawals || 0,
-                        creator: stats?.pending_creator_withdrawals || 0,
-                        marketplace: stats?.pending_marketplace_withdrawals || 0,
-                        total: stats?.pending_withdrawals || 0,
-                    }"
-                    :pending-reports="stats?.pending_reports || 0"
-                    :pending-posts="stats?.pending_posts_moderation || 0"
-                    :pending-clips="stats?.pending_clips || 0"
-                    :pending-campaigns="stats?.pending_campaigns || 0"
-                    :pending-brand-approvals="stats?.pending_brand_approvals || 0"
-                    :fraud-alerts="stats?.fraud_alerts_count || 0"
-                />
-
-                <!-- Quick Actions -->
-                <QuickActionsPanel
-                    :pending-withdrawals="stats?.pending_withdrawals || 0"
-                    :pending-reports="stats?.pending_reports || 0"
-                    :pending-posts="stats?.pending_posts_moderation || 0"
-                    :fraud-alerts="stats?.fraud_alerts_count || 0"
-                    :pending-brand-approvals="stats?.pending_brand_approvals || 0"
-                    :pending-clipper-approvals="stats?.pending_clipper_approvals || 0"
-                />
-
                 <!-- Enhanced Stats Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Withdrawals -->
-                    <Link
-                        :href="route('admin.withdrawals.index')"
-                        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow cursor-pointer"
-                    >
-                        <h3 class="text-sm font-medium text-gray-500 mb-2">Pending Withdrawals</h3>
-                        <p class="text-3xl font-bold text-yellow-600">
-                            {{ stats?.pending_withdrawals || 0 }}
-                        </p>
-                        <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Clipper: {{ stats?.pending_clipper_withdrawals || 0 }} | 
-                            Creator: {{ stats?.pending_creator_withdrawals || 0 }} | 
-                            Market: {{ stats?.pending_marketplace_withdrawals || 0 }}
-                        </div>
-                    </Link>
-
                     <!-- Users -->
                     <Link
                         :href="route('admin.users.index')"
@@ -106,33 +56,6 @@ const formatCurrency = (amount) => {
                         <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
                             New today: {{ stats?.new_users_today || 0 }} | 
                             Banned: {{ stats?.banned_users || 0 }}
-                        </div>
-                    </Link>
-
-                    <!-- Sales -->
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                        <h3 class="text-sm font-medium text-gray-500 mb-2">Total Sales</h3>
-                        <p class="text-3xl font-bold text-green-600">
-                            Rp {{ formatCurrency(stats?.total_sales || 0) }}
-                        </p>
-                        <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Today: Rp {{ formatCurrency(stats?.sales_today || 0) }} | 
-                            This month: Rp {{ formatCurrency(stats?.sales_this_month || 0) }}
-                        </div>
-                    </div>
-
-                    <!-- Marketplace Commission -->
-                    <Link
-                        :href="route('admin.marketplace.settings')"
-                        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow cursor-pointer"
-                    >
-                        <h3 class="text-sm font-medium text-gray-500 mb-2">Marketplace Commission</h3>
-                        <p class="text-3xl font-bold text-purple-600">
-                            Rp {{ formatCurrency(stats?.marketplace_commission_total || 0) }}
-                        </p>
-                        <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            This month: Rp {{ formatCurrency(stats?.marketplace_commission_this_month || 0) }} | 
-                            Avg/Order: Rp {{ formatCurrency(stats?.average_commission_per_order || 0) }}
                         </div>
                     </Link>
 
@@ -152,17 +75,6 @@ const formatCurrency = (amount) => {
                             </ul>
                         </div>
                     </div>
-
-                    <!-- Products -->
-                    <Link
-                        :href="route('admin.products.index')"
-                        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow cursor-pointer"
-                    >
-                        <h3 class="text-sm font-medium text-gray-500 mb-2">Total Products</h3>
-                        <p class="text-3xl font-bold text-purple-600">
-                            {{ stats?.total_products || 0 }}
-                        </p>
-                    </Link>
 
                     <!-- Reports -->
                     <Link
@@ -194,52 +106,14 @@ const formatCurrency = (amount) => {
                             Active: {{ stats?.active_posts || 0 }}
                         </div>
                     </Link>
-
-                    <!-- Clipper System -->
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                        <h3 class="text-sm font-medium text-gray-500 mb-2">Clipper System</h3>
-                        <p class="text-3xl font-bold text-indigo-600">
-                            {{ stats?.total_clips || 0 }}
-                        </p>
-                        <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Pending: {{ stats?.pending_clips || 0 }} | 
-                            Campaigns: {{ stats?.total_campaigns || 0 }} | 
-                            Active: {{ stats?.active_campaigns || 0 }}
-                        </div>
-                    </div>
-
-                    <!-- Fraud Alerts -->
-                    <Link
-                        v-if="stats?.fraud_alerts_count > 0"
-                        :href="route('admin.clips.fraud-alerts')"
-                        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border-2 border-red-300 dark:border-red-700 p-6 hover:shadow-md transition-shadow cursor-pointer"
-                    >
-                        <h3 class="text-sm font-medium text-gray-500 mb-2">Fraud Alerts</h3>
-                        <p class="text-3xl font-bold text-red-600">
-                            {{ stats?.fraud_alerts_count || 0 }}
-                        </p>
-                        <div class="mt-2 text-xs text-red-600 dark:text-red-400">
-                            Requires immediate attention
-                        </div>
-                    </Link>
                 </div>
 
                 <!-- Analytics Charts -->
                 <AnalyticsCharts
                     v-if="analytics"
                     :user-growth-trends="analytics.user_growth_trends || { labels: [], data: [] }"
-                    :sales-trends="analytics.sales_trends || { labels: [], data: [] }"
                     :post-trends="analytics.post_trends || { labels: [], data: [] }"
                     period="monthly"
-                />
-
-                <!-- Clipper System Widget -->
-                <ClipperSystemWidget
-                    :fraud-alerts-count="stats?.fraud_alerts_count || 0"
-                    :pending-clips="stats?.pending_clips || 0"
-                    :pending-campaigns="stats?.pending_campaigns || 0"
-                    :pending-brand-approvals="stats?.pending_brand_approvals || 0"
-                    :active-campaigns="stats?.active_campaigns || 0"
                 />
 
                 <!-- Two Column Layout -->
@@ -331,57 +205,6 @@ const formatCurrency = (amount) => {
                     </div>
                 </div>
 
-                <!-- Recent Withdrawals -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Withdrawal Requests</h3>
-                        <Link
-                            :href="route('admin.withdrawals.index')"
-                            class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                        >
-                            View All
-                        </Link>
-                    </div>
-                    <div v-if="recent_withdrawals && recent_withdrawals.length > 0" class="space-y-4">
-                        <div
-                            v-for="withdrawal in recent_withdrawals"
-                            :key="withdrawal.id"
-                            class="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                        >
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <p class="font-semibold text-gray-900 dark:text-white">
-                                        {{ withdrawal.user?.name }}
-                                    </p>
-                                    <span
-                                        v-if="withdrawal.user_type"
-                                        :class="[
-                                            'px-2 py-0.5 text-xs rounded-full',
-                                            withdrawal.user_type === 'clipper' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                                            withdrawal.user_type === 'creator' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
-                                            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                        ]"
-                                    >
-                                        {{ withdrawal.user_type === 'clipper' ? 'Creator' : withdrawal.user_type === 'creator' ? 'Brand' : 'Marketplace' }}
-                                    </span>
-                                </div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    Rp {{ formatCurrency(withdrawal.amount) }}
-                                </p>
-                            </div>
-                            <Link
-                                :href="route('admin.withdrawals.show', withdrawal.id)"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                            >
-                                Review
-                            </Link>
-                        </div>
-                    </div>
-                    <div v-else class="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-                        No pending withdrawals
-                    </div>
-                </div>
-
                 <!-- Recent Activities -->
                 <RecentActivitiesWidget
                     v-if="recent_activities"
@@ -425,32 +248,16 @@ const formatCurrency = (amount) => {
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Marketplace Settings</h3>
+                                <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Moderation</h3>
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                    Configure commission percentage and flat fee for marketplace transactions
+                                    Review reports and posts that require admin attention
                                 </p>
                             </div>
                             <Link
-                                :href="route('admin.marketplace.settings')"
+                                :href="route('admin.reports.index')"
                                 class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
                             >
-                                Configure
-                            </Link>
-                        </div>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Clipper Settings</h3>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                    Configure platform fee percentage for clipper rewards
-                                </p>
-                            </div>
-                            <Link
-                                :href="route('admin.clipper.settings')"
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
-                            >
-                                Configure
+                                Open Reports
                             </Link>
                         </div>
                     </div>

@@ -6,8 +6,6 @@ import Tabs from '@/Components/Profile/Tabs.vue';
 import TabPosts from '@/Components/Profile/TabPosts.vue';
 import TabAnalytics from '@/Components/Profile/TabAnalytics.vue';
 import TabAbout from '@/Components/Profile/TabAbout.vue';
-import TabBrand from '@/Components/Profile/TabBrand.vue';
-import TabClipper from '@/Components/Profile/TabClipper.vue';
 import { usePage } from '@inertiajs/vue3';
 import { Head } from '@inertiajs/vue3';
 
@@ -47,14 +45,6 @@ const props = defineProps({
     stats: Object,
     engagement_data: Object,
     top_posts: Array,
-    brandRegistration: {
-        type: Object,
-        default: null,
-    },
-    clipperProfile: {
-        type: Object,
-        default: null,
-    },
 });
 
 const activeTab = ref('posts');
@@ -64,13 +54,6 @@ const safeProfileUser = computed(() => {
     return props.profileUser || {};
 });
 
-const hasBrandProfile = computed(() => {
-    return !!props.brandRegistration;
-});
-
-const hasClipperProfile = computed(() => {
-    return !!props.clipperProfile;
-});
 const page = usePage();
 const isBlockedByMe = computed(() => {
     const ids = page.props.blocked_user_ids || [];
@@ -103,8 +86,6 @@ const isBlockedByMe = computed(() => {
                         :active-tab="activeTab" 
                         :is-own-profile="isOwnProfile"
                         :profile-user="safeProfileUser"
-                        :has-brand-profile="hasBrandProfile"
-                        :has-clipper-profile="hasClipperProfile"
                         @update:active-tab="activeTab = $event" 
                     />
 
@@ -131,20 +112,6 @@ const isBlockedByMe = computed(() => {
                         <TabAbout 
                             v-else-if="activeTab === 'about'"
                             :profile-user="safeProfileUser"
-                        />
-
-                        <TabBrand
-                            v-else-if="activeTab === 'brand'"
-                            :profile-user="safeProfileUser"
-                            :brand-registration="brandRegistration"
-                            :is-own-profile="isOwnProfile"
-                        />
-
-                        <TabClipper
-                            v-else-if="activeTab === 'clipper'"
-                            :profile-user="safeProfileUser"
-                            :clipper-profile="clipperProfile"
-                            :is-own-profile="isOwnProfile"
                         />
                     </div>
                 </div>

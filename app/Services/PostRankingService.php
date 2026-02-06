@@ -6,6 +6,7 @@ use App\Models\Post;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class PostRankingService
 {
@@ -56,12 +57,16 @@ class PostRankingService
     private function scoreExpression(string $metric): string
     {
         $halfLifeHours = 36;
-        $timeDecay = "POWER(GREATEST(TIMESTAMPDIFF(HOUR, created_at, NOW()), 1) / {$halfLifeHours}, 1.3)";
+        $driver = DB::getDriverName();
+        $timeDecay = $driver === 'sqlite'
+            ? "(1 + (max((julianday('now') - julianday(created_at)) * 24, 1) / {$halfLifeHours}))"
+            : "POWER(GREATEST(TIMESTAMPDIFF(HOUR, created_at, NOW()), 1) / {$halfLifeHours}, 1.3)";
 
         return match ($metric) {
             'upvotes' => "((COALESCE(upvotes_count,0) - COALESCE(downvotes_count,0)) + (comments_count) * 0.5 + (reposts_count) * 1.0) / {$timeDecay} as score",
-            'engagement', 'default' => "((comments_count) * 1.0 + (reposts_count) * 2.0) / {$timeDecay} as score",
             'mixed' => "((COALESCE(upvotes_count,0) - COALESCE(downvotes_count,0)) * 1.0 + (comments_count) * 0.8 + (reposts_count) * 1.5) / {$timeDecay} as score",
+            'engagement' => "((comments_count) * 1.0 + (reposts_count) * 2.0) / {$timeDecay} as score",
+            default => "((comments_count) * 1.0 + (reposts_count) * 2.0) / {$timeDecay} as score",
         };
     }
 }
