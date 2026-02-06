@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 
@@ -10,22 +10,26 @@ const props = defineProps({
     },
     placeholder: {
         type: String,
-        default: 'Search posts, users, products...',
+        default: 'Search posts, users...',
     },
 });
 
 const query = ref(props.initialQuery || '');
 const isSearching = ref(false);
-const suggestions = ref([]);
+const results = ref({ users: [], posts: [] });
 const showSuggestions = ref(false);
 const selectedIndex = ref(-1);
 const suggestionsContainer = ref(null);
 let debounceTimer = null;
 let abortController = null;
 
+const usersOffset = computed(() => 1);
+const postsOffset = computed(() => 1 + (results.value.users?.length || 0));
+const selectableCount = computed(() => 1 + (results.value.users?.length || 0) + (results.value.posts?.length || 0));
+
 const fetchSuggestions = async (searchQuery) => {
     if (!searchQuery.trim() || searchQuery.length < 2) {
-        suggestions.value = [];
+        results.value = { users: [], posts: [] };
         showSuggestions.value = false;
         return;
     }
@@ -37,16 +41,19 @@ const fetchSuggestions = async (searchQuery) => {
     abortController = new AbortController();
 
     try {
-        const response = await axios.get(route('search.suggestions'), {
+        const response = await axios.get(route('search.quick'), {
             params: { q: searchQuery },
             signal: abortController.signal,
         });
-        suggestions.value = response.data.suggestions || [];
-        showSuggestions.value = suggestions.value.length > 0;
+        results.value = {
+            users: response.data.users || [],
+            posts: response.data.posts || [],
+        };
+        showSuggestions.value = true;
         selectedIndex.value = -1;
     } catch (error) {
         if (error.name !== 'CanceledError') {
-            suggestions.value = [];
+            results.value = { users: [], posts: [] };
             showSuggestions.value = false;
         }
     }
@@ -79,24 +86,43 @@ const handleSubmit = (e) => {
     performSearch();
 };
 
-const selectSuggestion = (suggestion) => {
-    query.value = suggestion;
+const selectSearch = () => performSearch();
+
+const selectUser = (user) => {
     showSuggestions.value = false;
-    performSearch(suggestion);
+    router.get(route('profile.show', user.id), {}, { preserveState: false, preserveScroll: false });
+};
+
+const selectPost = (post) => {
+    showSuggestions.value = false;
+    router.get(route('posts.show', post.id), {}, { preserveState: false, preserveScroll: false });
 };
 
 const handleKeyDown = (e) => {
-    if (!showSuggestions.value || suggestions.value.length === 0) return;
+    if (!showSuggestions.value || selectableCount.value === 0) return;
 
     if (e.key === 'ArrowDown') {
         e.preventDefault();
-        selectedIndex.value = Math.min(selectedIndex.value + 1, suggestions.value.length - 1);
+        selectedIndex.value = Math.min(selectedIndex.value + 1, selectableCount.value - 1);
     } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         selectedIndex.value = Math.max(selectedIndex.value - 1, -1);
     } else if (e.key === 'Enter' && selectedIndex.value >= 0) {
         e.preventDefault();
-        selectSuggestion(suggestions.value[selectedIndex.value]);
+        const usersLen = results.value.users?.length || 0;
+        if (selectedIndex.value === 0) {
+            selectSearch();
+            return;
+        }
+        const userIndex = selectedIndex.value - usersOffset.value;
+        if (userIndex >= 0 && userIndex < usersLen) {
+            selectUser(results.value.users[userIndex]);
+            return;
+        }
+        const postIndex = selectedIndex.value - postsOffset.value;
+        if (postIndex >= 0 && postIndex < (results.value.posts?.length || 0)) {
+            selectPost(results.value.posts[postIndex]);
+        }
     } else if (e.key === 'Escape') {
         showSuggestions.value = false;
         selectedIndex.value = -1;
@@ -113,7 +139,7 @@ watch(() => query.value, (newVal) => {
     if (newVal && newVal.length >= 2) {
         debouncedFetchSuggestions(newVal);
     } else {
-        suggestions.value = [];
+        results.value = { users: [], posts: [] };
         showSuggestions.value = false;
     }
 });
@@ -159,13 +185,13 @@ onUnmounted(() => {
                     type="text"
                     :placeholder="placeholder"
                     @keydown="handleKeyDown"
-                    @focus="query.length >= 2 && suggestions.length > 0 && (showSuggestions = true)"
+                    @focus="query.length >= 2 && (showSuggestions = true)"
                     class="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <button
                     v-if="query"
                     type="button"
-                    @click="query = ''; showSuggestions = false; suggestions = []"
+                    @click="query = ''; showSuggestions = false; results = { users: [], posts: [] }"
                     class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                     <svg
@@ -195,17 +221,15 @@ onUnmounted(() => {
             leave-to-class="opacity-0 scale-95"
         >
             <div
-                v-if="showSuggestions && suggestions.length > 0"
+                v-if="showSuggestions && query && query.length >= 2"
                 class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto"
             >
                 <div class="py-2">
                     <button
-                        v-for="(suggestion, index) in suggestions"
-                        :key="index"
-                        @click="selectSuggestion(suggestion)"
+                        @click="selectSearch"
                         :class="[
                             'w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3',
-                            selectedIndex === index ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            selectedIndex === 0 ? 'bg-gray-100 dark:bg-gray-700' : ''
                         ]"
                     >
                         <svg
@@ -221,7 +245,70 @@ onUnmounted(() => {
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                             />
                         </svg>
-                        <span class="text-sm text-gray-900 dark:text-gray-100 truncate">{{ suggestion }}</span>
+                        <span class="text-sm text-gray-900 dark:text-gray-100 truncate">Search for "{{ query.trim() }}"</span>
+                    </button>
+
+                    <div v-if="results.users && results.users.length > 0" class="mt-2">
+                        <div class="px-4 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Users</div>
+                        <button
+                            v-for="(user, index) in results.users"
+                            :key="user.id"
+                            @click="selectUser(user)"
+                            :class="[
+                                'w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3',
+                                selectedIndex === (usersOffset + index) ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            ]"
+                        >
+                            <div class="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold text-xs overflow-hidden flex-shrink-0">
+                                <img
+                                    v-if="user.avatar_url"
+                                    :src="user.avatar_url"
+                                    :alt="user.business_name || user.name"
+                                    class="w-full h-full object-cover"
+                                />
+                                <span v-else>{{ (user.business_name || user.name || 'U').charAt(0).toUpperCase() }}</span>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-sm text-gray-900 dark:text-gray-100 truncate">{{ user.name }}</div>
+                                <div v-if="user.business_name" class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ user.business_name }}</div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div v-if="results.posts && results.posts.length > 0" class="mt-2">
+                        <div class="px-4 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Posts</div>
+                        <button
+                            v-for="(post, index) in results.posts"
+                            :key="post.id"
+                            @click="selectPost(post)"
+                            :class="[
+                                'w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3',
+                                selectedIndex === (postsOffset + index) ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            ]"
+                        >
+                            <svg
+                                class="w-5 h-5 text-gray-400 flex-shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <div class="min-w-0">
+                                <div class="text-sm text-gray-900 dark:text-gray-100 truncate">{{ post.title }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                    {{ post.user?.business_name || post.user?.name }}
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <button
+                        v-if="results.users.length === 0 && results.posts.length === 0"
+                        disabled
+                        class="w-full text-left px-4 py-2 text-sm text-gray-500 dark:text-gray-400"
+                    >
+                        No suggestions
                     </button>
                 </div>
             </div>

@@ -10,6 +10,42 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class SearchService
 {
+    public function quick(string $query, int $limit = 5): array
+    {
+        $q = trim($query);
+        if ($q === '') {
+            return ['users' => [], 'posts' => []];
+        }
+
+        $users = User::query()
+            ->select(['id', 'name', 'business_name', 'avatar_url'])
+            ->where('is_banned', false)
+            ->where(function ($builder) use ($q) {
+                $builder->where('name', 'like', "%{$q}%")
+                    ->orWhere('business_name', 'like', "%{$q}%");
+            })
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
+
+        $posts = Post::query()
+            ->select(['id', 'title', 'created_at', 'user_id'])
+            ->with(['user:id,name,avatar_url,business_name'])
+            ->where('status', 'active')
+            ->where(function ($builder) use ($q) {
+                $builder->where('title', 'like', "%{$q}%")
+                    ->orWhere('content', 'like', "%{$q}%");
+            })
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
+
+        return [
+            'users' => $users->toArray(),
+            'posts' => $posts->toArray(),
+        ];
+    }
+
     /**
      * Perform global search across posts, users, and articles.
      *

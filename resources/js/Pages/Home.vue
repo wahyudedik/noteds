@@ -5,7 +5,6 @@ import SidebarWidget from '@/Components/SidebarWidget.vue';
 import PostComposer from '@/Components/PostComposer.vue';
 import TrendingTopics from '@/Components/Widgets/TrendingTopics.vue';
 import SuggestedUsers from '@/Components/Widgets/SuggestedUsers.vue';
-import QuickStats from '@/Components/Widgets/QuickStats.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import YouMightLike from '@/Components/Recommendations/YouMightLike.vue';
  
@@ -17,7 +16,6 @@ defineProps({
     filters: Object,
     trending: Array,
     suggestedUsers: Array,
-    quickStats: Object,
     userVotes: Object,
     userBookmarks: Object,
     auth: Object,
@@ -52,11 +50,6 @@ defineProps({
                     <!-- Right Sidebar -->
                     <div class="lg:col-span-4 hidden lg:block order-1 lg:order-2">
                         <div class="sticky top-4 space-y-6">
-                            <!-- Quick Stats Widget -->
-                            <SidebarWidget title="Quick Stats" v-if="quickStats">
-                                <QuickStats :stats="quickStats" />
-                            </SidebarWidget>
-
                             <!-- Trending Topics Widget -->
                             <SidebarWidget title="Trending Topics" v-if="trending && trending.length > 0">
                                 <TrendingTopics :topics="trending" />

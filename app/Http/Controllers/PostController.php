@@ -84,7 +84,6 @@ class PostController extends Controller
         if ($request->routeIs('home')) {
             $trending = $this->feedService->getTrendingTopics(7, 5);
             $suggestedUsers = $this->feedService->getSuggestedUsers(30, 5);
-            $quickStats = $this->feedService->getQuickStats($request->user());
             $shareDraft = $this->getShareDraft($request);
 
             return Inertia::render('Home', array_merge([
@@ -92,7 +91,6 @@ class PostController extends Controller
                 'filters' => $request->only(['purpose_type']),
                 'trending' => $trending,
                 'suggestedUsers' => $suggestedUsers,
-                'quickStats' => $quickStats,
                 'shareDraft' => $shareDraft,
             ], $interactions));
         }

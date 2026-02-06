@@ -41,6 +41,9 @@ class SearchController extends Controller
 
         $query = $request->input('q');
         $type = $request->input('type', 'all');
+        if ($type === 'products') {
+            $type = 'all';
+        }
         
         $filters = [
             'type' => $type,
@@ -62,18 +65,15 @@ class SearchController extends Controller
         $defaultPerPage = 20;
         $postsPer = in_array((int)$request->input('posts_per_page'), $perPageOptions) ? (int)$request->input('posts_per_page') : $defaultPerPage;
         $usersPer = in_array((int)$request->input('users_per_page'), $perPageOptions) ? (int)$request->input('users_per_page') : $defaultPerPage;
-        $productsPer = in_array((int)$request->input('products_per_page'), $perPageOptions) ? (int)$request->input('products_per_page') : $defaultPerPage;
         $articlesPer = in_array((int)$request->input('articles_per_page'), $perPageOptions) ? (int)$request->input('articles_per_page') : $defaultPerPage;
 
         $postsPage = max(1, (int) $request->input('posts_page', 1));
         $usersPage = max(1, (int) $request->input('users_page', 1));
-        $productsPage = max(1, (int) $request->input('products_page', 1));
         $articlesPage = max(1, (int) $request->input('articles_page', 1));
 
         $results = [
             'posts' => null,
             'users' => null,
-            'products' => null,
             'articles' => null,
         ];
         // Users
@@ -81,12 +81,6 @@ class SearchController extends Controller
             $results['users'] = $this->searchService->searchUsers($query, $usersPer)
                 ->setPageName('users_page')
                 ->appends(['users_per_page' => $usersPer]);
-        }
-        // Products
-        if ($type === 'all' || $type === 'products') {
-            $results['products'] = $this->searchService->searchProducts($query, $filters['category'] ?? null, $productsPer)
-                ->setPageName('products_page')
-                ->appends(['products_per_page' => $productsPer]);
         }
         // Articles
         if ($type === 'all' || $type === 'articles') {
@@ -135,7 +129,6 @@ class SearchController extends Controller
             'pagination' => [
                 'posts' => $results['posts'] ? ['current_page' => $results['posts']->currentPage(), 'last_page' => $results['posts']->lastPage(), 'per_page' => $results['posts']->perPage(), 'total' => $results['posts']->total()] : null,
                 'users' => $results['users'] ? ['current_page' => $results['users']->currentPage(), 'last_page' => $results['users']->lastPage(), 'per_page' => $results['users']->perPage(), 'total' => $results['users']->total()] : null,
-                'products' => $results['products'] ? ['current_page' => $results['products']->currentPage(), 'last_page' => $results['products']->lastPage(), 'per_page' => $results['products']->perPage(), 'total' => $results['products']->total()] : null,
                 'articles' => $results['articles'] ? ['current_page' => $results['articles']->currentPage(), 'last_page' => $results['articles']->lastPage(), 'per_page' => $results['articles']->perPage(), 'total' => $results['articles']->total()] : null,
                 'per_page_options' => [10, 20, 50, 100],
             ],
@@ -161,6 +154,17 @@ class SearchController extends Controller
         return response()->json([
             'suggestions' => $suggestions,
         ]);
+    }
+
+    public function quick(Request $request)
+    {
+        $request->validate([
+            'q' => 'required|string|min:1|max:255',
+        ]);
+
+        $results = $this->searchService->quick($request->input('q'), 5);
+
+        return response()->json($results);
     }
 
     public function saved(Request $request)

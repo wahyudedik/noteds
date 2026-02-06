@@ -17,7 +17,6 @@ const props = defineProps({
         default: () => ({
             posts: [],
             users: [],
-            products: [],
             articles: [],
         }),
     },
@@ -132,7 +131,6 @@ const deleteHistoryItem = async (id) => {
                                 <option value="all">All</option>
                                 <option value="posts">Posts</option>
                                 <option value="users">Users</option>
-                                <option value="products">Products</option>
                                 <option value="articles">Articles</option>
                             </select>
                         </div>

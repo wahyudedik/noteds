@@ -130,6 +130,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/search', [App\Http\Controllers\SearchController::class, 'index'])
         ->middleware('throttle:60,1')
         ->name('search.index'); // 30 searches per minute
+    Route::get('/search/quick', [App\Http\Controllers\SearchController::class, 'quick'])
+        ->middleware('throttle:search')
+        ->name('search.quick'); // 60 quick results per minute
     Route::get('/search/suggestions', [App\Http\Controllers\SearchController::class, 'suggestions'])
         ->middleware('throttle:search')
         ->name('search.suggestions'); // 60 suggestions per minute
