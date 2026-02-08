@@ -126,7 +126,9 @@ const filterByPurpose = async (purposeType) => {
             route: baseRoute,
         };
         lastSortMode = sortMode.value;
-        await axios.post(route('analytics.events.store'), { type: 'feed_sort_change', payload });
+        if (page.props.auth?.user) {
+            await axios.post(route('analytics.events.store'), { type: 'feed_sort_change', payload });
+        }
     } catch {}
     router.get(route(baseRoute), params, {
         preserveState: true,

@@ -70,9 +70,13 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(NotificationSent::class, BroadcastUserNotification::class);
         Event::listen(NotificationSent::class, function (NotificationSent $event) {
             try {
-                $type = method_exists($event->notification, 'toArray')
-                    ? ($event->notification->toArray($event->notifiable)['type'] ?? get_class($event->notification))
-                    : get_class($event->notification);
+                $type = get_class($event->notification);
+                if (is_callable([$event->notification, 'toArray'])) {
+                    $payload = call_user_func([$event->notification, 'toArray'], $event->notifiable);
+                    if (is_array($payload) && array_key_exists('type', $payload) && is_string($payload['type'])) {
+                        $type = $payload['type'];
+                    }
+                }
                 Log::info('Notification sent', [
                     'channel' => $event->channel,
                     'type' => $type,
@@ -84,7 +88,9 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Event::listen(Login::class, function (Login $event) {
-            app(\App\Services\GamificationService::class)->awardDailyLogin($event->user);
+            if ($event->user instanceof \App\Models\User) {
+                app(\App\Services\GamificationService::class)->awardDailyLogin($event->user);
+            }
         });
 
         RateLimiter::for('analytics', function ($request) {

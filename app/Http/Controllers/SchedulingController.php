@@ -7,6 +7,8 @@ use App\Models\RecurrenceRule;
 use App\Services\RecurrenceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SchedulingController extends Controller
 {
@@ -57,14 +59,14 @@ class SchedulingController extends Controller
     protected function mapScheduleableType(string $type): string
     {
         return match ($type) {
-            \App\Models\Post::class => 'post',
+            Post::class => 'post',
             default => 'unknown',
         };
     }
 
     protected function getTitleForRule(RecurrenceRule $rule): string
     {
-        if ($rule->scheduleable_type === \App\Models\Post::class) {
+        if ($rule->scheduleable_type === Post::class) {
             $p = Post::find($rule->scheduleable_id);
             return $p?->title ?? 'Post';
         }
@@ -93,10 +95,10 @@ class SchedulingController extends Controller
             if ($resolved) {
                 $post->scheduled_at = $resolved;
                 $post->save();
-                \DB::table('scheduling_audits')->insert([
+                DB::table('scheduling_audits')->insert([
                     'scheduleable_type' => Post::class,
                     'scheduleable_id' => $post->id,
-                    'user_id' => $request->user()->id,
+                    'user_id' => Auth::id(),
                     'action' => 'auto_resolve',
                     'meta' => json_encode(['original' => $data['scheduled_at'], 'resolved' => $resolved->toIso8601String()]),
                     'created_at' => now(),
@@ -105,10 +107,10 @@ class SchedulingController extends Controller
                 $conflicts = [];
             }
         }
-        \DB::table('scheduling_audits')->insert([
+        DB::table('scheduling_audits')->insert([
             'scheduleable_type' => Post::class,
             'scheduleable_id' => $post->id,
-            'user_id' => $request->user()->id,
+            'user_id' => Auth::id(),
             'action' => 'update',
             'meta' => json_encode(['scheduled_at' => $data['scheduled_at'], 'timezone' => $tz]),
             'created_at' => now(),
@@ -145,10 +147,10 @@ class SchedulingController extends Controller
             }
             if ($data['type'] === 'post') {
                 Post::where('id', $id)->update(['scheduled_at' => $current, 'publish_status' => 'scheduled']);
-                \DB::table('scheduling_audits')->insert([
+                DB::table('scheduling_audits')->insert([
                     'scheduleable_type' => Post::class,
                     'scheduleable_id' => $id,
-                    'user_id' => $request->user()->id,
+                    'user_id' => Auth::id(),
                     'action' => 'update',
                     'meta' => json_encode(['bulk' => true]),
                     'created_at' => now(),
@@ -177,10 +179,10 @@ class SchedulingController extends Controller
             ->where('id', '!=', $selfId)
             ->pluck('id')->toArray();
         if ($log && !empty($conflicts)) {
-            \DB::table('scheduling_audits')->insert([
+            DB::table('scheduling_audits')->insert([
                 'scheduleable_type' => $this->reverseMapType($type),
                 'scheduleable_id' => $selfId,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'action' => 'conflict',
                 'meta' => json_encode(['conflicts' => $conflicts]),
                 'created_at' => now(),
@@ -193,8 +195,8 @@ class SchedulingController extends Controller
     protected function reverseMapType(string $type): string
     {
         return match ($type) {
-            'post' => \App\Models\Post::class,
-            default => \App\Models\Post::class,
+            'post' => Post::class,
+            default => Post::class,
         };
     }
 

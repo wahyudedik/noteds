@@ -23,34 +23,6 @@ Broadcast::channel('user.{userId}.notifications', function ($user, $userId) {
     return (string) $user->id === (string) $userId;
 });
 
-// Conversation channel - check if user is participant and not blocked
-Broadcast::channel('conversation.{conversationId}', function ($user, $conversationId) {
-    $conversation = \App\Models\Conversation::find($conversationId);
-
-    if (!$conversation) {
-        return false;
-    }
-
-    // Check if user is participant
-    if (!$conversation->hasParticipant($user)) {
-        return false;
-    }
-
-    // Check if user is blocked by any participant
-    $otherParticipants = $conversation->activeParticipants()
-        ->where('user_id', '!=', $user->id)
-        ->get();
-
-    foreach ($otherParticipants as $participant) {
-        $otherUser = $participant->user;
-        if ($user->hasBlocked($otherUser) || $otherUser->hasBlocked($user)) {
-            return false;
-        }
-    }
-
-    return true;
-});
-
 // User conversations list updates (private channel)
 Broadcast::channel('user.{userId}.conversations', function ($user, $userId) {
     return $user->id === $userId;

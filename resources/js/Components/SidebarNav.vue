@@ -15,6 +15,8 @@ const page = usePage();
 const supportMenuExpanded = ref(false);
 const accountMenuExpanded = ref(false);
 
+// Logout handled via Inertia Link with POST to include CSRF automatically
+
 const normalizePath = (url) => {
     const raw = String(url ?? '');
     const noQuery = raw.split('?')[0];
@@ -264,44 +266,55 @@ if (page.url.startsWith('/profile') || page.url.startsWith('/settings') || page.
                             </svg>
                         </button>
                         <div v-if="accountMenuExpanded" class="ml-4 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-3">
-                            <Link
-                                v-for="subItem in accountSubmenuItems"
-                                :key="subItem.name"
-                                :href="subItem.routeParams ? route(subItem.route, typeof subItem.routeParams === 'function' ? subItem.routeParams() : subItem.routeParams) : route(subItem.route)"
-                                :method="subItem.method"
-                                :as="subItem.as"
-                                :class="[
-                                    'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
-                                    (() => {
-                                        const params = subItem.routeParams
-                                            ? (typeof subItem.routeParams === 'function' ? subItem.routeParams() : subItem.routeParams)
-                                            : undefined;
-                                        try {
-                                            const routePath = normalizePath(params ? route(subItem.route, params) : route(subItem.route));
-                                            return page.url === routePath || page.url.startsWith(`${routePath}/`);
-                                        } catch {
-                                            return page.url.includes(subItem.route.replace('.', '/'));
-                                        }
-                                    })()
-                                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
-                                        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700',
-                                ]"
-                            >
-                                <svg
-                                    class="h-5 w-5 flex-shrink-0"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
+                            <template v-for="subItem in accountSubmenuItems" :key="subItem.name">
+                                <button
+                                    v-if="subItem.route === 'logout'"
+                                    type="button"
+                                    class="group w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
                                 >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        :d="subItem.icon"
-                                    />
-                                </svg>
-                                <span>{{ subItem.name }}</span>
-                            </Link>
+                                    <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="subItem.icon" />
+                                    </svg>
+                                    <Link :href="route('logout')" method="post" as="span" class="flex-1 text-left">
+                                        {{ subItem.name }}
+                                    </Link>
+                                </button>
+                                <Link
+                                    v-else
+                                    :href="subItem.routeParams ? route(subItem.route, typeof subItem.routeParams === 'function' ? subItem.routeParams() : subItem.routeParams) : route(subItem.route)"
+                                    :class="[
+                                        'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
+                                        (() => {
+                                            const params = subItem.routeParams
+                                                ? (typeof subItem.routeParams === 'function' ? subItem.routeParams() : subItem.routeParams)
+                                                : undefined;
+                                            try {
+                                                const routePath = normalizePath(params ? route(subItem.route, params) : route(subItem.route));
+                                                return page.url === routePath || page.url.startsWith(`${routePath}/`);
+                                            } catch {
+                                                return page.url.includes(subItem.route.replace('.', '/'));
+                                            }
+                                        })()
+                                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700',
+                                    ]"
+                                >
+                                    <svg
+                                        class="h-5 w-5 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            :d="subItem.icon"
+                                        />
+                                    </svg>
+                                    <span>{{ subItem.name }}</span>
+                                </Link>
+                            </template>
                         </div>
                     </div>
                     <!-- Regular menu item -->
@@ -390,17 +403,17 @@ if (page.url.startsWith('/profile') || page.url.startsWith('/settings') || page.
                         </p>
                     </div>
                 </Link>
-                <Link
-                    :href="route('logout')"
-                    method="post"
-                    as="button"
+                <button
+                    type="button"
                     class="mt-2 w-full flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition"
                 >
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                     </svg>
-                    <span>Logout</span>
-                </Link>
+                    <Link :href="route('logout')" method="post" as="span" class="flex-1 text-center">
+                        Logout
+                    </Link>
+                </button>
             </div>
         </div>
     </aside>

@@ -34,13 +34,13 @@ class PostTopCachingTest extends TestCase
         ]);
         $svc = app(PostRankingService::class);
         $first = $svc->getTopPosts('day', 'upvotes', 15);
-        $topId = $first->pluck('id')->first();
+        $topId = $first->getCollection()->pluck('id')->first();
         $this->assertEquals($p1->id, $topId);
         $p2->update(['upvotes_count' => 100]);
         $svc->getTopPosts('day', 'upvotes', 15); // cached
         Cache::flush(); // simulate invalidation after write
         $second = $svc->getTopPosts('day', 'upvotes', 15);
-        $this->assertEquals($p2->id, $second->pluck('id')->first());
+        $this->assertEquals($p2->id, $second->getCollection()->pluck('id')->first());
     }
 
     public function test_cache_separates_by_params_page_and_filters()
@@ -53,9 +53,9 @@ class PostTopCachingTest extends TestCase
         $res1 = $svc->getTopPosts('week', 'engagement', 15, 'idea_business');
         request()->merge(['page' => 2]);
         $res2 = $svc->getTopPosts('week', 'engagement', 15, 'idea_business');
-        $this->assertNotEquals($res1->pluck('id')->first(), $res2->pluck('id')->first());
+        $this->assertNotEquals($res1->getCollection()->pluck('id')->first(), $res2->getCollection()->pluck('id')->first());
         request()->merge(['page' => 1]);
         $res3 = $svc->getTopPosts('week', 'engagement', 15, 'validate_idea');
-        $this->assertNotEquals($res1->pluck('id')->first(), $res3->pluck('id')->first());
+        $this->assertNotEquals($res1->getCollection()->pluck('id')->first(), $res3->getCollection()->pluck('id')->first());
     }
 }

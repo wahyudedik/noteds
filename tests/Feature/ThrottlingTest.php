@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 
@@ -177,7 +178,7 @@ class ThrottlingTest extends TestCase
         // Make 3 requests - they may succeed or fail, but shouldn't be throttled (except after first success)
         for ($i = 0; $i < 3; $i++) {
             // Re-authenticate if user was deleted
-            if (!auth()->check()) {
+            if (!Auth::check()) {
                 $this->user = User::factory()->create();
                 $this->actingAs($this->user);
             }

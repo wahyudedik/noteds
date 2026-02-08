@@ -62,6 +62,9 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:5,60') // 5 requests per hour
         ->name('password.update');
 
+    Route::get('logout', function () {
+        return redirect()->route('home');
+    });
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });

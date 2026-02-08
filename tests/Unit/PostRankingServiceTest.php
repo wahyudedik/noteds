@@ -52,11 +52,16 @@ class PostRankingServiceTest extends TestCase
     {
         Post::factory()->recent()->count(10)->create();
         $svc = app(PostRankingService::class);
-        $t1 = microtime(true);
-        $svc->getTopPosts('week', 'engagement', 15);
-        $t2 = microtime(true);
-        $svc->getTopPosts('week', 'engagement', 15);
-        $t3 = microtime(true);
-        $this->assertTrue(($t3 - $t2) < ($t2 - $t1) + 0.01);
+        request()->merge(['page' => 1]);
+        $cacheKey = sprintf('posts_top_%s_%s_%s_page_%s', 'week', 'engagement', 'all', request('page', 1));
+
+        $first = $svc->getTopPosts('week', 'engagement', 15);
+        $this->assertTrue(Cache::has($cacheKey));
+
+        $second = $svc->getTopPosts('week', 'engagement', 15);
+        $this->assertEquals(
+            $first->getCollection()->pluck('id')->all(),
+            $second->getCollection()->pluck('id')->all()
+        );
     }
 }

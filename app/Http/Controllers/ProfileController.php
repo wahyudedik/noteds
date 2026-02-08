@@ -41,15 +41,15 @@ class ProfileController extends Controller
     /**
      * Display the user's profile.
      */
-    public function show(Request $request, User $user = null): \Inertia\Response|\Illuminate\Http\RedirectResponse
+    public function show(Request $request, ?User $user = null): Response|RedirectResponse
     {
         $profileUser = $user ?? $request->user();
-        
+
         // Ensure we have a valid user
         if (!$profileUser) {
             abort(404, 'User not found');
         }
-        
+
         $isOwnProfile = $request->user() && $request->user()->id === $profileUser->id;
 
         // Privacy: profile visibility
@@ -65,7 +65,7 @@ class ProfileController extends Controller
         }
 
         // Get user's posts
-        $postsQuery = \App\Models\Post::where('user_id', $profileUser->id)
+        $postsQuery = Post::where('user_id', $profileUser->id)
             ->where('status', 'active')
             ->with('user')
             ->latest();
@@ -75,7 +75,7 @@ class ProfileController extends Controller
             if ($activityVis === 'private') {
                 $posts = collect([]);
             } elseif ($activityVis === 'followers') {
-                $posts = ($viewer && $viewer->isFollowing($profileUser)) ? $postsQuery->get() : collect([]);
+                $posts = ($viewer?->isFollowing($profileUser)) ? $postsQuery->get() : collect([]);
             } else {
                 $posts = $postsQuery->get();
             }
@@ -88,16 +88,15 @@ class ProfileController extends Controller
         $userBookmarks = [];
         if ($request->user()) {
             $postIds = $posts->pluck('id');
-            
+
             // Get votes
-            $votes = \App\Models\PostVote::where('user_id', $request->user()->id)
+            $votes = PostVote::where('user_id', $request->user()->id)
                 ->whereIn('post_id', $postIds)
                 ->get()
                 ->keyBy('post_id');
 
             foreach ($posts as $post) {
-                $vote = $votes->get($post->id);
-                $userVotes[$post->id] = $vote ? $vote->vote_type : null;
+                $userVotes[$post->id] = $votes->get($post->id)?->vote_type ?? null;
             }
 
             // Get bookmarks
@@ -107,7 +106,7 @@ class ProfileController extends Controller
                 ->toArray();
 
             foreach ($posts as $post) {
-                $userBookmarks[$post->id] = in_array($post->id, $bookmarks);
+                $userBookmarks[$post->id] = \in_array($post->id, $bookmarks);
             }
         }
 
@@ -173,7 +172,7 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-        
+
         // Handle avatar upload
         if ($request->hasFile('avatar')) {
             // Delete old avatar if exists

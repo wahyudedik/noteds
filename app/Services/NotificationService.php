@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketResponse;
 use App\Models\Post;
+use App\Models\Repost;
 
 class NotificationService
 {
@@ -52,7 +53,7 @@ class NotificationService
     /**
      * Notify user about new follow.
      */
-    public function notifyNewFollow(\App\Models\User $user, \App\Models\User $follower): void
+    public function notifyNewFollow(User $user, User $follower): void
     {
         $user->notify(new \App\Notifications\NewFollowNotification($follower));
     }
@@ -62,11 +63,9 @@ class NotificationService
      */
     public function notifyContentReported(\App\Models\ContentReport $report): void
     {
-        $admins = User::where('role', 'admin')->get();
-
-        foreach ($admins as $admin) {
+        User::where('role', 'admin')->each(function (User $admin) use ($report) {
             $admin->notify(new \App\Notifications\ContentReportedNotification($report));
-        }
+        });
     }
 
     /**
@@ -100,7 +99,7 @@ class NotificationService
     /**
      * Notify user about mention (future feature).
      */
-    public function notifyMention(\App\Models\User $user, $mentionable): void
+    public function notifyMention(User $user, $mentionable): void
     {
         // Future implementation for mentions
     }
@@ -114,12 +113,9 @@ class NotificationService
         if (!$ticket->relationLoaded('user')) {
             $ticket->load('user');
         }
-
-        $admins = User::where('role', 'admin')->get();
-
-        foreach ($admins as $admin) {
+        User::where('role', 'admin')->each(function (User $admin) use ($ticket) {
             $admin->notify(new \App\Notifications\NewSupportTicketNotification($ticket));
-        }
+        });
     }
 
     /**
@@ -151,10 +147,9 @@ class NotificationService
                 }
             } else {
                 // Notify all admins if no admin is assigned
-                $admins = User::where('role', 'admin')->get();
-                foreach ($admins as $admin) {
+                User::where('role', 'admin')->each(function (User $admin) use ($ticket, $response) {
                     $admin->notify(new \App\Notifications\SupportTicketResponseNotification($ticket, $response));
-                }
+                });
             }
         }
     }
@@ -186,7 +181,7 @@ class NotificationService
     /**
      * Notify post author when their post is reposted.
      */
-    public function notifyPostReposted(\App\Models\Post $post, User $reposter, ?\App\Models\Repost $repost = null): void
+    public function notifyPostReposted(Post $post, User $reposter, ?Repost $repost = null): void
     {
         // Ensure relationships are loaded
         if (!$post->relationLoaded('user')) {

@@ -182,7 +182,7 @@ class SearchService
      * @param int $limit
      * @return array
      */
-    public function getSuggestions(string $query, int $limit = 10, ?\App\Models\User $user = null): array
+    public function getSuggestions(string $query, int $limit = 10, ? User $user = null): array
     {
         $suggestions = [];
         $perTypeLimit = max(3, ceil($limit / 2)); // At least 3 per type

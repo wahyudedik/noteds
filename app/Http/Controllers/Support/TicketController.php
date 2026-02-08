@@ -9,6 +9,7 @@ use App\Models\Faq;
 use App\Services\SupportTicketService;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -79,7 +80,7 @@ class TicketController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = SupportTicket::where('user_id', auth()->id())
+        $query = SupportTicket::where('user_id', Auth::id())
             ->with([
                 'assignedAdmin:id,name,email',
                 'responses' => function ($q) {
@@ -109,7 +110,7 @@ class TicketController extends Controller
         $tickets = $query->latest()->paginate(15);
 
         // Get unique categories for filter
-        $categories = SupportTicket::where('user_id', auth()->id())
+        $categories = SupportTicket::where('user_id', Auth::id())
             ->distinct()
             ->whereNotNull('category')
             ->pluck('category')
@@ -166,7 +167,7 @@ class TicketController extends Controller
         }
 
         $ticket = SupportTicket::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'subject' => $validated['subject'],
             'message' => $validated['message'],
             'category' => $validated['category'] ?? 'general',
@@ -196,7 +197,7 @@ class TicketController extends Controller
     public function show(SupportTicket $ticket): Response
     {
         // Ensure user can only view their own tickets
-        if ($ticket->user_id !== auth()->id()) {
+        if ($ticket->user_id !== Auth::id()) {
             abort(403);
         }
 
@@ -228,7 +229,7 @@ class TicketController extends Controller
     public function addResponse(Request $request, SupportTicket $ticket)
     {
         // Ensure user can only respond to their own tickets
-        if ($ticket->user_id !== auth()->id()) {
+        if ($ticket->user_id !== Auth::id()) {
             abort(403);
         }
 
@@ -253,7 +254,7 @@ class TicketController extends Controller
 
         $response = SupportTicketResponse::create([
             'ticket_id' => $ticket->id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'message' => $validated['message'],
             'is_admin_response' => false,
             'is_internal_note' => false,

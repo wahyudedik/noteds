@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Carbon\Carbon;
 
 class TrendingController extends Controller
 {
@@ -20,8 +19,6 @@ class TrendingController extends Controller
         };
 
         $trendingService = app(\App\Services\TrendingService::class);
-        $hashtagService = app(\App\Services\HashtagService::class);
-        $feedService = app(\App\Services\FeedService::class);
 
         // Trending posts (apply privacy filter similarly to PostController@trending)
         $posts = $trendingService->getTrendingPosts(50)->filter(function ($post) use ($days) {
@@ -74,8 +71,8 @@ class TrendingController extends Controller
 
         // Trending users: most posts in period
         $users = \App\Models\User::whereHas('posts', function ($query) use ($days) {
-                $query->where('status', 'active')->where('created_at', '>=', now()->subDays($days));
-            })
+            $query->where('status', 'active')->where('created_at', '>=', now()->subDays($days));
+        })
             ->withCount(['posts' => function ($query) use ($days) {
                 $query->where('created_at', '>=', now()->subDays($days))->where('status', 'active');
             }])
