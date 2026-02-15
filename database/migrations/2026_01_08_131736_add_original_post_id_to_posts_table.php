@@ -12,7 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->uuid('original_post_id')->nullable()->after('campaign_id');
+            if (Schema::hasColumn('posts', 'campaign_id')) {
+                $table->uuid('original_post_id')->nullable()->after('campaign_id');
+            } else {
+                $table->uuid('original_post_id')->nullable();
+            }
             $table->boolean('is_quote_repost')->default(false)->after('original_post_id');
             
             $table->foreign('original_post_id')->references('id')->on('posts')->onDelete('cascade');
