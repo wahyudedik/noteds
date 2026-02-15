@@ -31,6 +31,16 @@ class Plugin extends Model
         'storage_path',
         'installed_at',
         'activated_at',
+        'price',
+        'demo_url',
+        'thumbnail_url',
+        'is_paid',
+        'category',
+        'screenshots',
+        'system_requirements',
+        'file_path',
+        'file_size',
+        'status',
     ];
 
     protected function casts(): array
@@ -39,7 +49,10 @@ class Plugin extends Model
             'manifest' => 'array',
             'dependencies' => 'array',
             'permissions' => 'array',
+            'screenshots' => 'array',
             'enabled' => 'boolean',
+            'is_paid' => 'boolean',
+            'price' => 'decimal:2',
             'installed_at' => 'datetime',
             'activated_at' => 'datetime',
         ];

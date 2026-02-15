@@ -127,8 +127,29 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/plugins/{plugin}/activate', [App\Http\Controllers\Admin\PluginController::class, 'activate'])->name('admin.plugins.activate');
         Route::post('/admin/plugins/{plugin}/deactivate', [App\Http\Controllers\Admin\PluginController::class, 'deactivate'])->name('admin.plugins.deactivate');
         Route::get('/admin/plugins/{plugin}', [App\Http\Controllers\Admin\PluginController::class, 'show'])->name('admin.plugins.show');
+        Route::put('/admin/plugins/{plugin}', [App\Http\Controllers\Admin\PluginController::class, 'update'])->name('admin.plugins.update');
+        Route::post('/admin/plugins/{plugin}/update-version', [App\Http\Controllers\Admin\PluginController::class, 'updateVersion'])->name('admin.plugins.update-version');
+        Route::post('/admin/plugins/{plugin}/upload-download', [App\Http\Controllers\Admin\PluginController::class, 'uploadDownload'])->name('admin.plugins.upload-download');
         Route::post('/admin/plugins/{plugin}/rollback', [App\Http\Controllers\Admin\PluginController::class, 'rollback'])->name('admin.plugins.rollback');
         Route::put('/admin/plugins/{plugin}/config', [App\Http\Controllers\Admin\PluginController::class, 'updateConfig'])->name('admin.plugins.config.update');
+
+        // Marketplace Admin
+        Route::get('/admin/marketplace/orders', [App\Http\Controllers\Admin\MarketplaceController::class, 'orders'])->name('admin.marketplace.orders.index');
+        Route::get('/admin/marketplace/orders/export', [App\Http\Controllers\Admin\MarketplaceController::class, 'exportOrders'])->name('admin.marketplace.orders.export');
+        Route::put('/admin/marketplace/orders/{order}', [App\Http\Controllers\Admin\MarketplaceController::class, 'updateOrder'])->name('admin.marketplace.orders.update');
+        Route::get('/admin/marketplace/settings', [App\Http\Controllers\Admin\MarketplaceController::class, 'settings'])->name('admin.marketplace.settings');
+
+        // Bank Accounts CRUD
+        Route::resource('/admin/marketplace/bank-accounts', App\Http\Controllers\Admin\BankAccountController::class)
+            ->names('admin.bank-accounts')
+            ->except(['show', 'create', 'edit']);
+
+        Route::post('/admin/marketplace/settings', [App\Http\Controllers\Admin\MarketplaceController::class, 'updateSettings'])->name('admin.marketplace.settings.update');
+    });
+
+    // Secure product download for buyers
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/marketplace/plugins/{plugin}/download', [App\Http\Controllers\MarketplaceController::class, 'download'])->name('marketplace.download');
     });
     Route::get('/search', [App\Http\Controllers\SearchController::class, 'index'])
         ->middleware('throttle:60,1')
@@ -159,6 +180,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/plugins', [App\Http\Controllers\PluginsController::class, 'index'])
         ->middleware(['auth'])
         ->name('plugins.index');
+    Route::get('/plugins/orders', [App\Http\Controllers\MarketplaceController::class, 'orders'])
+        ->middleware(['auth'])
+        ->name('marketplace.orders');
+    Route::get('/plugins/{plugin}', [App\Http\Controllers\PluginsController::class, 'show'])
+        ->middleware(['auth'])
+        ->name('plugins.show');
+    Route::post('/plugins/{plugin}/buy', [App\Http\Controllers\MarketplaceController::class, 'buy'])
+        ->middleware(['auth'])
+        ->name('plugins.buy');
 
     // Events
     Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index');

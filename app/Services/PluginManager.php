@@ -72,7 +72,7 @@ class PluginManager
 
     public function installFromArchive(string $archivePath): Plugin
     {
-        $content = Storage::get($archivePath);
+        // $content = Storage::get($archivePath); // Removed to avoid memory issues with large files
         $tmpDir = storage_path('app/plugins/tmp/' . Str::uuid());
         if (!is_dir($tmpDir)) {
             mkdir($tmpDir, 0775, true);
