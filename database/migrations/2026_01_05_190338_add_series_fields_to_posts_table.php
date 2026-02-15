@@ -12,7 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->uuid('series_id')->nullable()->after('campaign_id');
+            if (Schema::hasColumn('posts', 'campaign_id')) {
+                $table->uuid('series_id')->nullable()->after('campaign_id');
+            } else {
+                $table->uuid('series_id')->nullable();
+            }
             $table->unsignedInteger('series_order')->nullable()->after('series_id');
             $table->boolean('is_series_root')->default(false)->after('series_order');
             
