@@ -7,6 +7,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import SocialShareButtons from '@/Components/Social/SocialShareButtons.vue';
 import { sharePlacement } from '@/config/sharePlacement';
 import YouMightLike from '@/Components/Recommendations/YouMightLike.vue';
+import { useFeatureGate } from '@/Composables/useFeatureGate.js';
  
 
 const props = defineProps({
@@ -16,6 +17,7 @@ const props = defineProps({
 });
  
 
+const { can } = useFeatureGate();
 const changeCategory = (category) => {
     router.get(route('explorer.index'), { 
         category: category || null,
@@ -126,6 +128,14 @@ const btoaSafe = (s) => {
                             <p class="text-sm text-gray-600 dark:text-gray-400">
                                 Menampilkan {{ articles?.total || 0 }} artikel
                             </p>
+                            <div v-if="can('admin')">
+                                <Link
+                                    :href="route('admin.articles.create')"
+                                    class="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm"
+                                >
+                                    Buat Artikel
+                                </Link>
+                            </div>
                         </div>
 
                         <!-- Articles Grid -->

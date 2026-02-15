@@ -117,6 +117,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/rate-limit', function () {
             return Inertia::render('Admin/RateLimitDashboard');
         })->name('admin.rate-limit.dashboard');
+        // Articles Management (manual news)
+        Route::get('/admin/articles/create', [App\Http\Controllers\Admin\ArticleController::class, 'create'])->name('admin.articles.create');
+        Route::post('/admin/articles', [App\Http\Controllers\Admin\ArticleController::class, 'store'])->name('admin.articles.store');
         // Plugin Management
         Route::get('/admin/plugins', [App\Http\Controllers\Admin\PluginController::class, 'index'])->name('admin.plugins.index');
         Route::post('/admin/plugins/upload', [App\Http\Controllers\Admin\PluginController::class, 'upload'])->name('admin.plugins.upload');

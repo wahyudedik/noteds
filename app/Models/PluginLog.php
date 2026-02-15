@@ -15,6 +15,7 @@ class PluginLog extends Model
     public $incrementing = false;
 
     protected $fillable = [
+        'id',
         'plugin_id',
         'level',
         'message',

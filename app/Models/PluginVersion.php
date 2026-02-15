@@ -15,6 +15,7 @@ class PluginVersion extends Model
     public $incrementing = false;
 
     protected $fillable = [
+        'id',
         'plugin_id',
         'version',
         'manifest',
